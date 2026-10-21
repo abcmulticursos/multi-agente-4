@@ -77,7 +77,8 @@ export async function GET(req: Request) {
     (loadWorkflowConfig()?.tiendas ?? []).filter((t) => t?.enabled !== false).map((t) => String(t?.numero ?? "").trim()).filter(Boolean)
   );
   const numeros = listMetaWhatsAppConnections().map((c) => ({
-    enUso: c.active === 1 || deTiendas.has(c.phone_number_id),
+    // (Un número pausado en este proyecto no se usa aquí: lo atiende otro.)
+    enUso: c.pausado !== 1 && (c.active === 1 || deTiendas.has(c.phone_number_id)),
     id: c.phone_number_id,
     numero: c.display_phone_number ?? c.phone_number_id,
     nombre: c.verified_name ?? null,

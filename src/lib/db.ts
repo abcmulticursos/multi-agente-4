@@ -495,6 +495,8 @@ export interface MetaWhatsAppConnectionRow {
   compartido_con: string | null;
   /** 1 = `access_token` es el token permanente de su BM (no caduca). Ver la migración. */
   token_permanente?: number;
+  /** 1 = pausado en este proyecto: este bot ignora sus mensajes. Ver la migración. */
+  pausado?: number;
 }
 
 export interface ConversationListRow extends ConversationRow {
@@ -958,6 +960,10 @@ for (const statement of [
   // permanente del BM dueño del número, que no caduca; 0 = el del inicio de sesión (~60 días).
   // Con 1, un inicio de sesión nuevo ya no lo pisa. Ver `ponerTokenPermanenteAlNumero`.
   "ALTER TABLE meta_whatsapp_connections ADD COLUMN token_permanente INTEGER NOT NULL DEFAULT 0",
+  // PAUSADO EN ESTE PROYECTO (21/10/2026): el número sigue en la lista, pero este bot ignora sus
+  // mensajes. Para cuando OTRO proyecto lo atiende y no debe haber dos bots contestando. Iniciar
+  // sesión no lo cambia. Ver `pausarNumero` y la puerta de `handler.ts`.
+  "ALTER TABLE meta_whatsapp_connections ADD COLUMN pausado INTEGER NOT NULL DEFAULT 0",
 ]) {
   try {
     db.exec(statement);
@@ -3950,6 +3956,14 @@ const stmtPonerTokenPermanente = db.prepare<[string, string]>(
 );
 export function ponerTokenPermanenteAlNumero(phoneNumberId: string, token: string): boolean {
   return stmtPonerTokenPermanente.run(encryptMetaValue(token), phoneNumberId).changes > 0;
+}
+
+/** PAUSAR O REANUDAR UN NÚMERO EN ESTE PROYECTO (21/10/2026). No toca nada en Meta. */
+const stmtPausarNumero = db.prepare<[number, string]>(
+  "UPDATE meta_whatsapp_connections SET pausado = ?, updated_at = unixepoch() WHERE phone_number_id = ?"
+);
+export function pausarNumero(phoneNumberId: string, pausado: boolean): boolean {
+  return stmtPausarNumero.run(pausado ? 1 : 0, phoneNumberId).changes > 0;
 }
 
 export function activateMetaWhatsAppConnection(

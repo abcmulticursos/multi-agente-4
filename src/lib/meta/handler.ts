@@ -1053,6 +1053,16 @@ export async function processWebhookPayload(payload: unknown): Promise<void> {
       const incomingPhoneId = (
         value.metadata as { phone_number_id?: string } | undefined
       )?.phone_number_id;
+      // PAUSADO EN ESTE PROYECTO (21/10/2026, con su permiso): otro proyecto atiende ese
+      // número y no debe haber dos bots contestando. Se ignora aquí, antes de leer nada (sin
+      // gastar tokens). Es una línea AÑADIDA: lo de abajo sigue igual.
+      if (
+        incomingPhoneId &&
+        listMetaWhatsAppConnections().some((c) => c.phone_number_id === incomingPhoneId && c.pausado === 1)
+      ) {
+        console.log(`[wh] webhook para phone_number_id ${incomingPhoneId}: pausado en este proyecto, ignoro`);
+        continue;
+      }
       const conectados = listMetaWhatsAppConnections().map(
         (c) => c.phone_number_id
       );

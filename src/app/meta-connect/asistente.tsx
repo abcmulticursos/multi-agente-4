@@ -362,6 +362,44 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
    * OTRA dirección (otro bot), se pregunta antes. Según lo que conteste Meta, lleva a la pantalla
    * que toca: el permiso de la app, los datos a mano, o la URI.
    */
+  /** Por objeto de Meta (whatsapp_business_account / page / instagram): ¿aceptó configurarlo? */
+  const [productos, setProductos] = useState<Record<string, { ok: boolean; detalle: string }> | null>(null);
+  const [comprobando, setComprobando] = useState(false);
+  async function comprobarProductos() {
+    setComprobando(true);
+    try {
+      // COMPROBAR TAMBIÉN CONFIGURA: los mensajes de la app pasan a llegar a ESTE proyecto. Si hoy
+      // le llegan a otro, ese otro se quedaría sin mensajes: se avisa antes, como en «preparar».
+      const ahora = await (await fetch("/api/meta/connect/configurar-app", { cache: "no-store" })).json();
+      const propias = new Set((ahora.urlsPropuestas ?? []).map((p: { url: string }) => p.url));
+      const ajenas = (ahora.suscripciones ?? []).filter((s: { url: string }) => s.url && !propias.has(s.url)) as Array<{ url: string }>;
+      if (
+        ajenas.length &&
+        !window.confirm(
+          `⛔ Tu app hoy entrega sus mensajes a OTRO proyecto:\n${ajenas.map((a) => a.url).join("\n")}\n\nSi sigues, ese proyecto DEJA DE RECIBIR MENSAJES y sus clientes no tendrán respuesta.\n\n¿Seguir de todos modos?`
+        )
+      ) {
+        setComprobando(false);
+        return;
+      }
+      const d = (await (await fetch("/api/meta/connect/configurar-app", { method: "POST" })).json()) as {
+        pasos?: Array<{ paso: string; ok: boolean; detalle: string }>;
+        error?: string;
+      };
+      const r: Record<string, { ok: boolean; detalle: string }> = {};
+      for (const p of d.pasos ?? []) {
+        const objeto = p.paso.match(/^Webhook de (\S+)/)?.[1];
+        if (objeto) r[objeto] = { ok: p.ok, detalle: p.detalle };
+      }
+      if (!Object.keys(r).length) r.whatsapp_business_account = { ok: false, detalle: d.error ?? "Meta no respondió." };
+      setProductos(r);
+    } catch {
+      setProductos({ whatsapp_business_account: { ok: false, detalle: "No se pudo consultar a Meta." } });
+    } finally {
+      setComprobando(false);
+    }
+  }
+
   async function preparar() {
     setOcupado(true);
     setError(null);
@@ -372,7 +410,7 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       if (
         ajenas.length > 0 &&
         !window.confirm(
-          `Esta app ya manda sus mensajes a otra dirección:\n${ajenas.map((s) => `· ${s.url}`).join("\n")}\n\nSi la preparo para este CRM, esa otra dirección (otro bot) dejará de recibirlos. ¿Seguir?`
+          `⛔ Tu app hoy entrega sus mensajes a OTRO proyecto:\n${ajenas.map((s) => s.url).join("\n")}\n\nSi sigues, ese proyecto DEJA DE RECIBIR MENSAJES y sus clientes no tendrán respuesta.\n\n¿Seguir de todos modos?`
         )
       )
         return;
@@ -543,10 +581,45 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
           {/* EN ESTE ORDEN (20/10/2026): «primero WhatsApp, luego Messenger, luego IG, y al final lo
               de URI». El Inicio de sesión va en la pantalla siguiente, junto a su URI. */}
-          <Casilla id="p-whatsapp" casillas={casillas} marcar={marcar} texto={<><b>WhatsApp</b></>} />
-          <Casilla id="p-messenger" casillas={casillas} marcar={marcar} texto={<><b>Messenger</b></>} />
-          <Casilla id="p-instagram" casillas={casillas} marcar={marcar} texto={<><b>Instagram</b> (o márcalo si no vas a vender por Instagram)</>} />
-          <Botones listo={!!casillas["p-whatsapp"] && !!casillas["p-messenger"] && !!casillas["p-instagram"]} alSeguir={() => ir("uri")} />
+          {/* COMPROBADO CON META, NO CON CASILLAS (21/10/2026): «un checklist a mano no dice
+              nada, puede mentir». Meta no tiene una pregunta de «qué productos tiene la app»
+              (revisado en su referencia), así que se le pide CONFIGURAR cada uno: lo que
+              acepta, está; lo que rechaza, falta, y se muestra su respuesta. */}
+          <button type="button" disabled={comprobando} className="inline-flex items-center gap-1 rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-40" onClick={() => void comprobarProductos()}>
+            {comprobando ? (
+              <>
+                Comprobando con Meta
+                <Puntos />
+              </>
+            ) : (
+              "🔍 Comprobar"
+            )}
+          </button>
+          {productos && (
+            <div className="space-y-1.5">
+              {(
+                [
+                  ["whatsapp_business_account", "WhatsApp", true],
+                  ["page", "Messenger", false],
+                  ["instagram", "Instagram", false],
+                ] as const
+              ).map(([clave, nombre, obligatorio]) => {
+                const r = productos[clave];
+                return (
+                  <div key={clave} className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+                    <span className="font-semibold">{r?.ok ? "✅" : "❌"} {nombre}</span>
+                    {!r?.ok && (
+                      <span className="block text-xs text-neutral-600">
+                        {obligatorio ? "Falta: agrégalo a tu app y vuelve a comprobar." : "No se pudo configurar. Si vas a vender por aquí, agrégalo y vuelve a comprobar."}
+                        {r?.detalle ? <span className="block text-neutral-400">Meta: {r.detalle}</span> : null}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <Botones listo={!!productos?.whatsapp_business_account?.ok} alSeguir={() => ir("uri")} />
         </>
       )}
 

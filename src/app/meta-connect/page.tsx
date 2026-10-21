@@ -74,6 +74,8 @@ type MetaStatus = {
     verifiedName: string | null;
     profilePictureUrl: string | null;
     active: boolean;
+    /** Pausado en este proyecto: este bot ignora sus mensajes. */
+    pausado?: boolean;
     connectedAt: number;
     updatedAt: number;
     /** La cuenta dueña. null = sin identificar todavía. */
@@ -2351,6 +2353,28 @@ export default function MetaConnectPage() {
     setStatus(await res.json());
   }
 
+  async function pausarNumeroDelProyecto(phoneNumberId: string, pausado: boolean, nombre: string) {
+    if (
+      pausado &&
+      !window.confirm(
+        `¿Pausar ${nombre} en este proyecto?\n\nEste bot dejará de contestar por ese número. Úsalo cuando OTRO proyecto lo atiende, para que no contesten dos bots.\n\nNo cambia nada en Meta y lo reanudas con un clic.`
+      )
+    )
+      return;
+    setBusyWhatsAppId(phoneNumberId);
+    try {
+      const res = await fetch("/api/meta/connect/whatsapp/pausar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumberId, pausado }),
+      });
+      if (!res.ok) alert("No se pudo cambiar.");
+      await loadStatus();
+    } finally {
+      setBusyWhatsAppId(null);
+    }
+  }
+
   async function loadReaders() {
     const res = await fetch("/api/meta/ads-readers", { cache: "no-store" });
     const data = await res.json();
@@ -3860,6 +3884,11 @@ export default function MetaConnectPage() {
                         Activo
                       </span>
                     ) : null}
+                    {connection.pausado ? (
+                      <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-700">
+                        ⏸ Pausado en este proyecto
+                      </span>
+                    ) : null}
                   </div>
                   <p className="mt-1 text-xs text-neutral-500">
                     {connection.verifiedName ?? "Sin nombre verificado"} · Phone Number ID: {connection.phoneNumberId}
@@ -3869,6 +3898,18 @@ export default function MetaConnectPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* PAUSAR EN ESTE PROYECTO (21/10/2026): «en vez de quitarlo, deshabilitarlo».
+                      Este bot deja de contestar por él (otro proyecto lo atiende), sigue en la
+                      lista y se reanuda con un clic. Iniciar sesión no lo reactiva. */}
+                  <button
+                    className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+                    disabled={busyWhatsAppId === connection.phoneNumberId}
+                    title={connection.pausado ? "Este bot vuelve a contestar por este número" : "Este bot deja de contestar por este número (otro proyecto lo atiende). No cambia nada en Meta."}
+                    onClick={() => void pausarNumeroDelProyecto(connection.phoneNumberId, !connection.pausado, connection.displayPhoneNumber ?? "este número")}
+                    type="button"
+                  >
+                    {connection.pausado ? "▶ Reanudar" : "⏸ Pausar"}
+                  </button>
                   {connection.active ? (
                     <button
                       className="rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"

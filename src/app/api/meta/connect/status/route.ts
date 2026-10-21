@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
     verifiedName: row.verified_name,
     profilePictureUrl: row.profile_picture_url,
     active: row.active === 1,
+    pausado: row.pausado === 1,
     connectedAt: row.connected_at,
     updatedAt: row.updated_at,
     businessName: row.business_name ?? null,

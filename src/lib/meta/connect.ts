@@ -427,6 +427,39 @@ export function conMemoriaDeMeta<T>(fn: () => Promise<T>): Promise<T> {
   return memoriaDelLogin.run(new Map(), fn);
 }
 
+/**
+ * TODO LO DE UN BM EN UNA SOLA PREGUNTA, DURANTE EL INICIO DE SESIÓN (21/10/2026). «No quiero
+ * hacer una demo en vivo y que se corte por exceso de llamadas». Al volver de Facebook se
+ * preguntaba a cada BM seis cosas por separado: sus cuentas de WhatsApp Business (propias y de
+ * clientes), sus píxeles (ídem) y sus páginas (ídem). Meta deja pedirlas juntas («campos
+ * anidados»): una pregunta por BM en vez de seis. Si Meta rechaza la pregunta junta (p. ej. por
+ * un permiso que falta en uno de los seis), se devuelve null y cada función pregunta lo suyo por
+ * separado, como siempre. Solo dentro de `conMemoriaDeMeta`.
+ */
+const CAMPOS_WABA_LOGIN = "id,name,phone_numbers{id,display_phone_number,verified_name,code_verification_status}";
+const CAMPOS_PIXEL_LOGIN = "id,name,owner_business{id,name}";
+type BordesDelNegocio = {
+  owned_whatsapp_business_accounts?: { data?: MetaWaba[] };
+  client_whatsapp_business_accounts?: { data?: MetaWaba[] };
+  owned_pixels?: { data?: Array<{ id?: string; name?: string; owner_business?: { id?: string; name?: string } }> };
+  client_pixels?: { data?: Array<{ id?: string; name?: string; owner_business?: { id?: string; name?: string } }> };
+  owned_pages?: { data?: Array<{ id?: string }> };
+  client_pages?: { data?: Array<{ id?: string }> };
+};
+async function bordesDelNegocio(negocioId: string, accessToken: string): Promise<BordesDelNegocio | null> {
+  if (!memoriaDelLogin.getStore()) return null;
+  return graphGet<BordesDelNegocio>(negocioId, accessToken, {
+    fields: [
+      `owned_whatsapp_business_accounts.limit(100){${CAMPOS_WABA_LOGIN}}`,
+      `client_whatsapp_business_accounts.limit(100){${CAMPOS_WABA_LOGIN}}`,
+      `owned_pixels.limit(100){${CAMPOS_PIXEL_LOGIN}}`,
+      `client_pixels.limit(100){${CAMPOS_PIXEL_LOGIN}}`,
+      "owned_pages.limit(200){id}",
+      "client_pages.limit(200){id}",
+    ].join(","),
+  });
+}
+
 async function graphGet<T>(
   path: string,
   accessToken: string,
@@ -509,18 +542,21 @@ export async function fetchPixelOptions(
   };
 
   for (const business of businesses?.data ?? []) {
-    const respuestas = await Promise.all([
-      graphGet<{ data?: PixelDeMeta[] }>(
-        `${business.id}/owned_pixels`,
-        userAccessToken,
-        { fields: "id,name,owner_business{id,name}" }
-      ),
-      graphGet<{ data?: PixelDeMeta[] }>(
-        `${business.id}/client_pixels`,
-        userAccessToken,
-        { fields: "id,name,owner_business{id,name}" }
-      ),
-    ]);
+    const juntos = await bordesDelNegocio(business.id, userAccessToken);
+    const respuestas: Array<{ data?: PixelDeMeta[] } | null> = juntos
+      ? [juntos.owned_pixels ?? { data: [] }, juntos.client_pixels ?? { data: [] }]
+      : await Promise.all([
+          graphGet<{ data?: PixelDeMeta[] }>(
+            `${business.id}/owned_pixels`,
+            userAccessToken,
+            { fields: CAMPOS_PIXEL_LOGIN }
+          ),
+          graphGet<{ data?: PixelDeMeta[] }>(
+            `${business.id}/client_pixels`,
+            userAccessToken,
+            { fields: CAMPOS_PIXEL_LOGIN }
+          ),
+        ]);
     respuestas.forEach((respuesta, indice) => {
       for (const pixel of respuesta?.data ?? []) {
         if (typeof pixel.id !== "string") continue;
@@ -568,18 +604,21 @@ export async function fetchWhatsAppOptions(
   const seen = new Set<string>();
 
   for (const business of businesses?.data ?? []) {
-    const responses = await Promise.all([
-      graphGet<MetaWabaResponse>(
-        `${business.id}/owned_whatsapp_business_accounts`,
-        userAccessToken,
-        { fields: "id,name,phone_numbers{id,display_phone_number,verified_name,code_verification_status}" }
-      ),
-      graphGet<MetaWabaResponse>(
-        `${business.id}/client_whatsapp_business_accounts`,
-        userAccessToken,
-        { fields: "id,name,phone_numbers{id,display_phone_number,verified_name,code_verification_status}" }
-      ),
-    ]);
+    const juntos = await bordesDelNegocio(business.id, userAccessToken);
+    const responses: Array<MetaWabaResponse | null> = juntos
+      ? [juntos.owned_whatsapp_business_accounts ?? { data: [] }, juntos.client_whatsapp_business_accounts ?? { data: [] }]
+      : await Promise.all([
+          graphGet<MetaWabaResponse>(
+            `${business.id}/owned_whatsapp_business_accounts`,
+            userAccessToken,
+            { fields: CAMPOS_WABA_LOGIN }
+          ),
+          graphGet<MetaWabaResponse>(
+            `${business.id}/client_whatsapp_business_accounts`,
+            userAccessToken,
+            { fields: CAMPOS_WABA_LOGIN }
+          ),
+        ]);
     // De quién es cada cuenta de WhatsApp. Las PROPIAS son de este negocio, sin
     // preguntar nada. Las de CLIENTE son de otro, y a ésas se les pregunta el dueño:
     // atribuírselas al negocio por el que se llegó sería decir que son suyas.
@@ -652,13 +691,16 @@ export async function accesoDeLasPaginas(
 ): Promise<Map<string, CuentaDeMeta[]>> {
   const acceso = new Map<string, CuentaDeMeta[]>();
   for (const negocio of negocios) {
-    for (const borde of ["owned_pages", "client_pages"]) {
+    const juntos = await bordesDelNegocio(negocio.id, userAccessToken);
+    for (const borde of ["owned_pages", "client_pages"] as const) {
       try {
-        const cuerpo = await graphGet<{ data?: Array<{ id?: string }> }>(
-          `${negocio.id}/${borde}`,
-          userAccessToken,
-          { fields: "id", limit: "200" }
-        );
+        const cuerpo = juntos
+          ? juntos[borde] ?? { data: [] }
+          : await graphGet<{ data?: Array<{ id?: string }> }>(
+              `${negocio.id}/${borde}`,
+              userAccessToken,
+              { fields: "id", limit: "200" }
+            );
         for (const pagina of cuerpo?.data ?? []) {
           if (!pagina.id) continue;
           const lista = acceso.get(pagina.id) ?? [];
@@ -712,11 +754,10 @@ export async function detectMetaEnvFromUserToken(
   for (const business of businesses?.data ?? []) {
     // Los mismos campos que `fetchPixelOptions`: dentro de un inicio de sesión es la MISMA
     // pregunta y no se repite. Aquí solo se usa el id.
-    const pixels = await graphGet<MetaPixelResponse>(
-      `${business.id}/owned_pixels`,
-      userAccessToken,
-      { fields: "id,name,owner_business{id,name}" }
-    );
+    const juntos = await bordesDelNegocio(business.id, userAccessToken);
+    const pixels = juntos
+      ? ((juntos.owned_pixels ?? { data: [] }) as MetaPixelResponse)
+      : await graphGet<MetaPixelResponse>(`${business.id}/owned_pixels`, userAccessToken, { fields: CAMPOS_PIXEL_LOGIN });
     const pixel = pixels?.data?.[0];
     if (pixel && !values.META_PIXEL_ID) {
       values.META_PIXEL_ID = pixel.id;

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getMetaRuntimeSetting, setMetaRuntimeSettings } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
 import {
   getMetaAppId,
@@ -67,7 +68,36 @@ async function leerApp(appId: string, appSecret: string) {
   let negocio: string | null = null;
   let avisoNegocio: string | null = null;
 
-  if (!token) {
+  // GUARDADO EN LA BASE (21/10/2026): el BM de una app no cambia, y buscarlo recorría todos los
+  // BM (2 preguntas por cada uno) cada vez que el servidor se reiniciaba. Se busca una vez.
+  // «Cerrar sesión de Meta» lo borra con todo lo demás.
+  const guardado = getMetaRuntimeSetting(`app_negocio_${appId}`);
+  if (guardado) return { configurada: true, appId, nombre, negocio: guardado, avisoNombre, avisoNegocio };
+
+  // Primero en UNA pregunta: los BM con sus apps propias dentro. Si Meta no la acepta, se
+  // recorren los BM uno por uno, como antes.
+  if (token) {
+    try {
+      const url = new URL(`https://graph.facebook.com/${graphVersion()}/me/businesses`);
+      url.searchParams.set("fields", "id,name,owned_apps.limit(200){id}");
+      url.searchParams.set("limit", "200");
+      url.searchParams.set("access_token", token);
+      const res = await fetchMeta(url);
+      if (res.ok) {
+        const cuerpo = (await res.json().catch(() => null)) as {
+          data?: Array<{ id?: string; name?: string; owned_apps?: { data?: Array<{ id?: string }> } }>;
+        } | null;
+        const dueño = (cuerpo?.data ?? []).find((b) => (b.owned_apps?.data ?? []).some((a) => a.id === appId));
+        if (dueño) negocio = dueño.name ?? dueño.id ?? null;
+      }
+    } catch {
+      // Se sigue por partes.
+    }
+  }
+
+  if (negocio) {
+    setMetaRuntimeSettings({ [`app_negocio_${appId}`]: negocio });
+  } else if (!token) {
     avisoNegocio = "Conecta con Meta para poder comprobar el negocio.";
   } else {
     try {
@@ -102,6 +132,7 @@ async function leerApp(appId: string, appSecret: string) {
           }
         }
       }
+      if (negocio) setMetaRuntimeSettings({ [`app_negocio_${appId}`]: negocio });
       if (!negocio) {
         avisoNegocio =
           "No pude ver a qué negocio pertenece la app. Puede ser que el login no tenga permiso para listar las apps de tus negocios, o que la app no esté en ninguno.";
