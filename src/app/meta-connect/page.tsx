@@ -1487,6 +1487,19 @@ function SeccionEnVentana({
  * Y SE QUEDAN LA CONSULTA A META Y EL BOTÓN «Ver el de esta cuenta»: funcionan y
  * sirven para mirarlo. Lo único que se les quitó es decidir el color.
  */
+/** Agrupa una lista por su BM, en orden alfabético; lo que no tiene BM, al final. */
+function porNegocio<T>(lista: T[], negocioDe: (x: T) => string | null | undefined): Array<{ nombre: string; items: T[] }> {
+  const SIN = "BM sin identificar";
+  const grupos = new Map<string, T[]>();
+  for (const x of lista) {
+    const nombre = negocioDe(x)?.trim() || SIN;
+    grupos.set(nombre, [...(grupos.get(nombre) ?? []), x]);
+  }
+  return [...grupos.entries()]
+    .sort(([a], [b]) => (a === SIN ? 1 : b === SIN ? -1 : a.localeCompare(b, "es", { sensitivity: "base" })))
+    .map(([nombre, items]) => ({ nombre, items }));
+}
+
 function SetDeVenta({
   pagina,
   whatsapp,
@@ -1532,8 +1545,12 @@ function SetDeVenta({
     verde: "text-emerald-900",
     rojo: "text-red-900",
   }[estado];
+  // NO PROMETE LO QUE NO SABE (20/10/2026): «¿cómo sabe que no estoy eligiendo el píxel
+  // equivocado? No he creado ninguna campaña». Con los tres elegidos solo se sabe que el bot
+  // mandará la compra; que haga match depende de que la CAMPAÑA use estos mismos. Se le muestran,
+  // con sus IDs, para que los compare.
   const TITULAR = {
-    verde: "✅ Listo para registrar ventas",
+    verde: "✅ Los tres elegidos — ¿tu campaña usa estos mismos?",
     rojo: "⛔ Todavía no se pueden registrar ventas",
   }[estado];
 
@@ -1543,13 +1560,13 @@ function SetDeVenta({
   const filas: [string, string, boolean][] = [
     [
       "Página de Facebook",
-      pagina ? `${pagina.pageName}` : "Sin elegir",
+      pagina ? `${pagina.pageName} · ${pagina.pageId}` : "Sin elegir",
       Boolean(pagina),
     ],
     [
       "Número de WhatsApp",
       whatsapp
-        ? `${whatsapp.verifiedName ?? whatsapp.displayPhoneNumber ?? whatsapp.wabaId}`
+        ? [whatsapp.displayPhoneNumber, whatsapp.verifiedName].filter(Boolean).join(" · ") || whatsapp.wabaId
         : "Sin elegir",
       Boolean(whatsapp),
     ],
@@ -1603,7 +1620,9 @@ function SetDeVenta({
       ) : null}
       {estado === "verde" ? (
         <p className="mt-3 rounded border border-emerald-300 bg-tarjeta px-3 py-2 text-xs text-emerald-900">
-          Los tres elegidos. Las compras se registran.
+          El bot mandará cada compra a Meta con estos tres. Para que <b>hagan match</b>, tu campaña tiene que usar
+          <b> esta misma página</b> y <b>este mismo píxel</b>, y anunciar <b>este número</b>: compáralos con tu
+          administrador de anuncios. Si la campaña usa otros, las compras no se registrarán en ella.
           {/* LA NOTA, Y NO ES UNA ALARMA. Él va a ver en Meta que su cuenta de
               WhatsApp tiene asociado otro conjunto de datos y va a preguntar si
               eso le rompe algo. Se le contesta aquí, antes de que lo busque. */}
@@ -3426,7 +3445,14 @@ export default function MetaConnectPage() {
         </div>
         <div className="divide-y divide-amber-100">
           {status?.detectedPages.length ? (
-            status.detectedPages.map((page) => (
+            // SEPARADAS POR BM (20/10/2026): «aparecen en lista pero no hay un separador que
+            // indique de qué BM sale».
+            porNegocio(status.detectedPages, (p) => p.businessName).map((grupo) => (
+              <div key={grupo.nombre}>
+              <p className="border-y border-amber-200 bg-amber-100/70 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-amber-900">
+                🏢 {grupo.nombre}
+              </p>
+              {grupo.items.map((page) => (
               <div key={page.pageId} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                 <div className="flex min-w-0 items-center gap-3">
                   {page.pageId ? (
@@ -3447,6 +3473,8 @@ export default function MetaConnectPage() {
                 >
                   {busyPageId === page.pageId ? "Agregando..." : "Agregar y usar"}
                 </button>
+              </div>
+              ))}
               </div>
             ))
           ) : (
@@ -3749,13 +3777,22 @@ export default function MetaConnectPage() {
         </div>
         <div className="divide-y divide-neutral-100">
           {numerosConectados.length ? (
-            numerosConectados
-              .filter(
+            // SEPARADOS POR BM (20/10/2026), como las páginas detectadas.
+            porNegocio(
+              numerosConectados.filter(
                 (connection) =>
                   verTodosNumeros ||
                   connection.phoneNumberId === numeroElegido
-              )
-              .map((connection) => (
+              ),
+              (c) => c.businessName
+            ).map((grupo) => (
+              <div key={grupo.nombre}>
+              {verTodosNumeros ? (
+                <p className="border-y border-neutral-200 bg-neutral-100 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-neutral-700">
+                  🏢 {grupo.nombre}
+                </p>
+              ) : null}
+              {grupo.items.map((connection) => (
               <div
                 key={connection.phoneNumberId}
                 className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
@@ -3841,6 +3878,8 @@ export default function MetaConnectPage() {
                   </>
                   )}
                 </div>
+              </div>
+              ))}
               </div>
             ))
           ) : (

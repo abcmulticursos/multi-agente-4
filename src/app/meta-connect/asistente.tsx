@@ -859,6 +859,34 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
 }
 
 function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null; appName: string | null; paginas: number; numeros: number } | null; volver: () => void; cerrar: () => void }) {
+  // EL TOKEN PERMANENTE, EN UN CLIC (20/10/2026): «antes yo creaba un token… ahora no lo creé».
+  // Es el del usuario del sistema del BM: con él el bot contesta, reporta compras y lee anuncios, y
+  // no caduca (el del inicio de sesión dura unos 60 días). Si falta, un botón lo crea con lo mismo
+  // que «Crear token permanente». NO se crea solo: cambia el permiso con el que el bot contesta, y
+  // eso lo decide él. Uno ya puesto no se toca.
+  const [token, setToken] = useState<{ estado: "mirando" | "falta" | "creando" | "listo" | "ya" | "error"; texto?: string }>({ estado: "mirando" });
+  const crearToken = useCallback(async () => {
+    setToken({ estado: "creando" });
+    try {
+      const d = await (await fetch("/api/meta/connect/token-permanente", { method: "POST" })).json();
+      if (d.ok) setToken({ estado: "listo", texto: `Creado en «${d.negocio}». No caduca.` });
+      else setToken({ estado: "error", texto: d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo." });
+    } catch {
+      setToken({ estado: "error", texto: "No se pudo consultar a Meta." });
+    }
+  }, []);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const s = await (await fetch("/api/meta/connect/status", { cache: "no-store" })).json();
+        if (s.credentials?.whatsAppAccessTokenConfigured) setToken({ estado: "ya" });
+        else if (s.appId) setToken({ estado: "falta" });
+        else setToken({ estado: "error", texto: "Primero conecta tu app." });
+      } catch {
+        setToken({ estado: "error", texto: "No se pudo consultar." });
+      }
+    })();
+  }, [crearToken]);
   const fila = (ok: boolean, texto: string, falta?: string) => (
     <div className="flex items-start gap-2">
       <span>{ok ? "✅" : "⬜"}</span>
@@ -874,8 +902,34 @@ function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null;
       {fila(!!estado?.appId, `Tu app${estado?.appName ? `: ${estado.appName}` : ""}`, "Falta conectar tu app (paso 🔑).")}
       {fila((estado?.numeros ?? 0) > 0, `${estado?.numeros ?? 0} número(s) en tu CRM`, "Inicia sesión con Facebook y trae o activa un número.")}
       {fila((estado?.paginas ?? 0) > 0, `${estado?.paginas ?? 0} página(s) detectada(s)`, "Para Messenger e Instagram: inicia sesión y marca tu página.")}
+      <div className="flex items-start gap-2">
+        <span>{token.estado === "listo" || token.estado === "ya" ? "✅" : token.estado === "error" ? "⚠" : "⏳"}</span>
+        <span>
+          Token permanente
+          {token.estado === "mirando" && " — revisando…"}
+          {token.estado === "falta" && (
+            <span className="block text-xs text-neutral-600">
+              Falta. Sin él, la conexión caduca en unos 60 días.{" "}
+              <button type="button" className="rounded bg-sky-600 px-2 py-0.5 font-bold text-white" onClick={() => void crearToken()}>
+                Crear token permanente
+              </button>
+            </span>
+          )}
+          {token.estado === "creando" && " — creándolo…"}
+          {token.estado === "ya" && " — ya lo tienes."}
+          {token.estado === "listo" && ` — ${token.texto}`}
+          {token.estado === "error" && (
+            <span className="block text-xs text-amber-800">
+              {token.texto}{" "}
+              <button type="button" className="font-bold text-sky-700 hover:underline" onClick={() => void crearToken()}>
+                Reintentar
+              </button>
+            </span>
+          )}
+        </span>
+      </div>
       <p className="pt-2 text-xs text-neutral-600">
-        Página, Instagram, píxel y el token permanente se eligen abajo, en esta misma pantalla (secciones «Páginas de Facebook», «Píxel» y «Configuración automática»), como siempre.
+        Página, Instagram y píxel se eligen abajo, en esta misma pantalla (secciones «Páginas de Facebook» y «Píxel»), como siempre.
       </p>
       <p className="text-xs text-neutral-600">
         <b>Prueba final:</b> escríbele a tu número desde otro WhatsApp. Si contesta, ya está.
