@@ -71,6 +71,43 @@ const ESCALERA_DE_PERMISOS = [
   ],
 ].map((lista) => lista.join(","));
 
+async function guardarPegado(pegado: string) {
+  const appId = getMetaAppId();
+  const appSecret = getMetaOAuthAppSecret();
+  if (!appId || !appSecret) return NextResponse.json({ ok: false, error: "Faltan el ID de la app o su clave secreta." });
+  // ¿Es de verdad un token, de esta app, y no caduca? Lo dice Meta.
+  const info = await graph("debug_token", `${appId}|${appSecret}`, appSecret, { input_token: pegado });
+  const d = (info.cuerpo?.data ?? null) as { is_valid?: boolean; app_id?: string; expires_at?: number; type?: string } | null;
+  if (!d?.is_valid) return NextResponse.json({ ok: false, error: "Meta dice que ese token no es válido. Cópialo otra vez completo, sin espacios." });
+  if (d.app_id && d.app_id !== appId)
+    return NextResponse.json({ ok: false, error: "Ese token es de otra app. Créalo eligiendo la misma app que usa Meta Connect." });
+  const caduca = !!d.expires_at && d.expires_at > 0;
+
+  const alcanzados = await repartirTokenPermanente(pegado, true);
+  if (!alcanzados.length)
+    return NextResponse.json({
+      ok: false,
+      error:
+        "El token es válido, pero no alcanza ninguno de tus números conectados. En el BM, entra al usuario del sistema → «Asignar activos» → Cuentas de WhatsApp → marca la cuenta de tus números con control total, y pégalo otra vez.",
+    });
+  olvidar("token-estado");
+
+  // El general solo cambia si no había o si este alcanza al número activo (igual que al crearlo).
+  const activo = getActiveMetaWhatsAppConnection();
+  const alcanzaAlActivo = !!activo && alcanzados.some((c) => c.phone_number_id === activo.phone_number_id);
+  if (!getMetaRuntimeSetting("whatsapp_access_token_override") || alcanzaAlActivo) {
+    setMetaRuntimeSettings({ whatsapp_access_token_override: pegado });
+  }
+  if (!getMetaRuntimeSetting("capi_access_token") || alcanzaAlActivo) {
+    setMetaRuntimeSettings({ capi_access_token: pegado, capi_token_origen: "manual" });
+  }
+  return NextResponse.json({
+    ok: true,
+    numeros: alcanzados.map((c) => c.display_phone_number ?? c.phone_number_id),
+    aviso: caduca ? "Ojo: este token SÍ caduca. Al crearlo en Meta, elige «Nunca» en la caducidad." : null,
+  });
+}
+
 /** Meta exige firmar la llamada con el secreto de la app. */
 function pruebaDeSecreto(token: string, appSecret: string): string {
   return createHmac("sha256", appSecret).update(token).digest("hex");
@@ -118,7 +155,13 @@ export async function POST(req: NextRequest) {
    *
    * Sin `cuenta`, exactamente lo de siempre.
    */
-  const cuerpoPedido = (await req.json().catch(() => null)) as { cuenta?: unknown; negocio?: unknown } | null;
+  const cuerpoPedido = (await req.json().catch(() => null)) as { cuenta?: unknown; negocio?: unknown; pegado?: unknown } | null;
+
+  // UN TOKEN CREADO EN LA PÁGINA DE META, PEGADO AQUÍ (21/10/2026). «Meta es raro: a veces pide el
+  // código al correo y a veces no». Crearlo en la página de Meta es lo que Meta controla bien; aquí
+  // solo se comprueba: que no caduque, y a qué números alcanza. Se le pone solo a esos.
+  const pegado = typeof cuerpoPedido?.pegado === "string" ? cuerpoPedido.pegado.trim() : "";
+  if (pegado) return guardarPegado(pegado);
   const cuenta = typeof cuerpoPedido?.cuenta === "string" ? cuerpoPedido.cuenta.trim() : "";
   // EN UN BM CONCRETO (20/10/2026): el asistente lo pide en el BM de los números, para que el
   // token pueda usarlos. Se guarda igual que el de siempre; solo se elige dónde se crea.

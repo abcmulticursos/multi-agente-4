@@ -850,8 +850,9 @@ function DiferenciacionPorNegocio() {
   useEffect(() => {
     void fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { numeros?: Array<{ id: string; permanente: boolean }> } | null) =>
-        setTokenDe(Object.fromEntries((d?.numeros ?? []).map((n) => [n.id, n.permanente])))
+      .then((d: { numeros?: Array<{ id: string; permanente: boolean; enUso?: boolean }> } | null) =>
+        // Solo los que usa este proyecto: de los que atiende otra app no hace falta el token.
+        setTokenDe(Object.fromEntries((d?.numeros ?? []).filter((n) => n.permanente || n.enUso !== false).map((n) => [n.id, n.permanente])))
       )
       .catch(() => {});
   }, []);

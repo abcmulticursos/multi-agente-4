@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
+import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
@@ -69,7 +70,14 @@ export async function GET(req: Request) {
   const secreto = getMetaOAuthAppSecret();
   const login = getTokenDeLaConexion();
 
+  // LOS QUE USA ESTE PROYECTO (21/10/2026): al iniciar sesión se guardan TODOS los números que ve
+  // la cuenta de Facebook, también los que atiende otra app. El aviso solo cuenta los que usa
+  // este proyecto: el activo y los que tiene alguna tienda. Los demás salen en gris.
+  const deTiendas = new Set(
+    (loadWorkflowConfig()?.tiendas ?? []).filter((t) => t?.enabled !== false).map((t) => String(t?.numero ?? "").trim()).filter(Boolean)
+  );
   const numeros = listMetaWhatsAppConnections().map((c) => ({
+    enUso: c.active === 1 || deTiendas.has(c.phone_number_id),
     id: c.phone_number_id,
     numero: c.display_phone_number ?? c.phone_number_id,
     nombre: c.verified_name ?? null,
@@ -81,7 +89,7 @@ export async function GET(req: Request) {
   // Una instalación con el token puesto en las variables de EasyPanel, sin números en Meta
   // Connect, cuenta como que lo tiene (como antes de Meta Connect).
   const delEntorno = !numeros.length && !!process.env.META_ACCESS_TOKEN?.trim();
-  const faltan = numeros.filter((n) => !n.permanente).length;
+  const faltan = numeros.filter((n) => n.enUso && !n.permanente).length;
 
   // Cuándo caduca el inicio de sesión (con el que contestan los números sin token permanente).
   // Si Meta dice que ya no vale, se avisa: esos números ya no tienen con qué contestar.

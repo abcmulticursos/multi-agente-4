@@ -103,7 +103,7 @@ export default function AsistenteDeConexion() {
                 faltan: d.faltan,
                 // «No me indica cuáles son los números ni qué BM» (21/10/2026).
                 cuales: (d.numeros ?? [])
-                  .filter((n: { permanente: boolean }) => !n.permanente)
+                  .filter((n: { permanente: boolean; enUso?: boolean }) => n.enUso !== false && !n.permanente)
                   .map((n: { numero: string; negocio: string | null }) => `${n.numero}${n.negocio ? ` (${n.negocio})` : ""}`),
               }
             : null
@@ -1118,7 +1118,8 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
 
 interface EstadoDelToken {
   tiene: boolean;
-  numeros: Array<{ id: string; numero: string; nombre: string | null; negocioId: string | null; negocio: string | null; permanente: boolean; activo: boolean }>;
+  /** `enUso`: el activo o el de alguna tienda. Los demás los atiende otra app y no cuentan. */
+  numeros: Array<{ id: string; numero: string; nombre: string | null; negocioId: string | null; negocio: string | null; permanente: boolean; activo: boolean; enUso: boolean }>;
   faltan: number;
   vence: number | null;
   loginVencido?: boolean;
@@ -1188,7 +1189,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
       if (fresco) q.set("fresco", "1");
       const d = (await (await fetch(`/api/meta/connect/token-estado?${q}`, { cache: "no-store" })).json()) as EstadoDelToken;
       setE(d);
-      setElegido((actual) => actual || d.numeros.find((n) => !n.permanente)?.negocioId || d.negocios[0]?.id || "");
+      setElegido((actual) => actual || d.numeros.find((n) => n.enUso && !n.permanente)?.negocioId || d.negocios[0]?.id || "");
     } catch {
       setAviso("No se pudo consultar a Meta.");
     } finally {
@@ -1201,6 +1202,32 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   useEffect(() => {
     if (elegido) void cargar(false, elegido);
   }, [elegido, cargar]);
+
+  const [pegado, setPegado] = useState("");
+  async function guardarPegado() {
+    setOcupado(true);
+    setAviso(null);
+    setHecho(null);
+    try {
+      const d = await (
+        await fetch("/api/meta/connect/token-permanente", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pegado: pegado.trim() }),
+        })
+      ).json();
+      if (d.ok) {
+        setPegado("");
+        setHecho(`Listo. Ya no caducan: ${d.numeros.join(", ")}.${d.aviso ? ` ⚠ ${d.aviso}` : ""}`);
+      } else setAvisoPegado(d.error ?? "No se pudo guardar.");
+      await cargar(false, elegido);
+    } catch {
+      setAvisoPegado("No se pudo consultar a Meta.");
+    } finally {
+      setOcupado(false);
+    }
+  }
+  const [avisoPegado, setAvisoPegado] = useState<string | null>(null);
 
   async function crear() {
     setOcupado(true);
@@ -1233,7 +1260,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
     );
 
   const bm = e.negocios.find((n) => n.id === elegido);
-  const sinToken = new Set(e.numeros.filter((n) => !n.permanente).map((n) => n.negocioId));
+  const sinToken = new Set(e.numeros.filter((n) => n.enUso && !n.permanente).map((n) => n.negocioId));
   const listo = e.numeros.length > 0 && e.faltan === 0;
   const boton = "inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm transition";
 
@@ -1253,6 +1280,10 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
             </span>
             {n.permanente ? (
               <span className="text-xs font-semibold text-emerald-700">🔐 No caduca</span>
+            ) : !n.enUso ? (
+              <span className="text-xs text-neutral-400" title="No es el activo ni lo tiene ninguna tienda: no hace falta su token">
+                No lo usa este proyecto
+              </span>
             ) : (
               <span className={`text-xs font-semibold ${e.loginVencido ? "text-red-700" : "text-amber-700"}`}>
                 {e.loginVencido ? "⛔ Sin permiso: inicia sesión de nuevo" : e.vence ? `⚠ Caduca el ${fecha(e.vence)}` : "⚠ Sin token permanente"}
@@ -1344,7 +1375,22 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
           {/* META PIDE UNA PERSONA (20/10/2026, lo vivió él): el primer intento casi nunca crea el
               token. Meta deja una solicitud en el BM («Se ha solicitado…»): al aceptarla manda un
               código al correo, y con el código puesto el segundo intento sí lo crea. */}
-          {aviso && bm && (
+          {/* LO QUE META PIDE DE VERDAD (21/10/2026): el código por correo sale UNA vez; las demás,
+              Meta dice otra cosa (casi siempre: la app sin asignar al usuario del sistema). Se
+              muestra su instrucción, no siempre la del correo. */}
+          {aviso && bm && !/correo|c[oó]digo|email|verif/i.test(aviso) && (
+            <div className="space-y-2 rounded-lg border-2 border-amber-400 bg-amber-50 p-3">
+              <div className="font-bold">👉 Falta un paso en Meta</div>
+              <div className="text-[13px]">{aviso}</div>
+              <a href={`https://business.facebook.com/settings/system-users?business_id=${bm.id}`} target="_blank" rel="noreferrer" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
+                Ir a {bm.nombre} ↗
+              </a>
+              <div className="text-[13px]">
+                Luego vuelve y pulsa <b>«Crear token permanente»</b> otra vez. O, más fácil: créalo en esa página de Meta y pégalo abajo.
+              </div>
+            </div>
+          )}
+          {aviso && bm && /correo|c[oó]digo|email|verif/i.test(aviso) && (
             <div className="space-y-2 rounded-lg border-2 border-amber-400 bg-amber-50 p-3">
               <div className="font-bold">👉 Meta te pide confirmarlo. Es normal la primera vez.</div>
               <div>
@@ -1360,6 +1406,27 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
             </div>
           )}
           {aviso && !bm && <div className="text-xs text-red-700">❌ {aviso}</div>}
+
+          {/* PEGAR UN TOKEN YA CREADO (21/10/2026): crearlo en la página de Meta es lo más seguro
+              («Meta es raro»). Aquí se comprueba y se pone en los números que alcanza. */}
+          <div className="space-y-2 border-t border-sky-200 pt-3">
+            <div className="text-[13px] font-semibold text-neutral-800">¿Ya creaste el token en la página de Meta? Pégalo aquí:</div>
+            <div className="flex gap-2">
+              <input
+                type="password"
+                autoComplete="off"
+                className="min-w-0 flex-1 rounded-lg border border-neutral-300 px-2 py-1.5 font-mono text-xs"
+                placeholder="EAA…"
+                value={pegado}
+                onChange={(ev) => setPegado(ev.target.value)}
+              />
+              <button type="button" disabled={ocupado || pegado.trim().length < 20} className={`${boton} bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-40`} onClick={() => void guardarPegado()}>
+                Guardar
+              </button>
+            </div>
+            {avisoPegado && <div className="text-[13px] text-red-700">❌ {avisoPegado}</div>}
+            <div className="text-xs text-neutral-500">Al crearlo en Meta: elige tu app, caducidad «Nunca», y los permisos que empiezan con whatsapp_, más business_management y ads_read.</div>
+          </div>
 
           <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar(true, elegido)}>
             {revisando ? (
