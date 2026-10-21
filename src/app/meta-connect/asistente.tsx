@@ -34,7 +34,7 @@ interface Negocio {
   id: string;
   nombre: string;
   verificado: boolean;
-  cuentas: Array<{ id: string; nombre: string; otrasApps: string[]; numeros: Numero[] }>;
+  cuentas: Array<{ id: string; nombre: string; otrasApps: string[]; estaApp: boolean; numeros: Numero[] }>;
 }
 
 function leer(): { paso: Paso; casillas: Record<string, boolean> } | null {
@@ -456,10 +456,12 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
             <b>Agrega a tu app lo que necesita.</b> En la página que se abre, busca cada uno y pulsa <b>«Configurar»</b>. Si ya lo tiene, solo márcalo.
           </div>
           <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
-          <Casilla id="p-login" casillas={casillas} marcar={marcar} texto={<><b>Inicio de sesión con Facebook para empresas</b> (sin este no aparece dónde pegar la URI)</>} />
+          {/* EN ESTE ORDEN (20/10/2026): «primero WhatsApp, luego Messenger, luego IG, y al final lo
+              de URI». El Inicio de sesión va en la pantalla siguiente, junto a su URI. */}
           <Casilla id="p-whatsapp" casillas={casillas} marcar={marcar} texto={<><b>WhatsApp</b></>} />
           <Casilla id="p-messenger" casillas={casillas} marcar={marcar} texto={<><b>Messenger</b></>} />
-          <Botones listo={!!casillas["p-login"] && !!casillas["p-whatsapp"] && !!casillas["p-messenger"]} alSeguir={() => ir("uri")} />
+          <Casilla id="p-instagram" casillas={casillas} marcar={marcar} texto={<><b>Instagram</b> (o márcalo si no vas a vender por Instagram)</>} />
+          <Botones listo={!!casillas["p-whatsapp"] && !!casillas["p-messenger"] && !!casillas["p-instagram"]} alSeguir={() => ir("uri")} />
         </>
       )}
 
@@ -467,12 +469,21 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
         <>
           {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
           <div>
-            <b>La URI.</b> Ya está completa: cópiala y pégala en <i>«URI de redireccionamiento de OAuth válidos»</i>; luego «Guardar cambios».
+            <b>1.</b> Agrega a tu app <b>Inicio de sesión con Facebook para empresas</b> («Configurar»). Sin él no aparece dónde pegar la URI.
           </div>
-          <Copiar texto={uri} />
-          <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
-          <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
-          <Botones listo={!!casillas.uri} alSeguir={() => ir("vivo")} />
+          <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
+          <Casilla id="p-login" casillas={casillas} marcar={marcar} texto="Lo agregué." />
+          {casillas["p-login"] && (
+            <>
+              <div className="pt-2">
+                <b>2. La URI.</b> Ya está completa: cópiala y pégala en <i>«URI de redireccionamiento de OAuth válidos»</i>; luego «Guardar cambios».
+              </div>
+              <Copiar texto={uri} />
+              <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
+              <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
+            </>
+          )}
+          <Botones listo={!!casillas["p-login"] && !!casillas.uri} alSeguir={() => ir("vivo")} />
         </>
       )}
 
@@ -504,6 +515,7 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [f, setF] = useState({ cc: "51", numero: "", nombre: "", codigo: "", pin: "" });
+  const [nuevo, setNuevo] = useState<{ paso: "negocio" | "datos" | "codigo" | "pin" | "listo"; wabaId?: string; negocio?: string; phoneNumberId?: string; numero?: string } | null>(null);
 
   const cargar = useCallback(async () => {
     setError(null);
@@ -537,40 +549,194 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
     return null;
   }
 
+  // AGREGAR UN NÚMERO NUEVO, PASO A PASO (20/10/2026): «he visto asistentes que dicen agregar
+  // nuevo número, se elige el BM…». Un solo botón arriba y una pregunta por pantalla, en vez de un
+  // «+» en cada negocio de una lista larga.
+  if (nuevo) {
+    const pasoN = { negocio: 1, datos: 2, codigo: 3, pin: 4, listo: 4 }[nuevo.paso];
+    const cerrarNuevo = () => {
+      setNuevo(null);
+      setMensaje(null);
+      setF({ cc: f.cc, numero: "", nombre: "", codigo: "", pin: "" });
+    };
+    return (
+      <div className="space-y-3 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="font-bold">➕ Agregar número nuevo</div>
+          <span className="ml-auto text-xs text-neutral-500">Paso {pasoN} de 4</span>
+        </div>
+        {mensaje && <div className="text-sm">{mensaje}</div>}
+
+        {nuevo.paso === "negocio" && (
+          <>
+            <div>¿En qué <b>negocio</b> va este número?</div>
+            <div className="space-y-2">
+              {(negocios ?? []).map((n) => {
+                const conNumeros = n.cuentas.filter((c) => c.numeros.length > 0);
+                const cantidad = conNumeros.reduce((s, c) => s + c.numeros.length, 0);
+                const lleno = !n.verificado && cantidad >= 2;
+                const donde = conNumeros[0] ?? n.cuentas[0];
+                const motivo = !donde ? "No tiene cuenta de WhatsApp: créala una vez en el WhatsApp Manager." : lleno ? "Ya tiene 2 números y no está verificado." : null;
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    disabled={!!motivo}
+                    className="block w-full rounded-lg border border-neutral-300 p-3 text-left hover:border-sky-400 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+                    onClick={() => {
+                      setOtras(donde!.otrasApps);
+                      setNuevo({ paso: "datos", wabaId: donde!.id, negocio: n.nombre });
+                    }}
+                  >
+                    <div className="font-bold">🏢 {n.nombre}</div>
+                    <div className="text-xs text-neutral-600">
+                      {cantidad} número(s){!n.verificado ? " · sin verificar (Meta admite 2)" : ""}
+                      {motivo ? ` — ${motivo}` : ""}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex justify-between pt-2">
+              <button type="button" className="text-neutral-500 hover:underline" onClick={cerrarNuevo}>← Volver a mis números</button>
+            </div>
+          </>
+        )}
+
+        {nuevo.paso === "datos" && (
+          <>
+            <div>
+              El número para <b>{nuevo.negocio}</b>. No puede estar usándose en el WhatsApp normal o Business de un celular: si lo está, bórralo de ahí primero.
+            </div>
+            <div className="flex gap-2">
+              <input className="w-20 rounded border px-2 py-1.5" placeholder="País" value={f.cc} onChange={(e) => setF({ ...f, cc: e.target.value })} title="Código de país sin +, por ejemplo 51" />
+              <input className="flex-1 rounded border px-2 py-1.5" placeholder="Número, sin el código de país" value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} />
+            </div>
+            <input className="w-full rounded border px-2 py-1.5" placeholder="Nombre visible para tus clientes (lo revisa Meta)" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
+            <div className="flex justify-between pt-2">
+              <button type="button" className="text-neutral-500 hover:underline" onClick={() => setNuevo({ ...nuevo, paso: "negocio" })}>← Atrás</button>
+              <button
+                type="button"
+                disabled={ocupado || !f.cc.trim() || !f.numero.trim() || !f.nombre.trim()}
+                className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                onClick={async () => {
+                  const d = await pedir({ accion: "agregar", wabaId: nuevo.wabaId!, cc: f.cc, numero: f.numero, nombre: f.nombre });
+                  if (d?.phoneNumberId) setNuevo({ ...nuevo, paso: "codigo", phoneNumberId: d.phoneNumberId, numero: `+${f.cc} ${f.numero}` });
+                }}
+              >
+                {ocupado ? "Agregando…" : "Agregar →"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {nuevo.paso === "codigo" && (
+          <>
+            <div>
+              Meta te manda un código a <b>{nuevo.numero}</b>. ¿Cómo lo quieres?
+            </div>
+            <div className="flex gap-2">
+              <button type="button" disabled={ocupado} className="rounded border bg-white px-3 py-1.5 hover:bg-neutral-50" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: nuevo.phoneNumberId!, metodo: "SMS" }, () => setMensaje("📩 Te mandé el código por SMS."))}>
+                ✉️ Por SMS
+              </button>
+              <button type="button" disabled={ocupado} className="rounded border bg-white px-3 py-1.5 hover:bg-neutral-50" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: nuevo.phoneNumberId!, metodo: "VOICE" }, () => setMensaje("📞 Te llamarán con el código."))}>
+                📞 Por llamada
+              </button>
+            </div>
+            <input className="w-full rounded border px-2 py-1.5" placeholder="Escribe el código que te llegó" value={f.codigo} onChange={(e) => setF({ ...f, codigo: e.target.value })} />
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                disabled={ocupado || !f.codigo.trim()}
+                className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                onClick={() => void pedir({ accion: "verificar", phoneNumberId: nuevo.phoneNumberId!, codigo: f.codigo }, () => setNuevo({ ...nuevo, paso: "pin" }))}
+              >
+                {ocupado ? "Verificando…" : "Verificar →"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {nuevo.paso === "pin" && (
+          <>
+            <div>
+              🔒 Elige un <b>PIN de 6 números</b> y <b>guárdalo</b>: activa la verificación en dos pasos y Meta puede pedírtelo después.
+            </div>
+            <input className="w-full rounded border px-2 py-1.5" placeholder="PIN de 6 números" inputMode="numeric" maxLength={6} value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value })} />
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                disabled={ocupado || f.pin.replace(/\D/g, "").length !== 6}
+                className="rounded-md bg-emerald-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                onClick={() =>
+                  aceptaDosBots(otras) &&
+                  void pedir({ accion: "activar", phoneNumberId: nuevo.phoneNumberId!, pin: f.pin }, () => {
+                    setMensaje(null);
+                    setNuevo({ ...nuevo, paso: "listo" });
+                    void cargar();
+                  })
+                }
+              >
+                {ocupado ? "Activando…" : "Activar"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {nuevo.paso === "listo" && (
+          <>
+            <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3">
+              ✅ <b>{nuevo.numero}</b> está activo y lo atiende este CRM. Ya puedes elegirlo en tu tienda.
+            </div>
+            <div className="flex justify-end pt-2">
+              <button type="button" className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white" onClick={cerrarNuevo}>
+                Volver a mis números
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 text-sm">
       <div className="font-bold">📱 Tus números, por negocio</div>
       <p className="text-xs text-neutral-600">Los números viven en tus negocios, no en la app. Tu app los atiende a todos.</p>
+      {negocios && negocios.length > 0 && (
+        <button type="button" className="w-full rounded-lg border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold text-sky-900 hover:bg-sky-100" onClick={() => { setMensaje(null); setNuevo({ paso: "negocio" }); }}>
+          ➕ Agregar número nuevo
+        </button>
+      )}
       {error && <div className="text-red-700">❌ {error}</div>}
       {!negocios && !error && <div className="text-neutral-500">Consultando a Meta…</div>}
       {negocios?.length === 0 && <div className="text-neutral-600">No veo negocios. Inicia sesión con Facebook y marca tus negocios en la ventana de Meta.</div>}
+      {/* POR NEGOCIO, SOLO LO QUE TIENE NÚMEROS (20/10/2026): cada negocio trae varias cuentas de
+          WhatsApp vacías y salía un «Agregar número» por cada una. Ahora: sus números (de todas
+          sus cuentas) y UN solo «Agregar número». Qué app atiende cada número lo dice Meta. */}
       {negocios?.map((n) => {
-        const cantidad = n.cuentas.reduce((s, c) => s + c.numeros.length, 0);
+        const conNumeros = n.cuentas.filter((c) => c.numeros.length > 0);
+        const cantidad = conNumeros.reduce((s, c) => s + c.numeros.length, 0);
         const lleno = !n.verificado && cantidad >= 2;
+        const dondeAgregar = conNumeros[0] ?? n.cuentas[0];
         return (
           <div key={n.id} className="rounded-lg border border-neutral-200 p-3">
             <div className="flex flex-wrap items-center gap-2">
               <b>🏢 {n.nombre}</b>
-              {!n.verificado && <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">Sin verificar · máximo 2 números ({cantidad}/2)</span>}
+              {!n.verificado && <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">Sin verificar · Meta admite 2 números</span>}
+              <span className="text-xs text-neutral-500">{cantidad} número(s)</span>
             </div>
-            {n.cuentas.length === 0 && <div className="text-xs text-neutral-600">Este negocio no tiene cuenta de WhatsApp todavía. Créala una vez en el WhatsApp Manager de Meta.</div>}
-            {n.cuentas.map((c) => (
-              <div key={c.id} className="mt-2 space-y-1">
-                {/* DOS APPS, DOS BOTS (20/10/2026): Meta suscribe la cuenta de WhatsApp entera. */}
-                {c.otrasApps.length > 0 && (
-                  <div className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs text-red-800">
-                    ⚠ Estos números también los atiende otra app: <b>{c.otrasApps.join(", ")}</b>. Si además los atiende tu CRM, a cada cliente le contestarían dos bots. Quítale la suscripción a la otra desde el proyecto que la usa.
-                  </div>
-                )}
-                {c.numeros.map((x) => (
-                  <div key={x.id} className="flex flex-wrap items-center gap-2 rounded bg-neutral-50 px-2 py-1">
+            {conNumeros.map((c) =>
+              c.numeros.map((x) => (
+                <div key={x.id} className="mt-1 rounded bg-neutral-50 px-2 py-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono">{x.numero}</span>
                     <span className="text-xs text-neutral-500">{x.nombre}</span>
                     <span className="ml-auto" />
-                    {x.estado === "activo" && x.suscritoAqui && <span className="text-xs text-emerald-700">✅ Activo y en tu CRM</span>}
-                    {x.estado === "activo" && !x.suscritoAqui && (
+                    {x.estado === "activo" && c.estaApp && <span className="text-xs font-semibold text-emerald-700">✅ Lo atiende este CRM</span>}
+                    {x.estado === "activo" && !c.estaApp && (
                       <button type="button" disabled={ocupado} className="rounded bg-sky-600 px-2 py-0.5 text-xs font-bold text-white" onClick={() => aceptaDosBots(c.otrasApps) && void pedir({ accion: "traer", phoneNumberId: x.id }, () => void cargar())}>
-                        Traer a mi CRM
+                        Traer a este CRM
                       </button>
                     )}
                     {x.estado === "sin_activar" && (
@@ -584,18 +750,24 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
                       </button>
                     )}
                   </div>
-                ))}
-                <button
-                  type="button"
-                  disabled={lleno}
-                  title={lleno ? "Este negocio no está verificado: máximo 2 números. Verifícalo en Meta para tener hasta 20, o usa otro negocio." : ""}
-                  className="text-xs font-bold text-sky-700 hover:underline disabled:text-neutral-400 disabled:no-underline"
-                  onClick={() => { setOtras(c.otrasApps); setTrabajo({ tipo: "agregar", wabaId: c.id }); }}
-                >
-                  ➕ Agregar número {lleno ? "(lleno: máximo 2)" : ""}
-                </button>
-              </div>
-            ))}
+                  {/* Quién más lo atiende: en gris si es solo información; en rojo si ESTE CRM también
+                      (ahí contestan dos bots). */}
+                  {c.otrasApps.length > 0 &&
+                    (c.estaApp ? (
+                      <div className="mt-0.5 text-xs font-semibold text-red-700">
+                        ⚠ También lo atiende «{c.otrasApps.join(", ")}»: a cada cliente le contestan dos bots. Quítale la suscripción a la otra desde el proyecto que la usa.
+                      </div>
+                    ) : (
+                      <div className="mt-0.5 text-xs text-neutral-500">Lo atiende: {c.otrasApps.join(", ")}</div>
+                    ))}
+                </div>
+              ))
+            )}
+            {/* (Agregar va arriba, en «➕ Agregar número nuevo», con su paso a paso.) */}
+            {!dondeAgregar && (
+              <div className="mt-1 text-xs text-neutral-600">Este negocio no tiene cuenta de WhatsApp todavía. Créala una vez en el WhatsApp Manager de Meta.</div>
+            )}
+            {lleno && <div className="mt-1 text-xs text-neutral-500">Lleno: para agregar otro, verifica este negocio en Meta o usa otro negocio.</div>}
           </div>
         );
       })}

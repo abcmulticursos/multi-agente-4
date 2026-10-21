@@ -55,7 +55,9 @@ async function otrasAppsDeLaCuenta(wabaId: string, accessToken: string): Promise
     return (r.data ?? [])
       .map((a) => a.whatsapp_business_api_data)
       .filter((a) => !!a?.id && a.id !== nuestra)
-      .map((a) => a?.name || a?.id || "otra app");
+      .map((a) => a?.name || a?.id || "otra app")
+      // (Las apps internas de Meta, como «WA DevX Webhook Events 1P App», no son otro bot.)
+      .filter((nombre) => !/WA DevX|1P App|Meta Internal/i.test(nombre));
   } catch {
     return [];
   }

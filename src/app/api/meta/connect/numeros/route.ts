@@ -95,6 +95,8 @@ async function listar() {
         nombre: string;
         /** Las OTRAS apps que atienden esta cuenta de WhatsApp (20/10/2026): con dos, contestan dos bots. */
         otrasApps: string[];
+        /** ¿La atiende ESTA app? (lo dice Meta, no lo guardado en el CRM). */
+        estaApp: boolean;
         numeros: Array<{ id: string; numero: string; nombre: string; estado: "activo" | "sin_activar" | "sin_verificar"; suscritoAqui: boolean }>;
       }>;
     }
@@ -117,8 +119,12 @@ async function listar() {
       // QUÉ OTRAS APPS ATIENDEN CADA CUENTA DE WHATSAPP (20/10/2026): «no quiero tener problemas
       // con duplicidad». Meta suscribe la cuenta entera; con dos apps, a cada cliente le
       // contestarían dos bots. Solo se lee.
+      // «WA DevX Webhook Events 1P App» y parecidas son apps INTERNAS de Meta, puestas en casi
+      // todas las cuentas: no son otro bot y no contestan a nadie. No cuentan.
       const nuestraApp = getMetaAppId();
+      const esDeMeta = (nombre: string) => /WA DevX|1P App|Meta Internal/i.test(nombre);
       const otrasAppsDe = new Map<string, string[]>();
+      const estaAppEn = new Set<string>();
       await Promise.all(
         (w.data ?? []).map(async (waba) => {
           const s = await graph<{ data?: Array<{ whatsapp_business_api_data?: { id?: string; name?: string } }> }>(
@@ -126,12 +132,14 @@ async function listar() {
             token,
             "GET"
           );
+          const apps = (s.data ?? []).map((a) => a.whatsapp_business_api_data).filter((a) => !!a?.id);
+          if (apps.some((a) => a?.id === nuestraApp)) estaAppEn.add(waba.id);
           otrasAppsDe.set(
             waba.id,
-            (s.data ?? [])
-              .map((a) => a.whatsapp_business_api_data)
-              .filter((a) => !!a?.id && a.id !== nuestraApp)
+            apps
+              .filter((a) => a?.id !== nuestraApp)
               .map((a) => a?.name || a?.id || "otra app")
+              .filter((nombre) => !esDeMeta(nombre))
           );
         })
       );
@@ -145,6 +153,7 @@ async function listar() {
             id: waba.id,
             nombre: waba.name ?? waba.id,
             otrasApps: otrasAppsDe.get(waba.id) ?? [],
+            estaApp: estaAppEn.has(waba.id),
             numeros: (waba.phone_numbers?.data ?? [])
               .filter((n) => !/test number/i.test(n.verified_name ?? ""))
               .map((n) => {
