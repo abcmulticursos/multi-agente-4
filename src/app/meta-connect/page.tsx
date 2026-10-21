@@ -1398,6 +1398,15 @@ function SeccionEnVentana({
   children: ReactNode;
 }) {
   const [abierto, setAbierto] = useState(false);
+  // EL ASISTENTE LA ABRE (21/10/2026): «¿Qué deseas hacer? → Elegir página o píxel» abre esta
+  // ventana directamente, por su título.
+  useEffect(() => {
+    const alPedir = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === titulo) setAbierto(true);
+    };
+    window.addEventListener("meta-connect:abrir", alPedir);
+    return () => window.removeEventListener("meta-connect:abrir", alPedir);
+  }, [titulo]);
   useEffect(() => {
     if (!abierto) return;
     const alPulsar = (evento: KeyboardEvent) => {

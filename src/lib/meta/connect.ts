@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { MEDIA_HORA, recordar } from "@/lib/meta/recuerdo";
 import {
   getMetaAppId as getStoredMetaAppId,
   getMetaOAuthAppSecret,
@@ -112,16 +113,20 @@ export async function fetchMetaAppName(): Promise<string | null> {
   const appSecret = getMetaAppSecret();
   if (!appId || !appSecret) return null;
 
-  const url = new URL(`https://graph.facebook.com/${graphVersion()}/${appId}`);
-  url.searchParams.set("fields", "name");
-  url.searchParams.set("access_token", `${appId}|${appSecret}`);
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    const body = (await res.json()) as { name?: string };
-    return res.ok && body.name ? body.name : null;
-  } catch {
-    return null;
-  }
+  // RECORDADO MEDIA HORA (21/10/2026): el nombre de la app se pedía en cada apertura de Meta
+  // Connect y en cada paso del asistente. No cambia; si cambia la app, cambia la clave.
+  return recordar(`app-nombre:${appId}`, MEDIA_HORA, async () => {
+    const url = new URL(`https://graph.facebook.com/${graphVersion()}/${appId}`);
+    url.searchParams.set("fields", "name");
+    url.searchParams.set("access_token", `${appId}|${appSecret}`);
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      const body = (await res.json()) as { name?: string };
+      return res.ok && body.name ? body.name : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 function isLocalOrigin(value: string): boolean {

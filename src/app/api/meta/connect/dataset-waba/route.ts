@@ -6,6 +6,7 @@ import {
 } from "@/lib/db";
 import { graphVersion, type MetaPixelOption } from "@/lib/meta/connect";
 import { getTokenDeLaConexion } from "@/lib/meta/runtime-config";
+import { MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -132,7 +133,13 @@ export async function GET() {
     });
   }
 
-  const { id, error } = await pedirDataset(waba.wabaId, token, false);
+  // RECORDADO MEDIA HORA (21/10/2026): se pedía en cada apertura de Meta Connect. Crearlo
+  // (POST, abajo) lo olvida.
+  const { id, error } = await recordar(`dataset:${waba.wabaId}`, MEDIA_HORA, async () => {
+    const r = await pedirDataset(waba.wabaId, token, false);
+    if (r.error) throw new Error(r.error);
+    return r;
+  }).catch((e: Error) => ({ id: null, error: e.message }));
   return NextResponse.json({
     ok: !error,
     error,
@@ -146,6 +153,7 @@ export async function GET() {
 
 /** Crea el conjunto de datos —o recupera el que ya hubiera— y lo deja elegido. */
 export async function POST() {
+  olvidar("dataset");
   const waba = wabaActiva();
   if (!waba) {
     return NextResponse.json({

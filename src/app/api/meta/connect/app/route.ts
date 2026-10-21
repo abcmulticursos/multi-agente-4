@@ -5,7 +5,8 @@ import {
   getMetaOAuthAppSecret,
   getTokenDeLaConexion,
 } from "@/lib/meta/runtime-config";
-import { MINUTOS, recordar } from "@/lib/meta/recuerdo";
+import { MEDIA_HORA, recordar } from "@/lib/meta/recuerdo";
+import { fetchMeta } from "@/lib/meta/freno";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -35,7 +36,7 @@ export async function GET() {
   // RECORDADO 10 MINUTOS (21/10/2026): para el negocio de la app se recorren todos los BM, dos
   // preguntas por cada uno; repetirlo en cada apertura de Meta Connect hizo que Meta frenara la
   // app («#4»). Cambiar de app cambia la clave, así que se lee de nuevo.
-  const datos = await recordar(`app:${appId}`, MINUTOS(10), () => leerApp(appId, appSecret));
+  const datos = await recordar(`app:${appId}`, MEDIA_HORA, () => leerApp(appId, appSecret));
   return NextResponse.json(datos, { headers: { "Cache-Control": "no-store" } });
 }
 
@@ -49,7 +50,7 @@ async function leerApp(appId: string, appSecret: string) {
     const url = new URL(`https://graph.facebook.com/${graphVersion()}/${appId}`);
     url.searchParams.set("fields", "name");
     url.searchParams.set("access_token", tokenDeApp);
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetchMeta(url);
     const cuerpo = (await res.json().catch(() => null)) as {
       name?: string;
       error?: { message?: string };
@@ -75,7 +76,7 @@ async function leerApp(appId: string, appSecret: string) {
       );
       url.searchParams.set("fields", "id,name");
       url.searchParams.set("access_token", token);
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetchMeta(url);
       const cuerpo = (await res.json().catch(() => null)) as {
         data?: Array<{ id?: string; name?: string }>;
       } | null;
@@ -90,7 +91,7 @@ async function leerApp(appId: string, appSecret: string) {
           consulta.searchParams.set("fields", "id");
           consulta.searchParams.set("limit", "200");
           consulta.searchParams.set("access_token", token);
-          const respuesta = await fetch(consulta, { cache: "no-store" });
+          const respuesta = await fetchMeta(consulta);
           if (!respuesta.ok) continue;
           const lista = (await respuesta.json().catch(() => null)) as {
             data?: Array<{ id?: string }>;

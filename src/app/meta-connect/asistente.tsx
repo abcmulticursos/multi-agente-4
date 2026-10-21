@@ -202,8 +202,9 @@ export default function AsistenteDeConexion() {
           type="button"
           className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
           onClick={() => {
+            // Siempre empieza por «¿Qué deseas hacer?».
             setAbierto(true);
-            setPaso(leer()?.paso ?? "inicio");
+            ir("inicio");
           }}
         >
           Abrir asistente
@@ -227,20 +228,45 @@ export default function AsistenteDeConexion() {
             {aviso && <div className="mb-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{aviso}</div>}
 
             {paso === "inicio" && (
+              // «¿QUÉ DESEAS HACER?» (21/10/2026): cada tarea consulta a Meta solo lo suyo. Las que
+              // más se usan, grandes y arriba; las de una vez, chicas abajo.
               <div className="space-y-2">
-                <p className="text-sm text-neutral-600">¿Qué quieres hacer?</p>
+                <p className="text-sm font-semibold text-neutral-700">¿Qué deseas hacer?</p>
                 {[
-                  ["app", "🔑 Conectar mi app (la puerta)", "Una sola vez: su ID y su clave. Lo demás se llena solo."],
-                  ["facebook", "👤 Iniciar sesión con Facebook, o agregar otra cuenta", "Para ver tus negocios, números, páginas y píxeles."],
-                  ["numeros", "📱 Agregar o activar un número", "Sin entrar a la app ni al WhatsApp Manager."],
-                  ["token", "🔐 Token permanente", "La base para que la conexión no caduque. Obligatorio."],
-                  ["listo", "✅ Revisar que todo esté bien", "Lo que falta, en palabras simples."],
+                  ["numeros", "📱 Agregar o activar un número", "Eliges el BM y solo se consulta ese."],
+                  ["token", "🔐 Crear token permanente", "Para que tus números no caduquen."],
+                  ["pagina", "📘 Elegir página de Facebook", "La que responde Messenger y registra tus compras."],
+                  ["pixel", "📈 Elegir píxel", "El que mide tus compras en Meta."],
                 ].map(([p, t, d]) => (
-                  <button key={p} type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left hover:border-sky-400 hover:bg-sky-50" onClick={() => ir(p as Paso)}>
+                  <button
+                    key={p}
+                    type="button"
+                    className="block w-full rounded-xl border border-neutral-200 bg-white p-3 text-left shadow-sm transition hover:border-sky-400 hover:bg-sky-50"
+                    onClick={() => {
+                      // Página y píxel ya tienen su ventana abajo: se abre esa, sin consultar nada más.
+                      if (p === "pagina" || p === "pixel") {
+                        setAbierto(false);
+                        window.dispatchEvent(new CustomEvent("meta-connect:abrir", { detail: p === "pagina" ? "Páginas de Facebook" : "Píxel" }));
+                        return;
+                      }
+                      ir(p as Paso);
+                    }}
+                  >
                     <div className="font-bold">{t}</div>
                     <div className="text-xs text-neutral-600">{d}</div>
                   </button>
                 ))}
+                <div className="grid gap-2 pt-1 sm:grid-cols-3">
+                  {[
+                    ["app", "🔑 Mi app"],
+                    ["facebook", "👤 Iniciar sesión"],
+                    ["listo", "✅ Revisar todo"],
+                  ].map(([p, t]) => (
+                    <button key={p} type="button" className="rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-sky-400 hover:bg-sky-50" onClick={() => ir(p as Paso)}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -553,10 +579,73 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
   );
 }
 
+/** BOTONES QUE PARECEN BOTONES, TODOS IGUALES (21/10/2026): «ese botón no parece botón, parece un
+ *  aviso… muy delgado; uniformizar el diseño para entenderlo». */
+const BTN = "inline-flex items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40";
+const BTN_AZUL = `${BTN} bg-sky-600 text-white hover:bg-sky-700`;
+const BTN_VERDE = `${BTN} bg-emerald-600 text-white hover:bg-emerald-700`;
+const BTN_BLANCO = `${BTN} border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50`;
+
+/**
+ * CUÁNTOS DÍGITOS TIENE UN CELULAR EN CADA PAÍS (21/10/2026). Se agregó +51 9023437000 —un cero de
+ * más— y ni el CRM ni Meta lo frenaron: el SMS nunca llega y el número ocupa uno de los 2 lugares
+ * del BM. Solo AVISA y pide confirmar; no bloquea (hay números fijos y casos raros).
+ */
+const DIGITOS_POR_PAIS: Record<string, { largos: number[]; empieza?: string; pais: string }> = {
+  "51": { largos: [9], empieza: "9", pais: "Perú" },
+  "52": { largos: [10], pais: "México" },
+  "54": { largos: [10, 11], pais: "Argentina" },
+  "56": { largos: [9], empieza: "9", pais: "Chile" },
+  "57": { largos: [10], empieza: "3", pais: "Colombia" },
+  "58": { largos: [10], pais: "Venezuela" },
+  "591": { largos: [8], pais: "Bolivia" },
+  "593": { largos: [9], empieza: "9", pais: "Ecuador" },
+  "595": { largos: [9], pais: "Paraguay" },
+  "598": { largos: [8, 9], pais: "Uruguay" },
+  "502": { largos: [8], pais: "Guatemala" },
+  "503": { largos: [8], pais: "El Salvador" },
+  "504": { largos: [8], pais: "Honduras" },
+  "505": { largos: [8], pais: "Nicaragua" },
+  "506": { largos: [8], pais: "Costa Rica" },
+  "507": { largos: [8], pais: "Panamá" },
+  "1": { largos: [10], pais: "Estados Unidos" },
+  "34": { largos: [9], pais: "España" },
+};
+function avisoDelNumero(cc: string, numero: string): string | null {
+  const regla = DIGITOS_POR_PAIS[cc.replace(/\D/g, "")];
+  const n = numero.replace(/\D/g, "");
+  if (!regla || !n) return null;
+  if (!regla.largos.includes(n.length))
+    return `Tiene ${n.length} dígitos; en ${regla.pais} un celular tiene ${regla.largos.join(" u ")}. Revísalo: con un dígito de más o de menos, el código nunca llega.`;
+  if (regla.empieza && !n.startsWith(regla.empieza)) return `En ${regla.pais} un celular empieza con ${regla.empieza}. Revísalo.`;
+  return null;
+}
+
+/** «hace 5 min» */
+function hace(ms: number | null | undefined): string {
+  if (!ms) return "";
+  const min = Math.round((Date.now() - ms) / 60_000);
+  return min < 1 ? "recién" : min === 1 ? "hace 1 min" : `hace ${min} min`;
+}
+
+type BmLigero = { id: string; nombre: string; verificado: boolean };
+
+/**
+ * TUS NÚMEROS, UN BM A LA VEZ (21/10/2026). «¿Cuando iba a agregar un número revisaba todas las
+ * consultas? ¿No debería ser así?». Primero la lista de BM (1 llamada); al elegir uno, solo ese BM
+ * (1 llamada): sus números, qué app los atiende, y «Agregar un número». Cada paso relee solo ese
+ * BM. «🔍 Revisar todo» trae todos los BM juntos, y solo cuando se pide.
+ */
 function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => void }) {
-  const [negocios, setNegocios] = useState<Negocio[] | null>(null);
+  const [bms, setBms] = useState<BmLigero[] | null>(null);
+  const [desde, setDesde] = useState<number | null>(null);
+  const [bmElegido, setBmElegido] = useState<string | null>(null);
+  const [negocio, setNegocio] = useState<Negocio | null>(null);
+  const [todos, setTodos] = useState<Negocio[] | null>(null);
+  const [vista, setVista] = useState<"bms" | "bm" | "todo">("bms");
+  const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [trabajo, setTrabajo] = useState<{ tipo: "agregar"; wabaId: string } | { tipo: "codigo" | "pin"; phoneNumberId: string; numero: string } | null>(null);
+  const [trabajo, setTrabajo] = useState<{ tipo: "codigo" | "pin"; phoneNumberId: string; numero: string } | null>(null);
   /** Las otras apps de la cuenta de WhatsApp con la que se trabaja: se avisa antes de sumar la tuya. */
   const [otras, setOtras] = useState<string[]>([]);
   const aceptaDosBots = (lista: string[]) =>
@@ -567,30 +656,68 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [f, setF] = useState({ cc: "51", numero: "", nombre: "", codigo: "", pin: "" });
-  const [nuevo, setNuevo] = useState<{ paso: "negocio" | "datos" | "codigo" | "pin" | "listo"; wabaId?: string; negocio?: string; phoneNumberId?: string; numero?: string } | null>(null);
+  const [nuevo, setNuevo] = useState<{ paso: "datos" | "codigo" | "pin" | "listo"; wabaId: string; phoneNumberId?: string; numero?: string } | null>(null);
 
-  const cargar = useCallback(async () => {
+  const leerBms = useCallback(async (fresco = false) => {
+    setCargando(true);
     setError(null);
     try {
-      const d = await (await fetch("/api/meta/connect/numeros", { cache: "no-store" })).json();
+      const d = await (await fetch(`/api/meta/connect/numeros?vista=bms${fresco ? "&fresco=1" : ""}`, { cache: "no-store" })).json();
       if (!d.ok) setError(d.error);
-      else setNegocios(d.negocios);
+      else {
+        setBms(d.bms);
+        setDesde(d.desde ?? null);
+      }
     } catch {
       setError("No se pudo consultar a Meta.");
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+  const leerBm = useCallback(async (id: string, fresco = false) => {
+    setCargando(true);
+    setError(null);
+    try {
+      const d = await (await fetch(`/api/meta/connect/numeros?bm=${encodeURIComponent(id)}${fresco ? "&fresco=1" : ""}`, { cache: "no-store" })).json();
+      if (!d.ok) setError(d.error);
+      else {
+        setNegocio(d.negocio);
+        setDesde(d.desde ?? null);
+      }
+    } catch {
+      setError("No se pudo consultar a Meta.");
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+  const leerTodo = useCallback(async (fresco = false) => {
+    setCargando(true);
+    setError(null);
+    try {
+      const d = await (await fetch(`/api/meta/connect/numeros${fresco ? "?fresco=1" : ""}`, { cache: "no-store" })).json();
+      if (!d.ok) setError(d.error);
+      else {
+        setTodos(d.negocios);
+        setDesde(d.desde ?? null);
+      }
+    } catch {
+      setError("No se pudo consultar a Meta.");
+    } finally {
+      setCargando(false);
     }
   }, []);
   useEffect(() => {
-    void cargar();
-  }, [cargar]);
+    void leerBms();
+  }, [leerBms]);
 
-  async function pedir(cuerpo: Record<string, string>, luego?: () => void) {
+  async function pedir(cuerpo: Record<string, string>, luego?: (d: { yaVerificado?: boolean; phoneNumberId?: string }) => void) {
     setOcupado(true);
     setMensaje(null);
     try {
       const d = await (await fetch("/api/meta/connect/numeros", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) })).json();
       if (!d.ok) setMensaje(`❌ ${d.error}`);
       else {
-        luego?.();
+        luego?.(d);
         return d;
       }
     } catch {
@@ -601,82 +728,85 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
     return null;
   }
 
-  // AGREGAR UN NÚMERO NUEVO, PASO A PASO (20/10/2026): «he visto asistentes que dicen agregar
-  // nuevo número, se elige el BM…». Un solo botón arriba y una pregunta por pantalla, en vez de un
-  // «+» en cada negocio de una lista larga.
-  if (nuevo) {
-    const pasoN = { negocio: 1, datos: 2, codigo: 3, pin: 4, listo: 4 }[nuevo.paso];
+  const abrirBm = (id: string) => {
+    setBmElegido(id);
+    setNegocio(null);
+    setTrabajo(null);
+    setNuevo(null);
+    setMensaje(null);
+    setVista("bm");
+    void leerBm(id);
+  };
+  const recargarBm = () => bmElegido && void leerBm(bmElegido);
+  const limpiarFormulario = () => setF({ cc: f.cc, numero: "", nombre: "", codigo: "", pin: "" });
+
+  const cabecera = (titulo: React.ReactNode, alActualizar: () => void) => (
+    <div className="space-y-1">
+      <div className="font-bold">{titulo}</div>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+        {desde ? <span>Revisado {hace(desde)}</span> : null}
+        <button type="button" disabled={cargando} className="font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={alActualizar}>
+          ↻ Actualizar
+        </button>
+      </div>
+    </div>
+  );
+  const espera = (texto: string) => (
+    <div className="text-neutral-600">
+      {texto}
+      <Puntos />
+    </div>
+  );
+
+  // ── AGREGAR UN NÚMERO NUEVO EN EL BM ELEGIDO ─────────────────────────────────────────────
+  if (nuevo && negocio) {
+    const pasoN = { datos: 1, codigo: 2, pin: 3, listo: 3 }[nuevo.paso];
     const cerrarNuevo = () => {
       setNuevo(null);
       setMensaje(null);
-      setF({ cc: f.cc, numero: "", nombre: "", codigo: "", pin: "" });
+      limpiarFormulario();
+      recargarBm();
     };
+    const aviso = avisoDelNumero(f.cc, f.numero);
     return (
       <div className="space-y-3 text-sm">
         <div className="flex items-center gap-2">
-          <div className="font-bold">➕ Agregar número nuevo</div>
-          <span className="ml-auto text-xs text-neutral-500">Paso {pasoN} de 4</span>
+          <div className="font-bold">➕ Agregar un número a {negocio.nombre}</div>
+          <span className="ml-auto text-xs text-neutral-500">Paso {pasoN} de 3</span>
         </div>
         {mensaje && <div className="text-sm">{mensaje}</div>}
 
-        {nuevo.paso === "negocio" && (
-          <>
-            <div>¿En qué <b>negocio</b> va este número?</div>
-            <div className="space-y-2">
-              {(negocios ?? []).map((n) => {
-                const conNumeros = n.cuentas.filter((c) => c.numeros.length > 0);
-                const cantidad = conNumeros.reduce((s, c) => s + c.numeros.length, 0);
-                const lleno = !n.verificado && cantidad >= 2;
-                const donde = conNumeros[0] ?? n.cuentas[0];
-                const motivo = !donde ? "No tiene cuenta de WhatsApp: créala una vez en el WhatsApp Manager." : lleno ? "Ya tiene 2 números y no está verificado." : null;
-                return (
-                  <button
-                    key={n.id}
-                    type="button"
-                    disabled={!!motivo}
-                    className="block w-full rounded-lg border border-neutral-300 p-3 text-left hover:border-sky-400 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
-                    onClick={() => {
-                      setOtras(donde!.otrasApps);
-                      setNuevo({ paso: "datos", wabaId: donde!.id, negocio: n.nombre });
-                    }}
-                  >
-                    <div className="font-bold">🏢 {n.nombre}</div>
-                    <div className="text-xs text-neutral-600">
-                      {cantidad} número(s){!n.verificado ? " · sin verificar (Meta admite 2)" : ""}
-                      {motivo ? ` — ${motivo}` : ""}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex justify-between pt-2">
-              <button type="button" className="text-neutral-500 hover:underline" onClick={cerrarNuevo}>← Volver a mis números</button>
-            </div>
-          </>
-        )}
-
         {nuevo.paso === "datos" && (
           <>
-            <div>
-              El número para <b>{nuevo.negocio}</b>. No puede estar usándose en el WhatsApp normal o Business de un celular: si lo está, bórralo de ahí primero.
-            </div>
+            <div>No puede estar usándose en el WhatsApp normal o Business de un celular: si lo está, bórralo de ahí primero.</div>
             <div className="flex gap-2">
-              <input className="w-20 rounded border px-2 py-1.5" placeholder="País" value={f.cc} onChange={(e) => setF({ ...f, cc: e.target.value })} title="Código de país sin +, por ejemplo 51" />
-              <input className="flex-1 rounded border px-2 py-1.5" placeholder="Número, sin el código de país" value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} />
+              <input className="w-20 rounded-lg border px-2 py-1.5" placeholder="País" value={f.cc} onChange={(e) => setF({ ...f, cc: e.target.value })} title="Código de país sin +, por ejemplo 51" />
+              <input className="flex-1 rounded-lg border px-2 py-1.5" placeholder="Número, sin el código de país" inputMode="numeric" value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} />
             </div>
-            <input className="w-full rounded border px-2 py-1.5" placeholder="Nombre visible para tus clientes (lo revisa Meta)" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
+            {aviso && <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[13px] text-amber-900">⚠ {aviso}</div>}
+            <input className="w-full rounded-lg border px-2 py-1.5" placeholder="Nombre visible para tus clientes (lo revisa Meta)" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
             <div className="flex justify-between pt-2">
-              <button type="button" className="text-neutral-500 hover:underline" onClick={() => setNuevo({ ...nuevo, paso: "negocio" })}>← Atrás</button>
+              <button type="button" className="text-neutral-500 hover:underline" onClick={cerrarNuevo}>← Atrás</button>
               <button
                 type="button"
                 disabled={ocupado || !f.cc.trim() || !f.numero.trim() || !f.nombre.trim()}
-                className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                className={BTN_AZUL}
                 onClick={async () => {
-                  const d = await pedir({ accion: "agregar", wabaId: nuevo.wabaId!, cc: f.cc, numero: f.numero, nombre: f.nombre });
-                  if (d?.phoneNumberId) setNuevo({ ...nuevo, paso: "codigo", phoneNumberId: d.phoneNumberId, numero: `+${f.cc} ${f.numero}` });
+                  const completo = `+${f.cc.replace(/\D/g, "")} ${f.numero.replace(/\D/g, "")}`;
+                  // Confirmarlo grande antes de mandarlo: un número mal escrito ocupa un lugar del BM.
+                  if (!window.confirm(`¿Agregar ${completo} a «${negocio.nombre}»?${aviso ? `\n\n⚠ ${aviso}` : ""}`)) return;
+                  const d = await pedir({ accion: "agregar", wabaId: nuevo.wabaId, cc: f.cc, numero: f.numero, nombre: f.nombre });
+                  if (d?.phoneNumberId) setNuevo({ ...nuevo, paso: "codigo", phoneNumberId: d.phoneNumberId, numero: completo });
                 }}
               >
-                {ocupado ? "Agregando…" : "Agregar →"}
+                {ocupado ? (
+                  <>
+                    Agregando
+                    <Puntos />
+                  </>
+                ) : (
+                  "Agregar →"
+                )}
               </button>
             </div>
           </>
@@ -688,19 +818,29 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
               Meta te manda un código a <b>{nuevo.numero}</b>. ¿Cómo lo quieres?
             </div>
             <div className="flex gap-2">
-              <button type="button" disabled={ocupado} className="rounded border bg-white px-3 py-1.5 hover:bg-neutral-50" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: nuevo.phoneNumberId!, metodo: "SMS" }, () => setMensaje("📩 Te mandé el código por SMS."))}>
-                ✉️ Por SMS
-              </button>
-              <button type="button" disabled={ocupado} className="rounded border bg-white px-3 py-1.5 hover:bg-neutral-50" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: nuevo.phoneNumberId!, metodo: "VOICE" }, () => setMensaje("📞 Te llamarán con el código."))}>
-                📞 Por llamada
-              </button>
+              {(["SMS", "VOICE"] as const).map((metodo) => (
+                <button
+                  key={metodo}
+                  type="button"
+                  disabled={ocupado}
+                  className={BTN_BLANCO}
+                  onClick={() =>
+                    void pedir({ accion: "pedirCodigo", phoneNumberId: nuevo.phoneNumberId!, metodo }, (d) =>
+                      // «Ya está verificado»: directo al PIN, sin cerrar nada.
+                      d.yaVerificado ? setNuevo({ ...nuevo, paso: "pin" }) : setMensaje(metodo === "SMS" ? "📩 Te mandé el código por SMS." : "📞 Te llamarán con el código.")
+                    )
+                  }
+                >
+                  {metodo === "SMS" ? "✉️ Por SMS" : "📞 Por llamada"}
+                </button>
+              ))}
             </div>
-            <input className="w-full rounded border px-2 py-1.5" placeholder="Escribe el código que te llegó" value={f.codigo} onChange={(e) => setF({ ...f, codigo: e.target.value })} />
+            <input className="w-full rounded-lg border px-2 py-1.5" placeholder="Escribe el código que te llegó" inputMode="numeric" value={f.codigo} onChange={(e) => setF({ ...f, codigo: e.target.value })} />
             <div className="flex justify-end pt-2">
               <button
                 type="button"
                 disabled={ocupado || !f.codigo.trim()}
-                className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                className={BTN_AZUL}
                 onClick={() => void pedir({ accion: "verificar", phoneNumberId: nuevo.phoneNumberId!, codigo: f.codigo }, () => setNuevo({ ...nuevo, paso: "pin" }))}
               >
                 {ocupado ? "Verificando…" : "Verificar →"}
@@ -714,18 +854,17 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
             <div>
               🔒 Elige un <b>PIN de 6 números</b> y <b>guárdalo</b>: activa la verificación en dos pasos y Meta puede pedírtelo después.
             </div>
-            <input className="w-full rounded border px-2 py-1.5" placeholder="PIN de 6 números" inputMode="numeric" maxLength={6} value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value })} />
+            <input className="w-full rounded-lg border px-2 py-1.5" placeholder="PIN de 6 números" inputMode="numeric" maxLength={6} value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value })} />
             <div className="flex justify-end pt-2">
               <button
                 type="button"
                 disabled={ocupado || f.pin.replace(/\D/g, "").length !== 6}
-                className="rounded-md bg-emerald-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                className={BTN_VERDE}
                 onClick={() =>
                   aceptaDosBots(otras) &&
                   void pedir({ accion: "activar", phoneNumberId: nuevo.phoneNumberId!, pin: f.pin }, () => {
                     setMensaje(null);
                     setNuevo({ ...nuevo, paso: "listo" });
-                    void cargar();
                   })
                 }
               >
@@ -741,8 +880,8 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
               ✅ <b>{nuevo.numero}</b> está activo y lo atiende este CRM. Ya puedes elegirlo en tu tienda.
             </div>
             <div className="flex justify-end pt-2">
-              <button type="button" className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white" onClick={cerrarNuevo}>
-                Volver a mis números
+              <button type="button" className={BTN_AZUL} onClick={cerrarNuevo}>
+                Volver a {negocio.nombre}
               </button>
             </div>
           </>
@@ -751,169 +890,231 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
     );
   }
 
-  return (
-    <div className="space-y-3 text-sm">
-      <div className="font-bold">📱 Tus números, por negocio</div>
-      <p className="text-xs text-neutral-600">Los números viven en tus negocios, no en la app. Tu app los atiende a todos.</p>
-      {negocios && negocios.length > 0 && (
-        <button type="button" className="w-full rounded-lg border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold text-sky-900 hover:bg-sky-100" onClick={() => { setMensaje(null); setNuevo({ paso: "negocio" }); }}>
-          ➕ Agregar número nuevo
-        </button>
-      )}
-      {error && <div className="text-red-700">❌ {error}</div>}
-      {!negocios && !error && (
-        <div className="text-neutral-600">
-          Consultando a Meta
-          <Puntos />
-        </div>
-      )}
-      {negocios?.length === 0 && <div className="text-neutral-600">No veo negocios. Inicia sesión con Facebook y marca tus negocios en la ventana de Meta.</div>}
-      {/* POR NEGOCIO, SOLO LO QUE TIENE NÚMEROS (20/10/2026): cada negocio trae varias cuentas de
-          WhatsApp vacías y salía un «Agregar número» por cada una. Ahora: sus números (de todas
-          sus cuentas) y UN solo «Agregar número». Qué app atiende cada número lo dice Meta. */}
-      {negocios?.map((n) => {
-        const conNumeros = n.cuentas.filter((c) => c.numeros.length > 0);
-        const cantidad = conNumeros.reduce((s, c) => s + c.numeros.length, 0);
-        const lleno = !n.verificado && cantidad >= 2;
-        const dondeAgregar = conNumeros[0] ?? n.cuentas[0];
-        return (
-          <div key={n.id} className="rounded-lg border border-neutral-200 p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <b>🏢 {n.nombre}</b>
-              {!n.verificado && <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">Sin verificar · Meta admite 2 números</span>}
-              <span className="text-xs text-neutral-500">{cantidad} número(s)</span>
+  // Los pasos de un número ya existente, justo debajo de su fila (no al fondo de la lista).
+  const pasosDelNumero = (x: Numero) =>
+    trabajo?.phoneNumberId === x.id && (
+      <div className="mt-2 space-y-2 rounded-lg border-2 border-sky-400 bg-sky-50 p-3">
+        {trabajo.tipo === "codigo" && (
+          <>
+            <div className="font-semibold">Verificar {trabajo.numero}</div>
+            <div className="flex flex-wrap gap-2">
+              {(["SMS", "VOICE"] as const).map((metodo) => (
+                <button
+                  key={metodo}
+                  type="button"
+                  disabled={ocupado}
+                  className={BTN_BLANCO}
+                  onClick={() =>
+                    void pedir({ accion: "pedirCodigo", phoneNumberId: trabajo.phoneNumberId, metodo }, (d) =>
+                      d.yaVerificado ? setTrabajo({ ...trabajo, tipo: "pin" }) : setMensaje(metodo === "SMS" ? "📩 Te mandé el código por SMS." : "📞 Te llamarán con el código.")
+                    )
+                  }
+                >
+                  {metodo === "SMS" ? "✉️ Por SMS" : "📞 Por llamada"}
+                </button>
+              ))}
             </div>
-            {conNumeros.map((c) =>
-              c.numeros.map((x) => (
-                <div key={x.id} className="mt-1 rounded bg-neutral-50 px-2 py-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono">{x.numero}</span>
-                    <span className="text-xs text-neutral-500">{x.nombre}</span>
-                    <span className="ml-auto" />
-                    {x.estado === "activo" && c.estaApp && <span className="text-xs font-semibold text-emerald-700">✅ Lo atiende este CRM</span>}
-                    {x.estado === "activo" && !c.estaApp && (
-                      <button type="button" disabled={ocupado} className="rounded bg-sky-600 px-2 py-0.5 text-xs font-bold text-white" onClick={() => aceptaDosBots(c.otrasApps) && void pedir({ accion: "traer", phoneNumberId: x.id }, () => void cargar())}>
-                        Traer a este CRM
-                      </button>
-                    )}
-                    {x.estado === "sin_activar" && (
-                      <button type="button" className="rounded bg-sky-600 px-2 py-0.5 text-xs font-bold text-white" onClick={() => { setOtras(c.otrasApps); setTrabajo({ tipo: "pin", phoneNumberId: x.id, numero: x.numero }); }}>
-                        Activar
-                      </button>
-                    )}
-                    {x.estado === "sin_verificar" && (
-                      <button type="button" className="rounded bg-sky-600 px-2 py-0.5 text-xs font-bold text-white" onClick={() => { setOtras(c.otrasApps); setTrabajo({ tipo: "codigo", phoneNumberId: x.id, numero: x.numero }); }}>
-                        Verificar y activar
-                      </button>
-                    )}
-                  </div>
-                  {/* Quién más lo atiende: en gris si es solo información; en rojo si ESTE CRM también
-                      (ahí contestan dos bots). */}
-                  {c.otrasApps.length > 0 &&
-                    (c.estaApp ? (
-                      <div className="mt-0.5 text-xs font-semibold text-red-700">
-                        ⚠ También lo atiende «{c.otrasApps.join(", ")}»: a cada cliente le contestan dos bots. Quítale la suscripción a la otra desde el proyecto que la usa.
-                      </div>
-                    ) : (
-                      <div className="mt-0.5 text-xs text-neutral-500">Lo atiende: {c.otrasApps.join(", ")}</div>
-                    ))}
-                </div>
-              ))
-            )}
-            {/* (Agregar va arriba, en «➕ Agregar número nuevo», con su paso a paso.) */}
-            {!dondeAgregar && (
-              <div className="mt-1 text-xs text-neutral-600">Este negocio no tiene cuenta de WhatsApp todavía. Créala una vez en el WhatsApp Manager de Meta.</div>
-            )}
-            {lleno && <div className="mt-1 text-xs text-neutral-500">Lleno: para agregar otro, verifica este negocio en Meta o usa otro negocio.</div>}
-          </div>
-        );
-      })}
-
-      {trabajo && (
-        <div className="space-y-2 rounded-lg border-2 border-sky-400 bg-sky-50 p-3">
-          {trabajo.tipo === "agregar" && (
-            <>
-              <b>➕ Agregar número</b>
-              <div className="text-xs">El número no debe estar en uso en otro WhatsApp (app normal o Business). Si lo está, bórralo de ahí primero.</div>
-              <div className="flex gap-2">
-                <input className="w-20 rounded border px-2 py-1" placeholder="País" value={f.cc} onChange={(e) => setF({ ...f, cc: e.target.value })} title="Código de país sin +, por ejemplo 51" />
-                <input className="flex-1 rounded border px-2 py-1" placeholder="Número, sin el código de país" value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value })} />
-              </div>
-              <input className="w-full rounded border px-2 py-1" placeholder="Nombre visible (lo revisa Meta)" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
-              <button
-                type="button"
-                disabled={ocupado}
-                className="rounded bg-sky-600 px-3 py-1 font-bold text-white disabled:opacity-50"
-                onClick={async () => {
-                  const d = await pedir({ accion: "agregar", wabaId: trabajo.wabaId, cc: f.cc, numero: f.numero, nombre: f.nombre });
-                  if (d?.phoneNumberId) setTrabajo({ tipo: "codigo", phoneNumberId: d.phoneNumberId, numero: `+${f.cc} ${f.numero}` });
-                }}
-              >
-                Agregar
-              </button>
-            </>
-          )}
-          {trabajo.tipo === "codigo" && (
-            <>
-              <b>Verificar {trabajo.numero}</b>
-              <div className="flex gap-2">
-                <button type="button" disabled={ocupado} className="rounded border bg-white px-2 py-1" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: trabajo.phoneNumberId, metodo: "SMS" }, () => setMensaje("📩 Te mandé el código por SMS."))}>
-                  Enviarme el código por SMS
-                </button>
-                <button type="button" disabled={ocupado} className="rounded border bg-white px-2 py-1" onClick={() => void pedir({ accion: "pedirCodigo", phoneNumberId: trabajo.phoneNumberId, metodo: "VOICE" }, () => setMensaje("📞 Te llamarán con el código."))}>
-                  Por llamada
-                </button>
-              </div>
-              <input className="w-full rounded border px-2 py-1" placeholder="Código que te llegó" value={f.codigo} onChange={(e) => setF({ ...f, codigo: e.target.value })} />
-              <button
-                type="button"
-                disabled={ocupado}
-                className="rounded bg-sky-600 px-3 py-1 font-bold text-white disabled:opacity-50"
-                onClick={() => void pedir({ accion: "verificar", phoneNumberId: trabajo.phoneNumberId, codigo: f.codigo }, () => setTrabajo({ tipo: "pin", phoneNumberId: trabajo.phoneNumberId, numero: trabajo.numero }))}
-              >
-                Verificar
-              </button>
-            </>
-          )}
-          {trabajo.tipo === "pin" && (
-            <>
-              <b>Activar {trabajo.numero}</b>
-              <div className="text-xs">Elige un PIN de 6 números y <b>guárdalo</b>: activa la verificación en dos pasos y Meta puede pedírtelo después.</div>
-              <input className="w-full rounded border px-2 py-1" placeholder="PIN de 6 números" inputMode="numeric" maxLength={6} value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value })} />
-              <button
-                type="button"
-                disabled={ocupado}
-                className="rounded bg-emerald-600 px-3 py-1 font-bold text-white disabled:opacity-50"
-                onClick={() =>
-                  aceptaDosBots(otras) &&
-                  void pedir({ accion: "activar", phoneNumberId: trabajo.phoneNumberId, pin: f.pin }, () => {
-                    setTrabajo(null);
-                    setMensaje("✅ Número activo y en tu CRM. Ya puedes elegirlo en tu tienda.");
-                    setF({ cc: f.cc, numero: "", nombre: "", codigo: "", pin: "" });
-                    void cargar();
-                  })
-                }
-              >
-                Activar
-              </button>
-            </>
-          )}
-          <button type="button" className="ml-2 text-xs text-neutral-500 hover:underline" onClick={() => setTrabajo(null)}>
-            Cancelar
-          </button>
-        </div>
-      )}
-      {mensaje && <div className="text-sm">{mensaje}</div>}
-
-      <div className="flex justify-between">
-        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>← Atrás</button>
-        <button type="button" className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white" onClick={seguir}>
-          Continuar →
+            <input className="w-full rounded-lg border px-2 py-1.5" placeholder="Código que te llegó" inputMode="numeric" value={f.codigo} onChange={(e) => setF({ ...f, codigo: e.target.value })} />
+            <button
+              type="button"
+              disabled={ocupado || !f.codigo.trim()}
+              className={BTN_AZUL}
+              onClick={() => void pedir({ accion: "verificar", phoneNumberId: trabajo.phoneNumberId, codigo: f.codigo }, () => setTrabajo({ ...trabajo, tipo: "pin" }))}
+            >
+              Verificar →
+            </button>
+          </>
+        )}
+        {trabajo.tipo === "pin" && (
+          <>
+            <div className="font-semibold">Activar {trabajo.numero}</div>
+            <div className="text-[13px]">Elige un PIN de 6 números y <b>guárdalo</b>: activa la verificación en dos pasos y Meta puede pedírtelo después.</div>
+            <input className="w-full rounded-lg border px-2 py-1.5" placeholder="PIN de 6 números" inputMode="numeric" maxLength={6} value={f.pin} onChange={(e) => setF({ ...f, pin: e.target.value })} />
+            <button
+              type="button"
+              disabled={ocupado || f.pin.replace(/\D/g, "").length !== 6}
+              className={BTN_VERDE}
+              onClick={() =>
+                aceptaDosBots(otras) &&
+                void pedir({ accion: "activar", phoneNumberId: trabajo.phoneNumberId, pin: f.pin }, () => {
+                  setTrabajo(null);
+                  setMensaje("✅ Número activo y en tu CRM. Ya puedes elegirlo en tu tienda.");
+                  limpiarFormulario();
+                  recargarBm();
+                })
+              }
+            >
+              Activar
+            </button>
+          </>
+        )}
+        <button type="button" className="ml-1 text-xs text-neutral-500 hover:underline" onClick={() => setTrabajo(null)}>
+          Cancelar
         </button>
       </div>
+    );
+
+  /** Los números de un BM, con lo que se puede hacer con cada uno. */
+  const numerosDe = (n: Negocio, conAcciones: boolean) => {
+    const conNumeros = n.cuentas.filter((c) => c.numeros.length > 0);
+    if (!conNumeros.length) return <div className="text-xs text-neutral-500">Sin números todavía.</div>;
+    return conNumeros.map((c) =>
+      c.numeros.map((x) => (
+        <div key={x.id} className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono">{x.numero}</span>
+            <span className="text-xs text-neutral-500">{x.nombre}</span>
+            <span className="ml-auto" />
+            {x.estado === "activo" && c.estaApp && <span className="text-xs font-semibold text-emerald-700">✅ Lo atiende este CRM</span>}
+            {conAcciones && x.estado === "activo" && !c.estaApp && (
+              <button type="button" disabled={ocupado} className={BTN_AZUL} onClick={() => aceptaDosBots(c.otrasApps) && void pedir({ accion: "traer", phoneNumberId: x.id }, () => recargarBm())}>
+                Traer a este CRM
+              </button>
+            )}
+            {conAcciones && x.estado === "sin_activar" && (
+              <button type="button" className={BTN_AZUL} onClick={() => { setOtras(c.otrasApps); setMensaje(null); setTrabajo({ tipo: "pin", phoneNumberId: x.id, numero: x.numero }); }}>
+                Activar
+              </button>
+            )}
+            {conAcciones && x.estado === "sin_verificar" && (
+              <button type="button" className={BTN_AZUL} onClick={() => { setOtras(c.otrasApps); setMensaje(null); setTrabajo({ tipo: "codigo", phoneNumberId: x.id, numero: x.numero }); }}>
+                Verificar y activar
+              </button>
+            )}
+            {!conAcciones && x.estado !== "activo" && <span className="text-xs text-amber-700">Sin activar</span>}
+          </div>
+          {/* Quién más lo atiende: en gris si es solo información; en rojo si ESTE CRM también
+              (ahí contestan dos bots). */}
+          {c.otrasApps.length > 0 &&
+            (c.estaApp ? (
+              <div className="mt-1 text-xs font-semibold text-red-700">
+                ⚠ También lo atiende «{c.otrasApps.join(", ")}»: a cada cliente le contestan dos bots. Quítale la suscripción a la otra desde el proyecto que la usa.
+              </div>
+            ) : (
+              <div className="mt-1 text-xs text-neutral-500">Lo atiende: {c.otrasApps.join(", ")}</div>
+            ))}
+          {conAcciones && pasosDelNumero(x)}
+        </div>
+      ))
+    );
+  };
+
+  const pie = (
+    <div className="flex justify-between pt-2">
+      <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>← Atrás</button>
+      <button type="button" className={BTN_AZUL} onClick={seguir}>
+        Continuar →
+      </button>
+    </div>
+  );
+
+  // ── UN BM ────────────────────────────────────────────────────────────────────────────────
+  if (vista === "bm") {
+    const n = negocio;
+    const cantidad = n ? n.cuentas.reduce((s, c) => s + c.numeros.length, 0) : 0;
+    const lleno = !!n && !n.verificado && cantidad >= 2;
+    // Donde va el número nuevo: la cuenta de WhatsApp Business que ya tiene números, o la primera.
+    const donde = n ? n.cuentas.find((c) => c.numeros.length > 0) ?? n.cuentas[0] : undefined;
+    return (
+      <div className="space-y-3 text-sm">
+        <button type="button" className="text-xs text-neutral-500 hover:underline" onClick={() => { setVista("bms"); setNegocio(null); setTrabajo(null); setMensaje(null); }}>
+          ← Todos mis BM
+        </button>
+        {cabecera(<>🏢 {bms?.find((b) => b.id === bmElegido)?.nombre ?? "Tu BM"}</>, () => bmElegido && void leerBm(bmElegido, true))}
+        {error && <div className="text-red-700">❌ {error}</div>}
+        {!n && !error && espera("Consultando a Meta")}
+        {n && (
+          <>
+            {!n.verificado && <div className="text-xs text-amber-800">Sin verificar · Meta admite 2 números en este BM.</div>}
+            <div className="space-y-1.5">{numerosDe(n, true)}</div>
+            {mensaje && <div className="text-sm">{mensaje}</div>}
+            {donde ? (
+              <button
+                type="button"
+                disabled={lleno}
+                title={lleno ? "Este BM no está verificado: Meta admite 2 números. Verifícalo para tener hasta 20, o usa otro BM." : ""}
+                className={`${BTN_AZUL} w-full`}
+                onClick={() => {
+                  setOtras(donde.otrasApps);
+                  setMensaje(null);
+                  setNuevo({ paso: "datos", wabaId: donde.id });
+                }}
+              >
+                ➕ Agregar un número nuevo aquí
+              </button>
+            ) : (
+              <div className="text-xs text-neutral-600">Este BM no tiene cuenta de WhatsApp Business todavía. Créala una vez en el WhatsApp Manager de Meta.</div>
+            )}
+            {lleno && <div className="text-xs text-neutral-500">Lleno: para agregar otro, verifica este BM en Meta o usa otro BM.</div>}
+          </>
+        )}
+        {pie}
+      </div>
+    );
+  }
+
+  // ── TODOS LOS BM CON TODO (solo cuando se pide) ──────────────────────────────────────────
+  if (vista === "todo") {
+    return (
+      <div className="space-y-3 text-sm">
+        <button type="button" className="text-xs text-neutral-500 hover:underline" onClick={() => setVista("bms")}>
+          ← Todos mis BM
+        </button>
+        {cabecera("🔍 Todo lo de tus BM", () => void leerTodo(true))}
+        {error && <div className="text-red-700">❌ {error}</div>}
+        {!todos && !error && espera("Revisando todos tus BM. Tarda un poco")}
+        {todos?.map((n) => (
+          <div key={n.id} className="space-y-1.5 rounded-xl border border-neutral-200 p-3">
+            <button type="button" className="font-bold hover:underline" onClick={() => abrirBm(n.id)}>
+              🏢 {n.nombre} →
+            </button>
+            {numerosDe(n, false)}
+          </div>
+        ))}
+        {pie}
+      </div>
+    );
+  }
+
+  // ── LA LISTA DE BM ───────────────────────────────────────────────────────────────────────
+  return (
+    <div className="space-y-3 text-sm">
+      {cabecera("📱 Tus números: ¿en qué BM?", () => void leerBms(true))}
+      <p className="text-xs text-neutral-600">Elige el BM. Ahí ves sus números, los activas o agregas uno nuevo.</p>
+      {error && <div className="text-red-700">❌ {error}</div>}
+      {!bms && !error && espera("Consultando a Meta")}
+      {bms?.length === 0 && <div className="text-neutral-600">No veo BM. Inicia sesión con Facebook y marca tus negocios en la ventana de Meta.</div>}
+      <div className="space-y-2">
+        {bms?.map((b) => (
+          <button
+            key={b.id}
+            type="button"
+            className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-400 hover:bg-sky-50"
+            onClick={() => abrirBm(b.id)}
+          >
+            <span className="font-semibold">🏢 {b.nombre}</span>
+            {!b.verificado && <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">Sin verificar</span>}
+            <span className="ml-auto text-sky-700">→</span>
+          </button>
+        ))}
+      </div>
+      {bms && bms.length > 0 && (
+        <button
+          type="button"
+          className="text-xs font-semibold text-sky-700 hover:underline"
+          onClick={() => {
+            setVista("todo");
+            if (!todos) void leerTodo();
+          }}
+        >
+          🔍 Revisar todo (todos los BM con sus números; tarda un poco)
+        </button>
+      )}
+      {pie}
     </div>
   );
 }
+
 
 interface EstadoDelToken {
   tiene: boolean;
@@ -922,7 +1123,9 @@ interface EstadoDelToken {
   vence: number | null;
   loginVencido?: boolean;
   appId: string | null;
-  negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }>;
+  /** `conLaApp` y `usuarioAdmin` vienen solo en el BM pedido; en los demás, sin revisar. */
+  negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean }>;
+  frenado?: boolean;
 }
 
 const fecha = (ms: number) => new Date(ms).toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" });
@@ -973,12 +1176,17 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   const [aviso, setAviso] = useState<string | null>(null);
   const [hecho, setHecho] = useState<string | null>(null);
 
-  const cargar = useCallback(async (fresco = false) => {
+  // SOLO EL BM ELEGIDO (21/10/2026): la lista de BM sale sin revisar; los dos requisitos (app y
+  // usuario del sistema) se piden solo del BM que está en el selector.
+  const cargar = useCallback(async (fresco = false, bm = "") => {
     setRevisando(true);
     try {
       // El token que ya existía (de antes del 21/10) se pone en los números que alcanza.
       await fetch("/api/meta/connect/token-estado", { method: "POST" }).catch(() => null);
-      const d = (await (await fetch(`/api/meta/connect/token-estado${fresco ? "?fresco=1" : ""}`, { cache: "no-store" })).json()) as EstadoDelToken;
+      const q = new URLSearchParams();
+      if (bm) q.set("bm", bm);
+      if (fresco) q.set("fresco", "1");
+      const d = (await (await fetch(`/api/meta/connect/token-estado?${q}`, { cache: "no-store" })).json()) as EstadoDelToken;
       setE(d);
       setElegido((actual) => actual || d.numeros.find((n) => !n.permanente)?.negocioId || d.negocios[0]?.id || "");
     } catch {
@@ -990,6 +1198,9 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   useEffect(() => {
     void cargar();
   }, [cargar]);
+  useEffect(() => {
+    if (elegido) void cargar(false, elegido);
+  }, [elegido, cargar]);
 
   async function crear() {
     setOcupado(true);
@@ -1005,7 +1216,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
       ).json();
       if (d.ok) setHecho(d.numeros?.length ? `Listo. Ya no caducan: ${d.numeros.join(", ")}.` : "Listo. Este BM no tiene números conectados todavía.");
       else setAviso(d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo.");
-      await cargar();
+      await cargar(false, elegido);
     } catch {
       setAviso("No se pudo consultar a Meta.");
     } finally {
@@ -1082,9 +1293,14 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
             </select>
           </label>
 
-          {bm && (
+          {bm && bm.conLaApp === undefined && (
+            <div className="text-[13px] text-neutral-600">
+              {e.frenado ? "Meta pidió una pausa por muchas consultas. Espera unos minutos y pulsa «Ya lo hice, revisar de nuevo»." : <>Revisando {bm.nombre}<Puntos /></>}
+            </div>
+          )}
+          {bm && bm.conLaApp !== undefined && (
             <>
-              <PasoDeLista ok={bm.conLaApp} n={1} titulo={`¿Agregaste tu app al BM «${bm.nombre}»?`}>
+              <PasoDeLista ok={!!bm.conLaApp} n={1} titulo={`¿Agregaste tu app al BM «${bm.nombre}»?`}>
                 <div>
                   En la página que se abre: <b>Agregar → Conectar un identificador de app</b>, pega este ID y confirma.
                 </div>
@@ -1094,7 +1310,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
                 </a>
               </PasoDeLista>
 
-              <PasoDeLista ok={bm.usuarioAdmin} n={2} titulo="¿Tu BM tiene un usuario del sistema administrador?">
+              <PasoDeLista ok={!!bm.usuarioAdmin} n={2} titulo="¿Tu BM tiene un usuario del sistema administrador?">
                 <div>
                   Créalo con rol <b>Administrador</b>. Luego, en ese usuario, <b>Asignar activos → Apps → tu app → Control total</b>.
                 </div>
@@ -1145,7 +1361,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
           )}
           {aviso && !bm && <div className="text-xs text-red-700">❌ {aviso}</div>}
 
-          <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar(true)}>
+          <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar(true, elegido)}>
             {revisando ? (
               <>
                 Revisando

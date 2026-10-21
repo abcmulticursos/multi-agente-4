@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getMetaWhatsAppConnection, listMetaWhatsAppConnections } from "@/lib/db";
 import { estaSuscritaAEstaApp, getMetaAppId, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
-import { MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
+import { MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
+import { fetchMeta } from "@/lib/meta/freno";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,7 +25,7 @@ export const runtime = "nodejs";
 export async function GET() {
   // RECORDADO 5 MINUTOS (21/10/2026): dos preguntas por cada cuenta de WhatsApp Business en cada
   // apertura de Meta Connect. «Suscribir» (abajo) lo olvida para que se vea el cambio al momento.
-  return NextResponse.json(await recordar("suscribir", MINUTOS(5), leerSuscripciones));
+  return NextResponse.json(await recordar("suscribir", MEDIA_HORA, leerSuscripciones));
 }
 
 async function leerSuscripciones() {
@@ -55,7 +56,7 @@ async function otrasAppsDeLaCuenta(wabaId: string, accessToken: string): Promise
   try {
     const url = new URL(`https://graph.facebook.com/${graphVersion()}/${wabaId}/subscribed_apps`);
     url.searchParams.set("access_token", accessToken);
-    const r = (await (await fetch(url, { cache: "no-store" })).json()) as {
+    const r = (await (await fetchMeta(url)).json()) as {
       data?: Array<{ whatsapp_business_api_data?: { id?: string; name?: string } }>;
     };
     const nuestra = getMetaAppId();

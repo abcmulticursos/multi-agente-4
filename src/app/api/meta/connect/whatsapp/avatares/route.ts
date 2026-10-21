@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listMetaConnections, listMetaWhatsAppConnections } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
+import { MEDIA_HORA, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -19,6 +20,13 @@ export const runtime = "nodejs";
  * piden al abrir la pantalla, que es un sitio que se visita de tanto en tanto.
  */
 export async function GET() {
+  // RECORDADAS MEDIA HORA (21/10/2026): una pregunta por número y por página en cada apertura.
+  // Las URLs firmadas de Meta duran bastante más que eso.
+  const avatares = await recordar("avatares", MEDIA_HORA, leerAvatares);
+  return NextResponse.json({ avatares }, { headers: { "Cache-Control": "no-store" } });
+}
+
+async function leerAvatares(): Promise<Record<string, string>> {
   const avatares: Record<string, string> = {};
 
   const numeros = listMetaWhatsAppConnections().map(async (conexion) => {
@@ -71,9 +79,5 @@ export async function GET() {
   });
 
   await Promise.all([...numeros, ...paginas]);
-
-  return NextResponse.json(
-    { avatares },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return avatares;
 }

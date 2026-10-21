@@ -8,6 +8,7 @@ import {
 } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
+import { fetchMeta } from "@/lib/meta/freno";
 
 /**
  * CADA NÚMERO CON EL TOKEN PERMANENTE DE SU BM (21/10/2026).
@@ -40,7 +41,7 @@ async function idsDeLaCuenta(wabaId: string, token: string, secreto: string | nu
     url.searchParams.set("limit", "100");
     url.searchParams.set("access_token", token);
     if (secreto) url.searchParams.set("appsecret_proof", createHmac("sha256", secreto).update(token).digest("hex"));
-    const r = await fetch(url, { cache: "no-store" });
+    const r = await fetchMeta(url);
     if (!r.ok) return [];
     const d = (await r.json()) as { data?: Array<{ id?: string }> };
     return (d.data ?? []).map((n) => String(n.id));

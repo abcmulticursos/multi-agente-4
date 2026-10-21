@@ -3,7 +3,8 @@ import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
-import { MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
+import { MEDIA_HORA, MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
+import { fetchMeta, metaFrenada } from "@/lib/meta/freno";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,7 +23,8 @@ async function graph<T>(ruta: string, token: string, params: Record<string, stri
     const url = new URL(`https://graph.facebook.com/${graphVersion()}/${ruta}`);
     url.searchParams.set("access_token", token);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-    const r = await fetch(url, { cache: "no-store" });
+    // Con el freno de seguridad: si Meta está cerca del límite, no se pregunta.
+    const r = await fetchMeta(url);
     return r.ok ? ((await r.json()) as T) : null;
   } catch {
     return null;
@@ -30,33 +32,35 @@ async function graph<T>(ruta: string, token: string, params: Record<string, stri
 }
 
 /**
- * Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
- * Los BM de TODOS los permisos guardados (la cuenta principal y las anexadas), como «📱 Tus
- * números». Cada BM se consulta con el permiso que lo vio.
+ * SOLO LA LISTA DE BM (21/10/2026): 1 llamada por cuenta de Facebook. Antes se revisaban los 10 BM
+ * con 3 preguntas cada uno al abrir el paso; ahora solo se revisa el BM que él elige.
  */
-async function leerNegocios(): Promise<Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }>> {
-  const appId = getMetaAppId();
-  const vistos = new Map<string, { id: string; name?: string; token: string }>();
+async function leerBms(): Promise<Array<{ id: string; nombre: string; token: string }>> {
+  const vistos = new Map<string, { id: string; nombre: string; token: string }>();
   const listas = await Promise.all(
     permisosConocidos().map(async (token) => ({
       token,
       r: await graph<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", token, { fields: "id,name", limit: "200" }),
     }))
   );
-  for (const { token, r } of listas) for (const b of r?.data ?? []) if (!vistos.has(b.id)) vistos.set(b.id, { ...b, token });
-  return Promise.all(
-    [...vistos.values()].map(async (b) => {
-      const [propias, deClientes, usuarios] = await Promise.all([
-        graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
-        graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
-        graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, b.token, { fields: "id,role", limit: "100" }),
-      ]);
-      const conLaApp = !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId);
-      const usuarioAdmin = (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN");
-      return { id: b.id, nombre: b.name ?? b.id, conLaApp, usuarioAdmin };
-    })
-  );
+  for (const { token, r } of listas) for (const b of r?.data ?? []) if (!vistos.has(b.id)) vistos.set(b.id, { id: b.id, nombre: b.name ?? b.id, token });
+  return [...vistos.values()];
 }
+
+/** UN BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? 3 preguntas, a la vez. */
+async function revisarBm(b: { id: string; token: string }): Promise<{ conLaApp: boolean; usuarioAdmin: boolean }> {
+  const appId = getMetaAppId();
+  const [propias, deClientes, usuarios] = await Promise.all([
+    graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
+    graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
+    graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, b.token, { fields: "id,role", limit: "100" }),
+  ]);
+  return {
+    conLaApp: !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId),
+    usuarioAdmin: (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN"),
+  };
+}
+
 
 export async function GET(req: Request) {
   // «?ligero=1»: solo los números y cuándo caduca (para el aviso fijo); sin recorrer los BM.
@@ -96,12 +100,19 @@ export async function GET(req: Request) {
   }
 
   // Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
-  let negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }> = [];
+  // La lista de BM (recordada media hora) y, solo del BM pedido con «?bm=», sus dos requisitos.
+  // «?fresco=1» («Ya lo hice, revisar de nuevo») relee ese BM, porque él acaba de cambiar algo.
+  let negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean }> = [];
   if (!ligero) {
-    // RECORDADO 5 MINUTOS: son tres preguntas por BM. «?fresco=1» («Ya lo hice, revisar de
-    // nuevo») lo lee otra vez, porque ahí él acaba de cambiar algo en Meta.
-    if (new URL(req.url).searchParams.get("fresco") === "1") olvidar("token-estado:negocios");
-    negocios = await recordar("token-estado:negocios", MINUTOS(5), leerNegocios);
+    const p = new URL(req.url).searchParams;
+    const bms = await recordar("token-estado:bms", MEDIA_HORA, leerBms);
+    const pedido = bms.find((b) => b.id === p.get("bm"));
+    let revisado: { conLaApp: boolean; usuarioAdmin: boolean } | null = null;
+    if (pedido) {
+      if (p.get("fresco") === "1") olvidar(`token-estado:bm:${pedido.id}`);
+      revisado = await recordar(`token-estado:bm:${pedido.id}`, MEDIA_HORA, () => revisarBm(pedido));
+    }
+    negocios = bms.map((b) => ({ id: b.id, nombre: b.nombre, ...(b.id === pedido?.id && revisado ? revisado : {}) }));
   }
   // Primero los que tienen números, luego por nombre.
   const conNumeros = new Set(numeros.map((n) => n.negocioId));
@@ -120,6 +131,7 @@ export async function GET(req: Request) {
       faltan,
       vence,
       loginVencido,
+      frenado: metaFrenada(),
       appId,
       negocios,
     },
