@@ -232,7 +232,25 @@ export default function AsistenteDeConexion() {
             </div>
             {aviso && <div className="mb-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">{aviso}</div>}
 
-            {paso === "inicio" && (
+            {/* SIN APP, LO PRIMERO ES LA APP (21/10/2026): «primero debe ser la conexión de la app,
+                luego que diga que ya está conectada, y luego conectar mi cuenta de Facebook». */}
+            {paso === "inicio" && estado && !estado.appId && (
+              <div className="space-y-3 text-sm">
+                <p className="font-semibold text-neutral-700">Empecemos por tu app</p>
+                <button
+                  type="button"
+                  className="block w-full rounded-xl border-2 border-sky-500 bg-sky-50 p-4 text-left shadow-sm hover:bg-sky-100"
+                  onClick={() => ir("app")}
+                >
+                  <div className="font-bold">🔑 Conectar mi app</div>
+                  <div className="text-xs text-neutral-600">
+                    Es la puerta de tu CRM en Meta. Después inicias sesión con Facebook y ya puedes agregar números, crear tu token y elegir página y píxel.
+                  </div>
+                </button>
+              </div>
+            )}
+
+            {paso === "inicio" && !(estado && !estado.appId) && (
               // «¿QUÉ DESEAS HACER?» (21/10/2026): cada tarea consulta a Meta solo lo suyo. Las que
               // más se usan, grandes y arriba; las de una vez, chicas abajo.
               <div className="space-y-2">
@@ -424,9 +442,11 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
     }
   }
 
+  const [reintentar, setReintentar] = useState(false);
   async function preparar() {
     setOcupado(true);
     setError(null);
+    setReintentar(false);
     try {
       const ahora = await (await fetch("/api/meta/connect/configurar-app", { cache: "no-store" })).json();
       const propias = new Set((ahora.urlsPropuestas ?? []).map((p: { url: string }) => p.url));
@@ -443,9 +463,17 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       // (Con su razón cuando falla: un «❌» solo no dice qué hacer.)
       setPasos(lista.map((p) => `${p.ok ? "✅" : "❌"} ${p.paso}${p.ok ? "" : ` — ${p.detalle}`}`));
       const dominio = lista.find((p) => !p.ok && /Dominio/.test(p.paso));
-      const otroFallo = lista.find((p) => !p.ok && !/Dominio/.test(p.paso));
-      if (otroFallo) {
-        setError(`Meta no dejó preparar la app: ${otroFallo.paso} — ${otroFallo.detalle}`);
+      // SOLO WHATSAPP FRENA (21/10/2026): un fallo de Instagram («DNS server failure», mientras el
+      // servidor se desplegaba) paraba todo. Messenger e Instagram fallando quedan anotados en la
+      // lista de arriba y se sigue; se reintentan con «🔍 Comprobar». WhatsApp sí es obligatorio.
+      const whatsapp = lista.find((p) => !p.ok && /whatsapp_business_account/.test(p.paso));
+      if (whatsapp) {
+        setError(
+          /curl|DNS|502|503|timed? ?out|Callback verification failed/i.test(whatsapp.detalle)
+            ? "Meta no pudo comunicarse con tu servidor (quizá se estaba desplegando o reiniciando). Espera un minuto y pulsa «Reintentar»."
+            : `Meta no dejó conectar WhatsApp: ${whatsapp.detalle}`
+        );
+        setReintentar(true);
         return;
       }
       // (#10): la app tiene apagado «Permitir acceso a la API para la configuración de la app».
@@ -505,29 +533,51 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
   return (
     <div className="space-y-3 text-sm">
       <div className="font-bold">🔑 Tu app: la puerta de tu CRM en Meta</div>
-      {error && <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">❌ {error}</div>}
+      {error && (
+        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">
+          ❌ {error}
+          {reintentar && (
+            <button type="button" disabled={ocupado} className="ml-2 rounded bg-red-600 px-2 py-0.5 text-xs font-semibold text-white disabled:opacity-40" onClick={() => void preparar()}>
+              {ocupado ? "Reintentando…" : "Reintentar"}
+            </button>
+          )}
+        </div>
+      )}
 
+      {/* PRIMERO USAR LA QUE TIENES (21/10/2026): «si pones crear app primero, parece que esa es la
+          condición». Con app: se ve conectada y se sigue. Sin app: «Usar mi app» grande, y abajo,
+          chico, «¿No tienes app todavía?». */}
       {sub === "elegir" && (
         <>
-          {app?.nombre && (
-            <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
-              ✅ Ya tienes conectada: <b>{app.nombre}</b> <span className="text-xs text-neutral-500">(ID {app.appId})</span>
-            </div>
-          )}
-          <div className="space-y-2">
-            {app?.nombre && (
-              <button type="button" className="block w-full rounded-lg border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold" onClick={() => ir("preparar")}>
-                Seguir con esta app
+          {app?.nombre ? (
+            <>
+              <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2">
+                ✅ <b>App conectada:</b> {app.nombre} <span className="text-xs text-neutral-500">(ID {app.appId})</span>
+              </div>
+              <button type="button" className="block w-full rounded-xl border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold" onClick={() => ir("preparar")}>
+                Seguir con esta app →
               </button>
-            )}
-            <button type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left" onClick={() => ir("crear")}>
-              Crear una app nueva
-            </button>
-            <button type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left" onClick={() => ir("claves")}>
-              {app?.nombre ? "Usar otra app que ya tengo" : "Usar una app que ya tengo"}
-            </button>
+              <button type="button" className="text-xs font-semibold text-neutral-500 hover:underline" onClick={() => ir("claves")}>
+                Cambiar a otra app
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="block w-full rounded-xl border-2 border-sky-500 bg-sky-50 p-3 text-left" onClick={() => ir("claves")}>
+                <div className="font-bold">Usar mi app</div>
+                <div className="text-xs text-neutral-600">Pegas su ID y su clave secreta. Lo demás se llena solo.</div>
+              </button>
+              <div className="pt-1 text-sm">
+                ¿No tienes app todavía?{" "}
+                <button type="button" className="font-semibold text-sky-700 hover:underline" onClick={() => ir("crear")}>
+                  Crear una
+                </button>
+              </div>
+            </>
+          )}
+          <div className="pt-2">
+            <button type="button" className="text-neutral-500 hover:underline" onClick={atras}>← Atrás</button>
           </div>
-          <Botones listo={false} alSeguir={() => {}} texto="Elige una opción" />
         </>
       )}
 
