@@ -44,7 +44,12 @@ export async function GET(req: NextRequest) {
     });
     return res;
   } catch (err) {
+    // DE VUELTA A META CONNECT, CON PALABRAS (21/10/2026): tras «Cerrar sesión de Meta», pulsar
+    // «Conectar» mostraba una página en blanco con {"error":"META_APP_ID no configurado"}.
     const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const texto = /APP_ID|APP_SECRET/i.test(message)
+      ? "Primero conecta tu app: Abrir asistente → 🔑 Mi app. Después inicia sesión con Facebook."
+      : message;
+    return NextResponse.redirect(new URL(`/meta-connect?error=${encodeURIComponent(texto)}`, getPublicOrigin(req)));
   }
 }
