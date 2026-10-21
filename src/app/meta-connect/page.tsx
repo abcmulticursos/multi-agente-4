@@ -843,6 +843,26 @@ function DiferenciacionPorNegocio() {
   const [errores, setErrores] = useState<Record<string, string>>({});
   /** El negocio cuyo pop up está abierto. null = ninguno. */
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
+  /** EL TOKEN DE CADA NÚMERO, a la vista (21/10/2026): «pensé que se vería en la sección
+   *  "1 cuenta de Facebook · 4 negocios"… ahí se podría agregar los que no tienen token».
+   *  Por id de número: true = token permanente; false = el del inicio de sesión. */
+  const [tokenDe, setTokenDe] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    void fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { numeros?: Array<{ id: string; permanente: boolean }> } | null) =>
+        setTokenDe(Object.fromEntries((d?.numeros ?? []).map((n) => [n.id, n.permanente])))
+      )
+      .catch(() => {});
+  }, []);
+  const etiquetaDeToken = (id: string) =>
+    id in tokenDe ? (
+      tokenDe[id] ? (
+        <span className="ml-1.5 whitespace-nowrap text-xs font-semibold text-emerald-700">🔐 No caduca</span>
+      ) : (
+        <span className="ml-1.5 whitespace-nowrap text-xs font-semibold text-amber-700">⚠ Sin token permanente</span>
+      )
+    ) : null;
   // Escape cierra el pop up, y solo mientras está abierto: cerrado, la tecla sigue siendo
   // de quien la tenía. Es el mismo trato que las ventanas de las secciones numeradas.
   useEffect(() => {
@@ -1017,6 +1037,7 @@ function DiferenciacionPorNegocio() {
           {n.etiqueta}
           {n.detalle ? <span className="text-xs text-tinta-suave"> · {n.detalle}</span> : null}
           {extra}
+          {etiquetaDeToken(n.id)}
         </>,
         estadoDelNumero(n.id)
       )}
@@ -1136,6 +1157,9 @@ function DiferenciacionPorNegocio() {
                 "píxeles"
               ),
             ].join(" · ");
+            // Cuántos de SUS números siguen sin token permanente: se ve sin abrir el negocio.
+            const sinToken = cuenta.numerosConId.filter((n) => tokenDe[n.id] === false).length;
+            const conToken = cuenta.numerosConId.filter((n) => tokenDe[n.id] === true).length;
             return (
               <button
                 key={cuenta.id}
@@ -1153,6 +1177,13 @@ function DiferenciacionPorNegocio() {
                   </span>
                   <span className="block truncate text-xs text-tinta-suave">{cuantos}</span>
                 </span>
+                {sinToken > 0 ? (
+                  <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                    ⚠ {sinToken === 1 ? "1 sin token" : `${sinToken} sin token`}
+                  </span>
+                ) : conToken > 0 ? (
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">🔐 Con token</span>
+                ) : null}
                 <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">
                   Abrir
                 </span>

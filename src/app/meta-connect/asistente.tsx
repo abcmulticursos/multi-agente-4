@@ -91,12 +91,23 @@ export default function AsistenteDeConexion() {
   // Lo que ya hay: la app y lo conectado.
   const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number } | null>(null);
   /** null = hay token (o aún no se sabe); con valor = falta, y cuándo caduca la conexión. */
-  const [sinToken, setSinToken] = useState<{ vence: number | null; faltan: number } | null>(null);
+  const [sinToken, setSinToken] = useState<{ vence: number | null; faltan: number; cuales: string[] } | null>(null);
   useEffect(() => {
     void (async () => {
       try {
         const d = await (await fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })).json();
-        setSinToken(d.appId && !d.tiene && d.faltan > 0 ? { vence: d.vence ?? null, faltan: d.faltan } : null);
+        setSinToken(
+          d.appId && !d.tiene && d.faltan > 0
+            ? {
+                vence: d.vence ?? null,
+                faltan: d.faltan,
+                // «No me indica cuáles son los números ni qué BM» (21/10/2026).
+                cuales: (d.numeros ?? [])
+                  .filter((n: { permanente: boolean }) => !n.permanente)
+                  .map((n: { numero: string; negocio: string | null }) => `${n.numero}${n.negocio ? ` (${n.negocio})` : ""}`),
+              }
+            : null
+        );
       } catch {}
     })();
   }, [paso]);
@@ -161,7 +172,8 @@ export default function AsistenteDeConexion() {
         <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-red-400 bg-red-50 p-3 text-sm text-red-900">
           <span className="min-w-0 flex-1">
             ⚠ <b>{sinToken.faltan === 1 ? "1 número sin token permanente." : `${sinToken.faltan} números sin token permanente.`}</b>{" "}
-            {sinToken.vence ? <>Caduca el <b>{fecha(sinToken.vence)}</b> y el bot dejará de contestar por él.</> : "Caducará y el bot dejará de contestar por él."}
+            {sinToken.vence ? <>Caducan el <b>{fecha(sinToken.vence)}</b> y el bot dejará de contestar por ellos.</> : "Caducarán y el bot dejará de contestar por ellos."}
+            <span className="mt-1 block text-xs text-red-800">{sinToken.cuales.join(" · ")}</span>
           </span>
           <button
             type="button"
