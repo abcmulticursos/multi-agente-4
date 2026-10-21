@@ -238,7 +238,7 @@ export default function AsistenteDeConexion() {
  * me confunde, es como un bypass». Una cosa por pantalla; la siguiente no aparece hasta terminar
  * la anterior, y «Continuar» solo se activa cuando está hecha.
  */
-type SubPaso = "elegir" | "crear" | "claves" | "preparar" | "permiso" | "datos" | "uri" | "vivo";
+type SubPaso = "elegir" | "crear" | "claves" | "preparar" | "permiso" | "datos" | "productos" | "uri" | "vivo";
 
 function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<string, boolean>; marcar: (id: string, v: boolean) => void; alListo: () => void; volver: () => void }) {
   const [sub, setSub] = useState<SubPaso>("elegir");
@@ -307,7 +307,7 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       // (#10): la app tiene apagado «Permitir acceso a la API para la configuración de la app».
       if (dominio && /\(#10\)|app settings through API|advanced settings/i.test(dominio.detalle)) ir("permiso");
       else if (dominio) ir("datos");
-      else ir("uri");
+      else ir("productos");
     } catch {
       setError("No se pudo consultar a Meta.");
     } finally {
@@ -392,8 +392,7 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <div>Crea tu app en Meta. Al terminar, vuelve aquí.</div>
           <Abrir href="https://developers.facebook.com/apps/creation/" texto="Abrir Meta para crear la app" />
           <Casilla id="tipo" casillas={casillas} marcar={marcar} texto={<>La creé de tipo <b>Empresa</b>.</>} />
-          <Casilla id="productos" casillas={casillas} marcar={marcar} texto={<>Le agregué <b>WhatsApp</b>, <b>Messenger</b> e <b>Inicio de sesión con Facebook para empresas</b>.</>} />
-          <Botones listo={!!casillas.tipo && !!casillas.productos} alSeguir={() => ir("claves")} />
+          <Botones listo={!!casillas.tipo} alSeguir={() => ir("claves")} />
         </>
       )}
 
@@ -443,7 +442,24 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <div className="text-xs">Sitio web (abajo del todo: «+ Agregar plataforma» → «Sitio web»):</div>
           <Copiar texto={origen} />
           <Casilla id="datos" casillas={casillas} marcar={marcar} texto="Pegué los 3 datos y guardé." />
-          <Botones listo={!!casillas.datos} alSeguir={() => ir("uri")} />
+          <Botones listo={!!casillas.datos} alSeguir={() => ir("productos")} />
+        </>
+      )}
+
+      {/* LOS PRODUCTOS DE LA APP, OBLIGATORIO (20/10/2026): «hay que agregar Inicio de sesión de
+          Facebook para empresas, ese paso falta; un novato no sabrá que hay que crear eso para
+          agregar la URI». Sale siempre: una app vieja puede no tenerlos. Meta no deja agregarlos
+          desde fuera, ni comprobarlo: por eso las casillas. */}
+      {sub === "productos" && (
+        <>
+          <div>
+            <b>Agrega a tu app lo que necesita.</b> En la página que se abre, busca cada uno y pulsa <b>«Configurar»</b>. Si ya lo tiene, solo márcalo.
+          </div>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
+          <Casilla id="p-login" casillas={casillas} marcar={marcar} texto={<><b>Inicio de sesión con Facebook para empresas</b> (sin este no aparece dónde pegar la URI)</>} />
+          <Casilla id="p-whatsapp" casillas={casillas} marcar={marcar} texto={<><b>WhatsApp</b></>} />
+          <Casilla id="p-messenger" casillas={casillas} marcar={marcar} texto={<><b>Messenger</b></>} />
+          <Botones listo={!!casillas["p-login"] && !!casillas["p-whatsapp"] && !!casillas["p-messenger"]} alSeguir={() => ir("uri")} />
         </>
       )}
 
