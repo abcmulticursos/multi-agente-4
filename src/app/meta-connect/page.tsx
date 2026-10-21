@@ -1340,7 +1340,8 @@ function DiferenciacionPorNegocio() {
           href="/api/meta/connect/start?nueva=1"
           className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
         >
-          + Conectar nueva cuenta
+          {/* «Parece cuenta de app; me confundí» (21/10/2026): dice qué cuenta es. */}
+          + Conectar otra cuenta de Facebook
         </a>
         <p className="mx-auto mt-2 max-w-xl text-xs text-tinta-suave">
           Para agregar otra cuenta de Facebook usando tu misma app. Solo hace falta si sus

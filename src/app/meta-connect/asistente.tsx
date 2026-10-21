@@ -132,9 +132,14 @@ export default function AsistenteDeConexion() {
       setCasillas(guardado.casillas ?? {});
       if (p.get("error")) {
         const error = p.get("error") ?? "";
-        setPaso(/bloquead|redirect|URL/i.test(error) ? "app" : "facebook");
+        // SIN APP, A «MI APP» (21/10/2026): tras cerrar sesión, el aviso decía «primero conecta tu
+        // app» pero dejaba la pantalla de Facebook. Se contradecía.
+        const sinApp = /Primero conecta tu app/i.test(error);
+        setPaso(sinApp || /bloquead|redirect|URL/i.test(error) ? "app" : "facebook");
         setAviso(
-          /bloquead|redirect|URL/i.test(error)
+          sinApp
+            ? "Primero conecta tu app. Después inicias sesión con Facebook."
+            : /bloquead|redirect|URL/i.test(error)
             ? "Meta rechazó el inicio de sesión: la URI no está pegada o tiene un error. Cópiala otra vez y pégala en tu app."
             : /\(#(4|17|32|613)\)|request limit/i.test(error)
               ? // (#4) y familia: Meta frenó la app por muchas consultas seguidas (21/10/2026).
@@ -267,17 +272,36 @@ export default function AsistenteDeConexion() {
                     </button>
                   ))}
                 </div>
-                <div className="pt-2 text-right">
-                  <button type="button" className="text-xs font-semibold text-red-700 hover:underline" onClick={() => ir("cerrar")}>
-                    🚪 Cerrar sesión de Meta
-                  </button>
-                </div>
+                {/* Solo con algo conectado: sin app no hay sesión que cerrar. */}
+                {(estado?.appId || (estado?.numeros ?? 0) > 0 || (estado?.paginas ?? 0) > 0) && (
+                  <div className="pt-2 text-right">
+                    <button type="button" className="text-xs font-semibold text-red-700 hover:underline" onClick={() => ir("cerrar")}>
+                      🚪 Cerrar sesión de Meta
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
             {paso === "app" && <PasoApp casillas={casillas} marcar={marcar} alListo={() => { void cargarEstado(); ir("facebook"); }} volver={() => ir("inicio")} />}
 
-            {paso === "facebook" && (
+            {/* SIN APP NO HAY INICIO DE SESIÓN (21/10/2026): el botón de Facebook parpadeaba y volvía
+                al mismo sitio. Primero la app. */}
+            {paso === "facebook" && estado && !estado.appId && (
+              <div className="space-y-3 text-sm">
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+                  Para iniciar sesión con Facebook, <b>primero conecta tu app</b>. Es lo que abre la puerta.
+                </div>
+                <button type="button" className="rounded-lg bg-sky-600 px-4 py-2 font-semibold text-white hover:bg-sky-700" onClick={() => ir("app")}>
+                  🔑 Conectar mi app
+                </button>
+                <div>
+                  <button type="button" className="text-sm text-neutral-500 hover:underline" onClick={() => ir("inicio")}>← Atrás</button>
+                </div>
+              </div>
+            )}
+
+            {paso === "facebook" && !(estado && !estado.appId) && (
               <div className="space-y-3 text-sm">
                 <p>Entra con tu Facebook. En la ventana de Meta, marca tus negocios, páginas y números para que tu CRM pueda verlos.</p>
                 <a href="/api/meta/connect/start" onClick={() => guardar({ paso: "numeros", casillas })} className="block rounded-lg bg-[#1877f2] px-4 py-3 text-center font-bold text-white hover:opacity-90">
