@@ -2611,6 +2611,26 @@ export default function MetaConnectPage() {
   }
 
   async function configureWhatsApp() {
+    // DOS BOTS (21/10/2026): este botón suscribe el número ACTIVO y no avisaba si otra app ya lo
+    // atiende (así se suscribió por accidente el +51 904 325 080). Mismo aviso que «Suscribir».
+    const activo = (status?.whatsAppConnections ?? []).find((c) => c.active);
+    if (activo) {
+      try {
+        const d = (await (await fetch("/api/meta/connect/whatsapp/suscribir", { cache: "no-store" })).json()) as {
+          otras?: Record<string, string[]>;
+        };
+        const otras = d.otras?.[activo.phoneNumberId] ?? [];
+        if (
+          otras.length &&
+          !window.confirm(
+            `${activo.displayPhoneNumber ?? "Este número"} ya lo atiende otra app: «${otras.join(", ")}». Si sigues, también lo atenderá este CRM y a cada cliente le contestarían DOS bots.\n\nQuítale primero la suscripción a la otra. ¿Seguir de todos modos?`
+          )
+        )
+          return;
+      } catch {
+        // Sin poder saberlo, se sigue como antes.
+      }
+    }
     setConfiguringWhatsApp(true);
     setWhatsAppConfigureResult(null);
     try {
@@ -3375,8 +3395,12 @@ export default function MetaConnectPage() {
               colorCirculo: "bg-sky-500",
               activa: conn.active,
             }))}
+            // SIN NINGUNA ACTIVA NO HAY NADA QUE REEMPLAZAR (21/10/2026): el texto decía «reemplazar»
+            // aunque no hubiera ninguna, y confundía.
             confirmar={(opcion) =>
-              `¿Reemplazar la página activa por «${opcion.titulo}»?\n\nEl bot pasará a responder por esta página.`
+              (status?.connections ?? []).some((c) => c.active)
+                ? `¿Reemplazar la página activa por «${opcion.titulo}»?\n\nEl bot pasará a responder por esta página.`
+                : `¿Usar «${opcion.titulo}» como la página que responde?\n\nEl bot pasará a responder por esta página.`
             }
             onElegir={(pageId) => void activate(pageId)}
           />
@@ -3824,7 +3848,9 @@ export default function MetaConnectPage() {
               activa: connection.active,
             }))}
             confirmar={(opcion) =>
-              `¿Reemplazar el número activo por «${opcion.titulo}»?\n\nEl bot pasará a atender por este número.`
+              numerosConectados.some((c) => c.active)
+                ? `¿Reemplazar el número activo por «${opcion.titulo}»?\n\nEl bot pasará a atender por este número.`
+                : `¿Usar «${opcion.titulo}» como el número que atiende?\n\nEl bot pasará a atender por este número.`
             }
             onElegir={(phoneNumberId) => void activateWhatsApp(phoneNumberId)}
           />
