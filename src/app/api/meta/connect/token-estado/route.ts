@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
-import { repartirTokenPermanente } from "@/lib/meta/token-por-numero";
+import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -50,25 +50,37 @@ export async function GET(req: Request) {
   const faltan = numeros.filter((n) => !n.permanente).length;
 
   // Cuándo caduca el inicio de sesión (con el que contestan los números sin token permanente).
+  // Si Meta dice que ya no vale, se avisa: esos números ya no tienen con qué contestar.
   let vence: number | null = null;
+  let loginVencido = false;
   if (faltan && login && appId && secreto) {
-    const d = await graph<{ data?: { expires_at?: number; data_access_expires_at?: number } }>("debug_token", `${appId}|${secreto}`, {
+    const d = await graph<{ data?: { is_valid?: boolean; expires_at?: number; data_access_expires_at?: number } }>("debug_token", `${appId}|${secreto}`, {
       input_token: login,
     });
+    loginVencido = d?.data?.is_valid === false;
     const fechas = [d?.data?.expires_at, d?.data?.data_access_expires_at].filter((x): x is number => !!x && x > 0);
     vence = fechas.length ? Math.min(...fechas) * 1000 : null;
   }
 
   // Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
   let negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }> = [];
-  if (login && !ligero) {
-    const r = await graph<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", login, { fields: "id,name", limit: "200" });
+  if (!ligero) {
+    // Los BM de TODOS los permisos guardados (la cuenta principal y las anexadas), como
+    // «📱 Tus números». Cada BM se consulta con el permiso que lo vio.
+    const vistos = new Map<string, { id: string; name?: string; token: string }>();
+    const listas = await Promise.all(
+      permisosConocidos().map(async (token) => ({
+        token,
+        r: await graph<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", token, { fields: "id,name", limit: "200" }),
+      }))
+    );
+    for (const { token, r } of listas) for (const b of r?.data ?? []) if (!vistos.has(b.id)) vistos.set(b.id, { ...b, token });
     negocios = await Promise.all(
-      (r?.data ?? []).map(async (b) => {
+      [...vistos.values()].map(async (b) => {
         const [propias, deClientes, usuarios] = await Promise.all([
-          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, login, { fields: "id", limit: "200" }),
-          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, login, { fields: "id", limit: "200" }),
-          graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, login, { fields: "id,role", limit: "100" }),
+          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
+          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
+          graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, b.token, { fields: "id,role", limit: "100" }),
         ]);
         const conLaApp = !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId);
         const usuarioAdmin = (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN");
@@ -90,6 +102,7 @@ export async function GET(req: Request) {
       numeros,
       faltan,
       vence,
+      loginVencido,
       appId,
       negocios,
     },

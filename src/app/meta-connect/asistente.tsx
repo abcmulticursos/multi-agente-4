@@ -917,6 +917,7 @@ interface EstadoDelToken {
   numeros: Array<{ id: string; numero: string; nombre: string | null; negocioId: string | null; negocio: string | null; permanente: boolean; activo: boolean }>;
   faltan: number;
   vence: number | null;
+  loginVencido?: boolean;
   appId: string | null;
   negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }>;
 }
@@ -1039,7 +1040,9 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
             {n.permanente ? (
               <span className="text-xs font-semibold text-emerald-700">🔐 No caduca</span>
             ) : (
-              <span className="text-xs font-semibold text-amber-700">⚠ {e.vence ? `Caduca el ${fecha(e.vence)}` : "Caduca"}</span>
+              <span className={`text-xs font-semibold ${e.loginVencido ? "text-red-700" : "text-amber-700"}`}>
+                {e.loginVencido ? "⛔ Sin permiso: inicia sesión de nuevo" : e.vence ? `⚠ Caduca el ${fecha(e.vence)}` : "⚠ Sin token permanente"}
+              </span>
             )}
           </div>
         ))}
@@ -1048,7 +1051,15 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
 
       {!listo && e.numeros.length > 0 && (
         <div className="space-y-4 rounded-xl border border-sky-200 bg-sky-50/60 p-4">
-          <label className="flex flex-wrap items-center gap-2 text-[13px] font-semibold text-neutral-800">
+          {!e.negocios.length && (
+            <div className="space-y-2 text-[13px] text-neutral-700">
+              <div>No pude ver tus BM: tu inicio de sesión con Facebook ya no tiene permiso. Vuelve a entrar y regresa a este paso.</div>
+              <a href="/api/meta/connect/start" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
+                Iniciar sesión con Facebook
+              </a>
+            </div>
+          )}
+          <label className={`${e.negocios.length ? "flex" : "hidden"} flex-wrap items-center gap-2 text-[13px] font-semibold text-neutral-800`}>
             BM donde crearlo
             <select
               className="rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-sm font-normal"

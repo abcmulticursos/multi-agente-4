@@ -7,7 +7,7 @@ import {
   permisoDeConexionDeLaCuenta,
   setMetaRuntimeSettings,
 } from "@/lib/db";
-import { repartirTokenPermanente } from "@/lib/meta/token-por-numero";
+import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
 import { graphVersion } from "@/lib/meta/connect";
 import {
   getMetaAppId,
@@ -122,9 +122,20 @@ export async function POST(req: NextRequest) {
   // EN UN BM CONCRETO (20/10/2026): el asistente lo pide en el BM de los números, para que el
   // token pueda usarlos. Se guarda igual que el de siempre; solo se elige dónde se crea.
   const negocioPedido = typeof cuerpoPedido?.negocio === "string" ? cuerpoPedido.negocio.trim() : "";
-  const token = cuenta ? permisoDeConexionDeLaCuenta(cuenta) : getTokenDeLaConexion();
   const appId = getMetaAppId();
   const appSecret = getMetaOAuthAppSecret();
+  let token = cuenta ? permisoDeConexionDeLaCuenta(cuenta) : getTokenDeLaConexion();
+  // CON UN BM ELEGIDO, EL PERMISO QUE LO VE (21/10/2026): el de la conexión puede ser de otra
+  // cuenta de Facebook, o ya no ver nada; se busca entre todos los guardados el que ve ese BM.
+  if (!cuenta && negocioPedido && appSecret) {
+    for (const candidato of permisosConocidos()) {
+      const r = await graph("me/businesses", candidato, appSecret, { fields: "id", limit: "200" });
+      if (Array.isArray(r.cuerpo?.data) && (r.cuerpo.data as Array<{ id?: string }>).some((b) => b.id === negocioPedido)) {
+        token = candidato;
+        break;
+      }
+    }
+  }
 
   if (!token) {
     return NextResponse.json({

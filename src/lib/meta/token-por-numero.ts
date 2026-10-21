@@ -2,11 +2,12 @@ import { createHmac } from "node:crypto";
 import {
   getMetaRuntimeSetting,
   listMetaWhatsAppConnections,
+  permisosDeTodasLasCuentas,
   ponerTokenPermanenteAlNumero,
   type MetaWhatsAppConnectionRow,
 } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
-import { getMetaOAuthAppSecret } from "@/lib/meta/runtime-config";
+import { getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 
 /**
  * CADA NÚMERO CON EL TOKEN PERMANENTE DE SU BM (21/10/2026).
@@ -55,6 +56,15 @@ export async function repartirTokenPermanente(token: string, tambienLosQueYaTien
     if (tambienLosQueYaTienen || c.token_permanente !== 1) ponerTokenPermanenteAlNumero(c.phone_number_id, token);
   }
   return alcanzados;
+}
+
+/**
+ * LOS PERMISOS DE INICIO DE SESIÓN QUE HAY: el de la conexión y el de cada cuenta de Facebook
+ * anexada. Es lo que usa «📱 Tus números» para ver los BM; el paso del token usaba solo el
+ * primero y, cuando ése ya no veía nada, el selector de BM salía vacío (21/10/2026).
+ */
+export function permisosConocidos(): string[] {
+  return [...new Set([getTokenDeLaConexion(), ...permisosDeTodasLasCuentas().map((p) => p.token)].filter((t): t is string => !!t))];
 }
 
 /** Todos los tokens permanentes que hay: el general y el de cada número. Sin repetir. */
