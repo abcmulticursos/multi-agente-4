@@ -1852,6 +1852,15 @@ export default function MetaConnectPage() {
     }
   }, []);
   /**
+   * LO DE LA ÉPOCA MANUAL, SOLO SI FALLA (21/10/2026): «Datos exactos para Meta», «Variables
+   * detectadas» y «Variables manuales» eran para pegar direcciones, IDs y tokens a mano. Con el
+   * asistente no hacen falta, así que no se muestran. Él: «si falla, que diga activar ocultos, pero
+   * solo cuando falle la conexión». Falla = los mensajes de WhatsApp de la app no le llegan a este
+   * proyecto (lo dice Meta). Entonces sale un aviso con el botón que los muestra.
+   */
+  const [conexionFallo, setConexionFallo] = useState(false);
+  const [verAvanzado, setVerAvanzado] = useState(false);
+  /**
    * EL LUGAR DE CADA SECCIÓN EN EL MODO ESENCIAL: su número y su orden en la columna.
    * null = oculta. En el profesional no se usa: cada una lleva su número de siempre.
    *
@@ -2347,6 +2356,18 @@ export default function MetaConnectPage() {
   const [busyInstagramPageId, setBusyInstagramPageId] = useState<string | null>(null);
   const [removingConnectionId, setRemovingConnectionId] = useState<string | null>(null);
   const [resettingMessengerSecret, setResettingMessengerSecret] = useState(false);
+
+  // ¿Quedó lista la conexión? Solo con una app puesta; sin app no hay nada que haya fallado.
+  useEffect(() => {
+    if (!status?.appId) {
+      setConexionFallo(false);
+      return;
+    }
+    void fetch("/api/meta/connect/configurar-app?revisar=1", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { ok?: boolean; lista?: boolean | null }) => setConexionFallo(d.ok === true && d.lista === false))
+      .catch(() => {});
+  }, [status?.appId]);
 
   async function loadStatus() {
     const res = await fetch("/api/meta/connect/status", { cache: "no-store" });
@@ -4388,8 +4409,25 @@ export default function MetaConnectPage() {
       </section>
       </SeccionEnVentana>
 
+      {conexionFallo && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border-2 border-amber-400 bg-amber-50 p-3 text-sm text-amber-900">
+          <span className="min-w-0 flex-1">
+            ⚠ <b>La conexión automática no quedó lista:</b> los mensajes de WhatsApp de tu app no le llegan a este proyecto. Prueba
+            otra vez con el asistente («🔑 Mi app»), o conéctalo a mano con los datos.
+          </span>
+          <button
+            type="button"
+            onClick={() => setVerAvanzado((v) => !v)}
+            className="rounded-lg border border-amber-500 bg-white px-3 py-1.5 font-semibold hover:bg-amber-100"
+          >
+            {verAvanzado ? "Ocultar los datos" : "Mostrar datos para conectar a mano"}
+          </button>
+        </div>
+      )}
+
       <SeccionEnVentana
         {...lugar(8)}
+        oculta={lugar(8).oculta || !verAvanzado}
         titulo="Datos exactos para Meta"
         tono="bg-orange-200 text-orange-900"
         detalle="Las URLs y los verify tokens que pide Meta"
@@ -4474,6 +4512,7 @@ export default function MetaConnectPage() {
 
       <SeccionEnVentana
         {...lugar(9)}
+        oculta={lugar(9).oculta || !verAvanzado}
         titulo="Variables detectadas"
         tono="bg-cyan-200 text-cyan-900"
         detalle="El bloque listo para pegar en EasyPanel"
@@ -4536,6 +4575,7 @@ export default function MetaConnectPage() {
 
       <SeccionEnVentana
         {...lugar(10)}
+        oculta={lugar(10).oculta || !verAvanzado}
         titulo="Variables manuales"
         tono="bg-rose-200 text-rose-900"
         detalle="Las que el panel no puede sacar de Meta: las pones tú"

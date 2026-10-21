@@ -5,6 +5,8 @@ import {
   getMetaOAuthAppSecret,
   getWebhookVerifyToken,
 } from "@/lib/meta/runtime-config";
+import { MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
+import { fetchMeta } from "@/lib/meta/freno";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -62,6 +64,27 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // «?revisar=1»: SOLO SI QUEDÓ LISTA (21/10/2026). ¿Le llegan a ESTE proyecto los mensajes de
+  // WhatsApp de la app? Si no, Meta Connect muestra los datos para conectar a mano, que si no
+  // quedan escondidos. Recordado media hora; «preparar» (POST) lo olvida.
+  if (req.nextUrl.searchParams.get("revisar") === "1") {
+    const nuestra = urlDelWebhook(req, "whatsapp_business_account");
+    try {
+      const lista = await recordar(`conexion-lista:${appId}`, MEDIA_HORA, async () => {
+        const url = new URL(`https://graph.facebook.com/${graphVersion()}/${appId}/subscriptions`);
+        url.searchParams.set("access_token", token);
+        const res = await fetchMeta(url);
+        if (!res.ok) throw new Error("sin respuesta");
+        const cuerpo = (await res.json()) as { data?: Array<{ object?: string; callback_url?: string }> };
+        return (cuerpo.data ?? []).some((s) => s.object === "whatsapp_business_account" && s.callback_url === nuestra);
+      });
+      return NextResponse.json({ ok: true, lista });
+    } catch {
+      // Sin poder saberlo no se alarma a nadie.
+      return NextResponse.json({ ok: false, lista: null });
+    }
+  }
+
   try {
     const url = new URL(
       `https://graph.facebook.com/${graphVersion()}/${appId}/subscriptions`
@@ -106,6 +129,7 @@ export async function GET(req: NextRequest) {
  * es el único paso que queda a mano. Se devuelve para poder copiarla.
  */
 export async function POST(req: NextRequest) {
+  olvidar("conexion-lista");
   const appId = getMetaAppId();
   const token = tokenDeApp();
   if (!appId || !token) {
