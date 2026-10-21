@@ -233,17 +233,25 @@ export default function AsistenteDeConexion() {
   );
 }
 
+/**
+ * LA APP, PASO A PASO DE VERDAD (20/10/2026): «paso a paso debería ser PASO A PASO… tener eso ahí
+ * me confunde, es como un bypass». Una cosa por pantalla; la siguiente no aparece hasta terminar
+ * la anterior, y «Continuar» solo se activa cuando está hecha.
+ */
+type SubPaso = "elegir" | "crear" | "claves" | "preparar" | "permiso" | "datos" | "uri" | "vivo";
+
 function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<string, boolean>; marcar: (id: string, v: boolean) => void; alListo: () => void; volver: () => void }) {
-  const [nueva, setNueva] = useState<boolean | null>(null);
+  const [sub, setSub] = useState<SubPaso>("elegir");
+  const [historial, setHistorial] = useState<SubPaso[]>([]);
   const [appId, setAppId] = useState("");
   const [clave, setClave] = useState("");
   const [app, setApp] = useState<{ appId?: string; nombre?: string | null } | null>(null);
   const [pasos, setPasos] = useState<string[]>([]);
-  const [faltaDominio, setFaltaDominio] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const origen = typeof window !== "undefined" ? window.location.origin : "";
   const uri = `${origen}/api/meta/connect/callback`;
+  const id = app?.appId ?? "";
 
   useEffect(() => {
     void (async () => {
@@ -254,6 +262,58 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       } catch {}
     })();
   }, []);
+
+  const ir = (s: SubPaso) => {
+    setError(null);
+    setHistorial((h) => [...h, sub]);
+    setSub(s);
+  };
+  const atras = () => {
+    setError(null);
+    if (historial.length === 0) return volver();
+    setSub(historial[historial.length - 1]);
+    setHistorial((h) => h.slice(0, -1));
+  };
+
+  /**
+   * «Preparar mi app»: webhooks, dominio y privacidad, solos. Si la app ya manda sus mensajes a
+   * OTRA dirección (otro bot), se pregunta antes. Según lo que conteste Meta, lleva a la pantalla
+   * que toca: el permiso de la app, los datos a mano, o la URI.
+   */
+  async function preparar() {
+    setOcupado(true);
+    setError(null);
+    try {
+      const ahora = await (await fetch("/api/meta/connect/configurar-app", { cache: "no-store" })).json();
+      const propias = new Set((ahora.urlsPropuestas ?? []).map((p: { url: string }) => p.url));
+      const ajenas = (ahora.suscripciones ?? []).filter((s: { url: string }) => s.url && !propias.has(s.url)) as Array<{ url: string }>;
+      if (
+        ajenas.length > 0 &&
+        !window.confirm(
+          `Esta app ya manda sus mensajes a otra dirección:\n${ajenas.map((s) => `· ${s.url}`).join("\n")}\n\nSi la preparo para este CRM, esa otra dirección (otro bot) dejará de recibirlos. ¿Seguir?`
+        )
+      )
+        return;
+      const c = await (await fetch("/api/meta/connect/configurar-app", { method: "POST" })).json();
+      const lista = (c.pasos ?? []) as Array<{ paso: string; ok: boolean; detalle: string }>;
+      // (Con su razón cuando falla: un «❌» solo no dice qué hacer.)
+      setPasos(lista.map((p) => `${p.ok ? "✅" : "❌"} ${p.paso}${p.ok ? "" : ` — ${p.detalle}`}`));
+      const dominio = lista.find((p) => !p.ok && /Dominio/.test(p.paso));
+      const otroFallo = lista.find((p) => !p.ok && !/Dominio/.test(p.paso));
+      if (otroFallo) {
+        setError(`Meta no dejó preparar la app: ${otroFallo.paso} — ${otroFallo.detalle}`);
+        return;
+      }
+      // (#10): la app tiene apagado «Permitir acceso a la API para la configuración de la app».
+      if (dominio && /\(#10\)|app settings through API|advanced settings/i.test(dominio.detalle)) ir("permiso");
+      else if (dominio) ir("datos");
+      else ir("uri");
+    } catch {
+      setError("No se pudo consultar a Meta.");
+    } finally {
+      setOcupado(false);
+    }
+  }
 
   async function guardarApp() {
     // CAMBIAR DE PUERTA: los números suscritos a la app anterior dejarían de llegar aquí.
@@ -267,7 +327,6 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       return;
     setOcupado(true);
     setError(null);
-    setPasos([]);
     try {
       const r = await fetch("/api/meta/connect/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ appId: appId.trim(), appSecret: clave.trim() }) });
       const d = await r.json();
@@ -275,129 +334,142 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       const a = await (await fetch("/api/meta/connect/app", { cache: "no-store" })).json();
       if (!a.nombre) throw new Error(a.avisoNombre ? `Meta no reconoce esa app: ${a.avisoNombre}. Revisa el ID y la clave.` : "Meta no reconoce esa app. Revisa el ID y la clave.");
       setApp(a);
-      // «Preparar mi app»: webhooks y dominio, solos. PERO SI LA APP YA MANDA SUS MENSAJES A
-      // OTRA DIRECCIÓN (otro bot tuyo), se pregunta antes: cambiarla se los quitaría a ése.
-      const ahora = await (await fetch("/api/meta/connect/configurar-app", { cache: "no-store" })).json();
-      const propias = new Set((ahora.urlsPropuestas ?? []).map((p: { url: string }) => p.url));
-      const ajenas = (ahora.suscripciones ?? []).filter((s: { url: string }) => s.url && !propias.has(s.url)) as Array<{ objeto: string; url: string }>;
-      if (
-        ajenas.length > 0 &&
-        !window.confirm(
-          `Esta app ya manda sus mensajes a otra dirección:\n${ajenas.map((s) => `· ${s.url}`).join("\n")}\n\nSi la preparo para este CRM, esa otra dirección (otro bot) dejará de recibirlos. ¿Seguir?`
-        )
-      ) {
-        setPasos(["⏸ No toqué los webhooks de la app. Puedes prepararla después desde «Configuración automática»."]);
-        return;
-      }
-      const c = await (await fetch("/api/meta/connect/configurar-app", { method: "POST" })).json();
-      // (Con su razón cuando falla: un «❌» solo no dice qué hacer.)
-      setPasos((c.pasos ?? []).map((p: { paso: string; ok: boolean; detalle: string }) => `${p.ok ? "✅" : "❌"} ${p.paso}${p.ok ? "" : ` — ${p.detalle}`}`));
-      setFaltaDominio((c.pasos ?? []).some((p: { paso: string; ok: boolean }) => !p.ok && /Dominio/.test(p.paso)));
       setClave("");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
-    } finally {
       setOcupado(false);
+      return;
     }
+    setOcupado(false);
+    await preparar();
   }
 
-  const id = app?.appId ?? "";
-  const listaParaSeguir = !!app?.nombre && !!casillas.uri && !!casillas.vivo && (nueva === false || (!!casillas.tipo && !!casillas.productos));
+  const Botones = ({ listo, alSeguir, texto = "Continuar →" }: { listo: boolean; alSeguir: () => void; texto?: string }) => (
+    <div className="flex justify-between pt-2">
+      <button type="button" className="text-neutral-500 hover:underline" onClick={atras}>← Atrás</button>
+      <button type="button" disabled={!listo || ocupado} className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40" onClick={alSeguir}>
+        {texto}
+      </button>
+    </div>
+  );
+  const Abrir = ({ href, texto }: { href: string; texto: string }) => (
+    <a href={href} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+      {texto} ↗
+    </a>
+  );
 
   return (
-    <div className="space-y-4 text-sm">
+    <div className="space-y-3 text-sm">
       <div className="font-bold">🔑 Tu app: la puerta de tu CRM en Meta</div>
-      {app?.nombre && (
-        <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
-          ✅ Conectada: <b>{app.nombre}</b> <span className="text-xs text-neutral-500">(ID {app.appId})</span>
-        </div>
+      {error && <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">❌ {error}</div>}
+
+      {sub === "elegir" && (
+        <>
+          {app?.nombre && (
+            <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
+              ✅ Ya tienes conectada: <b>{app.nombre}</b> <span className="text-xs text-neutral-500">(ID {app.appId})</span>
+            </div>
+          )}
+          <div className="space-y-2">
+            {app?.nombre && (
+              <button type="button" className="block w-full rounded-lg border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold" onClick={() => ir("preparar")}>
+                Seguir con esta app
+              </button>
+            )}
+            <button type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left" onClick={() => ir("crear")}>
+              Crear una app nueva
+            </button>
+            <button type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left" onClick={() => ir("claves")}>
+              {app?.nombre ? "Usar otra app que ya tengo" : "Usar una app que ya tengo"}
+            </button>
+          </div>
+          <Botones listo={false} alSeguir={() => {}} texto="Elige una opción" />
+        </>
       )}
 
-      <div className="flex gap-2">
-        <button type="button" className={`flex-1 rounded-lg border p-2 ${nueva === true ? "border-sky-500 bg-sky-50 font-bold" : "border-neutral-300"}`} onClick={() => setNueva(true)}>
-          Crear una app nueva
-        </button>
-        <button type="button" className={`flex-1 rounded-lg border p-2 ${nueva === false ? "border-sky-500 bg-sky-50 font-bold" : "border-neutral-300"}`} onClick={() => setNueva(false)}>
-          Usar una que ya tengo
-        </button>
-      </div>
-
-      {nueva === true && (
-        <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
-          <a href="https://developers.facebook.com/apps/creation/" target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-            Abrir Meta para crear la app ↗
-          </a>
+      {sub === "crear" && (
+        <>
+          <div>Crea tu app en Meta. Al terminar, vuelve aquí.</div>
+          <Abrir href="https://developers.facebook.com/apps/creation/" texto="Abrir Meta para crear la app" />
           <Casilla id="tipo" casillas={casillas} marcar={marcar} texto={<>La creé de tipo <b>Empresa</b>.</>} />
           <Casilla id="productos" casillas={casillas} marcar={marcar} texto={<>Le agregué <b>WhatsApp</b>, <b>Messenger</b> e <b>Inicio de sesión con Facebook para empresas</b>.</>} />
-          {app?.appId && (
-            <a href={`https://developers.facebook.com/apps/${app.appId}/add/`} target="_blank" rel="noreferrer" className="inline-block text-sky-700 hover:underline">
-              Abrir «Agregar productos» de mi app ↗
-            </a>
-          )}
-        </div>
+          <Botones listo={!!casillas.tipo && !!casillas.productos} alSeguir={() => ir("claves")} />
+        </>
       )}
 
-      {nueva !== null && (
-        <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
+      {sub === "claves" && (
+        <>
           <div>
-            Pega su <b>ID de la app</b> y su <b>clave secreta</b>. Están en tu app → <i>Configuración de la app → Básica</i>.
+            Pega el <b>ID de la app</b> y su <b>clave secreta</b>. Están en tu app → <i>Configuración de la app → Básica</i> (la clave, con «Mostrar»).
           </div>
           <input className="w-full rounded border border-neutral-300 px-2 py-1.5" placeholder="ID de la app" value={appId} onChange={(e) => setAppId(e.target.value)} />
           <input className="w-full rounded border border-neutral-300 px-2 py-1.5" placeholder="Clave secreta de la app" type="password" value={clave} onChange={(e) => setClave(e.target.value)} />
-          <button type="button" disabled={ocupado || !appId.trim() || !clave.trim()} className="rounded-md bg-sky-600 px-3 py-1.5 font-bold text-white disabled:opacity-50" onClick={() => void guardarApp()}>
-            {ocupado ? "Comprobando…" : "Guardar y preparar mi app"}
-          </button>
-          {error && <div className="text-red-700">❌ {error}</div>}
-          {pasos.length > 0 && <pre className="whitespace-pre-wrap text-xs">{pasos.join("\n")}</pre>}
-        </div>
+          <Botones listo={!!appId.trim() && !!clave.trim()} alSeguir={() => void guardarApp()} texto={ocupado ? "Comprobando…" : "Guardar y preparar mi app →"} />
+        </>
       )}
 
-      {/* LO QUE META NO DEJÓ GUARDAR SOLO: un clic al sitio exacto y los datos listos para copiar. */}
-      {faltaDominio && app?.appId && (
-        <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+      {sub === "preparar" && (
+        <>
           <div>
-            <b>Falta llenar 3 datos de tu app.</b> Ábrela con el botón y pega cada uno en su campo; luego «Guardar cambios».
+            Preparo tu app <b>{app?.nombre}</b> para este CRM: sus webhooks, su dominio y su política de privacidad. Es automático.
           </div>
-          <a href={`https://developers.facebook.com/apps/${app.appId}/settings/basic/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-            Abrir «Configuración básica» de mi app ↗
-          </a>
+          <Botones listo={true} alSeguir={() => void preparar()} texto={ocupado ? "Preparando…" : "Preparar mi app →"} />
+        </>
+      )}
+
+      {sub === "permiso" && (
+        <>
+          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+            <b>Enciende un permiso de tu app (una sola vez).</b> Tu app no deja que el CRM complete su configuración. En la página que se abre, pon en <b>«Sí»</b>{" "}
+            <i>«Permitir acceso a la API para la configuración de la app»</i> y guarda.
+          </div>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/settings/advanced/`} texto="Abrir ese permiso de mi app" />
+          <Botones listo={true} alSeguir={() => void preparar()} texto={ocupado ? "Reintentando…" : "Ya lo encendí → Reintentar"} />
+        </>
+      )}
+
+      {sub === "datos" && (
+        <>
+          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
+          <div>
+            <b>Falta llenar 3 datos de tu app.</b> Ábrela y pega cada uno en su campo; luego «Guardar cambios».
+          </div>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/settings/basic/`} texto="Abrir «Configuración básica» de mi app" />
           <div className="text-xs">Dominios de la app:</div>
           <Copiar texto={origen.replace(/^https?:\/\//, "")} />
           <div className="text-xs">URL de la política de privacidad:</div>
           <Copiar texto={`${origen}/privacidad`} />
           <div className="text-xs">Sitio web (abajo del todo: «+ Agregar plataforma» → «Sitio web»):</div>
           <Copiar texto={origen} />
-        </div>
+          <Casilla id="datos" casillas={casillas} marcar={marcar} texto="Pegué los 3 datos y guardé." />
+          <Botones listo={!!casillas.datos} alSeguir={() => ir("uri")} />
+        </>
       )}
 
-      {app?.nombre && (
-        <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
+      {sub === "uri" && (
+        <>
+          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
           <div>
-            <b>La URI.</b> Ya está completa: solo cópiala y pégala en tu app → <i>Inicio de sesión con Facebook para empresas → Configuración → «URI de redireccionamiento de OAuth válidos»</i> → Guardar cambios.
+            <b>La URI.</b> Ya está completa: cópiala y pégala en <i>«URI de redireccionamiento de OAuth válidos»</i>; luego «Guardar cambios».
           </div>
           <Copiar texto={uri} />
-          {/* UN CLIC AL SITIO EXACTO (20/10/2026): «necesito poder ir con un clic a ellos». Si Meta
-              cambia sus direcciones, el texto de arriba dice el camino. */}
-          <a href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-            Abrir donde se pega la URI ↗
-          </a>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
           <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
-          <div className="pt-2">
-            <b>En vivo.</b> Arriba de tu app, cambia «Modo de la app» a <i>En vivo</i> (o «Publicar»). Meta pide la política de privacidad: tu CRM ya la tiene publicada.
-          </div>
-          <a href={`https://developers.facebook.com/apps/${id}/settings/basic/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-            Abrir mi app para ponerla en vivo ↗
-          </a>
-          <Casilla id="vivo" casillas={casillas} marcar={marcar} texto="Puse mi app en vivo." />
-        </div>
+          <Botones listo={!!casillas.uri} alSeguir={() => ir("vivo")} />
+        </>
       )}
 
-      <div className="flex justify-between">
-        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>← Atrás</button>
-        <button type="button" disabled={!listaParaSeguir} title={listaParaSeguir ? "" : "Marca las casillas de arriba para seguir"} className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40" onClick={alListo}>
-          Continuar →
-        </button>
-      </div>
+      {sub === "vivo" && (
+        <>
+          <div>
+            <b>En vivo.</b> Arriba de tu app, cambia «Modo de la app» a <i>En vivo</i> (o «Publicar»). Meta pide la política de privacidad: tu CRM ya la tiene publicada.
+          </div>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/settings/basic/`} texto="Abrir mi app para ponerla en vivo" />
+          <Casilla id="vivo" casillas={casillas} marcar={marcar} texto="Puse mi app en vivo." />
+          <Botones listo={!!casillas.vivo} alSeguir={alListo} />
+        </>
+      )}
     </div>
   );
 }
