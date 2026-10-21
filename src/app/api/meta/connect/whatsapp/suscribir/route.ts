@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getMetaWhatsAppConnection, listMetaWhatsAppConnections } from "@/lib/db";
 import { estaSuscritaAEstaApp, getMetaAppId, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
+import { MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,6 +22,12 @@ export const runtime = "nodejs";
 
 /** El estado de cada número: true = suscrito, false = no, null = no se pudo saber. */
 export async function GET() {
+  // RECORDADO 5 MINUTOS (21/10/2026): dos preguntas por cada cuenta de WhatsApp Business en cada
+  // apertura de Meta Connect. «Suscribir» (abajo) lo olvida para que se vea el cambio al momento.
+  return NextResponse.json(await recordar("suscribir", MINUTOS(5), leerSuscripciones));
+}
+
+async function leerSuscripciones() {
   const porCuenta = new Map<string, boolean | null>();
   const otrasPorCuenta = new Map<string, string[]>();
   const estado: Record<string, boolean | null> = {};
@@ -41,7 +48,7 @@ export async function GET() {
     estado[fila.phone_number_id] = porCuenta.get(fila.waba_id) ?? null;
     otras[fila.phone_number_id] = otrasPorCuenta.get(fila.waba_id) ?? [];
   }
-  return NextResponse.json({ estado, otras });
+  return { estado, otras };
 }
 
 async function otrasAppsDeLaCuenta(wabaId: string, accessToken: string): Promise<string[]> {
@@ -78,5 +85,7 @@ export async function POST(req: NextRequest) {
     wabaId: fila.waba_id,
     accessToken: fila.access_token,
   });
+  olvidar("suscribir");
+  olvidar("numeros");
   return NextResponse.json({ ok: resultado.ok, mensaje: resultado.message });
 }

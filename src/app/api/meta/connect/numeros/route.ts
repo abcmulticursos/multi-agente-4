@@ -7,6 +7,7 @@ import {
 } from "@/lib/db";
 import { graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
 import { getMetaAppId, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
+import { MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -176,12 +177,17 @@ async function listar() {
   return [...negocios.values()];
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (permisosConocidos().length === 0) {
     return NextResponse.json({ ok: false, error: "Primero conecta con Facebook (iniciar sesión)." });
   }
   try {
-    return NextResponse.json({ ok: true, negocios: await listar() }, { headers: { "Cache-Control": "no-store" } });
+    // RECORDADO 5 MINUTOS (21/10/2026): listar recorre todos los BM y cuentas de WhatsApp
+    // Business, y repetirlo en cada apertura hizo que Meta frenara la app («#4»). «?fresco=1»
+    // (el botón de actualizar) lo lee de nuevo. Las acciones de abajo lo olvidan solas.
+    if (req.nextUrl.searchParams.get("fresco") === "1") olvidar("numeros");
+    const negocios = await recordar("numeros", MINUTOS(5), listar);
+    return NextResponse.json({ ok: true, negocios }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ ok: false, error: "No se pudo consultar a Meta." });
   }
@@ -191,6 +197,9 @@ export async function POST(req: NextRequest) {
   const c = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   const texto = (v: unknown) => (typeof v === "string" ? v.trim() : "");
   const accion = texto(c?.accion);
+  // Toda acción cambia algo en Meta: lo recordado deja de valer.
+  olvidar("numeros");
+  olvidar("token-estado");
   // El permiso del negocio, de la cuenta de WhatsApp o del número; si no se listó aún, se lista.
   const permisoPara = async (id: string) => {
     if (!permisoDe.has(id)) await listar();

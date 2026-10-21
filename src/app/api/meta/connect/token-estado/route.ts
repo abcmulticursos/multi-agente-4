@@ -3,6 +3,7 @@ import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
+import { MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,6 +27,35 @@ async function graph<T>(ruta: string, token: string, params: Record<string, stri
   } catch {
     return null;
   }
+}
+
+/**
+ * Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
+ * Los BM de TODOS los permisos guardados (la cuenta principal y las anexadas), como «📱 Tus
+ * números». Cada BM se consulta con el permiso que lo vio.
+ */
+async function leerNegocios(): Promise<Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }>> {
+  const appId = getMetaAppId();
+  const vistos = new Map<string, { id: string; name?: string; token: string }>();
+  const listas = await Promise.all(
+    permisosConocidos().map(async (token) => ({
+      token,
+      r: await graph<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", token, { fields: "id,name", limit: "200" }),
+    }))
+  );
+  for (const { token, r } of listas) for (const b of r?.data ?? []) if (!vistos.has(b.id)) vistos.set(b.id, { ...b, token });
+  return Promise.all(
+    [...vistos.values()].map(async (b) => {
+      const [propias, deClientes, usuarios] = await Promise.all([
+        graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
+        graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
+        graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, b.token, { fields: "id,role", limit: "100" }),
+      ]);
+      const conLaApp = !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId);
+      const usuarioAdmin = (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN");
+      return { id: b.id, nombre: b.name ?? b.id, conLaApp, usuarioAdmin };
+    })
+  );
 }
 
 export async function GET(req: Request) {
@@ -54,9 +84,12 @@ export async function GET(req: Request) {
   let vence: number | null = null;
   let loginVencido = false;
   if (faltan && login && appId && secreto) {
-    const d = await graph<{ data?: { is_valid?: boolean; expires_at?: number; data_access_expires_at?: number } }>("debug_token", `${appId}|${secreto}`, {
-      input_token: login,
-    });
+    // Recordado 10 minutos: el aviso rojo lo pide en cada paso del asistente.
+    const d = await recordar(`token-estado:vence:${login.slice(-12)}`, MINUTOS(10), () =>
+      graph<{ data?: { is_valid?: boolean; expires_at?: number; data_access_expires_at?: number } }>("debug_token", `${appId}|${secreto}`, {
+        input_token: login,
+      })
+    );
     loginVencido = d?.data?.is_valid === false;
     const fechas = [d?.data?.expires_at, d?.data?.data_access_expires_at].filter((x): x is number => !!x && x > 0);
     vence = fechas.length ? Math.min(...fechas) * 1000 : null;
@@ -65,32 +98,16 @@ export async function GET(req: Request) {
   // Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
   let negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }> = [];
   if (!ligero) {
-    // Los BM de TODOS los permisos guardados (la cuenta principal y las anexadas), como
-    // «📱 Tus números». Cada BM se consulta con el permiso que lo vio.
-    const vistos = new Map<string, { id: string; name?: string; token: string }>();
-    const listas = await Promise.all(
-      permisosConocidos().map(async (token) => ({
-        token,
-        r: await graph<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", token, { fields: "id,name", limit: "200" }),
-      }))
-    );
-    for (const { token, r } of listas) for (const b of r?.data ?? []) if (!vistos.has(b.id)) vistos.set(b.id, { ...b, token });
-    negocios = await Promise.all(
-      [...vistos.values()].map(async (b) => {
-        const [propias, deClientes, usuarios] = await Promise.all([
-          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
-          graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
-          graph<{ data?: Array<{ role?: string }> }>(`${b.id}/system_users`, b.token, { fields: "id,role", limit: "100" }),
-        ]);
-        const conLaApp = !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId);
-        const usuarioAdmin = (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN");
-        return { id: b.id, nombre: b.name ?? b.id, conLaApp, usuarioAdmin };
-      })
-    );
-    // Primero los que tienen números, luego por nombre.
-    const conNumeros = new Set(numeros.map((n) => n.negocioId));
-    negocios.sort((a, b) => Number(conNumeros.has(b.id)) - Number(conNumeros.has(a.id)) || a.nombre.localeCompare(b.nombre, "es"));
+    // RECORDADO 5 MINUTOS: son tres preguntas por BM. «?fresco=1» («Ya lo hice, revisar de
+    // nuevo») lo lee otra vez, porque ahí él acaba de cambiar algo en Meta.
+    if (new URL(req.url).searchParams.get("fresco") === "1") olvidar("token-estado:negocios");
+    negocios = await recordar("token-estado:negocios", MINUTOS(5), leerNegocios);
   }
+  // Primero los que tienen números, luego por nombre.
+  const conNumeros = new Set(numeros.map((n) => n.negocioId));
+  negocios = [...negocios].sort(
+    (a, b) => Number(conNumeros.has(b.id)) - Number(conNumeros.has(a.id)) || a.nombre.localeCompare(b.nombre, "es")
+  );
 
   return NextResponse.json(
     {
@@ -116,7 +133,10 @@ export async function GET(req: Request) {
  */
 export async function POST() {
   const general = getMetaRuntimeSetting("whatsapp_access_token_override");
-  if (!general) return NextResponse.json({ ok: true, numeros: [] });
-  const alcanzados = await repartirTokenPermanente(general);
+  if (!general || !listMetaWhatsAppConnections().some((c) => c.token_permanente !== 1)) {
+    return NextResponse.json({ ok: true, numeros: [] });
+  }
+  // Una vez cada 10 minutos basta: los números no cambian de BM.
+  const alcanzados = await recordar(`token-estado:repartir:${general.slice(-12)}`, MINUTOS(10), () => repartirTokenPermanente(general));
   return NextResponse.json({ ok: true, numeros: alcanzados.map((c) => c.display_phone_number ?? c.phone_number_id) });
 }

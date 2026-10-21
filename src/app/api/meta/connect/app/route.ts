@@ -5,6 +5,7 @@ import {
   getMetaOAuthAppSecret,
   getTokenDeLaConexion,
 } from "@/lib/meta/runtime-config";
+import { MINUTOS, recordar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -31,6 +32,14 @@ export async function GET() {
       aviso: "Falta el ID de la app o su clave secreta.",
     });
   }
+  // RECORDADO 10 MINUTOS (21/10/2026): para el negocio de la app se recorren todos los BM, dos
+  // preguntas por cada uno; repetirlo en cada apertura de Meta Connect hizo que Meta frenara la
+  // app («#4»). Cambiar de app cambia la clave, así que se lee de nuevo.
+  const datos = await recordar(`app:${appId}`, MINUTOS(10), () => leerApp(appId, appSecret));
+  return NextResponse.json(datos, { headers: { "Cache-Control": "no-store" } });
+}
+
+async function leerApp(appId: string, appSecret: string) {
 
   // Token de aplicación: se arma con el id y el secreto, sin pedirle nada a nadie.
   const tokenDeApp = `${appId}|${appSecret}`;
@@ -101,8 +110,5 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json(
-    { configurada: true, appId, nombre, negocio, avisoNombre, avisoNegocio },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return { configurada: true, appId, nombre, negocio, avisoNombre, avisoNegocio };
 }

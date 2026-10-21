@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { olvidar } from "@/lib/meta/recuerdo";
 import {
   apuntarCuentaDeLaPagina,
   apuntarCuentaDelNumero,
@@ -149,6 +150,8 @@ async function identificarLasCuentasQueFaltan(): Promise<void> {
 }
 
 export async function GET(req: NextRequest) {
+  // Un inicio de sesión nuevo puede traer otros BM y números: lo recordado deja de valer.
+  olvidar();
   const url = new URL(req.url);
   const publicOrigin = getPublicOrigin(req);
   const redirectToMetaConnect = (query: string) =>

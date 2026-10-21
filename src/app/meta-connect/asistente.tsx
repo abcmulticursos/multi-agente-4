@@ -136,7 +136,10 @@ export default function AsistenteDeConexion() {
         setAviso(
           /bloquead|redirect|URL/i.test(error)
             ? "Meta rechazó el inicio de sesión: la URI no está pegada o tiene un error. Cópiala otra vez y pégala en tu app."
-            : `Meta respondió: ${error}`
+            : /\(#(4|17|32|613)\)|request limit/i.test(error)
+              ? // (#4) y familia: Meta frenó la app por muchas consultas seguidas (21/10/2026).
+                "Meta frenó tu app un rato por hacer muchas consultas seguidas. No se rompió nada: espera 1 hora sin abrir Meta Connect y vuelve a intentarlo."
+              : `Meta respondió: ${error}`
         );
         setAbierto(true);
       } else if (p.get("connected") !== null) {
@@ -970,12 +973,12 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   const [aviso, setAviso] = useState<string | null>(null);
   const [hecho, setHecho] = useState<string | null>(null);
 
-  const cargar = useCallback(async () => {
+  const cargar = useCallback(async (fresco = false) => {
     setRevisando(true);
     try {
       // El token que ya existía (de antes del 21/10) se pone en los números que alcanza.
       await fetch("/api/meta/connect/token-estado", { method: "POST" }).catch(() => null);
-      const d = (await (await fetch("/api/meta/connect/token-estado", { cache: "no-store" })).json()) as EstadoDelToken;
+      const d = (await (await fetch(`/api/meta/connect/token-estado${fresco ? "?fresco=1" : ""}`, { cache: "no-store" })).json()) as EstadoDelToken;
       setE(d);
       setElegido((actual) => actual || d.numeros.find((n) => !n.permanente)?.negocioId || d.negocios[0]?.id || "");
     } catch {
@@ -1142,7 +1145,7 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
           )}
           {aviso && !bm && <div className="text-xs text-red-700">❌ {aviso}</div>}
 
-          <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar()}>
+          <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar(true)}>
             {revisando ? (
               <>
                 Revisando

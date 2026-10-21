@@ -8,6 +8,7 @@ import {
   setMetaRuntimeSettings,
 } from "@/lib/db";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
+import { olvidar } from "@/lib/meta/recuerdo";
 import { graphVersion } from "@/lib/meta/connect";
 import {
   getMetaAppId,
@@ -275,6 +276,7 @@ export async function POST(req: NextRequest) {
           const nuevo = cuerpo.access_token;
           // (Al crearlo de nuevo en el mismo BM, el nuevo reemplaza al viejo en sus números.)
           const alcanzados = await repartirTokenPermanente(nuevo, true);
+          olvidar("token-estado");
 
           // El general (el de los envíos sin número propio y el de las compras) solo se
           // cambia si no había ninguno o si este alcanza el número ACTIVO: un token de otro
