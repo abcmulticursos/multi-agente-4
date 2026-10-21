@@ -6,6 +6,7 @@ import {
   saveAdOriginCache,
 } from "@/lib/db";
 import { getTokenDeLaConexion } from "@/lib/meta/runtime-config";
+import { tokensPermanentes } from "@/lib/meta/token-por-numero";
 import { negocioDeLaCuenta, nombreParaMostrar } from "@/lib/meta/dueno-de-la-cuenta";
 import { graphVersion } from "@/lib/meta/connect";
 
@@ -94,6 +95,11 @@ export async function POST(req: NextRequest) {
       token: lector.token,
     })),
     ...(permanente ? [{ name: "token permanente", token: permanente }] : []),
+    // LOS PERMANENTES DE VERDAD (21/10/2026): el de arriba es el inicio de sesión, que caduca a
+    // los ~60 días. Estos no caducan; van detrás para que lo de siempre responda igual que antes.
+    ...tokensPermanentes()
+      .filter((t) => t !== permanente)
+      .map((token) => ({ name: "token permanente del BM", token })),
     // LOS PERMISOS DE CADA CUENTA DE META, AL FINAL. Con varias cuentas, el anuncio de
     // la otra solo lo ve su permiso. Van detrás para que lo que ya funcionaba se pruebe
     // primero y responda igual que antes. Parte 2 de PLAN-VARIAS-CUENTAS-DE-FACEBOOK.md.

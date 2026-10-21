@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getMetaAdsReaderActivo } from "@/lib/db";
 import { getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { graphVersion } from "@/lib/meta/connect";
+import { tokensPermanentes } from "@/lib/meta/token-por-numero";
 import { negocioDeLaCuenta, nombreParaMostrar } from "@/lib/meta/dueno-de-la-cuenta";
 
 export const runtime = "nodejs";
@@ -65,8 +66,29 @@ export async function POST(req: NextRequest) {
   // exigía un token cargado a mano incluso para las cuentas del propio
   // negocio, que es justo donde no hace falta ninguno.
   const lector = getMetaAdsReaderActivo(Number(body?.readerId));
-  const permanente = getTokenDeLaConexion();
-  const reader = lector ?? (permanente ? { name: "token permanente", token: permanente } : null);
+  // SIN LECTOR: EL INICIO DE SESIÓN Y LUEGO LOS TOKENS PERMANENTES (21/10/2026). Lo que aquí se
+  // llamaba «permanente» era el inicio de sesión, que caduca a los ~60 días: ese día la
+  // importación de los anuncios propios dejaba de funcionar. Ahora, si él no puede leer la
+  // cuenta, se prueba con los permanentes de verdad, que no caducan.
+  const login = getTokenDeLaConexion();
+  const candidatos: Array<{ name: string; token: string }> = lector
+    ? [lector]
+    : [
+        ...(login ? [{ name: "inicio de sesión", token: login }] : []),
+        ...tokensPermanentes()
+          .filter((t) => t !== login)
+          .map((token) => ({ name: "token permanente", token })),
+      ];
+  let reader: { name: string; token: string } | null = candidatos[0] ?? null;
+  for (const c of candidatos) {
+    try {
+      await graph(`act_${accountId}?fields=id`, c.token);
+      reader = c;
+      break;
+    } catch {
+      // Este no alcanza la cuenta: se prueba el siguiente.
+    }
+  }
   if (!reader || !accountId) {
     return NextResponse.json(
       { error: "Falta la cuenta publicitaria, o no hay ningún token con el que consultar." },

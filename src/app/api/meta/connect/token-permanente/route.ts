@@ -1,10 +1,13 @@
 import { createHmac } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  getActiveMetaWhatsAppConnection,
+  getMetaRuntimeSetting,
   guardarPermisoPermanenteDeCuenta,
   permisoDeConexionDeLaCuenta,
   setMetaRuntimeSettings,
 } from "@/lib/db";
+import { repartirTokenPermanente } from "@/lib/meta/token-por-numero";
 import { graphVersion } from "@/lib/meta/connect";
 import {
   getMetaAppId,
@@ -255,15 +258,35 @@ export async function POST(req: NextRequest) {
           // El de una cuenta va SOLO a su cuenta. Ver el comentario de arriba.
           guardarPermisoPermanenteDeCuenta(cuenta, cuerpo.access_token);
         } else {
-          // Se guarda en los dos sitios: WhatsApp y el reporte de compras. Así
-          // nada queda dependiendo de un token que vence.
-          setMetaRuntimeSettings({
-            whatsapp_access_token_override: cuerpo.access_token,
-            capi_access_token: cuerpo.access_token,
-            capi_token_origen: "manual",
-            // En qué BM quedó: el asistente comprueba que sea el de los números.
-            token_permanente_negocio_id: negocio.id,
-            token_permanente_negocio: negocio.name ?? negocio.id,
+          // CADA NÚMERO CON EL TOKEN DE SU BM (21/10/2026): «para usar los números del otro
+          // usuario… crear el token permanente, que no reemplazará al tuyo». Se le pregunta a
+          // Meta, número por número, si este token lo alcanza; solo a esos se les pone.
+          const nuevo = cuerpo.access_token;
+          // (Al crearlo de nuevo en el mismo BM, el nuevo reemplaza al viejo en sus números.)
+          const alcanzados = await repartirTokenPermanente(nuevo, true);
+
+          // El general (el de los envíos sin número propio y el de las compras) solo se
+          // cambia si no había ninguno o si este alcanza el número ACTIVO: un token de otro
+          // BM no puede dejar sin permiso al número que ya funcionaba.
+          const activo = getActiveMetaWhatsAppConnection();
+          const habia = getMetaRuntimeSetting("whatsapp_access_token_override");
+          const alcanzaAlActivo = !!activo && alcanzados.some((c) => c.phone_number_id === activo.phone_number_id);
+          if (!habia || alcanzaAlActivo) {
+            setMetaRuntimeSettings({
+              whatsapp_access_token_override: nuevo,
+              token_permanente_negocio_id: negocio.id,
+              token_permanente_negocio: negocio.name ?? negocio.id,
+            });
+          }
+          if (!getMetaRuntimeSetting("capi_access_token") || alcanzaAlActivo) {
+            setMetaRuntimeSettings({ capi_access_token: nuevo, capi_token_origen: "manual" });
+          }
+          return NextResponse.json({
+            ok: true,
+            negocio: negocio.name ?? negocio.id,
+            usuario: usuario.name ?? usuario.id,
+            permisos: permisosLogrados.split(","),
+            numeros: alcanzados.map((c) => c.display_phone_number ?? c.phone_number_id),
           });
         }
         return NextResponse.json({

@@ -493,6 +493,8 @@ export interface MetaWhatsAppConnectionRow {
   business_name: string | null;
   /** JSON [{id, nombre}]: las cuentas que pueden usarlo. null = no se sabe todavía. */
   compartido_con: string | null;
+  /** 1 = `access_token` es el token permanente de su BM (no caduca). Ver la migración. */
+  token_permanente?: number;
 }
 
 export interface ConversationListRow extends ConversationRow {
@@ -952,6 +954,10 @@ for (const statement of [
   // NULL = todavía no se sabe; se rellena al pulsar «Actualizar lista de Meta».
   "ALTER TABLE meta_whatsapp_connections ADD COLUMN compartido_con TEXT",
   "ALTER TABLE meta_connections ADD COLUMN compartido_con TEXT",
+  // EL TOKEN PERMANENTE DE CADA NÚMERO (21/10/2026). 1 = su `access_token` es el token
+  // permanente del BM dueño del número, que no caduca; 0 = el del inicio de sesión (~60 días).
+  // Con 1, un inicio de sesión nuevo ya no lo pisa. Ver `ponerTokenPermanenteAlNumero`.
+  "ALTER TABLE meta_whatsapp_connections ADD COLUMN token_permanente INTEGER NOT NULL DEFAULT 0",
 ]) {
   try {
     db.exec(statement);
@@ -3519,7 +3525,12 @@ const stmtUpsertMetaWhatsAppConnection = db.prepare<
      display_phone_number = excluded.display_phone_number,
      verified_name = excluded.verified_name,
      profile_picture_url = COALESCE(excluded.profile_picture_url, meta_whatsapp_connections.profile_picture_url),
-     access_token = excluded.access_token,
+     -- Un número con token permanente lo conserva: volver a iniciar sesión (o «Traer»,
+     -- «Activar») traería el de 60 días y lo cambiaría por uno que caduca.
+     access_token = CASE
+       WHEN meta_whatsapp_connections.token_permanente = 1 THEN meta_whatsapp_connections.access_token
+       ELSE excluded.access_token
+     END,
      -- Si Meta no contestó quién es el dueño, se conserva el que ya estaba: un fallo
      -- de red no puede dejar un número sin cuenta.
      business_id = COALESCE(excluded.business_id, meta_whatsapp_connections.business_id),
@@ -3904,6 +3915,18 @@ export function saveMetaWhatsAppConnection(
   const row = stmtGetMetaWhatsAppByPhoneId.get(input.phoneNumberId);
   if (!row) throw new Error("No se pudo guardar la conexion de WhatsApp");
   return hydrateWhatsAppConnection(row);
+}
+
+/**
+ * EL TOKEN PERMANENTE DE SU BM, A UN NÚMERO (21/10/2026). Cada número contesta con el token
+ * de su propio BM: así el de otro BM (otra cuenta de Facebook) no pisa el tuyo. Solo se llama
+ * después de comprobar con Meta que ese token alcanza ese número.
+ */
+const stmtPonerTokenPermanente = db.prepare<[string, string]>(
+  "UPDATE meta_whatsapp_connections SET access_token = ?, token_permanente = 1, updated_at = unixepoch() WHERE phone_number_id = ?"
+);
+export function ponerTokenPermanenteAlNumero(phoneNumberId: string, token: string): boolean {
+  return stmtPonerTokenPermanente.run(encryptMetaValue(token), phoneNumberId).changes > 0;
 }
 
 export function activateMetaWhatsAppConnection(

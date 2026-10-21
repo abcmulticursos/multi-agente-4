@@ -91,12 +91,12 @@ export default function AsistenteDeConexion() {
   // Lo que ya hay: la app y lo conectado.
   const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number } | null>(null);
   /** null = hay token (o aún no se sabe); con valor = falta, y cuándo caduca la conexión. */
-  const [sinToken, setSinToken] = useState<{ vence: number | null } | null>(null);
+  const [sinToken, setSinToken] = useState<{ vence: number | null; faltan: number } | null>(null);
   useEffect(() => {
     void (async () => {
       try {
         const d = await (await fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })).json();
-        setSinToken(d.appId && !d.tiene ? { vence: d.vence ?? null } : null);
+        setSinToken(d.appId && !d.tiene && d.faltan > 0 ? { vence: d.vence ?? null, faltan: d.faltan } : null);
       } catch {}
     })();
   }, [paso]);
@@ -160,7 +160,8 @@ export default function AsistenteDeConexion() {
       {sinToken && (
         <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-red-400 bg-red-50 p-3 text-sm text-red-900">
           <span className="min-w-0 flex-1">
-            ⚠ <b>Sin token permanente.</b> {sinToken.vence ? <>Tu conexión <b>caduca el {fecha(sinToken.vence)}</b> y el bot dejará de contestar.</> : "Tu conexión caducará y el bot dejará de contestar."}
+            ⚠ <b>{sinToken.faltan === 1 ? "1 número sin token permanente." : `${sinToken.faltan} números sin token permanente.`}</b>{" "}
+            {sinToken.vence ? <>Caduca el <b>{fecha(sinToken.vence)}</b> y el bot dejará de contestar por él.</> : "Caducará y el bot dejará de contestar por él."}
           </span>
           <button
             type="button"
@@ -425,7 +426,10 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <div>Crea tu app en Meta. Al terminar, vuelve aquí.</div>
           <Abrir href="https://developers.facebook.com/apps/creation/" texto="Abrir Meta para crear la app" />
           <Casilla id="tipo" casillas={casillas} marcar={marcar} texto={<>La creé de tipo <b>Empresa</b>.</>} />
-          <Botones listo={!!casillas.tipo} alSeguir={() => ir("claves")} />
+          {/* EL BM DE LA APP (21/10/2026): es donde se crea el token permanente, y ese token solo
+              alcanza los números de su BM. Elegir el de los números ahorra un token después. */}
+          <Casilla id="bm" casillas={casillas} marcar={marcar} texto={<>Al crearla elegí <b>el BM donde están mis números</b>.</>} />
+          <Botones listo={!!casillas.tipo && !!casillas.bm} alSeguir={() => ir("claves")} />
         </>
       )}
 
@@ -742,7 +746,12 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
         </button>
       )}
       {error && <div className="text-red-700">❌ {error}</div>}
-      {!negocios && !error && <div className="text-neutral-500">Consultando a Meta…</div>}
+      {!negocios && !error && (
+        <div className="text-neutral-600">
+          Consultando a Meta
+          <Puntos />
+        </div>
+      )}
       {negocios?.length === 0 && <div className="text-neutral-600">No veo negocios. Inicia sesión con Facebook y marca tus negocios en la ventana de Meta.</div>}
       {/* POR NEGOCIO, SOLO LO QUE TIENE NÚMEROS (20/10/2026): cada negocio trae varias cuentas de
           WhatsApp vacías y salía un «Agregar número» por cada una. Ahora: sus números (de todas
@@ -893,33 +902,73 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
 
 interface EstadoDelToken {
   tiene: boolean;
-  negocioDelToken: { id: string; nombre: string } | null;
-  numero: { numero: string; negocioId: string | null; negocio: string | null } | null;
+  numeros: Array<{ id: string; numero: string; nombre: string | null; negocioId: string | null; negocio: string | null; permanente: boolean; activo: boolean }>;
+  faltan: number;
   vence: number | null;
   appId: string | null;
-  negocios: Array<{ id: string; nombre: string; conLaApp: boolean }>;
+  negocios: Array<{ id: string; nombre: string; conLaApp: boolean; usuarioAdmin: boolean }>;
 }
 
 const fecha = (ms: number) => new Date(ms).toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" });
 
+/** TRES PUNTOS QUE SALTAN (21/10/2026): «que diga Consultando a Meta y algo al lado… para saber
+ *  que tengo que esperar». */
+export function Puntos() {
+  return (
+    <span className="ml-1 inline-flex items-end gap-0.5 align-middle" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="h-1.5 w-1.5 animate-bounce rounded-full bg-sky-500" style={{ animationDelay: `${i * 150}ms` }} />
+      ))}
+    </span>
+  );
+}
+
+/** Un paso de la lista: ✓ verde si ya está; si no, su número y lo que hay que hacer. */
+function PasoDeLista({ ok, n, titulo, children }: { ok: boolean; n: number; titulo: string; children?: React.ReactNode }) {
+  return (
+    <div className="flex gap-3">
+      <span
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+          ok ? "bg-emerald-500 text-white" : "bg-white text-sky-700 ring-1 ring-sky-300"
+        }`}
+      >
+        {ok ? "✓" : n}
+      </span>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <div className={`font-semibold ${ok ? "text-emerald-800" : "text-neutral-900"}`}>{titulo}</div>
+        {!ok && children && <div className="mt-1.5 space-y-2 text-[13px] leading-relaxed text-neutral-700">{children}</div>}
+      </div>
+    </div>
+  );
+}
+
 /**
- * EL TOKEN PERMANENTE, PASO OBLIGATORIO (20/10/2026): «no es un chiste… es una de las bases del
- * proyecto». Se crea en el BM del NÚMERO que atiende (si no, el bot puede no poder contestar por
- * él), y Meta solo deja crearlo donde la app está agregada: si no lo está, primero se agrega, con
- * un botón directo a ese BM y el ID de la app para copiar. «Continuar» solo con el token creado.
+ * EL TOKEN PERMANENTE, PASO A PASO (21/10/2026). «Esto también debería tener un asistente… ¿ya
+ * compartiste la app? ¿ya le diste privilegios?». Cada número necesita el token de SU BM (ver
+ * `token-por-numero.ts`): se elige el BM y se marcan con ✓ las dos cosas que Meta exige —la app
+ * agregada y un usuario del sistema administrador—, que se comprueban solas. Al crearlo, se le
+ * pone solo a los números que alcanza: el de otro BM no pisa el tuyo.
  */
 function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void }) {
   const [e, setE] = useState<EstadoDelToken | null>(null);
-  const [elegido, setElegido] = useState<string>("");
+  const [elegido, setElegido] = useState("");
   const [ocupado, setOcupado] = useState(false);
+  const [revisando, setRevisando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [hecho, setHecho] = useState<string | null>(null);
+
   const cargar = useCallback(async () => {
+    setRevisando(true);
     try {
+      // El token que ya existía (de antes del 21/10) se pone en los números que alcanza.
+      await fetch("/api/meta/connect/token-estado", { method: "POST" }).catch(() => null);
       const d = (await (await fetch("/api/meta/connect/token-estado", { cache: "no-store" })).json()) as EstadoDelToken;
       setE(d);
-      setElegido((actual) => actual || d.numero?.negocioId || d.negocios.find((n) => n.conLaApp)?.id || d.negocios[0]?.id || "");
+      setElegido((actual) => actual || d.numeros.find((n) => !n.permanente)?.negocioId || d.negocios[0]?.id || "");
     } catch {
       setAviso("No se pudo consultar a Meta.");
+    } finally {
+      setRevisando(false);
     }
   }, []);
   useEffect(() => {
@@ -927,20 +976,19 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   }, [cargar]);
 
   async function crear() {
-    // REEMPLAZAR UN TOKEN QUE YA FUNCIONA: vale para todo el proyecto. Los números de otro BM que
-    // el nuevo no pueda usar dejarían de contestar.
-    if (
-      e?.tiene &&
-      !window.confirm(
-        `Ya tienes un token permanente${e.negocioDelToken ? ` en «${e.negocioDelToken.nombre}»` : ""}. El nuevo lo REEMPLAZA para todo este proyecto: si tienes números de otros BM, esos podrían dejar de contestar.\n\n¿Seguir?`
-      )
-    )
-      return;
     setOcupado(true);
     setAviso(null);
+    setHecho(null);
     try {
-      const d = await (await fetch("/api/meta/connect/token-permanente", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ negocio: elegido }) })).json();
-      if (!d.ok) setAviso(d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo.");
+      const d = await (
+        await fetch("/api/meta/connect/token-permanente", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ negocio: elegido }),
+        })
+      ).json();
+      if (d.ok) setHecho(d.numeros?.length ? `Listo. Ya no caducan: ${d.numeros.join(", ")}.` : "Listo. Este BM no tiene números conectados todavía.");
+      else setAviso(d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo.");
       await cargar();
     } catch {
       setAviso("No se pudo consultar a Meta.");
@@ -949,119 +997,162 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
     }
   }
 
-  if (!e) return <div className="text-sm text-neutral-500">Revisando tu token…</div>;
-  const destino = e.negocios.find((n) => n.id === elegido);
-  const distintos = e.tiene && !!e.negocioDelToken && !!e.numero?.negocioId && e.negocioDelToken.id !== e.numero.negocioId;
+  if (!e)
+    return (
+      <div className="text-sm text-neutral-600">
+        Revisando tus números
+        <Puntos />
+      </div>
+    );
+
+  const bm = e.negocios.find((n) => n.id === elegido);
+  const sinToken = new Set(e.numeros.filter((n) => !n.permanente).map((n) => n.negocioId));
+  const listo = e.numeros.length > 0 && e.faltan === 0;
+  const boton = "inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm transition";
 
   return (
-    <div className="space-y-3 text-sm">
-      <div className="font-bold">🔐 Token permanente</div>
-      <p className="text-xs text-neutral-600">
-        Con él el bot contesta por WhatsApp, reporta tus compras y lee tus anuncios. <b>No caduca.</b>
-      </p>
+    <div className="space-y-4 text-sm">
+      <div>
+        <div className="font-bold">🔐 Token permanente</div>
+        <p className="mt-0.5 text-xs text-neutral-600">Cada número necesita el token de su BM. Con él, la conexión no caduca.</p>
+      </div>
 
-      {e.tiene ? (
-        <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
-          ✅ Ya tienes token permanente{e.negocioDelToken ? <> en el BM <b>{e.negocioDelToken.nombre}</b></> : null}.
-        </div>
-      ) : (
-        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">
-          ⚠ Todavía no tienes token permanente.{e.vence ? <> Tu conexión <b>caduca el {fecha(e.vence)}</b>.</> : null}
-        </div>
-      )}
+      <div className="space-y-1.5">
+        {e.numeros.map((n) => (
+          <div key={n.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2">
+            <span className="min-w-0">
+              <span className="font-mono">{n.numero}</span>
+              <span className="ml-2 text-xs text-neutral-500">{n.negocio ?? "BM sin identificar"}</span>
+            </span>
+            {n.permanente ? (
+              <span className="text-xs font-semibold text-emerald-700">🔐 No caduca</span>
+            ) : (
+              <span className="text-xs font-semibold text-amber-700">⚠ {e.vence ? `Caduca el ${fecha(e.vence)}` : "Caduca"}</span>
+            )}
+          </div>
+        ))}
+        {!e.numeros.length && <div className="text-xs text-neutral-500">Todavía no hay números conectados. Conecta uno en «📱 Tus números».</div>}
+      </div>
 
-      {distintos && (
-        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">
-          ⚠ Tu número {e.numero?.numero} está en el BM <b>{e.numero?.negocio}</b>, pero el token está en <b>{e.negocioDelToken?.nombre}</b>. El bot podría no poder contestar por ese número. Créalo en el BM de tu número.
-        </div>
-      )}
-
-      {(!e.tiene || distintos) && (
-        <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
-          {e.numero && (
-            <div>
-              Tu número <b>{e.numero.numero}</b> está en el BM <b>{e.numero.negocio ?? "sin identificar"}</b>. El token se crea ahí.
-            </div>
-          )}
-          <label className="block text-xs text-neutral-600">
-            BM donde crearlo:
-            <select className="ml-2 rounded border px-1 py-0.5" value={elegido} onChange={(ev) => setElegido(ev.target.value)}>
+      {!listo && e.numeros.length > 0 && (
+        <div className="space-y-4 rounded-xl border border-sky-200 bg-sky-50/60 p-4">
+          <label className="flex flex-wrap items-center gap-2 text-[13px] font-semibold text-neutral-800">
+            BM donde crearlo
+            <select
+              className="rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-sm font-normal"
+              value={elegido}
+              onChange={(ev) => {
+                setElegido(ev.target.value);
+                setAviso(null);
+                setHecho(null);
+              }}
+            >
               {e.negocios.map((n) => (
                 <option key={n.id} value={n.id}>
                   {n.nombre}
-                  {n.conLaApp ? " · tiene la app" : ""}
-                  {n.id === e.numero?.negocioId ? " · el de tu número" : ""}
+                  {sinToken.has(n.id) ? " · tiene números sin token" : ""}
                 </option>
               ))}
             </select>
           </label>
 
-          {destino && !destino.conLaApp && (
-            <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-2">
-              <div>
-                <b>1. Agrega tu app a «{destino.nombre}».</b> Meta no deja crear el token en un BM que no tiene la app. En la página que se abre: <i>Agregar → Conectar un identificador de app</i>, pega el ID y confirma.
-              </div>
-              {e.appId && <Copiar texto={e.appId} />}
-              <a href={`https://business.facebook.com/settings/apps?business_id=${destino.id}`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-                Abrir «Apps» de {destino.nombre} ↗
-              </a>
-              <div>
-                <button type="button" className="text-xs font-bold text-sky-700 hover:underline" onClick={() => void cargar()}>
-                  Ya la agregué → Revisar
+          {bm && (
+            <>
+              <PasoDeLista ok={bm.conLaApp} n={1} titulo={`¿Agregaste tu app al BM «${bm.nombre}»?`}>
+                <div>
+                  En la página que se abre: <b>Agregar → Conectar un identificador de app</b>, pega este ID y confirma.
+                </div>
+                {e.appId && <Copiar texto={e.appId} />}
+                <a href={`https://business.facebook.com/settings/apps?business_id=${bm.id}`} target="_blank" rel="noreferrer" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
+                  Abrir «Apps» de {bm.nombre} ↗
+                </a>
+              </PasoDeLista>
+
+              <PasoDeLista ok={bm.usuarioAdmin} n={2} titulo="¿Tu BM tiene un usuario del sistema administrador?">
+                <div>
+                  Créalo con rol <b>Administrador</b>. Luego, en ese usuario, <b>Asignar activos → Apps → tu app → Control total</b>.
+                </div>
+                <a href={`https://business.facebook.com/settings/system-users?business_id=${bm.id}`} target="_blank" rel="noreferrer" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
+                  Abrir «Usuarios del sistema» ↗
+                </a>
+              </PasoDeLista>
+
+              <PasoDeLista ok={false} n={3} titulo="Crea el token">
+                <button
+                  type="button"
+                  disabled={ocupado || !bm.conLaApp || !bm.usuarioAdmin}
+                  title={bm.conLaApp && bm.usuarioAdmin ? "" : "Primero los pasos 1 y 2"}
+                  className={`${boton} bg-sky-600 text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-40`}
+                  onClick={() => void crear()}
+                >
+                  {ocupado ? (
+                    <>
+                      Creando
+                      <Puntos />
+                    </>
+                  ) : (
+                    "Crear token permanente"
+                  )}
                 </button>
-              </div>
-            </div>
+                {!aviso && <div className="text-xs text-neutral-500">La primera vez, Meta suele pedir un código que te manda por correo. Si pasa, aquí te decimos qué hacer.</div>}
+              </PasoDeLista>
+            </>
           )}
 
-          <button
-            type="button"
-            disabled={ocupado || !destino?.conLaApp}
-            title={destino?.conLaApp ? "" : "Primero agrega tu app a este BM"}
-            className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
-            onClick={() => void crear()}
-          >
-            {ocupado ? "Creando…" : `${destino && !destino.conLaApp ? "2. " : ""}Crear token permanente${destino ? ` en «${destino.nombre}»` : ""}`}
-          </button>
-          {!aviso && (
-            <div className="text-xs text-neutral-600">
-              La primera vez, Meta suele pedir un código que te manda por correo. Si pasa, aquí te decimos qué hacer.
-            </div>
-          )}
           {/* META PIDE UNA PERSONA (20/10/2026, lo vivió él): el primer intento casi nunca crea el
-              token. Meta deja una SOLICITUD en el BM que solo se ve entrando allí («Se ha solicitado…
-              verifica antes de generar»): al aceptarla manda un código de 6 dígitos al correo; con
-              el código puesto, el segundo intento sí lo crea. Eso no se puede hacer desde aquí. */}
-          {aviso && destino && (
-            <div className="space-y-2 rounded-md border-2 border-amber-400 bg-amber-50 p-3 text-sm">
+              token. Meta deja una solicitud en el BM («Se ha solicitado…»): al aceptarla manda un
+              código al correo, y con el código puesto el segundo intento sí lo crea. */}
+          {aviso && bm && (
+            <div className="space-y-2 rounded-lg border-2 border-amber-400 bg-amber-50 p-3">
               <div className="font-bold">👉 Meta te pide confirmarlo. Es normal la primera vez.</div>
               <div>
-                Ve a tu BM <b>{destino.nombre}</b>, confirma el aviso que pide <b>enviar un código a tu correo</b> y escribe el código que te llegue.
+                Ve a tu BM <b>{bm.nombre}</b>, confirma el aviso que pide <b>enviar un código a tu correo</b> y escribe el código que te llegue.
               </div>
-              <div className="text-xs text-neutral-600">
-                Si Meta te pide dar privilegios a la app, dáselos (control total).
-              </div>
-              <a href={`https://business.facebook.com/settings/system-users?business_id=${destino.id}`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
-                Ir a {destino.nombre} ↗
+              <a href={`https://business.facebook.com/settings/system-users?business_id=${bm.id}`} target="_blank" rel="noreferrer" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
+                Ir a {bm.nombre} ↗
               </a>
               <div>
-                Luego vuelve aquí y pulsa <b>«Crear token permanente»</b> otra vez.
+                Luego vuelve y pulsa <b>«Crear token permanente»</b> otra vez.
               </div>
               <div className="text-xs text-neutral-500">Lo que respondió Meta: {aviso}</div>
             </div>
           )}
-          {aviso && !destino && <div className="text-xs text-red-700">❌ {aviso}</div>}
+          {aviso && !bm && <div className="text-xs text-red-700">❌ {aviso}</div>}
+
+          <button type="button" disabled={revisando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => void cargar()}>
+            {revisando ? (
+              <>
+                Revisando
+                <Puntos />
+              </>
+            ) : (
+              "↻ Ya lo hice, revisar de nuevo"
+            )}
+          </button>
         </div>
       )}
 
-      <div className="flex justify-between pt-2">
-        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>← Atrás</button>
-        <button type="button" disabled={!e.tiene} title={e.tiene ? "" : "Crea el token permanente para seguir"} className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40" onClick={seguir}>
-          Continuar →
+      {hecho && <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 font-semibold text-emerald-800">✅ {hecho}</div>}
+
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>
+          ← Atrás
         </button>
+        <div className="flex items-center gap-3">
+          {!listo && e.numeros.some((n) => n.permanente) && (
+            <button type="button" className="text-xs text-neutral-500 hover:underline" onClick={seguir}>
+              Seguir sin token en {e.faltan} número(s)
+            </button>
+          )}
+          <button type="button" disabled={!listo} title={listo ? "" : "Falta el token permanente"} className={`${boton} bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-40`} onClick={seguir}>
+            Continuar →
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
 
 function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null; appName: string | null; paginas: number; numeros: number } | null; volver: () => void; cerrar: () => void }) {
   // EL TOKEN, EN LA REVISIÓN: solo se mira. Se crea en su paso («🔐 Token permanente»), que sabe
