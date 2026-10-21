@@ -114,8 +114,11 @@ export async function POST(req: NextRequest) {
    *
    * Sin `cuenta`, exactamente lo de siempre.
    */
-  const cuerpoPedido = (await req.json().catch(() => null)) as { cuenta?: unknown } | null;
+  const cuerpoPedido = (await req.json().catch(() => null)) as { cuenta?: unknown; negocio?: unknown } | null;
   const cuenta = typeof cuerpoPedido?.cuenta === "string" ? cuerpoPedido.cuenta.trim() : "";
+  // EN UN BM CONCRETO (20/10/2026): el asistente lo pide en el BM de los números, para que el
+  // token pueda usarlos. Se guarda igual que el de siempre; solo se elige dónde se crea.
+  const negocioPedido = typeof cuerpoPedido?.negocio === "string" ? cuerpoPedido.negocio.trim() : "";
   const token = cuenta ? permisoDeConexionDeLaCuenta(cuenta) : getTokenDeLaConexion();
   const appId = getMetaAppId();
   const appSecret = getMetaOAuthAppSecret();
@@ -149,7 +152,9 @@ export async function POST(req: NextRequest) {
   // un permiso que no puede medir sus compras.
   const listaNegocios = cuenta
     ? todosLosNegocios.filter((n) => n.id === cuenta)
-    : todosLosNegocios;
+    : negocioPedido
+      ? todosLosNegocios.filter((n) => n.id === negocioPedido)
+      : todosLosNegocios;
   if (!listaNegocios.length) {
     return NextResponse.json({
       ok: false,
@@ -256,6 +261,9 @@ export async function POST(req: NextRequest) {
             whatsapp_access_token_override: cuerpo.access_token,
             capi_access_token: cuerpo.access_token,
             capi_token_origen: "manual",
+            // En qué BM quedó: el asistente comprueba que sea el de los números.
+            token_permanente_negocio_id: negocio.id,
+            token_permanente_negocio: negocio.name ?? negocio.id,
           });
         }
         return NextResponse.json({

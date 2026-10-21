@@ -20,7 +20,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type Paso = "inicio" | "app" | "facebook" | "numeros" | "listo";
+type Paso = "inicio" | "app" | "facebook" | "numeros" | "token" | "listo";
+const CAMINO: Paso[] = ["app", "facebook", "numeros", "token", "listo"];
 const CLAVE = "meta-asistente";
 
 interface Numero {
@@ -89,6 +90,16 @@ export default function AsistenteDeConexion() {
 
   // Lo que ya hay: la app y lo conectado.
   const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number } | null>(null);
+  /** null = hay token (o aún no se sabe); con valor = falta, y cuándo caduca la conexión. */
+  const [sinToken, setSinToken] = useState<{ vence: number | null } | null>(null);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const d = await (await fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })).json();
+        setSinToken(d.appId && !d.tiene ? { vence: d.vence ?? null } : null);
+      } catch {}
+    })();
+  }, [paso]);
   const cargarEstado = useCallback(async () => {
     try {
       const r = await fetch("/api/meta/connect/status", { cache: "no-store" });
@@ -144,6 +155,25 @@ export default function AsistenteDeConexion() {
 
   return (
     <>
+      {/* SIN TOKEN PERMANENTE, AVISO FIJO (20/10/2026): «no generarlo es dejar que el proyecto se
+          caiga». No se va hasta que se crea. Con la fecha real en que caduca la conexión. */}
+      {sinToken && (
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border-2 border-red-400 bg-red-50 p-3 text-sm text-red-900">
+          <span className="min-w-0 flex-1">
+            ⚠ <b>Sin token permanente.</b> {sinToken.vence ? <>Tu conexión <b>caduca el {fecha(sinToken.vence)}</b> y el bot dejará de contestar.</> : "Tu conexión caducará y el bot dejará de contestar."}
+          </span>
+          <button
+            type="button"
+            className="rounded-lg bg-red-600 px-3 py-1.5 font-bold text-white hover:bg-red-700"
+            onClick={() => {
+              setAbierto(true);
+              ir("token");
+            }}
+          >
+            Crearlo ahora
+          </button>
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border-2 border-sky-400 bg-sky-50 p-4">
         <div className="min-w-0 flex-1">
           <div className="text-base font-bold text-sky-900">🧭 Conectar paso a paso</div>
@@ -170,8 +200,8 @@ export default function AsistenteDeConexion() {
             <div className="mb-3 flex items-center gap-3">
               <div className="text-lg font-bold">🧭 Conectar paso a paso</div>
               <div className="ml-auto flex gap-1">
-                {(["app", "facebook", "numeros", "listo"] as Paso[]).map((p, i) => (
-                  <span key={p} className={`h-2 w-8 rounded-full ${p === paso ? "bg-sky-600" : (["app", "facebook", "numeros", "listo"] as Paso[]).indexOf(paso) > i ? "bg-sky-300" : "bg-neutral-200"}`} />
+                {CAMINO.map((p, i) => (
+                  <span key={p} className={`h-2 w-8 rounded-full ${p === paso ? "bg-sky-600" : CAMINO.indexOf(paso) > i ? "bg-sky-300" : "bg-neutral-200"}`} />
                 ))}
               </div>
               <button type="button" className="rounded px-2 text-xl leading-none text-neutral-500 hover:bg-neutral-100" onClick={() => setAbierto(false)} title="Cerrar (sigue donde quedaste)">
@@ -187,6 +217,7 @@ export default function AsistenteDeConexion() {
                   ["app", "🔑 Conectar mi app (la puerta)", "Una sola vez: su ID y su clave. Lo demás se llena solo."],
                   ["facebook", "👤 Iniciar sesión con Facebook, o agregar otra cuenta", "Para ver tus negocios, números, páginas y píxeles."],
                   ["numeros", "📱 Agregar o activar un número", "Sin entrar a la app ni al WhatsApp Manager."],
+                  ["token", "🔐 Token permanente", "La base para que la conexión no caduque. Obligatorio."],
                   ["listo", "✅ Revisar que todo esté bien", "Lo que falta, en palabras simples."],
                 ].map(([p, t, d]) => (
                   <button key={p} type="button" className="block w-full rounded-lg border border-neutral-300 p-3 text-left hover:border-sky-400 hover:bg-sky-50" onClick={() => ir(p as Paso)}>
@@ -223,9 +254,11 @@ export default function AsistenteDeConexion() {
               </div>
             )}
 
-            {paso === "numeros" && <PasoNumeros volver={() => ir("facebook")} seguir={() => { void cargarEstado(); ir("listo"); }} />}
+            {paso === "numeros" && <PasoNumeros volver={() => ir("facebook")} seguir={() => { void cargarEstado(); ir("token"); }} />}
 
-            {paso === "listo" && <PasoListo estado={estado} volver={() => ir("numeros")} cerrar={cerrar} />}
+            {paso === "token" && <PasoToken volver={() => ir("numeros")} seguir={() => ir("listo")} />}
+
+            {paso === "listo" && <PasoListo estado={estado} volver={() => ir("token")} cerrar={cerrar} />}
           </div>
         </div>
       )}
@@ -858,35 +891,165 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
   );
 }
 
-function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null; appName: string | null; paginas: number; numeros: number } | null; volver: () => void; cerrar: () => void }) {
-  // EL TOKEN PERMANENTE, EN UN CLIC (20/10/2026): «antes yo creaba un token… ahora no lo creé».
-  // Es el del usuario del sistema del BM: con él el bot contesta, reporta compras y lee anuncios, y
-  // no caduca (el del inicio de sesión dura unos 60 días). Si falta, un botón lo crea con lo mismo
-  // que «Crear token permanente». NO se crea solo: cambia el permiso con el que el bot contesta, y
-  // eso lo decide él. Uno ya puesto no se toca.
-  const [token, setToken] = useState<{ estado: "mirando" | "falta" | "creando" | "listo" | "ya" | "error"; texto?: string }>({ estado: "mirando" });
-  const crearToken = useCallback(async () => {
-    setToken({ estado: "creando" });
+interface EstadoDelToken {
+  tiene: boolean;
+  negocioDelToken: { id: string; nombre: string } | null;
+  numero: { numero: string; negocioId: string | null; negocio: string | null } | null;
+  vence: number | null;
+  appId: string | null;
+  negocios: Array<{ id: string; nombre: string; conLaApp: boolean }>;
+}
+
+const fecha = (ms: number) => new Date(ms).toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" });
+
+/**
+ * EL TOKEN PERMANENTE, PASO OBLIGATORIO (20/10/2026): «no es un chiste… es una de las bases del
+ * proyecto». Se crea en el BM del NÚMERO que atiende (si no, el bot puede no poder contestar por
+ * él), y Meta solo deja crearlo donde la app está agregada: si no lo está, primero se agrega, con
+ * un botón directo a ese BM y el ID de la app para copiar. «Continuar» solo con el token creado.
+ */
+function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void }) {
+  const [e, setE] = useState<EstadoDelToken | null>(null);
+  const [elegido, setElegido] = useState<string>("");
+  const [ocupado, setOcupado] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const cargar = useCallback(async () => {
     try {
-      const d = await (await fetch("/api/meta/connect/token-permanente", { method: "POST" })).json();
-      if (d.ok) setToken({ estado: "listo", texto: `Creado en «${d.negocio}». No caduca.` });
-      else setToken({ estado: "error", texto: d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo." });
+      const d = (await (await fetch("/api/meta/connect/token-estado", { cache: "no-store" })).json()) as EstadoDelToken;
+      setE(d);
+      setElegido((actual) => actual || d.numero?.negocioId || d.negocios.find((n) => n.conLaApp)?.id || d.negocios[0]?.id || "");
     } catch {
-      setToken({ estado: "error", texto: "No se pudo consultar a Meta." });
+      setAviso("No se pudo consultar a Meta.");
     }
   }, []);
   useEffect(() => {
+    void cargar();
+  }, [cargar]);
+
+  async function crear() {
+    // REEMPLAZAR UN TOKEN QUE YA FUNCIONA: vale para todo el proyecto. Los números de otro BM que
+    // el nuevo no pueda usar dejarían de contestar.
+    if (
+      e?.tiene &&
+      !window.confirm(
+        `Ya tienes un token permanente${e.negocioDelToken ? ` en «${e.negocioDelToken.nombre}»` : ""}. El nuevo lo REEMPLAZA para todo este proyecto: si tienes números de otros BM, esos podrían dejar de contestar.\n\n¿Seguir?`
+      )
+    )
+      return;
+    setOcupado(true);
+    setAviso(null);
+    try {
+      const d = await (await fetch("/api/meta/connect/token-permanente", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ negocio: elegido }) })).json();
+      if (!d.ok) setAviso(d.sugerencia ? `${d.sugerencia.quePasa} 👉 ${d.sugerencia.queHacer}` : d.error ?? "Meta no dejó crearlo.");
+      await cargar();
+    } catch {
+      setAviso("No se pudo consultar a Meta.");
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  if (!e) return <div className="text-sm text-neutral-500">Revisando tu token…</div>;
+  const destino = e.negocios.find((n) => n.id === elegido);
+  const distintos = e.tiene && !!e.negocioDelToken && !!e.numero?.negocioId && e.negocioDelToken.id !== e.numero.negocioId;
+
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="font-bold">🔐 Token permanente</div>
+      <p className="text-xs text-neutral-600">
+        Con él el bot contesta por WhatsApp, reporta tus compras y lee tus anuncios. <b>No caduca.</b>
+      </p>
+
+      {e.tiene ? (
+        <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
+          ✅ Ya tienes token permanente{e.negocioDelToken ? <> en el BM <b>{e.negocioDelToken.nombre}</b></> : null}.
+        </div>
+      ) : (
+        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">
+          ⚠ Todavía no tienes token permanente.{e.vence ? <> Tu conexión <b>caduca el {fecha(e.vence)}</b>.</> : null}
+        </div>
+      )}
+
+      {distintos && (
+        <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-red-800">
+          ⚠ Tu número {e.numero?.numero} está en el BM <b>{e.numero?.negocio}</b>, pero el token está en <b>{e.negocioDelToken?.nombre}</b>. El bot podría no poder contestar por ese número. Créalo en el BM de tu número.
+        </div>
+      )}
+
+      {(!e.tiene || distintos) && (
+        <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
+          {e.numero && (
+            <div>
+              Tu número <b>{e.numero.numero}</b> está en el BM <b>{e.numero.negocio ?? "sin identificar"}</b>. El token se crea ahí.
+            </div>
+          )}
+          <label className="block text-xs text-neutral-600">
+            BM donde crearlo:
+            <select className="ml-2 rounded border px-1 py-0.5" value={elegido} onChange={(ev) => setElegido(ev.target.value)}>
+              {e.negocios.map((n) => (
+                <option key={n.id} value={n.id}>
+                  {n.nombre}
+                  {n.conLaApp ? " · tiene la app" : ""}
+                  {n.id === e.numero?.negocioId ? " · el de tu número" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {destino && !destino.conLaApp && (
+            <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-2">
+              <div>
+                <b>1. Agrega tu app a «{destino.nombre}».</b> Meta no deja crear el token en un BM que no tiene la app. En la página que se abre: <i>Agregar → Conectar un identificador de app</i>, pega el ID y confirma.
+              </div>
+              {e.appId && <Copiar texto={e.appId} />}
+              <a href={`https://business.facebook.com/settings/apps?business_id=${destino.id}`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+                Abrir «Apps» de {destino.nombre} ↗
+              </a>
+              <div>
+                <button type="button" className="text-xs font-bold text-sky-700 hover:underline" onClick={() => void cargar()}>
+                  Ya la agregué → Revisar
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            disabled={ocupado || !destino?.conLaApp}
+            title={destino?.conLaApp ? "" : "Primero agrega tu app a este BM"}
+            className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+            onClick={() => void crear()}
+          >
+            {ocupado ? "Creando…" : `${destino && !destino.conLaApp ? "2. " : ""}Crear token permanente${destino ? ` en «${destino.nombre}»` : ""}`}
+          </button>
+          {aviso && <div className="text-xs text-red-700">❌ {aviso}</div>}
+        </div>
+      )}
+
+      <div className="flex justify-between pt-2">
+        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>← Atrás</button>
+        <button type="button" disabled={!e.tiene} title={e.tiene ? "" : "Crea el token permanente para seguir"} className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40" onClick={seguir}>
+          Continuar →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null; appName: string | null; paginas: number; numeros: number } | null; volver: () => void; cerrar: () => void }) {
+  // EL TOKEN, EN LA REVISIÓN: solo se mira. Se crea en su paso («🔐 Token permanente»), que sabe
+  // en qué BM hacerlo.
+  const [token, setToken] = useState<{ tiene: boolean; negocio?: string } | null>(null);
+  useEffect(() => {
     void (async () => {
       try {
-        const s = await (await fetch("/api/meta/connect/status", { cache: "no-store" })).json();
-        if (s.credentials?.whatsAppAccessTokenConfigured) setToken({ estado: "ya" });
-        else if (s.appId) setToken({ estado: "falta" });
-        else setToken({ estado: "error", texto: "Primero conecta tu app." });
+        const d = await (await fetch("/api/meta/connect/token-estado", { cache: "no-store" })).json();
+        setToken({ tiene: !!d.tiene, negocio: d.negocioDelToken?.nombre });
       } catch {
-        setToken({ estado: "error", texto: "No se pudo consultar." });
+        setToken(null);
       }
     })();
-  }, [crearToken]);
+  }, []);
   const fila = (ok: boolean, texto: string, falta?: string) => (
     <div className="flex items-start gap-2">
       <span>{ok ? "✅" : "⬜"}</span>
@@ -902,32 +1065,11 @@ function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null;
       {fila(!!estado?.appId, `Tu app${estado?.appName ? `: ${estado.appName}` : ""}`, "Falta conectar tu app (paso 🔑).")}
       {fila((estado?.numeros ?? 0) > 0, `${estado?.numeros ?? 0} número(s) en tu CRM`, "Inicia sesión con Facebook y trae o activa un número.")}
       {fila((estado?.paginas ?? 0) > 0, `${estado?.paginas ?? 0} página(s) detectada(s)`, "Para Messenger e Instagram: inicia sesión y marca tu página.")}
-      <div className="flex items-start gap-2">
-        <span>{token.estado === "listo" || token.estado === "ya" ? "✅" : token.estado === "error" ? "⚠" : "⏳"}</span>
-        <span>
-          Token permanente
-          {token.estado === "mirando" && " — revisando…"}
-          {token.estado === "falta" && (
-            <span className="block text-xs text-neutral-600">
-              Falta. Sin él, la conexión caduca en unos 60 días.{" "}
-              <button type="button" className="rounded bg-sky-600 px-2 py-0.5 font-bold text-white" onClick={() => void crearToken()}>
-                Crear token permanente
-              </button>
-            </span>
-          )}
-          {token.estado === "creando" && " — creándolo…"}
-          {token.estado === "ya" && " — ya lo tienes."}
-          {token.estado === "listo" && ` — ${token.texto}`}
-          {token.estado === "error" && (
-            <span className="block text-xs text-amber-800">
-              {token.texto}{" "}
-              <button type="button" className="font-bold text-sky-700 hover:underline" onClick={() => void crearToken()}>
-                Reintentar
-              </button>
-            </span>
-          )}
-        </span>
-      </div>
+      {fila(
+        !!token?.tiene,
+        token?.tiene ? `Token permanente${token.negocio ? ` (BM ${token.negocio})` : ""}` : "Token permanente",
+        "Falta: vuelve al paso «🔐 Token permanente». Sin él, la conexión caduca."
+      )}
       <p className="pt-2 text-xs text-neutral-600">
         Página, Instagram y píxel se eligen abajo, en esta misma pantalla (secciones «Páginas de Facebook» y «Píxel»), como siempre.
       </p>
