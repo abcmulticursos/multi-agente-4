@@ -89,7 +89,7 @@ export default function AsistenteDeConexion() {
   const [aviso, setAviso] = useState<string | null>(null);
 
   // Lo que ya hay: la app y lo conectado.
-  const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number } | null>(null);
+  const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number; conFacebook?: boolean } | null>(null);
   /** null = hay token (o aún no se sabe); con valor = falta, y cuándo caduca la conexión. */
   const [sinToken, setSinToken] = useState<{ vence: number | null; faltan: number; cuales: string[] } | null>(null);
   useEffect(() => {
@@ -120,6 +120,7 @@ export default function AsistenteDeConexion() {
         appName: d.appName ?? null,
         paginas: (d.connections ?? []).length + (d.detectedPages ?? []).length,
         numeros: (d.whatsAppConnections ?? []).length,
+        conFacebook: d.conectadoConFacebook === true,
       });
     } catch {}
   }, []);
@@ -199,10 +200,22 @@ export default function AsistenteDeConexion() {
         <div className="min-w-0 flex-1">
           <div className="text-base font-bold text-sky-900">🧭 Conectar paso a paso</div>
           <div className="text-xs text-sky-900/80">
-            {estado?.appId ? `App: ${estado.appName ?? estado.appId} · ` : "Sin app todavía · "}
-            {estado ? `${estado.numeros} número(s) · ${estado.paginas} página(s)` : "…"}
+            {estado?.appId ? (
+              <>
+                ✅ App conectada: <b>{estado.appName ?? estado.appId}</b> ·{" "}
+              </>
+            ) : (
+              "Sin app todavía · "
+            )}
+            {estado ? (estado.conFacebook ? `${estado.numeros} número(s) · ${estado.paginas} página(s)` : "Facebook sin conectar") : "…"}
           </div>
         </div>
+        {/* CONECTAR CON FACEBOOK, CUANDO ÉL QUIERA: con la app lista y sin sesión de Facebook. */}
+        {estado?.appId && !estado.conFacebook && (
+          <a href="/api/meta/connect/start" className="rounded-lg bg-[#1877f2] px-4 py-2 text-sm font-bold text-white hover:opacity-90">
+            Conectar con Facebook
+          </a>
+        )}
         <button
           type="button"
           className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
@@ -301,7 +314,10 @@ export default function AsistenteDeConexion() {
               </div>
             )}
 
-            {paso === "app" && <PasoApp casillas={casillas} marcar={marcar} alListo={() => { void cargarEstado(); ir("facebook"); }} volver={() => ir("inicio")} />}
+            {/* LA APP ES UN PASO APARTE (21/10/2026): «es solo una app… que termine y diga app
+                conectada, y que luego yo decida iniciar sesión con un botón». Al terminar se cierra
+                el asistente; arriba queda «✅ App conectada» con «Conectar con Facebook». */}
+            {paso === "app" && <PasoApp casillas={casillas} marcar={marcar} alListo={() => { void cargarEstado(); cerrar(); }} volver={() => ir("inicio")} />}
 
             {/* SIN APP NO HAY INICIO DE SESIÓN (21/10/2026): el botón de Facebook parpadeaba y volvía
                 al mismo sitio. Primero la app. */}
