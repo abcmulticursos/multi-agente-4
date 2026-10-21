@@ -211,6 +211,11 @@ export default function AsistenteDeConexion() {
                 <p className="text-xs text-neutral-600">
                   Otra persona entra con <b>su</b> Facebook por tu misma app. Mientras tu app no pase la revisión de Meta, esa persona tiene que estar en tu app como <b>probadora</b> (Roles de la app → Probadores). Si ya estás conectado a Facebook en este navegador, usa una ventana de incógnito.
                 </p>
+                {estado?.appId && (
+                  <a href={`https://developers.facebook.com/apps/${estado.appId}/roles/roles/`} target="_blank" rel="noreferrer" className="inline-block text-xs text-sky-700 hover:underline">
+                    Abrir «Roles» de mi app para agregar una probadora ↗
+                  </a>
+                )}
                 <div className="flex justify-between">
                   <button type="button" className="text-sm text-neutral-500 hover:underline" onClick={() => ir("app")}>← Atrás</button>
                   <button type="button" className="text-sm text-sky-700 hover:underline" onClick={() => ir("numeros")}>Ya inicié sesión → Continuar</button>
@@ -234,9 +239,11 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
   const [clave, setClave] = useState("");
   const [app, setApp] = useState<{ appId?: string; nombre?: string | null } | null>(null);
   const [pasos, setPasos] = useState<string[]>([]);
+  const [faltaDominio, setFaltaDominio] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const uri = typeof window !== "undefined" ? `${window.location.origin}/api/meta/connect/callback` : "";
+  const origen = typeof window !== "undefined" ? window.location.origin : "";
+  const uri = `${origen}/api/meta/connect/callback`;
 
   useEffect(() => {
     void (async () => {
@@ -283,7 +290,9 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
         return;
       }
       const c = await (await fetch("/api/meta/connect/configurar-app", { method: "POST" })).json();
-      setPasos((c.pasos ?? []).map((p: { paso: string; ok: boolean; detalle: string }) => `${p.ok ? "✅" : "❌"} ${p.paso}`));
+      // (Con su razón cuando falla: un «❌» solo no dice qué hacer.)
+      setPasos((c.pasos ?? []).map((p: { paso: string; ok: boolean; detalle: string }) => `${p.ok ? "✅" : "❌"} ${p.paso}${p.ok ? "" : ` — ${p.detalle}`}`));
+      setFaltaDominio((c.pasos ?? []).some((p: { paso: string; ok: boolean }) => !p.ok && /Dominio/.test(p.paso)));
       setClave("");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -320,6 +329,11 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           </a>
           <Casilla id="tipo" casillas={casillas} marcar={marcar} texto={<>La creé de tipo <b>Empresa</b>.</>} />
           <Casilla id="productos" casillas={casillas} marcar={marcar} texto={<>Le agregué <b>WhatsApp</b>, <b>Messenger</b> e <b>Inicio de sesión con Facebook para empresas</b>.</>} />
+          {app?.appId && (
+            <a href={`https://developers.facebook.com/apps/${app.appId}/add/`} target="_blank" rel="noreferrer" className="inline-block text-sky-700 hover:underline">
+              Abrir «Agregar productos» de mi app ↗
+            </a>
+          )}
         </div>
       )}
 
@@ -338,19 +352,42 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
         </div>
       )}
 
+      {/* LO QUE META NO DEJÓ GUARDAR SOLO: un clic al sitio exacto y los datos listos para copiar. */}
+      {faltaDominio && app?.appId && (
+        <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <div>
+            <b>Falta llenar 3 datos de tu app.</b> Ábrela con el botón y pega cada uno en su campo; luego «Guardar cambios».
+          </div>
+          <a href={`https://developers.facebook.com/apps/${app.appId}/settings/basic/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+            Abrir «Configuración básica» de mi app ↗
+          </a>
+          <div className="text-xs">Dominios de la app:</div>
+          <Copiar texto={origen.replace(/^https?:\/\//, "")} />
+          <div className="text-xs">URL de la política de privacidad:</div>
+          <Copiar texto={`${origen}/privacidad`} />
+          <div className="text-xs">Sitio web (abajo del todo: «+ Agregar plataforma» → «Sitio web»):</div>
+          <Copiar texto={origen} />
+        </div>
+      )}
+
       {app?.nombre && (
         <div className="space-y-2 rounded-lg border border-neutral-200 p-3">
           <div>
             <b>La URI.</b> Ya está completa: solo cópiala y pégala en tu app → <i>Inicio de sesión con Facebook para empresas → Configuración → «URI de redireccionamiento de OAuth válidos»</i> → Guardar cambios.
           </div>
           <Copiar texto={uri} />
-          <a href={`https://developers.facebook.com/apps/${id}/`} target="_blank" rel="noreferrer" className="inline-block text-sky-700 hover:underline">
-            Abrir mi app en Meta ↗
+          {/* UN CLIC AL SITIO EXACTO (20/10/2026): «necesito poder ir con un clic a ellos». Si Meta
+              cambia sus direcciones, el texto de arriba dice el camino. */}
+          <a href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+            Abrir donde se pega la URI ↗
           </a>
           <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
           <div className="pt-2">
-            <b>En vivo.</b> En la parte de arriba de tu app, cambia el modo a <i>En vivo</i> (o «Publicar»). Meta pide para eso la política de privacidad: tu CRM ya la tiene publicada.
+            <b>En vivo.</b> Arriba de tu app, cambia «Modo de la app» a <i>En vivo</i> (o «Publicar»). Meta pide la política de privacidad: tu CRM ya la tiene publicada.
           </div>
+          <a href={`https://developers.facebook.com/apps/${id}/settings/basic/`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+            Abrir mi app para ponerla en vivo ↗
+          </a>
           <Casilla id="vivo" casillas={casillas} marcar={marcar} texto="Puse mi app en vivo." />
         </div>
       )}
