@@ -3843,6 +3843,29 @@ export function setMetaRuntimeSettings(values: Record<string, string>): void {
   tx();
 }
 
+/**
+ * CERRAR SESIÓN DE META: DEJAR META CONNECT VACÍO (21/10/2026). «Necesito poder desconectar la
+ * app y volver a conectar otra… al cerrar sesión que se vacíe, como un CRM».
+ *
+ * Borra SOLO lo de Meta de ESTE proyecto: la app y su clave, los inicios de sesión, los tokens
+ * permanentes, los números, las páginas, los píxeles detectados, las cuentas de Facebook anexadas
+ * y las cuentas de lectura de anuncios. NO toca nada en Meta (la app, los números y los tokens
+ * siguen existiendo allá), ni el contenido, ni las tiendas, ni los chats.
+ *
+ * Se conservan los «verify token» de los webhooks: son palabras al azar de este proyecto, no de
+ * una app, y la app nueva se configura con ellas.
+ */
+export function vaciarMetaConnect(): void {
+  db.transaction(() => {
+    db.prepare("DELETE FROM meta_whatsapp_connections").run();
+    db.prepare("DELETE FROM meta_connections").run();
+    db.prepare("DELETE FROM meta_detected_env").run();
+    db.prepare("DELETE FROM meta_ads_readers").run();
+    db.prepare("DELETE FROM meta_cuentas").run();
+    db.prepare("DELETE FROM meta_runtime_settings WHERE name NOT LIKE '%verify_token'").run();
+  })();
+}
+
 export function deleteMetaRuntimeSettings(names: string[]): void {
   const tx = db.transaction(() => {
     for (const name of names) stmtDeleteMetaRuntimeSetting.run(name);

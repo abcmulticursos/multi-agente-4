@@ -21,6 +21,7 @@ import {
   META_CONNECT_INSTAGRAM_COOKIE,
   META_CONNECT_NUEVA_COOKIE,
   accesoDeLasPaginas,
+  conMemoriaDeMeta,
   cuentaDeLaPagina,
   cuentaDeLaWaba,
   detectMetaEnvFromUserToken,
@@ -152,6 +153,11 @@ async function identificarLasCuentasQueFaltan(): Promise<void> {
 export async function GET(req: NextRequest) {
   // Un inicio de sesión nuevo puede traer otros BM y números: lo recordado deja de valer.
   olvidar();
+  // Cada pregunta a Meta, UNA vez en todo el inicio de sesión (ver `conMemoriaDeMeta`).
+  return conMemoriaDeMeta(() => iniciarSesion(req));
+}
+
+async function iniciarSesion(req: NextRequest) {
   const url = new URL(req.url);
   const publicOrigin = getPublicOrigin(req);
   const redirectToMetaConnect = (query: string) =>
@@ -229,10 +235,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Con qué cuentas está compartida cada página. Consulta aparte y tolerante.
-    const accesoPaginas = await accesoDeLasPaginas(userToken, negociosDelLogin);
+    // De paso se anota el DUEÑO de cada una (el BM que la tiene como propia).
+    const duenosDePaginas = new Map<string, { id: string; nombre: string | null }>();
+    const accesoPaginas = await accesoDeLasPaginas(userToken, negociosDelLogin, duenosDePaginas);
     for (const page of pages) {
-      // De qué cuenta es. Consulta aparte: si falla, la página se guarda igual.
-      const dueño = await cuentaDeLaPagina(page.pageId, page.pageAccessToken);
+      // De qué cuenta es: si ya se supo arriba, sin preguntar (21/10/2026: una consulta por
+      // página en cada inicio de sesión). Si no, consulta aparte; si falla, se guarda igual.
+      const dueño = duenosDePaginas.get(page.pageId) ?? (await cuentaDeLaPagina(page.pageId, page.pageAccessToken));
       const vistoAhora = [...(accesoPaginas.get(page.pageId) ?? [])];
       if (dueño && !vistoAhora.some((c) => c.id === dueño.id)) vistoAhora.unshift(dueño);
       saveMetaConnection({

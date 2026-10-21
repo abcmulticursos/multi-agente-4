@@ -326,5 +326,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  // DAR DE BAJA EN META (21/10/2026): el número deja de funcionar en TODAS las apps hasta
+  // volver a activarlo con su PIN. No lo borra de la lista de Meta: eso solo se puede en el
+  // WhatsApp Manager (Meta no ofrece borrarlo por programa).
+  if (accion === "darDeBaja") {
+    const id = texto(c?.phoneNumberId);
+    const token = id ? await permisoPara(id) : null;
+    if (!token) return NextResponse.json({ ok: false, error: "No encuentro ese número en tus negocios." });
+    const r = await graph<{ success?: boolean }>(`${id}/deregister`, token, "POST", {});
+    if (!r.success) return NextResponse.json({ ok: false, error: errorDeMeta(r.error) });
+    olvidarElBmDe(id);
+    olvidar("suscribir");
+    return NextResponse.json({ ok: true });
+  }
+
   return NextResponse.json({ ok: false, error: "Acción desconocida." }, { status: 400 });
 }

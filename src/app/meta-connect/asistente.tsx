@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-type Paso = "inicio" | "app" | "facebook" | "numeros" | "token" | "listo";
+type Paso = "inicio" | "app" | "facebook" | "numeros" | "token" | "listo" | "cerrar";
 const CAMINO: Paso[] = ["app", "facebook", "numeros", "token", "listo"];
 const CLAVE = "meta-asistente";
 
@@ -267,6 +267,11 @@ export default function AsistenteDeConexion() {
                     </button>
                   ))}
                 </div>
+                <div className="pt-2 text-right">
+                  <button type="button" className="text-xs font-semibold text-red-700 hover:underline" onClick={() => ir("cerrar")}>
+                    🚪 Cerrar sesión de Meta
+                  </button>
+                </div>
               </div>
             )}
 
@@ -297,6 +302,8 @@ export default function AsistenteDeConexion() {
             )}
 
             {paso === "numeros" && <PasoNumeros volver={() => ir("facebook")} seguir={() => { void cargarEstado(); ir("token"); }} />}
+
+            {paso === "cerrar" && <PasoCerrarSesion volver={() => ir("inicio")} />}
 
             {paso === "token" && <PasoToken volver={() => ir("numeros")} seguir={() => ir("listo")} />}
 
@@ -983,6 +990,36 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
             )}
             {!conAcciones && x.estado !== "activo" && <span className="text-xs text-amber-700">Sin activar</span>}
           </div>
+          {/* QUITARLO DE META (21/10/2026): «quitar el número de WhatsApp Manager desde el CRM».
+              Meta no deja borrarlo por programa: el botón abre su página de números, ya en su BM
+              y su cuenta. «Dar de baja» sí se hace desde aquí: deja de funcionar en todas las
+              apps hasta volver a activarlo con su PIN. */}
+          {conAcciones && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs">
+              <a
+                href={`https://business.facebook.com/wa/manage/phone-numbers/?business_id=${n.id}&waba_id=${c.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-neutral-500 hover:text-red-700 hover:underline"
+              >
+                🗑 Borrar en WhatsApp Manager ↗
+              </a>
+              {x.estado === "activo" && (
+                <button
+                  type="button"
+                  disabled={ocupado}
+                  className="font-semibold text-neutral-500 hover:text-red-700 hover:underline disabled:opacity-40"
+                  onClick={() =>
+                    window.confirm(
+                      `¿Dar de baja ${x.numero} en Meta?\n\nDeja de funcionar en TODAS las apps y bots (también en otros proyectos) hasta que lo vuelvas a activar con su PIN de 6 números.`
+                    ) && void pedir({ accion: "darDeBaja", phoneNumberId: x.id }, () => { setMensaje(`✅ ${x.numero} quedó dado de baja en Meta.`); recargarBm(); })
+                  }
+                >
+                  ⏻ Dar de baja
+                </button>
+              )}
+            </div>
+          )}
           {/* Quién más lo atiende: en gris si es solo información; en rojo si ESTE CRM también
               (ahí contestan dos bots). */}
           {c.otrasApps.length > 0 &&
@@ -1462,6 +1499,69 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
   );
 }
 
+
+/**
+ * CERRAR SESIÓN DE META (21/10/2026): «al cerrar sesión que se vacíe, como un CRM». Deja Meta
+ * Connect vacío para conectar otra app. Pide la contraseña del CRM y la palabra CERRAR, porque
+ * mientras no se vuelva a conectar el bot no contesta por ningún número.
+ */
+function PasoCerrarSesion({ volver }: { volver: () => void }) {
+  const [clave, setClave] = useState("");
+  const [palabra, setPalabra] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function cerrarSesion() {
+    setOcupado(true);
+    setError(null);
+    try {
+      const d = await (
+        await fetch("/api/meta/connect/cerrar-sesion", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clave, palabra }) })
+      ).json();
+      if (!d.ok) setError(d.error ?? "No se pudo cerrar la sesión.");
+      else {
+        try {
+          localStorage.removeItem(CLAVE);
+        } catch {}
+        window.location.href = "/meta-connect";
+      }
+    } catch {
+      setError("No se pudo cerrar la sesión.");
+    } finally {
+      setOcupado(false);
+    }
+  }
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="font-bold text-red-800">🚪 Cerrar sesión de Meta</div>
+      <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-[13px] text-red-900">
+        <div>
+          Meta Connect queda <b>vacío</b>: se borran tu app, tus inicios de sesión, tus tokens, tus números, tus páginas y tus
+          píxeles <b>de este proyecto</b>.
+        </div>
+        <div className="mt-1">
+          <b>El bot deja de contestar por todos los números</b> hasta que conectes otra vez.
+        </div>
+        <div className="mt-1 text-red-800">En Meta no se borra nada. Tu contenido, tus tiendas y tus chats quedan igual.</div>
+      </div>
+      <input type="password" autoComplete="current-password" className="w-full rounded-lg border px-2 py-1.5" placeholder="Contraseña del CRM" value={clave} onChange={(e) => setClave(e.target.value)} />
+      <input className="w-full rounded-lg border px-2 py-1.5" placeholder="Escribe CERRAR" value={palabra} onChange={(e) => setPalabra(e.target.value)} />
+      {error && <div className="text-red-700">❌ {error}</div>}
+      <div className="flex justify-between pt-1">
+        <button type="button" className="text-neutral-500 hover:underline" onClick={volver}>
+          ← Atrás
+        </button>
+        <button
+          type="button"
+          disabled={ocupado || !clave || palabra.trim().toUpperCase() !== "CERRAR"}
+          className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-40"
+          onClick={() => void cerrarSesion()}
+        >
+          {ocupado ? "Cerrando…" : "Cerrar sesión de Meta"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function PasoListo({ estado, volver, cerrar }: { estado: { appId: string | null; appName: string | null; paginas: number; numeros: number } | null; volver: () => void; cerrar: () => void }) {
   // EL TOKEN, EN LA REVISIÓN: solo se mira. Se crea en su paso («🔐 Token permanente»), que sabe

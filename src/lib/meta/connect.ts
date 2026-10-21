@@ -1,4 +1,7 @@
 import crypto from "node:crypto";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { getMetaWhatsAppConnection } from "@/lib/db";
+import { fetchMeta } from "@/lib/meta/freno";
 import { MEDIA_HORA, recordar } from "@/lib/meta/recuerdo";
 import {
   getMetaAppId as getStoredMetaAppId,
@@ -413,6 +416,17 @@ function isMetaTestWhatsAppAsset(waba: MetaWaba, phone: MetaPhoneNumber): boolea
   );
 }
 
+/**
+ * LA MISMA PREGUNTA, UNA SOLA VEZ POR INICIO DE SESIÓN (21/10/2026). Al volver de Facebook se
+ * preguntaba «¿qué BM tengo?» 4 veces y toda la lista de números 2 veces (unas 150 consultas con
+ * 10 BM); Meta frenó la app («#4»). Dentro de `conMemoriaDeMeta`, cada pregunta igual se hace una
+ * vez y las demás reciben la misma respuesta. Fuera de ella, todo como siempre.
+ */
+const memoriaDelLogin = new AsyncLocalStorage<Map<string, Promise<unknown>>>();
+export function conMemoriaDeMeta<T>(fn: () => Promise<T>): Promise<T> {
+  return memoriaDelLogin.run(new Map(), fn);
+}
+
 async function graphGet<T>(
   path: string,
   accessToken: string,
@@ -424,10 +438,22 @@ async function graphGet<T>(
   }
   url.searchParams.set("access_token", accessToken);
 
-  const res = await fetch(url, { cache: "no-store" });
-  const body = (await res.json()) as T & { error?: { message?: string } };
-  if (!res.ok) return null;
-  return body;
+  const preguntar = async (): Promise<T | null> => {
+    try {
+      // Con el freno de seguridad: si Meta está cerca del límite, no se pregunta (null).
+      const res = await fetchMeta(url);
+      const body = (await res.json()) as T & { error?: { message?: string } };
+      if (!res.ok) return null;
+      return body;
+    } catch {
+      return null;
+    }
+  };
+  const memoria = memoriaDelLogin.getStore();
+  if (!memoria) return preguntar();
+  const clave = url.toString();
+  if (!memoria.has(clave)) memoria.set(clave, preguntar());
+  return memoria.get(clave) as Promise<T | null>;
 }
 
 export interface MetaPixelOption {
@@ -580,14 +606,15 @@ export async function fetchWhatsAppOptions(
         const accesoDe: CuentaDeMeta[] = [];
         if (dueño) sumarAcceso(accesoDe, dueño);
         sumarAcceso(accesoDe, { id: business.id, nombre: business.name ?? null });
-        const profile = await graphGet<{
-          profile_picture_url?: string | null;
-          data?: Array<{ profile_picture_url?: string | null }>;
-        }>(
-          `${phone.id}/whatsapp_business_profile`,
-          userAccessToken,
-          { fields: "profile_picture_url" }
-        );
+        // LA FOTO, SOLO SI NO LA TENEMOS (21/10/2026): una consulta por número en cada inicio de
+        // sesión. Sin pedirla, se guarda null y la base CONSERVA la que ya tenía (COALESCE).
+        const yaTieneFoto = !!getMetaWhatsAppConnection(phone.id)?.profile_picture_url;
+        const profile = yaTieneFoto
+          ? null
+          : await graphGet<{
+              profile_picture_url?: string | null;
+              data?: Array<{ profile_picture_url?: string | null }>;
+            }>(`${phone.id}/whatsapp_business_profile`, userAccessToken, { fields: "profile_picture_url" });
         options.push({
           wabaId: waba.id,
           wabaName: waba.name ?? null,
@@ -618,7 +645,10 @@ export async function fetchWhatsAppOptions(
  */
 export async function accesoDeLasPaginas(
   userAccessToken: string,
-  negocios: CuentaDeMeta[]
+  negocios: CuentaDeMeta[],
+  /** Si se pasa, se llena con el DUEÑO de cada página (la que la tiene en «owned_pages»):
+   *  así no hay que preguntarlo página por página (21/10/2026). */
+  duenos?: Map<string, CuentaDeMeta>
 ): Promise<Map<string, CuentaDeMeta[]>> {
   const acceso = new Map<string, CuentaDeMeta[]>();
   for (const negocio of negocios) {
@@ -634,6 +664,7 @@ export async function accesoDeLasPaginas(
           const lista = acceso.get(pagina.id) ?? [];
           sumarAcceso(lista, negocio);
           acceso.set(pagina.id, lista);
+          if (borde === "owned_pages" && duenos && !duenos.has(pagina.id)) duenos.set(pagina.id, negocio);
         }
       } catch {
         // Sin respuesta de este negocio: no suma acceso, y nada más.
@@ -679,10 +710,12 @@ export async function detectMetaEnvFromUserToken(
     { fields: "id,name" }
   );
   for (const business of businesses?.data ?? []) {
+    // Los mismos campos que `fetchPixelOptions`: dentro de un inicio de sesión es la MISMA
+    // pregunta y no se repite. Aquí solo se usa el id.
     const pixels = await graphGet<MetaPixelResponse>(
       `${business.id}/owned_pixels`,
       userAccessToken,
-      { fields: "id,name" }
+      { fields: "id,name,owner_business{id,name}" }
     );
     const pixel = pixels?.data?.[0];
     if (pixel && !values.META_PIXEL_ID) {
