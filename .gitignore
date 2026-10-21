@@ -1,0 +1,50 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Datos runtime
+data/
+
+# Backups locales del intro-data (creados por actualizar.ps1, no se suben)
+backups-locales/
+# Perfiles comerciales de la plantilla. Deben versionarse para que un clon
+# conserve todos sus productos, no solo el producto activo.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Entorno
+.env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Archivo temporal de mensajes de commit
+.commitmsg.tmp

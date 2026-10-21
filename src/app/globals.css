@@ -1,0 +1,389 @@
+@import "tailwindcss";
+
+/* ─── LA VARIANTE «OSCURO» ──────────────────────────────────────────────────
+ *
+ * Permite escribir `text-emerald-700 oscuro:text-emerald-300`: el primero manda
+ * siempre, el segundo solo cuando el tema es oscuro.
+ *
+ * POR QUÉ HACE FALTA ADEMÁS DE LOS COLORES DE FUNCIÓN. Los colores de abajo
+ * resuelven el fondo, el borde y la tinta, que es la mayor parte. Pero quedan
+ * los colores con SIGNIFICADO —el verde del bot activo, el violeta del
+ * producto— que no pueden volverse grises: un verde claro que en claro se lee
+ * perfecto, sobre fondo oscuro se convierte en una mancha brillante.
+ *
+ * Con esta variante se corrige ese caso sin inventar un color de función para
+ * cada matiz, y sin tocar cómo se ve el tema claro.
+ */
+@custom-variant oscuro (&:where(:root[data-tema="oscuro"] *));
+
+/* ─── LOS COLORES DEL TEMA, EN UN SOLO SITIO ────────────────────────────────
+ *
+ * EL PROBLEMA QUE RESUELVEN.
+ *
+ * El editor tiene los colores escritos a mano, clase por clase, en decenas de
+ * miles de líneas: un `bg-neutral-100` aquí, un `border-emerald-300` allá. Con
+ * eso, un tema oscuro significa repasar cada pantalla otra vez, y cada pantalla
+ * nueva nace atada a un solo aspecto.
+ *
+ * Aquí los colores se nombran por su FUNCIÓN —suelo, tarjeta, borde, tinta— y
+ * no por su color. Una pantalla escrita con estos nombres sirve para los dos
+ * temas sin tocarla: lo que cambia son los valores, no las pantallas.
+ *
+ * SE VAN ADOPTANDO POR PARTES. Lo que todavía está escrito a mano sigue
+ * funcionando igual; nada de esto lo rompe. Cada pestaña que se convierte deja
+ * de tener color propio y pasa a leer de aquí.
+ *
+ * CÓMO SE USA. `bg-fondo`, `bg-tarjeta`, `border-borde`, `text-tinta`,
+ * `text-tinta-suave`, `bg-relleno`, `text-acento`… como cualquier clase de
+ * Tailwind, porque `@theme` las genera a partir de estas variables.
+ */
+@theme {
+  --color-ai-50: #ecfdf5;
+  --color-ai-100: #d1fae5;
+  --color-ai-500: #10b981;
+  --color-ai-600: #059669;
+  --color-ai-700: #047857;
+
+  --color-human-50: #fffbeb;
+  --color-human-100: #fef3c7;
+  --color-human-500: #f59e0b;
+  --color-human-600: #d97706;
+  --color-human-700: #b45309;
+
+  /* El suelo de la pantalla y la superficie que flota encima. */
+  --color-fondo: var(--tema-fondo);
+  /* La caja que agrupa una sección entera, entre el suelo y las tarjetas. */
+  --color-panel: var(--tema-panel);
+  --color-tarjeta: var(--tema-tarjeta);
+  /* Un relleno más suave que la tarjeta: chapas, campos, cajas de dentro. */
+  --color-relleno: var(--tema-relleno);
+  --color-borde: var(--tema-borde);
+  /* La tinta del texto, y la de lo que acompaña sin protagonizar. */
+  --color-tinta: var(--tema-tinta);
+  --color-tinta-suave: var(--tema-tinta-suave);
+  /* El color de la casa: lo seleccionado, lo activo. */
+  --color-acento: var(--tema-acento);
+  --color-acento-suave: var(--tema-acento-suave);
+
+  /* ─── LA ESCALA GRIS, QUE AHORA TAMBIÉN ES DEL TEMA ───────────────────────
+   *
+   * EL PROBLEMA. El bot está escrito con la escala gris de fábrica a mano:
+   * `bg-neutral-50` para una caja, `text-neutral-500` para una frase de apoyo,
+   * `border-neutral-300` para una raya. Son unas mil seiscientas veces, en
+   * treinta y dos mil líneas. Convertirlas una por una a los nombres de
+   * función es semanas de trabajo, y cada línea tocada es una línea que se
+   * puede romper.
+   *
+   * QUÉ SE HACE EN LUGAR DE ESO. La escala no se toca en ningún archivo: se
+   * REDEFINE aquí. En claro vale exactamente lo de fábrica, copiado de
+   * `tailwindcss/theme.css`, así que el tema claro queda idéntico al del día
+   * anterior. En oscuro se da la vuelta: lo que era casi blanco pasa a ser la
+   * superficie oscura y lo que era casi negro pasa a ser la tinta clara.
+   *
+   * POR QUÉ FUNCIONA. La escala se usa con sentido en todo el proyecto: los
+   * números bajos son fondos y los altos son texto. Darla la vuelta conserva
+   * ese sentido, solo que del otro lado.
+   *
+   * DÓNDE NO FUNCIONA, Y CÓMO SE ARREGLA. En los pocos botones que van
+   * RELLENOS de gris oscuro con letra blanca —«Guardar», «Ir al editor»— el
+   * número alto es un FONDO, no una tinta, y darlo la vuelta los dejaría
+   * blancos con letra blanca. Esos llevan su `oscuro:` escrito a mano, que
+   * manda sobre esto.
+   *
+   * `--color-white` NO se toca: `text-white` sobre un botón verde tiene que
+   * seguir siendo blanco en los dos temas.
+   */
+  --color-neutral-50: var(--tema-gris-50);
+  --color-neutral-100: var(--tema-gris-100);
+  --color-neutral-200: var(--tema-gris-200);
+  --color-neutral-300: var(--tema-gris-300);
+  --color-neutral-400: var(--tema-gris-400);
+  --color-neutral-500: var(--tema-gris-500);
+  --color-neutral-600: var(--tema-gris-600);
+  --color-neutral-700: var(--tema-gris-700);
+  --color-neutral-800: var(--tema-gris-800);
+  --color-neutral-900: var(--tema-gris-900);
+  --color-neutral-950: var(--tema-gris-950);
+
+  /* ─── EL CARBÓN: OSCURO EN LOS DOS TEMAS ──────────────────────────────────
+   *
+   * El puñado de sitios donde el gris oscuro es un FONDO y no una tinta: la
+   * cortina que tapa la pantalla mientras cambia, los botones rellenos con
+   * letra blanca, la chapa de «editando».
+   *
+   * Ahí la escala de arriba no sirve: al darla la vuelta esos bloques se
+   * volverían casi blancos y la letra blanca de encima desaparecería. Este
+   * color no pertenece a ningún tema — vale lo mismo en claro y en oscuro— y
+   * son exactamente los tonos que tenían, copiados de la escala de fábrica,
+   * así que el tema claro no se mueve ni un pelo.
+   */
+  --color-carbon: oklch(20.5% 0 0);
+  --color-carbon-fuerte: oklch(14.5% 0 0);
+  --color-carbon-suave: oklch(26.9% 0 0);
+  --color-carbon-claro: oklch(37.1% 0 0);
+
+  /* La letra de los títulos. Ver `layout.tsx`. */
+  --font-titulo: var(--fuente-titulo), ui-sans-serif, system-ui, sans-serif;
+
+  /* LOS EMOJIS, AL FINAL DE LA PILA. Ver `fuenteDeEmojis` en `layout.tsx`.
+   *
+   * VA DESPUÉS DE LAS LETRAS Y ANTES DE LAS DEL SISTEMA, y el orden importa por
+   * cómo elige el navegador: recorre la lista POR CADA CARÁCTER y se queda con
+   * la primera fuente que sepa dibujarlo.
+   *
+   *  · Las letras y los números los dibuja `ui-sans-serif`, como siempre: Noto
+   *    Color Emoji no tiene alfabeto, así que ni se la consulta para el texto.
+   *  · Los emojis sí, porque `ui-sans-serif` no los tiene y la siguiente que
+   *    sabe dibujarlos es Noto — por delante de la del sistema.
+   *
+   * Poner Noto ANTES que `ui-sans-serif` dejaría el texto corriente buscando en
+   * una fuente sin letras; ponerla DESPUÉS de «Apple Color Emoji» la dejaría sin
+   * uso en un Mac, que es justo la máquina que hay que arreglar.
+   *
+   * Y toca las textareas porque Tailwind ya hace que los campos de formulario
+   * hereden la letra en vez de usar la del sistema.
+   */
+  --font-sans: ui-sans-serif, system-ui, var(--fuente-emoji), "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+/* TEMA CLARO, el de fábrica.
+ *
+ * TRES ALTURAS, NO DOS.
+ *
+ * Antes el suelo era casi blanco y las tarjetas eran blancas: dos tonos tan
+ * parecidos que la pantalla entera se leía como una sola sábana clara y no
+ * había dónde descansar la vista.
+ *
+ * Ahora hay tres alturas y cada una dice qué es:
+ *
+ *   SUELO    gris de verdad, lo que rodea todo.
+ *   PANEL    gris claro, la caja que agrupa una sección entera.
+ *   TARJETA  blanco, lo que se lee y se edita.
+ *
+ * Con eso el blanco vuelve a significar algo: es donde está el contenido. Y el
+ * ojo tiene un gris al que volver entre bloque y bloque.
+ *
+ * SI SE QUIERE MÁS O MENOS CONTRASTE, se mueve `--tema-fondo` y nada más. Más
+ * oscuro separa más, pero un gris medio con tarjetas blancas encima empieza a
+ * deslumbrar a la hora de estar editando. Este es el punto donde separa sin
+ * cansar. */
+:root {
+  --tema-fondo: #a7afbe;
+  --tema-panel: #d1d7e1;
+  --tema-tarjeta: #ffffff;
+  --tema-relleno: #f1f3f7;
+  --tema-borde: #d8dde6;
+  --tema-tinta: #0f172a;
+  --tema-tinta-suave: #64748b;
+  /* VIVO, PERO SIN PESAR TANTO.
+   * El primero salió de una referencia oscura, donde un color saturado se apoya
+   * en la oscuridad; en bloque sobre blanco daba un salto que tiraba del ojo. Se
+   * probó apagándolo y quedó opaco, que es peor: un color que no dice nada y
+   * encima se ve sucio.
+   * Este es vivo. Lo que baja no es el color, es la CANTIDAD: el bloque relleno
+   * se reserva para lo que está encendido, y el resto va perfilado. */
+  --tema-acento: #6366f1;
+  --tema-acento-suave: #eef0ff;
+
+  /* La escala gris de fábrica, copiada tal cual de `tailwindcss/theme.css`.
+   * Está aquí para que el tema oscuro pueda darla la vuelta; el claro no
+   * cambia ni un tono. */
+  --tema-gris-50: oklch(98.5% 0 0);
+  --tema-gris-100: oklch(97% 0 0);
+  --tema-gris-200: oklch(92.2% 0 0);
+  --tema-gris-300: oklch(87% 0 0);
+  --tema-gris-400: oklch(70.8% 0 0);
+  --tema-gris-500: oklch(55.6% 0 0);
+  --tema-gris-600: oklch(43.9% 0 0);
+  --tema-gris-700: oklch(37.1% 0 0);
+  --tema-gris-800: oklch(26.9% 0 0);
+  --tema-gris-900: oklch(20.5% 0 0);
+  --tema-gris-950: oklch(14.5% 0 0);
+}
+
+/* TEMA OSCURO. No es negro: es un gris azulado: el negro puro con texto blanco
+ * deslumbra y cansa a los diez minutos. */
+:root[data-tema="oscuro"] {
+  --tema-fondo: #22252e;
+  --tema-tarjeta: #2e313c;
+  --tema-relleno: #383c48;
+  --tema-borde: #434857;
+  --tema-tinta: #f1f3f7;
+  --tema-tinta-suave: #a3aab9;
+  --tema-acento: #8b7bff;
+  --tema-acento-suave: #3b3466;
+
+  /* LA ESCALA GRIS, DEL REVÉS.
+   *
+   * Lo que en claro era casi blanco pasa a ser superficie, y lo que era casi
+   * negro pasa a ser tinta. No es gris puro sino gris azulado, el mismo tinte
+   * que el resto del tema oscuro: mezclar un gris neutro con un fondo azulado
+   * se ve sucio.
+   *
+   * Con esto, cada pantalla escrita a mano con la escala de fábrica —que son
+   * casi todas— pasa al tema oscuro sin tocarle una línea. */
+  --tema-gris-50: #2a2d36;
+  --tema-gris-100: #33363f;
+  --tema-gris-200: #3d414c;
+  --tema-gris-300: #484d5a;
+  --tema-gris-400: #767e8f;
+  --tema-gris-500: #9aa2b2;
+  --tema-gris-600: #b0b8c6;
+  --tema-gris-700: #ccd3de;
+  --tema-gris-800: #e2e7ef;
+  --tema-gris-900: #f1f3f7;
+  --tema-gris-950: #fbfcfe;
+}
+
+/* LAS BARRAS DE LA PIZARRA EN SU FONDO OSCURO (19/10/2026): «que la barra de arriba de la pizarra
+ * en modo oscuro se vea oscuro… coherente con el diseño». Los MISMOS colores del tema oscuro,
+ * solo dentro de esas barras: la pizarra tiene su propio ☀️/🌙. */
+.tema-oscuro-local {
+  --tema-fondo: #22252e;
+  --tema-tarjeta: #2e313c;
+  --tema-relleno: #383c48;
+  --tema-borde: #434857;
+  --tema-tinta: #f1f3f7;
+  --tema-tinta-suave: #a3aab9;
+  --tema-acento: #8b7bff;
+  --tema-acento-suave: #3b3466;
+  /* (Los colores de Tailwind se resuelven en la raíz: aquí se vuelven a leer.) */
+  --color-fondo: var(--tema-fondo);
+  --color-tarjeta: var(--tema-tarjeta);
+  --color-relleno: var(--tema-relleno);
+  --color-borde: var(--tema-borde);
+  --color-tinta: var(--tema-tinta);
+  --color-tinta-suave: var(--tema-tinta-suave);
+  --color-acento: var(--tema-acento);
+  --color-acento-suave: var(--tema-acento-suave);
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+::selection {
+  background-color: rgb(16 185 129 / 0.2);
+}
+
+/* ─── RESPUESTA AL TOQUE ────────────────────────────────────────────────────
+ *
+ * En un celular NO existe el "hover": si un botón solo cambia al pasar el
+ * ratón, al tocarlo no pasa absolutamente nada y uno se queda sin saber si le
+ * dio o si la aplicación se colgó.
+ *
+ * Esto le da a TODO lo que se puede tocar una reacción inmediata mientras el
+ * dedo está encima, como WhatsApp. Solo se aplica en pantallas táctiles: en la
+ * computadora el hover sigue mandando y nada cambia.
+ */
+button,
+a,
+select,
+textarea,
+input,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  /* Quita el retardo de ~300ms que el navegador espera por si es doble toque. */
+  touch-action: manipulation;
+}
+
+/* PIZARRA: LO ELEGIDO SE VE (18/10/2026): «con Shift selecciono 2 y no se nota que estén
+   seleccionados». Un marco azul suave alrededor de cada ficha elegida (los fondos de país no). */
+/* (19/10/2026: «no lo veo al clickearlo sino cuando clickeo otro». La ficha recién pulsada
+   tiene el foco, y React Flow le quita el borde al que tiene el foco: por eso solo se veía al
+   soltarla. Ahora se pinta también con el foco.) */
+.react-flow__node.selected:not(.react-flow__node-caja),
+.react-flow__node.selected:not(.react-flow__node-caja):focus,
+.react-flow__node.selected:not(.react-flow__node-caja):focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.7) !important;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* EL RECUADRO DE LO ELEGIDO NO ATRAPA EL RATÓN (19/10/2026): «moví en grupo el upsell y luego se
+   congeló el click en la pantalla… no mueve el fondo». Cubría todo lo elegido y se tragaba los
+   clics. Ahora arrastrar en un hueco mueve el panorama; arrastrar una ficha elegida mueve el grupo. */
+.react-flow__nodesselection-rect {
+  pointer-events: none !important;
+}
+
+/* EL MINIMAPA, SIEMPRE EN SU ESQUINA Y SIN ATRAPAR EL RATÓN (19/10/2026). */
+.react-flow__panel.react-flow__minimap {
+  pointer-events: none !important;
+  top: auto !important;
+  bottom: 12px !important;
+  right: 12px !important;
+}
+
+/* EL FONDO DE UN PAÍS ELEGIDO (19/10/2026): con el recuadro de selección, también se nota. */
+.react-flow__node-caja.selected > * {
+  outline: 3px dashed rgba(59, 130, 246, 0.7);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* EL EFECTO DE ELEVACIÓN (19/10/2026): «cuando coloco el mouse sobre esa ficha, se mueve hacia
+   arriba ligeramente… casi nada, pero se ve». 2 píxeles DE PANTALLA, con cualquier zoom: se
+   compensa con --zoom-pizarra, que pone la pizarra. Sin sombra: solo el levantamiento. */
+.react-flow__node:not(.react-flow__node-caja):not(.react-flow__node-etiqueta) > * {
+  /* Un poco más lenta y un píxel menos (19/10/2026): «en Sendy es un poquito más lenta, y
+     parece que tiene un píxel menos». */
+  transition: translate 0.25s ease-out;
+}
+.react-flow__node:not(.react-flow__node-caja):not(.react-flow__node-etiqueta):not(.dragging):hover > * {
+  translate: 0 calc(-2px / var(--zoom-pizarra, 1));
+}
+
+/* EL RECUADRO DE UN BOTÓN, ARRASTRADO DESDE SU PUNTO, CON EL SIGNO + (19/10/2026): igual que al
+   tirar del punto de un botón de la ficha. */
+.react-flow__node-destino.dragging,
+.react-flow__node-destino.dragging * {
+  cursor: crosshair !important;
+}
+
+/* LO DESCONECTADO, TENUE PERO CON SU COLOR (19/10/2026): «si está en gris me confundo… cuando
+   le pase el mouse por encima se ponga no atenuado». */
+.ficha-tenue {
+  opacity: 0.45;
+  transition: opacity 0.15s ease-out;
+}
+.ficha-tenue:hover,
+.react-flow__node.selected .ficha-tenue,
+.react-flow__node.dragging .ficha-tenue {
+  opacity: 1;
+}
+
+/* UN PUNTO QUE PIDE SU CABLE (19/10/2026): «algo alrededor de ese punto que llame la atención…
+   que no sea molestoso a la vista». Un aro fijo y suave de su mismo color, y dos latidos solo al
+   aparecer (al abrir la pizarra). Después, quieto. El color lo pone quien lo usa (--aro). */
+.punto-pide-cable {
+  box-shadow: 0 0 0 4px var(--aro, rgba(236, 72, 153, 0.3));
+  animation: latido-del-punto 1.2s ease-out 2;
+}
+@keyframes latido-del-punto {
+  0% {
+    box-shadow: 0 0 0 0 var(--aro, rgba(236, 72, 153, 0.3));
+  }
+  70% {
+    box-shadow: 0 0 0 11px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 4px var(--aro, rgba(236, 72, 153, 0.3));
+  }
+}
+
+@media (hover: none) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.5;
+  }
+  /* Los botones desactivados no deben "responder": seria mentir. */
+  button:disabled:active,
+  [role="button"][aria-disabled="true"]:active {
+    opacity: inherit;
+  }
+}

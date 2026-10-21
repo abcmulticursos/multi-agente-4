@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "active_product_id": "plantillas-sublimacion-test",
+  "products": [
+    {
+      "id": "producto-actual",
+      "name": "Super Kit Flores de Papel",
+      "created_at": "2026-08-12T12:11:22.964Z",
+      "updated_at": "2026-09-08T17:46:37.519Z"
+    },
+    {
+      "id": "lectoescritura",
+      "name": "lectoescritura",
+      "created_at": "2026-08-12T12:11:59.146Z",
+      "updated_at": "2026-09-04T06:35:46.127Z"
+    },
+    {
+      "id": "minecraft-matematicas-con-minecraft",
+      "name": "MINECRAFT - Matematicas con MInecraft",
+      "created_at": "2026-08-16T10:44:19.071Z",
+      "updated_at": "2026-09-04T06:36:08.676Z"
+    },
+    {
+      "id": "prueba",
+      "name": "prueba",
+      "created_at": "2026-08-22T19:16:07.778Z",
+      "updated_at": "2026-09-04T06:36:26.114Z"
+    },
+    {
+      "id": "prueba-2-borrar",
+      "name": "PRUEBA 2 BORRAR",
+      "created_at": "2026-08-23T00:53:08.437Z",
+      "updated_at": "2026-08-25T05:54:43.844Z"
+    },
+    {
+      "id": "laminas-de-trazos",
+      "name": "LAMINAS DE TRAZOS",
+      "created_at": "2026-08-31T19:03:53.904Z",
+      "updated_at": "2026-09-11T22:36:36.555Z"
+    },
+    {
+      "id": "plantillas-editables-para-sublimar",
+      "name": "Plantillas editables para sublimar",
+      "created_at": "2026-09-01T21:22:58.969Z",
+      "updated_at": "2026-09-06T04:32:39.947Z"
+    },
+    {
+      "id": "plantillas-sublimacion-test",
+      "name": "QUIMICA EN ACCION",
+      "created_at": "2026-09-06T05:08:51.028Z",
+      "updated_at": "2026-09-24T12:48:10.981Z"
+    }
+  ]
+}

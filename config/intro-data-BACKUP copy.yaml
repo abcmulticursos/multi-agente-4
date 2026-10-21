@@ -1,0 +1,868 @@
+# ─────────────────────────────────────────────────────────────────────────
+# Configuración del flujo de bienvenida (saludo + intro data + pago)
+# ─────────────────────────────────────────────────────────────────────────
+# Para editar:
+#   1. Cambia los textos / URLs aquí mismo en VS Code
+#   2. git add config/intro-data.yaml
+#   3. git commit -m "ajuste textos workflow"
+#   4. git push
+#   5. Deploy en EasyPanel
+#
+# Reglas:
+#   - El símbolo "|" antes de un texto multilínea le dice a YAML que respete
+#     los saltos de línea. NO QUITES ese símbolo en los textos largos.
+#   - Los enlaces de Drive deben ser PÚBLICOS y < 25 MB.
+#   - Mientras existan placeholders <<...>>, el flujo NO se ejecuta — útil
+#     para deshabilitarlo temporalmente sin tocar código.
+#
+# VARIANTES DE TEXTO (anti-fingerprint Meta):
+#   - Donde ves "body_variants:" o "caption_variants:", el bot elige UNA
+#     opcion ALEATORIA al enviar, para reducir el patron de spam que detecta
+#     Meta. Mientras solo una variante este completada, el bot usara esa
+#     (las variantes con <<...>> se ignoran automaticamente).
+#   - Cuando quieras agregar variacion: rellena las lineas que dicen
+#     <<VARIANTE 2 — ...>> y <<VARIANTE 3 — ...>> con textos del MISMO
+#     objetivo pero palabras distintas. Cuando todas esten completas, el
+#     bot rotara entre las 3 opciones al azar.
+# ─────────────────────────────────────────────────────────────────────────
+
+greeting:
+  text_variants:
+    - |
+      *Hola!* 👋🏼 ¡Qué bueno tenerte aquí, un gusto saludarte! 😊
+
+      * ✅ Vi que te llamó la atención el *Pack PDF de Grafismo Fonético* 📚 para ayudar a tu peque a leer. 💫
+
+      Antes de continuar con la información dime: 👇
+
+      🔴 *¿Cuál es tu nombre?* ¿con quién tengo el gusto?
+    - |
+      *¡Hola!* 👋🏼 *Cómo estás* ‼️ ¡un gusto saludarte!
+
+      *✅ *Veo que te llamó la atención el Pack PDF de Grafismo Fonético* 📚 diseñado para apoyar a tu peque en el proceso de lectura. 👶🏻💫
+
+      *Antes de enviarte la información*, cuéntame por favor: 👇
+
+      🔴 *¿Cómo te llamas?* ¿con quién tengo el gusto? 😊
+    - |
+      *¡Hola!* Un gusto Saludarte ‼️
+
+      *✅ *Ví que nuestro de Grafismo Fonético te llamó la atención* 📚 le comento que es muy útil para apoyar a tu peque en la lectura. 👶🏻💫
+
+      *Antes de brindarte la información*, dígame: 👇
+
+      🔴 *¿Cuál es su nombre?* ¿con quién tengo el gusto? 😊
+    - |
+      *¡Hola!, Como estás?* espero que bien ‼️ ¡Un gusto en saludarte!
+
+      *✅ *Acabo de ver de que te interesó nuestro Pack PDF de Grafismo Fonético* 📚 útil para apoyar a tu peque con la lectura. 👶🏻💫
+
+      *Antes de brindarle la información* dígame: 👇
+
+      🔴 *¿Cuál es su nombre?* ¿con quién tengo el gusto? 😊
+    - |
+      *¡Hola* Un gusto saludarte ‼️ 
+
+      *✅ *Veo que le interesó el Pack PDF de Grafismo Fonético* 📚 una manera muy divertida de aprender. 👶🏻💫
+
+      *Antes de brindarle la información* cuénteme: 👇
+
+      🔴 *¿Cuál es su nombre?* ¿con quién tengo el gusto? 😊
+
+no_response_delay_seconds: 300
+
+# Delay (segundos) entre mensajes consecutivos del bot.
+# Aplica a las respuestas de pago (los 3 textos de Yape o BCP) y a
+# cualquier respuesta del LLM que tenga doble salto de línea (\n\n).
+# Subir = más natural pero más lento. Bajar = más rápido pero spam-feel.
+between_messages_delay_seconds: 6
+
+# Delay (segundos) que el bot espera antes de responder a un mensaje del
+# cliente. Durante esos segundos, muestra "escribiendo…" en WhatsApp.
+# Sirve para que no responda al instante (parece más humano).
+# 0 = respuesta inmediata. Sugerido 5-7s. NO afecta a los mensajes
+# programados (intro, pago aprobado) — esos tienen sus propios delays.
+bot_response_delay_seconds: 6
+
+# Tiempo (segundos) que pasa entre la petición del correo y el envío
+# del audio + texto del regalo. Durante este tiempo, si el cliente
+# pregunta cosas, el LLM le responde sin disparar el gift antes.
+# Si el cliente da su correo en este lapso, también se captura y manda
+# el email — pero el gift fire igual al cumplirse el tiempo.
+# Sugerido 180-300s (3-5 min) para dar tiempo prudente al cliente.
+awaiting_email_timeout_seconds: 300
+
+# Precio del curso en soles. El bot acumula montos de comprobantes
+# parciales hasta llegar a este número para aprobar la compra.
+course_price_soles: 10
+
+# Descuento progresivo: cuando arranca el seguimiento indicado (1-based,
+# 1=seguimiento_1, 3=seguimiento_3, etc.) el precio del curso baja al
+# valor `price_soles` para esa conversación en particular. La oferta
+# queda activa para esa convo hasta que pague o le hagan /restart.
+# El system prompt también ve este precio reducido y lo cita al cliente.
+# Para DESACTIVAR el descuento, comentá las 3 líneas siguientes.
+discount_after_followup:
+  sequence_index: 3
+  price_soles: 8
+
+# Validación de comprobantes de pago.
+payment_validation:
+  # Para Yape/Plin: el nombre del receptor debe empezar con esto.
+  # Yape oculta el apellido (ej. "Alberto S***"), Plin lo muestra completo.
+  # Solo se valida el inicio para que ambos pasen.
+  yape_recipient_name_starts_with: "Alberto"
+
+intro_sequence:
+  - type: audio
+    drive_url: "https://drive.google.com/file/d/1GEAA6yU-DoArSEpZZn-ze-77rg5-qY-2/view?usp=sharing"
+    delay_after_sec: 7
+
+  - type: image
+    drive_url: "https://drive.google.com/file/d/1Q6buztfsGaw0fQNoY5h3KKoEq3THE_R9/view?usp=drive_link"
+    caption_variants:
+      - |
+        🚨 *INVERSION*
+
+        (antes) ~Precio Normal 45 Soles~✖️
+
+        🟢 *(Hoy) Precio Super Descuento: a solo S/. 10 SOLES* ‼️
+
+        🫰🏼💵 *Realiza un único pago* y *tendrás acceso de por vida* (NO MENSUALIDADES) ❌
+
+        *Promoción de Locura* 😱 Solamente Válida *Hasta el día de Hoy!* (Cupos Limitados) ✅
+      - |
+        📣 *INVERSIÓN* 🫰🏼
+
+        *(antes)* ~Precio Regular 45 Soles~ ❌
+
+        *🎉 Solo por Hoy! aprovecha el Súper Descuento: solo por S/. 10 SOLES* ‼️
+
+        💳✨ *Realizas un único pago* y tendrás *acceso permanente* ✅ *(SIN mensualidades)* 🚫
+
+        🔥 *Promoción Especial* 💫 Disponible *Solo por Hoy!* (Cupos Limitados) 😱
+      - |
+        🚨 *INVERSIÓN* 📣
+
+        *(antes)* ~Valor Original 45 Soles~ ✖️
+
+        🟢 *🚀 Hoy está con Descuento Especial: solo S/. 10 SOLES* ‼️
+
+        💵🎓 *Con un único pago* tendrás *ingreso ilimitado al material para siempre* ✅ *(SIN mensualidades)* 🚫
+
+        🎁 *Promo de Locura* 😱 Disponible *Únicamente el Día de Hoy!* (Cupos Reducidos) 📚
+      - |
+        🚨 *INVERSIÓN* 📣
+
+        *(antes)* ~Precio real S/. 45 Soles~ ✖️
+
+        🟢 *🚀 Pero hoy! está con Descuento Especial: solamente S/. 10 SOLES* ‼️
+
+        🫰🏼💵 *Con un único pago* podrás *acceder ilimitadamente al material para siempre* ✅ *(SIN mensualidades)* 🚫
+
+        🎁 *Promo Increible!* 😱 Válida *Solamente hasta Hoy!* (Quedan pocos cupos) ⚠️
+      - |
+        🚨 *INVERSIÓN* 🫰🏼
+
+        *(antes)* ~Precio S/. 45 Soles~ ✖️
+
+        🟢 💫 *Hoy! Un Descuento Especial: a solamente S/. 10 SOLES* ‼️
+
+        👉🏼💵 *Con un solo pago* puedes *acceder al material para siempre sin limitaciones* ✅ *(NO mensualidades)* 🚫
+
+        🎁 *Super Promo!* 😱 Válida *Solamente por Hoy!* (Quedan pocos cupos) ⚠️
+    delay_after_sec: 7
+
+  - type: video
+    drive_url: "https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link"
+    caption_variants:
+      - |
+        🔴 *ES MÁS*: *Si lo adquieres HOY MISMO te regalaremos 5 BONOS EN PDF 🖐🏼 valorados en 50 soles* _(SOLO POR HOY COMPLETAMENTE GRATIS)_ 😱🎁
+
+        1.- 📔 *Trazos y Ejercicios de las Vocales*
+        2.- 📔 Cuentos Infantiles
+        3.- 📔 *Silabario*
+        4.- 📔 Trazo del Abecedario
+        5.- 📔 *Ejercicios con las Vocales*
+
+        🎁 *REGALOS ESPECIALES POR TIEMPO LIMITADO* ⏳
+      - |
+        🔴 *Y HAY MÁS*: ‼️
+        *Si lo obtienes HOY te llevas 5 BONOS PDF 🖐🏼 valorizados en 50 soles* _(SOLO X HOY TOTALMENTE GRATIS)_ 😱🎉
+
+        1.- 📙 *Trazos y Actividades de las Vocales*
+        2.- 📒 Cuentos para Niños
+        3.- 📘 *Silabario Infantil*
+        4.- 📕 Práctica del Abecedario
+        5.- 📗 *Ejercicios de Vocales*
+
+        🎁 *OBSEQUIOS ESPECIALES POR POCAS HORAS* ⏰
+      - |
+        🚨 *ADEMÁS*: ‼️
+        *Si aprovechas la promoción HOY MISMO recibirás 5 REGALOS EN PDF 🖐🏼 valorados de 50 soles* _(*GRATIS* SOLO POR HOY)_ 🤗🎁
+
+        1.- 📔 *Ejercicios y Trazos de Vocales*
+        2.- 📔 Historias Infantiles
+        3.- 📔 *Silabario Completo*
+        4.- 📔 Trazo de Letras del Abecedario
+        5.- 📔 *Prácticas con Vocales*
+
+        🎁 *BONOS ESPECIALES DURANTE ESTAS ULTIMAS HORAS* 🕑
+      - |
+        🚨 *Y ADEMÁS*: ‼️
+        *Si aprovechas esta SUPER PROMO, HOY MISMO! recibirás 5 REGALOS EN PDF 🖐🏼 valorados de 50 soles* _(*GRATIS* SOLO POR HOY)_ 🤗🎁
+
+        1.- 📔 *Ejercicios y Trazos de Vocales*
+        2.- 📔 Historias Infantiles
+        3.- 📔 *Silabario Completo*
+        4.- 📔 Trazo de Letras del Abecedario
+        5.- 📔 *Prácticas con Vocales*
+
+        🎁 *LOS OBSEQUIOS ESTARAN DISPONIBLES POR POCAS HORAS* 🕑
+      - |
+        🚨 *Y HAY MAS*: ‼️
+        *Si aprovechas esta SUPER PROMO, HOY MISMO!* recibirás *5 BONOS EN PDF 🖐🏼 valorados en aprox. 50 soles* _(*GRATIS* SOLO POR HOY)_ 🤗🎁
+
+        1.- 📘 *Trazos y Actividades de las Vocales*
+        2.- 📗 Cuentos para Niños
+        3.- 📙 *Silabario Infantil*
+        4.- 📕 Práctica del Abecedario
+        5.- 📒 *Ejercicios de Vocales*
+
+        🎁 *ESTOS OBSEQUIOS ESTARAN DISPONIBLES POR POCAS HORAS* 🕑
+    delay_after_sec: 7
+
+  - type: image
+    drive_url: "https://drive.google.com/file/d/1cumPHP1zAqSsK0U_CZ35cDC5CcSaMIkW/view?usp=drive_link"
+    caption_variants:
+      - |
+        🔴 *PARA COMPRA:* 🫰🏼
+
+        ✅ *"Responde con el método de pago que prefieras":* 😊👇🏼
+
+        * *YAPE*: 🤳🏼
+        * *PLIN*: 📲
+        * *BCP*: 🤗
+
+        ⚠️ *Si realizas el pago dentro de los próximos 10 minutos* ⏱️ te entregaré un *"Regalo Sorpresa Totalmente Gratis"* 🎁
+      - |
+        🔴 *PARA COMPRA:* 🫰🏼
+
+        ✅ *"Solo dinos el método de pago prefieres usar":* 😊👇🏼
+
+        * *YAPE*: 📱
+        * *PLIN*: 🤳🏼
+        * *BCP*: 👈🏼
+
+        ⚠️ *Si haces el pago en los próximos 10 minutos* ⏰ recibirás un *"Regalo Sorpresa GRATIS"* 🎁✨
+      - |
+        🚨 *PARA COMPRA:* 🫰🏼
+
+        ✅ *"Cuentanos: ¿Cuál método te parece más sencillo de utilizar?":* 😊👇🏼
+
+        * *YAPE*: 📲
+        * *PLIN*: 📱
+        * *BCP*: 🤝
+
+        🎁 *Si realizas el pago dentro de los siguientes 10 minutos* ⏳ te llevarás un *"Obsequio Sorpresa Totalmente Gratis"* 💫
+      - |
+        🔴 *PARA COMPRA:* 🫰🏼
+
+        ✅ *"Confirmanos con el método de pago de tu preferencia":* 😊👇🏼
+
+        * *YAPE*: 📲
+        * *PLIN*: 🤳🏼
+        * *BCP*: 🤗
+
+        ⚠️ *Y Si realizas la compra dentro de los próximos 10 minutos* ⏱️ te entregaré un *"Bono Sorpresa Totalmente Gratis"* 🎁
+      - |
+        🔴 *PARA COMPRA:* 🫰🏼
+
+        ✅ *"Responde tu método de pago favorito":* 😊👇🏼
+
+        * *YAPE*: 📲
+        * *PLIN*: 🤳🏼
+        * *BCP*: 🤗
+
+        ⚠️ *Y Si lo adquieres dentro de los próximos 10 minutos* ⏱️ te entregaré un *"Bono Sorpresa Totalmente Gratis"* 🎁
+    delay_after_sec: 7
+
+# ─────────────────────────────────────────────────────────────────────────
+# Secuencias de seguimiento (hasta 4) para clientes que no compran rápido.
+#
+# Funcionamiento:
+#   - Al recibir el PRIMER mensaje del cliente (T0), se programan las 4
+#     secuencias para los tiempos indicados en `delay_minutes_from_first_message`.
+#   - Cada secuencia tiene sus propios `steps` (mismo formato que intro_sequence):
+#       - type: text   → body + delay_after_sec
+#       - type: audio  → drive_url + delay_after_sec
+#       - type: image  → drive_url + caption + delay_after_sec
+#       - type: video  → drive_url + caption + delay_after_sec
+#   - Si el cliente paga antes de que una secuencia dispare → se cancela.
+#   - Si una secuencia tiene placeholders <<...>>, NO se envía (dejala así
+#     mientras prepares el contenido — el bot la salta silenciosamente).
+#   - /restart cancela todas las pendientes.
+#
+# Para ajustar los TIEMPOS: cambia `delay_minutes_from_first_message`.
+# Para AGREGAR pasos: copia/pega un bloque entero y ajusta type/body/url.
+# ─────────────────────────────────────────────────────────────────────────
+followup_sequences:
+  # ──────────── SEGUIMIENTO 1 ────────────
+  # Estructura: texto → (6s) → imagen+caption → (7s) → imagen+caption
+  - name: seguimiento_1
+    delay_minutes_from_first_message: 30
+    steps:
+      - type: text
+        body_variants:
+          - |
+            Hola! *¿aún no lo has decidido?* 🤗 Te quiero comentar lo siguiente:
+          - |
+            Hola! 😊 *¿Te quedó alguna duda o deseas que te ayude a avanzar con tu compra?* ❓
+          - |
+            Hola❗ 😊 *¿Te quedó alguna duda o necesitas ayuda para avanzar con tu compra?* ❓
+          - |
+            Hola❗ 😊 *¿necesitas ayuda para avanzar con tu compra* ❓ Aquí estoy para ayudarte!
+          - |
+            Hola❗ 😊 *¿Tienes alguna duda o pregunta para poder brindarte ayuda* ❓
+        delay_after_sec: 6
+
+      - type: image
+        drive_url: "https://drive.google.com/file/d/1z9bw93pBv3mGQiVXiiSswPZWL86M821t/view?usp=drive_link"
+        caption_variants:
+          - |
+            ⚠️ *!Si realizas el pago dentro de los próximos 10 minutos*, te entregaré un *REGALO SORPRESA* adicional *TOTALMENTE GRATIS* 🎁
+
+            *!Mira todo lo que te llevarás!* 👀📚
+
+            _Todo el kit de *Grafismo Fonético* y *Material Adicional de Apoyo* para que tu peque aprenda a leer de forma rápida y divertida_ 😍
+
+            📚 Kit Completo 6 Niveles de *Grafismo Fonético* con más de 250 páginas.
+            🎁 Cuadernos de los números
+            🎁 Plan de Clase Kids
+            🎁 Son 7 bonos adicionales
+
+            !Solo por *S/. 10 Soles*! 😱 una inversión mínima para un aprendizaje al máximo.
+          - |
+            ⚠️ *Si realizas el pago en los próximos 10 minutos*, ‼️ recibirás un *REGALO SORPRESA* extra *TOTALMENTE GRATIS* 🎁✨
+
+            *¡Mira todo lo que obtendrás!* 👀📚
+
+            _Tendrás acceso al kit completo de *Grafismo Fonético en PDF* junto con *Material Complementario de Apoyo* para ayudar a tu peque a leer de manera rápida y entretenida_ 👶🏻🎓
+
+            📚 Kit Completo de *Grafismo Fonético* (6 niveles) con más de 250 páginas.
+            🎁 Cuadernillos de números
+            🎁 Planificador de Clase Kids
+            🎁 7 bonos adicionales incluidos
+
+            🔥 *Todo por solo S/. 10 Soles* 😱 una pequeña inversión para un gran aprendizaje.
+          - |
+            🚨 *Si haces el pago dentro de los siguientes 10 minutos*, 🕑 te llevarás un *BONO SORPRESA* adicional *GRATIS* 🎉🎁
+
+            *¡Observa todo lo que recibirás!* 👀📖
+
+            _El pack completo de *Grafismo Fonético en PDF* más *Material Extra de Apoyo* ideal para que tu peque aprenda a leer de forma divertida y sencilla_ 😍
+
+            📚 Pack Completo 6 niveles de *Grafismo Fonético* con más de 250 hojas.
+            🎁 *Cuadernos numéricos*
+            🎁 Plan de Clase Infantil
+            🎁 *Incluye 7 bonos extras*
+
+            💥 *Todo esto por únicamente S/. 10 Soles* 😱
+          - |
+            ⚠️ *!Si realizas el pago dentro de los próximos 10 minutos*, te entregaré un *REGALO SORPRESA* incluído *TOTALMENTE GRATIS* 🎁
+
+            *!Mira todo lo que te llevarás!* 👀📚
+
+            _Todo el kit de *Grafismo Fonético* y *Material Adicional de Apoyo* para que tu peque aprenda a reconocer y pronunciar sílabas de forma rápida y divertida_ 😍
+
+            1.- 📚 Kit Completo 6 Niveles de *Grafismo Fonético* con más de 250 páginas.
+            2.- 🎁 Cuadernos de los números
+            3.- 🎁 Plan de Clase Kids
+            4.- 🎁 Son 7 bonos adicionales!
+
+            !Solo por *S/. 10 Soles*! 😱 una inversión mínima para un aprendizaje al máximo.
+          - |
+            ⚠️ *!Si realizas la compra dentro de los siguientes 10 minutos*, llévate gratis un *REGALO SORPRESA TOTALMENTE GRATIS* 🎁
+
+            *!Mira todo lo que te llevarás!* 👀📚
+
+            _Todo el kit de *Grafismo Fonético* y *Material Adicional de Apoyo* para que tu peque aprenda a reconocer y pronunciar sílabas de forma rápida y divertida_ 😍
+
+            1.- 📚 *EL Kit Completo* 6 Niveles de *Grafismo Fonético* con más de 250 páginas.
+            2.- 🎁 *Cuadernos de los números*
+            3.- 🎁 *Plan de Clase Kids*
+            4.- 🎁 *Son 7 bonos* adicionales!
+
+            !A tan solo *S/. 10 Soles*! 😱 una inversión mínima para un aprendizaje al máximo.
+        delay_after_sec: 7
+
+      - type: image
+        drive_url: "https://drive.google.com/file/d/1qyow5LY57If44LlcHNBvx70J15ILEb4H/view?usp=sharing"
+        caption_variants:
+          - |
+            *!No pierdas esta oportunidad!* y ayúdalo a dar sus primeros pasos en la lectura con este Kit Educativo 📚💡
+
+            *¿CÓMO COMPRAR?* ❓
+
+            ✅ *Responde con el método de pago que prefieras:* y realiza una única inversión de *S/. 10 Soles* 😊👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤗
+          - |
+            📚 *¡Aprovecha esta oportunidad!* y acompaña a tu peque en sus primeros pasos hacia la lectura ✨💡
+
+            *¿CÓMO OBTENERLO?* ❓
+
+            ✅ *Responde con el método de pago que prefieras:* y realiza un único pago de *S/. 10 Soles* 😊👇🏼
+
+            * *YAPE*: 📱
+            * *PLIN*: 🤳🏼
+            * *BCP*: 💳
+          - |
+            🚨 *¡No dejes pasar esta promoción!* ayuda a tu peque a iniciar *su camino al maravilloso mundo de la lectura* con este Kit Educativo 📖🌟
+
+            *¿CÓMO COMPRAR?* ❓
+
+            ✅ *Indícame el método de pago de tu preferencia:* y accede con una sola inversión de *S/. 10 Soles* 😊👇🏼
+
+            * *YAPE*: 📲
+            * *PLIN*: 📱
+            * *BCP*: 🏦
+          - |
+            🚨 *¡La promoción está próxima a terminar!* ayuda a tu peque a iniciar *su camino al maravilloso mundo de la lectura* con este Kit Educativo 📖🌟
+
+            *¿CÓMO ADQUIRIRLO?* ❓
+
+            ✅ *Indícame el método de pago de tu preferencia:* y accede con una sola inversión de *S/. 10 Soles* 😊👇🏼
+
+            * *YAPE*: 📲
+            * *PLIN*: 📱
+            * *BCP*: 🏦
+          - |
+            🚨 *¡Ya estamos a muy poco de cerrar la Promo!* ayuda a tu peque a iniciar *su camino al maravilloso mundo de la lectura* con este Kit Educativo 📖🌟
+
+            *¿CÓMO PUEDES ADQUIRIRLO?* ❓
+
+            ✅ *Indícame el método de pago de tu preferencia:* y accede con una sola inversión de *S/. 10 Soles* 😊👇🏼
+
+            * *YAPE*: 📲
+            * *PLIN*: 📱
+            * *BCP*: 🏦
+        delay_after_sec: 0
+
+  # ──────────── SEGUIMIENTO 2 ────────────
+  # Estructura: video+caption
+  - name: seguimiento_2
+    delay_minutes_from_first_message: 390
+    steps:
+      - type: video
+        drive_url: "https://drive.google.com/file/d/1ayLUWVz5Bz9XOnQOS8JVT-HoWCtlN6RK/view?usp=sharing"
+        caption_variants:
+          - |
+            🎥 *!Queremos que veas un poco más!* 😊
+
+            *Te compartimos una pequeña muestra en video* de todo lo que incluye el *Kit de Grafismo Fonético*. 📚
+            Estamos seguros que te encantará y *descubrirás lo útil que puede ser para tí y tu peque*. 🎓
+
+            * ✅ *Si decides adquirirlo,* puedes realizar tu pago de manera fácil y rápida utilizando uno de estos métodos:
+
+            🟠 *Escribe que método es más fácil para tí*, y te enviaremos los datos de pago y asegurar tu acceso al instante. 😊👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤗
+          - |
+            🎥 *¡Queremos mostrarte un poquito más!* 😊
+
+            * *Aquí te compartimos una breve muestra en video* parte del contenido que encontrarás en el *Kit de Grafismo Fonético*. 📚✨
+
+            * Estamos seguros de que te encantará y *verás lo útil que puede ser para apoyar a tu peque en el aprendizaje*. 🎓💖
+
+            * ✅ *Si deseas obtenerlo,* puedes hacer lo siguiente:
+
+            🟠 *Escríbeme cuál método te resulta más cómodo* y enseguida te enviaré los datos para asegurar tu acceso 😊👇🏼
+
+            * *YAPE*: 📱
+            * *PLIN*: 🤳🏼
+            * *BCP*: 💳
+          - |
+            🎬 *¡Queremos mostrarte un poquito más!* 😊
+
+            * *Te compartimos un pequeño video* para que puedas conocer mejor el *Kit de Grafismo Fonético en PDF*. 📚💫
+
+            * Estamos seguros de que te gustará y *notarás lo beneficioso que puede ser para tu peque*. 🎓👶🏻
+
+            ✅ *Si deseas obtener acceso a la descarga,* recuerda que es super sencillo:
+
+            🟠 *Indícanos qué método de pago te resulta más fácil* y te enviaremos la información para asegurar tu acceso inmediato 😊👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤝
+        delay_after_sec: 0
+
+  # ──────────── SEGUIMIENTO 3 ────────────
+  # Estructura: muestra PDF (con link de Drive en caption) → (6s) → oferta S/.8
+  # Aquí ARRANCA la etapa de oferta — el flag discount_active se activa al
+  # ejecutarse esta secuencia y el precio efectivo del curso pasa a S/.8.
+  - name: seguimiento_3
+    delay_minutes_from_first_message: 750
+    steps:
+      # 1) Muestra PDF gratuita con link de Drive en el caption.
+      - type: image
+        drive_url: "https://drive.google.com/file/d/1feiXE7QI523NFk2v5bzKOKP1IiUMYI1O/view?usp=sharing"
+        caption_variants:
+          - |
+            🎁 *Te envío una muestra PDF gratuita del curso* 📚 *para que puedas descargar* y ver parte del contenido.
+
+            *Toca y descárgalo y revisalo!!, para que conozcas un poquito más!* 😊👇🏼
+
+            https://drive.google.com/drive/folders/1w2mBMtRVRfvnZw-jPKlwExRkUb4-rCXx?usp=sharing
+          - |
+            🎁 *Te comparto una muestra gratuita en PDF del curso* 📚 para que puedas descargarla y conocer parte del material.
+
+            *Haz clic, descárgalo y échale un vistazo!* 😊👇🏼
+
+            https://drive.google.com/drive/folders/1w2mBMtRVRfvnZw-jPKlwExRkUb4-rCXx?usp=sharing
+          - |
+            🎁 *Te enviamos una muestra gratuita pequeña del curso en PDF* 📔 para que puedas descargarla y ver cómo es parte del contenido.
+
+            *Ábrelo, descárgalo y descubre un poquito más del material!* 😊👇🏼
+
+            https://drive.google.com/drive/folders/1w2mBMtRVRfvnZw-jPKlwExRkUb4-rCXx?usp=sharing
+        delay_after_sec: 6
+
+      # 2) Oferta flash a S/.8.
+      - type: image
+        drive_url: "https://drive.google.com/file/d/1_ZN7xu1gxInr6gvfRz3cT9ekHfmQQfYf/view?usp=drive_link"
+        caption_variants:
+          - |
+            🔥 *!Mamita, última oferta flash!* 📣
+
+            **Sólo S/.8 SOLES** por tiempo limitado‼️📉 😱
+
+            Nuestro *Kit de Grafismo Fonético* 📚 para niños entre 4 a 7 años, incluye actividades para que tu peque aprenda a leer, reconocer vocales, consonantes y síblabas mientras se divierte. 😍💡
+
+            🚨 *Descuento exclusivo válido solo por Hoy!*, aprovéchalo antes de que se agote! ⏳
+
+            *EN RESUMEN RECIBIRAS:*
+
+            📚 Kit Completo de Grafismo Fonético en PDF descargable
+            🎁 Video instructivo de como estudiar
+            🎁 Bonos de obsequio incluye tarjetitas graficas, libros complementarios, cuentos scaneados etc. 🤗
+
+            🔴 *Elige tu método de pago Favorito* y realiza una inversión mínima de **S/. 8 SOLES!** 👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤗
+
+            *⚠️ No dejes que la oportunidad se te escape!* 🏃🏻‍♀️💫
+          - |
+            🚨 *¡Mamita, OFERTA FLASH FINAL!* 🎉
+
+            * 📉 *Por Cierre de Promoción a solo: S/. 8 SOLES*‼️😮
+
+            *Nuestro *Kit de Grafismo Fonético* 📚 para niños entre 5 y 8 años incluye ejercicios prácticos para aprender a leer, reconocer letras, vocales y sílabas de manera divertida.* 🤗🎓
+
+            ⏰ *Descuento especial válido solamente HOY* ¡Aprovecha antes que termine!
+
+            *💫 *ESTO ES LO QUE RECIBIRÁS:*
+
+            📚 *Kit completo* de Grafismo Fonético en formato PDF
+            🎁 *Video explicativo* para estudiar correctamente
+            🎁 *Regalitos extra*: cuentos, libros complementarios, tarjetas didácticas y mucho más 🎁
+
+            🔴 *Escoge tu método de pago favorito* y realiza una única inversión de *S/. 8 SOLES* 👇🏼😊
+
+            * *YAPE*: 📲
+            * *PLIN*: 📱
+            * *BCP*: 👈🏼
+
+            💫 *¡No te quedes fuera de esta promoción!* 🏃🏻‍♀️
+          - |
+            📢 *¡Mamita, atención! Última oferta especial!* 🔥
+
+            💖 *Por cierre de Promoción a solo: S/. 8 SOLES* 😱📚
+
+            *El *Kit de Grafismo Fonético* está pensado para niños de 5 a 8 años e incluye material dinámico para aprender vocales, consonantes y sílabas mientras se entretienen.* 🥳✨
+
+            🚨 *Promoción válida A PUNTO DE TERMINAR* ⏳ ¡No esperes hasta el último momento!
+
+            *🎁 RESUMEN DE TODO LO QUE OBTIENES:*
+
+            📚 *Kit completo* descargable de Grafismo Fonético
+            🎁 *Video instructivo* paso a paso
+            🎁 *Bonos adicionales:* cuentos, tarjetas gráficas, libros de apoyo y más 🤗
+
+            🔴 *Indícanos qué método de pago deseas usar* y obtén acceso con una inversión mínima de *S/. 8 SOLES* 👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 💙
+
+            ⚠️ *¡Aprovecha antes de que la promoción acabe!* 💫
+          - |
+            🔥 *!Mamita, OFERTA FINAL flash!* 📣
+
+            **Por sólo S/.8 SOLES** por estas últimas horas‼️📉 😱
+
+            Nuestro *Kit de Grafismo Fonético* 📚 para niños entre 5 a 8 años, incluye actividades para que tu peque aprenda a leer, reconocer vocales, consonantes y síblabas mientras se divierte. 😍💡
+
+            🚨 *Descuento exclusivo válido solo por Hoy!*, aprovéchalo antes de que se agote! ⏳
+
+            *EN RESUMEN RECIBIRAS:*
+
+            📚 Kit Completo de Grafismo Fonético en PDF descargable
+            🎁 Video instructivo de como estudiar
+            🎁 Bonos de obsequio incluye tarjetitas graficas, libros complementarios, cuentos scaneados etc. 🤗
+
+            🔴 *Elige tu método de pago Favorito* y realiza una inversión mínima de **S/. 8 SOLES!** 👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤗
+
+            *⚠️ Apresúrate antes que la oportunidad se te escape!* 🏃🏻‍♀️💫
+          - |
+            🔥 *!Mamita, OFERTA FINAL Por cierre de Primo!* 📣
+
+            **Por sólo S/.8 SOLES** y por estas últimas horas‼️📉 😱
+
+            Nuestro *Kit de Grafismo Fonético* 📚 para niños entre 5 a 8 años, incluye actividades para que tu peque aprenda a leer, reconocer vocales, consonantes y síblabas mientras se divierte. 😍💡
+
+            🚨 *Descuento exclusivo válido solo por Hoy!*, aprovéchalo antes que termine la promoción! ⏳
+
+            *EN RESUMEN RECIBIRAS:*
+
+            📚 Kit Completo de Grafismo Fonético en PDF descargable
+            🎁 Video instructivo de como estudiar
+            🎁 Bonos de obsequio incluye tarjetitas graficas, libros complementarios, cuentos scaneados etc. 🤗
+
+            🔴 *Elige tu método de pago Favorito* y realiza una inversión mínima de **S/. 8 SOLES!** 👇🏼
+
+            * *YAPE*: 🤳🏼
+            * *PLIN*: 📲
+            * *BCP*: 🤗
+
+            *⚠️ Apresúrate antes que la oferta se acabe!* 🏃🏻‍♀️💫
+        delay_after_sec: 0
+
+  # ──────────── SEGUIMIENTO 4 ────────────
+  # Estructura: video+caption → (6s) → imagen+caption
+  # <<DISABLED>> ← marker que apaga este seguimiento sin borrarlo.
+  # Borrá la linea <<DISABLED>> del caption de abajo para reactivarlo.
+  - name: seguimiento_4
+    delay_minutes_from_first_message: 1090
+    steps:
+      - type: video
+        drive_url: "https://drive.google.com/file/d/1wVyfJ6tutWywRQgyJpIKZUyMyIZYwYFK/view?usp=sharing"
+        caption: |
+          <<DISABLED>>
+          🔥 *!Llamada Final!* *La promoción está por terminar!*: 😱⏳
+
+          A solo *S/. 8 SOLES*, por tiempo por esta última hora 📉✨
+
+          Nuestro *Kit de Grafismo Fonético* para niños entre 5 y 8 años, incluye actividades para que tu peque *aprenda a leer mientras se divierte*. 😍💡
+
+          🚨 *Descuento exclusivo válido solo por hoy!*, !Aprovéchalo antes que se agote! 🏃🏻‍♀️
+
+          *EN RESUMEN RECIBIRÁS!:*
+
+          📚 *Kit Completo* de Grafismo Fonético
+          🎁 *7 Bonos* adicionales +
+          🎥 *Video instructivo* de como aprender
+        delay_after_sec: 6
+
+      - type: image
+        drive_url: "https://drive.google.com/file/d/1X2uI_Y-3prNnCK6ikrBNOnk2PnX9-tAN/view?usp=drive_link"
+        caption: |
+          🚨 *LA PROMOCION EXCLUSIVA DE ULTIMO MOMENTO ESTA POR TERMINAR* ‼️
+
+          ((⏰)) *Hoy es el Día* para priorizarte!
+
+          💰 *Precio Especial* 🫰🏼
+          A tan solo:
+          🔵 *S/. 8 SOLES!!* 😱
+          ____________
+
+          💳 *Método de Pago:* 👇🏼
+
+          🔴 *Yape/Plin : 935286681*
+          🙎🏻‍♂️A nombre de: *Alberto Salinas.*
+          💰 *Monto: S/. 8 soles*
+
+          💛 Disponible solo *HASTA HOY!*
+        delay_after_sec: 0
+
+payment_responses:
+  yape:
+    - type: text
+      body_variants:
+        - |
+          ✅ *¡Perfecto!* puedes adquirir el curso de la siguiente manera 😊👇
+        - |
+          <<VARIANTE 2 — confirmacion breve de eleccion Yape, invita a continuar>>
+        - |
+          <<VARIANTE 3 — otra forma de confirmar eleccion Yape>>
+    - type: text
+      body_variants:
+        - |
+          🔴 *Yape/Plin : 935286681*
+          🙎🏻‍♂️A nombre de: *Alberto Salinas.*
+          💰 *Monto: S/. {price} soles*
+        - |
+          <<VARIANTE 2 — datos de Yape/Plin (935286681, Alberto Salinas, monto S/. {price} soles) — DEBE incluir {price} para que se reemplace dinamicamente con 10 u 8>>
+        - |
+          <<VARIANTE 3 — otra forma de presentar los datos Yape/Plin con {price}>>
+    - type: text
+      body_variants:
+        - |
+          😊 *Cuando lo hagas, por favor no olvides enviar la imagen de tu comprobante para verificar el pago y darte acceso*. ¡Aquí estaré para ayudarte!
+        - |
+          <<VARIANTE 2 — pide envio de comprobante tras hacer el pago, tono cordial>>
+        - |
+          <<VARIANTE 3 — otra forma de pedir comprobante>>
+
+  bcp_transferencia:
+    - type: text
+      body_variants:
+        - |
+          ✅ *Para Transferencia BCP* puedes adquirir el curso de la siguiente manera 😊👇
+        - |
+          <<VARIANTE 2 — confirmacion breve de eleccion BCP, invita a continuar>>
+        - |
+          <<VARIANTE 3 — otra forma de confirmar eleccion BCP>>
+    - type: text
+      body_variants:
+        - |
+          ✅ *BCP: 19101633649049*
+          ☑️ *BCP Interbancaria: 00219110163364904950*
+          Titular: Alberto Salinas. 🙎🏻‍♂️
+        - |
+          <<VARIANTE 2 — datos BCP (19101633649049 / Interbancaria 00219110163364904950 / Titular Alberto Salinas)>>
+        - |
+          <<VARIANTE 3 — otra forma de presentar los datos BCP>>
+    - type: text
+      body_variants:
+        - |
+          Recuerda que puedes hacerlo por Banca Móvil 📲😊 y si no tienes cuenta puedes hacerlo desde tu agente BCP más cercano.
+        - |
+          <<VARIANTE 2 — recordatorio de que puede hacer transferencia desde Banca Movil o agente BCP>>
+        - |
+          <<VARIANTE 3 — otra forma de recordar opciones de transferencia BCP>>
+
+# ─────────────────────────────────────────────────────────────────────────
+# Email enviado al cliente cuando da su correo electrónico tras la compra.
+# Edita libremente — los cambios aplican sin redeploy.
+# ─────────────────────────────────────────────────────────────────────────
+email_template:
+  from_name: "Abcmulticlases"
+  subject: "📚 Ya puedes descargar el Pack de Grafismo Fonético"
+  body: |
+    ¡Hola!
+
+    ¡Muchas gracias por tu compra del Pack PDF de Grafismo Fonético! 🎉
+
+    Aquí tienes tu enlace de descarga del material:
+
+    https://drive.google.com/drive/folders/1WrSLZOkBdCvf9B0UrZNraurgngfCPlKY?usp=sharing
+
+    Recuerda ver el video instructivo. Si tienes alguna duda, escríbeme por WhatsApp.
+
+    ¡Disfruta del material!
+    Atentamente: AbcMulticlases
+
+# ─────────────────────────────────────────────────────────────────────────
+# Secuencia disparada cuando el cliente completa el pago (acumula los S/.10).
+# Mientras tenga placeholders <<...>>, no se activa.
+# ─────────────────────────────────────────────────────────────────────────
+payment_approved_sequence:
+  - type: video
+    drive_url: "https://drive.google.com/file/d/1DMb2isnetBsVA25vDs2kL7lFJJkMpdkP/view?usp=drive_link"
+    caption_variants:
+      - |
+        ✅ *¡PAGO APROBADO!* 🥳🎉
+
+        👉🏼 *Ya puedes acceder* al material de *Grafismo Fonético* 📚 ✨ 🙌
+
+        🔴 *TOCA EL ENLACE PARA DESCARGARLO* "Y NO OLVIDES *VER EL VIDEO INSTRUCTIVO"* 😊👇🏼
+
+        https://drive.google.com/drive/folders/1WrSLZOkBdCvf9B0UrZNraurgngfCPlKY?usp=sharing
+
+        *¡Muchas Gracias por tu compra*, disfruta de tu acceso *y avísanos si pudiste entrar todo ok*. 🤗
+      - |
+        <<VARIANTE 2 — confirmacion de pago aprobado + link Drive (https://drive.google.com/drive/folders/1WrSLZOkBdCvf9B0UrZNraurgngfCPlKY?usp=sharing) + recordar video instructivo>>
+      - |
+        <<VARIANTE 3 — otra forma de celebrar pago aprobado con el mismo link de descarga>>
+    delay_after_sec: 10
+
+  # Mensaje que pide el correo del cliente. Edita el texto a tu gusto —
+  # los cambios aplican sin redeploy (igual que el resto del YAML).
+  - type: text
+    body_variants:
+      - |
+        📧 *Recuerda* que a veces los mensajes de WhatsApp se borran con el tiempo. Envíame tu *correo electrónico* para enviarte el enlace directamente a tu bandeja de entrada y lo tengas para siempre. 💾✨
+      - |
+        <<VARIANTE 2 — pide correo electronico para enviar el link de descarga al email>>
+      - |
+        <<VARIANTE 3 — otra forma de pedir el email del cliente>>
+    delay_after_sec: 0
+
+# ─────────────────────────────────────────────────────────────────────────
+# Mecánica de PDF de regalo (Opción D):
+#   1. Bot envía un AUDIO con la explicación del regalo (más cercano)
+#   2. Bot envía un TEXTO con el link al post de Facebook (para que el
+#      cliente pueda dar click directo y comentar sin salir de WhatsApp)
+#   3. Cuando el cliente escribe "COMENTADO", recibe el reward_message
+#      con el link bonus + felicitaciones.
+#
+# Mientras la sección tenga placeholders <<...>>, NO se activa.
+# Necesitas llenar 3 cosas:
+#   - El link de Drive del audio (graba, sube a Drive público, pega link)
+#   - El link al post de FB que quieres que comenten
+#   - El link de Drive del PDF bonus (dentro del reward_message)
+# ─────────────────────────────────────────────────────────────────────────
+gift_mechanic:
+  # 0) PREGUNTA DE CONSENTIMIENTO: se envía PRIMERO. Solo si el cliente
+  #    responde afirmativamente (sí, claro, me interesa, etc.) se manda
+  #    el audio + ask_text. Si responde no, se cierra cordial. Si no
+  #    responde, queda esperando indefinidamente sin molestar.
+  consent_question: |
+    🎁 *¿Deseas un Regalito Adicional extra* para complementar el aprendizaje de tu peque?
+
+    Son unos *bonitos PDFs* que podrás descargar de manera totalmente gratuita 📚✨
+
+    ¿Quieres descargar este Plus? 😊
+
+  # Mensaje cordial cuando el cliente RECHAZA el regalo. Opcional —
+  # si lo dejás vacío, no se envía nada y la convo queda en silencio.
+  decline_message: |
+    ¡Perfecto! ¡A disfrutar del material! 🎉 Éxitos con tu peque ✨
+
+  # 1) AUDIO: graba tú el audio "hola mamita...", súbelo a Drive (público),
+  #    y pega el link de "compartir" aquí.
+  ask_audio_drive_url: "https://drive.google.com/file/d/1MdW0pW6RGSrzOvSpfv9LlExKMDjoZJ-j/view?usp=sharing"
+
+  # 2) TEXTO con el link al post de FB. Llega después del audio.
+  ask_text: |
+    🎁 *PARA RECIBIR TU REGALITO ADICIONAL SIGUE ESTAS INSTRUCCIONES* 🎁
+
+    1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+    https://www.facebook.com/61583751875359/posts/122136818799125062/
+
+    2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación*
+
+    3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+
+  # 3) Respuesta cuando el cliente escribe "comentado" / "comenté" / etc.
+  reward_message: |
+    🎉 *¡Gracias por tu comentario!*
+
+    Aquí tienes tu *PDF de regalo* — un material extra para complementar el aprendizaje de tu hijo:
+
+    https://drive.google.com/drive/folders/11u7uNnGpb_y7FY2CMs1VdRi92-SR09Rn?usp=drive_link
+
+    *¡Felicitaciones en tu camino de aprendizaje!* 📚✨
