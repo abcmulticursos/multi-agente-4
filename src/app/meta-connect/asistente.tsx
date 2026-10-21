@@ -1022,7 +1022,34 @@ function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void 
           >
             {ocupado ? "Creando…" : `${destino && !destino.conLaApp ? "2. " : ""}Crear token permanente${destino ? ` en «${destino.nombre}»` : ""}`}
           </button>
-          {aviso && <div className="text-xs text-red-700">❌ {aviso}</div>}
+          {!aviso && (
+            <div className="text-xs text-neutral-600">
+              La primera vez, Meta suele pedir un código que te manda por correo. Si pasa, aquí te decimos qué hacer.
+            </div>
+          )}
+          {/* META PIDE UNA PERSONA (20/10/2026, lo vivió él): el primer intento casi nunca crea el
+              token. Meta deja una SOLICITUD en el BM que solo se ve entrando allí («Se ha solicitado…
+              verifica antes de generar»): al aceptarla manda un código de 6 dígitos al correo; con
+              el código puesto, el segundo intento sí lo crea. Eso no se puede hacer desde aquí. */}
+          {aviso && destino && (
+            <div className="space-y-2 rounded-md border-2 border-amber-400 bg-amber-50 p-3 text-sm">
+              <div className="font-bold">👉 Meta te pide confirmarlo. Es normal la primera vez.</div>
+              <div>
+                Ve a tu BM <b>{destino.nombre}</b>, confirma el aviso que pide <b>enviar un código a tu correo</b> y escribe el código que te llegue.
+              </div>
+              <div className="text-xs text-neutral-600">
+                Si Meta te pide dar privilegios a la app, dáselos (control total).
+              </div>
+              <a href={`https://business.facebook.com/settings/system-users?business_id=${destino.id}`} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-[#1877f2] px-3 py-1.5 font-bold text-white">
+                Ir a {destino.nombre} ↗
+              </a>
+              <div>
+                Luego vuelve aquí y pulsa <b>«Crear token permanente»</b> otra vez.
+              </div>
+              <div className="text-xs text-neutral-500">Lo que respondió Meta: {aviso}</div>
+            </div>
+          )}
+          {aviso && !destino && <div className="text-xs text-red-700">❌ {aviso}</div>}
         </div>
       )}
 
