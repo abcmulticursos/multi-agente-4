@@ -30684,6 +30684,23 @@ function MisTiendas({
             const sinNumero = !String(t.numero ?? "").trim();
             const cobrador = (cfg.cobradores ?? []).find((c) => c.id === t.cobrador);
             const frases = (t.frases_de_entrada ?? []).filter((f) => f.trim());
+            // SIN PALABRA, LA SEGUNDA DE UN NÚMERO NO RECIBE A NADIE (22/10/2026). Si comparte número
+            // con una tienda encendida que está ANTES en la lista y ninguna de las dos tiene palabra
+            // activadora, el bot manda todos los clientes a esa otra (la misma regla que
+            // `tiendaDelNumero`). Solo se avisa; nada se bloquea.
+            const suNumero = String(t.numero ?? "").trim();
+            const yo = tiendas.findIndex((x) => x.id === t.id);
+            const leGana =
+              !apagada && suNumero && frasesDeEntrada(t).length === 0
+                ? tiendas
+                    .slice(0, yo)
+                    .find(
+                      (x) =>
+                        x.enabled !== false &&
+                        String(x.numero ?? "").trim() === suNumero &&
+                        frasesDeEntrada(x).length === 0
+                    ) ?? null
+                : null;
             return (
               <div
                 key={t.id}
@@ -30698,6 +30715,13 @@ function MisTiendas({
                     {cobrador ? ` · cobra ${cobrador.nombre?.trim() || "su cobrador"}` : ""}
                     {frases.length > 0 ? ` · 🔑 ${frases.join(", ")}` : ""}
                   </div>
+                  {leGana && (
+                    <div className="mt-1 text-[11px] font-semibold text-red-700">
+                      ⚠ Comparte número con «{leGana.nombre?.trim() || "otra tienda"}» y ninguna tiene palabra
+                      activadora: todos sus clientes van a «{leGana.nombre?.trim() || "esa tienda"}». Ponle una
+                      palabra a una de las dos (⋯ Más opciones → 🔑 Palabra activadora).
+                    </div>
+                  )}
                 </div>
                 {/* El teléfono, no el código interno de Meta (si este proyecto lo conoce). */}
                 <span className="text-[11px] text-tinta-suave" title={sinNumero ? undefined : `ID en Meta: ${t.numero}`}>
@@ -30751,6 +30775,31 @@ function MisTiendas({
                       >
                         ✏️ Cambiar sus datos
                         <span className="block text-[10px] text-tinta-suave">Nombre, número, productos, cobrador, frases</span>
+                      </button>
+                      {/* ACCESO DIRECTO A LA PALABRA ACTIVADORA (22/10/2026). Abre la misma ventana de
+                          datos y lleva el cursor a su casilla (`frases_de_entrada`): no es otro sitio. */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuDe(null);
+                          setDatosDe(t.id);
+                          const irALaCasilla = (intento: number) => {
+                            const casilla = document.getElementById(`tienda_${t.id}_frases`) as HTMLInputElement | null;
+                            if (casilla) {
+                              casilla.scrollIntoView({ block: "center" });
+                              casilla.focus();
+                            } else if (intento < 20) {
+                              window.setTimeout(() => irALaCasilla(intento + 1), 100);
+                            }
+                          };
+                          irALaCasilla(0);
+                        }}
+                        className="block w-full px-3 py-1.5 text-left hover:bg-relleno"
+                      >
+                        🔑 Palabra activadora
+                        <span className="block text-[10px] text-tinta-suave">
+                          {frases.length > 0 ? `Hoy: ${frases.join(", ")}` : "Opcional: para varias tiendas en un número"}
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -51832,8 +51881,8 @@ function revisarTienda(
       avisos.push({
         clave: "numero_repetido",
         grave: true,
-        queFalta: "Su número está en otra tienda y ninguna de las dos tiene frase de entrada",
-        queOcurre: "Gana la primera y la otra no atiende a nadie. Ponle frases de entrada a una de las dos.",
+        queFalta: "Su número está en otra tienda y ninguna de las dos tiene palabra activadora",
+        queOcurre: "Todos los clientes de ese número van a la primera de la lista; la otra no recibe a nadie. Ponle una palabra activadora a una de las dos.",
       });
     } else if (comparte.fraseRepetida) {
       avisos.push({
@@ -52635,8 +52684,8 @@ function TiendasDelProyecto({
                     if (comparte.tipo === "choque") {
                       return (
                         <span className="mt-1 block text-[10px] font-bold text-rojo">
-                          Otra tienda ya tiene este número y ninguna de las dos tiene frase de
-                          entrada. Atenderá solo una.
+                          Otra tienda ya tiene este número y ninguna de las dos tiene palabra
+                          activadora: todos los clientes irán a la primera de la lista.
                         </span>
                       );
                     }
@@ -52644,11 +52693,11 @@ function TiendasDelProyecto({
                       <span className="mt-1 block text-[10px] text-tinta-suave">
                         Comparte el número con {otras}.{" "}
                         {comparte.tipo === "por-frase"
-                          ? "Le llegan los clientes cuyo primer mensaje trae su frase."
-                          : "Es la de por defecto: le llegan los que no escriben ninguna frase."}
+                          ? "Le llegan los clientes cuyo primer mensaje trae su palabra activadora."
+                          : "Es la de por defecto: le llegan los que no escriben ninguna palabra activadora."}
                         {comparte.fraseRepetida ? (
                           <span className="block font-bold text-rojo">
-                            La frase «{comparte.fraseRepetida.frase}» también la tiene «
+                            La palabra «{comparte.fraseRepetida.frase}» también la tiene «
                             {comparte.fraseRepetida.con.nombre?.trim() || "otra tienda"}»: gana
                             la primera de la lista.
                           </span>
@@ -52660,7 +52709,7 @@ function TiendasDelProyecto({
                     número pueda atender a más de 2 tiendas… en cada campaña cambiaría la
                     frase de entrada». Se escriben con comas y se limpian al guardar. */}
                 <label className="mt-2 block text-xs font-medium text-tinta-suave">
-                  Frases de entrada (opcional)
+                  🔑 Palabra activadora (opcional)
                   <input
                     id={`tienda_${tienda.id}_frases`}
                     value={(tienda.frases_de_entrada ?? []).join(",")}
@@ -52671,9 +52720,9 @@ function TiendasDelProyecto({
                   />
                   <span className="mt-1 block text-[10px] text-tinta-suave">
                     Para que un número atienda varias tiendas: si el primer mensaje del cliente
-                    trae una de estas frases, entra a esta tienda y se queda en ella. Separadas
-                    por coma; da igual mayúsculas, tildes y signos. Vacío = la tienda se elige
-                    por el número, como siempre.
+                    trae una de estas palabras (en cualquier parte del mensaje), entra a esta
+                    tienda y se queda en ella. Varias, separadas por coma; da igual mayúsculas,
+                    tildes y signos. Vacío = la tienda se elige por el número, como siempre.
                   </span>
                 </label>
               </div>
