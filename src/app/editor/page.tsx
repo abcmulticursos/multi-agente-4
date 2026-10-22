@@ -30585,6 +30585,37 @@ function MisTiendas({
   const [menuDe, setMenuDe] = useState<string | null>(null);
   const [datosDe, setDatosDe] = useState<string | null>(null);
   const [buscar, setBuscar] = useState("");
+  // EL ESTADO REAL DE CADA NÚMERO (22/10/2026): «🟢 Activa» salía aunque su número estuviera pausado
+  // o ni siquiera conectado aquí, y entonces nadie contestaba. Solo lee la base, nada de Meta.
+  // null = todavía no se sabe (o falló): se muestra como siempre, sin inventar un estado.
+  const [numeros, setNumeros] = useState<Array<{ id: string; telefono: string; pausado: boolean }> | null>(null);
+  const leerNumeros = useCallback(() => {
+    fetch("/api/negocio", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { lista?: Array<{ id: string; telefono: string; pausado: boolean }> } | null) => {
+        if (Array.isArray(d?.lista)) setNumeros(d.lista);
+      })
+      .catch(() => undefined);
+  }, []);
+  useEffect(() => leerNumeros(), [leerNumeros]);
+  const numeroDe = (t: TiendaEditor) => {
+    const id = String(t.numero ?? "").trim();
+    return id && numeros ? numeros.find((n) => n.id === id) ?? null : null;
+  };
+  /** Pausa o reanuda un número al instante (lo mismo que el botón de Meta Connect). */
+  const pausar = async (id: string, pausado: boolean) => {
+    try {
+      const r = await fetch("/api/meta/connect/whatsapp/pausar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumberId: id, pausado }),
+      });
+      if (!r.ok) window.alert("No se pudo cambiar el número. Hazlo en Meta Connect → 6. Cuentas de WhatsApp.");
+    } catch {
+      window.alert("No se pudo cambiar el número. Hazlo en Meta Connect → 6. Cuentas de WhatsApp.");
+    }
+    leerNumeros();
+  };
   useEffect(() => {
     if (!menuDe) return;
     const cerrar = (e: Event) => {
@@ -30668,14 +30699,31 @@ function MisTiendas({
                     {frases.length > 0 ? ` · 🔑 ${frases.join(", ")}` : ""}
                   </div>
                 </div>
-                <span className="text-[11px] text-tinta-suave">📱 {sinNumero ? "sin número" : t.numero}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                    apagada ? "bg-slate-200 text-slate-700" : sinNumero ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-                  }`}
-                >
-                  {apagada ? "⏸ Apagada" : sinNumero ? "Preparada" : "🟢 Activa"}
+                {/* El teléfono, no el código interno de Meta (si este proyecto lo conoce). */}
+                <span className="text-[11px] text-tinta-suave" title={sinNumero ? undefined : `ID en Meta: ${t.numero}`}>
+                  📱 {sinNumero ? "sin número" : numeroDe(t)?.telefono ?? t.numero}
                 </span>
+                {(() => {
+                  // EL ESTADO DE VERDAD: apagada, sin número, su número pausado, su número no
+                  // conectado aquí, o activa. Mientras no se sabe del número, como siempre.
+                  const n = numeroDe(t);
+                  const noConectado = !apagada && !sinNumero && numeros !== null && !n;
+                  const pausadoSuNumero = !apagada && !!n?.pausado;
+                  const [clase, texto, ayuda] = apagada
+                    ? ["bg-slate-200 text-slate-700", "⏸ Apagada", "No atiende. Su número contesta con tu contenido general (u otra tienda del mismo número), salvo que lo pauses."]
+                    : sinNumero
+                      ? ["bg-amber-100 text-amber-800", "Preparada", "Sin número todavía: nadie la elige por WhatsApp."]
+                      : pausadoSuNumero
+                        ? ["bg-amber-100 text-amber-800", "⏸ Su número está pausado", "Nadie le contesta. Reanúdalo en Meta Connect → 6. Cuentas de WhatsApp, o con «▶ Reanudar su número» en Más opciones."]
+                        : noConectado
+                          ? ["bg-red-100 text-red-800", "⚠ Su número no está conectado aquí", "Este proyecto no tiene ese número: sus clientes no llegan aquí. Conéctalo en Meta Connect."]
+                          : ["bg-emerald-100 text-emerald-800", "🟢 Activa", "Atiende por su número."];
+                  return (
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${clase}`} title={ayuda}>
+                      {texto}
+                    </span>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={() => onAbrir(t.id)}
@@ -30724,14 +30772,63 @@ function MisTiendas({
                             ...cfg,
                             tiendas: (cfg.tiendas ?? []).map((x) => (x.id === t.id ? { ...x, enabled: apagada } : x)),
                           });
+                          // APAGAR NO CALLABA EL NÚMERO (22/10/2026): decía «deja de atender» y su
+                          // número seguía contestando con el contenido general. Ahora se le pregunta.
+                          // Solo si ninguna otra tienda encendida usa ese número: si la hay, la atiende ella.
+                          const n = numeroDe(t);
+                          if (!n) return;
+                          const otraLoUsa = (cfg.tiendas ?? []).some(
+                            (x) => x.id !== t.id && x.enabled !== false && String(x.numero ?? "").trim() === n.id
+                          );
+                          if (otraLoUsa) return;
+                          if (!apagada && !n.pausado) {
+                            if (
+                              window.confirm(
+                                `¿Pausar también su número ${n.telefono}?\n\n` +
+                                  `• Aceptar: nadie le contesta a ese número (ni los seguimientos pendientes).\n` +
+                                  `• Cancelar: sus clientes pasan a tu contenido general.\n\n` +
+                                  `La tienda se apaga al GUARDAR; el número se pausa YA.`
+                              )
+                            )
+                              void pausar(n.id, true);
+                          } else if (apagada && n.pausado) {
+                            if (
+                              window.confirm(
+                                `¿Reanudar también su número ${n.telefono}?\n\nEstá pausado: sin reanudarlo, la tienda encendida no le contesta a nadie.\n\nLa tienda se enciende al GUARDAR; el número se reanuda YA.`
+                              )
+                            )
+                              void pausar(n.id, false);
+                          }
                         }}
                         className="block w-full px-3 py-1.5 text-left hover:bg-relleno"
                       >
                         {apagada ? "▶ Encender" : "⏸ Apagar"}
                         <span className="block text-[10px] text-tinta-suave">
-                          {apagada ? "Vuelve a atender en su número" : "Deja de atender, sin borrar nada"}
+                          {apagada
+                            ? "Vuelve a atender en su número"
+                            : "Deja de vender lo suyo. Te pregunta si pausar su número"}
                         </span>
                       </button>
+                      {(() => {
+                        // Reanudar o pausar su número desde aquí, sin ir a Meta Connect.
+                        const n = numeroDe(t);
+                        if (!n) return null;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMenuDe(null);
+                              void pausar(n.id, !n.pausado);
+                            }}
+                            className="block w-full px-3 py-1.5 text-left hover:bg-relleno"
+                          >
+                            {n.pausado ? "▶ Reanudar su número" : "⏸ Pausar su número"}
+                            <span className="block text-[10px] text-tinta-suave">
+                              {n.pausado ? `${n.telefono} vuelve a contestar. Al instante` : `Nadie le contesta a ${n.telefono}. Al instante`}
+                            </span>
+                          </button>
+                        );
+                      })()}
                       <div className="my-1 border-t border-borde" />
                       <button
                         type="button"

@@ -18,6 +18,12 @@ function respuesta() {
       nombre: getMetaRuntimeSetting(CLAVE)?.trim() || null,
       numeros: numeros.filter((n) => n.pausado !== 1).length,
       pausados: numeros.filter((n) => n.pausado === 1).length,
+      // Cada número con su estado, para que «Mis tiendas» diga la verdad (22/10/2026).
+      lista: numeros.map((n) => ({
+        id: n.phone_number_id,
+        telefono: n.display_phone_number ?? n.phone_number_id,
+        pausado: n.pausado === 1,
+      })),
     },
     { headers: { "Cache-Control": "no-store" } }
   );

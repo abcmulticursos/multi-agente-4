@@ -54,6 +54,8 @@ import {
   setLastFollowupIndex,
   setLastFollowupStartedAt,
   setMode,
+  isNumberBlocked,
+  listMetaWhatsAppConnections,
   type ConversationRow,
   type ScheduledActionRow,
   type WorkflowState,
@@ -6668,6 +6670,22 @@ async function executeActionInner(action: ScheduledActionRow): Promise<void> {
     console.log(
       `[wf] acción ${action.id}: convo en modo HUMAN, saltando`
     );
+    return;
+  }
+  // BLOQUEADO O PAUSADO = EL BOT NO LE ESCRIBE (22/10/2026). «Bloquear» decía «el bot ignorará sus
+  // mensajes» y «Pausar» un número «dejará de contestar por ese número», pero los seguimientos ya
+  // programados seguían saliendo: al bloqueado le llegaba «¿sigues interesado?» y, con el número
+  // pausado porque lo atiende otro proyecto, el cliente recibía los de los dos bots. Se salta igual
+  // que en modo HUMANO. Las del simulador no tienen número ni bloqueo: no les toca.
+  if (convo.channel !== "test" && isNumberBlocked(convo.phone)) {
+    console.log(`[wf] acción ${action.id}: el cliente está BLOQUEADO, no le escribo`);
+    return;
+  }
+  if (
+    convo.wa_phone_number_id &&
+    listMetaWhatsAppConnections().some((c) => c.phone_number_id === convo.wa_phone_number_id && c.pausado === 1)
+  ) {
+    console.log(`[wf] acción ${action.id}: su número ${convo.wa_phone_number_id} está PAUSADO en este proyecto, no le escribo`);
     return;
   }
 

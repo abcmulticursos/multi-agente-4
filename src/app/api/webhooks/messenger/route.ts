@@ -468,7 +468,14 @@ async function handleMessengerMessage(
   }
   cancelPendingActionsByTypeForConvo(convo.id, "send_text_chunk");
 
-  const debounceSec = Number(process.env.BOT_DEBOUNCE_SECONDS ?? 8);
+  // EL MISMO TIEMPO QUE WHATSAPP (22/10/2026): el del panel (Ajustes), y si no está, la variable
+  // de EasyPanel. Antes este canal leía SOLO la variable: cambiarlo en el panel movía WhatsApp y
+  // aquí no pasaba nada. Misma regla que handler.ts.
+  const debounceDelPanel = loadWorkflowConfig()?.bot_debounce_seconds;
+  const debounceSec =
+    typeof debounceDelPanel === "number" && debounceDelPanel >= 0
+      ? debounceDelPanel
+      : Number(process.env.BOT_DEBOUNCE_SECONDS ?? 8);
   if (debounceSec > 0) {
     latestInboundMsgId.set(phone, messageId);
     await sleep(debounceSec * 1000);
