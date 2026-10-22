@@ -23,6 +23,8 @@ interface Props {
     foto: string | null;
     linea: string | null;
     color?: string | null;
+    /** El número de la tienda elegida: su calidad se lee aparte (la del principal no sirve). */
+    numeroId?: string | null;
   } | null;
   onRefresh: () => Promise<void> | void;
   view?: "chats" | "kanban" | "resultados";
@@ -40,6 +42,24 @@ export default function DashboardHeader({
   view = "chats",
   onView,
 }: Props) {
+  // La calidad del número de la tienda elegida. Se pide al cambiar de tienda (el servidor la
+  // recuerda media hora); mientras llega, no se muestra nada en vez de la del principal.
+  const numeroDeLaTienda = identidad?.numeroId ?? null;
+  const [calidadDeLaTienda, setCalidadDeLaTienda] = useState<string | null>(null);
+  useEffect(() => {
+    setCalidadDeLaTienda(null);
+    if (!numeroDeLaTienda) return;
+    let vigente = true;
+    fetch(`/api/meta/calidad?wa=${encodeURIComponent(numeroDeLaTienda)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { quality?: string | null } | null) => {
+        if (vigente) setCalidadDeLaTienda(d?.quality ?? null);
+      })
+      .catch(() => undefined);
+    return () => {
+      vigente = false;
+    };
+  }, [numeroDeLaTienda]);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<"ok" | "err" | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -119,8 +139,13 @@ export default function DashboardHeader({
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-neutral-900">{identidad.nombre}</div>
             {identidad.telefono && (
-              <div className="text-sm text-neutral-500">
-                {identidad.telefono.startsWith("+") ? identidad.telefono : `+${identidad.telefono}`}
+              <div className="flex flex-wrap items-center gap-x-2 text-sm text-neutral-500">
+                {/* El número nunca se parte en dos líneas; si no cabe, la calidad baja a la siguiente. */}
+                <span className="whitespace-nowrap">
+                  {identidad.telefono.startsWith("+") ? identidad.telefono : `+${identidad.telefono}`}
+                </span>
+                {/* SU CALIDAD, la de ESTE número (22/10/2026): «falta el indicador de calidad». */}
+                <QualityBadge quality={calidadDeLaTienda} />
               </div>
             )}
             {identidad.linea && (

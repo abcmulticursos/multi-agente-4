@@ -415,6 +415,7 @@ export default function ConnectionGate({ initialView }: Props) {
       foto: b.numeroId ? `/api/meta/avatar?wa=${b.numeroId}` : b.paginaId ? `/api/meta/avatar?page=${b.paginaId}` : null,
       linea: esTienda ? `Tienda: ${b.nombre}` : "Número sin tienda",
       color: b.color,
+      numeroId: b.numeroId ?? null,
     };
   }, [conBarra, bandejaVigente, bandejas]);
 
