@@ -87,6 +87,8 @@ export default function AsistenteDeConexion() {
   const [paso, setPaso] = useState<Paso>("inicio");
   const [casillas, setCasillas] = useState<Record<string, boolean>>({});
   const [aviso, setAviso] = useState<string | null>(null);
+  /** El BM con el que se abre el paso del token (desde «Crear token de este BM»). */
+  const [bmDelToken, setBmDelToken] = useState<string | null>(null);
   /** La línea que deja el regreso de Facebook: éxito (se va sola) o qué hacer si falló. */
   const [regreso, setRegreso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
 
@@ -98,8 +100,12 @@ export default function AsistenteDeConexion() {
     void (async () => {
       try {
         const d = await (await fetch("/api/meta/connect/token-estado?ligero=1", { cache: "no-store" })).json();
+        // ARRIBA SOLO SI ES URGENTE (21/10/2026): «esto aparece encima de las cuentas… ¿está bien que
+        // esté ahí?». Lo pendiente se ve en la fila de la cuenta y del negocio («⚠ 2 sin token»);
+        // el rojo de arriba solo vuelve a 15 días o menos de que caduque, o si ya no hay permiso.
+        const urgente = d.loginVencido || (d.vence && d.vence - Date.now() <= 15 * 86_400_000);
         setSinToken(
-          d.appId && !d.tiene && d.faltan > 0
+          d.appId && !d.tiene && d.faltan > 0 && urgente
             ? {
                 vence: d.vence ?? null,
                 faltan: d.faltan,
@@ -182,7 +188,10 @@ export default function AsistenteDeConexion() {
   // LOS BOTONES DEL ENCABEZADO ABREN EL PASO QUE TOCA (ver `EstadoDeConexion` en page.tsx).
   useEffect(() => {
     const alPedir = (e: Event) => {
-      const paso = (e as CustomEvent<string>).detail as Paso;
+      // El detalle es el paso («app», «cerrar»…) o {paso, bm} para abrir el token ya en un BM.
+      const d = (e as CustomEvent<string | { paso: string; bm?: string }>).detail;
+      const paso = (typeof d === "string" ? d : d.paso) as Paso;
+      setBmDelToken(typeof d === "string" ? null : d.bm ?? null);
       setRegreso(null);
       setAbierto(true);
       setAviso(null);
@@ -386,7 +395,7 @@ export default function AsistenteDeConexion() {
 
             {paso === "cerrar" && <PasoCerrarSesion volver={() => ir("inicio")} />}
 
-            {paso === "token" && <PasoToken volver={() => ir("numeros")} seguir={() => ir("listo")} />}
+            {paso === "token" && <PasoToken key={bmDelToken ?? "token"} bmInicial={bmDelToken} volver={() => ir("numeros")} seguir={() => ir("listo")} />}
 
             {paso === "listo" && <PasoListo estado={estado} volver={() => ir("token")} cerrar={cerrar} />}
           </div>
@@ -401,7 +410,14 @@ export default function AsistenteDeConexion() {
  * me confunde, es como un bypass». Una cosa por pantalla; la siguiente no aparece hasta terminar
  * la anterior, y «Continuar» solo se activa cuando está hecha.
  */
-type SubPaso = "elegir" | "crear" | "claves" | "preparar" | "permiso" | "datos" | "productos" | "uri" | "vivo";
+type SubPaso = "elegir" | "crear" | "claves" | "preparar" | "permiso" | "datos" | "whatsapp" | "messenger" | "instagram" | "login" | "uri" | "vivo";
+
+/** Los productos que se revisan solos, en su orden: objeto de Meta, su ventana y su nombre. */
+const ORDEN_PRODUCTOS = [
+  ["whatsapp_business_account", "whatsapp", "WhatsApp"],
+  ["page", "messenger", "Messenger"],
+  ["instagram", "instagram", "Instagram"],
+] as const;
 
 function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<string, boolean>; marcar: (id: string, v: boolean) => void; alListo: () => void; volver: () => void }) {
   const [sub, setSub] = useState<SubPaso>("elegir");
@@ -446,7 +462,28 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
   /** Por objeto de Meta (whatsapp_business_account / page / instagram): ¿aceptó configurarlo? */
   const [productos, setProductos] = useState<Record<string, { ok: boolean; detalle: string }> | null>(null);
   const [comprobando, setComprobando] = useState(false);
-  async function comprobarProductos() {
+  /** Los productos que él dijo que no usará (Messenger, Instagram). */
+  const [saltados, setSaltados] = useState<string[]>([]);
+
+  /** Lo que respondió Meta al configurar, por producto. */
+  const productosDe = (lista: Array<{ paso: string; ok: boolean; detalle: string }>) => {
+    const r: Record<string, { ok: boolean; detalle: string }> = {};
+    for (const p of lista) {
+      const objeto = p.paso.match(/^Webhook de (\S+)/)?.[1];
+      if (objeto) r[objeto] = { ok: p.ok, detalle: p.detalle };
+    }
+    return r;
+  };
+
+  /** A la ventana del primer producto que falta (desde `desde`); si no falta ninguno, al inicio de sesión. */
+  function irAProductos(mapa: Record<string, { ok: boolean; detalle: string }> | null, desde = 0, saltar = saltados) {
+    for (const [objeto, ventana] of ORDEN_PRODUCTOS.slice(desde)) {
+      if (!mapa?.[objeto]?.ok && !saltar.includes(objeto)) return ir(ventana);
+    }
+    ir("login");
+  }
+
+  async function comprobarProductos(): Promise<Record<string, { ok: boolean; detalle: string }> | null> {
     setComprobando(true);
     try {
       // COMPROBAR TAMBIÉN CONFIGURA: los mensajes de la app pasan a llegar a ESTE proyecto. Si hoy
@@ -461,21 +498,20 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
         )
       ) {
         setComprobando(false);
-        return;
+        return null;
       }
       const d = (await (await fetch("/api/meta/connect/configurar-app", { method: "POST" })).json()) as {
         pasos?: Array<{ paso: string; ok: boolean; detalle: string }>;
         error?: string;
       };
-      const r: Record<string, { ok: boolean; detalle: string }> = {};
-      for (const p of d.pasos ?? []) {
-        const objeto = p.paso.match(/^Webhook de (\S+)/)?.[1];
-        if (objeto) r[objeto] = { ok: p.ok, detalle: p.detalle };
-      }
+      const r = productosDe(d.pasos ?? []);
       if (!Object.keys(r).length) r.whatsapp_business_account = { ok: false, detalle: d.error ?? "Meta no respondió." };
       setProductos(r);
+      return r;
     } catch {
-      setProductos({ whatsapp_business_account: { ok: false, detalle: "No se pudo consultar a Meta." } });
+      const r = { whatsapp_business_account: { ok: false, detalle: "No se pudo consultar a Meta." } };
+      setProductos(r);
+      return r;
     } finally {
       setComprobando(false);
     }
@@ -501,24 +537,25 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       const lista = (c.pasos ?? []) as Array<{ paso: string; ok: boolean; detalle: string }>;
       // (Con su razón cuando falla: un «❌» solo no dice qué hacer.)
       setPasos(lista.map((p) => `${p.ok ? "✅" : "❌"} ${p.paso}${p.ok ? "" : ` — ${p.detalle}`}`));
+      // Lo que Meta aceptó o rechazó de cada producto: decide qué ventanas se saltan.
+      const mapa = productosDe(lista);
+      setProductos(mapa);
       const dominio = lista.find((p) => !p.ok && /Dominio/.test(p.paso));
       // SOLO WHATSAPP FRENA (21/10/2026): un fallo de Instagram («DNS server failure», mientras el
       // servidor se desplegaba) paraba todo. Messenger e Instagram fallando quedan anotados en la
       // lista de arriba y se sigue; se reintentan con «🔍 Comprobar». WhatsApp sí es obligatorio.
       const whatsapp = lista.find((p) => !p.ok && /whatsapp_business_account/.test(p.paso));
-      if (whatsapp) {
-        setError(
-          /curl|DNS|502|503|timed? ?out|Callback verification failed/i.test(whatsapp.detalle)
-            ? "Meta no pudo comunicarse con tu servidor (quizá se estaba desplegando o reiniciando). Espera un minuto y pulsa «Reintentar»."
-            : `Meta no dejó conectar WhatsApp: ${whatsapp.detalle}`
-        );
+      // Solo frena un fallo de CONEXIÓN con el servidor. Si WhatsApp falla porque falta agregarlo a la
+      // app, se sigue: su ventana lo dice en rojo, con «Abrir mi app» y «Reintentar».
+      if (whatsapp && /curl|DNS|502|503|timed? ?out|Callback verification failed/i.test(whatsapp.detalle)) {
+        setError("Meta no pudo comunicarse con tu servidor (quizá se estaba desplegando o reiniciando). Espera un minuto y pulsa «Reintentar».");
         setReintentar(true);
         return;
       }
       // (#10): la app tiene apagado «Permitir acceso a la API para la configuración de la app».
       if (dominio && /\(#10\)|app settings through API|advanced settings/i.test(dominio.detalle)) ir("permiso");
       else if (dominio) ir("datos");
-      else ir("productos");
+      else irAProductos(mapa);
     } catch {
       setError("No se pudo consultar a Meta.");
     } finally {
@@ -654,7 +691,6 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
 
       {sub === "permiso" && (
         <>
-          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
             <b>Enciende un permiso de tu app (una sola vez).</b> Tu app no deja que el CRM complete su configuración. En la página que se abre, pon en <b>«Sí»</b>{" "}
             <i>«Permitir acceso a la API para la configuración de la app»</i> y guarda.
@@ -666,7 +702,6 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
 
       {sub === "datos" && (
         <>
-          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
           <div>
             <b>Falta llenar 3 datos de tu app.</b> Ábrela y pega cada uno en su campo; luego «Guardar cambios».
           </div>
@@ -678,85 +713,111 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <div className="text-xs">Sitio web (abajo del todo: «+ Agregar plataforma» → «Sitio web»):</div>
           <Copiar texto={origen} />
           <Casilla id="datos" casillas={casillas} marcar={marcar} texto="Pegué los 3 datos y guardé." />
-          <Botones listo={!!casillas.datos} alSeguir={() => ir("productos")} />
+          <Botones listo={!!casillas.datos} alSeguir={() => irAProductos(productos)} />
         </>
       )}
 
-      {/* LOS PRODUCTOS DE LA APP, OBLIGATORIO (20/10/2026): «hay que agregar Inicio de sesión de
-          Facebook para empresas, ese paso falta; un novato no sabrá que hay que crear eso para
-          agregar la URI». Sale siempre: una app vieja puede no tenerlos. Meta no deja agregarlos
-          desde fuera, ni comprobarlo: por eso las casillas. */}
-      {sub === "productos" && (
-        <>
-          <div>
-            <b>Agrega a tu app lo que necesita.</b> En la página que se abre, busca cada uno y pulsa <b>«Configurar»</b>. Si ya lo tiene, solo márcalo.
-          </div>
-          <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
-          {/* EN ESTE ORDEN (20/10/2026): «primero WhatsApp, luego Messenger, luego IG, y al final lo
-              de URI». El Inicio de sesión va en la pantalla siguiente, junto a su URI. */}
-          {/* COMPROBADO CON META, NO CON CASILLAS (21/10/2026): «un checklist a mano no dice
-              nada, puede mentir». Meta no tiene una pregunta de «qué productos tiene la app»
-              (revisado en su referencia), así que se le pide CONFIGURAR cada uno: lo que
-              acepta, está; lo que rechaza, falta, y se muestra su respuesta. */}
-          <button type="button" disabled={comprobando} className="inline-flex items-center gap-1 rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-40" onClick={() => void comprobarProductos()}>
-            {comprobando ? (
-              <>
-                Comprobando con Meta
-                <Puntos />
-              </>
-            ) : (
-              "🔍 Comprobar"
-            )}
-          </button>
-          {productos && (
-            <div className="space-y-1.5">
-              {(
-                [
-                  ["whatsapp_business_account", "WhatsApp", true],
-                  ["page", "Messenger", false],
-                  ["instagram", "Instagram", false],
-                ] as const
-              ).map(([clave, nombre, obligatorio]) => {
-                const r = productos[clave];
-                return (
-                  <div key={clave} className="rounded-lg border border-neutral-200 bg-white px-3 py-2">
-                    <span className="font-semibold">{r?.ok ? "✅" : "❌"} {nombre}</span>
-                    {!r?.ok && (
-                      <span className="block text-xs text-neutral-600">
-                        {obligatorio ? "Falta: agrégalo a tu app y vuelve a comprobar." : "No se pudo configurar. Si vas a vender por aquí, agrégalo y vuelve a comprobar."}
-                        {r?.detalle ? <span className="block text-neutral-400">Meta: {r.detalle}</span> : null}
-                      </span>
-                    )}
+      {/* UNA VENTANA POR PRODUCTO, REVISADA SOLA (21/10/2026): «que meta connect sienta que falta
+          WhatsApp y vaya ventana por ventana… sale rojo, agrega WhatsApp en tu app, reintentar y
+          siguiente». Al preparar la app el CRM ya le pidió a Meta configurar los tres: lo que
+          aceptó está agregado y su ventana se SALTA; lo que rechazó, sale aquí en rojo. Messenger e
+          Instagram se pueden saltar si no se usan. WhatsApp es obligatorio. */}
+      {(sub === "whatsapp" || sub === "messenger" || sub === "instagram") &&
+        (() => {
+          const i = ORDEN_PRODUCTOS.findIndex(([, s]) => s === sub);
+          const [objeto, , nombre] = ORDEN_PRODUCTOS[i];
+          const r = productos?.[objeto];
+          return (
+            <>
+              <div className="font-semibold">
+                Paso {i + 1} de 5 · {nombre}
+              </div>
+              {r?.ok ? (
+                <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 font-semibold text-emerald-800">✅ {nombre} ya está en tu app.</div>
+              ) : (
+                <div className="space-y-2 rounded-lg border border-red-300 bg-red-50 px-3 py-3">
+                  <div className="font-semibold text-red-800">Falta agregar {nombre} a tu app.</div>
+                  <div className="text-[13px] text-neutral-700">
+                    En la página que se abre, busca <b>«{nombre}»</b> y pulsa <b>«Configurar»</b>. Luego vuelve aquí y pulsa <b>«Reintentar»</b>.
                   </div>
-                );
-              })}
-            </div>
-          )}
-          <Botones listo={!!productos?.whatsapp_business_account?.ok} alSeguir={() => ir("uri")} />
+                  <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir mi app" />
+                </div>
+              )}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+                <button type="button" className="text-neutral-500 hover:underline" onClick={atras}>← Atrás</button>
+                <div className="flex flex-wrap items-center gap-3">
+                  {objeto !== "whatsapp_business_account" && !r?.ok && (
+                    <button
+                      type="button"
+                      className="text-xs text-neutral-500 hover:underline"
+                      onClick={() => {
+                        const s = [...saltados, objeto];
+                        setSaltados(s);
+                        irAProductos(productos, i + 1, s);
+                      }}
+                    >
+                      No lo usaré, saltar
+                    </button>
+                  )}
+                  {r?.ok ? (
+                    <button type="button" className="rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white" onClick={() => irAProductos(productos, i + 1)}>
+                      Siguiente →
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={comprobando}
+                      className="inline-flex items-center gap-1 rounded-md bg-sky-600 px-4 py-1.5 font-bold text-white disabled:opacity-40"
+                      onClick={async () => {
+                        const nuevo = await comprobarProductos();
+                        // Si ya quedó, se sigue solo.
+                        if (nuevo?.[objeto]?.ok) irAProductos(nuevo, i + 1);
+                      }}
+                    >
+                      {comprobando ? (
+                        <>
+                          Revisando
+                          <Puntos />
+                        </>
+                      ) : (
+                        "🔍 Reintentar"
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </>
+          );
+        })()}
+
+      {/* INICIO DE SESIÓN PARA EMPRESAS, SU PROPIA VENTANA. Meta no deja preguntar si la app lo
+          tiene (revisado en su referencia de la app): por eso, con casilla. */}
+      {sub === "login" && (
+        <>
+          <div className="font-semibold">Paso 4 de 5 · Inicio de sesión para empresas</div>
+          <div>
+            Agrega a tu app <b>«Inicio de sesión con Facebook para empresas»</b> (pulsa «Configurar»). Es lo que deja que tu CRM entre con tu Facebook.
+          </div>
+          <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir mi app" />
+          <Casilla id="p-login" casillas={casillas} marcar={marcar} texto="Lo agregué." />
+          <Botones listo={!!casillas["p-login"]} alSeguir={() => ir("uri")} />
         </>
       )}
 
+      {/* LA URI, SU PROPIA VENTANA. Tampoco se puede comprobar desde fuera: con casilla. */}
       {sub === "uri" && (
         <>
-          {pasos.length > 0 && <pre className="whitespace-pre-wrap rounded bg-neutral-50 p-2 text-xs">{pasos.join("\n")}</pre>}
+          <div className="font-semibold">Paso 5 de 5 · La URI</div>
           <div>
-            <b>1.</b> Agrega a tu app <b>Inicio de sesión con Facebook para empresas</b> («Configurar»). Sin él no aparece dónde pegar la URI.
+            Ya está completa: cópiala y pégala en <i>«URI de redireccionamiento de OAuth válidos»</i>; luego <b>«Guardar cambios»</b>.
           </div>
-          <Abrir href={`https://developers.facebook.com/apps/${id}/add/`} texto="Abrir «Agregar productos» de mi app" />
-          <Casilla id="p-login" casillas={casillas} marcar={marcar} texto="Lo agregué." />
-          {casillas["p-login"] && (
-            <>
-              <div className="pt-2">
-                <b>2. La URI.</b> Ya está completa: cópiala y pégala en <i>«URI de redireccionamiento de OAuth válidos»</i>; luego «Guardar cambios».
-              </div>
-              <Copiar texto={uri} />
-              <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
-              <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
-            </>
-          )}
-          <Botones listo={!!casillas["p-login"] && !!casillas.uri} alSeguir={() => ir("vivo")} />
+          <Copiar texto={uri} />
+          <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
+          <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
+          <Botones listo={!!casillas.uri} alSeguir={() => ir("vivo")} />
         </>
       )}
+
 
       {sub === "vivo" && (
         <>
@@ -1448,9 +1509,10 @@ function PasoDeLista({ ok, n, titulo, children }: { ok: boolean; n: number; titu
  * agregada y un usuario del sistema administrador—, que se comprueban solas. Al crearlo, se le
  * pone solo a los números que alcanza: el de otro BM no pisa el tuyo.
  */
-function PasoToken({ volver, seguir }: { volver: () => void; seguir: () => void }) {
+function PasoToken({ volver, seguir, bmInicial = null }: { volver: () => void; seguir: () => void; bmInicial?: string | null }) {
   const [e, setE] = useState<EstadoDelToken | null>(null);
-  const [elegido, setElegido] = useState("");
+  // Desde «Crear token de este BM», ya elegido ese BM.
+  const [elegido, setElegido] = useState(bmInicial ?? "");
   const [ocupado, setOcupado] = useState(false);
   const [revisando, setRevisando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);

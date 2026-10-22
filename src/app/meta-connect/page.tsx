@@ -849,6 +849,8 @@ function DiferenciacionPorNegocio() {
   const [errores, setErrores] = useState<Record<string, string>>({});
   /** El negocio cuyo pop up está abierto. null = ninguno. */
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
+  /** La cuenta de Facebook cuyo pop up está abierto (su nombre, o «sin-cuenta»). */
+  const [cuentaFbAbierta, setCuentaFbAbierta] = useState<string | null>(null);
   /** EL TOKEN DE CADA NÚMERO, a la vista (21/10/2026): «pensé que se vería en la sección
    *  "1 cuenta de Facebook · 4 negocios"… ahí se podría agregar los que no tienen token».
    *  Por id de número: true = token permanente; false = el del inicio de sesión. */
@@ -1111,40 +1113,8 @@ function DiferenciacionPorNegocio() {
   );
   const plural = (n: number, uno: string, varios: string) => (n === 1 ? `1 ${uno}` : `${n} ${varios}`);
 
-  return (
-    <div className="space-y-3">
-      <p className="text-center font-titulo text-xl font-extrabold text-tinta">
-        {datos.total === 0
-          ? "Ningún negocio identificado todavía"
-          : datos.cuentasDeFacebook > 0
-            ? `${plural(datos.cuentasDeFacebook, "cuenta de Facebook", "cuentas de Facebook")} · ${plural(datos.total, "negocio", "negocios")}`
-            : plural(datos.total, "negocio conectado", "negocios conectados")}
-      </p>
-      {datos.total > 0 && grupos.some((g) => !g.facebook) ? (
-        <p className="text-center text-xs text-tinta-suave">
-          Para saber de qué cuenta de Facebook es cada negocio, vuelve a entrar una vez con
-          cada cuenta: «Actualizar lista de Meta» con la principal y «+ Conectar nueva
-          cuenta» con las demás.
-        </p>
-      ) : null}
-      {grupos.map((grupo) => (
-        <div key={grupo.facebook ?? "sin-cuenta"} className="space-y-1.5">
-          <h3 className="pt-2 font-titulo text-base font-extrabold text-tinta">
-            {grupo.facebook ? (
-              <>
-                👤 {grupo.facebook}{" "}
-                <span className="text-xs font-semibold text-tinta-suave">
-                  {grupo.principal ? "(cuenta principal)" : "(anexada)"}
-                </span>
-              </>
-            ) : (
-              <span className="text-sm text-tinta-suave">Cuenta de Facebook sin apuntar</span>
-            )}
-          </h3>
-          {/* CADA NEGOCIO, UNA FILA PEQUEÑA QUE ABRE SU POP UP. Lo pidió el dueño el
-              10/10/2026: «sería genial que sean pop ups». Más chica que las filas de las
-              secciones numeradas, para que se vea que es otra cosa. */}
-          {grupo.cuentas.map((cuenta) => {
+  /** La fila de un negocio, que abre su pop up. */
+  const filaDeNegocio = (cuenta: CuentasDeMeta["cuentas"][number]) => {
             const cuantos = [
               plural(
                 cuenta.numerosConId.length +
@@ -1196,9 +1166,97 @@ function DiferenciacionPorNegocio() {
                 </span>
               </button>
             );
-          })}
-        </div>
-      ))}
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* TUS CUENTAS DE FACEBOOK, UNA FILA POR CUENTA (21/10/2026): «dice 1 cuenta · 4 negocios pero
+          no dice qué cuenta; si agrego otra se apilarían de manera rara». Cada cuenta es una fila
+          que abre su pop up con sus negocios (que abren el suyo, como siempre). */}
+      <p className="text-center font-titulo text-xl font-extrabold text-tinta">
+        {datos.total === 0 ? "Ningún negocio identificado todavía" : "Tus cuentas de Facebook"}
+      </p>
+      {datos.total > 0 && grupos.some((g) => !g.facebook) ? (
+        <p className="text-center text-xs text-tinta-suave">
+          Para saber de qué cuenta de Facebook es cada negocio, vuelve a conectar Facebook una vez
+          con cada cuenta.
+        </p>
+      ) : null}
+      {grupos.map((grupo) => {
+        const clave = grupo.facebook ?? "sin-cuenta";
+        // Lo pendiente de sus negocios, a la vista sin abrir nada.
+        const sinToken = grupo.cuentas.reduce((s, c) => s + c.numerosConId.filter((n) => tokenDe[n.id] === false).length, 0);
+        return (
+          <button
+            key={clave}
+            type="button"
+            onClick={() => setCuentaFbAbierta(clave)}
+            className="flex w-full items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-3 text-left shadow-sm hover:bg-relleno"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
+              <img src="/facebook-logo.png" alt="" className="h-7 w-7" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-bold text-tinta">
+                {grupo.facebook ?? "Cuenta de Facebook sin apuntar"}
+              </span>
+              <span className="block truncate text-xs text-tinta-suave">
+                {grupo.facebook ? (grupo.principal ? "Cuenta principal · " : "Anexada · ") : ""}
+                {plural(grupo.cuentas.length, "negocio", "negocios")}
+              </span>
+            </span>
+            {sinToken > 0 ? (
+              <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                ⚠ {sinToken === 1 ? "1 sin token" : `${sinToken} sin token`}
+              </span>
+            ) : null}
+            <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>
+          </button>
+        );
+      })}
+
+      {/* EL POP UP DE UNA CUENTA DE FACEBOOK: sus negocios, cada uno una fila que abre el suyo. */}
+      {(() => {
+        const grupo = grupos.find((g) => (g.facebook ?? "sin-cuenta") === cuentaFbAbierta);
+        if (!grupo) return null;
+        return (
+          <div
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label={grupo.facebook ?? "Cuenta de Facebook"}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setCuentaFbAbierta(null);
+            }}
+          >
+            <div className="flex min-h-full items-start justify-center">
+              <div className="my-8 w-full max-w-2xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
+                <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-extrabold uppercase tracking-wide text-tinta">
+                      {grupo.facebook ?? "Cuenta de Facebook sin apuntar"}
+                    </h3>
+                    <p className="text-xs text-tinta-suave">
+                      {grupo.principal ? "Cuenta principal" : grupo.facebook ? "Cuenta anexada" : ""} · {plural(grupo.cuentas.length, "negocio", "negocios")}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCuentaFbAbierta(null)}
+                    className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+                <div className="space-y-1.5 p-4">
+                  {grupo.cuentas.map((cuenta) => filaDeNegocio(cuenta))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
 
       {/* EL POP UP DEL NEGOCIO ABIERTO: sus números (con «Suscribir»), sus páginas y sus
           píxeles, cada uno con su cara. Se cierra con Cerrar, con Escape o al pulsar el
@@ -1275,6 +1333,21 @@ function DiferenciacionPorNegocio() {
                       </p>
                     ) : null}
                   </div>
+                  {/* EL TOKEN, DONDE ESTÁ EL PROBLEMA (21/10/2026): el token es del BM, así que se crea
+                      desde aquí, con el asistente ya en este BM. */}
+                  {cuenta.numerosConId.some((n) => tokenDe[n.id] === false) ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNegocioAbierto(null);
+                        setCuentaFbAbierta(null);
+                        window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: { paso: "token", bm: cuenta.id } }));
+                      }}
+                      className="shrink-0 rounded-md bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700"
+                    >
+                      🔐 Crear token de este BM
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => setNegocioAbierto(null)}
@@ -1566,6 +1639,8 @@ function SetsDeVentaPorTienda({ general }: { general: ReactNode }) {
     pagina: PiezaDelSet;
     pixel: PiezaDelSet;
   }> | null>(null);
+  /** La tienda cuyo pop up está abierto. */
+  const [abierta, setAbierta] = useState<string | null>(null);
   useEffect(() => {
     void fetch("/api/meta/connect/set-de-venta", { cache: "no-store" })
       .then((r) => r.json())
@@ -1574,6 +1649,7 @@ function SetsDeVentaPorTienda({ general }: { general: ReactNode }) {
   }, []);
   if (!tiendas) return null;
   if (!tiendas.length) return <>{general}</>;
+  // (`abierta` se declara arriba: los hooks no pueden ir después de un return.)
 
   const pieza = (titulo: string, p: PiezaDelSet) => (
     <div className="min-w-0 rounded-md border border-neutral-200 bg-tarjeta px-3 py-2">
@@ -1593,25 +1669,79 @@ function SetsDeVentaPorTienda({ general }: { general: ReactNode }) {
       <p className="mt-1 text-sm text-neutral-700">
         Cada compra se registra con la página y el píxel de su tienda. Tu campaña tiene que usar <b>estos mismos</b>.
       </p>
-      <div className="mt-3 space-y-3">
+      {/* UNA FILA POR TIENDA (21/10/2026): «en Meta Connect necesito una forma ordenada… y los sets
+          también otro pop up». La fila dice si está completa; el detalle, en su pop up, con el
+          enlace a la tienda en el editor. */}
+      <div className="mt-3 space-y-1.5">
         {tiendas.map((t) => {
           const completa = !!(t.numero && t.pagina && t.pixel);
           return (
-            <div key={t.id} className={`rounded-lg border p-3 ${completa ? "border-emerald-300 bg-emerald-50/50" : "border-amber-300 bg-amber-50/50"}`}>
-              <p className="flex items-center gap-2 text-sm font-bold text-neutral-900">
-                <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: t.color || "#14b8a6" }} />
-                {t.nombre}
-                <span className="text-xs font-semibold">{completa ? "✅ ¿tu campaña usa estos mismos?" : "⚠ Falta elegir algo"}</span>
-              </p>
-              <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                {pieza("Página de Facebook", t.pagina)}
-                {pieza("Número de WhatsApp", t.numero)}
-                {pieza("Píxel", t.pixel)}
-              </div>
-            </div>
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setAbierta(t.id)}
+              className="flex w-full items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-2.5 text-left shadow-sm hover:bg-relleno"
+            >
+              <span className="inline-block h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: t.color || "#14b8a6" }} />
+              <span className="min-w-0 flex-1 truncate text-sm font-bold text-neutral-900">{t.nombre}</span>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${completa ? "bg-emerald-50 text-emerald-700" : "bg-amber-100 text-amber-800"}`}>
+                {completa ? "✅ Completo" : `⚠ Falta ${[!t.pagina && "la página", !t.numero && "el número", !t.pixel && "el píxel"].filter(Boolean).join(", ")}`}
+              </span>
+              <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Ver</span>
+            </button>
           );
         })}
       </div>
+
+      {(() => {
+        const t = tiendas.find((x) => x.id === abierta);
+        if (!t) return null;
+        return (
+          <div
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.nombre}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setAbierta(null);
+            }}
+          >
+            <div className="flex min-h-full items-start justify-center">
+              <div className="my-8 w-full max-w-2xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
+                <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
+                  <h3 className="flex min-w-0 items-center gap-2 truncate text-sm font-extrabold uppercase tracking-wide text-tinta">
+                    <span className="inline-block h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: t.color || "#14b8a6" }} />
+                    {t.nombre}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setAbierta(null)}
+                    className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+                <div className="space-y-3 p-5">
+                  <p className="text-sm text-neutral-700">
+                    La campaña de esta tienda tiene que usar <b>esta misma página</b> y <b>este mismo píxel</b>, y anunciar <b>este número</b>.
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {pieza("Página de Facebook", t.pagina)}
+                    {pieza("Número de WhatsApp", t.numero)}
+                    {pieza("Píxel", t.pixel)}
+                  </div>
+                  <a
+                    href="/editor?tab=ajustes"
+                    className="inline-flex items-center rounded-lg border border-borde bg-tarjeta px-4 py-2 text-sm font-semibold text-tinta hover:bg-relleno"
+                  >
+                    Ir a la tienda en el editor ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }

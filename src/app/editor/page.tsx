@@ -6832,6 +6832,13 @@ export default function EditorPage() {
     };
   }, [dynamicSourceMenu]);
   const [tab, setTab] = useState<Tab>("canales");
+  // ABRIR DIRECTO EN AJUSTES (21/10/2026): el «Ir a la tienda» del Set de venta de Meta Connect
+  // llega con «?tab=ajustes», donde están las tiendas. Sin eso, el editor abre como siempre.
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("tab") === "ajustes") setTab("ajustes");
+    } catch {}
+  }, []);
   // Vista nueva (menú lateral) o clásica (pestañas arriba). Se recuerda en este
   // navegador; la clásica queda intacta y siempre a un botón de distancia.
   // Lo que hay en el archivo, sin mezclar. Ver el cerrojo en `save()`.
