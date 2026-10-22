@@ -68,10 +68,12 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
     });
   }
   for (const n of numeros) {
-    // Un número de una tienda sale aparte solo si tiene chats que no son de ninguna (varias
-    // tiendas en el mismo número sin frase que las distinga). Uno pausado, solo si tiene chats.
+    // UN NÚMERO PAUSADO NUNCA SALE (22/10/2026): «números personales míos que están en Facebook
+    // pero no los quiero usar aparecen en el chat». Sus chats viejos siguen en «Todas».
+    if (n.pausado === 1) continue;
+    // Un número de una tienda sale aparte solo si tiene chats que no son de ninguna tienda.
     const clave = `n:${n.phone_number_id}`;
-    if ((deTiendas.has(n.phone_number_id) || n.pausado === 1) && !enUso.has(clave)) continue;
+    if (deTiendas.has(n.phone_number_id) && !enUso.has(clave)) continue;
     bandejas.push({
       clave,
       nombre: n.display_phone_number ?? n.phone_number_id,

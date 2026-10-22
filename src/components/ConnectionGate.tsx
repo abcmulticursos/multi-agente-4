@@ -84,14 +84,25 @@ export default function ConnectionGate({ initialView }: Props) {
       return false;
     }
   });
-  const elegirBandeja = useCallback((clave: string) => {
-    setBandejaElegida(clave);
-    try {
-      window.localStorage.setItem("chat:bandeja", clave);
-    } catch {
-      // sin memoria del navegador, igual funciona
-    }
-  }, []);
+  const elegirBandeja = useCallback(
+    (clave: string) => {
+      setBandejaElegida(clave);
+      // EL CHAT ABIERTO NO ES DE OTRA TIENDA (22/10/2026): si el que está abierto no es de la
+      // elegida, se cierra; si es suyo, sigue abierto. Solo al ELEGIR: si un chat sale de «Te
+      // necesitan» mientras le contestas (lo pasas a IA), no se te cierra en la cara.
+      setSelectedId((abierto) => {
+        if (abierto === null || clave === TODAS) return abierto;
+        const chat = conversations.find((c) => c.id === abierto);
+        return chat && enLaBandeja(chat, clave) ? abierto : null;
+      });
+      try {
+        window.localStorage.setItem("chat:bandeja", clave);
+      } catch {
+        // sin memoria del navegador, igual funciona
+      }
+    },
+    [conversations]
+  );
   const plegarBarra = useCallback(() => {
     setBarraPlegada((antes) => {
       try {

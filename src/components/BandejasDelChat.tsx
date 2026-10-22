@@ -262,7 +262,9 @@ function PieDelNegocio({ plegada }: { plegada: boolean }) {
           </button>
         )}
         <a href="/meta-connect" className="block truncate text-[11px] text-neutral-500 hover:underline">
-          {datos.numeros > 0 ? `🟢 ${datos.numeros} ${datos.numeros === 1 ? "número conectado" : "números conectados"}` : "⚠ Sin números conectados"}
+          {datos.numeros > 0
+            ? `🟢 ${datos.numeros} ${datos.pausados > 0 ? (datos.numeros === 1 ? "conectado" : "conectados") : datos.numeros === 1 ? "número conectado" : "números conectados"}`
+            : "⚠ Sin números conectados"}
           {datos.pausados > 0 ? ` · ${datos.pausados} pausado${datos.pausados === 1 ? "" : "s"}` : ""}
         </a>
       </div>
