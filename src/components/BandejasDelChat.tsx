@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * LA BARRA DE TIENDAS DEL CHAT (21/10/2026).
@@ -19,6 +19,10 @@ export interface Bandeja {
   nombre: string;
   color: string | null;
   detalle: string | null;
+  numeroId?: string | null;
+  verificado?: string | null;
+  telefono?: string | null;
+  paginaId?: string | null;
 }
 
 export interface ChatDeBandeja {
@@ -27,6 +31,15 @@ export interface ChatDeBandeja {
   nocodb_label?: string | null;
   unread_count?: number | null;
   manually_unread?: number | null;
+}
+
+/** Letra oscura sobre un color claro y blanca sobre uno oscuro: con un celeste, la blanca no se lee. */
+export function letraSobre(color: string | null | undefined): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(color ?? "").trim());
+  if (!m) return "#ffffff";
+  const n = parseInt(m[1], 16);
+  const luz = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  return luz > 0.62 ? "#1f2937" : "#ffffff";
 }
 
 export const TODAS = "todas";
@@ -131,7 +144,7 @@ export function BarraDeBandejas({
               <button
                 type="button"
                 onClick={() => onElegir(o.clave)}
-                title={plegada ? `${o.nombre}${o.detalle ? ` · ${o.detalle}` : ""}` : undefined}
+                title={`${o.nombre}${o.detalle ? ` · ${o.detalle}` : ""}`}
                 className={`relative flex w-full items-center gap-2 rounded-lg py-2 text-left transition ${plegada ? "justify-center px-0" : "px-2.5"} ${
                   activa ? "bg-white shadow-sm ring-1 ring-black/5" : "hover:bg-white/70"
                 }`}
@@ -143,8 +156,8 @@ export function BarraDeBandejas({
                       <span className="text-base">{o.icono}</span>
                     ) : (
                       <span
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
-                        style={{ backgroundColor: o.color || "#14b8a6" }}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                        style={{ backgroundColor: o.color || "#14b8a6", color: letraSobre(o.color || "#14b8a6") }}
                       >
                         {o.nombre.slice(0, 1).toUpperCase()}
                       </span>
@@ -269,13 +282,25 @@ export function FilaDeBandejas({
   elegida: string;
   onElegir: (clave: string) => void;
 }) {
+  // La elegida se desliza a la vista solo al elegirla (o al abrir): si no, al volver quedaba
+  // escondida a la derecha. No en cada refresco, para no moverle la fila mientras desliza.
+  const fila = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const caja = fila.current;
+    const boton = caja?.querySelector<HTMLElement>("[data-activa]");
+    if (!caja || !boton) return;
+    const c = caja.getBoundingClientRect();
+    const b = boton.getBoundingClientRect();
+    caja.scrollTo({ left: caja.scrollLeft + (b.left - c.left) - (c.width - b.width) / 2, behavior: "smooth" });
+  }, [elegida]);
   return (
-    <div className="flex gap-2 overflow-x-auto border-b border-neutral-200 bg-neutral-50 px-3 py-2 md:hidden">
+    <div ref={fila} className="flex gap-2 overflow-x-auto border-b border-neutral-200 bg-neutral-50 px-3 py-2 md:hidden">
       {opciones(bandejas, chats).map((o) => {
         const activa = o.clave === elegida;
         return (
           <button
             key={o.clave}
+            data-activa={activa ? "1" : undefined}
             type="button"
             onClick={() => onElegir(o.clave)}
             className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition ${

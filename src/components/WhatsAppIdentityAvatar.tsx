@@ -6,6 +6,10 @@ interface Props {
   phone: string;
   verifiedName: string | null;
   productName?: string | null;
+  /** La foto de otro número (la tienda elegida en la barra). Sin ella, la del principal. */
+  foto?: string;
+  /** La línea de abajo en la vista ampliada. Sin ella, el producto activo. */
+  etiqueta?: string;
 }
 
 function formatPhone(phone: string): string {
@@ -31,6 +35,8 @@ export default function WhatsAppIdentityAvatar({
   phone,
   verifiedName,
   productName,
+  foto = FOTO,
+  etiqueta,
 }: Props) {
   const [open, setOpen] = useState(false);
   // Si la imagen no carga —número sin foto, token sin permiso, lo que sea— se
@@ -61,7 +67,7 @@ export default function WhatsAppIdentityAvatar({
           "W"
         ) : (
           <img
-            src={FOTO}
+            src={foto}
             alt=""
             onError={() => setSinFoto(true)}
             className="h-full w-full rounded-full object-cover blur-[0.18px] saturate-[.94] contrast-[.97]"
@@ -87,7 +93,7 @@ export default function WhatsAppIdentityAvatar({
                 "W"
               ) : (
                 <img
-                  src={FOTO}
+                  src={foto}
                   alt={`Foto de ${name}`}
                   onError={() => setSinFoto(true)}
                   className="h-full w-full rounded-full object-cover"
@@ -97,7 +103,7 @@ export default function WhatsAppIdentityAvatar({
             <h2 className="mt-5 text-lg font-bold text-neutral-950">{name}</h2>
             <p className="mt-1 text-sm text-neutral-600">{formatPhone(phone)}</p>
             <p className="mt-4 rounded-lg bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-800">
-              Producto: {productName?.trim() || "Sin producto activo"}
+              {etiqueta ?? <>Producto: {productName?.trim() || "Sin producto activo"}</>}
             </p>
             <button
               type="button"

@@ -33,10 +33,22 @@ function getConfiguredIntroVariants(): number[] {
  * números sin tienda también chatean». Una por tienda con número o página, y una por cada número
  * conectado que ninguna tienda usa. Solo lee la configuración y la base: ninguna consulta a Meta.
  */
-function bandejasDelChat(enUso: Set<string>): Array<{ clave: string; nombre: string; color: string | null; detalle: string | null }> {
+type BandejaDelChat = {
+  clave: string;
+  nombre: string;
+  color: string | null;
+  detalle: string | null;
+  /** LA CABECERA SIGUE A LA BANDEJA (21/10/2026): el número y la página que la atienden. */
+  numeroId: string | null;
+  verificado: string | null;
+  telefono: string | null;
+  paginaId: string | null;
+};
+
+function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
   const numeros = listMetaWhatsAppConnections();
   const deTiendas = new Set<string>();
-  const bandejas: Array<{ clave: string; nombre: string; color: string | null; detalle: string | null }> = [];
+  const bandejas: BandejaDelChat[] = [];
   for (const t of loadWorkflowConfig()?.tiendas ?? []) {
     if (!t || t.enabled === false) continue;
     const numero = String(t.numero ?? "").trim();
@@ -44,14 +56,32 @@ function bandejasDelChat(enUso: Set<string>): Array<{ clave: string; nombre: str
     if (!numero && !String(t.pagina ?? "").trim() && !enUso.has(`t:${t.id}`)) continue;
     if (numero) deTiendas.add(numero);
     const n = numeros.find((x) => x.phone_number_id === numero);
-    bandejas.push({ clave: `t:${t.id}`, nombre: t.nombre?.trim() || "Tienda sin nombre", color: t.color?.trim() || null, detalle: n?.display_phone_number ?? null });
+    bandejas.push({
+      clave: `t:${t.id}`,
+      nombre: t.nombre?.trim() || "Tienda sin nombre",
+      color: t.color?.trim() || null,
+      detalle: n?.display_phone_number ?? null,
+      numeroId: n?.phone_number_id ?? null,
+      verificado: n?.verified_name ?? null,
+      telefono: n?.display_phone_number ?? null,
+      paginaId: String(t.pagina ?? "").trim() || null,
+    });
   }
   for (const n of numeros) {
     // Un número de una tienda sale aparte solo si tiene chats que no son de ninguna (varias
     // tiendas en el mismo número sin frase que las distinga). Uno pausado, solo si tiene chats.
     const clave = `n:${n.phone_number_id}`;
     if ((deTiendas.has(n.phone_number_id) || n.pausado === 1) && !enUso.has(clave)) continue;
-    bandejas.push({ clave, nombre: n.display_phone_number ?? n.phone_number_id, color: null, detalle: n.verified_name ?? null });
+    bandejas.push({
+      clave,
+      nombre: n.display_phone_number ?? n.phone_number_id,
+      color: null,
+      detalle: n.verified_name ?? null,
+      numeroId: n.phone_number_id,
+      verificado: n.verified_name ?? null,
+      telefono: n.display_phone_number ?? null,
+      paginaId: null,
+    });
   }
   return bandejas;
 }

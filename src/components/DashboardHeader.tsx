@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
+import { letraSobre } from "@/components/BandejasDelChat";
 
 interface Props {
   phone: string;
@@ -11,6 +12,18 @@ interface Props {
   quality: string | null;
   profilePictureUrl?: string | null;
   productName?: string | null;
+  /**
+   * LA CABECERA SIGUE A LA TIENDA ELEGIDA (21/10/2026): «arriba dice Aula Maestra… al cambiar de
+   * tienda sigue el mismo, eso es incoherencia». Con una tienda o un número elegido en la barra,
+   * se muestra su número; en «Todas», el resumen. Sin barra no llega y queda el principal.
+   */
+  identidad?: {
+    nombre: string;
+    telefono: string | null;
+    foto: string | null;
+    linea: string | null;
+    color?: string | null;
+  } | null;
   onRefresh: () => Promise<void> | void;
   view?: "chats" | "kanban" | "resultados";
   onView?: (v: "chats" | "kanban" | "resultados") => void;
@@ -22,6 +35,7 @@ export default function DashboardHeader({
   quality,
   profilePictureUrl,
   productName,
+  identidad = null,
   onRefresh,
   view = "chats",
   onView,
@@ -83,12 +97,41 @@ export default function DashboardHeader({
         {/* La foto se esconde en el celular: ocupa altura y no aporta nada
             estando siempre a la vista. WhatsApp tampoco la muestra ahí. */}
         <span className="hidden md:inline-flex">
-          <WhatsAppIdentityAvatar
-            phone={phone}
-            verifiedName={verifiedName}
-            productName={productName}
-          />
+          {identidad && !identidad.foto ? (
+            <span
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-bold"
+              style={{ backgroundColor: identidad.color || "#10b981", color: letraSobre(identidad.color || "#10b981") }}
+            >
+              {identidad.nombre.slice(0, 1).toUpperCase()}
+            </span>
+          ) : (
+            <WhatsAppIdentityAvatar
+              key={identidad?.foto ?? "principal"}
+              phone={identidad?.telefono ?? phone}
+              verifiedName={identidad ? identidad.nombre : verifiedName}
+              productName={productName}
+              foto={identidad?.foto ?? undefined}
+              etiqueta={identidad ? identidad.linea ?? "" : undefined}
+            />
+          )}
         </span>
+        {identidad ? (
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-neutral-900">{identidad.nombre}</div>
+            {identidad.telefono && (
+              <div className="text-sm text-neutral-500">
+                {identidad.telefono.startsWith("+") ? identidad.telefono : `+${identidad.telefono}`}
+              </div>
+            )}
+            {identidad.linea && (
+              // El color va en el punto, no en la letra: un color claro de tienda no se leería.
+              <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-neutral-700">
+                {identidad.color && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: identidad.color }} />}
+                <span className="truncate">{identidad.linea}</span>
+              </div>
+            )}
+          </div>
+        ) : (
         <div className="min-w-0">
           <div className="truncate text-sm font-semibold text-neutral-900">
             {verifiedName?.trim() || "Agente WhatsApp"}
@@ -109,6 +152,7 @@ export default function DashboardHeader({
             </div>
           ) : null}
         </div>
+        )}
       </div>
       {/* En el celular, todo lo que no es Chats/Kanban se guarda tras el menú
           de los tres puntos: eran cinco botones ocupando dos filas. */}

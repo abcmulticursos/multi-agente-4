@@ -377,6 +377,36 @@ export default function ConnectionGate({ initialView }: Props) {
     [displayConversations, bandejaVigente]
   );
 
+  // LA CABECERA SIGUE A LA BANDEJA (21/10/2026): el número de la tienda elegida, no siempre el principal.
+  const identidadDeLaBandeja = useMemo(() => {
+    if (!conBarra) return null;
+    if (bandejaVigente === TODAS) {
+      const tiendas = bandejas.filter((b) => b.clave.startsWith("t:")).length;
+      const sueltos = bandejas.length - tiendas;
+      return {
+        nombre: "Todas tus tiendas",
+        telefono: null,
+        foto: null,
+        linea: [tiendas ? `${tiendas} ${tiendas === 1 ? "tienda" : "tiendas"}` : "", sueltos ? `${sueltos} ${sueltos === 1 ? "número sin tienda" : "números sin tienda"}` : ""]
+          .filter(Boolean)
+          .join(" y "),
+      };
+    }
+    if (bandejaVigente === TE_NECESITAN) {
+      return { nombre: "⚡ Te necesitan", telefono: null, foto: null, linea: "Chats en modo humano y reclamos, de todas tus tiendas", color: "#d97706" };
+    }
+    const b = bandejas.find((x) => x.clave === bandejaVigente);
+    if (!b) return null;
+    const esTienda = b.clave.startsWith("t:");
+    return {
+      nombre: b.verificado?.trim() || b.nombre,
+      telefono: b.telefono ?? null,
+      foto: b.numeroId ? `/api/meta/avatar?wa=${b.numeroId}` : b.paginaId ? `/api/meta/avatar?page=${b.paginaId}` : null,
+      linea: esTienda ? `Tienda: ${b.nombre}` : "Número sin tienda",
+      color: b.color,
+    };
+  }, [conBarra, bandejaVigente, bandejas]);
+
   // ── Navegación en pantalla angosta ──────────────────────────────────────
   // En el celular la lista y el chat se turnan. Además, el botón ATRÁS del
   // teléfono vuelve a la lista en vez de sacarte de la aplicación: al abrir un
@@ -454,6 +484,7 @@ export default function ConnectionGate({ initialView }: Props) {
         // dejaba la foto rota. Este siempre trae la actual.
         profilePictureUrl="/api/meta/avatar?wa=active"
         productName={activeProductName}
+        identidad={view === "chats" ? identidadDeLaBandeja : null}
         onRefresh={fetchStatus}
         view={view}
         onView={handleView}
@@ -487,6 +518,13 @@ export default function ConnectionGate({ initialView }: Props) {
               onTogglePin={handleTogglePin}
               onToggleRead={handleToggleRead}
               mostrarTienda={conBarra && !bandejaVigente.startsWith("t:")}
+              vacio={
+                bandejaVigente === TE_NECESITAN
+                  ? "Nadie te necesita ahora: no hay chats en modo humano ni reclamos."
+                  : bandejaVigente === TODAS
+                    ? null
+                    : "Esta tienda todavía no tiene chats. Cuando un cliente le escriba, aparecerá aquí."
+              }
               encabezado={
                 conBarra ? (
                   <FilaDeBandejas

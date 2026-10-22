@@ -122,6 +122,8 @@ interface Props {
   mostrarTienda?: boolean;
   /** Lo que va encima de la lista: la fila de tiendas en el celular. */
   encabezado?: React.ReactNode;
+  /** El aviso cuando la tienda elegida en la barra no tiene chats. */
+  vacio?: string | null;
 }
 
 function relativeTime(unix: number | null): string {
@@ -200,6 +202,7 @@ export default function ConversationList({
   onToggleRead,
   mostrarTienda = false,
   encabezado = null,
+  vacio = null,
 }: Props) {
   const [search, setSearch] = useState("");
   const [labelFilter, setLabelFilter] = useState<LabelFilter>("todos");
@@ -745,8 +748,7 @@ export default function ConversationList({
       <>
         {encabezado}{searchHeader}
         <div className="p-6 text-sm text-neutral-500">
-          Aún no hay conversaciones. Cuando alguien escriba al número de
-          WhatsApp configurado, aparecerá aquí.
+          {vacio ?? "Aún no hay conversaciones. Cuando alguien escriba al número de WhatsApp configurado, aparecerá aquí."}
         </div>
       </>
     );
@@ -876,16 +878,6 @@ export default function ConversationList({
                             {c.nocodb_label}
                           </span>
                         )}
-                        {/* SU TIENDA (21/10/2026): viendo varias juntas, de qué tienda es sin abrirlo. */}
-                        {mostrarTienda && c.tienda_nombre && (
-                          <span
-                            title={`Tienda: ${c.tienda_nombre}`}
-                            className="inline-flex max-w-[7rem] shrink-0 items-center gap-1 rounded-full border border-neutral-200 bg-white px-1.5 py-0 text-[9px] font-semibold text-neutral-600"
-                          >
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: c.tienda_color || "#14b8a6" }} />
-                            <span className="truncate">{c.tienda_nombre}</span>
-                          </span>
-                        )}
                         {typeof c.intro_variant_sent === "number" &&
                           Number.isFinite(c.intro_variant_sent) && (
                             <span className="shrink-0 rounded-full border border-neutral-200 bg-neutral-50 px-1.5 py-0 text-[9px] font-medium text-neutral-500">
@@ -902,6 +894,14 @@ export default function ConversationList({
                       >
                         {c.last_message_preview ?? "—"}
                       </div>
+                      {/* SU TIENDA (21/10/2026): viendo varias juntas, de qué tienda es sin abrirlo. En
+                          su propia línea, para no quitarle sitio al nombre del cliente. */}
+                      {mostrarTienda && c.tienda_nombre && (
+                        <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] font-semibold text-neutral-500">
+                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: c.tienda_color || "#14b8a6" }} />
+                          <span className="truncate">{c.tienda_nombre}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span
