@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { olvidar } from "@/lib/meta/recuerdo";
 import { anotarFalloDeMeta } from "@/lib/meta/registro";
+import { anotarCuentaDeFacebook } from "@/lib/meta/cuentas-de-facebook";
 import {
   apuntarCuentaDeLaPagina,
   apuntarCuentaDelNumero,
@@ -220,6 +221,19 @@ async function iniciarSesion(req: NextRequest) {
     }
 
     const whatsAppOptions = await fetchWhatsAppOptions(userToken);
+
+    // QUIÉN ENTRÓ Y QUÉ TRAJO (21/10/2026): para que toda cuenta conectada tenga su fila en Meta
+    // Connect, aunque sus BM ya estén bajo otra o no tengan nada, y para el registro.
+    anotarCuentaDeFacebook({
+      id: quienEntro?.id ?? null,
+      nombre: quienEntro?.nombre ?? null,
+      origen: nuevaCuenta ? "nueva" : "principal",
+      negocios: negociosDelLogin.map((n) => n.id),
+    });
+    anotarFalloDeMeta(
+      "Inicio de sesión con Facebook (bien)",
+      `${quienEntro?.nombre ?? "Cuenta sin nombre"} · ${negociosDelLogin.length} negocio(s) · ${whatsAppOptions.length} número(s) · ${pages.length} página(s)`
+    );
 
     // Los pixels se guardan para poder elegirlos después en la pantalla. Si hay
     // uno solo y todavía no se eligió ninguno, queda preseleccionado: con un

@@ -531,6 +531,8 @@ type CuentasDeMeta = {
     tiendas: TiendaEnTarjeta[];
   };
   pixelsDeOtras: string[];
+  /** Toda cuenta de Facebook que inició sesión, con los BM que trajo (21/10/2026). */
+  conectadas?: Array<{ nombre: string | null; origen: "principal" | "nueva"; negocios: string[] }>;
 };
 
 /** Cómo se lee cada pieza en la fila de una tienda: icono y qué quiere decir. */
@@ -1171,89 +1173,133 @@ function DiferenciacionPorNegocio() {
   return (
     <div className="space-y-3">
       {/* TUS CUENTAS DE FACEBOOK, UNA FILA POR CUENTA (21/10/2026): «dice 1 cuenta · 4 negocios pero
-          no dice qué cuenta; si agrego otra se apilarían de manera rara». Cada cuenta es una fila
-          que abre su pop up con sus negocios (que abren el suyo, como siempre). */}
-      <p className="text-center font-titulo text-xl font-extrabold text-tinta">
-        {datos.total === 0 ? "Ningún negocio identificado todavía" : "Tus cuentas de Facebook"}
-      </p>
-      {datos.total > 0 && grupos.some((g) => !g.facebook) ? (
-        <p className="text-center text-xs text-tinta-suave">
-          Para saber de qué cuenta de Facebook es cada negocio, vuelve a conectar Facebook una vez
-          con cada cuenta.
-        </p>
-      ) : null}
-      {grupos.map((grupo) => {
-        const clave = grupo.facebook ?? "sin-cuenta";
-        // Lo pendiente de sus negocios, a la vista sin abrir nada.
-        const sinToken = grupo.cuentas.reduce((s, c) => s + c.numerosConId.filter((n) => tokenDe[n.id] === false).length, 0);
-        return (
-          <button
-            key={clave}
-            type="button"
-            onClick={() => setCuentaFbAbierta(clave)}
-            className="flex w-full items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-3 text-left shadow-sm hover:bg-relleno"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
-              <img src="/facebook-logo.png" alt="" className="h-7 w-7" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-bold text-tinta">
-                {grupo.facebook ?? "Cuenta de Facebook sin apuntar"}
-              </span>
-              <span className="block truncate text-xs text-tinta-suave">
-                {grupo.facebook ? (grupo.principal ? "Cuenta principal · " : "Anexada · ") : ""}
-                {plural(grupo.cuentas.length, "negocio", "negocios")}
-              </span>
-            </span>
-            {sinToken > 0 ? (
-              <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
-                ⚠ {sinToken === 1 ? "1 sin token" : `${sinToken} sin token`}
-              </span>
-            ) : null}
-            <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>
-          </button>
-        );
-      })}
-
-      {/* EL POP UP DE UNA CUENTA DE FACEBOOK: sus negocios, cada uno una fila que abre el suyo. */}
+          no dice qué cuenta; si agrego otra se apilarían de manera rara». Y: «acabo de conectar una
+          segunda cuenta pero no aparece». Cada cuenta que inició sesión tiene SIEMPRE su fila:
+          con sus negocios; o «comparte N negocios con…» si sus BM ya están bajo otra; o, si no
+          tiene páginas ni números, qué hacer. Cada fila abre su pop up. */}
       {(() => {
-        const grupo = grupos.find((g) => (g.facebook ?? "sin-cuenta") === cuentaFbAbierta);
-        if (!grupo) return null;
+        const conectadas = datos.conectadas ?? [];
+        type FilaDeCuenta = {
+          clave: string;
+          nombre: string | null;
+          principal: boolean;
+          negocios: CuentasDeMeta["cuentas"];
+          comparteCon: string[];
+        };
+        const filas: FilaDeCuenta[] = grupos.map((g) => ({
+          clave: g.facebook ?? "sin-cuenta",
+          nombre: g.facebook,
+          principal: g.principal,
+          negocios: g.cuentas,
+          comparteCon: [],
+        }));
+        for (const c of conectadas) {
+          if (!c.nombre || filas.some((f) => f.nombre === c.nombre)) continue;
+          const compartidos = datos.cuentas.filter((n) => c.negocios.includes(n.id));
+          filas.push({
+            clave: `conectada:${c.nombre}`,
+            nombre: c.nombre,
+            principal: c.origen === "principal",
+            negocios: compartidos,
+            comparteCon: [...new Set(compartidos.map((n) => n.facebookNombre).filter((x): x is string => !!x && x !== c.nombre))],
+          });
+        }
+        const abierta = filas.find((f) => f.clave === cuentaFbAbierta);
         return (
-          <div
-            className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label={grupo.facebook ?? "Cuenta de Facebook"}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setCuentaFbAbierta(null);
-            }}
-          >
-            <div className="flex min-h-full items-start justify-center">
-              <div className="my-8 w-full max-w-2xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
-                <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-extrabold uppercase tracking-wide text-tinta">
-                      {grupo.facebook ?? "Cuenta de Facebook sin apuntar"}
-                    </h3>
-                    <p className="text-xs text-tinta-suave">
-                      {grupo.principal ? "Cuenta principal" : grupo.facebook ? "Cuenta anexada" : ""} · {plural(grupo.cuentas.length, "negocio", "negocios")}
-                    </p>
-                  </div>
+          <>
+            <p className="text-center font-titulo text-xl font-extrabold text-tinta">
+              {filas.length ? "Tus cuentas de Facebook" : "Ningún negocio identificado todavía"}
+            </p>
+            {filas.map((f) => {
+              const sinToken = f.negocios.reduce((s, c) => s + c.numerosConId.filter((n) => tokenDe[n.id] === false).length, 0);
+              const vacia = f.negocios.length === 0;
+              return (
+                <div key={f.clave} className="rounded-xl border border-borde bg-tarjeta shadow-sm">
                   <button
                     type="button"
-                    onClick={() => setCuentaFbAbierta(null)}
-                    className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno"
+                    disabled={vacia}
+                    onClick={() => setCuentaFbAbierta(f.clave)}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left hover:bg-relleno disabled:cursor-default disabled:hover:bg-transparent"
                   >
-                    Cerrar
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
+                      <img src="/facebook-logo.png" alt="" className="h-7 w-7" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-tinta">{f.nombre ?? "Cuenta de Facebook sin apuntar"}</span>
+                      <span className="block truncate text-xs text-tinta-suave">
+                        {f.nombre ? (f.principal ? "Cuenta principal · " : "Anexada · ") : ""}
+                        {vacia
+                          ? "sin páginas ni números"
+                          : f.comparteCon.length
+                            ? `comparte ${plural(f.negocios.length, "negocio", "negocios")} con ${f.comparteCon.join(", ")}`
+                            : plural(f.negocios.length, "negocio", "negocios")}
+                      </span>
+                    </span>
+                    {sinToken > 0 ? (
+                      <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                        ⚠ {sinToken === 1 ? "1 sin token" : `${sinToken} sin token`}
+                      </span>
+                    ) : null}
+                    {!vacia && <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>}
                   </button>
+                  {/* SIN PÁGINAS NI NÚMEROS (21/10/2026): «Regresa a tu cuenta de Facebook "nombre" y
+                      agrega páginas a tu negocio para empezar a usarlas». Los BM vacíos no se listan. */}
+                  {vacia && (
+                    <div className="space-y-2 border-t border-borde px-4 py-3 text-[13px] text-tinta">
+                      <p className="font-semibold">Todavía no tienes páginas ni números.</p>
+                      <p className="text-tinta-suave">
+                        Entra a tu cuenta de Facebook <b>«{f.nombre ?? "tu cuenta"}»</b> y agrega una página a tu negocio para empezar a usarla.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: "numeros" }))}
+                        className="inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
+                      >
+                        📱 Agregar un número
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-1.5 p-4">
-                  {grupo.cuentas.map((cuenta) => filaDeNegocio(cuenta))}
+              );
+            })}
+
+            {/* EL POP UP DE UNA CUENTA DE FACEBOOK: sus negocios, cada uno una fila que abre el suyo. */}
+            {abierta ? (
+              <div
+                className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label={abierta.nombre ?? "Cuenta de Facebook"}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setCuentaFbAbierta(null);
+                }}
+              >
+                <div className="flex min-h-full items-start justify-center">
+                  <div className="my-8 w-full max-w-2xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
+                    <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-sm font-extrabold uppercase tracking-wide text-tinta">
+                          {abierta.nombre ?? "Cuenta de Facebook sin apuntar"}
+                        </h3>
+                        <p className="text-xs text-tinta-suave">
+                          {abierta.principal ? "Cuenta principal" : abierta.nombre ? "Cuenta anexada" : ""} · {plural(abierta.negocios.length, "negocio", "negocios")}
+                          {abierta.comparteCon.length ? ` · compartidos con ${abierta.comparteCon.join(", ")}` : ""}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCuentaFbAbierta(null)}
+                        className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
+                    <div className="space-y-1.5 p-4">{abierta.negocios.map((cuenta) => filaDeNegocio(cuenta))}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            ) : null}
+          </>
         );
       })()}
 
@@ -1327,11 +1373,21 @@ function DiferenciacionPorNegocio() {
                     <h3 className="truncate text-sm font-extrabold uppercase tracking-wide text-tinta">
                       {cuenta.nombre}
                     </h3>
-                    {cuenta.facebookNombre ? (
-                      <p className="text-xs text-tinta-suave">
-                        Cuenta de Facebook: {cuenta.facebookNombre}
-                      </p>
-                    ) : null}
+                    {(() => {
+                      // QUIÉN LO ADMINISTRA (21/10/2026): con dos cuentas en los mismos BM, se dice.
+                      const admins = [
+                        ...new Set(
+                          [cuenta.facebookNombre, ...(datos.conectadas ?? []).filter((c) => c.negocios.includes(cuenta.id)).map((c) => c.nombre)].filter(
+                            (x): x is string => !!x
+                          )
+                        ),
+                      ];
+                      return admins.length ? (
+                        <p className="text-xs text-tinta-suave">
+                          {admins.length > 1 ? `Lo administran: ${admins.join(", ")}` : `Cuenta de Facebook: ${admins[0]}`}
+                        </p>
+                      ) : null;
+                    })()}
                   </div>
                   {/* EL TOKEN, DONDE ESTÁ EL PROBLEMA (21/10/2026): el token es del BM, así que se crea
                       desde aquí, con el asistente ya en este BM. */}
@@ -1413,7 +1469,7 @@ function DiferenciacionPorNegocio() {
       {/* CONECTAR OTRA CUENTA DE FACEBOOK, por la misma app. Solo hace falta si los
           números de esa cuenta no salen ya aquí arriba. Y solo con una ya conectada: «otra» sin
           ninguna no tiene sentido (21/10/2026). */}
-      {datos.total > 0 ? (
+      {datos.total > 0 || (datos.conectadas ?? []).length > 0 ? (
       <div className="rounded-xl border border-borde bg-tarjeta p-4 text-center">
         <a
           href="/api/meta/connect/start?nueva=1"

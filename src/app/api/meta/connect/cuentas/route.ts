@@ -3,6 +3,7 @@ import { cuentaDeFacebookDeCadaNegocio, listPermisosDeCuentas } from "@/lib/db";
 import { loConectado } from "@/lib/meta/lo-conectado";
 import { compartidoPor, cuentaDeLaTienda, puedeUsarlo, type ConCuenta } from "@/lib/meta/cuentas";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
+import { cuentasDeFacebookConectadas } from "@/lib/meta/cuentas-de-facebook";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -244,5 +245,8 @@ export async function GET() {
     cuentas,
     sinIdentificar: { ...sinIdentificar, tiendas: tiendasSinCuenta },
     pixelsDeOtras,
+    // Toda cuenta de Facebook que inició sesión, con los BM que trajo (21/10/2026): para que tenga
+    // su fila aunque sus BM ya estén bajo otra o no tengan números ni páginas.
+    conectadas: cuentasDeFacebookConectadas().map((c) => ({ nombre: c.nombre, origen: c.origen, negocios: c.negocios })),
   });
 }
