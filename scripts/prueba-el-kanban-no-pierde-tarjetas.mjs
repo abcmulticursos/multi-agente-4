@@ -59,6 +59,7 @@ registerHooks({
           export const getFrozenPrices = () => null;
           export const getUpsellFrozenPrices = () => null; export const getPuestoEnLaFila = () => null; export const leerCompradosDeLaFila = () => []; export const moverLaFila = () => {};
           export const setFrozenPrices = () => {};
+          export const listMetaWhatsAppConnections = () => [];
         `,
       };
     if (url === DOBLE_NEXT)

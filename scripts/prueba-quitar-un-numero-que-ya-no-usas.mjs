@@ -49,7 +49,8 @@ console.log("\n— 1. un número no activo también se puede quitar —\n");
 // una prueba que se rompe al escribir un comentario obliga a no escribirlos.
 const ramaDeNoActivos =
   pantalla.match(
-    /"Usar este numero"\}[\s\S]{0,4000}?<\/>/
+    // El 22/10/2026 el botón pasó de «Usar este numero» a «Hacerlo principal».
+    /"(?:Usar este numero|Hacerlo principal)"\}[\s\S]{0,4000}?<\/>/
   )?.[0] ?? "";
 comprobar(
   "la rama del número NO activo existe",

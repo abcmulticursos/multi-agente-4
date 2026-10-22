@@ -53,7 +53,9 @@ comprobar(
 );
 comprobar(
   "pero en el chat queda su etiqueta",
-  /contenidoVisible = title\.trim\(\) \|\| id;/.test(manejador),
+  // Desde el 22/10/2026 la regla vive en `textoDelBotonPulsado` (la comparte Messenger).
+  /visible = title\.trim\(\) \|\| id;/.test(manejador) &&
+    /if \(traducido\.visible !== null\) contenidoVisible = traducido\.visible;/.test(manejador),
   "lo que el cliente vio"
 );
 comprobar(
