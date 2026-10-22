@@ -17,6 +17,7 @@ import {
   radiografiaDeAudio,
   saveTempAudio,
 } from "@/lib/meta/media";
+import { conElNumeroDeLaConversacion } from "@/lib/meta/numero-de-la-conversacion";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,7 +35,8 @@ function safeUnlink(p: string): void {
   }
 }
 
-export async function POST(req: NextRequest, { params }: Ctx) {
+/** El envío a mano. Se exporta envuelto en el número de su conversación (ver abajo). */
+async function enviar(req: NextRequest, { params }: Ctx) {
   const { conversationId } = await params;
   const id = Number(conversationId);
   if (!Number.isFinite(id) || id <= 0) {
@@ -158,3 +160,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     );
   }
 }
+
+// SALE POR EL NÚMERO DE ESTA CONVERSACIÓN (21/10/2026), no por el principal. Ver
+// `conElNumeroDeLaConversacion`.
+export const POST = conElNumeroDeLaConversacion(enviar);

@@ -4204,8 +4204,11 @@ export default function MetaConnectPage() {
                 Números de WhatsApp
               </h2>
               <p className="mt-1 text-xs text-neutral-500">
-                Elige uno de los numeros que Meta detecto. Este agente usa un numero
-                activo a la vez; cambiarlo no desconecta ni migra el numero en Meta.
+                {/* DICE LA VERDAD (21/10/2026): «le da acceso a un solo número pero yo uso varios
+                    para vender». El bot atiende todos; el principal solo es el de reserva. */}
+                El bot atiende <b>todos</b> tus números conectados: a cada cliente le contesta por el
+                número al que escribió. El <b>número principal</b> solo es el que se usa cuando un
+                mensaje no sale de ninguna conversación. Cambiarlo no toca nada en Meta.
               </p>
             </div>
             {/* SOLO COMO REPARACIÓN (21/10/2026): activar o traer un número desde el asistente ya
@@ -4284,7 +4287,7 @@ export default function MetaConnectPage() {
         </div>
         <div className="border-b border-neutral-100 bg-neutral-50">
           <SelectorDeCuenta
-            etiqueta="Número que atiende"
+            etiqueta="Número principal"
             ocupado={busyWhatsAppId !== null}
             vacio="Aún no hay números conectados."
             opciones={numerosConectados.map((connection) => ({
@@ -4307,8 +4310,8 @@ export default function MetaConnectPage() {
             }))}
             confirmar={(opcion) =>
               numerosConectados.some((c) => c.active)
-                ? `¿Reemplazar el número activo por «${opcion.titulo}»?\n\nEl bot pasará a atender por este número.`
-                : `¿Usar «${opcion.titulo}» como el número que atiende?\n\nEl bot pasará a atender por este número.`
+                ? `¿Usar «${opcion.titulo}» como número principal?\n\nEl bot sigue atendiendo todos tus números; este pasa a ser el de reserva.`
+                : `¿Usar «${opcion.titulo}» como número principal?\n\nEl bot sigue atendiendo todos tus números; este será el de reserva.`
             }
             onElegir={(phoneNumberId) => void activateWhatsApp(phoneNumberId)}
           />
@@ -4365,7 +4368,7 @@ export default function MetaConnectPage() {
                     </p>
                     {connection.active ? (
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        Activo
+                        Principal
                       </span>
                     ) : null}
                     {connection.pausado ? (
@@ -4413,7 +4416,7 @@ export default function MetaConnectPage() {
                     onClick={() => activateWhatsApp(connection.phoneNumberId)}
                     type="button"
                   >
-                    {busyWhatsAppId === connection.phoneNumberId ? "Activando..." : "Usar este numero"}
+                    {busyWhatsAppId === connection.phoneNumberId ? "Cambiando..." : "Hacerlo principal"}
                   </button>
                   {/* QUITAR UN NUMERO QUE NO ESTA ACTIVO.
                       LO PIDIO EL DUEÑO el 01/10/2026: habia borrado numeros en

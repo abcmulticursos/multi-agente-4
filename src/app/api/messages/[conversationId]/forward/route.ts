@@ -18,6 +18,7 @@ import {
 } from "@/lib/meta/client";
 import { resolveMediaAbsPath } from "@/lib/meta/media";
 import { marcaDeAdjunto, pieDeFotoReal } from "@/lib/marca-de-adjunto";
+import { conElNumeroDeLaConversacion } from "@/lib/meta/numero-de-la-conversacion";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,7 +43,8 @@ function pieDeFoto(contenido: string | null): string | undefined {
   return pieDeFotoReal(contenido) || undefined;
 }
 
-export async function POST(req: NextRequest, { params }: Ctx) {
+/** El envío a mano. Se exporta envuelto en el número de su conversación (ver abajo). */
+async function enviar(req: NextRequest, { params }: Ctx) {
   const { conversationId } = await params;
   const destinoId = Number(conversationId);
   if (!Number.isFinite(destinoId) || destinoId <= 0) {
@@ -172,3 +174,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     { status: enviados.length > 0 ? 200 : 502 }
   );
 }
+
+// SALE POR EL NÚMERO DE ESTA CONVERSACIÓN (21/10/2026), no por el principal. Ver
+// `conElNumeroDeLaConversacion`.
+export const POST = conElNumeroDeLaConversacion(enviar);

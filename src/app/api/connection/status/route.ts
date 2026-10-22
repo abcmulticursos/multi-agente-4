@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
+import { getActiveMetaWhatsAppConnection, listMetaWhatsAppConnections } from "@/lib/db";
 import { getPhoneNumberInfo } from "@/lib/meta/client";
 import {
   getWebhookAppSecret,
   getWebhookVerifyToken,
   getWhatsAppRuntimeConfig,
+  withOutboundWhatsAppNumber,
 } from "@/lib/meta/runtime-config";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
+  // CON VARIOS NÚMEROS, CUALQUIERA SIRVE (21/10/2026): tras conectar Facebook con 7 números no
+  // quedó ninguno como «activo», y el chat entero se bloqueaba con la pantalla de configuración,
+  // aunque las tiendas tuvieran su número. Se revisa el principal si lo hay; si no, uno conectado
+  // (primero uno con token permanente, que no caduca). Con un solo número, es el de siempre.
+  const conectados = listMetaWhatsAppConnections().filter((c) => c.pausado !== 1);
+  const principal =
+    getActiveMetaWhatsAppConnection() ?? conectados.find((c) => c.token_permanente === 1) ?? conectados[0] ?? null;
+  return withOutboundWhatsAppNumber(principal?.phone_number_id ?? null, revisar);
+}
+
+async function revisar() {
   const whatsApp = getWhatsAppRuntimeConfig();
   const missing = [
     ...(!whatsApp.accessToken ? ["WhatsApp Access Token"] : []),

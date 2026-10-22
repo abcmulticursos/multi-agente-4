@@ -16,6 +16,7 @@ import {
   uploadMediaToMeta,
 } from "@/lib/meta/client";
 import { rutaDelAdjunto } from "@/lib/quick-reply-media";
+import { conElNumeroDeLaConversacion } from "@/lib/meta/numero-de-la-conversacion";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,7 +34,8 @@ interface Ctx {
  * adjunto, el texto viaja como pie del archivo — una sola burbuja, igual que
  * cuando mandas una foto con su descripción por WhatsApp.
  */
-export async function POST(req: NextRequest, { params }: Ctx) {
+/** El envío a mano. Se exporta envuelto en el número de su conversación (ver abajo). */
+async function enviar(req: NextRequest, { params }: Ctx) {
   const { conversationId } = await params;
   const id = Number(conversationId);
   if (!Number.isFinite(id) || id <= 0) {
@@ -176,3 +178,7 @@ function errorDeEnvio(err: unknown, messageId: number): NextResponse {
   const message = err instanceof Error ? err.message : String(err);
   return NextResponse.json({ ok: false, messageId, error: message }, { status: 502 });
 }
+
+// SALE POR EL NÚMERO DE ESTA CONVERSACIÓN (21/10/2026), no por el principal. Ver
+// `conElNumeroDeLaConversacion`.
+export const POST = conElNumeroDeLaConversacion(enviar);
