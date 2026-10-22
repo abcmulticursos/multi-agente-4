@@ -1891,6 +1891,16 @@ export interface WorkflowConfig {
    * pagó y romper el modo de entregar.
    */
   no_responder_organicos?: boolean;
+  /**
+   * EL TOPE DE MENSAJES DEL MES, por número (22/10/2026).
+   *
+   * Lo pidió el dueño al saber que desde el 01/10/2026 Meta regala 1000 mensajes de servicio
+   * al mes por número y cobra desde el 1001 (y sin tarjeta, deja de entregarlos). Con el
+   * interruptor de arriba encendido, el bot contesta a los orgánicos NUEVOS mientras el número
+   * lleve menos de este tope en el mes; al llegar, calla con ellos. Ausente = 950, para dejar
+   * margen. 0 = no contestar nunca a un orgánico nuevo: lo de antes de este campo.
+   */
+  organicos_tope_mensajes?: number;
   /** Delay (segundos) que el bot "espera" antes de responder a cada
    *  mensaje entrante. Mientras espera, muestra el indicador "escribiendo…"
    *  estilo humano. 0 = respuesta instantánea. Por defecto 6. */
@@ -12231,4 +12241,16 @@ export function getSamplesAfterSequence(): SequenceStep[] {
     config.samples_after_sequence ??
     []
   );
+}
+
+
+/**
+ * EL TOPE DE MENSAJES DEL MES PARA LOS ORGÁNICOS. Ver `organicos_tope_mensajes`.
+ * Sin escribir = 950. Un número entero de 0 en adelante; 0 = no contestar nunca.
+ */
+export function topeDeOrganicos(
+  config: { organicos_tope_mensajes?: unknown } | null | undefined
+): number {
+  const v = config?.organicos_tope_mensajes;
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 950;
 }

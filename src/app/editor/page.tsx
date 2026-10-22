@@ -4,6 +4,7 @@ import Link from "next/link";
 import EmojiPicker from "@/components/EmojiPicker";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
+import { MensajesDelMes } from "@/components/MensajesDelMes";
 import { TwemojiText } from "@/components/TwemojiText";
 import { DEFAULT_SAMPLES_AFTER_TEXT } from "@/lib/workflow/defaults";
 import {
@@ -1517,6 +1518,8 @@ interface Globals {
   respaldo_entre_tiendas?: boolean;
   /** El bot calla con quien no vino de un anuncio. Ver config.ts. */
   no_responder_organicos: boolean;
+  /** El tope de mensajes del mes por número para seguir contestando a orgánicos. Ver config.ts. */
+  organicos_tope_mensajes?: number;
   bot_response_delay_seconds: number;
   /** Espera por si el cliente sigue escribiendo. Es la que JUNTA. Ver config.ts. */
   bot_debounce_seconds: number;
@@ -49423,21 +49426,43 @@ function AjustesTab({
               factura. */}
           <div className="col-span-full rounded-xl border-2 border-neutral-200 bg-tarjeta p-4">
             <p className="text-sm font-black uppercase tracking-wide text-neutral-900">
-              🌱 No contestar a quien no vino de un anuncio
+              🌱 Orgánicos: contestar solo hasta el tope del mes
             </p>
             <p className="mt-1 max-w-3xl text-xs leading-relaxed text-neutral-600">
-              Desde el <strong>1 de octubre de 2026</strong>, Meta cobra por
-              mensaje todo lo que el bot envía dentro de la ventana de 24 horas.
-              Recibir sigue siendo gratis: se paga lo que sale. Quien llega por
-              un <strong>anuncio de clic a WhatsApp</strong> o por el{" "}
-              <strong>botón de una página de Facebook</strong> no cuesta nada,
-              porque ahí la ventana de 72 horas es gratis entera.
+              Desde el <strong>1 de octubre de 2026</strong>, Meta regala{" "}
+              <strong>1000 mensajes al mes por número</strong> y desde el 1001
+              cobra cada mensaje que sale (sin tarjeta en Meta, deja de
+              entregarlos). Quien llega por un{" "}
+              <strong>anuncio de clic a WhatsApp</strong> no gasta esos 1000: su
+              ventana es gratis.
               <br />
-              Encendido, el bot <strong>calla</strong> con los demás: no
-              responde, no suelta la intro y no llama al modelo. El mensaje del
-              cliente se guarda igual y la conversación sigue en la bandeja para
+              Encendido, el bot contesta a los clientes orgánicos nuevos{" "}
+              <strong>mientras el número lleve menos mensajes que el tope</strong>.
+              Al llegar, <strong>calla</strong> con los orgánicos nuevos hasta el
+              día 1 del mes siguiente. Con los de anuncio sigue igual. El mensaje
+              del cliente se guarda y la conversación queda en la bandeja para
               atenderla a mano.
             </p>
+            <label className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-700">
+              Tope de mensajes al mes, por número:
+              <input
+                type="number"
+                min={0}
+                step={10}
+                value={typeof g.organicos_tope_mensajes === "number" ? g.organicos_tope_mensajes : 950}
+                onChange={(e) => {
+                  const v = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                  setCfg({ ...cfg, globals: { ...g, organicos_tope_mensajes: v } });
+                }}
+                className="w-24 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+              />
+              <span className="font-normal text-neutral-500">
+                950 deja margen bajo los 1000 de Meta · 0 = no contestar nunca a un orgánico nuevo
+              </span>
+            </label>
+            <MensajesDelMes
+              tope={typeof g.organicos_tope_mensajes === "number" ? g.organicos_tope_mensajes : 950}
+            />
             <button
               type="button"
               onClick={() =>
@@ -49463,7 +49488,7 @@ function AjustesTab({
             </button>
             <p className="mt-1 text-[11px] font-semibold text-neutral-500">
               {g.no_responder_organicos === true
-                ? "El bot NO contesta a los orgánicos"
+                ? "Encendido: a los orgánicos nuevos solo hasta el tope del mes"
                 : "El bot contesta a todos — como siempre"}
             </p>
             <p className="mt-2 max-w-3xl rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-4 text-amber-950">

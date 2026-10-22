@@ -80,7 +80,7 @@ comprobar(
 );
 comprobar(
   "hay un interruptor en la pantalla",
-  /No contestar a quien no vino de un anuncio/.test(editor) &&
+  /Orgánicos: contestar solo hasta el tope del mes/.test(editor) &&
     /no_responder_organicos: !\(/.test(editor),
   "en Ajustes"
 );
@@ -162,6 +162,43 @@ comprobar(
   corte > 0 && modelo > 0 && corte < modelo,
   "no llama a la IA"
 );
+
+// -- 6. EL TOPE DEL MES (22/10/2026) -----------------------------------------
+//
+// Meta regala 1000 mensajes de servicio al mes por número desde el 01/10/2026. El orgánico
+// nuevo se atiende mientras el número lleve menos que el tope; 0 = lo de antes.
+comprobar(
+  "el tope va DESPUES de los guardias",
+  guardia.indexOf("topeDeOrganicos(") > guardia.indexOf('if (convo.state !== "new") return true;'),
+  "quien ya pago o ya habla, siempre"
+);
+comprobar(
+  "debajo del tope, contesta",
+  /if \(tope > 0 && usados < tope\) return true;/.test(guardia),
+  "los 1000 gratis se usan"
+);
+comprobar(
+  "sin escribir, el tope es 950",
+  /: 950;/.test(config.slice(config.indexOf("export function topeDeOrganicos("))),
+  "margen bajo los 1000"
+);
+comprobar(
+  "y se guarda aunque valga 0",
+  /"organicos_tope_mensajes",/.test(ruta),
+  "0 = no contestar nunca"
+);
+{
+  const db = leer("src", "lib", "db.ts");
+  const cuenta = db.slice(db.indexOf("export function mensajesDelMesDelNumero("), db.indexOf("export function listMetaWhatsAppConnections("));
+  comprobar(
+    "la cuenta es del mes, por numero, sin fallidos ni ventana de anuncio",
+    /Date\.UTC\(d\.getUTCFullYear\(\), d\.getUTCMonth\(\), 1\)/.test(cuenta) &&
+      /c\.wa_phone_number_id = \?/.test(cuenta) &&
+      /<> 'failed'/.test(cuenta) &&
+      /c\.created_at \+ 72 \* 3600/.test(cuenta),
+    "como cuenta Meta"
+  );
+}
 
 console.log(fallos === 0 ? "\nTODO OK" : `\n${fallos} FALLO(S)`);
 process.exit(fallos === 0 ? 0 : 1);

@@ -3897,6 +3897,42 @@ export interface SaveMetaWhatsAppConnectionInput {
   compartidoCon?: Array<{ id: string; nombre: string | null }> | null;
 }
 
+/**
+ * LOS MENSAJES QUE ESTE NÚMERO MANDÓ EN EL MES (22/10/2026), para el tope de los orgánicos.
+ *
+ * Desde el 01/10/2026 Meta regala 1000 mensajes de servicio al mes POR NÚMERO, y el contador
+ * vuelve a cero el día 1. Se cuenta lo que SALIÓ por WhatsApp (bot y mano), sin los fallidos
+ * (no se entregaron) y sin los que caen en la ventana gratis de quien vino de un anuncio
+ * (72 horas desde que nació su conversación): esos no gastan el tramo gratis.
+ *
+ * Es una cuenta nuestra, no la de Meta: puede diferir en unos pocos. Por eso el tope por
+ * defecto es 950. El mes se toma en hora UTC. Sin número (conversaciones viejas), cuenta todos.
+ */
+export function mensajesDelMesDelNumero(
+  phoneNumberId: string | null | undefined,
+  ahoraSeg: number = Math.floor(Date.now() / 1000)
+): number {
+  const d = new Date(ahoraSeg * 1000);
+  const desde = Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 1000);
+  const numero = phoneNumberId?.trim() || null;
+  const fila = db
+    .prepare(
+      `SELECT COUNT(*) AS n
+         FROM messages m JOIN conversations c ON c.id = m.conversation_id
+        WHERE m.role IN ('assistant', 'human')
+          AND m.created_at >= ?
+          AND c.channel = 'whatsapp'
+          AND COALESCE(m.wa_status, '') <> 'failed'
+          AND (? IS NULL OR c.wa_phone_number_id = ?)
+          AND NOT (
+            (COALESCE(c.ctwa_clid, '') <> '' OR COALESCE(c.ad_source_id, '') <> '')
+            AND m.created_at < c.created_at + 72 * 3600
+          )`
+    )
+    .get(desde, numero, numero) as { n?: number } | undefined;
+  return Number(fila?.n ?? 0);
+}
+
 export function listMetaWhatsAppConnections(): MetaWhatsAppConnectionRow[] {
   return stmtListMetaWhatsAppConnections.all().map(hydrateWhatsAppConnection);
 }

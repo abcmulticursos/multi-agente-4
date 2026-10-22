@@ -24,6 +24,7 @@ import {
   type ConversationRow,
   type MediaPayload,
   type WaStatus,
+  mensajesDelMesDelNumero,
 } from "@/lib/db";
 import { evaluarModeracion } from "@/lib/workflow/moderation";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
@@ -85,6 +86,7 @@ import {
   getActiveModalityKey,
   getPaymentMethods,
   getSamplesOfferBubble,
+  topeDeOrganicos,
 } from "@/lib/workflow/config";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
@@ -585,7 +587,8 @@ function isShortVisualConsent(text: string): boolean {
  * ¿EL BOT LE CONTESTA A ESTA CONVERSACIÓN?
  *
  * Devuelve false solo en un caso: el interruptor `no_responder_organicos` está
- * encendido Y esta conversación no vino de un anuncio.
+ * encendido, esta conversación no vino de un anuncio Y su número ya llegó al tope de
+ * mensajes del mes (`organicos_tope_mensajes`, 950 si no está escrito; 0 = siempre).
  *
  * POR QUÉ.
  *
@@ -668,8 +671,16 @@ function leContestamos(convo: ConversationRow): boolean {
   // siga ahí, callar no interrumpe nada. En cuanto sale de `new`, hay una
   // conversación empezada y se termina.
   if (convo.state !== "new") return true;
+  // EL TOPE DEL MES (22/10/2026). Mientras el número lleve menos mensajes que el tope en el
+  // mes, el orgánico nuevo se atiende: esos caen en los 1000 gratis de Meta. Al llegar, calla.
+  // Tope 0 = lo de antes: no se atiende nunca. Ver `organicos_tope_mensajes` en config.ts.
+  const tope = topeDeOrganicos(loadWorkflowConfig());
+  const usados = tope > 0 ? mensajesDelMesDelNumero(convo.wa_phone_number_id) : 0;
+  if (tope > 0 && usados < tope) return true;
   console.log(
-    `[wh] convo ${convo.id} entró sin anuncio y «no responder orgánicos» está encendido: no contesto`
+    tope > 0
+      ? `[wh] convo ${convo.id} entró sin anuncio y el número ya mandó ${usados} mensajes este mes (tope ${tope}): no contesto`
+      : `[wh] convo ${convo.id} entró sin anuncio y «no responder orgánicos» está encendido: no contesto`
   );
   return false;
 }

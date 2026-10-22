@@ -13,6 +13,7 @@ import {
   DEFAULT_ORDER_BUMP_OPTION_PRESENTATION_RULE,
   DEFAULT_PAYMENT_TEXT,
   getPaymentButtons,
+  topeDeOrganicos,
 } from "@/lib/workflow/config";
 import { writeTextFileAtomically } from "@/lib/product-profiles";
 // LA PIZARRA: se lee y se escribe con la MISMA función. Ver `lee-pizarra.ts`.
@@ -1781,6 +1782,7 @@ export async function GET() {
     // atender a parte de la gente que escribe. Nadie debería encontrárselo
     // puesto por defecto.
     no_responder_organicos: config?.no_responder_organicos === true,
+    organicos_tope_mensajes: topeDeOrganicos(config),
     bot_response_delay_seconds: num(config?.bot_response_delay_seconds, 6),
     // El respaldo es la variable de entorno de siempre, para que un despliegue
     // que aún no ha guardado desde el panel vea en la casilla el número que de
@@ -3290,6 +3292,8 @@ export async function POST(req: NextRequest) {
       "customer_survey_delay_minutes",
       "no_response_delay_seconds",
       "autopurge_inactive_days",
+      // Se guarda aunque valga 0: 0 es «no contestar nunca a los orgánicos».
+      "organicos_tope_mensajes",
     ] as const;
     for (const k of keys) {
       if (typeof g[k] === "number" && Number.isFinite(g[k] as number)) {
