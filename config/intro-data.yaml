@@ -75180,6 +75180,21 @@ pizarra:
         dest:pz:PE:seg:1:seg:1:33:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvh1oea80:
           x: 1434
           y: -948
+        dest:pz:EC:seg:0:seg:0:23:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1099
+          y: 969
+        dest:pz:EC:seg:1:seg:1:22:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvdofvni0:
+          x: 1099
+          y: 1010
+        dest:pz:AR:seg:0:seg:0:22:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1234
+          y: 2369
+        dest:pz:AR:seg:1:seg:1:21:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvdofvnh0:
+          x: 1820
+          y: 2088
+        dest:pz:PE:seg:1:seg:1:20:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvdofvng0:
+          x: 1298
+          y: -1731
       cajas:
         - id: caja:carril:PE
           x: 174
