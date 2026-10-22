@@ -87,6 +87,8 @@ type MetaStatus = {
   whatsAppManualEnvReady: boolean;
   /** ¿Ya se inició sesión con Facebook? Sin eso, Meta Connect solo muestra el asistente. */
   conectadoConFacebook?: boolean;
+  /** El nombre de la cuenta de Facebook con la que se inició sesión. */
+  cuentaDeFacebook?: string | null;
 };
 
 type ConfigureResult = {
@@ -1336,7 +1338,9 @@ function DiferenciacionPorNegocio() {
       ) : null}
 
       {/* CONECTAR OTRA CUENTA DE FACEBOOK, por la misma app. Solo hace falta si los
-          números de esa cuenta no salen ya aquí arriba. */}
+          números de esa cuenta no salen ya aquí arriba. Y solo con una ya conectada: «otra» sin
+          ninguna no tiene sentido (21/10/2026). */}
+      {datos.total > 0 ? (
       <div className="rounded-xl border border-borde bg-tarjeta p-4 text-center">
         <a
           href="/api/meta/connect/start?nueva=1"
@@ -1352,6 +1356,7 @@ function DiferenciacionPorNegocio() {
           tienes.
         </p>
       </div>
+      ) : null}
     </div>
   );
 }
@@ -1654,6 +1659,92 @@ function RegistroDeMeta() {
       </div>
       <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-neutral-50 p-2 font-mono text-[11px] leading-5">{texto}</pre>
     </details>
+  );
+}
+
+/**
+ * EL ESTADO DE LA CONEXIÓN, COMO TITULAR (21/10/2026). «¿Cómo sé si ya se conectó una app?… y cómo
+ * lo desconecto?». Su ejemplo: arriba, «APP CONECTADA» y el nombre en grande, con el logo a la
+ * derecha en un cuadro blanco con sombra. Debajo, igual pero más chico, Facebook. Cada uno con
+ * su botón del momento; los botones abren el paso del asistente que toca.
+ */
+function EstadoDeConexion({ status }: { status: MetaStatus | null }) {
+  if (!status) return null;
+  const app = Boolean(status.appId);
+  const fb = Boolean(status.appId && status.conectadoConFacebook);
+  const abrir = (paso: string) => window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: paso }));
+  const boton = "rounded-lg px-3 py-1.5 text-xs font-semibold transition";
+  const fila = (o: {
+    logo: string;
+    grande: boolean;
+    apagado: boolean;
+    rotulo: string;
+    titulo: string;
+    detalle?: string | null;
+    acciones: ReactNode;
+  }) => (
+    <div className="flex items-center justify-center gap-5">
+      <div className="min-w-0 text-center">
+        <p className={`font-extrabold uppercase tracking-[0.12em] ${o.grande ? "text-sm" : "text-xs"} ${o.apagado ? "text-tinta-suave" : "text-tinta"}`}>
+          {o.rotulo}
+        </p>
+        <p className={`font-titulo font-extrabold leading-tight tracking-tight ${o.grande ? "text-3xl sm:text-4xl" : "text-xl sm:text-2xl"} ${o.apagado ? "text-tinta-suave" : "text-tinta"}`}>
+          {o.titulo}
+        </p>
+        {o.detalle ? <p className="mt-0.5 text-xs text-tinta-suave">{o.detalle}</p> : null}
+        <div className="mt-2 flex flex-wrap justify-center gap-2">{o.acciones}</div>
+      </div>
+      <span
+        className={`flex shrink-0 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-black/5 ${o.grande ? "h-20 w-20 p-2" : "h-14 w-14 p-2"} ${o.apagado ? "opacity-60 grayscale" : ""}`}
+      >
+        <img src={o.logo} alt="" className="h-full w-full object-contain" />
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="mt-6 space-y-5 rounded-2xl border border-borde bg-tarjeta px-4 py-5 shadow-sm">
+      {fila({
+        logo: "/meta-app-logo.png",
+        grande: true,
+        apagado: !app,
+        rotulo: app ? "App conectada" : "Sin app conectada",
+        titulo: app ? status.appName ?? status.appId ?? "" : "Conecta tu app para empezar",
+        detalle: app ? `ID ${status.appId}` : null,
+        acciones: app ? (
+          <>
+            <button type="button" onClick={() => abrir("app")} className={`${boton} border border-borde bg-tarjeta text-tinta-suave hover:bg-relleno`}>
+              Cambiar app
+            </button>
+            <button type="button" onClick={() => abrir("cerrar")} className={`${boton} border border-red-200 bg-tarjeta text-red-700 hover:bg-red-50`}>
+              Desconectar
+            </button>
+          </>
+        ) : (
+          <button type="button" onClick={() => abrir("app")} className={`${boton} bg-sky-600 text-white hover:bg-sky-700`}>
+            🔑 Conectar mi app
+          </button>
+        ),
+      })}
+      <div className="mx-auto h-px max-w-sm bg-borde" />
+      {fila({
+        logo: "/facebook-logo.png",
+        grande: false,
+        apagado: !fb,
+        rotulo: fb ? "Facebook conectado" : "Facebook sin conectar",
+        titulo: fb ? status.cuentaDeFacebook ?? "Tu cuenta de Facebook" : app ? "Inicia sesión para ver tus números y páginas" : "Primero conecta tu app",
+        detalle: fb ? `${status.whatsAppConnections.length} número(s) · ${status.connections.length + status.detectedPages.length} página(s)` : null,
+        acciones: fb ? (
+          <button type="button" onClick={() => abrir("inicio")} className={`${boton} bg-sky-600 text-white hover:bg-sky-700`}>
+            Abrir asistente
+          </button>
+        ) : app ? (
+          <a href="/api/meta/connect/start" className={`${boton} bg-[#1877f2] text-white hover:opacity-90`}>
+            Conectar con Facebook
+          </a>
+        ) : null,
+      })}
+    </div>
   );
 }
 
@@ -2487,6 +2578,13 @@ export default function MetaConnectPage() {
     const res = await fetch("/api/meta/connect/status", { cache: "no-store" });
     setStatus(await res.json());
   }
+  // Al cerrar el asistente (conectó la app, agregó un número…), el encabezado se pone al día.
+  useEffect(() => {
+    const alCambiar = () => void loadStatus().catch(() => {});
+    window.addEventListener("meta-connect:cambio", alCambiar);
+    return () => window.removeEventListener("meta-connect:cambio", alCambiar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function pausarNumeroDelProyecto(phoneNumberId: string, pausado: boolean, nombre: string) {
     if (
@@ -3015,6 +3113,8 @@ export default function MetaConnectPage() {
         </div>
       </div>
 
+      <EstadoDeConexion status={status} />
+
       {/* EL ASISTENTE «CONTINUAR» (20/10/2026): la forma simple de conectar. Lo de abajo
           sigue igual, como siempre. Ver `asistente.tsx`. */}
       <div className="mt-5">
@@ -3024,11 +3124,20 @@ export default function MetaConnectPage() {
       {/* UNA COLUMNA CON ORDEN, y no `space-y`, para que el modo esencial pueda poner
           «Configuración automática» después de la página sin mover código. Sin orden
           puesto —el profesional— cada sección sale donde siempre. */}
-      {/* TRES ESTADOS, UNA COSA A LA VEZ (21/10/2026): «un desorden visual es que el usuario no
-          tenga idea de qué hacer». Sin app: solo el asistente («Conectar mi app»). Con app y sin
-          Facebook: solo «Conectar con Facebook». Con Facebook: todo lo de abajo, como siempre. */}
-      {status?.appId && status.conectadoConFacebook ? (
-      <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-borde bg-panel p-5 shadow-sm">
+      {/* LAS SECCIONES SIEMPRE SE VEN, APAGADAS SIN FACEBOOK (21/10/2026): «a mí me gusta como está
+          Meta Connect… sirven para enseñar». Como Kommo: se ven, pero no se tocan hasta conectar. */}
+      {status && !(status.appId && status.conectadoConFacebook) ? (
+        <p className="mt-5 text-center text-sm font-semibold text-tinta-suave">
+          {status.appId ? "Conecta tu Facebook arriba para usar todo esto." : "Conecta tu app arriba para empezar."}
+        </p>
+      ) : null}
+      {status ? (
+      <div
+        className={`mt-5 flex flex-col gap-4 rounded-2xl border border-borde bg-panel p-5 shadow-sm ${
+          status.appId && status.conectadoConFacebook ? "" : "pointer-events-none select-none opacity-50"
+        }`}
+        aria-disabled={!(status.appId && status.conectadoConFacebook)}
+      >
 
       {/* LA DIFERENCIACIÓN, antes que nada: cuántas cuentas, de qué negocio es cada cosa,
           y suscribir cada número. Ver `DiferenciacionPorNegocio`. */}
@@ -3040,6 +3149,7 @@ export default function MetaConnectPage() {
           conjunto sirve. Ver `SetDeVenta`. */}
       {/* POR TIENDA (21/10/2026): «recuerda que es un set de ventas por tienda». Sin tiendas, el
           general de siempre. */}
+      {status?.appId && status.conectadoConFacebook ? (
       <SetsDeVentaPorTienda
         general={
           <SetDeVenta
@@ -3055,6 +3165,7 @@ export default function MetaConnectPage() {
           />
         }
       />
+      ) : null}
 
       <SeccionEnVentana
         {...lugar(1)}

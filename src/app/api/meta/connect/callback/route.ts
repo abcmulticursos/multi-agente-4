@@ -215,6 +215,8 @@ async function iniciarSesion(req: NextRequest) {
       // el que mide las compras de la cuenta principal, y reemplazarlo por el de otra
       // cuenta es justo lo que apagaba su medición. El de la nueva va a su cuenta.
       setMetaRuntimeSettings({ meta_user_token: userToken });
+      // Quién entró, para el titular de Meta Connect («FACEBOOK CONECTADO · Claudio SP»).
+      if (quienEntro?.nombre) setMetaRuntimeSettings({ meta_user_nombre: quienEntro.nombre });
     }
 
     const whatsAppOptions = await fetchWhatsAppOptions(userToken);

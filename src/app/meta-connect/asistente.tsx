@@ -18,7 +18,7 @@
  * casillas que BLOQUEAN «Continuar»: Meta no deja comprobarlo desde fuera.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Paso = "inicio" | "app" | "facebook" | "numeros" | "token" | "listo" | "cerrar";
 const CAMINO: Paso[] = ["app", "facebook", "numeros", "token", "listo"];
@@ -87,6 +87,8 @@ export default function AsistenteDeConexion() {
   const [paso, setPaso] = useState<Paso>("inicio");
   const [casillas, setCasillas] = useState<Record<string, boolean>>({});
   const [aviso, setAviso] = useState<string | null>(null);
+  /** La línea que deja el regreso de Facebook: éxito (se va sola) o qué hacer si falló. */
+  const [regreso, setRegreso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
 
   // Lo que ya hay: la app y lo conectado.
   const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number; conFacebook?: boolean } | null>(null);
@@ -140,34 +142,55 @@ export default function AsistenteDeConexion() {
         } catch {}
       }, 0);
     }
-    if (guardado) {
-      setCasillas(guardado.casillas ?? {});
-      if (p.get("error")) {
-        const error = p.get("error") ?? "";
-        // SIN APP, A «MI APP» (21/10/2026): tras cerrar sesión, el aviso decía «primero conecta tu
-        // app» pero dejaba la pantalla de Facebook. Se contradecía.
-        const sinApp = /Primero conecta tu app/i.test(error);
-        setPaso(sinApp || /bloquead|redirect|URL/i.test(error) ? "app" : "facebook");
-        setAviso(
-          sinApp
-            ? "Primero conecta tu app. Después inicias sesión con Facebook."
-            : /bloquead|redirect|URL/i.test(error)
-            ? "Meta rechazó el inicio de sesión: la URI no está pegada o tiene un error. Cópiala otra vez y pégala en tu app."
+    // AL VOLVER DE META, EL ASISTENTE NO SE ABRE SOLO (21/10/2026): «tiene que haber coherencia en
+    // el contexto de las ventanas… al volver aparecen menús innecesarios». Solo se abre con un
+    // botón. El regreso deja, como mucho, una línea: «✅ Conexión exitosa» unos segundos, o qué
+    // hacer si falló de verdad. Cancelar en Facebook no deja nada (ver callback).
+    if (guardado) setCasillas(guardado.casillas ?? {});
+    if (p.get("connected") !== null) {
+      setRegreso({ tipo: "ok", texto: "✅ Conexión exitosa con Facebook." });
+      window.setTimeout(() => setRegreso(null), 6000);
+    } else if (p.get("error")) {
+      const error = p.get("error") ?? "";
+      setRegreso({
+        tipo: "error",
+        texto: /Primero conecta tu app/i.test(error)
+          ? "Primero conecta tu app; después inicias sesión con Facebook."
+          : /bloquead|redirect|URL/i.test(error)
+            ? "No se pudo conectar con Facebook: falta pegar la URI en tu app. Pulsa «Cambiar app» y sigue sus pasos."
             : /\(#(4|17|32|613)\)|request limit/i.test(error)
-              ? // (#4) y familia: Meta frenó la app por muchas consultas seguidas (21/10/2026).
-                "Meta frenó tu app un rato por hacer muchas consultas seguidas. No se rompió nada: espera 1 hora sin abrir Meta Connect y vuelve a intentarlo."
-              : `Meta respondió: ${error}`
-        );
-        setAbierto(true);
-      } else if (p.get("connected") !== null) {
-        setPaso("numeros");
-        setAbierto(true);
-      } else {
-        setPaso(guardado.paso);
-      }
+              ? "Meta pidió una pausa por muchas consultas seguidas. No se rompió nada: espera un rato y vuelve a intentarlo."
+              : "No se pudo conectar con Facebook. Vuelve a intentarlo y acepta todo en la ventana de Facebook.",
+      });
     }
     void cargarEstado();
   }, [cargarEstado]);
+
+  // AL CERRAR EL ASISTENTE, EL ENCABEZADO SE PONE AL DÍA: conectaste la app, agregaste un número…
+  // La página vuelve a leer su estado; sin esto, decía «SIN APP» hasta refrescar.
+  const yaSeAbrio = useRef(false);
+  useEffect(() => {
+    if (abierto) {
+      yaSeAbrio.current = true;
+      return;
+    }
+    if (!yaSeAbrio.current) return;
+    void cargarEstado();
+    window.dispatchEvent(new Event("meta-connect:cambio"));
+  }, [abierto, cargarEstado]);
+
+  // LOS BOTONES DEL ENCABEZADO ABREN EL PASO QUE TOCA (ver `EstadoDeConexion` en page.tsx).
+  useEffect(() => {
+    const alPedir = (e: Event) => {
+      const paso = (e as CustomEvent<string>).detail as Paso;
+      setRegreso(null);
+      setAbierto(true);
+      setAviso(null);
+      setPaso(paso);
+    };
+    window.addEventListener("meta-connect:asistente", alPedir);
+    return () => window.removeEventListener("meta-connect:asistente", alPedir);
+  }, []);
 
   const ir = (nuevo: Paso) => {
     setAviso(null);
@@ -207,54 +230,27 @@ export default function AsistenteDeConexion() {
           </button>
         </div>
       )}
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border-2 border-sky-400 bg-sky-50 p-4">
-        <div className="min-w-0 flex-1">
-          <div className="text-base font-bold text-sky-900">🧭 Conectar paso a paso</div>
-          <div className="text-xs text-sky-900/80">
-            {estado?.appId ? (
-              <>
-                ✅ App conectada: <b>{estado.appName ?? estado.appId}</b> ·{" "}
-              </>
-            ) : (
-              "Sin app todavía · "
-            )}
-            {estado ? (estado.conFacebook ? `${estado.numeros} número(s) · ${estado.paginas} página(s)` : "Facebook sin conectar") : "…"}
-          </div>
+      {/* LA BARRA DEL ASISTENTE SE FUE AL ENCABEZADO (21/10/2026): sus botones están en
+          «EstadoDeConexion» (page.tsx). Aquí solo queda, si hace falta, la línea del regreso de
+          Facebook: verde unos segundos si salió bien, o qué hacer si falló de verdad. */}
+      {regreso && (
+        <div
+          className={`mb-4 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm ${
+            regreso.tipo === "ok" ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-red-300 bg-red-50 text-red-900"
+          }`}
+        >
+          <span className="min-w-0 flex-1 font-semibold">{regreso.texto}</span>
+          {regreso.tipo === "error" && estado?.appId && (
+            <a href="/api/meta/connect/start" className="rounded-lg bg-[#1877f2] px-3 py-1.5 text-xs font-bold text-white hover:opacity-90">
+              Reintentar
+            </a>
+          )}
+          <button type="button" className="text-xs text-current opacity-60 hover:opacity-100" onClick={() => setRegreso(null)} aria-label="Cerrar">
+            ✕
+          </button>
         </div>
-        {/* CONECTAR CON FACEBOOK, CUANDO ÉL QUIERA: con la app lista y sin sesión de Facebook. */}
-        {estado?.appId && !estado.conFacebook && (
-          <a href="/api/meta/connect/start" className="rounded-lg bg-[#1877f2] px-4 py-2 text-sm font-bold text-white hover:opacity-90">
-            Conectar con Facebook
-          </a>
-        )}
-        {/* UN SOLO BOTÓN SEGÚN EL MOMENTO (21/10/2026): sin app, «Conectar mi app»; con app y sin
-            Facebook, solo «Conectar con Facebook» (arriba); con todo, «Abrir asistente». */}
-        {estado && !estado.appId && (
-          <button
-            type="button"
-            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
-            onClick={() => {
-              setAbierto(true);
-              ir("app");
-            }}
-          >
-            🔑 Conectar mi app
-          </button>
-        )}
-        {estado?.appId && estado.conFacebook && (
-          <button
-            type="button"
-            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
-            onClick={() => {
-              // Siempre empieza por «¿Qué deseas hacer?».
-              setAbierto(true);
-              ir("inicio");
-            }}
-          >
-            Abrir asistente
-          </button>
-        )}
-      </div>
+      )}
+
 
       {abierto && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={(e) => e.target === e.currentTarget && setAbierto(false)}>

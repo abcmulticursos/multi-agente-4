@@ -276,10 +276,13 @@ export default function DashboardHeader({
         </Link>
         <Link
           href="/meta-connect"
-          className="rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
-          title="Conectar Meta"
+          className="flex items-center rounded-md border border-neutral-200 bg-white px-2.5 py-1 shadow-sm hover:bg-neutral-50"
+          title="Meta Connect"
+          aria-label="Meta Connect"
         >
-          Meta
+          {/* SU LOGO DE META CONNECT, COMO BOTÓN (21/10/2026): «creo que el logo de Meta Connect
+              más bien sería un botón para entrar». Fondo blanco para que no se pierda. */}
+          <img src="/meta-connect-logo.png" alt="Meta Connect" className="h-5 w-auto" />
         </Link>
         <button
           type="button"

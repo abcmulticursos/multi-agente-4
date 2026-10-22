@@ -109,6 +109,7 @@ export async function GET(req: NextRequest) {
       // ¿Ya se inició sesión con Facebook? (21/10/2026: tras conectar la app, Meta Connect ofrece
       // «Conectar con Facebook» mientras esto sea false.)
       conectadoConFacebook: Boolean(getMetaRuntimeSetting("meta_user_token")),
+      cuentaDeFacebook: getMetaRuntimeSetting("meta_user_nombre"),
       credentials: {
         appSecretConfigured: Boolean(getMetaAppSecret()),
         messengerAppSecretOverrideConfigured: Boolean(
