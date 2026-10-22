@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * CUÁNTOS MENSAJES LLEVA CADA NÚMERO ESTE MES (22/10/2026), dentro de Ajustes, junto al tope
  * de los orgánicos. Solo lee: `/api/mensajes-del-mes`.
  */
-export function MensajesDelMes({ tope }: { tope: number }) {
+export function MensajesDelMes({ tope, encendido }: { tope: number; encendido: boolean }) {
   const [numeros, setNumeros] = useState<Array<{ telefono: string; pausado: boolean; usados: number }> | null>(null);
   useEffect(() => {
     let vivo = true;
@@ -23,7 +23,8 @@ export function MensajesDelMes({ tope }: { tope: number }) {
   return (
     <ul className="mt-2 space-y-1">
       {numeros.map((n) => {
-        const lleno = tope > 0 && n.usados >= tope;
+        // Apagado el interruptor, el bot contesta a todos: llegar al tope no cambia nada.
+        const lleno = encendido && tope > 0 && n.usados >= tope;
         return (
           <li key={n.telefono} className="flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
             <span className="font-semibold">{n.telefono}</span>

@@ -49462,6 +49462,7 @@ function AjustesTab({
             </label>
             <MensajesDelMes
               tope={typeof g.organicos_tope_mensajes === "number" ? g.organicos_tope_mensajes : 950}
+              encendido={g.no_responder_organicos === true}
             />
             <button
               type="button"
@@ -49483,13 +49484,13 @@ function AjustesTab({
               }`}
             >
               {g.no_responder_organicos === true
-                ? "Volver a contestar"
-                : "Dejar de contestar"}
+                ? "Quitar el tope"
+                : "Activar el tope"}
             </button>
             <p className="mt-1 text-[11px] font-semibold text-neutral-500">
               {g.no_responder_organicos === true
                 ? "Encendido: a los orgánicos nuevos solo hasta el tope del mes"
-                : "El bot contesta a todos — como siempre"}
+                : "Apagado: el bot contesta a todos, sin tope — como siempre"}
             </p>
             <p className="mt-2 max-w-3xl rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-4 text-amber-950">
               <strong>Quien ya pagó se atiende siempre</strong>, venga de donde
