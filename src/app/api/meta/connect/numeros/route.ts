@@ -9,6 +9,7 @@ import { getMetaAppId } from "@/lib/meta/runtime-config";
 import { cuandoSeLeyo, MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta, MetaFrenada, metaFrenada, minutosDeFreno } from "@/lib/meta/freno";
 import { permisosConocidos } from "@/lib/meta/token-por-numero";
+import { anotarFalloDeMeta } from "@/lib/meta/registro";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -65,6 +66,7 @@ async function graph<T>(ruta: string, token: string, metodo: "GET" | "POST", par
 function errorDeMeta(e: Graph["error"]): string {
   const code = e?.code;
   const texto = e?.error_user_msg || e?.message || "Meta no respondió.";
+  anotarFalloDeMeta("Tus números", `${code ? `(#${code}${e?.error_subcode ? `/${e.error_subcode}` : ""}) ` : ""}${e?.message ?? texto}`);
   if (code === 4 || code === 17 || code === 32 || code === 613)
     return `Meta pidió una pausa por muchas consultas seguidas. No se rompió nada: espera ${Math.max(minutosDeFreno(), 15)} minutos.`;
   if (code === 136024) return "Ese número ya está verificado: pasa directo a activarlo.";

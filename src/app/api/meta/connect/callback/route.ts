@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { olvidar } from "@/lib/meta/recuerdo";
+import { anotarFalloDeMeta } from "@/lib/meta/registro";
 import {
   apuntarCuentaDeLaPagina,
   apuntarCuentaDelNumero,
@@ -182,6 +183,15 @@ async function iniciarSesion(req: NextRequest) {
     const detail = metaError
       ? `${metaErrorCode ? `${metaErrorCode}: ` : ""}${metaError}`
       : "Meta no devolvio codigo de autorizacion. Reintenta desde el boton Conectar con Meta.";
+    // CANCELAR NO ES UN ERROR (21/10/2026): al pulsar «cancelar» o volver atrás en la ventana de
+    // Facebook, Meta responde «200: Permissions error» / «user_denied», y salía en rojo como si el
+    // CRM hubiera fallado. Se vuelve a Meta Connect sin aviso rojo; queda en el registro.
+    const canceló =
+      url.searchParams.get("error_reason") === "user_denied" ||
+      url.searchParams.get("error") === "access_denied" ||
+      (metaErrorCode === "200" && /permission/i.test(metaError ?? ""));
+    anotarFalloDeMeta(canceló ? "Iniciar sesión con Facebook (canceló)" : "Iniciar sesión con Facebook", detail);
+    if (canceló) return redirectToMetaConnect("cancelado=1");
     return redirectToMetaConnect(`error=${encodeURIComponent(detail)}`);
   }
   if (!state || !cookieState || state !== cookieState) {
@@ -308,6 +318,7 @@ async function iniciarSesion(req: NextRequest) {
     res.cookies.delete(META_CONNECT_NUEVA_COOKIE);
     return res;
   } catch (err) {
+    anotarFalloDeMeta("Iniciar sesión con Facebook", err instanceof Error ? err.message : String(err));
     const message = encodeURIComponent(
       err instanceof Error ? err.message : String(err)
     );

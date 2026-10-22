@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { anotarFalloDeMeta } from "@/lib/meta/registro";
 import {
   META_CONNECT_COOKIE,
   META_CONNECT_INSTAGRAM_COOKIE,
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
     // DE VUELTA A META CONNECT, CON PALABRAS (21/10/2026): tras «Cerrar sesión de Meta», pulsar
     // «Conectar» mostraba una página en blanco con {"error":"META_APP_ID no configurado"}.
     const message = err instanceof Error ? err.message : String(err);
+    anotarFalloDeMeta("Conectar con Facebook", message);
     const texto = /APP_ID|APP_SECRET/i.test(message)
       ? "Primero conecta tu app: Abrir asistente → 🔑 Mi app. Después inicia sesión con Facebook."
       : message;

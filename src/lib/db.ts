@@ -3868,7 +3868,10 @@ export function vaciarMetaConnect(): void {
     db.prepare("DELETE FROM meta_detected_env").run();
     db.prepare("DELETE FROM meta_ads_readers").run();
     db.prepare("DELETE FROM meta_cuentas").run();
-    db.prepare("DELETE FROM meta_runtime_settings WHERE name NOT LIKE '%verify_token'").run();
+    // (El registro de fallos se queda: sirve justo para ver qué pasó antes de cerrar sesión.)
+    db.prepare(
+      "DELETE FROM meta_runtime_settings WHERE name NOT LIKE '%verify_token' AND name <> 'registro_meta_connect'"
+    ).run();
   })();
 }
 

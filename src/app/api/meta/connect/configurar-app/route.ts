@@ -7,6 +7,7 @@ import {
 } from "@/lib/meta/runtime-config";
 import { MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta } from "@/lib/meta/freno";
+import { anotarFalloDeMeta } from "@/lib/meta/registro";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -240,6 +241,7 @@ export async function POST(req: NextRequest) {
     pasos.push({ paso: `Webhook de ${objeto}`, ok: logrado, detalle: ultimoDetalle });
   }
 
+  for (const p of pasos) if (!p.ok) anotarFalloDeMeta(`Preparar la app: ${p.paso}`, p.detalle);
   return NextResponse.json({
     ok: pasos.some((paso) => paso.ok),
     pasos,

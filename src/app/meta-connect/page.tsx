@@ -85,6 +85,8 @@ type MetaStatus = {
   }>;
   whatsAppManualMode: boolean;
   whatsAppManualEnvReady: boolean;
+  /** ¿Ya se inició sesión con Facebook? Sin eso, Meta Connect solo muestra el asistente. */
+  conectadoConFacebook?: boolean;
 };
 
 type ConfigureResult = {
@@ -1544,6 +1546,117 @@ function porNegocio<T>(lista: T[], negocioDe: (x: T) => string | null | undefine
     .map(([nombre, items]) => ({ nombre, items }));
 }
 
+/**
+ * EL SET DE VENTA, UNA FILA POR TIENDA (21/10/2026). Cada tienda vende con su número, su página y
+ * su píxel; la campaña de cada una tiene que usar esos mismos. Con IDs, para compararlos. Sin
+ * tiendas se muestra el general (`general`). Ver `/api/meta/connect/set-de-venta`.
+ */
+type PiezaDelSet = { id: string; nombre: string | null; general?: boolean } | null;
+function SetsDeVentaPorTienda({ general }: { general: ReactNode }) {
+  const [tiendas, setTiendas] = useState<Array<{
+    id: string;
+    nombre: string;
+    color: string | null;
+    numero: PiezaDelSet;
+    pagina: PiezaDelSet;
+    pixel: PiezaDelSet;
+  }> | null>(null);
+  useEffect(() => {
+    void fetch("/api/meta/connect/set-de-venta", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setTiendas(d.tiendas ?? []))
+      .catch(() => setTiendas([]));
+  }, []);
+  if (!tiendas) return null;
+  if (!tiendas.length) return <>{general}</>;
+
+  const pieza = (titulo: string, p: PiezaDelSet) => (
+    <div className="min-w-0 rounded-md border border-neutral-200 bg-tarjeta px-3 py-2">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
+        {p ? "✔" : "✖"} {titulo}
+        {p?.general ? <span className="ml-1 normal-case text-neutral-400">(el general)</span> : null}
+      </p>
+      <p className={`mt-0.5 break-words text-xs ${p ? "text-neutral-800" : "font-semibold text-red-700"}`}>
+        {p ? `${p.nombre ?? "Sin nombre"} · ${p.id}` : "Sin elegir"}
+      </p>
+    </div>
+  );
+
+  return (
+    <section className="rounded-lg border-2 border-neutral-200 bg-tarjeta p-4 shadow-sm">
+      <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">Set de venta por tienda</p>
+      <p className="mt-1 text-sm text-neutral-700">
+        Cada compra se registra con la página y el píxel de su tienda. Tu campaña tiene que usar <b>estos mismos</b>.
+      </p>
+      <div className="mt-3 space-y-3">
+        {tiendas.map((t) => {
+          const completa = !!(t.numero && t.pagina && t.pixel);
+          return (
+            <div key={t.id} className={`rounded-lg border p-3 ${completa ? "border-emerald-300 bg-emerald-50/50" : "border-amber-300 bg-amber-50/50"}`}>
+              <p className="flex items-center gap-2 text-sm font-bold text-neutral-900">
+                <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: t.color || "#14b8a6" }} />
+                {t.nombre}
+                <span className="text-xs font-semibold">{completa ? "✅ ¿tu campaña usa estos mismos?" : "⚠ Falta elegir algo"}</span>
+              </p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                {pieza("Página de Facebook", t.pagina)}
+                {pieza("Número de WhatsApp", t.numero)}
+                {pieza("Píxel", t.pixel)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * EL REGISTRO DE META CONNECT (21/10/2026): los últimos fallos de Meta con su texto exacto, para
+ * copiarlos y pasárselos a soporte sin entrar a EasyPanel. Plegado y discreto: la pantalla no
+ * asusta a nadie. Ver `lib/meta/registro.ts`.
+ */
+function RegistroDeMeta() {
+  const [fallos, setFallos] = useState<Array<{ cuando: number; donde: string; texto: string }> | null>(null);
+  const [copiado, setCopiado] = useState(false);
+  const leer = () =>
+    void fetch("/api/meta/connect/registro", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setFallos(d.fallos ?? []))
+      .catch(() => setFallos([]));
+  useEffect(() => {
+    leer();
+  }, []);
+  if (!fallos?.length) return null;
+  const texto = fallos
+    .map((f) => `${new Date(f.cuando).toLocaleString("es")} — ${f.donde}: ${f.texto}`)
+    .join("\n");
+  return (
+    <details className="mt-6 rounded-lg border border-neutral-200 bg-tarjeta px-4 py-2 text-xs text-neutral-600">
+      <summary className="cursor-pointer select-none font-semibold text-neutral-500">
+        📋 Registro de Meta Connect ({fallos.length})
+      </summary>
+      <div className="mt-2 flex gap-2">
+        <button
+          type="button"
+          className="rounded-md border border-neutral-300 px-3 py-1 font-semibold text-neutral-700 hover:bg-neutral-50"
+          onClick={() => {
+            void navigator.clipboard?.writeText(texto);
+            setCopiado(true);
+            window.setTimeout(() => setCopiado(false), 1800);
+          }}
+        >
+          {copiado ? "✓ Copiado" : "Copiar todo"}
+        </button>
+        <button type="button" className="rounded-md border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-50" onClick={leer}>
+          ↻ Actualizar
+        </button>
+      </div>
+      <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-neutral-50 p-2 font-mono text-[11px] leading-5">{texto}</pre>
+    </details>
+  );
+}
+
 function SetDeVenta({
   pagina,
   whatsapp,
@@ -2911,6 +3024,10 @@ export default function MetaConnectPage() {
       {/* UNA COLUMNA CON ORDEN, y no `space-y`, para que el modo esencial pueda poner
           «Configuración automática» después de la página sin mover código. Sin orden
           puesto —el profesional— cada sección sale donde siempre. */}
+      {/* TRES ESTADOS, UNA COSA A LA VEZ (21/10/2026): «un desorden visual es que el usuario no
+          tenga idea de qué hacer». Sin app: solo el asistente («Conectar mi app»). Con app y sin
+          Facebook: solo «Conectar con Facebook». Con Facebook: todo lo de abajo, como siempre. */}
+      {status?.appId && status.conectadoConFacebook ? (
       <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-borde bg-panel p-5 shadow-sm">
 
       {/* LA DIFERENCIACIÓN, antes que nada: cuántas cuentas, de qué negocio es cada cosa,
@@ -2921,16 +3038,22 @@ export default function MetaConnectPage() {
           Es el resumen de si el bot puede registrar una venta. Debajo hay ocho
           secciones y cada una dice si LO SUYO está bien; ninguna decía si el
           conjunto sirve. Ver `SetDeVenta`. */}
-      <SetDeVenta
-        pagina={status?.connections?.[0] ?? null}
-        whatsapp={
-          status?.whatsAppConnections?.find((c) => c.active) ??
-          status?.whatsAppConnections?.[0] ??
-          null
+      {/* POR TIENDA (21/10/2026): «recuerda que es un set de ventas por tienda». Sin tiendas, el
+          general de siempre. */}
+      <SetsDeVentaPorTienda
+        general={
+          <SetDeVenta
+            pagina={status?.connections?.[0] ?? null}
+            whatsapp={
+              status?.whatsAppConnections?.find((c) => c.active) ??
+              status?.whatsAppConnections?.[0] ??
+              null
+            }
+            pixelId={pixelElegido || pixelEnUso || ""}
+            pixels={pixels}
+            datasetDeLaWaba={datasetDeLaWaba}
+          />
         }
-        pixelId={pixelElegido || pixelEnUso || ""}
-        pixels={pixels}
-        datasetDeLaWaba={datasetDeLaWaba}
       />
 
       <SeccionEnVentana
@@ -3108,6 +3231,10 @@ export default function MetaConnectPage() {
         icono="⚙️"
       >
       <section className="rounded-lg border border-neutral-200 bg-tarjeta p-4 shadow-sm">
+        {/* SOLO COMO REPARACIÓN (21/10/2026): al elegir una página con «Agregar y usar», ya se
+            suscribe sola a mensajes y comentarios. Este botón solo aparece si algo falló: la
+            conexión automática no quedó lista, o la activación de la página avisó de un fallo. */}
+        {(conexionFallo || pageMessageError) && (
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-neutral-950">
@@ -3127,6 +3254,7 @@ export default function MetaConnectPage() {
             {configuring ? "Configurando..." : "Configurar Messenger activo"}
           </button>
         </div>
+        )}
 
         {configureResult ? (
           <div
@@ -3776,6 +3904,9 @@ export default function MetaConnectPage() {
                 activo a la vez; cambiarlo no desconecta ni migra el numero en Meta.
               </p>
             </div>
+            {/* SOLO COMO REPARACIÓN (21/10/2026): activar o traer un número desde el asistente ya
+                lo suscribe. Este botón solo aparece si la conexión automática no quedó lista. */}
+            {conexionFallo && (
             <button
               className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
               disabled={!activeWhatsApp || configuringWhatsApp}
@@ -3784,6 +3915,7 @@ export default function MetaConnectPage() {
             >
               {configuringWhatsApp ? "Suscribiendo..." : "Suscribir WhatsApp"}
             </button>
+            )}
           </div>
           <div className={`mt-3 flex flex-wrap items-center justify-between gap-4 rounded-md border p-3 ${status?.whatsAppManualMode ? "border-blue-200 bg-blue-50" : "border-green-200 bg-green-50"}`}>
             <div>
@@ -4614,6 +4746,9 @@ export default function MetaConnectPage() {
       </section>
       </SeccionEnVentana>
       </div>
+      ) : null}
+
+      <RegistroDeMeta />
 
       {/* AQUÍ HABÍA UNA SEGUNDA PAREJA DE «Volver al chat / Ir al editor».
           Los mismos dos enlaces que ya están arriba, repetidos al final porque

@@ -129,6 +129,17 @@ export default function AsistenteDeConexion() {
   useEffect(() => {
     const guardado = leer();
     const p = new URLSearchParams(window.location.search);
+    // EL AVISO SE LEE UNA VEZ (21/10/2026): quedaba en la dirección (?error=… / ?connected=…) y
+    // cada vez que se refrescaba la página volvía a abrir el asistente pidiendo conectar la app,
+    // aunque ya estuviera conectada. Se lee y se borra de la dirección.
+    if (p.has("error") || p.has("connected") || p.has("cancelado")) {
+      // Un instante después: la página de abajo también lo lee (su efecto corre después de este).
+      window.setTimeout(() => {
+        try {
+          window.history.replaceState(null, "", window.location.pathname);
+        } catch {}
+      }, 0);
+    }
     if (guardado) {
       setCasillas(guardado.casillas ?? {});
       if (p.get("error")) {
@@ -216,17 +227,33 @@ export default function AsistenteDeConexion() {
             Conectar con Facebook
           </a>
         )}
-        <button
-          type="button"
-          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
-          onClick={() => {
-            // Siempre empieza por «¿Qué deseas hacer?».
-            setAbierto(true);
-            ir("inicio");
-          }}
-        >
-          Abrir asistente
-        </button>
+        {/* UN SOLO BOTÓN SEGÚN EL MOMENTO (21/10/2026): sin app, «Conectar mi app»; con app y sin
+            Facebook, solo «Conectar con Facebook» (arriba); con todo, «Abrir asistente». */}
+        {estado && !estado.appId && (
+          <button
+            type="button"
+            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
+            onClick={() => {
+              setAbierto(true);
+              ir("app");
+            }}
+          >
+            🔑 Conectar mi app
+          </button>
+        )}
+        {estado?.appId && estado.conFacebook && (
+          <button
+            type="button"
+            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
+            onClick={() => {
+              // Siempre empieza por «¿Qué deseas hacer?».
+              setAbierto(true);
+              ir("inicio");
+            }}
+          >
+            Abrir asistente
+          </button>
+        )}
       </div>
 
       {abierto && (

@@ -9,6 +9,7 @@ import {
 } from "@/lib/db";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
 import { olvidar } from "@/lib/meta/recuerdo";
+import { anotarFalloDeMeta } from "@/lib/meta/registro";
 import { graphVersion } from "@/lib/meta/connect";
 import {
   getMetaAppId,
@@ -78,7 +79,10 @@ async function guardarPegado(pegado: string) {
   // ¿Es de verdad un token, de esta app, y no caduca? Lo dice Meta.
   const info = await graph("debug_token", `${appId}|${appSecret}`, appSecret, { input_token: pegado });
   const d = (info.cuerpo?.data ?? null) as { is_valid?: boolean; app_id?: string; expires_at?: number; type?: string } | null;
-  if (!d?.is_valid) return NextResponse.json({ ok: false, error: "Meta dice que ese token no es válido. Cópialo otra vez completo, sin espacios." });
+  if (!d?.is_valid) {
+    anotarFalloDeMeta("Pegar token permanente", JSON.stringify(info.cuerpo ?? {}).slice(0, 600));
+    return NextResponse.json({ ok: false, error: "Meta dice que ese token no es válido. Cópialo otra vez completo, sin espacios." });
+  }
   if (d.app_id && d.app_id !== appId)
     return NextResponse.json({ ok: false, error: "Ese token es de otra app. Créalo eligiendo la misma app que usa Meta Connect." });
   const caduca = !!d.expires_at && d.expires_at > 0;
@@ -365,6 +369,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  anotarFalloDeMeta(
+    "Crear token permanente",
+    intentos.map((i) => `${i.negocio}${i.usuario ? ` / ${i.usuario}` : ""}: ${i.mensaje}`).join(" | ") || "sin respuesta"
+  );
   return NextResponse.json({
     ok: false,
     error: "Meta no dejó generar el token permanente.",
