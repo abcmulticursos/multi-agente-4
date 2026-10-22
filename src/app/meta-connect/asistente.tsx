@@ -849,7 +849,7 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [f, setF] = useState({ cc: "51", numero: "", nombre: "", codigo: "", pin: "" });
-  const [nuevo, setNuevo] = useState<{ paso: "datos" | "codigo" | "pin" | "listo"; wabaId: string; phoneNumberId?: string; numero?: string } | null>(null);
+  const [nuevo, setNuevo] = useState<{ paso: "cuenta" | "datos" | "codigo" | "pin" | "listo"; wabaId: string; phoneNumberId?: string; numero?: string } | null>(null);
 
   const leerBms = useCallback(async (fresco = false) => {
     setCargando(true);
@@ -953,7 +953,10 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
 
   // ── AGREGAR UN NÚMERO NUEVO EN EL BM ELEGIDO ─────────────────────────────────────────────
   if (nuevo && negocio) {
-    const pasoN = { datos: 1, codigo: 2, pin: 3, listo: 3 }[nuevo.paso];
+    // Con varias cuentas de WhatsApp Business hay un paso más al principio: elegir la cuenta.
+    const conEleccion = negocio.cuentas.length > 1;
+    const pasoN = { cuenta: 1, datos: 1, codigo: 2, pin: 3, listo: 3 }[nuevo.paso] + (conEleccion && nuevo.paso !== "cuenta" ? 1 : 0);
+    const totalPasos = conEleccion ? 4 : 3;
     const cerrarNuevo = () => {
       setNuevo(null);
       setMensaje(null);
@@ -965,9 +968,38 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
       <div className="space-y-3 text-sm">
         <div className="flex items-center gap-2">
           <div className="font-bold">➕ Agregar un número a {negocio.nombre}</div>
-          <span className="ml-auto text-xs text-neutral-500">Paso {pasoN} de 3</span>
+          <span className="ml-auto text-xs text-neutral-500">Paso {pasoN} de {totalPasos}</span>
         </div>
         {mensaje && <div className="text-sm">{mensaje}</div>}
+
+        {/* ELEGIR LA CUENTA DE WHATSAPP BUSINESS (21/10/2026): «¿hay opción de elegir la WABA?».
+            Solo cuando el BM tiene más de una; con una sola no se pregunta. */}
+        {nuevo.paso === "cuenta" && (
+          <>
+            <div>¿En qué <b>cuenta de WhatsApp Business</b> va este número?</div>
+            <div className="space-y-2">
+              {negocio.cuentas.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-400 hover:bg-sky-50"
+                  onClick={() => {
+                    setOtras(c.otrasApps);
+                    setNuevo({ ...nuevo, paso: "datos", wabaId: c.id });
+                  }}
+                >
+                  <span className="font-semibold">{c.nombre}</span>
+                  <span className="text-xs text-neutral-500">{c.numeros.length} número(s)</span>
+                  {c.estaApp && <span className="text-xs font-semibold text-emerald-700">· conectada a tu app</span>}
+                  <span className="ml-auto text-sky-700">→</span>
+                </button>
+              ))}
+            </div>
+            <div className="pt-2">
+              <button type="button" className="text-neutral-500 hover:underline" onClick={cerrarNuevo}>← Atrás</button>
+            </div>
+          </>
+        )}
 
         {nuevo.paso === "datos" && (
           <>
@@ -979,7 +1011,7 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
             {aviso && <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[13px] text-amber-900">⚠ {aviso}</div>}
             <input className="w-full rounded-lg border px-2 py-1.5" placeholder="Nombre visible para tus clientes (lo revisa Meta)" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
             <div className="flex justify-between pt-2">
-              <button type="button" className="text-neutral-500 hover:underline" onClick={cerrarNuevo}>← Atrás</button>
+              <button type="button" className="text-neutral-500 hover:underline" onClick={() => (conEleccion ? setNuevo({ ...nuevo, paso: "cuenta" }) : cerrarNuevo())}>← Atrás</button>
               <button
                 type="button"
                 disabled={ocupado || !f.cc.trim() || !f.numero.trim() || !f.nombre.trim()}
@@ -1260,13 +1292,37 @@ function PasoNumeros({ volver, seguir }: { volver: () => void; seguir: () => voi
                 onClick={() => {
                   setOtras(donde.otrasApps);
                   setMensaje(null);
-                  setNuevo({ paso: "datos", wabaId: donde.id });
+                  // Con VARIAS cuentas de WhatsApp Business, primero se pregunta en cuál (21/10/2026).
+                  setNuevo({ paso: n.cuentas.length > 1 ? "cuenta" : "datos", wabaId: donde.id });
                 }}
               >
                 ➕ Agregar un número nuevo aquí
               </button>
             ) : (
-              <div className="text-xs text-neutral-600">Este BM no tiene cuenta de WhatsApp Business todavía. Créala una vez en el WhatsApp Manager de Meta.</div>
+              // SIN NINGUNA CUENTA DE WHATSAPP BUSINESS (21/10/2026): «tu asistente está incompleto: no me
+              // va a permitir agregar números sin WABA». Meta solo deja crearla a sus proveedores
+              // oficiales; en sus pantallas se crea al agregar el primer número. Se guía hasta ahí y,
+              // al volver, se sigue aquí.
+              <div className="space-y-2 rounded-lg border border-sky-200 bg-sky-50/60 p-3 text-[13px]">
+                <div className="font-semibold text-neutral-800">Este BM todavía no tiene cuenta de WhatsApp Business.</div>
+                <div className="text-neutral-700">
+                  Se crea sola al agregar tu <b>primer número en Meta</b>. Hazlo una vez ahí (el número, su nombre para mostrar y el código), y los demás
+                  números los agregas desde aquí.
+                </div>
+                <a
+                  href={`https://business.facebook.com/wa/manage/phone-numbers/?business_id=${n.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`${BTN} bg-[#1877f2] text-white hover:bg-[#166fe0]`}
+                >
+                  Agregar mi primer número en Meta ↗
+                </a>
+                <div>
+                  <button type="button" disabled={cargando} className="text-xs font-semibold text-sky-700 hover:underline disabled:text-neutral-400" onClick={() => bmElegido && void leerBm(bmElegido, true)}>
+                    {cargando ? "Revisando…" : "↻ Ya lo hice, revisar"}
+                  </button>
+                </div>
+              </div>
             )}
             {lleno && <div className="text-xs text-neutral-500">Lleno: para agregar otro, verifica este BM en Meta o usa otro BM.</div>}
           </>

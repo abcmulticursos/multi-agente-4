@@ -1673,7 +1673,8 @@ function EstadoDeConexion({ status }: { status: MetaStatus | null }) {
   const app = Boolean(status.appId);
   const fb = Boolean(status.appId && status.conectadoConFacebook);
   const abrir = (paso: string) => window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: paso }));
-  const boton = "rounded-lg px-3 py-1.5 text-xs font-semibold transition";
+  // Botones de tamaño normal, no chicos (21/10/2026: «los botones están un poco pequeños»).
+  const boton = "inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition";
   const fila = (o: {
     logo: string;
     grande: boolean;
@@ -1702,8 +1703,12 @@ function EstadoDeConexion({ status }: { status: MetaStatus | null }) {
     </div>
   );
 
+  // DOS RECUADROS SEPARADOS (21/10/2026): «Facebook aparece amarrado en el mismo cajón; debería
+  // ser independiente: app conectada arriba y Facebook separado más abajo».
+  const recuadro = "rounded-2xl border border-borde bg-tarjeta px-4 py-5 shadow-sm";
   return (
-    <div className="mt-6 space-y-5 rounded-2xl border border-borde bg-tarjeta px-4 py-5 shadow-sm">
+    <div className="mt-6 space-y-4">
+      <div className={recuadro}>
       {fila({
         logo: "/meta-app-logo.png",
         grande: true,
@@ -1726,7 +1731,8 @@ function EstadoDeConexion({ status }: { status: MetaStatus | null }) {
           </button>
         ),
       })}
-      <div className="mx-auto h-px max-w-sm bg-borde" />
+      </div>
+      <div className={recuadro}>
       {fila({
         logo: "/facebook-logo.png",
         grande: false,
@@ -1744,6 +1750,7 @@ function EstadoDeConexion({ status }: { status: MetaStatus | null }) {
           </a>
         ) : null,
       })}
+      </div>
     </div>
   );
 }
