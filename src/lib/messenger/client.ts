@@ -31,9 +31,31 @@ function getMessengerToken(): string {
   return token;
 }
 
+/**
+ * SIN LOS ASTERISCOS DE WHATSAPP (22/10/2026). En WhatsApp `*PRECIO*` es negrita; Messenger no lo
+ * dibuja y el cliente veía los asteriscos. Se quitan las marcas de negrita, cursiva y tachado SOLO
+ * cuando envuelven texto (pegadas a él por dentro y con un espacio o un signo por fuera): un `*` o
+ * un `_` sueltos —un enlace con guion bajo, «2*3»— no se tocan. El texto guardado en el chat no
+ * cambia; esto es solo lo que viaja a Messenger.
+ */
+export function sinFormatoDeWhatsApp(text: string): string {
+  let t = text;
+  for (const marca of ["\\*", "_", "~"]) {
+    const re = new RegExp(
+      `(^|[\\s(¡¿"'«])${marca}(?=\\S)([^\\n]*?\\S)${marca}(?=$|[\\s.,;:!?)"'»])`,
+      "gm"
+    );
+    // Dos pasadas: «*hola* *chau*» deja la segunda pegada a la primera tras la primera pasada.
+    t = t.replace(re, "$1$2").replace(re, "$1$2");
+  }
+  return t;
+}
+
 export async function sendMessengerText(
   psid: string,
-  text: string
+  text: string,
+  /** RESPUESTAS RÁPIDAS (22/10/2026): los botones del bot, cada uno con su id. Máximo 13. */
+  respuestasRapidas?: { id: string; title: string }[]
 ): Promise<void> {
   const token = getMessengerToken();
 
@@ -48,7 +70,19 @@ export async function sendMessengerText(
     body: JSON.stringify({
       recipient: { id: psid },
       messaging_type: "RESPONSE",
-      message: { text },
+      message: {
+        text: sinFormatoDeWhatsApp(text),
+        ...(respuestasRapidas?.length
+          ? {
+              // Messenger corta el título a 20 caracteres; el id viaja entero y es lo que se enruta.
+              quick_replies: respuestasRapidas.slice(0, 13).map((b) => ({
+                content_type: "text",
+                title: sinFormatoDeWhatsApp(b.title).slice(0, 20),
+                payload: b.id,
+              })),
+            }
+          : {}),
+      },
     }),
   });
 

@@ -10888,6 +10888,19 @@ export default function EditorPage() {
         </div>
       )}
 
+      {/* EL MISMO AVISO DE GUARDAR QUE LA PIZARRA (22/10/2026): «en la pizarra al guardar sale un
+          aviso en el medio… me gustaría que también se vea en el editor». Mientras guarda, un velo
+          con «Guardando… espera un momento» y nada se toca; al terminar, el cuadro verde de arriba
+          (el de siempre). Con la pizarra abierta no hace falta: ella pone el suyo. */}
+      {saving && !showPizarra && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+          onKeyDownCapture={(e) => e.preventDefault()}
+        >
+          <div className="rounded-xl bg-tarjeta px-5 py-3 text-sm font-bold text-tinta shadow-2xl">💾 Guardando… espera un momento</div>
+        </div>
+      )}
       {toast && (
         <div
           role="status"
@@ -26864,14 +26877,23 @@ function VistaPizarra({
       window.removeEventListener("pointerdown", alPulsar);
     };
   }, [menuMas]);
-  /** ☀️ / 🌙 de la pizarra: el fondo, y (22/10/2026) los cajones editores y Mis tiendas. */
-  const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<"claro" | "oscuro">(() => {
+  /**
+   * LOS TRES MODOS DE LA PIZARRA (22/10/2026):
+   *   ☀️ claro  — todo claro.
+   *   🌗 mixto  — «fondo de pizarra oscuro y los pop ups en claro… y lo de la tienda claro, así como
+   *               antes»: el fondo y sus barras oscuros; cajones editores y Mis tiendas, claros.
+   *   🌙 oscuro — todo oscuro, cajones y Mis tiendas con los colores de Sendy.
+   */
+  const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<"claro" | "mixto" | "oscuro">(() => {
     try {
-      return window.localStorage.getItem("pizarra-tema") === "oscuro" ? "oscuro" : "claro";
+      const guardado = window.localStorage.getItem("pizarra-tema");
+      return guardado === "oscuro" || guardado === "mixto" ? guardado : "claro";
     } catch {
       return "claro";
     }
   });
+  /** El fondo y las barras: oscuros en mixto y en oscuro. */
+  const fondoOscuro = temaDeLaPizarra !== "claro";
   // LOS CAJONES EDITORES Y MIS TIENDAS SIGUEN AL 🌙 DE LA PIZARRA (22/10/2026): «en modo oscuro se
   // vea así… y el visor como WhatsApp oscuro». Se marca en la raíz mientras la pizarra está abierta;
   // globals.css oscurece solo lo que lleva la clase `prolijo`. Al salir de la pizarra se quita: el
@@ -26882,8 +26904,7 @@ function VistaPizarra({
       delete document.documentElement.dataset.pizarraTema;
     };
   }, [temaDeLaPizarra]);
-  const cambiarTemaDeLaPizarra = () => {
-    const siguiente = temaDeLaPizarra === "oscuro" ? "claro" : "oscuro";
+  const cambiarTemaDeLaPizarra = (siguiente: "claro" | "mixto" | "oscuro") => {
     setTemaDeLaPizarra(siguiente);
     try {
       window.localStorage.setItem("pizarra-tema", siguiente);
@@ -28887,7 +28908,7 @@ function VistaPizarra({
       )}
       {/* LA BARRA DE LA PIZARRA: lo de siempre del editor arriba —vista, modo, deshacer,
           guardar— y lo de la pizarra debajo. */}
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${temaDeLaPizarra === "oscuro" ? "tema-oscuro-local" : ""}`}>
+      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Vista del editor">
           <button type="button" onClick={onClose} className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno">
             ☰ Menús
@@ -28936,7 +28957,7 @@ function VistaPizarra({
         />
       ) : (
       <>
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${temaDeLaPizarra === "oscuro" ? "tema-oscuro-local" : ""}`}>
+      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         {tiendas.length > 0 ? (
           <select
             value={tiendaId}
@@ -29042,14 +29063,28 @@ function VistaPizarra({
           </select>
         )}
         <span className="ml-auto" />
-        <button
-          type="button"
-          onClick={cambiarTemaDeLaPizarra}
-          title={temaDeLaPizarra === "oscuro" ? "Fondo claro" : "Fondo oscuro"}
-          className="rounded-md border border-borde bg-relleno px-3 py-1 text-sm hover:bg-tarjeta"
-        >
-          {temaDeLaPizarra === "oscuro" ? "☀️" : "🌙"}
-        </button>
+        {/* CLARO · MIXTO · OSCURO (22/10/2026). El elegido, resaltado. */}
+        <div className="flex overflow-hidden rounded-md border border-borde text-xs font-semibold">
+          {(
+            [
+              ["claro", "☀️ Claro", "Todo claro"],
+              ["mixto", "🌗 Mixto", "Fondo oscuro; ventanas y Mis tiendas claras"],
+              ["oscuro", "🌙 Oscuro", "Todo oscuro"],
+            ] as const
+          ).map(([valor, texto, ayuda]) => (
+            <button
+              key={valor}
+              type="button"
+              onClick={() => cambiarTemaDeLaPizarra(valor)}
+              title={ayuda}
+              className={`px-2.5 py-1 ${
+                temaDeLaPizarra === valor ? "bg-acento text-white" : "bg-relleno text-tinta-suave hover:bg-tarjeta"
+              }`}
+            >
+              {texto}
+            </button>
+          ))}
+        </div>
       </div>
       {aviso && (
         <div className="border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-950">{aviso}</div>
@@ -29228,7 +29263,7 @@ function VistaPizarra({
             claveDeLaVista={claveDeLaVista(tiendaId, canal, semi)}
             probando={probando === "" ? null : probando === "__otros" ? "" : probando}
             buscar={buscar}
-            temaDeLaPizarra={temaDeLaPizarra}
+            temaDeLaPizarra={fondoOscuro ? "oscuro" : "claro"}
             pedidoDeCaja={pedidoDeCaja}
             registrarPosiciones={(f) => {
               posDePieza.current = f;

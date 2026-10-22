@@ -494,7 +494,27 @@ export async function sendBotButtons(
     updateMessageStatus(`test:${messageId}`, "delivered");
     return messageId;
   }
-  if (convo.channel === "messenger" || convo.channel === "instagram") {
+  // MESSENGER: RESPUESTAS RÁPIDAS (22/10/2026). Antes los botones salían como lista numerada y,
+  // al responder «1» o «Sí», el bot no ejecutaba la acción del botón: la acción solo se encuentra
+  // por su id, y una lista escrita no lleva id. Las respuestas rápidas sí lo llevan, y el webhook
+  // de Messenger las traduce con la MISMA regla que WhatsApp (`textoDelBotonPulsado`).
+  if (convo.channel === "messenger") {
+    // Messenger exige texto para llevar respuestas rápidas: sin cuerpo, va solo una flecha.
+    const cuerpo = safeBody.trim() ? safeBody : "👇";
+    const messageId = insertMessage(convo.id, "assistant", cuerpo, null);
+    recordarBotones(messageId, buttons);
+    try {
+      await sendMessengerText(convo.phone.replace(/^messenger:/, ""), cuerpo, buttons);
+      updateMessageWaId(messageId, `messenger:${messageId}`);
+      updateMessageStatus(`messenger:${messageId}`, "sent");
+    } catch (err) {
+      console.error("[wf] error enviando botones Messenger:", err);
+      throw err;
+    }
+    return messageId;
+  }
+  // Instagram: como siempre, la lista numerada.
+  if (convo.channel === "instagram") {
     const asText = [
       safeBody,
       ...buttons.map((button, index) => `${index + 1}. ${button.title}`),
@@ -538,6 +558,7 @@ export async function sendBotButtonsWithMedia(
     return sendBotButtons(convo, bodyText, buttons);
   }
   if (convo.channel === "messenger" || convo.channel === "instagram") {
+    // (Messenger: la imagen y después el texto con sus respuestas rápidas, en sendBotButtons.)
     await sendBotMediaFromDrive(convo, kind, driveUrl);
     return sendBotButtons(convo, bodyText, buttons);
   }

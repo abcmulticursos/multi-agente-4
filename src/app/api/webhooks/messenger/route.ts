@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifySignature } from "@/lib/meta/verify";
+import { textoDelBotonPulsado } from "@/lib/meta/handler";
 import {
   cancelPendingActionsByTypeForConvo,
   getActiveMetaConnection,
@@ -63,6 +64,8 @@ interface MessengerPayload {
         mid?: string;
         text?: string;
         is_echo?: boolean;
+        /** Una respuesta rápida pulsada: su `payload` es el id del botón (22/10/2026). */
+        quick_reply?: { payload?: string };
         referral?: MessengerReferral;
         attachments?: Array<{
           type?: string;
@@ -340,10 +343,17 @@ async function processMessengerPayload(payload: MessengerPayload): Promise<void>
         isSupportedAttachmentType(item.type)
       );
       if (!text && !postback && !attachment) continue;
+      // UNA RESPUESTA RÁPIDA = UN BOTÓN PULSADO (22/10/2026). Se traduce con la MISMA regla que
+      // WhatsApp: al motor va lo que encuentra la acción (el id de un botón del editor, el método
+      // de pago, el nombre completo de la opción…) y en el chat queda la etiqueta que vio el cliente.
+      const pulsado = event.message?.quick_reply?.payload?.trim();
+      const traducido = pulsado ? textoDelBotonPulsado(pulsado, text ?? "") : null;
       const content =
+        traducido?.texto ||
         (text ?? postback)?.trim() ||
         attachmentContentLabel(attachment?.type) ||
         "";
+      const visible = traducido?.visible ?? null;
       const referral =
         event.message?.referral ?? event.postback?.referral ?? event.referral;
       const messageId =
@@ -374,7 +384,7 @@ async function processMessengerPayload(payload: MessengerPayload): Promise<void>
       await withOutboundMessengerPage(entry.id, () =>
         conElTurnoDe({ messenger_page_id: entry.id ?? null }, () =>
           withWorkflowChannel("messenger", () =>
-            handleMessengerMessage(psid, messageId, content, attachment, referral)
+            handleMessengerMessage(psid, messageId, content, attachment, referral, visible)
           )
         )
       );
@@ -408,7 +418,9 @@ async function handleMessengerMessage(
   messageId: string,
   content: string,
   attachment?: { type?: string; payload?: { url?: string } },
-  referral?: MessengerReferral
+  referral?: MessengerReferral,
+  /** Lo que queda escrito en el chat cuando no es lo que se enruta (un botón del editor). */
+  visible: string | null = null
 ): Promise<void> {
   if (wasMessageProcessed(messageId)) {
     console.log(`[messenger] mensaje ${messageId} ya procesado, ignoro`);
@@ -464,7 +476,7 @@ async function handleMessengerMessage(
   if (media) {
     insertMessageWithMedia(convo.id, "user", content, messageId, media);
   } else {
-    insertMessage(convo.id, "user", content, messageId);
+    insertMessage(convo.id, "user", visible ?? content, messageId);
   }
   cancelPendingActionsByTypeForConvo(convo.id, "send_text_chunk");
 

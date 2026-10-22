@@ -1257,63 +1257,11 @@ async function handleIncomingMessage(
     // COMPLETO de la opción desde la config — NO el título, que WhatsApp trunca
     // a 20 caracteres y haría fallar el reconocimiento de la elección (entonces
     // el pago se validaría contra el precio individual = bug crítico).
-    let text: string;
-    if (id.startsWith("pmethod:")) {
-      text = id.slice("pmethod:".length).split(":")[0].trim();
-    } else if (id.startsWith("bubble:")) {
-      // Botón configurable del editor: el id interno es lo que se enruta —es lo
-      // único que encuentra la acción—, pero en el chat queda SU ETIQUETA.
-      // Ver `contenidoVisible` arriba.
-      text = id;
-      contenidoVisible = title.trim() || id;
-    } else if (id === "upsell_si" || id === "upsell_no") {
-      // Botones del PRODUCTO EXTRA: va el TEXTO DEL BOTÓN, tal cual.
-      //
-      // Antes se cambiaba por el nombre del producto, para que la detección lo
-      // reconociera. Funcionaba, pero dejaba escrito en la conversación algo
-      // que el cliente nunca escribió: él tocaba «Sí, lo quiero» y en el chat
-      // quedaba «PRODUCTO UPSELL». Al revisar un chat para entender qué pasó,
-      // eso engaña.
-      //
-      // Ahora el motor reconoce la elección comparándola contra las etiquetas
-      // configuradas (ver botonDelUpsell), así que el disfraz sobra.
-      text = title.trim();
-    } else if (id === "ob_combo" || id === "ob_basico") {
-      // Estos SÍ se traducen, y por un motivo distinto: aquí el título del
-      // botón ES el nombre del producto, solo que WhatsApp lo corta a 20
-      // caracteres. No se está cambiando por otra cosa, se está completando —
-      // y si no se completa, la elección no se reconoce y el pago se valida
-      // contra el precio equivocado.
-      // Resuelve el nombre desde la modalidad ACTIVA (order bump O doble oferta 2
-      // productos), NO desde order_bump fijo. Si no, el botón de doble oferta
-      // jalaba el nombre de una opción de order bump y rompía la
-      // elección → caía al LLM y hablaba del producto que no era.
-      const ob = getActiveTwoTierOffer(loadWorkflowConfig());
-      const opt = id === "ob_combo" ? ob?.combo : ob?.basico;
-      text = opt?.name?.trim() || title.trim();
-    } else if (id.startsWith("gift_accept:") || id.startsWith("gift_reject:")) {
-      // BOTONES DEL REGALO: va el TEXTO DEL BOTÓN, tal cual. Mismo motivo que
-      // los del producto extra, y aquí además hacía daño de verdad.
-      //
-      // Antes se cambiaban por "Si quiero" y "Por ahora no", pasara lo que
-      // pasara con la etiqueta configurada. Dos problemas:
-      //
-      //  · En el chat quedaba escrito algo que el cliente nunca escribió. Al
-      //    revisar una conversación para entender qué pasó, eso engaña.
-      //  · Y "si quiero" es una respuesta genérica que CUALQUIER otra pregunta
-      //    abierta puede reclamar. Con la oferta del segundo producto en pie,
-      //    tocar el botón del REGALO disparaba la compra del UPSELL — siempre,
-      //    no por casualidad: el disfraz coincidía palabra por palabra con sus
-      //    palabras clave. Ponerle otra etiqueta al botón no servía de nada,
-      //    porque la etiqueta se tiraba aquí.
-      //
-      // Mandando el texto real, el motor lo reconoce comparándolo contra las
-      // etiquetas configuradas (ver botonDelRegalo) — exacto, sin adivinar — y
-      // ninguna otra pregunta puede confundirlo con un "sí" suelto.
-      text = title.trim();
-    } else {
-      text = title.trim();
-    }
+    // LA TRADUCCIÓN DEL BOTÓN VIVE EN `textoDelBotonPulsado` (22/10/2026): la usa también Messenger,
+    // con sus respuestas rápidas. Una sola regla para los dos canales.
+    const traducido = textoDelBotonPulsado(id, title);
+    const text = traducido.texto;
+    if (traducido.visible !== null) contenidoVisible = traducido.visible;
     if (!text) {
       console.log(`[wh] interactivo ${waMsgId} sin título, ignorando`);
       return;
@@ -2666,4 +2614,72 @@ async function acusarElComprobanteSiSeQuedoMudo(
   } catch (err) {
     console.error("[wh] no pude acusar el comprobante:", err);
   }
+}
+
+/**
+ * QUÉ SIGNIFICA UN BOTÓN PULSADO (22/10/2026). Antes vivía dentro de `processIncomingMessage`, solo
+ * para WhatsApp. Messenger manda sus botones como respuestas rápidas con el MISMO id, y llega aquí
+ * para traducirse igual: `texto` es lo que se enruta al motor; `visible`, lo que queda escrito en el
+ * chat cuando no es lo mismo (solo los botones del editor). El cuerpo es el de siempre, sin cambios.
+ */
+export function textoDelBotonPulsado(id: string, title: string): { texto: string; visible: string | null } {
+  let text: string;
+  let visible: string | null = null;
+  if (id.startsWith("pmethod:")) {
+    text = id.slice("pmethod:".length).split(":")[0].trim();
+  } else if (id.startsWith("bubble:")) {
+    // Botón configurable del editor: el id interno es lo que se enruta —es lo
+    // único que encuentra la acción—, pero en el chat queda SU ETIQUETA.
+    // Ver `contenidoVisible` arriba.
+    text = id;
+    visible = title.trim() || id;
+  } else if (id === "upsell_si" || id === "upsell_no") {
+    // Botones del PRODUCTO EXTRA: va el TEXTO DEL BOTÓN, tal cual.
+    //
+    // Antes se cambiaba por el nombre del producto, para que la detección lo
+    // reconociera. Funcionaba, pero dejaba escrito en la conversación algo
+    // que el cliente nunca escribió: él tocaba «Sí, lo quiero» y en el chat
+    // quedaba «PRODUCTO UPSELL». Al revisar un chat para entender qué pasó,
+    // eso engaña.
+    //
+    // Ahora el motor reconoce la elección comparándola contra las etiquetas
+    // configuradas (ver botonDelUpsell), así que el disfraz sobra.
+    text = title.trim();
+  } else if (id === "ob_combo" || id === "ob_basico") {
+    // Estos SÍ se traducen, y por un motivo distinto: aquí el título del
+    // botón ES el nombre del producto, solo que WhatsApp lo corta a 20
+    // caracteres. No se está cambiando por otra cosa, se está completando —
+    // y si no se completa, la elección no se reconoce y el pago se valida
+    // contra el precio equivocado.
+    // Resuelve el nombre desde la modalidad ACTIVA (order bump O doble oferta 2
+    // productos), NO desde order_bump fijo. Si no, el botón de doble oferta
+    // jalaba el nombre de una opción de order bump y rompía la
+    // elección → caía al LLM y hablaba del producto que no era.
+    const ob = getActiveTwoTierOffer(loadWorkflowConfig());
+    const opt = id === "ob_combo" ? ob?.combo : ob?.basico;
+    text = opt?.name?.trim() || title.trim();
+  } else if (id.startsWith("gift_accept:") || id.startsWith("gift_reject:")) {
+    // BOTONES DEL REGALO: va el TEXTO DEL BOTÓN, tal cual. Mismo motivo que
+    // los del producto extra, y aquí además hacía daño de verdad.
+    //
+    // Antes se cambiaban por "Si quiero" y "Por ahora no", pasara lo que
+    // pasara con la etiqueta configurada. Dos problemas:
+    //
+    //  · En el chat quedaba escrito algo que el cliente nunca escribió. Al
+    //    revisar una conversación para entender qué pasó, eso engaña.
+    //  · Y "si quiero" es una respuesta genérica que CUALQUIER otra pregunta
+    //    abierta puede reclamar. Con la oferta del segundo producto en pie,
+    //    tocar el botón del REGALO disparaba la compra del UPSELL — siempre,
+    //    no por casualidad: el disfraz coincidía palabra por palabra con sus
+    //    palabras clave. Ponerle otra etiqueta al botón no servía de nada,
+    //    porque la etiqueta se tiraba aquí.
+    //
+    // Mandando el texto real, el motor lo reconoce comparándolo contra las
+    // etiquetas configuradas (ver botonDelRegalo) — exacto, sin adivinar — y
+    // ninguna otra pregunta puede confundirlo con un "sí" suelto.
+    text = title.trim();
+  } else {
+    text = title.trim();
+  }
+  return { texto: text, visible };
 }
