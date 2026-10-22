@@ -26864,7 +26864,7 @@ function VistaPizarra({
       window.removeEventListener("pointerdown", alPulsar);
     };
   }, [menuMas]);
-  /** ☀️ / 🌙 de la pizarra: solo el fondo; las fichas y los pop ups siguen claros. */
+  /** ☀️ / 🌙 de la pizarra: el fondo, y (22/10/2026) los cajones editores y Mis tiendas. */
   const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<"claro" | "oscuro">(() => {
     try {
       return window.localStorage.getItem("pizarra-tema") === "oscuro" ? "oscuro" : "claro";
@@ -26872,6 +26872,16 @@ function VistaPizarra({
       return "claro";
     }
   });
+  // LOS CAJONES EDITORES Y MIS TIENDAS SIGUEN AL 🌙 DE LA PIZARRA (22/10/2026): «en modo oscuro se
+  // vea así… y el visor como WhatsApp oscuro». Se marca en la raíz mientras la pizarra está abierta;
+  // globals.css oscurece solo lo que lleva la clase `prolijo`. Al salir de la pizarra se quita: el
+  // resto del bot sigue en claro.
+  useEffect(() => {
+    document.documentElement.dataset.pizarraTema = temaDeLaPizarra;
+    return () => {
+      delete document.documentElement.dataset.pizarraTema;
+    };
+  }, [temaDeLaPizarra]);
   const cambiarTemaDeLaPizarra = () => {
     const siguiente = temaDeLaPizarra === "oscuro" ? "claro" : "oscuro";
     setTemaDeLaPizarra(siguiente);
@@ -30648,7 +30658,8 @@ function MisTiendas({
   });
   const enDatos = tiendas.find((t) => t.id === datosDe);
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto bg-fondo p-6">
+    // `prolijo`: la letra de Sendy, y su oscuro con la pizarra en 🌙 (globals.css).
+    <div className="prolijo min-h-0 flex-1 overflow-y-auto bg-fondo p-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div>
@@ -31472,7 +31483,8 @@ function VentanaDelCajon({
   }
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
-      <div className="my-8 w-full max-w-6xl rounded-lg border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
+      {/* `prolijo`: la letra y el aire de Sendy, y su oscuro con la pizarra en 🌙 (globals.css). */}
+      <div className="prolijo my-8 w-full max-w-6xl rounded-xl border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           <div className="min-w-0 flex-1">
             {nombre !== undefined ? (
@@ -36113,7 +36125,7 @@ function StepCard({
             onChange={(next) => onUpdateText(0, next)}
             rows={4}
             placeholder="Escribe el mensaje tal como llegará por WhatsApp…"
-            className="w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-800"
+            className="texto-de-burbuja w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-800"
           />
         </div>
       </div>

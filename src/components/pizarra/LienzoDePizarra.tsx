@@ -564,7 +564,8 @@ function PesoYAnuncios({ p, porcentaje, nota }: { p: PiezaDePizarra; porcentaje?
   if (!ctx?.acciones.cambiarPeso) return null;
   const peso = p.peso ?? 1;
   return (
-    <div className="nodrag flex flex-wrap items-center gap-1.5 border-t border-slate-200 px-2 py-1 text-[11px] text-slate-700">
+    // Doble clic aquí es para el peso, no para abrir la ficha.
+    <div className="nodrag flex flex-wrap items-center gap-1.5 border-t border-slate-200 px-2 py-1 text-[11px] text-slate-700" onDoubleClick={(e) => e.stopPropagation()}>
       <label className="flex items-center gap-1 font-semibold" title="Cuántas partes del sorteo se lleva entre las de su columna en este país">
         ⚖ peso
         <input
@@ -756,6 +757,11 @@ function NodoDePieza({ id, data, selected }: NodeProps<Node<DatosDePieza>>) {
         : "NO LE LLEGA";
   return (
     <div
+      // DOBLE CLIC EN CUALQUIER PARTE DE LA FICHA (22/10/2026): «al dar clic en sus títulos se abre el
+      // pop up, debe abrirse cuando doble clickee cualquier lugar de la ficha». Antes solo la franja
+      // de color. Lo de dentro que abre otra cosa (una rama → su burbuja) o que no debe abrir (⧉ 🗑 ⚠,
+      // el peso) ya corta el doble clic.
+      onDoubleClick={() => p.editable && ctx?.acciones.abrir(p.id, undefined, pais || undefined)}
       onContextMenu={(e) => {
         e.preventDefault();
         // Una común sin conectar tiene su propio menú: quitarla de ese país (la ficha no se borra).
@@ -800,10 +806,9 @@ function NodoDePieza({ id, data, selected }: NodeProps<Node<DatosDePieza>>) {
         />
       )}
       <Handle type="source" position={Position.Right} id="sale" className={PUNTO_NARANJA} style={{ top: 18 }} />
-      {/* LA FRANJA DE COLOR: doble clic abre el cajón ENTERO, como en los menús. */}
+      {/* LA FRANJA DE COLOR. El doble clic ya lo atiende la ficha entera (arriba). */}
       <div
-        onDoubleClick={() => p.editable && ctx?.acciones.abrir(p.id, undefined, pais || undefined)}
-        title={p.editable ? "Doble clic para abrir el cajón entero" : "Se edita en su sección de siempre"}
+        title={p.editable ? "Doble clic en la ficha para abrir el cajón entero" : "Se edita en su sección de siempre"}
         className={`flex cursor-pointer items-center gap-2 rounded-t-[6px] ${c.banda} px-2 py-1.5 text-white`}
       >
         {/* EL ⚠ ARRIBA, CON SU EXPLICACIÓN AL PASAR EL RATÓN (16/10/2026). */}
@@ -1283,7 +1288,8 @@ function CampoDeTiempo({
   // admite medio minuto; se guarda redondeado a la unidad de siempre.
   const enPantalla = Math.round((valor / escala) * 10) / 10;
   return (
-    <div className="nodrag border-t border-slate-200 px-2 py-1.5 text-[11px] text-slate-700">
+    // Doble clic aquí es para el número, no para abrir la ficha.
+    <div className="nodrag border-t border-slate-200 px-2 py-1.5 text-[11px] text-slate-700" onDoubleClick={(e) => e.stopPropagation()}>
       <label className="flex items-center gap-1 font-semibold" title={nota}>
         ⏱ {etiqueta}
         <input

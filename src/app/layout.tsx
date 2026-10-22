@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Noto_Color_Emoji } from "next/font/google";
+import { Inter, Manrope, Noto_Color_Emoji } from "next/font/google";
 import "./globals.css";
 
 /**
@@ -23,6 +23,19 @@ const fuenteDeTitulos = Manrope({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
   variable: "--fuente-titulo",
+  display: "swap",
+});
+
+/**
+ * LA LETRA PROLIJA (22/10/2026): «mira el mío que parece una chatarra vieja y el de Sendy se ve
+ * más ordenado… en el mío se ven más delgaditas las letras». Segoe UI en tamaño chico se ve
+ * flaca; Inter está hecha para pantalla y a 13–15 px se lee firme. SOLO donde lleva la clase
+ * `prolijo` (los cajones editores y Mis tiendas): el resto del bot no cambia.
+ */
+const fuenteProlija = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--fuente-prolija",
   display: "swap",
 });
 
@@ -117,7 +130,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fuenteDeTitulos.variable} ${fuenteDeEmojis.variable}`}
+      className={`${fuenteDeTitulos.variable} ${fuenteDeEmojis.variable} ${fuenteProlija.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: ELEGIR_TEMA_ANTES_DE_PINTAR }} />
