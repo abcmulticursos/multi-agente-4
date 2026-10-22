@@ -8354,13 +8354,7 @@ channels:
             adName: ""
             adId: ""
             skipAskName: true
-            adKeys:
-              - ad_1785834921199
-              - ad_1785834939615
-              - ad_1785834950447
-              - meta_120249236901580336
-              - meta_120249236901600336
-              - meta_120249236901610336
+            adKeys: []
             adRoutingEnabled: true
             paises:
               - PE
