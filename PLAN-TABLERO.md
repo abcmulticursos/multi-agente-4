@@ -54,6 +54,22 @@ para editar burbujas:
   ficha que quiera: adelante, atrás, en círculo o a una venta nueva.
 - **Una salida sin cable no hace nada.** «Nada se conecta solo.»
 
+## El cobro sigue abierto mientras insiste (su aclaración del 22/10)
+
+> «Al final de la entrega, si el cliente no paga, decirle, como una especie de seguimientos:
+> "hola ya te envié, estoy a la espera de tu contribución", o "hola, ¿te gustó el material? me
+> dijiste que me enviarías"… y el monto que envíe el cliente, yo defino a qué ruta se va.»
+
+```
+Entregar → Cobro abierto ─ pagó 80 → plus de 80 · pagó 140 → plus de 140 · menos del mínimo → …
+                         └ no pagó en X → recordatorio 1 → no pagó en Y → recordatorio 2 → …
+```
+
+- **El cobro queda pendiente** mientras el cliente recorre los recordatorios. Un comprobante que
+  llegue en cualquier ficha se lee contra ESE cobro y sigue la salida de su monto.
+- **Al pagar se cancelan** los recordatorios que faltaban de ese cobro.
+- Los recordatorios son fichas Mensaje normales: él escribe cuántos quiera y con qué tiempo.
+
 ## Las piezas (tipos de ficha)
 
 | Ficha | Para qué | Sus salidas |
