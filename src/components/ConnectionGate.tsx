@@ -9,6 +9,14 @@ import ConversationPanel from "@/components/ConversationPanel";
 import DashboardHeader from "@/components/DashboardHeader";
 import KanbanBoard from "@/components/KanbanBoard";
 import ResultadosPanel from "@/components/ResultadosPanel";
+import {
+  BarraDeBandejas,
+  FilaDeBandejas,
+  TODAS,
+  TE_NECESITAN,
+  enLaBandeja,
+  type Bandeja,
+} from "@/components/BandejasDelChat";
 
 type ConnStatus =
   | { status: "loading" }
@@ -60,6 +68,40 @@ export default function ConnectionGate({ initialView }: Props) {
   const [activeProductName, setActiveProductName] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [introVariants, setIntroVariants] = useState<number[]>([]);
+  // LA BARRA DE TIENDAS (21/10/2026). Lo elegido y si está plegada se recuerdan en este navegador.
+  const [bandejas, setBandejas] = useState<Bandeja[]>([]);
+  const [bandejaElegida, setBandejaElegida] = useState<string>(() => {
+    try {
+      return (typeof window !== "undefined" && window.localStorage.getItem("chat:bandeja")) || TODAS;
+    } catch {
+      return TODAS;
+    }
+  });
+  const [barraPlegada, setBarraPlegada] = useState<boolean>(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("chat:barra-plegada") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const elegirBandeja = useCallback((clave: string) => {
+    setBandejaElegida(clave);
+    try {
+      window.localStorage.setItem("chat:bandeja", clave);
+    } catch {
+      // sin memoria del navegador, igual funciona
+    }
+  }, []);
+  const plegarBarra = useCallback(() => {
+    setBarraPlegada((antes) => {
+      try {
+        window.localStorage.setItem("chat:barra-plegada", antes ? "0" : "1");
+      } catch {
+        // igual funciona
+      }
+      return !antes;
+    });
+  }, []);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [view, setView] = useState<"chats" | "kanban" | "resultados">(() => {
     if (initialView) return initialView;
@@ -202,6 +244,7 @@ export default function ConnectionGate({ initialView }: Props) {
             conversations: ConversationListItem[];
             introVariants?: number[];
             parcial?: boolean;
+            bandejas?: Bandeja[];
           };
           if (!cancelled) {
             if (tocaCompleta) ultimaCompleta = ahora;
@@ -211,6 +254,7 @@ export default function ConnectionGate({ initialView }: Props) {
                 : data.conversations
             );
             setIntroVariants(data.introVariants ?? []);
+            if (data.bandejas) setBandejas(data.bandejas);
           }
         }
       } catch (err) {
@@ -230,9 +274,11 @@ export default function ConnectionGate({ initialView }: Props) {
           const data = (await res.json()) as {
             conversations: ConversationListItem[];
             introVariants?: number[];
+            bandejas?: Bandeja[];
           };
           setConversations(data.conversations);
           setIntroVariants(data.introVariants ?? []);
+          if (data.bandejas) setBandejas(data.bandejas);
         }
       } catch {
         // da igual: el refresco de abajo lo intenta enseguida
@@ -318,6 +364,17 @@ export default function ConnectionGate({ initialView }: Props) {
               : c
           ),
     [conversations, selectedId]
+  );
+
+  // Con 2 bandejas o más aparece la barra; con una sola, el chat es el de siempre.
+  const conBarra = bandejas.length >= 2;
+  const bandejaVigente =
+    conBarra && (bandejaElegida === TE_NECESITAN || bandejas.some((b) => b.clave === bandejaElegida))
+      ? bandejaElegida
+      : TODAS;
+  const chatsDeLaBandeja = useMemo(
+    () => (bandejaVigente === TODAS ? displayConversations : displayConversations.filter((c) => enLaBandeja(c, bandejaVigente))),
+    [displayConversations, bandejaVigente]
   );
 
   // ── Navegación en pantalla angosta ──────────────────────────────────────
@@ -407,18 +464,39 @@ export default function ConnectionGate({ initialView }: Props) {
         // dos, que no caben. En el escritorio (md hacia arriba) todo queda
         // exactamente como estaba: lista a la izquierda, chat a la derecha.
         <div className="flex flex-1 min-h-0">
+          {conBarra && (
+            <BarraDeBandejas
+              bandejas={bandejas}
+              chats={displayConversations}
+              elegida={bandejaVigente}
+              onElegir={elegirBandeja}
+              plegada={barraPlegada}
+              onPlegar={plegarBarra}
+            />
+          )}
           <aside
             className={`w-full shrink-0 overflow-y-auto border-r border-neutral-200 bg-tarjeta md:block md:w-96 ${
               enConversacion ? "hidden" : "block"
             }`}
           >
             <ConversationList
-              conversations={displayConversations}
+              conversations={chatsDeLaBandeja}
               introVariants={introVariants}
               selectedId={selectedId}
               onSelect={abrirConversacion}
               onTogglePin={handleTogglePin}
               onToggleRead={handleToggleRead}
+              mostrarTienda={conBarra && !bandejaVigente.startsWith("t:")}
+              encabezado={
+                conBarra ? (
+                  <FilaDeBandejas
+                    bandejas={bandejas}
+                    chats={displayConversations}
+                    elegida={bandejaVigente}
+                    onElegir={elegirBandeja}
+                  />
+                ) : null
+              }
             />
           </aside>
           <main

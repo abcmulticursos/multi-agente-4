@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { listConversations } from "@/lib/db";
+import { listConversations, listMetaWhatsAppConnections } from "@/lib/db";
 import {
   laTiendaDeLaConversacion,
   loadWorkflowConfig,
@@ -26,6 +26,34 @@ function getConfiguredIntroVariants(): number[] {
     }
   }
   return Array.from(variants).sort((a, b) => a - b);
+}
+
+/**
+ * LAS BANDEJAS DE LA BARRA DEL CHAT (21/10/2026): «quiero ver los chats de cada tienda… y los
+ * números sin tienda también chatean». Una por tienda con número o página, y una por cada número
+ * conectado que ninguna tienda usa. Solo lee la configuración y la base: ninguna consulta a Meta.
+ */
+function bandejasDelChat(enUso: Set<string>): Array<{ clave: string; nombre: string; color: string | null; detalle: string | null }> {
+  const numeros = listMetaWhatsAppConnections();
+  const deTiendas = new Set<string>();
+  const bandejas: Array<{ clave: string; nombre: string; color: string | null; detalle: string | null }> = [];
+  for (const t of loadWorkflowConfig()?.tiendas ?? []) {
+    if (!t || t.enabled === false) continue;
+    const numero = String(t.numero ?? "").trim();
+    // Una tienda sin número ni página (solo por frase de entrada) sale si ya tiene chats.
+    if (!numero && !String(t.pagina ?? "").trim() && !enUso.has(`t:${t.id}`)) continue;
+    if (numero) deTiendas.add(numero);
+    const n = numeros.find((x) => x.phone_number_id === numero);
+    bandejas.push({ clave: `t:${t.id}`, nombre: t.nombre?.trim() || "Tienda sin nombre", color: t.color?.trim() || null, detalle: n?.display_phone_number ?? null });
+  }
+  for (const n of numeros) {
+    // Un número de una tienda sale aparte solo si tiene chats que no son de ninguna (varias
+    // tiendas en el mismo número sin frase que las distinga). Uno pausado, solo si tiene chats.
+    const clave = `n:${n.phone_number_id}`;
+    if ((deTiendas.has(n.phone_number_id) || n.pausado === 1) && !enUso.has(clave)) continue;
+    bandejas.push({ clave, nombre: n.display_phone_number ?? n.phone_number_id, color: null, detalle: n.verified_name ?? null });
+  }
+  return bandejas;
 }
 
 export async function GET(req: NextRequest) {
@@ -62,6 +90,8 @@ export async function GET(req: NextRequest) {
       ...fila,
       tienda_nombre: suya?.nombre?.trim() || null,
       tienda_color: suya?.color?.trim() || null,
+      // SU BANDEJA EN LA BARRA DEL CHAT (21/10/2026): su tienda, o su número si no tiene tienda.
+      bandeja: suya ? `t:${suya.id}` : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
     };
   });
   return NextResponse.json(
@@ -69,6 +99,11 @@ export async function GET(req: NextRequest) {
       conversations: conSuTienda,
       introVariants: getConfiguredIntroVariants(),
       parcial: Number.isFinite(limite) && limite > 0,
+      // Solo con la lista entera: con las 30 primeras faltarían las bandejas de chats más viejos.
+      bandejas:
+        Number.isFinite(limite) && limite > 0
+          ? undefined
+          : bandejasDelChat(new Set(conSuTienda.map((c) => c.bandeja).filter((b): b is string => !!b))),
     },
     { headers: { "Cache-Control": "no-store" } }
   );

@@ -37,6 +37,10 @@ export interface ConversationListItem {
   /** 0 = el último evento que se le mandó a Meta NO llegó. Se marca en rojo
    *  para poder ver de un vistazo cuáles hay que revisar. */
   capi_last_ok?: number | null;
+  /** De qué tienda es, y su bandeja en la barra del chat (21/10/2026). Los pone el servidor. */
+  tienda_nombre?: string | null;
+  tienda_color?: string | null;
+  bandeja?: string | null;
   /** LA RUTA POR LA QUE ENTRÓ (20/10/2026): el camino de la intro que recibió. Vacío = la
    *  principal («Ruta A»). La anota el bot al mandar la intro; aquí solo se enseña. */
   camino?: string | null;
@@ -114,6 +118,10 @@ interface Props {
   onTogglePin: (id: number, pinned: boolean) => void;
   /** Marca una conversación como leída (read=true) o no leída (read=false). */
   onToggleRead: (id: number, read: boolean) => void;
+  /** Con la barra de tiendas en «Todas» o «Te necesitan»: cada chat lleva su tienda. */
+  mostrarTienda?: boolean;
+  /** Lo que va encima de la lista: la fila de tiendas en el celular. */
+  encabezado?: React.ReactNode;
 }
 
 function relativeTime(unix: number | null): string {
@@ -190,6 +198,8 @@ export default function ConversationList({
   onSelect,
   onTogglePin,
   onToggleRead,
+  mostrarTienda = false,
+  encabezado = null,
 }: Props) {
   const [search, setSearch] = useState("");
   const [labelFilter, setLabelFilter] = useState<LabelFilter>("todos");
@@ -733,7 +743,7 @@ export default function ConversationList({
   if (conversations.length === 0) {
     return (
       <>
-        {searchHeader}
+        {encabezado}{searchHeader}
         <div className="p-6 text-sm text-neutral-500">
           Aún no hay conversaciones. Cuando alguien escriba al número de
           WhatsApp configurado, aparecerá aquí.
@@ -745,7 +755,7 @@ export default function ConversationList({
   if (filtered.length === 0) {
     return (
       <>
-        {searchHeader}
+        {encabezado}{searchHeader}
         <div className="p-6 text-sm text-neutral-500">
           No se encontraron conversaciones que coincidan con &ldquo;{search}&rdquo;.
         </div>
@@ -755,7 +765,7 @@ export default function ConversationList({
 
   return (
     <>
-      {searchHeader}
+      {encabezado}{searchHeader}
       <ul className="divide-y divide-neutral-200">
         {filtered.map((c, idx) => {
           const active = c.id === selectedId;
@@ -864,6 +874,16 @@ export default function ConversationList({
                               }`}
                           >
                             {c.nocodb_label}
+                          </span>
+                        )}
+                        {/* SU TIENDA (21/10/2026): viendo varias juntas, de qué tienda es sin abrirlo. */}
+                        {mostrarTienda && c.tienda_nombre && (
+                          <span
+                            title={`Tienda: ${c.tienda_nombre}`}
+                            className="inline-flex max-w-[7rem] shrink-0 items-center gap-1 rounded-full border border-neutral-200 bg-white px-1.5 py-0 text-[9px] font-semibold text-neutral-600"
+                          >
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: c.tienda_color || "#14b8a6" }} />
+                            <span className="truncate">{c.tienda_nombre}</span>
                           </span>
                         )}
                         {typeof c.intro_variant_sent === "number" &&
