@@ -4,7 +4,7 @@
 > Mensaje (botones, cuadritos, «otra cosa», «no respondió»), Cobro (producto o pago abierto con
 > tramos por país, «no pagó»), Entregar, Condición (compró / país / anuncio), Esperar, Postventa y
 > regalo, y Pasar a humano. Varias ventas por conversación: cada cobro es su propio ticket
-> (`tablero_compras`). Messenger también (después de la pregunta del país). Falta: Instagram.
+> (`tablero_compras`). Messenger e Instagram también (después de la pregunta del país).
 > Ver la sección «EL TABLERO» de CLAUDE.md.
 
 > Pedido por Alberto el 22/10/2026. **Solo en ALBERTO 4**: «el bot alberto 2 queda tal como

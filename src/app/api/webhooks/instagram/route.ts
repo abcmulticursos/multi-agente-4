@@ -37,6 +37,8 @@ import {
 } from "@/lib/workflow/config";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
+import { alRecibirMensaje, esDelTablero } from "@/lib/tablero/motor";
+import { tiendaDeLaPagina } from "@/lib/workflow/config";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { getWebhookAppSecret, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
 
@@ -339,6 +341,19 @@ async function handleInstagramMessage(
   const countryReady = getConversationById(convo.id) ?? fresh;
   freezePricesForConvo(countryReady);
   if (gateHandled) return;
+
+  // EL TABLERO, también en Instagram (22/10/2026, solo ALBERTO 4). Igual que en Messenger:
+  // después de la pregunta del país y antes del motor de siempre. Su tienda es la de la página
+  // de Facebook unida a esta cuenta de Instagram (la conversación no la trae, y el motor de
+  // siempre sigue atendiéndola sin tienda, como hasta hoy). Los botones salen como lista
+  // numerada y el tablero entiende «1», «2» o el texto del botón.
+  try {
+    const tiendaDeInstagram = tiendaDeLaPagina(getActiveInstagramMetaConnection()?.page_id ?? null);
+    if (await alRecibirMensaje(countryReady, content, tiendaDeInstagram)) return;
+  } catch (err) {
+    console.error("[tablero] falló el turno del tablero (instagram):", err);
+    if (esDelTablero(countryReady.id)) return;
+  }
 
   try {
     const handled = await tryWorkflowOnIncoming(countryReady, content);

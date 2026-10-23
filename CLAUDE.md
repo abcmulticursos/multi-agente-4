@@ -762,7 +762,12 @@ comprobante de 15 → tramo 2 → plus → regalo), pago bajo el mínimo, compro
 pregunta del país; los botones van como respuestas rápidas con el mismo id. Probado en el
 simulador como cliente de Messenger (país → tablero completo). Lo programado del tablero sale por
 SU número y SU página (`withOutboundWhatsAppNumber` / `withOutboundMessengerPage`), como el de siempre.
-**No probado:** Instagram (no tiene tablero todavía), un Messenger real y una venta real.
+**Instagram (22/10, más tarde):** la misma entrada en `webhooks/instagram/route.ts`. Sus
+conversaciones no traen tienda (el motor de siempre las atiende con el contenido general, y así
+sigue): el tablero usa la tienda de la página de Facebook unida a la cuenta de Instagram y abre su
+turno con ella (`conSuTienda`). Los botones salen como lista numerada; el tablero entiende «1»,
+«2», «3» (solo en Instagram) y, en cualquier canal, el texto del botón escrito.
+**No probado:** Instagram de verdad (el simulador no lo tiene), un Messenger real y una venta real.
 
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 

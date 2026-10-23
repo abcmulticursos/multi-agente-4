@@ -48,6 +48,23 @@ comprobar("si falla, una conversación del tablero no cae al motor de siempre", 
     g > messenger.indexOf("if (gateHandled) return;") && g < messenger.indexOf("await tryWorkflowOnIncoming(countryReady, content)")
   );
 }
+{
+  // INSTAGRAM (22/10/2026): la misma puerta; su tienda, la de la página unida a la cuenta.
+  const instagram = leer("src", "app", "api", "webhooks", "instagram", "route.ts");
+  const g = instagram.indexOf("await alRecibirMensaje(countryReady, content, tiendaDeInstagram)");
+  comprobar(
+    "Instagram: después de la pregunta del país y antes del motor de siempre",
+    g > instagram.indexOf("if (gateHandled) return;") && g < instagram.indexOf("await tryWorkflowOnIncoming(countryReady, content)")
+  );
+  comprobar(
+    "y el motor de siempre en Instagram sigue sin tienda, como hoy",
+    !/setConversationMessengerPage|setConversationTienda/.test(instagram)
+  );
+  comprobar(
+    "la lista numerada de Instagram: «1» elige el botón 1 (solo en Instagram)",
+    /convo\.channel === "instagram" && \/\^\[1-3\]\$\/\.test\(dicho\)/.test(motor)
+  );
+}
 comprobar(
   "lo programado sale por su número y su página",
   /withOutboundWhatsAppNumber\(convo\.wa_phone_number_id/.test(motor) && /withOutboundMessengerPage\(convo\.messenger_page_id/.test(motor)

@@ -29,6 +29,9 @@ import { notifyAdmin } from "@/lib/notifications";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
 import {
   conElTurnoDe,
+  conLaTiendaDelTurno,
+  laTiendaDelTurno,
+  type Tienda,
   decisionQueCoincide,
   getEffectiveCountryCode,
   laTiendaDeLaConversacion,
@@ -313,20 +316,51 @@ async function atenderComprobante(convo: ConversationRow, t: Tablero, estado: Es
  * EL TURNO DE UN CLIENTE. Devuelve true si lo atendió el tablero; false = sigue el motor de
  * siempre, exactamente como si esto no existiera.
  */
-export async function alRecibirMensaje(convo: ConversationRow, contenido: string): Promise<boolean> {
+export async function alRecibirMensaje(
+  convo: ConversationRow,
+  contenido: string,
+  /**
+   * La tienda que pone el CANAL cuando la conversación no la trae. Es Instagram: sus
+   * conversaciones no llevan número ni página, así que el motor de siempre las atiende con el
+   * contenido general (y así sigue). El tablero sí necesita saber de qué tienda es: la de la
+   * página de Facebook unida a esa cuenta de Instagram.
+   */
+  tiendaDelCanal?: Tienda | null
+): Promise<boolean> {
   // /reiniciar (para probar): sale del tablero y el motor de siempre borra la charla como
   // siempre. El siguiente «hola» vuelve a entrar al tablero desde el Inicio.
   if (/^\/(restart|reset|reiniciar)$/i.test(contenido.trim())) {
     if (estadoEnElTablero(convo.id)) salirDelTablero(convo.id);
     return false;
   }
+  const yaDentro = estadoEnElTablero(convo.id);
+  const tiendaId = yaDentro?.tienda_id ?? (laTiendaDeLaConversacion(convo) ?? tiendaDelCanal)?.id;
+  if (!tiendaId) return false;
+  return conSuTienda(tiendaId, () => turnoDelTablero(convo, contenido, tiendaDelCanal));
+}
+
+/**
+ * EL TURNO CON SU TIENDA PUESTA: burbujas, comodines y precios leen la de esta conversación.
+ * Si el turno ya la trae (WhatsApp, Messenger), no se envuelve nada.
+ */
+function conSuTienda<T>(tiendaId: string, fn: () => T): T {
+  if (laTiendaDelTurno()?.id === tiendaId) return fn();
+  const t = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x?.id === tiendaId) ?? null;
+  return conLaTiendaDelTurno(t, fn);
+}
+
+async function turnoDelTablero(
+  convo: ConversationRow,
+  contenido: string,
+  tiendaDelCanal?: Tienda | null
+): Promise<boolean> {
   let estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
 
   if (!estado) {
     // SOLO AL NACER. Una conversación que ya empezó con el motor de siempre se queda en él.
     if (convo.state !== "new") return false;
-    const tienda = laTiendaDeLaConversacion(convo);
+    const tienda = laTiendaDeLaConversacion(convo) ?? tiendaDelCanal ?? null;
     const t = tableroDe(config, tienda?.id);
     if (!tienda?.id || !t || !elTableroAtiende(t)) return false;
     const inicio = t.fichas.find((f) => f.tipo === "inicio")!;
@@ -354,6 +388,21 @@ export async function alRecibirMensaje(convo: ConversationRow, contenido: string
   }
 
   const ficha = t.fichas.find((x) => x.id === estado!.ficha_id);
+  // 1-bis. UN BOTÓN ESCRITO. En Instagram los botones salen como lista numerada («1. Sí, quiero»)
+  // y el cliente contesta escribiendo «1» o el texto; en cualquier canal alguien puede escribir
+  // el texto del botón en vez de tocarlo. Solo los botones de SU ficha, y de la ÚLTIMA burbuja
+  // que los tenga (cada burbuja numera los suyos desde 1).
+  if (ficha?.tipo === "mensaje" && !contenido.startsWith("bubble:")) {
+    const conBotones = pasosActivos(ficha).filter((p) => (p.buttons ?? []).length > 0);
+    const botones = (conBotones[conBotones.length - 1]?.buttons ?? []).filter((b) => b.id && b.label?.trim()).slice(0, 3);
+    const limpio = (s: string) =>
+      s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+    const dicho = limpio(contenido);
+    const porNumero = convo.channel === "instagram" && /^[1-3]$/.test(dicho) ? botones[Number(dicho) - 1] : undefined;
+    const porTexto = botones.find((b) => limpio(b.label) === dicho);
+    const escrito = porNumero ?? porTexto;
+    if (escrito) contenido = `bubble:${escrito.id}`;
+  }
   // 2. UN BOTÓN, AUNQUE SEA DE UN MENSAJE ANTERIOR. El botón sigue en su chat: si tras la
   // insistencia toca «Sí, quiero» de la oferta, vale. Se busca la ficha que lo tiene; su id es
   // único en el tablero (cada botón nace con el suyo).
@@ -423,9 +472,13 @@ export async function ejecutarAccionDelTablero(accion: ScheduledActionRow): Prom
   }
   // CON SU TIENDA, SU NÚMERO Y SU PÁGINA, como lo programado del motor de siempre: aquí ya no
   // está el webhook delante, y con dos números o dos páginas saldría por el que no es.
+  const tiendaId = estadoEnElTablero(convo.id)?.tienda_id;
+  if (!tiendaId) return;
   await conElTurnoDe(convo, () =>
-    withOutboundWhatsAppNumber(convo.wa_phone_number_id ?? null, () =>
-      withOutboundMessengerPage(convo.messenger_page_id ?? null, () => relojDelTablero(accion, convo, payload))
+    conSuTienda(tiendaId, () =>
+      withOutboundWhatsAppNumber(convo.wa_phone_number_id ?? null, () =>
+        withOutboundMessengerPage(convo.messenger_page_id ?? null, () => relojDelTablero(accion, convo, payload))
+      )
     )
   );
 }
