@@ -803,6 +803,8 @@ export default function LienzoDelTablero({
           }}
           connectionLineStyle={{ stroke: "#f97316", strokeWidth: 2.5, strokeDasharray: "6 6" }}
           deleteKeyCode={null}
+          // El doble clic abre la ficha; no acerca el lienzo (se comía el doble clic de las cajas).
+          zoomOnDoubleClick={false}
           selectionKeyCode="Shift"
           multiSelectionKeyCode={["Control", "Meta"]}
           fitView
