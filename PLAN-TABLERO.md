@@ -5,6 +5,11 @@
 > tramos por país, «no pagó»), Entregar, Condición (compró / país / anuncio), Esperar, Postventa y
 > regalo, y Pasar a humano. Varias ventas por conversación: cada cobro es su propio ticket
 > (`tablero_compras`). Messenger e Instagram también (después de la pregunta del país).
+>
+> **23/10/2026:** la pantalla replica la pizarra, un tablero por canal, workflows, cajas de
+> Seguimientos e Intro de order bump, reparto por peso, cobro con las revisiones de siempre, la IA
+> que entiende la elección escrita, 24 h y horas de silencio. Ver la sección «El tablero, segunda
+> vuelta» de CLAUDE.md.
 > Ver la sección «EL TABLERO» de CLAUDE.md.
 
 > Pedido por Alberto el 22/10/2026. **Solo en ALBERTO 4**: «el bot alberto 2 queda tal como

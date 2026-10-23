@@ -22,6 +22,7 @@ import {
   setSelectedPaymentMethod,
   type ConversationRow,
 } from "@/lib/db";
+import { reenviarLoDelTablero } from "@/lib/tablero/reenvio";
 import {
   detectBiofertaChoice,
   getEffectiveCountryCode,
@@ -2161,6 +2162,9 @@ function maybeStartDeliveryPreference(
  * pagada (no se reenvía material a quien no compró).
  */
 export function resendApprovedMaterial(convo: ConversationRow): boolean {
+  // EL TABLERO REENVÍA LO SUYO (22/10/2026, ALBERTO 4): lo que entregaron sus fichas, no el
+  // producto de la venta de siempre, que ese cliente nunca compró. Sin tablero no hace nada.
+  if (reenviarLoDelTablero(convo)) return true;
   // UPSELLS EN FILA: también desde Messenger e Instagram. Ver `conLaFilaDe`.
   return conLaFilaDe(convo.id, () => resendApprovedMaterialConSuFila(convo));
 }

@@ -18,7 +18,7 @@ import {
 import { writeTextFileAtomically } from "@/lib/product-profiles";
 // LA PIZARRA: se lee y se escribe con la MISMA función. Ver `lee-pizarra.ts`.
 import { leePizarra } from "@/lib/editor/lee-pizarra";
-import { leeTableros } from "@/lib/tablero/datos";
+import { leeTableros, leeTablerosPorTienda } from "@/lib/tablero/datos";
 import { leeCamino, leeTambienEnCaminos } from "@/lib/workflow/etiqueta-de-camino";
 import {
   DEFAULT_PAYMENT_BUTTONS_PROMPT,
@@ -253,7 +253,30 @@ type BubbleButtonAction =
   | "show_payment"
   | "choose_combo"
   | "choose_basico"
-  | "human";
+  | "choose_upsell"
+  | "decline_upsell"
+  | "show_order_bump"
+  | "accept_gift"
+  | "decline_gift"
+  | "claim_gift"
+  | "human"
+  | "start_workflow";
+
+/** Las acciones de botón que se leen tal cual del archivo. Las mismas que ofrece el editor. */
+const ACCIONES_DE_BOTON: BubbleButtonAction[] = [
+  "send_payment_method",
+  "show_payment",
+  "choose_combo",
+  "choose_basico",
+  "choose_upsell",
+  "decline_upsell",
+  "show_order_bump",
+  "accept_gift",
+  "decline_gift",
+  "claim_gift",
+  "human",
+  "start_workflow",
+];
 
 type DecisionAction =
   | "choose_combo"
@@ -268,7 +291,8 @@ type DecisionAction =
   | "accept_gift"
   | "decline_gift"
   | "claim_gift"
-  | "human";
+  | "human"
+  | "start_workflow";
 
 // ESTA LISTA ES EL FILTRO: lo que no esté aquí se descarta al guardar y el
 // cuadrito aparece sin link la próxima vez que se abra el editor.
@@ -283,6 +307,7 @@ const LINKS_DE_DECISION: DecisionAction[] = [
   "decline_gift",
   "claim_gift",
   "human",
+  "start_workflow",
 ];
 
 interface EditorBubbleDecision {
@@ -297,6 +322,8 @@ interface EditorBubbleDecision {
   action?: DecisionAction;
   /** Para "send_payment_method": qué método manda, nunca sus datos. */
   payment_method?: string;
+  /** Para "start_workflow": cuál. */
+  workflow_id?: string;
 }
 
 interface EditorBubbleButton {
@@ -307,6 +334,8 @@ interface EditorBubbleButton {
   /** Para "send_payment_method": QUÉ método manda, no una copia de sus datos.
    *  Sus datos viven en Precios y pagos, por país. */
   payment_method?: string;
+  /** Para "start_workflow": cuál. */
+  workflow_id?: string;
 }
 
 interface EditorStep {
@@ -830,13 +859,18 @@ function readBubbleButtons(value: unknown): EditorBubbleButton[] {
         .map((item) => ({
           id: str(item.id),
           label: str(item.label),
-          action: ["send_payment_method", "show_payment", "choose_combo", "choose_basico", "human"].includes(str(item.action))
+          // TODAS LAS ACCIONES QUE OFRECE EL EDITOR (23/10/2026). Esta lista tenía solo cinco: un
+          // botón con «Elegir UPSELL», «Rechazar UPSELL», «Abrir la oferta de 2 opciones» o los del
+          // regalo se guardaba bien, pero al reabrir el editor volvía a «Enviar burbujas» y el
+          // siguiente guardado lo dejaba así: el botón dejaba de hacer lo que decía.
+          action: ACCIONES_DE_BOTON.includes(str(item.action) as BubbleButtonAction)
             ? str(item.action) as BubbleButtonAction
             : "send_steps",
           steps: Array.isArray(item.steps)
             ? (item.steps as Record<string, unknown>[]).map(readStep)
             : [],
           payment_method: str(item.payment_method),
+          workflow_id: str(item.workflow_id),
         }))
         .filter((item) => item.id && item.label)
     : [];
@@ -870,6 +904,7 @@ function readBubbleDecisions(value: unknown): EditorBubbleDecision[] {
             ? (str(item.action) as DecisionAction)
             : undefined,
           payment_method: str(item.payment_method),
+          workflow_id: str(item.workflow_id),
         }))
         .filter((item) => item.id)
     : [];
@@ -1306,6 +1341,9 @@ function writeBubbleButtons(
       button.payment_method?.trim()
         ? { payment_method: button.payment_method.trim() }
         : {}),
+      ...(button.action === "start_workflow" && button.workflow_id?.trim()
+        ? { workflow_id: button.workflow_id.trim() }
+        : {}),
     }));
 }
 
@@ -1339,6 +1377,9 @@ function writeBubbleDecisions(
       ...(decision.action === "send_payment_method" &&
       decision.payment_method?.trim()
         ? { payment_method: decision.payment_method.trim() }
+        : {}),
+      ...(decision.action === "start_workflow" && decision.workflow_id?.trim()
+        ? { workflow_id: decision.workflow_id.trim() }
         : {}),
       steps: (decision.steps ?? []).map(writeStep),
     }));
@@ -2803,7 +2844,12 @@ export async function GET() {
       pizarra: leePizarra(config?.pizarra),
       // EL TABLERO (22/10/2026): a diferencia de la pizarra, el bot SÍ lo lee. Las burbujas van
       // en el formato del editor, como las demás.
-      tableros: leeTableros(config?.tableros, (pasos) =>
+      // Uno por tienda Y POR CANAL (23/10/2026); los guardados antes, como el de WhatsApp.
+      tableros: leeTablerosPorTienda(config?.tableros, (pasos) =>
+        pasos.map((p) => readStep(p as Record<string, unknown>))
+      ),
+      // Los WORKFLOWS: tableros sin tienda que arrancan cuando algo los activa.
+      workflows: leeTableros(config?.workflows, (pasos) =>
         pasos.map((p) => readStep(p as Record<string, unknown>))
       ),
       ad_registry,
@@ -3086,7 +3132,13 @@ export async function POST(req: NextRequest) {
   if (body.tableros && typeof body.tableros === "object") {
     doc.set(
       "tableros",
-      leeTableros(body.tableros, (pasos) => pasos.map((p) => writeStep(p as EditorStep)))
+      leeTablerosPorTienda(body.tableros, (pasos) => pasos.map((p) => writeStep(p as EditorStep)))
+    );
+  }
+  if (body.workflows && typeof body.workflows === "object") {
+    doc.set(
+      "workflows",
+      leeTableros(body.workflows, (pasos) => pasos.map((p) => writeStep(p as EditorStep)))
     );
   }
   // LA PIZARRA, por el mismo carril: lo que no se nombra aquí no llega al archivo. Solo se

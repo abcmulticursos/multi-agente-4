@@ -181,7 +181,9 @@ export type BubbleButtonAction =
   | "accept_gift"
   | "decline_gift"
   | "claim_gift"
-  | "human";
+  | "human"
+  /** ARRANCA UN WORKFLOW del tablero (22/10/2026, ALBERTO 4). Ver `workflow_id`. */
+  | "start_workflow";
 
 export interface BubbleButton {
   /** Id interno estable: el cliente nunca lo ve. */
@@ -203,6 +205,8 @@ export interface BubbleButton {
    * era. Eso no da error y no avisa a nadie.
    */
   payment_method?: string;
+  /** Para "start_workflow": QUÉ workflow arranca (su id en `workflows`). */
+  workflow_id?: string;
 }
 
 /**
@@ -252,6 +256,8 @@ export interface BubbleDecision {
   /** Para "send_payment_method": qué método manda. Sus datos salen de Precios
    *  y pagos, nunca de una copia guardada aquí. */
   payment_method?: string;
+  /** Para "start_workflow": qué workflow arranca. */
+  workflow_id?: string;
 }
 
 /** Lo que puede hacer un cuadrito además de mandar sus burbujas. */
@@ -289,7 +295,9 @@ export type DecisionAction =
   | "accept_gift"
   | "decline_gift"
   | "claim_gift"
-  | "human";
+  | "human"
+  /** Arranca un workflow del tablero (22/10/2026). Ver `BubbleButtonAction`. */
+  | "start_workflow";
 
 type ButtonsOnBubble = {
   buttons?: BubbleButton[];

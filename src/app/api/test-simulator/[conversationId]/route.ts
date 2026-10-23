@@ -7,6 +7,7 @@ import {
   setTestConversationModality,
 } from "@/lib/db";
 import { tick } from "@/lib/workflow/worker";
+import { salirDelTablero } from "@/lib/tablero/estado";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,6 +81,9 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
   const id = Number((await params).conversationId);
   const convo = testConversation(id);
   if (!convo) return NextResponse.json({ error: "Prueba no encontrada" }, { status: 404 });
+  // Y lo suyo en el tablero (23/10/2026): sus compras y la huella de sus comprobantes, para poder
+  // volver a probar con la misma foto en otra conversación de prueba.
+  salirDelTablero(id);
   deleteConversation(id);
   return NextResponse.json({ ok: true });
 }

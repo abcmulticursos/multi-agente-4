@@ -180,8 +180,9 @@ comprobar(
 // ── 4. Se guarda de verdad ──────────────────────────────────────────────────
 comprobar(
   "la API acepta la acción nueva",
-  /\["send_payment_method", "show_payment", "choose_combo", "choose_basico", "human"\]/.test(
-    api
+  // Desde el 23/10/2026 la lista vive en `ACCIONES_DE_BOTON` (y relee también las que faltaban).
+  ["send_payment_method", "show_payment", "choose_combo", "choose_basico", "human"].every((a) =>
+    api.slice(api.indexOf("const ACCIONES_DE_BOTON"), api.indexOf("];", api.indexOf("const ACCIONES_DE_BOTON"))).includes(`"${a}"`)
   ),
   "sí"
 );

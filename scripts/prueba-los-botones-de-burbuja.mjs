@@ -147,7 +147,8 @@ comprobar(
 );
 comprobar(
   "el editor deja escribirlas en cualquier accion",
-  /button\.action !== "human" && \(/.test(editor),
+  // Desde el 23/10/2026 tampoco con «Activar workflow», que no lleva burbujas propias.
+  /button\.action !== "human" && (button\.action !== "start_workflow" && )?\(/.test(editor),
   "antes solo con «enviar burbujas»"
 );
 comprobar(

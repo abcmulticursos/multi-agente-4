@@ -64,6 +64,7 @@ import {
   withOutboundWhatsAppNumber,
   withOutboundMessengerPage,
 } from "@/lib/meta/runtime-config";
+import { avisarFinDelRegalo } from "@/lib/tablero/estado";
 import {
   conLaPresentacionDeLaConversacion,
   conElTurnoDe,
@@ -1542,7 +1543,8 @@ async function runBubbleButtonAction(convo: ConversationRow, id: string): Promis
         button.action,
         button.payment_method,
         button.label,
-        suyas.length > 0 ? suyas : undefined
+        suyas.length > 0 ? suyas : undefined,
+        button.workflow_id
       );
     }
   }
@@ -1575,7 +1577,9 @@ async function ejecutarAccion(
    * burbujas ya llevan los datos, las de fábrica no salen. Si no los llevan,
    * sale solo la parte que los lleva — nunca la presentación repetida.
    */
-  loQueYaDijo?: ResponseStep[]
+  loQueYaDijo?: ResponseStep[],
+  /** Para "start_workflow": cuál (22/10/2026, ALBERTO 4). */
+  workflowId?: string
 ): Promise<boolean> {
   // APAGADA NO ES DICHA. Ver `burbujasQueVanASalir`: contando las apagadas, un
   // cuadrito con sus burbujas en OFF hacía que el texto de fábrica saliera sin
@@ -1799,6 +1803,19 @@ async function ejecutarAccion(
       cancelPendingActionsForConvo(convo.id);
       await sendBotText(convo, "Te conecto con una asesora para ayudarte 😊");
       return true;
+    case "start_workflow": {
+      // EL CLIENTE PASA A UN WORKFLOW DEL TABLERO (22/10/2026, ALBERTO 4). Sale de la venta de
+      // siempre: se cancela lo que el motor tenía programado (seguimientos, intro en pausa) y el
+      // tablero arranca ese workflow desde su Inicio en el siguiente tick, cuando este turno ya
+      // terminó. Se importa al llamarse porque el tablero también usa este archivo.
+      const id = (workflowId ?? "").trim();
+      if (!id) {
+        console.warn(`[wf] convo ${convo.id}: "${deQuien}" no tiene workflow elegido → no hago nada`);
+        return false;
+      }
+      const { prepararEntradaAlWorkflow } = await import("@/lib/tablero/motor");
+      return prepararEntradaAlWorkflow(convo, id, deQuien);
+    }
     default:
       // Una acción que no se reconoce no hace nada, y queda escrito. Callar
       // aquí dejaría un cuadrito que parece linkeado y no ejecuta nada.
@@ -2087,7 +2104,8 @@ export async function tryWorkflowOnIncoming(
           // Lo que acaba de salir. Sin pasarlo, la acción mandaba el texto de
           // fábrica encima del suyo: la misma presentación dos veces, y con la
           // cuenta escrita a mano, la cuenta dos veces.
-          elegida.steps
+          elegida.steps,
+          elegida.workflow_id
         );
       }
       // Y si sus burbujas llevaban la cuenta, la conversación queda esperando
@@ -2395,7 +2413,8 @@ export async function tryWorkflowOnIncoming(
             suyo.action,
             suyo.payment_method,
             suyo.title || "esta decisión",
-            suyo.steps
+            suyo.steps,
+            suyo.workflow_id
           );
           console.log(
             `[wf:decision] convo ${convo.id}: eligió "${suyo.title || "(sin título)"}" fuera de la pausa`
@@ -2861,7 +2880,8 @@ export async function tryWorkflowOnIncoming(
             cuadritoRegalo.action,
             cuadritoRegalo.payment_method,
             cuadritoRegalo.title || "este cuadrito del regalo",
-            cuadritoRegalo.steps
+            cuadritoRegalo.steps,
+            cuadritoRegalo.workflow_id
           );
         }
         // La misma regla que en la oferta del extra: uno que ni dice ni hace
@@ -6374,7 +6394,8 @@ async function responderConElCuadritoDelExtra(
     cuadrito.action,
     cuadrito.payment_method,
     cuadrito.title || "este cuadrito de la oferta del extra",
-    cuadrito.steps
+    cuadrito.steps,
+    cuadrito.workflow_id
   );
   return laAccionMandoLosDatos;
 }
@@ -11110,6 +11131,8 @@ export async function declineGiftConsent(
   }
   setConversationState(convo.id, "payment_approved");
   console.log(`[wf] convo ${convo.id} rechazó regalo extra → cierre cordial`);
+  // Si es del tablero, su ruta puede seguir («Al terminar el regalo»). Sin tablero no hace nada.
+  avisarFinDelRegalo(convo.id);
   // Decir que no al REGALO no es decir que no al EXTRA: son dos cosas distintas
   // y el cliente contestó solo a una. Si la oferta sigue sin contestar, se le
   // recuerda una vez. Ver `programarRecordatorioDelUpsell`.
@@ -11136,6 +11159,8 @@ export async function claimGiftReward(convo: ConversationRow): Promise<void> {
   // pegada al re-ofrecimiento del regalo y no había forma de quedarse solo con
   // una de las dos.
   if (pedirCorreoTrasElRegalo(cfg)) scheduleEmailReminderAfterGift(convo);
+  // Si es del tablero, su ruta puede seguir («Al terminar el regalo»). Sin tablero no hace nada.
+  avisarFinDelRegalo(convo.id);
 }
 
 /** Ofrece completar el saldo para subir al combo (post-venta). Usada por el

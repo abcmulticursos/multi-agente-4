@@ -21,6 +21,8 @@ export interface ContextoDeLaIA {
   moneda?: string;
   /** Lo que acaba de pasar y la IA debe decir con sus palabras (p. ej. «pago recibido»). */
   nota?: string;
+  /** Si ya se le entregó algo: la IA puede reenviarlo si el cliente dice que no le llegó. */
+  reenviar?: () => Promise<void>;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -64,6 +66,73 @@ function historial(conversationId: number): ChatCompletionMessageParam[] {
     }));
 }
 
+export interface OpcionParaLaIA {
+  id: string;
+  /** Lo que el cliente ve o lo que significa: el texto del botón, el título del cuadrito. */
+  etiqueta: string;
+  /** Las palabras del cuadrito, si las tiene: ayudan a entender de qué habla. */
+  palabras?: string[];
+}
+
+/**
+ * ¿CUÁL ELIGIÓ? Cuando ningún botón ni cuadrito acertó por sus palabras («el de 10», «el otro»,
+ * «quiero el primero que me dijiste»), la IA decide cuál de las opciones de ESA ficha eligió el
+ * cliente, mirando lo que el bot le acaba de decir. NO escribe nada al cliente: devuelve el id
+ * de la opción, o null si no eligió ninguna (pregunta, duda, dice que no). Un «no quiero X» nunca
+ * es elegir X.
+ */
+export async function elegirOpcionConIA(
+  conversationId: number,
+  mensaje: string,
+  opciones: OpcionParaLaIA[]
+): Promise<string | null> {
+  if (opciones.length === 0 || !mensaje.trim()) return null;
+  const modelo = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
+  const lista = opciones
+    .map((o) => `- ${o.id}: «${o.etiqueta}»${o.palabras?.length ? ` (palabras: ${o.palabras.join(", ")})` : ""}`)
+    .join("\n");
+  const ultimos = ultimosMensajes(conversationId, 8)
+    .filter((m) => (m.content ?? "").trim())
+    .map((m) => `${m.role === "user" ? "CLIENTE" : "BOT"}: ${m.content.slice(0, 400)}`)
+    .join("\n");
+  try {
+    const r = await getClient().chat.completions.create({
+      model: modelo,
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Decides cuál de las opciones ELIGIÓ el cliente con su último mensaje. Responde SOLO con el id de la opción, o con NINGUNA. " +
+            "Es NINGUNA si pregunta, duda, compara, pide más información, dice que no quiere algo, o no queda claro. " +
+            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer.",
+        },
+        {
+          role: "user",
+          content: `CONVERSACIÓN RECIENTE:\n${ultimos}\n\nOPCIONES:\n${lista}\n\nÚLTIMO MENSAJE DEL CLIENTE: «${mensaje.slice(0, 500)}»\n\nRespuesta (solo el id o NINGUNA):`,
+        },
+      ],
+    });
+    const dicho = (r.choices[0]?.message?.content ?? "").trim().replace(/[«»"'`.]/g, "");
+    const elegida = opciones.find((o) => o.id === dicho) ?? null;
+    console.log(`[tablero:ia] convo ${conversationId}: «${mensaje.slice(0, 60)}» → ${elegida ? elegida.id : "ninguna"}`);
+    return elegida?.id ?? null;
+  } catch (err) {
+    console.error(`[tablero:ia] convo ${conversationId}: no se pudo decidir la elección`, err);
+    return null;
+  }
+}
+
+const HERRAMIENTA_DE_REENVIO = {
+  type: "function" as const,
+  function: {
+    name: "reenviar_material",
+    description:
+      "Use ONLY when the customer says they did not receive, lost, or wants again the material/links they were ALREADY sent. It resends what was delivered.",
+    parameters: { type: "object", properties: {}, additionalProperties: false },
+  },
+};
+
 /**
  * Contesta con la IA y lo envía en burbujas. Si la IA nombra un monto que no está permitido, se le
  * pide otra vez; si insiste, se quitan las frases con ese monto. Nunca sale un precio inventado.
@@ -83,7 +152,17 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
           ...historial(convo.id),
         ],
         temperature: 0.6,
+        ...(c.reenviar && intento === 0 ? { tools: [HERRAMIENTA_DE_REENVIO] } : {}),
       });
+      // «NO ME LLEGÓ»: se reenvía lo entregado, y la IA lo acompaña con una frase suya.
+      const pidioReenvio = r.choices[0]?.message?.tool_calls?.some(
+        (t) => t.type === "function" && t.function.name === "reenviar_material"
+      );
+      if (pidioReenvio && c.reenviar) {
+        console.log(`[tablero:ia] convo ${convo.id}: pidió que le reenvíen el material`);
+        await c.reenviar();
+        return true;
+      }
       texto = (r.choices[0]?.message?.content ?? "").trim();
     } catch (err) {
       console.error(`[tablero:ia] convo ${convo.id}: la IA no respondió`, err);

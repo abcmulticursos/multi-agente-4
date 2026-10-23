@@ -124,7 +124,9 @@ type BubbleButtonAction =
   | "accept_gift"
   | "decline_gift"
   | "claim_gift"
-  | "human";
+  | "human"
+  /** Arranca un workflow del tablero (23/10/2026). Ver `workflow_id`. */
+  | "start_workflow";
 
 /** Colores de los cuadritos de decisión. */
 const COLORES_DE_DECISION = [
@@ -222,7 +224,9 @@ type DecisionAction =
   | "accept_gift"
   | "decline_gift"
   | "claim_gift"
-  | "human";
+  | "human"
+  /** Arranca un workflow del tablero (23/10/2026). */
+  | "start_workflow";
 
 /**
  * Los tres productos que puede elegir un cuadrito, con los MISMOS nombres que
@@ -264,6 +268,8 @@ const LINKS_DE_DECISION: { valor: string; texto: string }[] = [
   { valor: "decline_gift", texto: "Rechazar el regalo" },
   { valor: "claim_gift", texto: "Entregar el regalo (ya comentó)" },
   { valor: "human", texto: "Pasar a una persona" },
+  // ▶ ACTIVAR UN WORKFLOW DEL TABLERO (23/10/2026): el cliente sale de la venta automática.
+  { valor: "start_workflow", texto: "▶ Activar un workflow" },
 ];
 
 interface EditorBubbleDecision {
@@ -278,6 +284,8 @@ interface EditorBubbleDecision {
   action?: DecisionAction;
   /** Para "send_payment_method": qué método manda. */
   payment_method?: string;
+  /** Para "start_workflow": cuál. */
+  workflow_id?: string;
 }
 
 interface EditorBubbleButton {
@@ -288,6 +296,8 @@ interface EditorBubbleButton {
   /** Para "send_payment_method": QUÉ método manda, no una copia de sus datos.
    *  Los datos viven en Precios y pagos, por país. */
   payment_method?: string;
+  /** Para "start_workflow": cuál. */
+  workflow_id?: string;
 }
 type GalleryMediaType = "image" | "video" | "document" | "audio";
 type CountryCode =
@@ -1070,6 +1080,8 @@ const PaymentMethodsContext = createContext<
  * a donde él conecte su cable. El editor de botones esconde la lista de acciones y lo dice.
  */
 const EnElTableroContext = createContext(false);
+/** LOS WORKFLOWS DEL PROYECTO (23/10/2026), para «▶ Activar workflow» en botones y cuadritos. */
+const WorkflowsContext = createContext<Array<{ id: string; nombre: string }>>([]);
 /**
  * LAS TIENDAS DEL PROYECTO, para etiquetar un cajón con la que lo recibe.
  *
@@ -2430,7 +2442,9 @@ interface FullConfig {
   pizarra?: { vistas?: Record<string, DisposicionDePizarra> };
   /** EL TABLERO DE CADA TIENDA (22/10/2026): la ruta armable que el bot SÍ sigue. Ver
    *  `PantallaDelTablero` y src/lib/tablero/. */
-  tableros?: Record<string, TableroEnElEditor>;
+  tableros?: Record<string, Partial<Record<"whatsapp" | "messenger" | "instagram", TableroEnElEditor>>>;
+  /** LOS WORKFLOWS (23/10/2026): tableros sin tienda, que arrancan cuando algo los activa. */
+  workflows?: Record<string, TableroEnElEditor>;
   /** Tus productos. El papel que juega cada uno lo decide la alineación de cada
    *  modalidad, y el motor lo reparte al leer — ver `repartirPorEtiqueta`. */
   biblioteca_de_productos?: BibliotecaEditor;
@@ -10183,6 +10197,7 @@ export default function EditorPage() {
   return (
     <PlaceholderOptionsContext.Provider value={placeholderOptions}>
     <PaymentMethodsContext.Provider value={metodosDePagoConfigurados}>
+    <WorkflowsContext.Provider value={Object.entries(cfg?.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }))}>
     <TiendasContext.Provider value={laListaDeTiendas}>
     <MarcasDeMediaContext.Provider value={marcasDeMedia}>
     <PortapapelesDeCajonesDeIntro.Provider value={portapapelesDeCajones}>
@@ -17707,6 +17722,7 @@ export default function EditorPage() {
     </PortapapelesDeCajonesDeIntro.Provider>
     </MarcasDeMediaContext.Provider>
     </TiendasContext.Provider>
+    </WorkflowsContext.Provider>
     </PaymentMethodsContext.Provider>
     </PlaceholderOptionsContext.Provider>
   );
@@ -26823,6 +26839,8 @@ function VistaPizarra({
     return () => onTiendaEnPantalla?.(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pantalla, tiendaId]);
+  /** El workflow abierto en el tablero (null = el de la tienda). Solo pantalla. */
+  const [workflowAbierto, setWorkflowAbierto] = useState<string | null>(null);
   const irA = (p: "tiendas" | "pizarra" | "tablero") => {
     setPantalla(p);
     try {
@@ -28973,6 +28991,11 @@ function VistaPizarra({
           }}
           onTablero={(id) => {
             setTiendaId(id);
+            setWorkflowAbierto(null);
+            irA("tablero");
+          }}
+          onWorkflow={(id) => {
+            setWorkflowAbierto(id);
             irA("tablero");
           }}
           onCambiar={aplicar}
@@ -28982,10 +29005,17 @@ function VistaPizarra({
       ) : pantalla === "tablero" ? (
         <PantallaDelTablero
           cfg={cfg}
-          tiendaId={tiendaId}
-          oscuro={fondoOscuro}
-          onTienda={setTiendaId}
-          onVolver={() => irA("tiendas")}
+          clave={workflowAbierto ? `wf:${workflowAbierto}` : tiendaId}
+          tema={temaDeLaPizarra}
+          onTema={cambiarTemaDeLaPizarra}
+          onTienda={(id) => {
+            setWorkflowAbierto(null);
+            setTiendaId(id);
+          }}
+          onVolver={() => {
+            setWorkflowAbierto(null);
+            irA("tiendas");
+          }}
           aplicar={aplicar}
         />
       ) : (
@@ -30644,16 +30674,28 @@ function VentanaFlotante({
  * hay dos sitios que puedan decir cosas distintas de la misma tienda.
  */
 /**
- * EL TABLERO DE UNA TIENDA (22/10/2026, solo ALBERTO 4) — la ruta que él arma con fichas y
- * cables, y que el bot SÍ sigue. Ver PLAN-TABLERO.md y src/lib/tablero/.
+ * EL TABLERO DE UNA TIENDA, POR CANAL, Y LOS WORKFLOWS (22-23/10/2026, solo ALBERTO 4) — la ruta
+ * que él arma con fichas y cables, y que el bot SÍ sigue. Ver PLAN-TABLERO.md y src/lib/tablero/.
  *
- * Doble clic en una ficha de mensaje abre el MISMO cajón de burbujas de siempre (con sus botones
- * y cuadritos, que son las salidas). Las demás fichas abren sus ajustes. Todo va al borrador del
+ * Se ve y se maneja como la pizarra (ver `LienzoDelTablero`). Doble clic en una ficha de mensaje o
+ * de cobro abre el MISMO cajón de burbujas de siempre; las cajas «Seguimientos» e «Intro de order
+ * bump» abren su gestor flotante con sus versiones; las demás, sus ajustes. Todo va al borrador del
  * editor: Ctrl+S guarda y Ctrl+Z deshace, como en la pizarra.
+ *
+ * UN TABLERO POR CANAL, como la sección Canales: «es que no puede funcionar el mismo camino para
+ * messenger… yo puedo variar las burbujas cuando yo desee». Messenger e Instagram tienen
+ * «Clonar desde WhatsApp». Un workflow es uno solo para los tres canales.
  */
 function tableroVacio(): TableroEnElEditor {
   return { encendido: false, fichas: [{ id: "inicio", tipo: "inicio", x: 0, y: 160 }], cables: [] };
 }
+
+type CanalDeTablero = "whatsapp" | "messenger" | "instagram";
+const CANALES_DE_TABLERO: Array<[CanalDeTablero, string]> = [
+  ["whatsapp", "🟢 WhatsApp"],
+  ["messenger", "🔵 Messenger"],
+  ["instagram", "🟣 Instagram"],
+];
 
 function textoDeLaBurbuja(s: EditorStep | undefined): string {
   if (!s) return "";
@@ -30662,65 +30704,106 @@ function textoDeLaBurbuja(s: EditorStep | undefined): string {
 
 function PantallaDelTablero({
   cfg,
-  tiendaId,
-  oscuro,
+  clave,
+  tema,
+  onTema,
   onTienda,
   onVolver,
   aplicar,
 }: {
   cfg: FullConfig;
-  tiendaId: string;
-  oscuro: boolean;
+  /** La tienda (su id) o un workflow (`wf:<id>`). */
+  clave: string;
+  tema: "claro" | "mixto" | "oscuro";
+  onTema: (t: "claro" | "mixto" | "oscuro") => void;
   onTienda: (id: string) => void;
   onVolver: () => void;
   aplicar: (c: FullConfig) => void;
 }) {
+  const esWorkflow = clave.startsWith("wf:");
+  const wfId = esWorkflow ? clave.slice(3) : "";
   const tiendas = cfg.tiendas ?? [];
-  const tienda = tiendas.find((t) => t.id === tiendaId) ?? tiendas[0];
-  const id = tienda?.id ?? "";
-  const tablero: TableroEnElEditor = cfg.tableros?.[id] ?? tableroVacio();
+  const tienda = esWorkflow ? undefined : tiendas.find((t) => t.id === clave) ?? tiendas[0];
+  const tiendaId = tienda?.id ?? "";
+  const [canal, setCanal] = useState<CanalDeTablero>(() => {
+    try {
+      const c = window.localStorage.getItem("tablero-canal");
+      return c === "messenger" || c === "instagram" ? c : "whatsapp";
+    } catch {
+      return "whatsapp";
+    }
+  });
+  const elegirCanal = (c: CanalDeTablero) => {
+    setCanal(c);
+    try {
+      window.localStorage.setItem("tablero-canal", c);
+    } catch {}
+  };
+  const tablero: TableroEnElEditor = esWorkflow
+    ? cfg.workflows?.[wfId] ?? tableroVacio()
+    : cfg.tableros?.[tiendaId]?.[canal] ?? tableroVacio();
   const [cajon, setCajon] = useState<string | null>(null);
+  const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
   const [paisVisto, setPaisVisto] = useState<string>("PE");
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
-  const nombreDelProducto = (pid?: string) => productos.find((p) => p.id === pid)?.name?.trim() || "(sin elegir)";
+  const nombres = Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id]));
+  const nombreDelProducto = (pid?: string) => (pid ? nombres[pid] : undefined) ?? "(sin elegir)";
+  const workflows = Object.entries(cfg.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }));
 
-  const guardar = (t: TableroEnElEditor) => aplicar({ ...cfg, tableros: { ...(cfg.tableros ?? {}), [id]: t } });
+  const guardar = (t: TableroEnElEditor) =>
+    aplicar(
+      esWorkflow
+        ? { ...cfg, workflows: { ...(cfg.workflows ?? {}), [wfId]: t } }
+        : { ...cfg, tableros: { ...(cfg.tableros ?? {}), [tiendaId]: { ...(cfg.tableros?.[tiendaId] ?? {}), [canal]: t } } }
+    );
   const cambiarFicha = (fid: string, cambio: Partial<FichaEnElEditor>) =>
     guardar({ ...tablero, fichas: tablero.fichas.map((f) => (f.id === fid ? { ...f, ...cambio } : f)) });
 
-  const inicio = tablero.fichas.find((f) => f.tipo === "inicio");
-  const conectado = !!inicio && tablero.cables.some((c) => c.de === inicio.id && c.salida === "siguiente");
-  const atiende = tablero.encendido && conectado;
+  const inicios = tablero.fichas.filter((f) => f.tipo === "inicio");
+  const conectados = inicios.filter((f) => !f.sin_venta && !f.en_revision && tablero.cables.some((c) => c.de === f.id && c.salida === "siguiente"));
+  const atiende = esWorkflow || (tablero.encendido && conectados.length > 0);
 
   const resumenDe = (f: FichaEnElEditor): string => {
     const pasos = ((f.steps ?? []) as EditorStep[]).filter((s) => s.enabled !== false);
     switch (f.tipo) {
       case "inicio":
-        return "Los clientes NUEVOS de esta tienda entran aquí.";
-      case "mensaje": {
-        if (pasos.length === 0) return "Sin burbujas — doble clic para escribirlas.";
-        const primero = textoDeLaBurbuja(pasos.find((s) => s.type === "text"));
-        return `${pasos.length} burbuja${pasos.length === 1 ? "" : "s"}${primero ? `\n«${primero.slice(0, 70)}${primero.length > 70 ? "…" : ""}»` : ""}`;
+        return "";
+      case "mensaje":
+        return pasos.length === 0 ? "Sin burbujas — doble clic para escribirlas." : "";
+      case "intro_ob":
+        return `${(f.variantes ?? []).length} versión(es) · destapa el producto oculto`;
+      case "seguimientos": {
+        const s = f.seguimientos ?? [];
+        return s.length === 0
+          ? "Sin seguimientos — doble clic para crearlos."
+          : `${s.length} seguimiento(s) · ${s.map((x) => minutosLegiblesDelTablero(x.minutos)).join(" · ")}\nDesde su último mensaje; se detienen si paga.`;
       }
       case "entregar":
         return `Entrega: ${nombreDelProducto(f.producto_id)}`;
       case "cobro": {
         const c = f.cobro;
-        const burbujas = pasos.length ? `${pasos.length} burbuja${pasos.length === 1 ? "" : "s"} · ` : "Sin burbujas · ";
-        if (c?.modo === "producto") return `${burbujas}Cobra: ${nombreDelProducto(c.producto_id)}`;
+        const precio = c?.precio === "normal" ? "precio normal" : c?.precio === "oferta" ? "precio de oferta" : "precio según la etapa";
+        if (c?.modo === "producto") return `Cobra: ${nombreDelProducto(c.producto_id)} · ${precio}${(c.acepta ?? []).length ? `\nTambién acepta: ${(c.acepta ?? []).map((x) => nombreDelProducto(x)).join(", ")}` : ""}`;
         const min = c?.minimo_por_pais?.[paisVisto];
         const tramos = c?.tramos_por_pais?.[paisVisto]?.length ?? 0;
-        return `${burbujas}Pago abierto · ${paisVisto}: mínimo ${min ?? 0}, ${tramos} tramo${tramos === 1 ? "" : "s"}`;
+        return `Pago abierto · ${paisVisto}: mínimo ${min ?? 0}, ${tramos} tramo${tramos === 1 ? "" : "s"}`;
       }
       case "condicion": {
         const c = f.condicion;
         if (c?.tipo === "pais") return `¿Es de ${(c.paises ?? []).join(", ") || "(elige países)"}?`;
-        if (c?.tipo === "anuncio") return "¿Vino de un anuncio?";
+        if (c?.tipo === "anuncio")
+          return (c.anuncios ?? []).length
+            ? `¿Vino de: ${(c.anuncios ?? []).map((k) => cfg.ad_registry?.find((a) => a.key === k)?.name ?? k).join(", ")}?`
+            : "¿Vino de un anuncio?";
         return `¿Ya compró ${nombreDelProducto(c?.producto_id)}?`;
       }
+      case "reparto":
+        return "Reparte a los clientes entre sus rutas, por peso.";
       case "esperar":
         return `Espera ${minutosLegiblesDelTablero(f.minutos ?? 60)} y sigue.`;
+      case "workflow":
+        return `Lleva al workflow: ${workflows.find((w) => w.id === f.workflow_id)?.nombre ?? "(sin elegir)"}`;
       case "regalo":
         return "Arranca el regalo de siempre (el de esta tienda, si tiene).";
       case "humano":
@@ -30729,44 +30812,115 @@ function PantallaDelTablero({
   };
 
   const fichaDeCajon = tablero.fichas.find((f) => f.id === cajon);
+  const fichaDeGestor = tablero.fichas.find((f) => f.id === gestor);
   const fichaDeAjustes = tablero.fichas.find((f) => f.id === ajustes);
   const paises = Object.keys(COUNTRIES);
+  const fondoOscuro = tema !== "claro";
+  const vacioEnEsteCanal = (t: TableroEnElEditor | undefined) =>
+    !t || (t.fichas.filter((f) => f.tipo !== "inicio").length === 0 && t.cables.length === 0);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${oscuro ? "tema-oscuro-local" : ""}`}>
+      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         <button type="button" onClick={onVolver} className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta">
           ← Mis tiendas
         </button>
-        <select
-          value={id}
-          onChange={(e) => onTienda(e.target.value)}
-          className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
-          title="Tienda"
-        >
-          {tiendas.map((t, i) => (
-            <option key={t.id} value={t.id}>
-              🏪 {t.nombre?.trim() || `Tienda ${i + 1}`}
-            </option>
-          ))}
-        </select>
-        <span className="text-xs font-bold">🧩 Tablero</span>
-        <button
-          type="button"
-          onClick={() => guardar({ ...tablero, encendido: !tablero.encendido })}
-          className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-500 hover:bg-slate-600"}`}
-          title="Encendido: los clientes NUEVOS de esta tienda van por el tablero. Apagado: la tienda vende como siempre."
-        >
-          {tablero.encendido ? "● Encendido" : "○ Apagado"}
-        </button>
+        {esWorkflow ? (
+          <input
+            value={cfg.workflows?.[wfId]?.nombre ?? ""}
+            onChange={(e) => guardar({ ...tablero, nombre: e.target.value })}
+            placeholder="Nombre del workflow"
+            className="w-56 rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
+            title="El nombre con el que lo eliges en «Activar workflow»"
+          />
+        ) : (
+          <select
+            value={tiendaId}
+            onChange={(e) => onTienda(e.target.value)}
+            className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
+            title="Tienda"
+          >
+            {tiendas.map((t, i) => (
+              <option key={t.id} value={t.id}>
+                🏪 {t.nombre?.trim() || `Tienda ${i + 1}`}
+              </option>
+            ))}
+          </select>
+        )}
+        <span className="text-xs font-bold">{esWorkflow ? "▶▶ Workflow" : "🧩 Tablero"}</span>
+        {!esWorkflow && (
+          <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Canal">
+            {CANALES_DE_TABLERO.map(([c, nombre]) => (
+              <button
+                key={c}
+                type="button"
+                aria-pressed={canal === c}
+                onClick={() => elegirCanal(c)}
+                className={`px-2.5 py-1 font-semibold ${canal === c ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+              >
+                {nombre}
+              </button>
+            ))}
+          </span>
+        )}
+        {!esWorkflow && canal !== "whatsapp" && (
+          <button
+            type="button"
+            onClick={() => {
+              const deWhatsApp = cfg.tableros?.[tiendaId]?.whatsapp;
+              if (vacioEnEsteCanal(deWhatsApp)) {
+                window.alert("El tablero de WhatsApp de esta tienda está vacío: no hay nada que clonar.");
+                return;
+              }
+              if (!vacioEnEsteCanal(cfg.tableros?.[tiendaId]?.[canal]) && !window.confirm(`El tablero de ${canal === "messenger" ? "Messenger" : "Instagram"} ya tiene fichas. ¿Reemplazarlo por una copia del de WhatsApp?`))
+                return;
+              guardar({ ...JSON.parse(JSON.stringify(deWhatsApp)), encendido: false });
+            }}
+            className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
+            title="Copia fichas, burbujas, botones y cables del tablero de WhatsApp. Luego lo cambias sin tocar el de WhatsApp. Nace apagado."
+          >
+            ⧉ Clonar desde WhatsApp
+          </button>
+        )}
+        {!esWorkflow && (
+          <button
+            type="button"
+            onClick={() => guardar({ ...tablero, encendido: !tablero.encendido })}
+            className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-500 hover:bg-slate-600"}`}
+            title="Encendido: los clientes NUEVOS de esta tienda, en este canal, van por el tablero. Apagado: venta automática."
+          >
+            {tablero.encendido ? "● Encendido" : "○ Apagado"}
+          </button>
+        )}
         <span className={`text-[11px] font-semibold ${atiende ? "text-emerald-700" : "text-tinta-suave"}`}>
-          {atiende
-            ? "Los clientes nuevos de esta tienda van por este tablero."
-            : !tablero.encendido
-              ? "Apagado: esta tienda vende con el motor de siempre."
-              : "Falta conectar el 🚀 Inicio a una ficha: mientras tanto, vende como siempre."}
+          {esWorkflow
+            ? "Arranca cuando un botón, cuadrito o ficha lo activa."
+            : atiende
+              ? `Los clientes nuevos (${conectados.map((f) => f.pais ?? "otros países").join(", ")}) van por este tablero.`
+              : !tablero.encendido
+                ? "Apagado: esta tienda vende con la venta automática en este canal."
+                : "Falta conectar un ▶ Inicio: mientras tanto, venta automática."}
         </span>
         <span className="ml-auto" />
+        <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Tema">
+          {(
+            [
+              ["claro", "☀️ Claro"],
+              ["mixto", "🌗 Mixto"],
+              ["oscuro", "🌙 Oscuro"],
+            ] as const
+          ).map(([v, n]) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={tema === v}
+              onClick={() => onTema(v)}
+              className={`px-2 py-1 font-semibold ${tema === v ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+            >
+              {n}
+            </button>
+          ))}
+        </span>
         <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
           Montos de
           <select value={paisVisto} onChange={(e) => setPaisVisto(e.target.value)} className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta">
@@ -30780,14 +30934,18 @@ function PantallaDelTablero({
       </div>
       <div className="min-h-0 flex-1">
         <LienzoDelTablero
+          key={`${clave}|${canal}`}
           tablero={tablero}
           resumenDe={resumenDe}
           paisVisto={paisVisto}
-          oscuro={oscuro}
+          tema={fondoOscuro ? "oscuro" : "claro"}
+          nombres={nombres}
+          paisesDisponibles={paises}
           onCambiar={guardar}
           onAbrir={(fid) => {
             const f = tablero.fichas.find((x) => x.id === fid);
-            if (f?.tipo === "mensaje") setCajon(fid);
+            if (f?.tipo === "mensaje" || f?.tipo === "cobro") setCajon(fid);
+            else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
             else setAjustes(fid);
           }}
           onAjustes={setAjustes}
@@ -30795,30 +30953,45 @@ function PantallaDelTablero({
       </div>
       {fichaDeCajon && (
         <EnElTableroContext.Provider value={true}>
-        <VentanaDelCajon
-          key={fichaDeCajon.id}
-          titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : "💬"} ${fichaDeCajon.titulo?.trim() || (fichaDeCajon.tipo === "cobro" ? "Cobro" : "Mensaje")}`}
-          steps={(fichaDeCajon.steps ?? []) as EditorStep[]}
-          idPrefix={`tablero_${fichaDeCajon.id.replace(/[^a-z0-9]/gi, "_")}`}
-          cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
-          pais={paisVisto}
-          onGuardar={(steps) => {
-            cambiarFicha(fichaDeCajon.id, { steps });
-            setCajon(null);
-          }}
-          onCerrar={() => setCajon(null)}
-        />
+          <VentanaDelCajon
+            key={fichaDeCajon.id}
+            titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : "💬"} ${fichaDeCajon.titulo?.trim() || (fichaDeCajon.tipo === "cobro" ? "Cobro" : "Mensaje")}`}
+            steps={(fichaDeCajon.steps ?? []) as EditorStep[]}
+            idPrefix={`tablero_${fichaDeCajon.id.replace(/[^a-z0-9]/gi, "_")}`}
+            cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
+            pais={paisVisto}
+            onGuardar={(steps) => {
+              cambiarFicha(fichaDeCajon.id, { steps });
+              setCajon(null);
+            }}
+            onCerrar={() => setCajon(null)}
+          />
+        </EnElTableroContext.Provider>
+      )}
+      {fichaDeGestor && (
+        <EnElTableroContext.Provider value={true}>
+          <GestorDeVersiones
+            key={fichaDeGestor.id}
+            ficha={fichaDeGestor}
+            cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
+            pais={paisVisto}
+            onCambiar={(cambio) => cambiarFicha(fichaDeGestor.id, cambio)}
+            onCerrar={() => setGestor(null)}
+          />
         </EnElTableroContext.Provider>
       )}
       {fichaDeAjustes && (
         <AjustesDeLaFicha
           ficha={fichaDeAjustes}
           productos={productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id }))}
+          anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
+          workflows={workflows.filter((w) => w.id !== wfId)}
           paises={paises}
           paisInicial={paisVisto}
           onAbrirBurbujas={() => {
             setAjustes(null);
-            setCajon(fichaDeAjustes.id);
+            if (fichaDeAjustes.tipo === "seguimientos" || fichaDeAjustes.tipo === "intro_ob") setGestor(fichaDeAjustes.id);
+            else setCajon(fichaDeAjustes.id);
           }}
           onGuardar={(cambio) => {
             cambiarFicha(fichaDeAjustes.id, cambio);
@@ -30827,6 +31000,206 @@ function PantallaDelTablero({
           onCerrar={() => setAjustes(null)}
         />
       )}
+    </div>
+  );
+}
+
+/**
+ * EL GESTOR FLOTANTE de la caja «Seguimientos» y de la «Intro de order bump», como los gestores
+ * de la pizarra: a la izquierda la lista (seguimientos y sus versiones con peso), a la derecha el
+ * cajón de burbujas de siempre, incrustado.
+ */
+function GestorDeVersiones({
+  ficha,
+  cfgVista,
+  pais,
+  onCambiar,
+  onCerrar,
+}: {
+  ficha: FichaEnElEditor;
+  cfgVista: FullConfig;
+  pais: string;
+  onCambiar: (cambio: Partial<FichaEnElEditor>) => void;
+  onCerrar: () => void;
+}) {
+  const esSeg = ficha.tipo === "seguimientos";
+  type Version = { id: string; nombre?: string; peso?: number; steps?: unknown[] };
+  type Seg = NonNullable<FichaEnElEditor["seguimientos"]>[number];
+  // UN BORRADOR, como el cajón: lo de aquí se aplica al ficha al ir cambiando, sin tener que pulsar
+  // «Listo» en cada versión.
+  const [segs, setSegs] = useState<Seg[]>(() => JSON.parse(JSON.stringify(ficha.seguimientos ?? [])));
+  const [versiones, setVersiones] = useState<Version[]>(() => JSON.parse(JSON.stringify(ficha.variantes ?? [])));
+  const [elegida, setElegida] = useState<{ seg: number; ver: number }>({ seg: 0, ver: 0 });
+  const nuevoId = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
+  const vivo = useRef({ segs, versiones });
+  vivo.current = { segs, versiones };
+  const aplicar = (s: Seg[], v: Version[]) => onCambiar(esSeg ? { seguimientos: s } : { variantes: v });
+  const ponerSegs = (s: Seg[]) => {
+    setSegs(s);
+    aplicar(s, vivo.current.versiones);
+  };
+  const ponerVersiones = (v: Version[]) => {
+    setVersiones(v);
+    aplicar(vivo.current.segs, v);
+  };
+  const listaActual: Version[] = esSeg ? segs[elegida.seg]?.variantes ?? [] : versiones;
+  const version = listaActual[elegida.ver];
+  const cambiarVersion = (cambio: Partial<Version>) => {
+    if (esSeg) ponerSegs(vivo.current.segs.map((s, i) => (i === elegida.seg ? { ...s, variantes: s.variantes.map((v, j) => (j === elegida.ver ? { ...v, ...cambio } : v)) } : s)));
+    else ponerVersiones(vivo.current.versiones.map((v, j) => (j === elegida.ver ? { ...v, ...cambio } : v)));
+  };
+  useEffect(() => {
+    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [onCerrar]);
+  const letra = (j: number) => String.fromCharCode(65 + j);
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={onCerrar}>
+      <div className="prolijo flex h-[88vh] w-full max-w-[1400px] overflow-hidden rounded-2xl border border-borde bg-tarjeta text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex w-72 shrink-0 flex-col gap-2 overflow-y-auto border-r border-borde p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-black">{esSeg ? "🔁 Seguimientos" : "🎁 Intro de order bump"}</p>
+            <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-2 py-0.5 text-xs font-semibold">
+              Listo
+            </button>
+          </div>
+          <p className="text-[11px] text-tinta-suave">
+            {esSeg
+              ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar). Respeta las 24 h y las horas de silencio, y se detiene si paga."
+              : "Antes de esta ficha la IA no sabe nada del producto oculto. Con varias versiones, el bot sortea por peso."}
+          </p>
+          {esSeg &&
+            segs.map((s, i) => (
+              <div key={s.id} className={`rounded-xl border p-2 ${elegida.seg === i ? "border-orange-400 bg-orange-50/60" : "border-borde"}`}>
+                <div className="flex items-center gap-2">
+                  <button type="button" className="text-xs font-bold" onClick={() => setElegida({ seg: i, ver: 0 })}>
+                    Seguimiento {i + 1}
+                  </button>
+                  <button
+                    type="button"
+                    className="ml-auto text-xs text-rose-600"
+                    title="Quitar este seguimiento"
+                    onClick={() => {
+                      if (!window.confirm(`¿Quitar el seguimiento ${i + 1}?`)) return;
+                      ponerSegs(segs.filter((_, k) => k !== i));
+                      setElegida({ seg: 0, ver: 0 });
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="mt-1 text-[11px]">
+                  a los <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, minutos: m ?? 60 } : x)))} />
+                  {s.minutos >= 24 * 60 - 7 && <span className="block text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
+                </div>
+                <label className="mt-1 flex items-center gap-1 text-[11px]">
+                  <input
+                    type="checkbox"
+                    checked={s.activa_oferta === true}
+                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, activa_oferta: e.target.checked } : x)))}
+                  />
+                  Activa el precio de oferta
+                </label>
+                <div className="mt-1 flex flex-col gap-1">
+                  {s.variantes.map((v, j) => (
+                    <div key={v.id} className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] ${elegida.seg === i && elegida.ver === j ? "bg-orange-100 font-bold" : "hover:bg-relleno"}`}>
+                      <button type="button" className="flex-1 text-left" onClick={() => setElegida({ seg: i, ver: j })}>
+                        Versión {letra(j)} · {((v.steps ?? []) as EditorStep[]).length} burbuja(s)
+                      </button>
+                      ⚖
+                      <input
+                        type="number"
+                        min={0}
+                        value={v.peso ?? 1}
+                        onChange={(e) =>
+                          ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: x.variantes.map((y, l) => (l === j ? { ...y, peso: Math.max(0, Number(e.target.value) || 0) } : y)) } : x)))
+                        }
+                        className="w-10 rounded border border-borde px-1"
+                        title="Peso en el sorteo (0 = apagada)"
+                      />
+                      {s.variantes.length > 1 && (
+                        <button
+                          type="button"
+                          className="text-rose-600"
+                          onClick={() => ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: x.variantes.filter((_, l) => l !== j) } : x)))}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="rounded-md border border-dashed border-borde px-1.5 py-0.5 text-left text-[11px]"
+                    onClick={() => ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: [...x.variantes, { id: nuevoId("v"), peso: 1, steps: JSON.parse(JSON.stringify(x.variantes[0]?.steps ?? [])) }] } : x)))}
+                  >
+                    + Versión (copia de la A)
+                  </button>
+                </div>
+              </div>
+            ))}
+          {esSeg && (
+            <button
+              type="button"
+              className="rounded-xl border border-dashed border-borde px-2 py-1.5 text-left text-xs font-semibold"
+              onClick={() => {
+                const ultimo = segs[segs.length - 1]?.minutos ?? 0;
+                ponerSegs([...segs, { id: nuevoId("s"), minutos: ultimo ? ultimo + 1440 : 180, variantes: [{ id: nuevoId("v"), peso: 1, steps: [] }] }]);
+              }}
+            >
+              + Seguimiento
+            </button>
+          )}
+          {!esSeg &&
+            versiones.map((v, j) => (
+              <div key={v.id} className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] ${elegida.ver === j ? "bg-violet-100 font-bold" : "hover:bg-relleno"}`}>
+                <button type="button" className="flex-1 text-left" onClick={() => setElegida({ seg: 0, ver: j })}>
+                  Versión {letra(j)} · {((v.steps ?? []) as EditorStep[]).length} burbuja(s)
+                </button>
+                ⚖
+                <input
+                  type="number"
+                  min={0}
+                  value={v.peso ?? 1}
+                  onChange={(e) => ponerVersiones(versiones.map((y, l) => (l === j ? { ...y, peso: Math.max(0, Number(e.target.value) || 0) } : y)))}
+                  className="w-10 rounded border border-borde px-1"
+                />
+                {versiones.length > 1 && (
+                  <button type="button" className="text-rose-600" onClick={() => ponerVersiones(versiones.filter((_, l) => l !== j))}>
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          {!esSeg && (
+            <button
+              type="button"
+              className="rounded-md border border-dashed border-borde px-1.5 py-0.5 text-left text-[11px]"
+              onClick={() => ponerVersiones([...versiones, { id: nuevoId("v"), peso: 1, steps: JSON.parse(JSON.stringify(versiones[0]?.steps ?? [])) }])}
+            >
+              + Versión (copia de la A)
+            </button>
+          )}
+        </div>
+        <div className="min-w-0 flex-1 overflow-y-auto">
+          {version ? (
+            <VentanaDelCajon
+              key={`${elegida.seg}|${version.id}`}
+              incrustado
+              titulo={esSeg ? `Seguimiento ${elegida.seg + 1} · Versión ${letra(elegida.ver)}` : `Intro de order bump · Versión ${letra(elegida.ver)}`}
+              steps={(version.steps ?? []) as EditorStep[]}
+              idPrefix={`tablero_${ficha.id.replace(/[^a-z0-9]/gi, "_")}_${version.id.replace(/[^a-z0-9]/gi, "_")}`}
+              cfgVista={cfgVista}
+              pais={pais}
+              onGuardar={(steps) => cambiarVersion({ steps })}
+              onCerrar={onCerrar}
+            />
+          ) : (
+            <div className="p-8 text-sm text-tinta-suave">{esSeg ? "Agrega un seguimiento a la izquierda." : "Agrega una versión a la izquierda."}</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -30852,7 +31225,7 @@ function CampoDeTiempoDelTablero({ valor, onCambio }: { valor: number | undefine
           const n = Number(e.target.value);
           onCambio(Number.isFinite(n) && n > 0 ? Math.round(n * unidad) : undefined);
         }}
-        className="w-20 rounded-md border border-borde bg-relleno px-2 py-1 text-sm"
+        className="w-16 rounded-md border border-borde bg-relleno px-2 py-1 text-sm"
       />
       <select
         value={unidad}
@@ -30871,9 +31244,39 @@ function CampoDeTiempoDelTablero({ valor, onCambio }: { valor: number | undefine
   );
 }
 
+function ListaDeEleccion({
+  todos,
+  elegidos,
+  onCambio,
+}: {
+  todos: Array<{ id: string; nombre: string }>;
+  elegidos: string[];
+  onCambio: (ids: string[]) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {todos.map((x) => {
+        const puesto = elegidos.includes(x.id);
+        return (
+          <button
+            key={x.id}
+            type="button"
+            onClick={() => onCambio(puesto ? elegidos.filter((y) => y !== x.id) : [...elegidos, x.id])}
+            className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-emerald-500 bg-emerald-50 font-bold" : "border-borde"}`}
+          >
+            {x.nombre}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function AjustesDeLaFicha({
   ficha,
   productos,
+  anuncios,
+  workflows,
   paises,
   paisInicial,
   onAbrirBurbujas,
@@ -30882,6 +31285,8 @@ function AjustesDeLaFicha({
 }: {
   ficha: FichaEnElEditor;
   productos: Array<{ id: string; nombre: string }>;
+  anuncios: Array<{ id: string; nombre: string }>;
+  workflows: Array<{ id: string; nombre: string }>;
   paises: string[];
   paisInicial: string;
   onAbrirBurbujas: () => void;
@@ -30894,8 +31299,7 @@ function AjustesDeLaFicha({
   const cobro = b.cobro ?? { modo: "abierto" as const };
   const tramos = cobro.tramos_por_pais?.[pais] ?? [];
   const ponCobro = (c: typeof cobro) => setB({ ...b, cobro: c });
-  const ponTramos = (lista: typeof tramos) =>
-    ponCobro({ ...cobro, tramos_por_pais: { ...(cobro.tramos_por_pais ?? {}), [pais]: lista } });
+  const ponTramos = (lista: typeof tramos) => ponCobro({ ...cobro, tramos_por_pais: { ...(cobro.tramos_por_pais ?? {}), [pais]: lista } });
   const etiqueta = "block text-xs font-semibold text-tinta";
   const ayuda = "mt-0.5 block text-[11px] font-normal text-tinta-suave";
   useEffect(() => {
@@ -30903,12 +31307,19 @@ function AjustesDeLaFicha({
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, [onCerrar]);
+  const selector = (valor: string | undefined, onCambio: (v: string | undefined) => void, lista: Array<{ id: string; nombre: string }>, vacio: string) => (
+    <select value={valor ?? ""} onChange={(e) => onCambio(e.target.value || undefined)} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
+      <option value="">{vacio}</option>
+      {lista.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.nombre}
+        </option>
+      ))}
+    </select>
+  );
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" onClick={onCerrar}>
-      <div
-        className="prolijo max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={onCerrar}>
+      <div className="prolijo max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <p className="text-sm font-black">
           {a.icono} {a.nombre}
         </p>
@@ -30916,61 +31327,88 @@ function AjustesDeLaFicha({
           {ficha.tipo !== "inicio" && (
             <label className={etiqueta}>
               Nombre de la ficha
-              <input
-                value={b.titulo ?? ""}
-                onChange={(e) => setB({ ...b, titulo: e.target.value })}
-                placeholder={a.nombre}
-                className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
-              />
+              <input value={b.titulo ?? ""} onChange={(e) => setB({ ...b, titulo: e.target.value })} placeholder={a.nombre} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal" />
             </label>
           )}
           {ficha.tipo === "inicio" && (
-            <p className="text-xs text-tinta-suave">
-              Por aquí entran los clientes NUEVOS de esta tienda cuando el tablero está encendido. Tira un cable desde su
-              puntito naranja a la primera ficha.
-            </p>
+            <>
+              <label className={etiqueta}>
+                País de este Inicio
+                <select value={b.pais ?? ""} onChange={(e) => setB({ ...b, pais: e.target.value || undefined })} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
+                  <option value="">🌍 Otros países (los que no tienen su Inicio)</option>
+                  {paises.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <span className={ayuda}>Por aquí entran los clientes NUEVOS de ese país. Tira un cable desde su punto naranja a la primera ficha.</span>
+              </label>
+            </>
           )}
-          {(ficha.tipo === "mensaje" || ficha.tipo === "cobro") && (
+          {(ficha.tipo === "mensaje" || ficha.tipo === "cobro" || ficha.tipo === "seguimientos" || ficha.tipo === "intro_ob") && (
             <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
-              ✏️ Escribir sus burbujas
+              ✏️ {ficha.tipo === "seguimientos" ? "Abrir sus seguimientos" : ficha.tipo === "intro_ob" ? "Abrir sus versiones" : "Escribir sus burbujas"}
             </button>
           )}
-          {ficha.tipo === "mensaje" && (
+          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob") && (
             <div className={etiqueta}>
-              ⏰ Si no responde en
-              <span className="ml-2">
-                <CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} />
-              </span>
-              <span className={ayuda}>
-                Aparece la salida «No respondió» para tu insistencia. Si responde algo, ya no sale. Vacío = sin esa salida.
-              </span>
+              ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
+              <span className={ayuda}>Aparece la salida «No respondió» para tu insistencia. Si responde algo, ya no sale. Vacío = sin esa salida.</span>
             </div>
           )}
           {ficha.tipo === "entregar" && (
             <label className={etiqueta}>
               Producto que se entrega
-              <select
-                value={b.producto_id ?? ""}
-                onChange={(e) => setB({ ...b, producto_id: e.target.value || undefined })}
-                className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
-              >
-                <option value="">(elige un producto)</option>
-                {productos.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nombre}
-                  </option>
-                ))}
-              </select>
-              <span className={ayuda}>Se manda su entrega, la de la ficha del producto, en cualquier momento de la ruta.</span>
+              {selector(b.producto_id, (v) => setB({ ...b, producto_id: v }), productos, "(elige un producto)")}
+              <span className={ayuda}>Manda la entrega de la ficha del producto, tal como está escrita. Si dice «compra aprobada», no sirve para algo gratis.</span>
             </label>
           )}
           {ficha.tipo === "esperar" && (
             <div className={etiqueta}>
-              Esperar
-              <span className="ml-2">
-                <CampoDeTiempoDelTablero valor={b.minutos} onCambio={(m) => setB({ ...b, minutos: m })} />
-              </span>
-              <span className={ayuda}>Y sigue por su cable. Si mientras tanto paga un cobro abierto, el pago manda.</span>
+              Esperar <span className="ml-2"><CampoDeTiempoDelTablero valor={b.minutos} onCambio={(m) => setB({ ...b, minutos: m })} /></span>
+              <span className={ayuda}>Y sigue por su cable. Respeta las horas de silencio. Si mientras tanto paga un cobro abierto, el pago manda.</span>
+            </div>
+          )}
+          {ficha.tipo === "workflow" && (
+            <label className={etiqueta}>
+              Workflow al que lleva
+              {selector(b.workflow_id, (v) => setB({ ...b, workflow_id: v }), workflows, workflows.length ? "(elige un workflow)" : "(no hay workflows: créalos en Mis tiendas)")}
+              <span className={ayuda}>El cliente sigue en ese workflow desde su ▶ Inicio.</span>
+            </label>
+          )}
+          {ficha.tipo === "reparto" && (
+            <div className="space-y-2">
+              <span className={etiqueta}>Rutas y su peso</span>
+              {(b.reparto ?? []).map((o, i) => (
+                <div key={o.id} className="flex items-center gap-2 text-xs">
+                  <input
+                    value={o.nombre ?? ""}
+                    placeholder={`Ruta ${i + 1}`}
+                    onChange={(e) => setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, nombre: e.target.value } : x)) })}
+                    className="flex-1 rounded-md border border-borde bg-relleno px-2 py-1"
+                  />
+                  ⚖
+                  <input
+                    type="number"
+                    min={0}
+                    value={o.peso}
+                    onChange={(e) => setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, peso: Math.max(0, Number(e.target.value) || 0) } : x)) })}
+                    className="w-16 rounded-md border border-borde bg-relleno px-2 py-1"
+                  />
+                  <button type="button" className="text-rose-600" onClick={() => setB({ ...b, reparto: (b.reparto ?? []).filter((x) => x.id !== o.id) })}>
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setB({ ...b, reparto: [...(b.reparto ?? []), { id: `r${Date.now().toString(36)}`, peso: 1 }] })}
+                className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold"
+              >
+                + Ruta
+              </button>
+              <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Sirve para probar dos intros o dos ofertas.</span>
             </div>
           )}
           {ficha.tipo === "condicion" && (
@@ -30979,7 +31417,7 @@ function AjustesDeLaFicha({
                 Pregunta
                 <select
                   value={b.condicion?.tipo ?? "compro"}
-                  onChange={(e) => setB({ ...b, condicion: { ...(b.condicion ?? {}), tipo: e.target.value as "compro" | "pais" | "anuncio" } })}
+                  onChange={(e) => setB({ ...b, condicion: { tipo: e.target.value as "compro" | "pais" | "anuncio" } })}
                   className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
                 >
                   <option value="compro">¿Ya compró un producto?</option>
@@ -30987,39 +31425,15 @@ function AjustesDeLaFicha({
                   <option value="anuncio">¿Vino de un anuncio?</option>
                 </select>
               </label>
-              {(b.condicion?.tipo ?? "compro") === "compro" && (
-                <select
-                  value={b.condicion?.producto_id ?? ""}
-                  onChange={(e) => setB({ ...b, condicion: { tipo: "compro", producto_id: e.target.value || undefined } })}
-                  className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm"
-                >
-                  <option value="">(elige un producto)</option>
-                  {productos.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nombre}
-                    </option>
-                  ))}
-                </select>
-              )}
+              {(b.condicion?.tipo ?? "compro") === "compro" && selector(b.condicion?.producto_id, (v) => setB({ ...b, condicion: { tipo: "compro", producto_id: v } }), productos, "(elige un producto)")}
               {b.condicion?.tipo === "pais" && (
-                <div className="flex flex-wrap gap-1">
-                  {paises.map((p) => {
-                    const puesto = b.condicion?.paises?.includes(p);
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => {
-                          const ya = b.condicion?.paises ?? [];
-                          setB({ ...b, condicion: { tipo: "pais", paises: puesto ? ya.filter((x) => x !== p) : [...ya, p] } });
-                        }}
-                        className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-emerald-500 bg-emerald-50 font-bold" : "border-borde"}`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
+                <ListaDeEleccion todos={paises.map((p) => ({ id: p, nombre: p }))} elegidos={b.condicion?.paises ?? []} onCambio={(ids) => setB({ ...b, condicion: { tipo: "pais", paises: ids } })} />
+              )}
+              {b.condicion?.tipo === "anuncio" && (
+                <>
+                  <ListaDeEleccion todos={anuncios} elegidos={b.condicion?.anuncios ?? []} onCambio={(ids) => setB({ ...b, condicion: { tipo: "anuncio", anuncios: ids } })} />
+                  <span className={ayuda}>Sin elegir ninguno: cualquier anuncio. Los anuncios son los de tu registro (menú ajustes).</span>
+                </>
               )}
               <span className={ayuda}>Salen dos cables: «Sí» y «No».</span>
             </div>
@@ -31028,33 +31442,36 @@ function AjustesDeLaFicha({
             <div className="space-y-3">
               <div className="flex gap-2 text-xs">
                 {(["abierto", "producto"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => ponCobro({ ...cobro, modo: m })}
-                    className={`rounded-md border px-3 py-1 font-semibold ${cobro.modo === m ? "border-amber-500 bg-amber-50" : "border-borde"}`}
-                  >
+                  <button key={m} type="button" onClick={() => ponCobro({ ...cobro, modo: m })} className={`rounded-md border px-3 py-1 font-semibold ${cobro.modo === m ? "border-amber-500 bg-amber-50" : "border-borde"}`}>
                     {m === "abierto" ? "Pago abierto (contribución)" : "Precio de un producto"}
                   </button>
                 ))}
               </div>
               {cobro.modo === "producto" ? (
-                <label className={etiqueta}>
-                  Producto que se cobra
-                  <select
-                    value={cobro.producto_id ?? ""}
-                    onChange={(e) => ponCobro({ ...cobro, producto_id: e.target.value || undefined })}
-                    className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
-                  >
-                    <option value="">(elige un producto)</option>
-                    {productos.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  <span className={ayuda}>Su precio del país del cliente. Salidas: «Pagó» y «Pagó de menos».</span>
-                </label>
+                <>
+                  <label className={etiqueta}>
+                    Producto que se cobra
+                    {selector(cobro.producto_id, (v) => ponCobro({ ...cobro, producto_id: v }), productos, "(elige un producto)")}
+                  </label>
+                  <div className={etiqueta}>
+                    También acepta
+                    <span className="mt-1 block">
+                      <ListaDeEleccion todos={productos.filter((p) => p.id !== cobro.producto_id)} elegidos={cobro.acepta ?? []} onCambio={(ids) => ponCobro({ ...cobro, acepta: ids })} />
+                    </span>
+                    <span className={ayuda}>
+                      Como en la venta de siempre: si paga el precio de uno más caro de estos, se le entrega ese; si paga el de uno más barato, se le pregunta si fue un error o si lo prefiere. Cada uno sale por su cable.
+                    </span>
+                  </div>
+                  <label className={etiqueta}>
+                    Qué precio
+                    <select value={cobro.precio ?? "etapa"} onChange={(e) => ponCobro({ ...cobro, precio: e.target.value as "normal" | "oferta" | "etapa" })} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
+                      <option value="etapa">Según la etapa (el de oferta si ya salió un seguimiento que lo activa)</option>
+                      <option value="normal">Siempre el normal</option>
+                      <option value="oferta">Siempre el de oferta</option>
+                    </select>
+                    <span className={ayuda}>El precio de cada país. Se congela al abrir el cobro: si lo cambias después, a este cliente se le cobra lo que se le dijo.</span>
+                  </label>
+                </>
               ) : (
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs font-semibold">
@@ -31083,32 +31500,24 @@ function AjustesDeLaFicha({
                       }}
                       className="w-24 rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
                     />
-                    <span className="font-normal text-tinta-suave">por debajo → salida «Menos del mínimo»</span>
+                    <span className="font-normal text-tinta-suave">por debajo → «Menos del mínimo»</span>
                   </label>
                   <div className="text-xs font-semibold">Tramos ({pais})</div>
                   {tramos.map((t, i) => (
                     <div key={t.id} className="flex items-center gap-2 text-xs">
                       <span className="w-14 font-semibold">Tramo {i + 1}</span>
                       desde
-                      <input
-                        type="number"
-                        min={0}
-                        value={t.desde}
-                        onChange={(e) => ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, desde: Number(e.target.value) || 0 } : x)))}
-                        className="w-20 rounded-md border border-borde bg-relleno px-2 py-1"
-                      />
+                      <input type="number" min={0} value={t.desde} onChange={(e) => ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, desde: Number(e.target.value) || 0 } : x)))} className="w-20 rounded-md border border-borde bg-relleno px-2 py-1" />
                       hasta
                       <input
                         type="number"
                         min={0}
                         value={t.hasta ?? ""}
                         placeholder="sin tope"
-                        onChange={(e) =>
-                          ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, hasta: e.target.value === "" ? undefined : Number(e.target.value) } : x)))
-                        }
+                        onChange={(e) => ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, hasta: e.target.value === "" ? undefined : Number(e.target.value) } : x)))}
                         className="w-20 rounded-md border border-borde bg-relleno px-2 py-1"
                       />
-                      <button type="button" onClick={() => ponTramos(tramos.filter((x) => x.id !== t.id))} className="text-rose-600" title="Quitar tramo">
+                      <button type="button" onClick={() => ponTramos(tramos.filter((x) => x.id !== t.id))} className="text-rose-600">
                         ✕
                       </button>
                     </div>
@@ -31116,52 +31525,36 @@ function AjustesDeLaFicha({
                   <button
                     type="button"
                     onClick={() => {
-                      // EL MISMO ID EN TODOS LOS PAÍSES: el tramo N de cada país sale por el mismo puntito.
                       const n = tramos.length + 1;
                       const ultimo = tramos[tramos.length - 1];
                       ponTramos([...tramos, { id: `t${n}`, desde: ultimo ? (ultimo.hasta ?? ultimo.desde) + 1 : 0 }]);
                     }}
-                    className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold hover:bg-tarjeta"
+                    className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold"
                   >
                     + Agregar tramo
                   </button>
-                  <span className={ayuda}>
-                    El tramo 1 de cada país sale por el mismo puntito «Tramo 1», cada uno con sus montos. Si paga en
-                    partes, se suman.
-                  </span>
+                  <span className={ayuda}>El tramo 1 de cada país sale por el mismo puntito «Tramo 1», cada uno con sus montos. Si paga en partes, se suman.</span>
                 </div>
               )}
               <div className={etiqueta}>
-                ⏰ Si no paga en
-                <span className="ml-2">
-                  <CampoDeTiempoDelTablero valor={b.sin_pago_min} onCambio={(m) => setB({ ...b, sin_pago_min: m })} />
-                </span>
-                <span className={ayuda}>
-                  Salida «No pagó» para tus recordatorios. El cobro sigue abierto: si paga en cualquier momento, su monto
-                  lo lleva a su ruta.
-                </span>
+                ⏰ Si no paga en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_pago_min} onCambio={(m) => setB({ ...b, sin_pago_min: m })} /></span>
+                <span className={ayuda}>Desde su último mensaje: si escribe, vuelve a contar. El cobro sigue abierto: si paga cuando sea, su monto lo lleva a su ruta.</span>
               </div>
+              <span className={ayuda}>Se revisa como en la venta de siempre: comprobante repetido, fecha (si el país la exige) y, en Yape/Plin, que esté a nombre de quien cobra.</span>
             </div>
           )}
           {ficha.tipo === "regalo" && (
             <p className="text-xs text-tinta-suave">
-              Desde aquí sigue el regalo de siempre: su pregunta, el enlace para comentar y el premio. Se edita en la
-              pestaña Regalo (o el de la tienda, si tiene el suyo).
+              Sigue el regalo de siempre: su pregunta, el enlace para comentar y el premio (se edita en la pestaña Regalo, o el de la tienda si tiene el suyo). Su salida «Al terminar el regalo» deja seguir la ruta después.
             </p>
           )}
-          {ficha.tipo === "humano" && (
-            <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>
-          )}
+          {ficha.tipo === "humano" && <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>}
         </div>
         <div className="mt-5 flex justify-end gap-2">
           <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold">
             Cancelar
           </button>
-          <button
-            type="button"
-            onClick={() => onGuardar(b)}
-            className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
-          >
+          <button type="button" onClick={() => onGuardar(b)} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
             Listo
           </button>
         </div>
@@ -31174,6 +31567,7 @@ function MisTiendas({
   cfg,
   onAbrir,
   onTablero,
+  onWorkflow,
   onCambiar,
   onConfigChange,
   onSnapshot,
@@ -31182,6 +31576,8 @@ function MisTiendas({
   onAbrir: (tiendaId: string) => void;
   /** Abre el tablero de la tienda (22/10/2026). */
   onTablero?: (tiendaId: string) => void;
+  /** Abre un workflow en el tablero (23/10/2026). */
+  onWorkflow?: (workflowId: string) => void;
   /** Un cambio de un solo paso (con su Ctrl+Z). */
   onCambiar: (c: FullConfig) => void;
   /** Un cambio sin paso propio: lo que se teclea en «Cambiar sus datos». */
@@ -31364,18 +31760,29 @@ function MisTiendas({
                 >
                   ◈ Abrir pizarra
                 </button>
-                {onTablero && (
-                  <button
-                    type="button"
-                    onClick={() => onTablero(t.id)}
-                    title="La ruta que tú armas con fichas y cables, y que el bot sigue"
-                    className={`rounded-md border px-3 py-1 text-xs font-semibold hover:bg-tarjeta ${
-                      cfg.tableros?.[t.id]?.encendido ? "border-emerald-400 bg-emerald-50 text-emerald-800" : "border-borde bg-relleno text-tinta"
-                    }`}
-                  >
-                    🧩 Tablero{cfg.tableros?.[t.id]?.encendido ? " ●" : ""}
-                  </button>
-                )}
+                {onTablero &&
+                  (() => {
+                    // Encendido en algún canal: se dice en cuáles.
+                    const enCanales = Object.entries(cfg.tableros?.[t.id] ?? {})
+                      .filter(([, tb]) => tb?.encendido)
+                      .map(([c]) => (c === "whatsapp" ? "🟢" : c === "messenger" ? "🔵" : "🟣"));
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => onTablero(t.id)}
+                        title={
+                          enCanales.length
+                            ? "Encendido en esos canales: sus clientes nuevos van por el tablero"
+                            : "La ruta que tú armas con fichas y cables, y que el bot sigue"
+                        }
+                        className={`rounded-md border px-3 py-1 text-xs font-semibold hover:bg-tarjeta ${
+                          enCanales.length ? "border-emerald-400 bg-emerald-50 text-emerald-800" : "border-borde bg-relleno text-tinta"
+                        }`}
+                      >
+                        🧩 Tablero{enCanales.length ? ` ${enCanales.join("")}` : ""}
+                      </button>
+                    );
+                  })()}
                 <div className="relative" data-menu-tienda>
                   <button
                     type="button"
@@ -31523,6 +31930,83 @@ function MisTiendas({
             );
           })}
         </div>
+        {/* MIS WORKFLOWS (23/10/2026): tuberías completas sin tienda. Arrancan cuando un botón o un
+            cuadrito con «▶ Activar workflow», o una ficha «Ir a un workflow», las activa. */}
+        {onWorkflow && (
+          <div className="mt-8">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-tinta">▶▶ Mis workflows</h2>
+                <p className="text-xs text-tinta-suave">
+                  Tuberías completas que no son de ninguna tienda. Arrancan cuando un botón o cuadrito con «▶ Activar workflow» (o una ficha «Ir a un workflow») las activa.
+                </p>
+              </div>
+              <span className="ml-auto" />
+              <button
+                type="button"
+                onClick={() => {
+                  const nombre = window.prompt("Nombre del workflow", "Nuevo workflow");
+                  if (nombre === null) return;
+                  const id = `wf_${Date.now().toString(36)}`;
+                  onCambiar({
+                    ...cfg,
+                    workflows: {
+                      ...(cfg.workflows ?? {}),
+                      [id]: { encendido: true, nombre: nombre.trim().slice(0, 80) || "Nuevo workflow", fichas: [{ id: "inicio", tipo: "inicio", x: 0, y: 160 }], cables: [] },
+                    },
+                  });
+                  onWorkflow(id);
+                }}
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700"
+              >
+                + Crear workflow
+              </button>
+            </div>
+            {Object.keys(cfg.workflows ?? {}).length === 0 && (
+              <div className="rounded-xl border border-dashed border-borde bg-tarjeta p-6 text-center text-sm text-tinta-suave">
+                Todavía no tienes workflows.
+              </div>
+            )}
+            <div className="space-y-2">
+              {Object.entries(cfg.workflows ?? {}).map(([id, w]) => (
+                <div
+                  key={id}
+                  onDoubleClick={() => onWorkflow(id)}
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-3 shadow-sm"
+                >
+                  <span className="text-sm font-bold text-tinta">▶▶ {w.nombre?.trim() || "Workflow sin nombre"}</span>
+                  <span className="text-[11px] text-tinta-suave">{w.fichas.filter((f) => f.tipo !== "inicio").length} ficha(s)</span>
+                  <span className="ml-auto" />
+                  <button type="button" onClick={() => onWorkflow(id)} className="rounded-md border border-borde bg-relleno px-3 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta">
+                    🧩 Abrir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const copia = JSON.parse(JSON.stringify(w)) as TableroEnElEditor;
+                      onCambiar({ ...cfg, workflows: { ...(cfg.workflows ?? {}), [`wf_${Date.now().toString(36)}`]: { ...copia, nombre: `${w.nombre ?? "Workflow"} (copia)` } } });
+                    }}
+                    className="rounded-md border border-borde bg-relleno px-3 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
+                  >
+                    ⧉ Duplicar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!window.confirm(`¿Eliminar el workflow «${w.nombre ?? id}»? Los botones que lo activan dejarán de hacer algo.`)) return;
+                      const resto = { ...(cfg.workflows ?? {}) };
+                      delete resto[id];
+                      onCambiar({ ...cfg, workflows: resto });
+                    }}
+                    className="rounded-md border border-red-200 bg-tarjeta px-2 py-1 text-xs text-red-700"
+                  >
+                    🗑
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {/* CAMBIAR SUS DATOS: la MISMA ficha de menú ajustes → Tiendas, ya abierta en ésta. */}
       {enDatos && (
@@ -32807,6 +33291,17 @@ function duplicarTienda(cfg: FullConfig, tiendaId: string): { cfg: FullConfig; i
     pagina: "",
   };
   let c: FullConfig = { ...cfg, tiendas: [...(cfg.tiendas ?? []), copia] };
+  // SU TABLERO TAMBIÉN (23/10/2026), en todos sus canales. Nace apagado: la copia no tiene número
+  // todavía, y encenderlo es decisión suya.
+  const suTablero = cfg.tableros?.[tiendaId];
+  if (suTablero) {
+    const copiaDelTablero = JSON.parse(JSON.stringify(suTablero)) as NonNullable<FullConfig["tableros"]>[string];
+    for (const k of Object.keys(copiaDelTablero) as Array<keyof typeof copiaDelTablero>) {
+      const tb = copiaDelTablero[k];
+      if (tb) tb.encendido = false;
+    }
+    c = { ...c, tableros: { ...(c.tableros ?? {}), [id]: copiaDelTablero } };
+  }
   const mode = activeModality(cfg);
   const yaCopiadas = new Set<string>();
   for (const canal of ["whatsapp", "messenger", "instagram"] as ChannelKey[]) {
@@ -35918,6 +36413,8 @@ function BubbleDecisionModal({
   );
   const [metodo, setMetodo] = useState(decision.payment_method ?? "");
   const metodosDisponibles = useContext(PaymentMethodsContext);
+  const [workflowElegido, setWorkflowElegido] = useState(decision.workflow_id ?? "");
+  const workflowsDisponibles = useContext(WorkflowsContext);
   useEffect(() => {
     const alPulsar = (evento: KeyboardEvent) => {
       if (evento.key !== "Escape") return;
@@ -35952,6 +36449,7 @@ function BubbleDecisionModal({
           : ((link || undefined) as DecisionAction | undefined),
       payment_method:
         link === "send_payment_method" ? metodo.trim() : undefined,
+      workflow_id: link === "start_workflow" ? workflowElegido.trim() : undefined,
     });
   return (
     <div
@@ -36207,6 +36705,26 @@ function BubbleDecisionModal({
               )}
             </label>
           )}
+          {link === "start_workflow" && (
+            <label className="block text-xs font-medium text-neutral-700">
+              ¿Qué workflow arranca?
+              <select
+                value={workflowElegido}
+                onChange={(e) => setWorkflowElegido(e.target.value)}
+                className="mt-1 block w-full rounded border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm"
+              >
+                <option value="">— Elige uno —</option>
+                {workflowsDisponibles.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.nombre}
+                  </option>
+                ))}
+              </select>
+              <span className="mt-1 block text-[11px] text-neutral-600">
+                Tras sus burbujas, el cliente deja la venta automática y sigue ese workflow desde su ▶ Inicio.
+              </span>
+            </label>
+          )}
         </div>
         )}
 
@@ -36254,6 +36772,7 @@ function BubbleButtonsEditor({
   };
   const metodosDePagoDisponibles = useContext(PaymentMethodsContext);
   const enElTablero = useContext(EnElTableroContext);
+  const workflowsDisponibles = useContext(WorkflowsContext);
   // Qué botón tiene la ventana abierta. null = ninguna.
   const [botonAbierto, setBotonAbierto] = useState<number | null>(null);
   const abierto = botonAbierto !== null ? buttons[botonAbierto] : undefined;
@@ -36331,10 +36850,36 @@ function BubbleButtonsEditor({
                 <option value="decline_gift">Regalo: rechazarlo</option>
                 <option value="claim_gift">Regalo: entregarlo</option>
                 <option value="human">Pasar a humano</option>
+                <option value="start_workflow">▶ Activar un workflow</option>
               </select>
               )}
               <button type="button" onClick={() => { if (confirm("¿Quitar este botón?")) { onSnapshot(); onChange(buttons.filter((_, i) => i !== index)); } }} className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs text-red-700">🗑️</button>
             </div>
+            {!enElTablero && button.action === "start_workflow" && (
+              // ▶ ACTIVAR UN WORKFLOW (23/10/2026): el cliente sale de la venta de siempre y entra
+              // a ese workflow del tablero, desde su Inicio. Lo que estaba programado se cancela.
+              <div className="mt-3 rounded border border-violet-100 bg-tarjeta p-2">
+                <label className="block text-xs font-medium text-neutral-700">
+                  ¿Qué workflow arranca?
+                  <select
+                    value={button.workflow_id ?? ""}
+                    onChange={(e) => update(index, { workflow_id: e.target.value })}
+                    className="mt-1 block w-full rounded border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm"
+                  >
+                    <option value="">— Elige uno —</option>
+                    {workflowsDisponibles.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p className="mt-1 text-xs text-neutral-600">
+                  El cliente deja la venta automática y sigue ese workflow desde su ▶ Inicio. Los workflows se crean en Pizarra → Mis tiendas → Mis workflows.
+                </p>
+                {!button.workflow_id?.trim() && <p className="mt-1 text-xs text-amber-700">Sin workflow elegido, este botón no hace nada.</p>}
+              </div>
+            )}
             {!enElTablero && button.action === "send_payment_method" && (
               // SE ELIGE EL MÉTODO, NO SE COPIA SU TEXTO.
               //
@@ -36372,7 +36917,7 @@ function BubbleButtonsEditor({
                 )}
               </div>
             )}
-            {!enElTablero && button.action !== "human" && (
+            {!enElTablero && button.action !== "human" && button.action !== "start_workflow" && (
               // EL CONTENIDO DEL BOTÓN SE EDITA EN UNA VENTANA APARTE.
               //
               // Estaba abierto aquí dentro, y con dos o tres botones el panel

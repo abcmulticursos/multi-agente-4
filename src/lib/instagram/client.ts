@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getActiveInstagramMetaConnection } from "@/lib/db";
+import { sinFormatoDeWhatsApp } from "@/lib/messenger/client";
 
 function graphBase(): string {
   const version = process.env.META_GRAPH_VERSION ?? "v21.0";
@@ -28,7 +29,9 @@ export async function sendInstagramText(
     body: JSON.stringify({
       recipient: { id: igsid },
       messaging_type: "RESPONSE",
-      message: { text },
+      // SIN ASTERISCOS (23/10/2026), como Messenger: Instagram no convierte *esto* en negrita y
+      // el cliente veía los asteriscos. Lo que queda escrito en el chat no cambia.
+      message: { text: sinFormatoDeWhatsApp(text) },
     }),
   });
 

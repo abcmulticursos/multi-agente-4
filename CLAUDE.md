@@ -769,6 +769,49 @@ turno con ella (`conSuTienda`). Los botones salen como lista numerada; el tabler
 «2», «3» (solo en Instagram) y, en cualquier canal, el texto del botón escrito.
 **No probado:** Instagram de verdad (el simulador no lo tiene), un Messenger real y una venta real.
 
+### El tablero, segunda vuelta (23/10/2026): «replicar la pizarra, mismos cables, mismo todo»
+
+**La pantalla** (`LienzoDelTablero`) se ve y se maneja como la pizarra: fichas de 250 px con franja,
+Inicio POR PAÍS (con «Vender con el tablero» y «En revisión»; sin país = «Otros países») y el fondo
+semitransparente de su ruta, cables punteados de goma con la ✕ al pasar el ratón, cajas, clic derecho,
+soltar el cable en el vacío crea una ficha conectada, Ctrl+C / Ctrl+V / Delete, fichas apagadas
+(tenues; no mandan y siguen por su «→») y «Fichas guardadas». Claro / mixto / oscuro como la pizarra.
+
+**Un tablero por tienda Y POR CANAL** (`tableros.<tienda>.<whatsapp|messenger|instagram>`), con
+«Clonar desde WhatsApp»; lo guardado antes se lee como WhatsApp. **Workflows** (`workflows.<id>`): sin
+tienda, uno para los tres canales; arrancan con la ficha «Ir a un workflow» o con «▶ Activar un
+workflow» en un botón o cuadrito de la venta de siempre (`start_workflow`, `workflow_id`), que cancela
+lo programado del motor de siempre y entra en el siguiente tick (`tablero_entrar_wf`).
+
+**Fichas nuevas:** «Seguimientos» (una caja con su gestor flotante: seguimientos con minutos desde el
+ÚLTIMO mensaje del cliente, versiones con peso, «activa el precio de oferta», salida «Terminaron sin
+respuesta»), «Intro de order bump» (versiones con peso), «Reparto por peso», «Ir a un workflow»; la
+Condición puede preguntar por anuncios concretos (claves del registro); el Regalo tiene «Al terminar
+el regalo» (lo avisa el motor de siempre con `avisarFinDelRegalo`).
+
+**El cobro, con las revisiones de siempre:** fecha si el país la exige, titular en Yape/Plin (la misma
+regla de la primera palabra, `titularCoincide`), comprobante repetido, precio congelado al abrir el
+cobro, precio normal / de oferta / según la etapa, y «eligió uno y pagó otro» (`acepta`: más caro →
+se entrega ese; más barato → se pregunta «¿error o prefieres X?»). Un comprobante sin cobro abierto no
+se cuenta: se avisa al dueño.
+
+**Lo que el motor de siempre respeta también en el tablero:** la ventana de 24 h (no envía), las horas
+de silencio (pospone), el «no pagó» se reinicia si escribe, el LeadSubmitted al entrar y el
+InitiateCheckout al abrir un cobro, el reenvío del material (`reenviarLoDelTablero` en
+`resendApprovedMaterial`: lo que entregó el tablero, no lo de la venta de siempre).
+
+**La IA del tablero entiende la elección escrita** (`elegirOpcionConIA`) cuando ningún botón ni
+cuadrito acierta: decide la opción sin escribir nada propio; «no quiero X» nunca es X; si duda,
+ninguna. El texto del botón escrito vale como tocarlo; en Instagram, «1/2/3».
+
+**Arreglado de paso (también en ALBERTO 2, pendiente de su permiso):** `readBubbleButtons` solo
+releía 5 acciones: un botón con «Elegir UPSELL», «Rechazar UPSELL», «Abrir la oferta de 2 opciones»
+o las del regalo volvía a «Enviar burbujas» al reabrir el editor. Ahora relee todas
+(`ACCIONES_DE_BOTON`). Y en Instagram ya no salen los asteriscos (`sinFormatoDeWhatsApp`).
+
+**Pruebas:** `prueba-el-tablero.mjs` (estática) y `recorrido-del-tablero.mjs` (vive la venta en el
+simulador y devuelve el contenido tal cual, con su huella).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

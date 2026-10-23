@@ -1,12 +1,15 @@
 /**
- * DÓNDE ESTÁ CADA CLIENTE EN EL TABLERO, y lo que ya compró. Tablas propias: el motor de siempre
- * no las lee ni las escribe, y una conversación SIN fila aquí es del motor de siempre.
+ * DÓNDE ESTÁ CADA CLIENTE EN EL TABLERO, y lo que ya compró y recibió. Tablas propias: el motor de
+ * siempre no las lee ni las escribe, y una conversación SIN fila aquí es del motor de siempre.
  *
- * `vuelta` sube cada vez que el cliente cambia de ficha: los relojes programados la llevan
- * anotada, y si al vencer ya no coincide, el cliente se movió y el reloj no hace nada. Así un
+ * `vuelta` sube cada vez que el cliente cambia de ficha (o contesta sin moverse): los relojes
+ * programados la llevan anotada, y si al vencer ya no coincide, el reloj no hace nada. Así un
  * «no respondió en 3 horas» nunca le llega a quien sí respondió.
+ *
+ * Este archivo NO importa el motor (ni el de siempre ni el del tablero): el motor de siempre lo
+ * importa a él (fin del regalo), y al revés habría un círculo.
  */
-import db from "@/lib/db";
+import db, { scheduleAction } from "@/lib/db";
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS tablero_estado (
@@ -36,28 +39,43 @@ db.exec(`
     conversation_id INTEGER NOT NULL,
     at INTEGER NOT NULL DEFAULT (unixepoch())
   );
+  -- LO QUE LE ENTREGARON LAS FICHAS «Entregar» (23/10/2026), para el reenvío.
+  CREATE TABLE IF NOT EXISTS tablero_entregas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL,
+    producto_id TEXT NOT NULL,
+    at INTEGER NOT NULL DEFAULT (unixepoch())
+  );
+  CREATE INDEX IF NOT EXISTS idx_tablero_entregas_convo ON tablero_entregas(conversation_id);
 `);
 
-// LOS BOTONES YA USADOS (22/10/2026): un botón de un mensaje anterior vale (tras la insistencia
-// toca «Sí, quiero» de la oferta), pero tocado OTRA VEZ no repite la entrega ni el cobro.
-try {
-  db.exec("ALTER TABLE tablero_estado ADD COLUMN botones_usados TEXT NOT NULL DEFAULT ''");
-} catch {
-  // Ya existía.
-}
-
-export function botonYaUsado(conversationId: number, botonId: string): boolean {
-  const fila = db.prepare("SELECT botones_usados FROM tablero_estado WHERE conversation_id = ?").get(conversationId) as
-    | { botones_usados?: string }
-    | undefined;
-  return (fila?.botones_usados ?? "").split("\n").includes(botonId);
-}
-
-export function apuntarBoton(conversationId: number, botonId: string): void {
-  if (botonYaUsado(conversationId, botonId)) return;
-  db.prepare(
-    "UPDATE tablero_estado SET botones_usados = CASE WHEN botones_usados = '' THEN ? ELSE botones_usados || char(10) || ? END WHERE conversation_id = ?"
-  ).run(botonId, botonId, conversationId);
+// Columnas que llegaron después: se añaden si faltan.
+for (const [col, tipo] of [
+  ["botones_usados", "TEXT NOT NULL DEFAULT ''"],
+  // El canal con el que entró: sigue en ESE tablero aunque luego escriba por otro sitio.
+  ["canal", "TEXT NOT NULL DEFAULT 'whatsapp'"],
+  // Un seguimiento con «activa el precio de oferta» ya salió.
+  ["oferta", "INTEGER NOT NULL DEFAULT 0"],
+  // La caja «Seguimientos»: cuál toca y la ficha (el token invalida los relojes viejos).
+  ["seg_ficha", "TEXT"],
+  ["seg_idx", "INTEGER NOT NULL DEFAULT 0"],
+  ["seg_token", "INTEGER NOT NULL DEFAULT 0"],
+  // El reloj del «no pagó»: se reinicia cuando el cliente escribe.
+  ["cobro_reloj", "INTEGER NOT NULL DEFAULT 0"],
+  // Los precios con los que se abrió el cobro (congelados): {productoId: precio}.
+  ["cobro_precios", "TEXT"],
+  // «¿Fue un error o deseas X?»: el producto que se le propuso.
+  ["cobro_propuesta", "TEXT"],
+  // La versión que le salió de cada ficha con versiones: {fichaId: varianteId}.
+  ["variantes", "TEXT NOT NULL DEFAULT '{}'"],
+  // El último comprobante (id del mensaje) que el tablero ya leyó: no se vuelve a leer.
+  ["comprobante_leido", "INTEGER"],
+] as const) {
+  try {
+    db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
+  } catch {
+    // Ya existía.
+  }
 }
 
 export interface EstadoEnElTablero {
@@ -69,6 +87,22 @@ export interface EstadoEnElTablero {
   cobro_ficha_id: string | null;
   cobro_desde: number | null;
   cobro_pagado: number;
+  botones_usados: string;
+  canal: string;
+  oferta: number;
+  seg_ficha: string | null;
+  seg_idx: number;
+  seg_token: number;
+  cobro_reloj: number;
+  cobro_precios: string | null;
+  cobro_propuesta: string | null;
+  variantes: string;
+  comprobante_leido: number | null;
+}
+
+export function marcarComprobanteLeido(conversationId: number, mensajeId: number | null): void {
+  if (mensajeId === null) return;
+  db.prepare("UPDATE tablero_estado SET comprobante_leido = ? WHERE conversation_id = ?").run(mensajeId, conversationId);
 }
 
 const ahora = () => Math.floor(Date.now() / 1000);
@@ -82,14 +116,28 @@ export function estadoEnElTablero(conversationId: number): EstadoEnElTablero | n
 }
 
 /** La conversación entra al tablero. Solo una vez: si ya tenía fila, no se toca. */
-export function entrarAlTablero(conversationId: number, tiendaId: string, fichaId: string): boolean {
+export function entrarAlTablero(conversationId: number, tiendaId: string, fichaId: string, canal = "whatsapp"): boolean {
   return (
     db
       .prepare(
-        "INSERT OR IGNORE INTO tablero_estado (conversation_id, tienda_id, ficha_id, desde) VALUES (?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO tablero_estado (conversation_id, tienda_id, ficha_id, desde, canal) VALUES (?, ?, ?, ?, ?)"
       )
-      .run(conversationId, tiendaId, fichaId, ahora()).changes > 0
+      .run(conversationId, tiendaId, fichaId, ahora(), canal).changes > 0
   );
+}
+
+/** Pasa a OTRO tablero (un workflow), desde su Inicio. Lo de dentro se reinicia; las compras no. */
+export function cambiarDeTablero(conversationId: number, clave: string, fichaId: string, canal = "whatsapp"): void {
+  if (!estadoEnElTablero(conversationId)) {
+    entrarAlTablero(conversationId, clave, fichaId, canal);
+    return;
+  }
+  db.prepare(
+    `UPDATE tablero_estado SET tienda_id = ?, ficha_id = ?, desde = ?, vuelta = vuelta + 1,
+       cobro_ficha_id = NULL, cobro_desde = NULL, cobro_pagado = 0, cobro_precios = NULL, cobro_propuesta = NULL,
+       seg_ficha = NULL, seg_idx = 0, seg_token = seg_token + 1, botones_usados = ''
+     WHERE conversation_id = ?`
+  ).run(clave, fichaId, ahora(), conversationId);
 }
 
 /** Mueve al cliente a otra ficha y devuelve la vuelta nueva. */
@@ -108,10 +156,20 @@ export function tocarVuelta(conversationId: number): void {
   db.prepare("UPDATE tablero_estado SET vuelta = vuelta + 1 WHERE conversation_id = ?").run(conversationId);
 }
 
-export function abrirCobro(conversationId: number, fichaId: string): void {
+export function abrirCobro(conversationId: number, fichaId: string, precios: Record<string, number>): void {
   db.prepare(
-    "UPDATE tablero_estado SET cobro_ficha_id = ?, cobro_desde = ?, cobro_pagado = 0 WHERE conversation_id = ?"
-  ).run(fichaId, ahora(), conversationId);
+    `UPDATE tablero_estado SET cobro_ficha_id = ?, cobro_desde = ?, cobro_pagado = 0, cobro_precios = ?,
+       cobro_propuesta = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
+  ).run(fichaId, ahora(), JSON.stringify(precios), conversationId);
+}
+
+export function preciosDelCobro(e: EstadoEnElTablero): Record<string, number> {
+  try {
+    const v = JSON.parse(e.cobro_precios ?? "{}");
+    return v && typeof v === "object" ? (v as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
 }
 
 export function sumarAlCobro(conversationId: number, monto: number): number {
@@ -122,10 +180,54 @@ export function sumarAlCobro(conversationId: number, monto: number): number {
   return estadoEnElTablero(conversationId)?.cobro_pagado ?? monto;
 }
 
+export function proponerProducto(conversationId: number, productoId: string | null): void {
+  db.prepare("UPDATE tablero_estado SET cobro_propuesta = ? WHERE conversation_id = ?").run(productoId, conversationId);
+}
+
+/** El reloj del «no pagó» vuelve a empezar (el cliente escribió). Devuelve su token nuevo. */
+export function reiniciarRelojDelCobro(conversationId: number): number {
+  db.prepare("UPDATE tablero_estado SET cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?").run(conversationId);
+  return estadoEnElTablero(conversationId)?.cobro_reloj ?? 0;
+}
+
 export function cerrarCobro(conversationId: number): void {
   db.prepare(
-    "UPDATE tablero_estado SET cobro_ficha_id = NULL, cobro_desde = NULL, cobro_pagado = 0 WHERE conversation_id = ?"
+    `UPDATE tablero_estado SET cobro_ficha_id = NULL, cobro_desde = NULL, cobro_pagado = 0, cobro_precios = NULL,
+       cobro_propuesta = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
   ).run(conversationId);
+}
+
+export function activarOferta(conversationId: number): void {
+  db.prepare("UPDATE tablero_estado SET oferta = 1 WHERE conversation_id = ?").run(conversationId);
+}
+
+/** La caja «Seguimientos»: arranca o pasa al siguiente. Devuelve el token nuevo. */
+export function ponerSeguimiento(conversationId: number, fichaId: string | null, idx: number): number {
+  db.prepare("UPDATE tablero_estado SET seg_ficha = ?, seg_idx = ?, seg_token = seg_token + 1 WHERE conversation_id = ?").run(
+    fichaId,
+    idx,
+    conversationId
+  );
+  return estadoEnElTablero(conversationId)?.seg_token ?? 0;
+}
+
+export function varianteVista(e: EstadoEnElTablero, fichaId: string): string | null {
+  try {
+    return (JSON.parse(e.variantes || "{}") as Record<string, string>)[fichaId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function apuntarVariante(conversationId: number, fichaId: string, varianteId: string): void {
+  const e = estadoEnElTablero(conversationId);
+  if (!e) return;
+  let mapa: Record<string, string> = {};
+  try {
+    mapa = JSON.parse(e.variantes || "{}");
+  } catch {}
+  mapa[fichaId] = varianteId;
+  db.prepare("UPDATE tablero_estado SET variantes = ? WHERE conversation_id = ?").run(JSON.stringify(mapa), conversationId);
 }
 
 export function anotarCompra(c: {
@@ -156,6 +258,18 @@ export function comprasDelCliente(
   }>;
 }
 
+export function anotarEntrega(conversationId: number, productoId: string): void {
+  db.prepare("INSERT INTO tablero_entregas (conversation_id, producto_id) VALUES (?, ?)").run(conversationId, productoId);
+}
+
+/** Los productos que le entregó el tablero, sin repetir, en el orden en que salieron. */
+export function entregasDelCliente(conversationId: number): string[] {
+  const filas = db
+    .prepare("SELECT producto_id FROM tablero_entregas WHERE conversation_id = ? ORDER BY id")
+    .all(conversationId) as Array<{ producto_id: string }>;
+  return [...new Set(filas.map((f) => f.producto_id))];
+}
+
 /**
  * EL MISMO COMPROBANTE NO VALE DOS VECES: se guarda su huella (número de operación, o fecha y
  * monto) y si ya estaba, devuelve false. Vale entre conversaciones: el mismo pago mandado por
@@ -168,12 +282,36 @@ export function apuntarHuella(huella: string, conversationId: number): boolean {
   );
 }
 
+export function botonYaUsado(conversationId: number, botonId: string): boolean {
+  const fila = db.prepare("SELECT botones_usados FROM tablero_estado WHERE conversation_id = ?").get(conversationId) as
+    | { botones_usados?: string }
+    | undefined;
+  return (fila?.botones_usados ?? "").split("\n").includes(botonId);
+}
+
+export function apuntarBoton(conversationId: number, botonId: string): void {
+  if (botonYaUsado(conversationId, botonId)) return;
+  db.prepare(
+    "UPDATE tablero_estado SET botones_usados = CASE WHEN botones_usados = '' THEN ? ELSE botones_usados || char(10) || ? END WHERE conversation_id = ?"
+  ).run(botonId, botonId, conversationId);
+}
+
 /**
- * Para «/reiniciar» una conversación: la saca del tablero y olvida sus compras y comprobantes,
- * como hace el motor de siempre al reiniciar. Así se puede volver a probar con la misma foto.
+ * EL REGALO TERMINÓ (lo avisa el motor de siempre, 23/10/2026). Si la conversación es del tablero,
+ * se programa seguir por la salida «Al terminar el regalo» de su ficha. Sin tablero, nada.
+ */
+export function avisarFinDelRegalo(conversationId: number): void {
+  if (!estadoEnElTablero(conversationId)) return;
+  scheduleAction(conversationId, "tablero_tras_regalo", {}, ahora() + 3);
+}
+
+/**
+ * Para «/reiniciar» una conversación: la saca del tablero y olvida sus compras, entregas y
+ * comprobantes, como hace el motor de siempre al reiniciar.
  */
 export function salirDelTablero(conversationId: number): void {
   db.prepare("DELETE FROM tablero_estado WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_compras WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_pagos WHERE conversation_id = ?").run(conversationId);
+  db.prepare("DELETE FROM tablero_entregas WHERE conversation_id = ?").run(conversationId);
 }

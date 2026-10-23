@@ -198,8 +198,10 @@ comprobar(
 // se olvidara, por ahi vuelve el duplicado.
 comprobar(
   "los cuatro caminos se lo pasan",
+  // Desde el 23/10/2026 detrás de las burbujas va también su workflow (`x.workflow_id`).
   (motor.match(/\.steps\s*\r?\n\s*\);/g) ?? []).length +
-    (motor.match(/\.steps,\s*\r?\n\s*\);/g) ?? []).length >=
+    (motor.match(/\.steps,\s*\r?\n\s*\);/g) ?? []).length +
+    (motor.match(/\.steps,\s*\r?\n\s*\w+\.workflow_id\s*\r?\n\s*\);/g) ?? []).length >=
     2,
   "pausa, fuera de pausa, regalo y extra"
 );

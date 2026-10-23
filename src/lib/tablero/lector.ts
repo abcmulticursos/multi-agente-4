@@ -15,6 +15,28 @@ export interface LecturaDelComprobante {
   fecha?: string;
   operacion?: string;
   titular?: string;
+  metodo?: string;
+}
+
+/**
+ * ¿EL COMPROBANTE ES A NOMBRE DE QUIEN COBRA? La MISMA regla que el validador de siempre
+ * (payment.ts, «Validación de receptor para Yape/Plin»), copiada porque allí vive dentro de la
+ * validación de la venta de siempre: SOLO la primera palabra de lo configurado (de 3+ letras),
+ * comparada por prefijo con cualquier palabra del comprobante (que suele venir recortado).
+ * Sin titular configurado, vale cualquiera.
+ */
+export function titularCoincide(esperado: string, recibido: string): boolean {
+  const normal = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const esperadas = normal(esperado).split(" ").filter((t) => t.length >= 3).slice(0, 1);
+  if (esperadas.length === 0) return true;
+  const recibidas = normal(recibido).split(" ").filter((t) => t.length >= 2);
+  return esperadas.some((et) =>
+    recibidas.some((gt) => {
+      const [corta, larga] = et.length <= gt.length ? [et, gt] : [gt, et];
+      return corta.length >= 3 && larga.startsWith(corta);
+    })
+  );
 }
 
 const HERRAMIENTA = {
@@ -30,6 +52,10 @@ const HERRAMIENTA = {
         fecha: { type: "string", description: "Date and time visible on the receipt, exactly as printed. Empty if none." },
         operacion: { type: "string", description: "Operation/transaction number if visible. Empty if none." },
         titular: { type: "string", description: "Recipient name exactly as printed (may be masked). Empty if none." },
+        metodo: {
+          type: "string",
+          description: "Payment app or bank as printed on the receipt, in lowercase (e.g. yape, plin, bcp, interbank, transferencia, nequi, mercadopago). Empty if unknown.",
+        },
       },
       required: ["monto"],
     },
@@ -45,9 +71,18 @@ export function ultimosMensajes(conversationId: number, cuantos = 20): MessageRo
   ).reverse();
 }
 
-/** ¿El turno trae una foto o PDF que el bot aún no atendió? */
-export function hayComprobantePendiente(conversationId: number): boolean {
-  return !!getRecentVisionImage(ultimosMensajes(conversationId, 12));
+/**
+ * ¿El turno trae una foto o PDF que el bot aún no atendió? `yaLeido` = el último que el tablero ya
+ * leyó: ese no vuelve a contar aunque el bot no haya contestado nada después (no se lee dos veces).
+ */
+export function hayComprobantePendiente(conversationId: number, yaLeido?: number | null): boolean {
+  const m = getRecentVisionImage(ultimosMensajes(conversationId, 12));
+  return !!m && m.id !== yaLeido;
+}
+
+/** El id del mensaje con la foto o PDF pendiente, para anotarlo como leído. */
+export function idDelComprobantePendiente(conversationId: number): number | null {
+  return getRecentVisionImage(ultimosMensajes(conversationId, 12))?.id ?? null;
 }
 
 /** Lee el comprobante pendiente. null = no hay, o no se ve como un comprobante con monto. */
@@ -92,6 +127,7 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
       fecha: limpio(args.fecha),
       operacion: limpio(args.operacion),
       titular: limpio(args.titular),
+      metodo: limpio(args.metodo)?.toLowerCase(),
     };
     console.log(
       `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"}`
