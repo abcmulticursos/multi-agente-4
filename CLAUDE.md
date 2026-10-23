@@ -758,7 +758,11 @@ montos de su cobro; si nombra otro monto se le pide otra vez y si insiste se qui
 insistencia (y no sale si respondió), botón tocado tarde (vale) y repetido (no reentrega),
 contribución completa (entrega gratis → cobro → recordatorio 1 → esperar → recordatorio 2 →
 comprobante de 15 → tramo 2 → plus → regalo), pago bajo el mínimo, comprobante repetido.
-**No probado:** Messenger e Instagram (el tablero es solo WhatsApp por ahora) y una venta real.
+**Messenger (22/10, más tarde):** la misma entrada en `webhooks/messenger/route.ts`, DESPUÉS de la
+pregunta del país; los botones van como respuestas rápidas con el mismo id. Probado en el
+simulador como cliente de Messenger (país → tablero completo). Lo programado del tablero sale por
+SU número y SU página (`withOutboundWhatsAppNumber` / `withOutboundMessengerPage`), como el de siempre.
+**No probado:** Instagram (no tiene tablero todavía), un Messenger real y una venta real.
 
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 

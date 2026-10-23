@@ -23,6 +23,7 @@ import {
   type ScheduledActionRow,
 } from "@/lib/db";
 import { getCountryInfo } from "@/lib/countries";
+import { withOutboundMessengerPage, withOutboundWhatsAppNumber } from "@/lib/meta/runtime-config";
 import { buildMessagingUserData, sendPurchaseEvent } from "@/lib/meta/conversions";
 import { notifyAdmin } from "@/lib/notifications";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
@@ -420,7 +421,21 @@ export async function ejecutarAccionDelTablero(accion: ScheduledActionRow): Prom
   } catch {
     return;
   }
-  await conElTurnoDe(convo, async () => {
+  // CON SU TIENDA, SU NÚMERO Y SU PÁGINA, como lo programado del motor de siempre: aquí ya no
+  // está el webhook delante, y con dos números o dos páginas saldría por el que no es.
+  await conElTurnoDe(convo, () =>
+    withOutboundWhatsAppNumber(convo.wa_phone_number_id ?? null, () =>
+      withOutboundMessengerPage(convo.messenger_page_id ?? null, () => relojDelTablero(accion, convo, payload))
+    )
+  );
+}
+
+async function relojDelTablero(
+  accion: ScheduledActionRow,
+  convo: ConversationRow,
+  payload: Record<string, unknown>
+): Promise<void> {
+  {
     const estado = estadoEnElTablero(convo.id);
     if (!estado || ESTADOS_DEL_REGALO.has(getConversationById(convo.id)?.state ?? "")) return;
     const t = tableroDe(loadWorkflowConfig(), estado.tienda_id);
@@ -441,5 +456,5 @@ export async function ejecutarAccionDelTablero(accion: ScheduledActionRow): Prom
       const cable = cableDeLaSalida(t, ficha, "sin_pago");
       if (cable) await irA(convo.id, t, cable.a);
     }
-  });
+  }
 }

@@ -39,6 +39,19 @@ comprobar("el gancho existe", gancho > 0);
 comprobar("va DESPUÉS de «¿le contestamos?» y de moderar", gancho > manejador.indexOf("!leContestamos(fresh)") && gancho > manejador.indexOf("await moderarSiCorresponde(fresh, content)"));
 comprobar("y ANTES del motor de siempre", gancho < manejador.indexOf("await tryWorkflowOnIncoming(fresh, content)"));
 comprobar("si falla, una conversación del tablero no cae al motor de siempre", /if \(esDelTablero\(fresh\.id\)\) return;/.test(manejador));
+{
+  // MESSENGER (22/10/2026): la misma puerta, después de la pregunta del país.
+  const messenger = leer("src", "app", "api", "webhooks", "messenger", "route.ts");
+  const g = messenger.indexOf("await alRecibirMensaje(countryReady, content)");
+  comprobar(
+    "Messenger: después de la pregunta del país y antes del motor de siempre",
+    g > messenger.indexOf("if (gateHandled) return;") && g < messenger.indexOf("await tryWorkflowOnIncoming(countryReady, content)")
+  );
+}
+comprobar(
+  "lo programado sale por su número y su página",
+  /withOutboundWhatsAppNumber\(convo\.wa_phone_number_id/.test(motor) && /withOutboundMessengerPage\(convo\.messenger_page_id/.test(motor)
+);
 
 console.log("\n— 3. lo programado lleva su dueño —\n");
 comprobar(

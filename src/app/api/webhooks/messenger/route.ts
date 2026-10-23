@@ -42,6 +42,7 @@ import {
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
+import { alRecibirMensaje, esDelTablero } from "@/lib/tablero/motor";
 import { registrarComentario } from "@/lib/meta/comments";
 import {
   getWebhookAppSecret,
@@ -513,6 +514,17 @@ async function handleMessengerMessage(
   const countryReady = getConversationById(convo.id) ?? fresh;
   freezePricesForConvo(countryReady);
   if (gateHandled) return;
+
+  // EL TABLERO, también en Messenger (22/10/2026, solo ALBERTO 4). Va DESPUÉS de la pregunta del
+  // país —aquí el país se pregunta primero— y antes del motor de siempre, igual que en WhatsApp
+  // (handler.ts). Solo atiende conversaciones nuevas de una tienda con tablero encendido; las
+  // demás siguen exactamente igual. Los botones llegan como respuestas rápidas con el mismo id.
+  try {
+    if (await alRecibirMensaje(countryReady, content)) return;
+  } catch (err) {
+    console.error("[tablero] falló el turno del tablero (messenger):", err);
+    if (esDelTablero(countryReady.id)) return;
+  }
 
   try {
     const handled = await tryWorkflowOnIncoming(countryReady, content);
