@@ -44,7 +44,14 @@ import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
 export interface FichaEnElEditor extends Omit<FichaDelTablero, "steps" | "variantes" | "seguimientos"> {
   steps?: unknown[];
   variantes?: Array<{ id: string; nombre?: string; peso?: number; steps?: unknown[] }>;
-  seguimientos?: Array<{ id: string; minutos: number; activa_oferta?: boolean; variantes: Array<{ id: string; nombre?: string; peso?: number; steps?: unknown[] }> }>;
+  seguimientos?: Array<{
+    id: string;
+    minutos: number;
+    activa_oferta?: boolean;
+    ignora_silencio?: boolean;
+    ignora_tardio?: boolean;
+    variantes: Array<{ id: string; nombre?: string; peso?: number; steps?: unknown[] }>;
+  }>;
 }
 export interface TableroEnElEditor extends Omit<Tablero, "fichas"> {
   fichas: FichaEnElEditor[];
@@ -218,7 +225,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const leLlega = ctx.tablero.cables.some((c) => c.a === f.id);
   const tenue = !!f.apagada;
   const burbujas =
-    f.tipo === "mensaje" || f.tipo === "cobro"
+    f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo"
       ? resumenDeBurbujas(f.steps)
       : f.tipo === "intro_ob"
         ? resumenDeBurbujas(f.variantes?.[0]?.steps)
@@ -315,6 +322,10 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         )}
         {(burbujas.length === 0 || (f.tipo !== "mensaje" && f.tipo !== "intro_ob")) && (
           <div className={`whitespace-pre-line text-[11px] ${burbujas.length === 0 ? "italic" : ""} text-slate-600`}>{ctx.resumenDe(f)}</div>
+        )}
+        {/* Con burbujas a la vista, el resumen no sale; lo que presenta sí (la IA solo sabe eso). */}
+        {burbujas.length > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && (f.presenta ?? []).length > 0 && (
+          <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
         )}
       </div>
       {salidas.length > 0 && (
@@ -734,6 +745,8 @@ export default function LienzoDelTablero({
       ...(tipo === "seguimientos"
         ? { seguimientos: [{ id: `s-${Date.now().toString(36)}`, minutos: 180, variantes: [{ id: `v-${Date.now().toString(36)}`, peso: 1, steps: [] }] }] }
         : {}),
+      // El correo nace con un texto que él cambia: es contenido suyo, no del código.
+      ...(tipo === "correo" ? { correo_texto: "Hola 👋\n\nAquí tienes tu material:\n\n{{MATERIAL}}\n\n¡Gracias por tu compra!" } : {}),
     };
     const actual = vivo.current;
     const cablesNuevos = desde

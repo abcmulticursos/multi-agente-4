@@ -70,6 +70,13 @@ for (const [col, tipo] of [
   ["variantes", "TEXT NOT NULL DEFAULT '{}'"],
   // El último comprobante (id del mensaje) que el tablero ya leyó: no se vuelve a leer.
   ["comprobante_leido", "INTEGER"],
+  // Los productos que ya se le presentaron (la IA solo habla de éstos): JSON con sus ids.
+  ["presentados", "TEXT NOT NULL DEFAULT '[]'"],
+  // En un cobro con varios productos, el que eligió (o al que cambió). Vacío = el de la ficha.
+  ["cobro_elegido", "TEXT"],
+  // Desde cuándo cuentan los seguimientos de la caja (su último mensaje, o la hora a la que se
+  // aplazó un lead tardío), como el T0 del motor de siempre.
+  ["seg_desde", "INTEGER"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -98,6 +105,39 @@ export interface EstadoEnElTablero {
   cobro_propuesta: string | null;
   variantes: string;
   comprobante_leido: number | null;
+  presentados: string;
+  cobro_elegido: string | null;
+  seg_desde: number | null;
+}
+
+/** Los productos que ya se le presentaron, en orden. */
+export function presentadosDe(e: EstadoEnElTablero | null): string[] {
+  try {
+    const v = JSON.parse(e?.presentados || "[]");
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Anota productos como presentados (sin repetir). */
+export function anotarPresentados(conversationId: number, ids: Array<string | null | undefined>): void {
+  const nuevos = ids.filter((x): x is string => !!x && !!x.trim());
+  if (nuevos.length === 0) return;
+  const e = estadoEnElTablero(conversationId);
+  if (!e) return;
+  const todos = [...new Set([...presentadosDe(e), ...nuevos])];
+  db.prepare("UPDATE tablero_estado SET presentados = ? WHERE conversation_id = ?").run(JSON.stringify(todos), conversationId);
+}
+
+/** En el cobro abierto, el producto que eligió (o null = el de la ficha). */
+export function elegirEnElCobro(conversationId: number, productoId: string | null): void {
+  db.prepare("UPDATE tablero_estado SET cobro_elegido = ? WHERE conversation_id = ?").run(productoId, conversationId);
+}
+
+/** Desde cuándo cuentan los seguimientos de la caja. */
+export function contarSeguimientosDesde(conversationId: number, desde: number): void {
+  db.prepare("UPDATE tablero_estado SET seg_desde = ? WHERE conversation_id = ?").run(desde, conversationId);
 }
 
 export function marcarComprobanteLeido(conversationId: number, mensajeId: number | null): void {
@@ -135,7 +175,7 @@ export function cambiarDeTablero(conversationId: number, clave: string, fichaId:
   db.prepare(
     `UPDATE tablero_estado SET tienda_id = ?, ficha_id = ?, desde = ?, vuelta = vuelta + 1,
        cobro_ficha_id = NULL, cobro_desde = NULL, cobro_pagado = 0, cobro_precios = NULL, cobro_propuesta = NULL,
-       seg_ficha = NULL, seg_idx = 0, seg_token = seg_token + 1, botones_usados = ''
+       cobro_elegido = NULL, seg_ficha = NULL, seg_idx = 0, seg_token = seg_token + 1, botones_usados = ''
      WHERE conversation_id = ?`
   ).run(clave, fichaId, ahora(), conversationId);
 }
@@ -159,7 +199,7 @@ export function tocarVuelta(conversationId: number): void {
 export function abrirCobro(conversationId: number, fichaId: string, precios: Record<string, number>): void {
   db.prepare(
     `UPDATE tablero_estado SET cobro_ficha_id = ?, cobro_desde = ?, cobro_pagado = 0, cobro_precios = ?,
-       cobro_propuesta = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
+       cobro_propuesta = NULL, cobro_elegido = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
   ).run(fichaId, ahora(), JSON.stringify(precios), conversationId);
 }
 
@@ -193,7 +233,7 @@ export function reiniciarRelojDelCobro(conversationId: number): number {
 export function cerrarCobro(conversationId: number): void {
   db.prepare(
     `UPDATE tablero_estado SET cobro_ficha_id = NULL, cobro_desde = NULL, cobro_pagado = 0, cobro_precios = NULL,
-       cobro_propuesta = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
+       cobro_propuesta = NULL, cobro_elegido = NULL, cobro_reloj = cobro_reloj + 1 WHERE conversation_id = ?`
   ).run(conversationId);
 }
 

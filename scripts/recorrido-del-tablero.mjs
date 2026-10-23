@@ -8,7 +8,7 @@
 //
 //   node scripts/recorrido-del-tablero.mjs --url=http://localhost:3000 --tienda=<id>
 //        [--comprobante=C:/ruta/yape.jpg --monto=15]   (las pruebas de pago necesitan una foto real)
-//        [--solo=contribucion,eleccion,seguimientos,cobro,workflow,activar,messenger]
+//        [--solo=contribucion,eleccion,seguimientos,cobro,metodo,ia,upgrade,correo,workflow,activar,messenger]
 //
 // Los tiempos son de verdad (1 y 2 minutos): tarda unos 15 minutos entero.
 import { createHash } from "node:crypto";
@@ -50,6 +50,16 @@ const basico = conEntrega.find((p) => precioPE(p) === monto) ?? null;
 const full = conEntrega.filter((p) => precioPE(p) > monto).sort((a, b) => precioPE(a) - precioPE(b))[0] ?? null;
 const gratis = conEntrega[0];
 const plus = conEntrega[1] ?? conEntrega[0];
+
+// LOS MÉTODOS DE PERÚ, los suyos (sus botones y sus cuentas): la prueba no inventa ninguno.
+const perfilPE = datos.payment_profiles_by_country?.PE ?? {};
+const metodosPE = (perfilPE.payment_buttons ?? []).filter((b) => b?.method && b?.label && b.enabled !== false);
+const cifras = (v) => String(v ?? "").replace(/\D/g, "");
+const cuentaDe = (m) => cifras(perfilPE.cuentas_por_metodo?.[m] ?? perfilPE.numero_de_cuenta);
+const conDatos = metodosPE.filter((m) => (perfilPE.payment_responses?.[m.method] ?? []).length > 0);
+// Dos métodos con cuentas DISTINTAS, para ver que al cambiar llegan los datos del nuevo.
+const metodoA = conDatos[0];
+const metodoB = conDatos.find((m) => cuentaDe(m.method) && cuentaDe(m.method) !== cuentaDe(metodoA?.method));
 
 const texto = (t, extra = {}) => ({ type: "text", body: t, body_variants: [t], delay_after_sec: 1, ...extra });
 const boton = (id, label) => ({ id, label, action: "send_steps" });
@@ -122,6 +132,51 @@ const TABLEROS = {
       ["cobro_full", "pagado", "entrega_full"], ["cobro_full", `prod:${basico?.id}`, "entrega_basico"],
       ["entrega_basico", "siguiente", "fin_basico"], ["entrega_full", "siguiente", "fin_full"],
     ].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
+  },
+  // EL COBRO QUE PREGUNTA EL MÉTODO (y la IA que solo sabe lo presentado).
+  metodo: {
+    encendido: true,
+    fichas: [
+      { id: "inicio", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+      { id: "intro", tipo: "mensaje", x: 300, y: 0, presenta: [basico?.id].filter(Boolean), steps: [texto("INTRO-METODO: te presento el básico.", { buttons: [boton("pagar", "Quiero pagar")] })] },
+      { id: "ob", tipo: "intro_ob", x: 650, y: 0, presenta: [basico?.id, full?.id].filter(Boolean), variantes: [{ id: "v", peso: 1, steps: [texto("INTRO-OB-METODO: ¿cuál prefieres?", { buttons: [boton("b_basico", "El básico"), boton("b_full", "El completo")] })] }] },
+      {
+        id: "cobro_basico", tipo: "cobro", x: 1000, y: 0,
+        cobro: { modo: "producto", producto_id: basico?.id, acepta: [full?.id].filter(Boolean), precio: "normal", metodos: true },
+        steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")],
+      },
+      { id: "entrega_basico", tipo: "entregar", x: 1350, y: -200, producto_id: basico?.id },
+      { id: "entrega_full", tipo: "entregar", x: 1350, y: 200, producto_id: full?.id },
+    ],
+    cables: [
+      ["inicio", "siguiente", "intro"], ["intro", "btn:pagar", "ob"], ["ob", "btn:b_basico", "cobro_basico"], ["ob", "btn:b_full", "cobro_basico"],
+      ["cobro_basico", "pagado", "entrega_basico"], ["cobro_basico", `prod:${full?.id}`, "entrega_full"],
+    ].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
+  },
+  // EL UPGRADE: compra el básico y después el completo por la diferencia.
+  upgrade: {
+    encendido: true,
+    fichas: [
+      { id: "inicio", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+      { id: "cobro_basico", tipo: "cobro", x: 300, y: 0, cobro: { modo: "producto", producto_id: basico?.id, precio: "normal" }, steps: [texto("DATOS-BASICO: paga {price}")] },
+      { id: "entrega_basico", tipo: "entregar", x: 650, y: 0, producto_id: basico?.id },
+      { id: "ofrece", tipo: "mensaje", x: 1000, y: 0, steps: [texto("OFRECE-UPGRADE: ¿quieres el completo?", { buttons: [boton("si_full", "Sí, el completo")] })] },
+      { id: "cobro_full", tipo: "cobro", x: 1350, y: 0, cobro: { modo: "producto", producto_id: full?.id, acepta: [basico?.id].filter(Boolean), precio: "normal", diferencia: true }, steps: [texto("DATOS-UPGRADE: paga {price}")] },
+    ],
+    cables: [["inicio", "siguiente", "cobro_basico"], ["cobro_basico", "pagado", "entrega_basico"], ["entrega_basico", "siguiente", "ofrece"], ["ofrece", "btn:si_full", "cobro_full"]].map(
+      ([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })
+    ),
+  },
+  // LA FICHA «PEDIR CORREO».
+  correo: {
+    encendido: true,
+    fichas: [
+      { id: "inicio", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+      { id: "entrega", tipo: "entregar", x: 300, y: 0, producto_id: gratis?.id },
+      { id: "correo", tipo: "correo", x: 650, y: 0, correo_texto: "Hola\n\n{{MATERIAL}}", steps: [texto("PIDE-CORREO: ¿a qué correo te lo mando?")] },
+      { id: "ok", tipo: "mensaje", x: 1000, y: 0, steps: [texto("CORREO-OK")] },
+    ],
+    cables: [["inicio", "siguiente", "entrega"], ["entrega", "siguiente", "correo"], ["correo", "enviado", "ok"]].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
   },
   workflow: {
     encendido: true,
@@ -307,6 +362,80 @@ try {
     comprobar("pagó el precio del básico: le pregunta si fue un error", !c.dijo("ENTREGADO-FULL") && !c.dijo("ENTREGADO-BASICO"));
     await c.decir("no, me quedo con ese entonces", 40);
     comprobar("se queda con el básico: le entrega el básico", c.dijo("ENTREGADO-BASICO"));
+    await c.borrar();
+  }
+
+  if (toca("metodo") && basico && full && metodoA && metodoB) {
+    console.log(`\n· El cobro pregunta el método: ${metodoA.label} → ${metodoB.label} → «mejor el completo» (básico ${precioPE(basico)}, completo ${precioPE(full)})`);
+    sembrar("metodo");
+    await esperar(3000);
+    const c = await cliente();
+    const nuevos = (desde) => c.bot.slice(desde).join("\n");
+    await c.decir("hola", 15);
+    await c.tocar("pagar", "Quiero pagar", 20);
+    await c.tocar("b_basico", "El básico", 20);
+    comprobar("sin método elegido: le pregunta el método", c.dijo("PREGUNTA-METODO"));
+    let antes = c.bot.length;
+    await c.decir(metodoA.label.toLowerCase(), 25);
+    comprobar(`dice «${metodoA.label}»: le llegan SUS datos`, cifras(nuevos(antes)).includes(cuentaDe(metodoA.method)), cuentaDe(metodoA.method).slice(0, 3) + "…");
+    comprobar("con el precio del básico", cifras(nuevos(antes)).includes(String(precioPE(basico))));
+    antes = c.bot.length;
+    await c.decir(`mejor por ${metodoB.label.toLowerCase()}`, 25);
+    comprobar(`cambia a «${metodoB.label}»: le llegan los del nuevo`, cifras(nuevos(antes)).includes(cuentaDe(metodoB.method)));
+    comprobar("sin repreguntar el producto", !nuevos(antes).includes("PREGUNTA-METODO"));
+    antes = c.bot.length;
+    await c.decir(`mejor quiero el ${full.name}`, 35);
+    comprobar("«mejor el completo»: datos con el precio del completo", cifras(nuevos(antes)).includes(String(precioPE(full))), String(precioPE(full)));
+    comprobar("y con el método que ya eligió, sin preguntarlo", cifras(nuevos(antes)).includes(cuentaDe(metodoB.method)) && !nuevos(antes).includes("PREGUNTA-METODO"));
+    await c.borrar();
+  }
+
+  if (toca("ia") && basico && full) {
+    console.log(`\n· La IA solo sabe lo presentado: el completo («${full.name}») sigue oculto hasta su intro`);
+    sembrar("metodo");
+    await esperar(3000);
+    const c = await cliente();
+    await c.decir("hola", 15);
+    let antes = c.bot.length;
+    await c.decir("y que contiene? que incluye exactamente?", 40);
+    const r1 = c.bot.slice(antes).join("\n");
+    comprobar("contesta qué contiene", r1.length > 40, r1.slice(0, 60).replace(/\n/g, " "));
+    comprobar("y no nombra el producto oculto", !r1.toLowerCase().includes(String(full.name).toLowerCase()));
+    await c.tocar("pagar", "Quiero pagar", 20);
+    antes = c.bot.length;
+    await c.decir(`y el ${full.name} cuanto cuesta?`, 40);
+    const r2 = c.bot.slice(antes).join("\n");
+    comprobar("ya presentado el completo: sabe su precio", cifras(r2).includes(String(precioPE(full))), r2.slice(0, 60).replace(/\n/g, " "));
+    await c.borrar();
+  }
+
+  if (toca("upgrade") && args.comprobante && basico && full) {
+    const dif = Math.round((precioPE(full) - precioPE(basico)) * 100) / 100;
+    console.log(`\n· El upgrade: paga el básico (${precioPE(basico)}) y luego el completo por la diferencia (${dif})`);
+    sembrar("upgrade");
+    await esperar(3000);
+    const c = await cliente();
+    await c.decir("hola", 15);
+    comprobar("le cobra el básico", c.dijo("DATOS-BASICO"));
+    await c.foto(60);
+    comprobar("pagó: le entrega y le ofrece el completo", c.dijo("OFRECE-UPGRADE"));
+    await c.tocar("si_full", "Sí, el completo", 20);
+    const datos = c.bot.find((x) => x.includes("DATOS-UPGRADE")) ?? "";
+    comprobar("el completo cuesta solo la diferencia", cifras(datos).includes(cifras(dif)) && !cifras(datos).includes(String(precioPE(full))), datos.slice(0, 50));
+    await c.borrar();
+  }
+
+  if (toca("correo") && gratis) {
+    console.log("\n· La ficha «Pedir correo»: escribe su correo y se le manda lo que recibió");
+    sembrar("correo");
+    await esperar(3000);
+    const c = await cliente();
+    await c.decir("hola", 20);
+    comprobar("después de la entrega le pide el correo", c.dijo("PIDE-CORREO"));
+    await c.decir("no tengo ahorita", 30);
+    comprobar("sin correo: la IA contesta y no sigue", !c.dijo("CORREO-OK"));
+    await c.decir("ya, es prueba.tablero@example.com", 20);
+    comprobar("con su correo: se envía y sigue por «Correo enviado»", c.dijo("CORREO-OK"));
     await c.borrar();
   }
 

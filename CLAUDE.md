@@ -817,6 +817,35 @@ Solo vista: no cambian nada.
 simulador y devuelve el contenido tal cual, con su huella). Su escenario `activar` prueba en vivo
 «▶ Activar un workflow» desde un botón de la venta de siempre (sin tablero → botón → workflow).
 
+### El tablero, tercera vuelta (23/10/2026): para vender como COMO HOY / COMO DOU / COMO OB
+
+Su pregunta: «¿has verificado que se pueda construir igual a los automáticos?». No se podía: la IA
+del tablero no conocía los productos, el cobro no entendía el método ni los cambios de idea, no había
+upgrade ni correo. Lo que se añadió (solo el tablero; el motor de siempre no se tocó):
+- **«Presenta estos productos»** en mensaje, intro de order bump y seguimientos. La IA (`conversador.ts`)
+  conoce el contenido, los regalos y el precio de su país SOLO de los ya presentados (también el que
+  se cobra y el que se entrega): el oculto no existe para ella hasta su intro. Reglas de la casa en
+  su cerebro: precio de frente, desconfianza con empatía, nunca números de cuenta; dialecto del país.
+  OJO: no usa las secciones del cerebro del editor (son de un producto y de las modalidades).
+- **Cobro «💳 Preguntar el método y mandar sus datos solo»** (`pago.ts`): sus burbujas preguntan; con
+  el método ya elegido no se repregunta; nombrar un método (o su botón) manda SUS respuestas de
+  «Métodos de pago» del país con el precio de lo elegido, y deja el método en la conversación
+  ({{NUMERO_DE_CUENTA}} sale con esa cuenta); «mejor el otro» cambia de producto (solo entre lo
+  presentado) y manda los datos con el método ya elegido; quejarse de un método no es elegirlo
+  (`messageHasPaymentConcern`). La IA tiene «reenviar_datos_de_pago». {{PRODUCTO}} en esas burbujas
+  = el producto del cobro.
+- **Cobro «⬆️ Upgrade»:** si ya compró uno de la lista más barato, los más caros cuestan la diferencia.
+- **Seguimientos:** las reglas de `scheduleFollowupSequences` con SU configuración (sus canales
+  tienen contenido, así que cada seguimiento va a SUS minutos —medido: las franjas no se usan ahí—):
+  lead tardío, horas de silencio (con «ignora» por seguimiento), cola antirráfaga, y vuelven a contar
+  si el cliente escribe. En el simulador no se aplazan.
+- **Ficha «📧 Pedir correo y enviar»:** sus burbujas lo piden; con el correo, manda por Gmail lo que
+  le entregó el tablero (texto de la entrega con sus enlaces, limpio para correo) con su asunto y su
+  texto ({{MATERIAL}}); sale por «Correo enviado». En el simulador no sale de verdad.
+Probado en vivo (copia aislada, su Yape/BCP y su comprobante de 15): escenarios `metodo`, `ia`,
+`upgrade`, `correo` del recorrido. **No probado:** el correo real (Gmail) y la IA con su contenido en
+otros países.
+
 ### Los números de cuenta escritos a mano (23/10/2026, solo ALBERTO 4)
 
 «Esa respuesta la tengo que poner varias veces en muchos lugares del editor… no sé dónde están», y la

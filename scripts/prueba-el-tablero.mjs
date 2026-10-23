@@ -113,5 +113,21 @@ comprobar(
   /message: \{ text: sinFormatoDeWhatsApp\(text\) \}/.test(leer("src", "lib", "instagram", "client.ts"))
 );
 
+// ── LO DEL 23/10 TARDE: para vender como COMO HOY / COMO DOU / COMO OB ─────────
+console.log("\n· la IA, el método, el upgrade, los seguimientos y el correo");
+const pago = leer("src", "lib", "tablero", "pago.ts");
+comprobar("la IA solo sabe de lo presentado (Presenta, cobro, entrega)", /presentadosDe\(estado\)/.test(motor) && /anotarPresentados\(convoId, f\.presenta/.test(motor));
+comprobar("y del cobro solo el que se cobra: el oculto no se destapa", /anotarPresentados\(convoId, \[principal\]\)/.test(motor));
+comprobar("con el método ya elegido no se repregunta", /const yaElegido = metodoVigente\(/.test(motor));
+comprobar("nombrar un método para quejarse no es elegirlo", /messageHasPaymentConcern\(contenido\) \? null : metodoQueNombra/.test(motor));
+comprobar("«mejor el otro» solo entre lo presentado", /Object\.keys\(precios\)\.filter\(\(id\) => vistos\.has\(id\)\)/.test(motor));
+comprobar("los datos son SUS textos por método, sin nombres de métodos en el código", /resolveCountryPaymentProfile\(pais, config\)\?\.payment_responses/.test(pago) && !/["'](yape|plin|bcp)["']\s*[:)]/i.test(pago.replace(/bcp_transferencia/g, "")));
+comprobar("el comprobante se valida contra lo que ELIGIÓ", /const elegidoId = estado\.cobro_elegido \?\? f\.cobro\.producto_id/.test(motor));
+comprobar("el upgrade cobra la diferencia", /f\.cobro\.diferencia/.test(motor) && /precios\[id\] = Math\.round\(\(v - pagado\) \* 100\) \/ 100/.test(motor));
+comprobar("los seguimientos usan las reglas de Ajustes (tardío, silencio, ráfaga)", /defer_late_leads_enabled/.test(motor) && /cumulativeBurstOffset/.test(motor) && /ignora_silencio/.test(motor));
+comprobar("y vuelven a contar si el cliente escribe", /contarSeguimientosDesde\(convo\.id, ahora\(\)\)/.test(motor));
+comprobar("el correo no sale desde el simulador", /if \(convo\.channel === "test"\) \{\s*console\.log\(`\[tablero:correo\]/.test(motor));
+comprobar("y la ficha de correo se guarda (sus burbujas y su texto)", /tipo === "correo"\) && Array\.isArray\(f\.steps\)/.test(datos) && /ficha\.correo_texto = cuerpo/.test(datos));
+
 console.log(fallos === 0 ? "\nTODO OK" : `\n${fallos} FALLO(S)`);
 process.exit(fallos === 0 ? 0 : 1);

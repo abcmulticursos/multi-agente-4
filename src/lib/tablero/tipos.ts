@@ -25,7 +25,8 @@ export type TipoDeFicha =
   | "esperar"
   | "workflow"
   | "regalo"
-  | "humano";
+  | "humano"
+  | "correo";
 
 /** Un tramo de monto del cobro abierto: «pagó entre `desde` y `hasta`». Montos de UN país. */
 export interface TramoDeCobro {
@@ -57,6 +58,17 @@ export interface CobroDeLaFicha {
   minimo_por_pais?: Record<string, number>;
   /** Por país: los tramos del pago abierto. */
   tramos_por_pais?: Record<string, TramoDeCobro[]>;
+  /**
+   * PREGUNTAR EL MÉTODO Y MANDAR SUS DATOS SOLO (23/10/2026), como la venta de siempre: sus
+   * burbujas preguntan el método; si el cliente ya lo eligió antes, no se le pregunta y le llegan
+   * los datos de ese método (los de «Métodos de pago» de su país) con el precio de lo que eligió.
+   * Si cambia de método o de producto mientras el cobro sigue abierto, le llegan los nuevos.
+   */
+  metodos?: boolean;
+  /**
+   * EL UPGRADE: si ya compró uno más barato de los de este cobro, se cobra solo la diferencia.
+   */
+  diferencia?: boolean;
 }
 
 export interface CondicionDeLaFicha {
@@ -86,6 +98,10 @@ export interface SeguimientoDeLaFicha {
   variantes: VarianteDeFicha[];
   /** Desde que sale, los cobros «según la etapa» cobran el precio de oferta. */
   activa_oferta?: boolean;
+  /** Sale aunque caiga en las horas de silencio (como «ignorar horario de silencio» de siempre). */
+  ignora_silencio?: boolean;
+  /** No se aplaza al día siguiente aunque el cliente haya llegado tarde («lead tardío»). */
+  ignora_tardio?: boolean;
 }
 
 /** Una salida del reparto por peso. */
@@ -134,6 +150,15 @@ export interface FichaDelTablero {
   minutos?: number;
   /** Ficha «Workflow»: a cuál lleva. */
   workflow_id?: string;
+  /**
+   * LOS PRODUCTOS QUE PRESENTA (mensaje, intro de order bump, seguimientos). La IA del tablero solo
+   * habla de un producto cuando ya se le presentó al cliente: así el oculto sigue oculto hasta su
+   * intro. El cobro presenta los suyos y «Entregar» el que entrega.
+   */
+  presenta?: string[];
+  /** Ficha «Pedir correo y enviar»: el asunto y el texto del correo. {{MATERIAL}} = lo que recibió. */
+  correo_asunto?: string;
+  correo_texto?: string;
 }
 
 export interface CableDelTablero {

@@ -34,6 +34,7 @@ const TIPOS: TipoDeFicha[] = [
   "workflow",
   "regalo",
   "humano",
+  "correo",
 ];
 
 /** La ventana de Meta: pasado esto sin que el cliente escriba, un mensaje libre no llega. */
@@ -94,6 +95,8 @@ function leeCobro(v: unknown): CobroDeLaFicha | undefined {
     ...(precio ? { precio } : {}),
     ...(Object.keys(minimo_por_pais).length ? { minimo_por_pais } : {}),
     ...(Object.keys(tramos_por_pais).length ? { tramos_por_pais } : {}),
+    ...(modo === "producto" && v.metodos === true ? { metodos: true } : {}),
+    ...(modo === "producto" && v.diferencia === true ? { diferencia: true } : {}),
   };
 }
 
@@ -144,6 +147,8 @@ function leeSeguimientos(v: unknown, leerPasos: (p: unknown[]) => unknown[]): Se
         minutos: Math.max(1, Math.round(positivo(x.minutos) ?? 180)),
         variantes: leeVariantes(x.variantes, leerPasos),
         ...(x.activa_oferta === true ? { activa_oferta: true } : {}),
+        ...(x.ignora_silencio === true ? { ignora_silencio: true } : {}),
+        ...(x.ignora_tardio === true ? { ignora_tardio: true } : {}),
       },
     ];
   });
@@ -189,13 +194,21 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       }
       if (f.apagada === true && tipo !== "inicio") ficha.apagada = true;
       if (f.guardada === true && tipo !== "inicio") ficha.guardada = true;
-      if ((tipo === "mensaje" || tipo === "cobro") && Array.isArray(f.steps))
+      if ((tipo === "mensaje" || tipo === "cobro" || tipo === "correo") && Array.isArray(f.steps))
         ficha.steps = leerPasos(f.steps.slice(0, 60)) as FichaDelTablero["steps"];
+      const presenta = ids(f.presenta, 20);
+      if ((tipo === "mensaje" || tipo === "intro_ob" || tipo === "seguimientos") && presenta.length) ficha.presenta = presenta;
+      if (tipo === "correo") {
+        const asunto = texto(f.correo_asunto, 200).trim();
+        const cuerpo = texto(f.correo_texto, 4000);
+        if (asunto) ficha.correo_asunto = asunto;
+        if (cuerpo.trim()) ficha.correo_texto = cuerpo;
+      }
       if (tipo === "intro_ob") ficha.variantes = leeVariantes(f.variantes, leerPasos);
       if (tipo === "seguimientos") ficha.seguimientos = leeSeguimientos(f.seguimientos, leerPasos);
       if (tipo === "reparto") ficha.reparto = leeReparto(f.reparto);
       const sr = positivo(f.sin_respuesta_min);
-      if ((tipo === "mensaje" || tipo === "intro_ob") && sr) ficha.sin_respuesta_min = sr;
+      if ((tipo === "mensaje" || tipo === "intro_ob" || tipo === "correo") && sr) ficha.sin_respuesta_min = sr;
       const sp = positivo(f.sin_pago_min);
       if (tipo === "cobro" && sp) ficha.sin_pago_min = sp;
       const producto = texto(f.producto_id, 120).trim();
@@ -356,6 +369,11 @@ export function salidasDeLaFicha(
       return [];
     case "regalo":
       return [{ clave: "fin", etiqueta: "🏁 Al terminar el regalo" }];
+    case "correo":
+      return [
+        { clave: "enviado", etiqueta: "✉️ Correo enviado" },
+        ...(f.sin_respuesta_min ? [{ clave: "sin_respuesta", etiqueta: `⏰ No dio su correo en ${minutosLegibles(f.sin_respuesta_min)}` }] : []),
+      ];
     case "condicion":
       return [
         { clave: "si", etiqueta: "Sí" },
@@ -497,7 +515,16 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
       if (f.condicion?.tipo === "compro" && !f.condicion.producto_id) avisos.push("No tiene producto elegido.");
       if (f.condicion?.tipo === "pais" && !(f.condicion.paises ?? []).length) avisos.push("No tiene países elegidos.");
       break;
+    case "correo":
+      if (pasos.length === 0) avisos.push("No tiene burbujas: no le pide el correo.");
+      if (!(f.correo_texto ?? "").includes("{{MATERIAL}}")) avisos.push("El texto del correo no lleva {{MATERIAL}}: no irían sus enlaces.");
+      break;
   }
+  // La IA solo habla de lo que ya se presentó. Se avisa en las que presentan de verdad: la intro de
+  // order bump y el primer mensaje de un Inicio (la intro). Un «gracias» no necesita producto.
+  const esLaIntro = f.tipo === "mensaje" && t.cables.some((c) => c.a === f.id && t.fichas.find((x) => x.id === c.de)?.tipo === "inicio");
+  if ((f.tipo === "intro_ob" || esLaIntro) && !(f.presenta ?? []).length && pasos.length > 0 && !f.apagada)
+    avisos.push("No dice qué producto presenta: la IA no sabrá contestar «qué contiene» hasta un cobro o una entrega.");
   // Una ficha que espera respuesta y no tiene NINGÚN cable de salida deja al cliente sin camino.
   if (FICHAS_CON_RESPUESTA.includes(f.tipo) && f.tipo !== "seguimientos") {
     const salidas = salidasDeLaFicha(f, pais);

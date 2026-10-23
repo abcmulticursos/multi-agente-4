@@ -18,6 +18,7 @@ export const ASPECTO: Record<TipoDeFicha, { icono: string; nombre: string; color
   workflow: { icono: "▶▶", nombre: "Ir a un workflow", color: "bg-indigo-600", borde: "border-indigo-500", trazo: "#4f46e5" },
   regalo: { icono: "🎁", nombre: "Postventa y regalo", color: "bg-pink-600", borde: "border-pink-500", trazo: "#db2777" },
   humano: { icono: "🙋", nombre: "Pasar a humano", color: "bg-rose-600", borde: "border-rose-500", trazo: "#e11d48" },
+  correo: { icono: "📧", nombre: "Pedir correo y enviar", color: "bg-cyan-600", borde: "border-cyan-500", trazo: "#0891b2" },
 };
 
 /** El orden en que se ofrecen al crear una ficha. */
@@ -27,6 +28,7 @@ export const TIPOS_PARA_CREAR: TipoDeFicha[] = [
   "intro_ob",
   "cobro",
   "entregar",
+  "correo",
   "condicion",
   "reparto",
   "esperar",

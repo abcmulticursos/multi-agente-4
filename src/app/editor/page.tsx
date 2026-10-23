@@ -30814,25 +30814,31 @@ function PantallaDelTablero({
 
   const resumenDe = (f: FichaEnElEditor): string => {
     const pasos = ((f.steps ?? []) as EditorStep[]).filter((s) => s.enabled !== false);
+    const presenta = (f.presenta ?? []).length ? `\nPresenta: ${(f.presenta ?? []).map((x) => nombreDelProducto(x)).join(", ")}` : "";
     switch (f.tipo) {
       case "inicio":
         return "";
       case "mensaje":
-        return pasos.length === 0 ? "Sin burbujas — doble clic para escribirlas." : "";
+        return (pasos.length === 0 ? "Sin burbujas — doble clic para escribirlas." : "") + presenta;
       case "intro_ob":
-        return `${(f.variantes ?? []).length} versión(es) · destapa el producto oculto`;
+        return `${(f.variantes ?? []).length} versión(es) · destapa el producto oculto${presenta}`;
       case "seguimientos": {
         const s = f.seguimientos ?? [];
         return s.length === 0
           ? "Sin seguimientos — doble clic para crearlos."
-          : `${s.length} seguimiento(s) · ${s.map((x) => minutosLegiblesDelTablero(x.minutos)).join(" · ")}\nDesde su último mensaje; se detienen si paga.`;
+          : `${s.length} seguimiento(s) · ${s.map((x) => minutosLegiblesDelTablero(x.minutos)).join(" · ")}\nDesde su último mensaje; se detienen si paga.${presenta}`;
       }
+      case "correo":
+        return `Pide el correo y le manda lo que recibió.${f.sin_respuesta_min ? `\nSi no lo da en ${minutosLegiblesDelTablero(f.sin_respuesta_min)}, sigue por «No dio su correo».` : ""}`;
       case "entregar":
         return `Entrega: ${nombreDelProducto(f.producto_id)}`;
       case "cobro": {
         const c = f.cobro;
         const precio = c?.precio === "normal" ? "precio normal" : c?.precio === "oferta" ? "precio de oferta" : "precio según la etapa";
-        if (c?.modo === "producto") return `Cobra: ${nombreDelProducto(c.producto_id)} · ${precio}${(c.acepta ?? []).length ? `\nTambién acepta: ${(c.acepta ?? []).map((x) => nombreDelProducto(x)).join(", ")}` : ""}`;
+        if (c?.modo === "producto")
+          return `Cobra: ${nombreDelProducto(c.producto_id)} · ${precio}${(c.acepta ?? []).length ? `\nTambién acepta: ${(c.acepta ?? []).map((x) => nombreDelProducto(x)).join(", ")}` : ""}${
+            c.metodos ? "\n💳 Pregunta el método y manda sus datos" : ""
+          }${c.diferencia ? "\n⬆️ Si ya compró uno más barato, cobra la diferencia" : ""}`;
         const min = c?.minimo_por_pais?.[paisVisto];
         const tramos = c?.tramos_por_pais?.[paisVisto]?.length ?? 0;
         return `Pago abierto · ${paisVisto}: mínimo ${min ?? 0}, ${tramos} tramo${tramos === 1 ? "" : "s"}`;
@@ -30992,7 +30998,7 @@ function PantallaDelTablero({
           onCambiar={guardar}
           onAbrir={(fid) => {
             const f = tablero.fichas.find((x) => x.id === fid);
-            if (f?.tipo === "mensaje" || f?.tipo === "cobro") setCajon(fid);
+            if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
             else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
             else setAjustes(fid);
           }}
@@ -31003,7 +31009,9 @@ function PantallaDelTablero({
         <EnElTableroContext.Provider value={true}>
           <VentanaDelCajon
             key={fichaDeCajon.id}
-            titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : "💬"} ${fichaDeCajon.titulo?.trim() || (fichaDeCajon.tipo === "cobro" ? "Cobro" : "Mensaje")}`}
+            titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : fichaDeCajon.tipo === "correo" ? "📧" : "💬"} ${
+              fichaDeCajon.titulo?.trim() || (fichaDeCajon.tipo === "cobro" ? "Cobro" : fichaDeCajon.tipo === "correo" ? "Pedir correo" : "Mensaje")
+            }`}
             steps={(fichaDeCajon.steps ?? []) as EditorStep[]}
             idPrefix={`tablero_${fichaDeCajon.id.replace(/[^a-z0-9]/gi, "_")}`}
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
@@ -31114,7 +31122,7 @@ function GestorDeVersiones({
           </div>
           <p className="text-[11px] text-tinta-suave">
             {esSeg
-              ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar). Respeta las 24 h y las horas de silencio, y se detiene si paga."
+              ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar), como tus seguimientos de siempre. Respeta las 24 h, las horas de silencio, el lead tardío y la cola antirráfaga de Ajustes, y se detiene si paga."
               : "Antes de esta ficha la IA no sabe nada del producto oculto. Con varias versiones, el bot sortea por peso."}
           </p>
           {esSeg &&
@@ -31148,6 +31156,22 @@ function GestorDeVersiones({
                     onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, activa_oferta: e.target.checked } : x)))}
                   />
                   Activa el precio de oferta
+                </label>
+                <label className="mt-0.5 flex items-center gap-1 text-[11px]" title="Sale aunque caiga en las horas de silencio de Ajustes">
+                  <input
+                    type="checkbox"
+                    checked={s.ignora_silencio === true}
+                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, ignora_silencio: e.target.checked || undefined } : x)))}
+                  />
+                  Ignora las horas de silencio
+                </label>
+                <label className="mt-0.5 flex items-center gap-1 text-[11px]" title="No se aplaza a la mañana aunque el cliente llegue tarde (Ajustes → lead tardío)">
+                  <input
+                    type="checkbox"
+                    checked={s.ignora_tardio === true}
+                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, ignora_tardio: e.target.checked || undefined } : x)))}
+                  />
+                  Ignora el aplazamiento del lead tardío
                 </label>
                 <div className="mt-1 flex flex-col gap-1">
                   {s.variantes.map((v, j) => (
@@ -31394,15 +31418,54 @@ function AjustesDeLaFicha({
               </label>
             </>
           )}
-          {(ficha.tipo === "mensaje" || ficha.tipo === "cobro" || ficha.tipo === "seguimientos" || ficha.tipo === "intro_ob") && (
+          {(ficha.tipo === "mensaje" || ficha.tipo === "cobro" || ficha.tipo === "seguimientos" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
             <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
               ✏️ {ficha.tipo === "seguimientos" ? "Abrir sus seguimientos" : ficha.tipo === "intro_ob" ? "Abrir sus versiones" : "Escribir sus burbujas"}
             </button>
           )}
-          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob") && (
+          {/* QUÉ PRODUCTO PRESENTA (23/10/2026): la IA solo habla de lo que ya se le presentó. */}
+          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "seguimientos") && (
+            <div className={etiqueta}>
+              Presenta estos productos
+              <span className="mt-1 block">
+                <ListaDeEleccion todos={productos} elegidos={b.presenta ?? []} onCambio={(ids) => setB({ ...b, presenta: ids })} />
+              </span>
+              <span className={ayuda}>
+                Desde que sale esta ficha, la IA conoce su contenido y su precio (de su ficha en Productos) y puede contestar «qué contiene» o «cuánto
+                cuesta». Un producto que todavía no se presentó no existe para la IA: así el oculto sigue oculto hasta su intro.
+              </span>
+            </div>
+          )}
+          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
             <div className={etiqueta}>
               ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
               <span className={ayuda}>Aparece la salida «No respondió» para tu insistencia. Si responde algo, ya no sale. Vacío = sin esa salida.</span>
+            </div>
+          )}
+          {ficha.tipo === "correo" && (
+            <div className="space-y-2">
+              <label className={etiqueta}>
+                Asunto del correo
+                <input
+                  value={b.correo_asunto ?? ""}
+                  onChange={(e) => setB({ ...b, correo_asunto: e.target.value })}
+                  placeholder="Vacío = el nombre de lo que compró"
+                  className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                />
+              </label>
+              <label className={etiqueta}>
+                Texto del correo
+                <textarea
+                  value={b.correo_texto ?? ""}
+                  onChange={(e) => setB({ ...b, correo_texto: e.target.value })}
+                  rows={6}
+                  className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                />
+                <span className={ayuda}>
+                  <strong>{"{{MATERIAL}}"}</strong> = lo que recibió por WhatsApp: el texto de la entrega de cada producto que le entregó esta ruta, con sus
+                  enlaces. Sus burbujas piden el correo; cuando lo escribe, se envía desde tu Gmail y sigue por «Correo enviado».
+                </span>
+              </label>
             </div>
           )}
           {ficha.tipo === "entregar" && (
@@ -31518,6 +31581,26 @@ function AjustesDeLaFicha({
                       <option value="oferta">Siempre el de oferta</option>
                     </select>
                     <span className={ayuda}>El precio de cada país. Se congela al abrir el cobro: si lo cambias después, a este cliente se le cobra lo que se le dijo.</span>
+                  </label>
+                  <label className="flex items-start gap-2 text-xs font-semibold">
+                    <input type="checkbox" checked={cobro.metodos === true} onChange={(e) => ponCobro({ ...cobro, metodos: e.target.checked || undefined })} className="mt-0.5" />
+                    <span>
+                      💳 Preguntar el método y mandar sus datos solo
+                      <span className={ayuda}>
+                        Como la venta de siempre. Tus burbujas de aquí preguntan el método (y, si usas botones de métodos, salen los botones). Si ya lo eligió antes,
+                        no se le pregunta: le llegan los datos de ese método. Los datos son los tuyos de «Métodos de pago» de su país, con el precio de lo que
+                        eligió. Si dice otro método o «mejor el otro», le llegan los nuevos.
+                      </span>
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2 text-xs font-semibold">
+                    <input type="checkbox" checked={cobro.diferencia === true} onChange={(e) => ponCobro({ ...cobro, diferencia: e.target.checked || undefined })} className="mt-0.5" />
+                    <span>
+                      ⬆️ Upgrade: si ya compró uno más barato de esta lista, cobra solo la diferencia
+                      <span className={ayuda}>
+                        Por ejemplo, compró el básico y ahora quiere el full: se le cobra el full menos lo que ya pagó. Lo que ya tiene no se le vuelve a cobrar.
+                      </span>
+                    </span>
                   </label>
                 </>
               ) : (

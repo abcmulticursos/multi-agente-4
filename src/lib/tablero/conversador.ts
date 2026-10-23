@@ -13,16 +13,38 @@ import { getClient } from "@/lib/openrouter";
 import { sendBotText } from "@/lib/workflow/sender";
 import { ultimosMensajes } from "./lector";
 
+/** Lo que la IA sabe de un producto YA PRESENTADO al cliente (sale de su ficha en Productos). */
+export interface ProductoParaLaIA {
+  nombre: string;
+  /** Su precio para este cliente, ya escrito con su moneda («S/ 10»). */
+  precio?: string;
+  /** Su precio anterior/tachado, si lo tiene. */
+  antes?: string;
+  contenido?: string;
+  regalos?: string;
+  /** Ya lo compró. */
+  comprado?: boolean;
+}
+
 export interface ContextoDeLaIA {
   /** Lo que el cliente tiene delante: el texto de la última pregunta del bot, si la hay. */
   preguntaPendiente?: string;
-  /** Los únicos montos que la IA puede nombrar (los de su cobro abierto, en su país). */
+  /** Los únicos montos que la IA puede nombrar (su cobro abierto y los precios de lo presentado). */
   montosPermitidos: number[];
   moneda?: string;
   /** Lo que acaba de pasar y la IA debe decir con sus palabras (p. ej. «pago recibido»). */
   nota?: string;
   /** Si ya se le entregó algo: la IA puede reenviarlo si el cliente dice que no le llegó. */
   reenviar?: () => Promise<void>;
+  /**
+   * LOS PRODUCTOS QUE YA SE LE PRESENTARON (23/10/2026). La IA habla SOLO de éstos: el que todavía
+   * no se presentó no existe para ella, y así el producto oculto sigue oculto hasta su intro.
+   */
+  productos?: ProductoParaLaIA[];
+  /** El dialecto del país del cliente (el mismo que usa el motor de siempre). */
+  dialecto?: string;
+  /** Con un cobro abierto y el método ya elegido: la IA puede reenviar los datos de pago. */
+  reenviarDatos?: () => Promise<void>;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -38,15 +60,46 @@ export function importesDelTexto(t: string): number[] {
   return fuera;
 }
 
+/**
+ * LO QUE SABE DE LOS PRODUCTOS. Sale de la ficha de cada producto en Productos (su contenido y sus
+ * regalos) y del precio de su país. Las reglas de la casa son las del cerebro de siempre que no
+ * dependen de una modalidad: la desconfianza se escucha, el precio se dice de frente, nunca se
+ * dice un número de cuenta.
+ */
+function loQueSabe(c: ContextoDeLaIA): string {
+  const productos = c.productos ?? [];
+  if (productos.length === 0)
+    return "Todavía no se le ha presentado ningún producto: no hables de productos, contenidos ni precios que no estén en la conversación.";
+  const fichas = productos.map((p) =>
+    [
+      `• ${p.nombre}${p.comprado ? " (YA LO COMPRÓ)" : ""}`,
+      p.precio ? `  Precio para este cliente: ${p.precio}${p.antes ? ` (antes ${p.antes})` : ""}` : "",
+      p.contenido?.trim() ? `  Qué incluye: ${p.contenido.trim().slice(0, 2500)}` : "",
+      p.regalos?.trim() ? `  Regalos: ${p.regalos.trim().slice(0, 600)}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n")
+  );
+  return [
+    "LOS PRODUCTOS QUE YA SE LE PRESENTARON (son los ÚNICOS que existen para ti; no menciones ni insinúes ningún otro):",
+    ...fichas,
+    "Datos del producto (cantidades, bonos, formatos): SOLO los escritos aquí. Si no está escrito, no lo afirmes.",
+  ].join("\n");
+}
+
 function cerebro(c: ContextoDeLaIA): string {
   const montos = c.montosPermitidos.length
     ? `Los ÚNICOS montos que puedes mencionar son: ${c.montosPermitidos.join(", ")}${c.moneda ? ` (${c.moneda})` : ""}. Ningún otro número de dinero, ni sumas, ni descuentos.`
     : "NO menciones ningún precio ni monto de dinero: si preguntan cuánto cuesta, di que en un momento le compartes la información, sin inventar cifras.";
   return [
-    "Eres el asistente de ventas de esta tienda por WhatsApp. La conversación sigue una ruta armada por el dueño; tu papel es contestar con calidez y brevedad lo que el cliente pregunta y devolverlo a la ruta.",
-    "Usa SOLO lo que ya se le dijo al cliente en esta conversación. No inventes contenido, beneficios, plazos ni condiciones que no aparezcan arriba.",
+    "Eres el asistente de ventas de esta tienda por WhatsApp: persuasivo sin presionar, cálido y breve. La conversación sigue una ruta armada por el dueño; tu papel es contestar lo que el cliente pregunta y devolverlo a la ruta.",
+    loQueSabe(c),
+    "Usa SOLO lo de arriba y lo que ya se le dijo en esta conversación. No inventes contenido, beneficios, plazos ni condiciones.",
     montos,
-    "No des datos de pago, números de cuenta ni enlaces: eso lo envía el sistema.",
+    "Si pregunta el precio, dilo de frente (de los montos permitidos) con una frase corta de valor y una invitación suave. No lo esquives.",
+    "Si muestra desconfianza o miedo a una estafa: primero reconoce lo que siente, luego tranquilízalo con honestidad y brevedad (la entrega es inmediata al validar el comprobante, el nombre del titular es siempre el mismo y verificable) y después invítalo con calma a seguir.",
+    "No des datos de pago, números de cuenta, nombres de titular ni enlaces: eso lo envía el sistema.",
+    c.dialecto ? `DIALECTO (manda sobre todo lo demás): ${c.dialecto}` : "",
     c.preguntaPendiente
       ? `Al final, invítalo con naturalidad a responder lo que quedó pendiente: «${c.preguntaPendiente.slice(0, 300)}».`
       : "Cierra con una frase corta que invite a seguir.",
@@ -133,6 +186,16 @@ const HERRAMIENTA_DE_REENVIO = {
   },
 };
 
+const HERRAMIENTA_DE_DATOS = {
+  type: "function" as const,
+  function: {
+    name: "reenviar_datos_de_pago",
+    description:
+      "Use when the customer asks for the payment details again (account, number, where to pay) or says yes to paying now. The system sends the payment details of the method they already chose, with the right price.",
+    parameters: { type: "object", properties: {}, additionalProperties: false },
+  },
+};
+
 /**
  * Contesta con la IA y lo envía en burbujas. Si la IA nombra un monto que no está permitido, se le
  * pide otra vez; si insiste, se quitan las frases con ese monto. Nunca sale un precio inventado.
@@ -145,6 +208,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   let aviso = "";
   for (let intento = 0; intento < 2; intento++) {
     try {
+      const herramientas = intento === 0 ? [...(c.reenviar ? [HERRAMIENTA_DE_REENVIO] : []), ...(c.reenviarDatos ? [HERRAMIENTA_DE_DATOS] : [])] : [];
       const r = await getClient().chat.completions.create({
         model: modelo,
         messages: [
@@ -152,15 +216,21 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
           ...historial(convo.id),
         ],
         temperature: 0.6,
-        ...(c.reenviar && intento === 0 ? { tools: [HERRAMIENTA_DE_REENVIO] } : {}),
+        ...(herramientas.length ? { tools: herramientas } : {}),
       });
+      const pidio = (nombre: string) =>
+        r.choices[0]?.message?.tool_calls?.some((t) => t.type === "function" && t.function.name === nombre) ?? false;
       // «NO ME LLEGÓ»: se reenvía lo entregado, y la IA lo acompaña con una frase suya.
-      const pidioReenvio = r.choices[0]?.message?.tool_calls?.some(
-        (t) => t.type === "function" && t.function.name === "reenviar_material"
-      );
-      if (pidioReenvio && c.reenviar) {
+      if (pidio("reenviar_material") && c.reenviar) {
         console.log(`[tablero:ia] convo ${convo.id}: pidió que le reenvíen el material`);
         await c.reenviar();
+        return true;
+      }
+      // «PÁSAME LA CUENTA» / «SÍ, YA PAGO»: los datos del método que eligió, con su precio. Los
+      // manda el sistema, no la IA (como la guarda de `payment_done` del motor de siempre).
+      if (pidio("reenviar_datos_de_pago") && c.reenviarDatos) {
+        console.log(`[tablero:ia] convo ${convo.id}: pidió los datos de pago otra vez`);
+        await c.reenviarDatos();
         return true;
       }
       texto = (r.choices[0]?.message?.content ?? "").trim();
