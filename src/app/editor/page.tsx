@@ -17,6 +17,23 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
+import {
+  aplicarPase,
+  avisosDeNumeros,
+  buscarNumerosAMano,
+  claveDeCuenta,
+  comodinDeCuenta,
+  conCuentaDelPais,
+  nombreDeLaClave,
+  nombrePropuesto,
+  numerosGuardadosEn,
+  otrasCuentas,
+  prepararPase,
+  renombrarComodin,
+  textosQueUsan,
+  type ConfigConCuentas,
+  type Hallazgo,
+} from "@/lib/editor/numeros-a-mano";
 import { compartidoPor, cuentaDeLaTienda, soloDeLaCuenta } from "@/lib/meta/cuentas";
 // LA MISMA REGLA QUE EL MOTOR, para que el aviso de «esta tienda se quedaría sin
 // seguimientos» no pueda desmentir al bot. Vive en su propio archivo justamente
@@ -1045,6 +1062,13 @@ const PlaceholderOptionsContext = createContext<PlaceholderOption[]>(
 );
 
 /**
+ * LAS CUENTAS GUARDADAS (sus cifras → su comodín), para el aviso amarillo de cada caja de texto:
+ * un número escrito a mano no cambia al cambiar la cuenta ni el usuario que cobra (23/10/2026).
+ * Ver `src/lib/editor/numeros-a-mano.ts`.
+ */
+const NumerosGuardadosContext = createContext<Map<string, string | null>>(new Map());
+
+/**
  * LAS MARCAS DE REFRESCO DE LOS ARCHIVOS.
  *
  * El navegador guarda la miniatura de Drive 24 horas. Al reemplazar la foto
@@ -1343,7 +1367,7 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
         vistos.set(metodo, etiqueta || metodo);
       }
     }
-    return Array.from(vistos, ([metodo, etiqueta]) => ({
+    const deMetodo = Array.from(vistos, ([metodo, etiqueta]) => ({
       token: `{{CUENTA_${metodo.toUpperCase()}}}`,
       label: `Cuenta de ${etiqueta}`,
       description:
@@ -1352,6 +1376,17 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
         `método, {{NUMERO_DE_CUENTA}} ya da la suya. Se escribe en 👤 Usuario → ` +
         `Datos para pago → Una cuenta por método.`,
     })) satisfies PlaceholderOption[];
+    // LAS OTRAS CUENTAS (23/10/2026): las que no son un método —«Interbancaria», «Cédula», la del
+    // upsell—. Mismo comodín, mismo motor; solo faltaba poder escribirlas.
+    const otras = new Set<string>();
+    for (const perfil of Object.values(cfg?.payment_profiles_by_country ?? {}))
+      for (const [clave] of otrasCuentas(perfil?.cuentas_por_metodo, [...vistos.keys()])) otras.add(clave.trim().toLowerCase());
+    const deOtras = [...otras].map((clave) => ({
+      token: comodinDeCuenta(clave),
+      label: `Cuenta «${nombreDeLaClave(clave)}»`,
+      description: `Tu cuenta «${nombreDeLaClave(clave)}», o la de quien cobre en ese número. Se escribe en 👤 Usuario → Datos para pago → Otras cuentas.`,
+    })) satisfies PlaceholderOption[];
+    return [...deMetodo, ...deOtras];
   })();
   return [...base, ...dynamic, ...custom, ...cuentasPorMetodo];
 }
@@ -9680,6 +9715,16 @@ export default function EditorPage() {
     // anterior después de cambiar el selector del editor.
     [cfg]
   );
+  // Solo dependen de las cuentas: escribir en una burbuja no las recalcula.
+  const numerosGuardados = useMemo(
+    () =>
+      avisosDeNumeros({
+        payment_profiles_by_country: cfg?.payment_profiles_by_country,
+        modality_payment_profiles: cfg?.modality_payment_profiles,
+        cobradores: cfg?.cobradores,
+      } as never),
+    [cfg?.payment_profiles_by_country, cfg?.modality_payment_profiles, cfg?.cobradores]
+  );
   /**
    * QUÉ PESTAÑAS CORRESPONDEN AHORA.
    *
@@ -10196,6 +10241,7 @@ export default function EditorPage() {
 
   return (
     <PlaceholderOptionsContext.Provider value={placeholderOptions}>
+    <NumerosGuardadosContext.Provider value={numerosGuardados}>
     <PaymentMethodsContext.Provider value={metodosDePagoConfigurados}>
     <WorkflowsContext.Provider value={Object.entries(cfg?.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }))}>
     <TiendasContext.Provider value={laListaDeTiendas}>
@@ -11133,6 +11179,7 @@ export default function EditorPage() {
             onDatos={(parche) =>
               guardarDatosDelUsuario(selectedPaymentCountry, parche)
             }
+            onCfg={setCfg}
             onColor={(color) => {
               snapshot();
               setCfg({
@@ -17724,6 +17771,7 @@ export default function EditorPage() {
     </TiendasContext.Provider>
     </WorkflowsContext.Provider>
     </PaymentMethodsContext.Provider>
+    </NumerosGuardadosContext.Provider>
     </PlaceholderOptionsContext.Provider>
   );
 }
@@ -35291,6 +35339,10 @@ function EditorEmojiTextarea({
   const placeholderOptions = useContext(PlaceholderOptionsContext);
   const [placeholderQuery, setPlaceholderQuery] = useState<string | null>(null);
   const hasPlaceholders = /\{\{\s*[A-Za-z0-9_]+\s*\}\}/.test(value);
+  // UN NÚMERO DE CUENTA ESCRITO A MANO (23/10/2026): si cambias la cuenta o el usuario que cobra,
+  // aquí no cambia. Se avisa y, si la cuenta tiene comodín, se cambia con un clic.
+  const numerosGuardados = useContext(NumerosGuardadosContext);
+  const aMano = useMemo(() => numerosGuardadosEn(value, numerosGuardados), [value, numerosGuardados]);
 
   function getPlaceholderMatch(text: string, cursor: number) {
     const before = text.slice(0, cursor);
@@ -35396,6 +35448,31 @@ function EditorEmojiTextarea({
             en dos sitios: el desplegable que sale al escribir {{ —que además
             los inserta— y el botón "Comodines" de arriba, que lista todos los
             que existen. Repetirlo aquí ya no aporta nada. */}
+        {aMano.length > 0 && (
+          <div className="mt-1 space-y-1">
+            {aMano.map((x) => (
+              <p
+                key={x.escrito}
+                className="flex flex-wrap items-center gap-1.5 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] leading-snug text-amber-900"
+              >
+                <span>
+                  ⚠ <strong>{x.escrito}</strong> está escrito a mano: si cambias tu cuenta o el usuario que cobra, aquí no cambia.
+                </span>
+                {x.comodin ? (
+                  <button
+                    type="button"
+                    onClick={() => onChange(value.split(x.escrito).join(x.comodin!))}
+                    className="rounded border border-amber-400 bg-tarjeta px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-900 hover:bg-amber-100"
+                  >
+                    Cambiar por {x.comodin}
+                  </button>
+                ) : (
+                  <span>Es la cuenta de un usuario: usa su comodín.</span>
+                )}
+              </p>
+            ))}
+          </div>
+        )}
         {/* Aquí había un SEGUNDO desplegable de comodines.
 
             Hacía lo mismo que el que sigue al cursor, pero clavado arriba a
@@ -45256,6 +45333,406 @@ function ChapaDeComodin({
   );
 }
 
+const comoCuentas = (c: FullConfig) => c as unknown as ConfigConCuentas;
+const deCuentas = (c: ConfigConCuentas) => c as unknown as FullConfig;
+const recortarNumero = (n: string) => (n.replace(/\D/g, "").length > 8 ? `${n.slice(0, 3)}…${n.slice(-3)}` : n);
+
+/**
+ * LAS OTRAS CUENTAS DE UN PAÍS (23/10/2026): las que no son un método —«Interbancaria», «Cédula»,
+ * la del upsell—. Cada una con su nombre y su número, en una fila, y su comodín {{CUENTA_…}}.
+ *
+ * Se guardan donde el bot las busca: el país, su copia en cada modalidad y el usuario que es él
+ * mismo (mismo titular). Sin eso, en la tienda que cobra «su» usuario saldría su cuenta principal
+ * en lugar de ésta. Ver `conCuentaDelPais`.
+ */
+function OtrasCuentasDelPais({
+  cfg,
+  pais,
+  paisLabel,
+  onCfg,
+  onSnapshot,
+}: {
+  cfg: FullConfig;
+  pais: CountryCode;
+  paisLabel: string;
+  onCfg: (siguiente: FullConfig) => void;
+  onSnapshot: () => void;
+}) {
+  const metodos = (cfg.payment_profiles_by_country?.[pais]?.payment_buttons ?? [])
+    .map((b) => String(b?.method ?? "").trim().toLowerCase())
+    .filter(Boolean);
+  const filas = otrasCuentas(cfg.payment_profiles_by_country?.[pais]?.cuentas_por_metodo, metodos);
+  const [borrador, setBorrador] = useState<Record<string, string>>({});
+  const [nota, setNota] = useState("");
+  const guardar = (clave: string, valor: string | null, claveVieja?: string) =>
+    onCfg(deCuentas(conCuentaDelPais(comoCuentas(cfg), pais, clave, valor, claveVieja)));
+  const renombrar = (vieja: string, valor: string) => {
+    const escrito = (borrador[vieja] ?? "").trim();
+    setBorrador((antes) => {
+      const resto = { ...antes };
+      delete resto[vieja];
+      return resto;
+    });
+    const nueva = claveDeCuenta(escrito);
+    if (!escrito || nueva === vieja) return;
+    if (!nueva || filas.some(([k]) => k === nueva) || metodos.includes(nueva)) {
+      setNota(`Ya hay una cuenta que se llama «${escrito}». Elige otro nombre.`);
+      return;
+    }
+    onSnapshot();
+    let siguiente = conCuentaDelPais(comoCuentas(cfg), pais, nueva, valor, vieja);
+    // Los usuarios que NO son él (Melissa…) también la llaman con el nuevo nombre.
+    siguiente = {
+      ...siguiente,
+      cobradores: (siguiente.cobradores ?? []).map((c) => {
+        const suyo = c.por_pais?.[pais];
+        if (!suyo?.cuentas_por_metodo || !(vieja in suyo.cuentas_por_metodo)) return c;
+        const { [vieja]: numero, ...resto } = suyo.cuentas_por_metodo;
+        return { ...c, por_pais: { ...c.por_pais, [pais]: { ...suyo, cuentas_por_metodo: { ...resto, [nueva]: numero } } } };
+      }),
+    };
+    // Y LOS TEXTOS QUE YA LA USAN siguen funcionando: su comodín cambia con ella.
+    const usados = textosQueUsan(cfg, vieja);
+    if (usados > 0) siguiente = renombrarComodin(siguiente, vieja, nueva).cfg;
+    onCfg(deCuentas(siguiente));
+    setNota(usados > 0 ? `Renombrada. Sus ${usados} texto(s) ahora usan ${comodinDeCuenta(nueva)}.` : "");
+  };
+  const agregar = () => {
+    let clave = "otra_cuenta";
+    for (let n = 2; filas.some(([k]) => k === clave); n++) clave = `otra_cuenta_${n}`;
+    onSnapshot();
+    guardar(clave, "");
+  };
+  return (
+    <div className="rounded-xl border border-neutral-300 bg-relleno p-3">
+      <span className="text-xs font-bold uppercase tracking-wide text-neutral-500">Otras cuentas</span>
+      <p className="mt-1 text-[11px] text-neutral-500">
+        Las que no son un método de pago: la interbancaria, tu cédula, la cuenta del upsell… Cada una sale con su comodín. Cambias el número aquí y cambia en
+        todos los textos de {paisLabel}.
+      </p>
+      {filas.length > 0 && (
+        <div className="mt-2 space-y-1.5">
+          {filas.map(([clave, valor]) => {
+            const usados = textosQueUsan(cfg, clave);
+            return (
+              <div key={clave} className="grid items-center gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_auto_auto]">
+                <input
+                  value={borrador[clave] ?? nombreDeLaClave(clave)}
+                  onChange={(e) => setBorrador({ ...borrador, [clave]: e.target.value })}
+                  onBlur={() => renombrar(clave, valor)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                  aria-label="Nombre de la cuenta"
+                  className="rounded-lg border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm font-semibold text-neutral-900"
+                />
+                <input
+                  value={valor}
+                  onFocus={onSnapshot}
+                  onChange={(e) => guardar(clave, e.target.value)}
+                  placeholder="El número tal como lo lee el cliente"
+                  aria-label={`Número de ${nombreDeLaClave(clave)}`}
+                  className="rounded-lg border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm text-neutral-900"
+                />
+                <span className="flex items-center gap-1 whitespace-nowrap">
+                  <ChapaDeComodin comodin={comodinDeCuenta(clave)} vacio={!valor.trim()} />
+                  <span className="text-[10px] text-neutral-500">{usados ? `${usados} texto(s)` : "sin usar"}</span>
+                </span>
+                <button
+                  type="button"
+                  title="Quitar esta cuenta"
+                  aria-label={`Quitar ${nombreDeLaClave(clave)}`}
+                  onClick={() => {
+                    if (
+                      usados > 0 &&
+                      !confirm(`«${nombreDeLaClave(clave)}» la usan ${usados} texto(s). Si la quitas, ahí saldrá tu número de cuenta principal.\n\n¿Quitarla igual?`)
+                    )
+                      return;
+                    onSnapshot();
+                    guardar(clave, null);
+                  }}
+                  className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                >
+                  🗑️
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {nota && <p className="mt-1.5 text-[11px] font-semibold text-amber-800">{nota}</p>}
+      <button
+        type="button"
+        onClick={agregar}
+        className="mt-2 rounded-lg border border-dashed border-neutral-400 px-3 py-1.5 text-xs font-bold text-neutral-600 hover:border-emerald-400 hover:text-emerald-700"
+      >
+        + Otra cuenta
+      </button>
+    </div>
+  );
+}
+
+/**
+ * LA VENTANA DE LOS NÚMEROS ESCRITOS A MANO (23/10/2026). Una fila por número (y por su nombre de
+ * titular): de quién es, dónde está, y un botón que lo cambia por el comodín de su cuenta. Antes de
+ * pulsar dice, país por país, si el cliente leerá lo mismo; donde no, NO se toca y se explica qué
+ * saldría. Toda la lógica vive en `src/lib/editor/numeros-a-mano.ts`.
+ */
+function VentanaDeNumerosAMano({
+  cfg,
+  onCfg,
+  onSnapshot,
+  onCerrar,
+}: {
+  cfg: FullConfig;
+  onCfg: (siguiente: FullConfig) => void;
+  onSnapshot: () => void;
+  onCerrar: () => void;
+}) {
+  const hallazgos = useMemo(() => buscarNumerosAMano(comoCuentas(cfg)), [cfg]);
+  const [hecho, setHecho] = useState("");
+  // LOS PAÍSES QUE ÉL APRUEBA: «que sus clientes vean su propia cuenta» donde hoy leen la de otro
+  // país. Sin aprobar, esos textos no se tocan.
+  const [aprobados, setAprobados] = useState<Set<string>>(new Set());
+  const pasar = (h: Hallazgo, elegido: Parameters<typeof prepararPase>[2]) => {
+    const p = prepararPase(comoCuentas(cfg), h, elegido);
+    const r = aplicarPase(comoCuentas(cfg), h, p, aprobados);
+    if (r.textos === 0) {
+      setHecho("No se cambió nada: en los textos que quedan, el cliente leería otra cosa. Mira los avisos de esa fila.");
+      return;
+    }
+    onSnapshot();
+    onCfg(deCuentas(r.cfg));
+    setHecho(`Listo: ${r.textos} texto(s) ahora usan ${p.comodin}. Ctrl+Z lo deshace. Guarda con Ctrl+S.`);
+  };
+  // TODO DE UNA VEZ, cada fila con lo que propone. Lo que saldría distinto (y no aprobó) se queda.
+  const pasarTodo = () => {
+    let c = comoCuentas(cfg);
+    let total = 0;
+    for (const h of hallazgos) {
+      const r = aplicarPase(c, h, prepararPase(c, h), aprobados);
+      c = r.cfg;
+      total += r.textos;
+    }
+    if (total === 0) {
+      setHecho("No se cambió nada: en todos los textos que quedan el cliente leería otra cosa.");
+      return;
+    }
+    onSnapshot();
+    onCfg(deCuentas(c));
+    setHecho(`Listo: ${total} cambio(s). Lo que saldría distinto quedó como estaba. Ctrl+Z lo deshace. Guarda con Ctrl+S.`);
+  };
+  // LOS PAÍSES QUE LEEN DATOS DE OTRO PAÍS, con cuántos textos y qué leerían con el comodín.
+  const otrosPaises = useMemo(() => {
+    const m = new Map<string, { textos: number; ejemplos: Set<string> }>();
+    for (const h of hallazgos)
+      for (const r of prepararPase(comoCuentas(cfg), h).resultados)
+        if (!r.igual && r.pais) {
+          const x = m.get(r.pais) ?? { textos: 0, ejemplos: new Set<string>() };
+          x.textos += r.textos;
+          for (const d of r.diferencias) if (d.sale) x.ejemplos.add(recortarNumero(d.sale));
+          m.set(r.pais, x);
+        }
+    return [...m].sort((a, b) => b[1].textos - a[1].textos);
+  }, [hallazgos, cfg]);
+  // La etiqueta del país ya trae su bandera.
+  const nombreDelPais = (code: string) => COUNTRY_OPTIONS.find((o) => o.code === code)?.label ?? code;
+  return (
+    <VentanaFlotante
+      titulo="🔎 Números escritos a mano"
+      detalle="Cada número se cambia por el comodín de su cuenta. El texto se queda donde está; después, cambias el número en un solo lugar."
+      onCerrar={onCerrar}
+      ancho="max-w-4xl"
+    >
+      <div className="space-y-3">
+        {hallazgos.length === 0 ? (
+          <p className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">
+            ✅ No queda ningún número de cuenta escrito a mano en tus textos de pago.
+          </p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3">
+            <p className="min-w-0 flex-1 text-sm text-emerald-950">
+              <strong>{hallazgos.length}</strong> número(s) o nombre(s) escritos a mano. Se cambian solo donde el cliente lee lo mismo
+              {aprobados.size > 0 ? " o donde aprobaste abajo" : ""}.
+            </p>
+            <button
+              type="button"
+              onClick={pasarTodo}
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700"
+            >
+              Pasar todo
+            </button>
+          </div>
+        )}
+
+        {/* UNA DECISIÓN POR PAÍS, y no una por fila. Medido el 23/10: sus seguimientos de Argentina y
+            de Ecuador, y las piezas sin bandera, llevan escritos sus datos de PERÚ. */}
+        {otrosPaises.length > 0 && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-950">
+            <p className="text-sm font-bold">Hay textos que también leen clientes de otros países.</p>
+            <p className="mt-0.5 text-xs">
+              Llevan escritos datos de otro país (o no tienen bandera y les llegan a todos). Hoy esos clientes leen esos números. Con el comodín
+              leerían <strong>la cuenta de su propio país</strong>. Sin tu permiso, esos textos no se tocan.
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {otrosPaises.map(([pais, x]) => (
+                <label key={pais} className="flex flex-wrap items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={aprobados.has(pais)}
+                    onChange={(e) => {
+                      const s = new Set(aprobados);
+                      if (e.target.checked) s.add(pais);
+                      else s.delete(pais);
+                      setAprobados(s);
+                    }}
+                  />
+                  <span className="font-semibold">{nombreDelPais(pais)}</span>
+                  <span>
+                    · que vean su propia cuenta ({[...x.ejemplos].slice(0, 3).map((e) => `«${e}»`).join(", ")}) en vez de la de otro país
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+        {hecho && <p className="rounded-md bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-900">{hecho}</p>}
+        {hallazgos.map((h) => (
+          <FilaDeNumeroAMano key={`${h.tipo}:${h.clave}`} cfg={cfg} h={h} aprobados={aprobados} onPasar={pasar} />
+        ))}
+      </div>
+    </VentanaFlotante>
+  );
+}
+
+function FilaDeNumeroAMano({
+  cfg,
+  h,
+  aprobados,
+  onPasar,
+}: {
+  cfg: FullConfig;
+  h: Hallazgo;
+  aprobados: Set<string>;
+  onPasar: (h: Hallazgo, elegido: Parameters<typeof prepararPase>[2]) => void;
+}) {
+  const [nombre, setNombre] = useState(() => nombrePropuesto(h));
+  const [formato, setFormato] = useState<string | undefined>(undefined);
+  const [verDonde, setVerDonde] = useState(false);
+  const elegido = { nombre, formato };
+  const p = prepararPase(comoCuentas(cfg), h, elegido);
+  const iguales = p.resultados.filter((r) => r.igual || (r.pais && aprobados.has(r.pais)));
+  const distintos = p.resultados.filter((r) => !r.igual);
+  const etiquetaPais = (code: string | null) =>
+    code ? COUNTRY_OPTIONS.find((o) => o.code === code)?.label ?? code : "textos que no lee nadie (solo países donde no vendes)";
+  // Las formas en que está escrito, y la guardada si es otra: él elige cómo saldrá en todos.
+  const formas = [...h.formatos.map((f) => f.texto), ...(h.cuenta && !h.formatos.some((f) => f.texto === h.cuenta!.valor) ? [h.cuenta.valor] : [])];
+  const otrasDelPais = h.tipo === "numero" && p.nueva && p.clave.includes("_") ? p.clave.replace(/_\d+$/, "") : null;
+  return (
+    <div className="rounded-xl border border-borde bg-tarjeta p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-base font-black tracking-wide text-tinta">{h.tipo === "nombre" ? `👤 ${h.clave}` : `💳 ${p.formato}`}</span>
+        <span className="rounded-full bg-relleno px-2 py-0.5 text-[11px] font-semibold text-tinta-suave">{h.textos} texto(s)</span>
+        <span className="ml-auto" />
+        <button
+          type="button"
+          disabled={iguales.length === 0}
+          onClick={() => onPasar(h, elegido)}
+          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-300"
+          title={iguales.length === 0 ? "En ningún país saldría igual: apruébalo arriba si quieres cambiarlo" : ""}
+        >
+          Pasar a {p.comodin}
+        </button>
+      </div>
+
+      <div className="mt-1.5 text-xs text-tinta">
+        {h.tipo === "nombre" ? (
+          <>Es tu nombre de {etiquetaPais(p.pais)}. Sale con el comodín de tu nombre completo.</>
+        ) : h.cuenta && !p.nueva ? (
+          <>
+            Es tu cuenta <strong>«{nombreDeLaClave(h.cuenta.clave)}»</strong> de {etiquetaPais(p.pais)}.
+          </>
+        ) : (
+          <span className="inline-flex flex-wrap items-center gap-1.5">
+            No está guardado en tus cuentas. Se guardará en {etiquetaPais(p.pais)} como
+            <input
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              aria-label="Nombre de la cuenta nueva"
+              className="w-36 rounded border border-borde bg-relleno px-1.5 py-0.5 text-xs font-semibold"
+            />
+            {otrasDelPais && (
+              <span className="text-amber-800">
+                (ya tienes otra «{nombreDeLaClave(otrasDelPais)}» con otro número: revisa cuál es la buena)
+              </span>
+            )}
+          </span>
+        )}
+      </div>
+
+      {h.tipo === "numero" && formas.length > 1 && (
+        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-tinta">
+          <span className="font-semibold">Cómo saldrá en todos:</span>
+          {formas.map((f) => {
+            const veces = h.formatos.find((x) => x.texto === f)?.veces ?? 0;
+            return (
+              <label key={f} className="inline-flex items-center gap-1 rounded border border-borde px-1.5 py-0.5">
+                <input type="radio" checked={p.formato === f} onChange={() => setFormato(f)} />
+                <span className="font-mono">{f}</span>
+                <span className="text-[10px] text-tinta-suave">{veces ? `escrito así ${veces}×` : "como está guardada"}</span>
+              </label>
+            );
+          })}
+          {h.cuenta && p.formato !== h.cuenta.valor && textosQueUsan(cfg, claveDeCuenta(h.cuenta.clave)) > 0 && (
+            <span className="text-[10px] text-amber-800">
+              Los {textosQueUsan(cfg, claveDeCuenta(h.cuenta.clave))} texto(s) que ya usan {p.comodin} también saldrán así.
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="mt-2 space-y-1">
+        {p.resultados
+          .filter((r) => r.igual)
+          .map((r) => (
+            <p key={`i-${r.pais}`} className="text-[11px] text-emerald-800">
+              ✅ {etiquetaPais(r.pais)}: {r.textos} texto(s) — el cliente lee lo mismo{r.soloFormato ? " (solo cambian los espacios del número)" : ""}.
+            </p>
+          ))}
+        {distintos.map((r) => {
+          const salen = [...new Set(r.diferencias.map((d) => d.sale || "nada"))];
+          // Si en todas las tiendas saldría lo mismo, no se nombran: solo cuando cambia según la tienda.
+          const leerian =
+            salen.length === 1
+              ? `«${recortarNumero(salen[0])}»`
+              : r.diferencias.map((d) => `«${recortarNumero(d.sale || "nada")}» en ${d.donde}`).join("; ");
+          const si = !!r.pais && aprobados.has(r.pais);
+          return (
+            <p key={`d-${r.pais}`} className={`text-[11px] ${si ? "text-sky-800" : "text-amber-900"}`}>
+              {si ? "🔄" : "⚠"} {etiquetaPais(r.pais)}: {r.textos} texto(s) — hoy leen este {h.tipo === "nombre" ? "nombre" : "número"}; con el comodín leerían {leerian}.{" "}
+              {si ? "Aprobado arriba: se cambia." : "No se tocan si no lo apruebas arriba."}
+            </p>
+          );
+        })}
+        {h.fueraDePago > 0 && (
+          <p className="text-[11px] text-tinta-suave">También aparece {h.fueraDePago} vez/veces en textos que no son de pago: esos no se tocan.</p>
+        )}
+      </div>
+
+      <button type="button" onClick={() => setVerDonde(!verDonde)} className="mt-1.5 text-[11px] font-semibold text-sky-700 hover:underline">
+        {verDonde ? "▾ Ocultar dónde está" : "▸ Dónde está"}
+      </button>
+      {verDonde && (
+        <ul className="mt-1 grid gap-0.5 text-[11px] text-tinta-suave sm:grid-cols-2">
+          {h.lugares.map((l) => (
+            <li key={l.donde}>
+              {l.donde} <span className="font-semibold">×{l.veces}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * EL BOTÓN DE LA MONEDA: May · Min · Off.
  *
@@ -47189,6 +47666,7 @@ function PestanaDeUsuario({
   pais,
   onPais,
   onDatos,
+  onCfg,
   onColor,
   onBotones,
   onTextoDeBotones,
@@ -47202,6 +47680,9 @@ function PestanaDeUsuario({
   pais: CountryCode;
   onPais: (pais: CountryCode) => void;
   onDatos: (parche: Partial<CountryPaymentProfileEditor>) => void;
+  /** El contenido entero: las «otras cuentas» y la herramienta de los números a mano tocan
+   *  varios sitios a la vez (el país, sus modalidades, el usuario que es él mismo, los textos). */
+  onCfg: (siguiente: FullConfig) => void;
   onColor: (color: string) => void;
   onBotones: (encendido: boolean) => void;
   onTextoDeBotones: (texto: string) => void;
@@ -47220,6 +47701,7 @@ function PestanaDeUsuario({
   const [abierta, setAbierta] = useState<
     null | "usuario" | "datos" | "mensajes" | "emergencia"
   >(null);
+  const [verNumeros, setVerNumeros] = useState(false);
   // ABRIR ES MARCAR A DÓNDE VOLVER.
   //
   // Las tres ventanas escriben en el borrador según se teclea, así que el punto
@@ -47455,6 +47937,29 @@ function PestanaDeUsuario({
           </span>
         </button>
 
+        {/* LOS NÚMEROS ESCRITOS A MANO (23/10/2026). Su propia ventana: recorre todo el contenido
+            y cambia cada número por el comodín de su cuenta, sin cambiar lo que lee el cliente. */}
+        <button
+          type="button"
+          onClick={() => setVerNumeros(true)}
+          className="inline-flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-left text-amber-950 shadow-sm transition-all hover:-translate-y-px hover:shadow"
+        >
+          <span className="text-2xl" aria-hidden>
+            🔎
+          </span>
+          <span>
+            <span className="block text-sm font-black uppercase tracking-wide">
+              Números escritos a mano
+            </span>
+            <span className="block text-xs font-semibold opacity-90">
+              en todo el editor, todos los países
+            </span>
+            <span className="mt-0.5 block text-[11px] opacity-80">
+              pásalos a tu cuenta: el cliente lee lo mismo
+            </span>
+          </span>
+        </button>
+
         {/* EL TERCER CUADRO. Este mensaje vivía dentro del cajón del producto,
             en Order Bump, en un desplegable dentro de otro desplegable. Es lo
             que el bot dice al cobrar, así que su sitio es este, junto a los
@@ -47503,6 +48008,15 @@ function PestanaDeUsuario({
           </div>
         </div>
       </div>
+
+      {verNumeros && (
+        <VentanaDeNumerosAMano
+          cfg={cfg}
+          onCfg={onCfg}
+          onSnapshot={onSnapshot}
+          onCerrar={() => setVerNumeros(false)}
+        />
+      )}
 
       {abierta === "emergencia" && (
         <VentanaDeProducto
@@ -48020,6 +48534,14 @@ function PestanaDeUsuario({
                 </div>
               </div>
             )}
+
+            <OtrasCuentasDelPais
+              cfg={cfg}
+              pais={pais}
+              paisLabel={paisLabel}
+              onCfg={onCfg}
+              onSnapshot={onSnapshot}
+            />
 
             {/* CON VISOR. Estas cajas llevan comodines dentro —el nombre, el
                 precio— y sin ver el resultado no se sabe qué va a leer el
@@ -52514,6 +53036,52 @@ function CobradoresDelProyecto({
                             )}
                         </div>
                       )}
+                      {/* SUS OTRAS CUENTAS (23/10/2026): las MISMAS que tienes tú en
+                          ese país —Interbancaria, Upsell…—, porque tus textos las piden
+                          por ese nombre. Vacía, el bot pondría su cuenta principal. */}
+                      {(() => {
+                        const tuyas = otrasCuentas(
+                          cfg.payment_profiles_by_country?.[pais.code]?.cuentas_por_metodo,
+                          metodosDe(pais.code).map((m) => m.method)
+                        );
+                        if (tuyas.length === 0) return null;
+                        const faltan = tuyas.filter(([k]) => !String(datos.cuentas_por_metodo?.[k] ?? "").trim());
+                        return (
+                          <div className="mt-2 rounded-md border border-borde bg-relleno p-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-tinta-suave">
+                              Sus otras cuentas
+                            </span>
+                            <div className="mt-1.5 grid gap-2 md:grid-cols-2">
+                              {tuyas.map(([clave]) => (
+                                <label key={clave} className="block text-[11px] font-medium text-tinta-suave">
+                                  {nombreDeLaClave(clave)}
+                                  <ChapaDeComodin comodin={comodinDeCuenta(clave)} />
+                                  <input
+                                    value={datos.cuentas_por_metodo?.[clave] ?? ""}
+                                    onChange={(e) =>
+                                      parcharPais(i, pais.code, {
+                                        cuentas_por_metodo: {
+                                          ...(datos.cuentas_por_metodo ?? {}),
+                                          [clave]: e.target.value,
+                                        },
+                                      })
+                                    }
+                                    onFocus={onSnapshot}
+                                    placeholder="Su número"
+                                    className="mt-1 block w-full rounded-md border border-borde bg-tarjeta px-2 py-1.5 text-sm"
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                            {puesto && faltan.length > 0 && (
+                              <p className="mt-1.5 text-[11px] font-semibold text-amber-800 oscuro:text-amber-300">
+                                ⚠ Le falta {faltan.map(([k]) => `«${nombreDeLaClave(k)}»`).join(", ")}: en su tienda, donde
+                                tus textos la nombran saldría su cuenta principal.
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {/* EL AVISO QUE PROMETE EL MOTOR. Un número sin titular
                           aprobaría comprobantes a cualquier nombre en ese país:
                           el titular es lo único que ata el pago a una persona. */}

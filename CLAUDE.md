@@ -817,6 +817,41 @@ Solo vista: no cambian nada.
 simulador y devuelve el contenido tal cual, con su huella). Su escenario `activar` prueba en vivo
 «▶ Activar un workflow» desde un botón de la venta de siempre (sin tablero → botón → workflow).
 
+### Los números de cuenta escritos a mano (23/10/2026, solo ALBERTO 4)
+
+«Esa respuesta la tengo que poner varias veces en muchos lugares del editor… no sé dónde están», y la
+condición: «la respuesta que le llegue al cliente igual, pero con otra configuración interna».
+Medido ese día: 1055 textos con datos de pago, 893 con el número escrito a mano (su Yape 437 veces),
+**cuatro cuentas BCP distintas en Perú** (tres a mano y la guardada), y seguimientos con bandera de
+Argentina y de Ecuador —y piezas sin bandera— que llevan escritos sus datos de **Perú**. Cambiar el
+usuario que cobra no cambiaba nada de eso: el bot manda lo escrito tal cual.
+
+**Lo que hay ahora (solo editor, el motor no se tocó):**
+- Menú usuarios → **🔎 Números escritos a mano**: una fila por número (y por su nombre de titular),
+  con un botón que lo cambia por el comodín de su cuenta (`{{CUENTA_<nombre>}}`, que el bot ya
+  resolvía). El texto se queda donde está, con su contexto. Si el número no está guardado, se guarda
+  como «otra cuenta» del país (si el nombre ya es otra cuenta, `bcp_2`, `bcp_3`…: no se pisa).
+- Antes de cambiar calcula, **por cada país que lee ese texto y por cada tienda**, qué saldría con el
+  comodín (la regla de `elCobroDelPais`). Solo cambia donde sale igual. Quién lee un texto: el país de
+  su sitio (`by_country`, perfil), o la bandera de su pieza, o —sin bandera— todos los países donde
+  vende. A propósito por el lado seguro: no calcula el descarte de piezas sin bandera que hace el
+  motor dentro de cada estación; contar un país de más solo deja ese texto esperando su aprobación.
+- Arriba, **una decisión por país**: «que los clientes de Argentina vean su propia cuenta» en vez de
+  la de Perú. Sin marcarla, esos textos no se tocan.
+- Menú usuarios → Datos para pago → **Otras cuentas**: nombre + número + comodín, «+ Otra cuenta».
+  Se guardan en el país, en su copia de cada modalidad y en el usuario que es él mismo (mismo
+  titular): si no, en la tienda que cobra «su» usuario saldría su cuenta principal. Renombrar una
+  cuenta cambia el comodín en sus textos. En cada usuario que cobra salen las mismas, con aviso si le
+  falta alguna.
+- **Aviso amarillo** en toda caja de texto que lleve escrito un número de una cuenta guardada, con
+  «Cambiar por {{CUENTA_…}}».
+
+**Probado:** `prueba-numeros-a-mano.mjs` (con datos inventados) y, con el MOTOR REAL en la copia
+aislada, cada texto cambiado armado antes y después para cada país que lo lee y cada tienda: 318
+textos, 1032 combinaciones, **0 diferencias**. **No probado:** que él lo aplique en su contenido (eso
+lo hace él, con Ctrl+Z y Ctrl+S como siempre); el formato del número (espacios) sí cambia en los
+textos escritos de otra forma, y la fila lo dice antes.
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el
