@@ -15,6 +15,9 @@ export type ConversationChannel =
   | "test";
 export type WorkflowState =
   | "new"
+  // LA CONVERSACIÓN VA POR EL TABLERO (22/10/2026): su lugar está en `tablero_estado`. Ningún
+  // estado del motor de siempre la reconoce, así que el motor de siempre no la toca.
+  | "tablero"
   // LAS DOS DE ABAJO YA NO SE PRODUCEN, Y SE QUEDAN SOLO POR LAS FILAS VIEJAS.
   //
   // Eran las esperas del arranque: el bot decía una línea y se callaba hasta que

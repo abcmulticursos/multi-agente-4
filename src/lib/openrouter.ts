@@ -205,7 +205,8 @@ const SEND_EXTRA_IMAGES_TOOL: ChatCompletionTool = {
   },
 };
 
-function getClient(): OpenAI {
+// Exportadas (22/10/2026) para el lector del tablero (`src/lib/tablero/lector.ts`). Sin cambios.
+export function getClient(): OpenAI {
   if (cached) return cached;
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -252,7 +253,7 @@ function esMediaLegible(m: MessageRow): boolean {
   return m.media_type === "image" || esComprobantePdf(m);
 }
 
-function getRecentVisionImage(history: MessageRow[]): MessageRow | null {
+export function getRecentVisionImage(history: MessageRow[]): MessageRow | null {
   const latestUser = [...history].reverse().find((m) => m.role === "user");
   if (!latestUser) return null;
   if (
@@ -300,7 +301,7 @@ function getRecentVisionImage(history: MessageRow[]): MessageRow | null {
  * OpenRouter. El tipo `file` no está en los tipos del SDK de OpenAI, de ahí
  * el cast: el objeto viaja tal cual en el cuerpo de la petición.
  */
-function bloqueDeMedia(m: MessageRow): Record<string, unknown> | null {
+export function bloqueDeMedia(m: MessageRow): Record<string, unknown> | null {
   if (!m.media_url || !m.media_mime) return null;
   if (esComprobantePdf(m)) {
     // LA FOTO DE DENTRO DEL PDF, SI LA TIENE. Ver `imagenDentroDelPdf`: una

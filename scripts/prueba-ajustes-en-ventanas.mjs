@@ -101,7 +101,8 @@ comprobar(
 const aLaVista = [
   ["tiempos y delays", "Tiempos generales (delays y limpieza)"],
   ["ahorro del cerebro", "💰 Ahorro del cerebro"],
-  ["no contestar a orgánicos", "El bot NO contesta a los orgánicos"],
+  // Desde el 22/10/2026 el recuadro es el del tope del mes (mismo interruptor).
+  ["no contestar a orgánicos", "Orgánicos: contestar solo hasta el tope del mes"],
 ];
 for (const [nombre, texto] of aLaVista) {
   const i = editor.indexOf(texto);

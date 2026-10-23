@@ -723,6 +723,43 @@ tocar): en la INTRO, quien llega por un anuncio recibe la suya y el resto se sor
 entre las que NO tienen anuncio (si no hay ninguna, no se manda). Él eligió dejarlo así; la
 pizarra lo dice en el cable de cada ficha.
 
+### EL TABLERO — el segundo motor (22/10/2026, SOLO EN ALBERTO 4)
+
+«No quiero que mi bot sea una tubería soldada… sino ser armable, en base a decisiones, botones,
+elecciones». En Mis tiendas → «🧩 Tablero», él arma la ruta de una tienda con fichas (Inicio,
+Mensaje, Cobro, Entregar, Condición, Esperar, Postventa y regalo, Pasar a humano) y cables; **los
+cables son las órdenes** (la pizarra solo dibuja; el tablero se ejecuta). Vive en `src/lib/tablero/`
+y el plan entero en PLAN-TABLERO.md. ALBERTO 2 no lo tiene: él trabaja ahí y no se toca.
+
+**Las cuatro reglas que lo aíslan, y su prueba es `prueba-el-tablero.mjs`:**
+1. **Una conversación, un solo motor.** Entra SOLO al nacer (`state = new`) en una tienda con
+   tablero **encendido y con el Inicio conectado**; queda con fila en `tablero_estado` y
+   `state = "tablero"`. Las demás no pasan por ahí.
+2. **Una sola entrada** en `handler.ts`, después de `leContestamos` y la moderación y antes de
+   `tryWorkflowOnIncoming`. El regalo (`payment_approved`…`awaiting_facebook_comment`) lo sigue
+   haciendo el motor de siempre.
+3. **Lo compartido se usa, no se toca:** `sendConfiguredSteps`, la entrega del producto
+   (`delivery` de la biblioteca), `scheduleGiftConsentWithDelay`, `notifyAdmin`, `sendPurchaseEvent`.
+4. **Lo programado lleva su dueño:** `tablero_reloj` y `tablero_sin_pago` van al tablero desde el
+   obrero. El reloj solo sale si el cliente sigue en esa ficha (`vuelta`); «no pagó» solo si ese
+   cobro sigue abierto y sin nada pagado.
+
+**El cobro abierto (la contribución):** acepta cualquier monto; mínimo y tramos POR PAÍS; los
+pagos parciales se suman; sale por el tramo más alto que alcance. Mientras está abierto, un
+comprobante en cualquier ficha (también en un recordatorio) se lee contra él. Lector propio
+(`lector.ts`, misma visión que el de siempre) y huella del comprobante (`tablero_pagos`): el mismo
+pago no vale dos veces, tampoco entre conversaciones.
+
+**La IA dentro del tablero** (`conversador.ts`) NO usa el cerebro de las modalidades (llevaría
+marcadores y datos de pago de otra venta): solo la conversación, la pregunta pendiente y los
+montos de su cobro; si nombra otro monto se le pide otra vez y si insiste se quita esa frase.
+
+**Probado el 22/10 en el simulador de una copia:** entrar por el Inicio, botón → humano, silencio →
+insistencia (y no sale si respondió), botón tocado tarde (vale) y repetido (no reentrega),
+contribución completa (entrega gratis → cobro → recordatorio 1 → esperar → recordatorio 2 →
+comprobante de 15 → tramo 2 → plus → regalo), pago bajo el mínimo, comprobante repetido.
+**No probado:** Messenger e Instagram (el tablero es solo WhatsApp por ahora) y una venta real.
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

@@ -18,6 +18,7 @@ import {
 import { writeTextFileAtomically } from "@/lib/product-profiles";
 // LA PIZARRA: se lee y se escribe con la MISMA función. Ver `lee-pizarra.ts`.
 import { leePizarra } from "@/lib/editor/lee-pizarra";
+import { leeTableros } from "@/lib/tablero/datos";
 import { leeCamino, leeTambienEnCaminos } from "@/lib/workflow/etiqueta-de-camino";
 import {
   DEFAULT_PAYMENT_BUTTONS_PROMPT,
@@ -2800,6 +2801,11 @@ export async function GET() {
       cobradores,
       // LA PIZARRA (16/10/2026): dónde dejó cada ficha y sus cajas. El bot no la lee nunca.
       pizarra: leePizarra(config?.pizarra),
+      // EL TABLERO (22/10/2026): a diferencia de la pizarra, el bot SÍ lo lee. Las burbujas van
+      // en el formato del editor, como las demás.
+      tableros: leeTableros(config?.tableros, (pasos) =>
+        pasos.map((p) => readStep(p as Record<string, unknown>))
+      ),
       ad_registry,
       ad_color_palette,
       intro_payment_menu: readPaymentMenu(config?.intro_payment_menu),
@@ -3075,6 +3081,13 @@ export async function POST(req: NextRequest) {
   // campo y lo que no se nombre no llega al bot.
   if (Array.isArray(body.tiendas)) {
     doc.set("tiendas", leeTiendas(body.tiendas, "escribir"));
+  }
+  // EL TABLERO, por el mismo carril. Solo si el panel lo manda: un editor viejo no lo borra.
+  if (body.tableros && typeof body.tableros === "object") {
+    doc.set(
+      "tableros",
+      leeTableros(body.tableros, (pasos) => pasos.map((p) => writeStep(p as EditorStep)))
+    );
   }
   // LA PIZARRA, por el mismo carril: lo que no se nombra aquí no llega al archivo. Solo se
   // escribe si el panel la manda, así que un editor viejo no la borra.

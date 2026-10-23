@@ -12414,7 +12414,8 @@ function renovarEsperaDelRegalo(
  * scheduleGiftAudioAndText). Si rechaza, se cierra cordial. Si no
  * responde, queda en awaiting_gift_consent indefinidamente.
  */
-function scheduleGiftConsentWithDelay(
+// Exportada (22/10/2026) para la ficha «Regalo» del tablero. Sin cambios.
+export function scheduleGiftConsentWithDelay(
   convoId: number,
   initialDelaySec: number
 ): void {

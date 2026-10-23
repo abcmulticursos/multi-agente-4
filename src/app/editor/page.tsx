@@ -5,6 +5,8 @@ import EmojiPicker from "@/components/EmojiPicker";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
 import { MensajesDelMes } from "@/components/MensajesDelMes";
+import { ASPECTO } from "@/components/tablero/aspecto";
+import type { FichaEnElEditor, TableroEnElEditor } from "@/components/tablero/LienzoDelTablero";
 import { TwemojiText } from "@/components/TwemojiText";
 import { DEFAULT_SAMPLES_AFTER_TEXT } from "@/lib/workflow/defaults";
 import {
@@ -71,6 +73,12 @@ import {
   paisesConBandera,
   type PiezaConEtiquetas,
 } from "@/lib/editor/pizarra-quien-sale";
+const LienzoDelTablero = dynamic(() => import("@/components/tablero/LienzoDelTablero"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center text-sm text-tinta-suave">Abriendo el tablero…</div>
+  ),
+});
 const LienzoDePizarra = dynamic(() => import("@/components/pizarra/LienzoDePizarra"), {
   ssr: false,
   loading: () => (
@@ -1057,6 +1065,11 @@ const MarcasDeMediaContext = createContext<{
 const PaymentMethodsContext = createContext<
   { method: string; label: string }[]
 >([]);
+/**
+ * ¿SE ESTÁ EDITANDO UNA FICHA DEL TABLERO? (22/10/2026). Ahí un botón no lleva «acción»: lleva
+ * a donde él conecte su cable. El editor de botones esconde la lista de acciones y lo dice.
+ */
+const EnElTableroContext = createContext(false);
 /**
  * LAS TIENDAS DEL PROYECTO, para etiquetar un cajón con la que lo recibe.
  *
@@ -2415,6 +2428,9 @@ interface FullConfig {
   /** LA PIZARRA: dónde dejó cada ficha y sus cajas, por «tienda|canal». El bot no la lee.
    *  Ver `leePizarra` en la ruta de guardado. */
   pizarra?: { vistas?: Record<string, DisposicionDePizarra> };
+  /** EL TABLERO DE CADA TIENDA (22/10/2026): la ruta armable que el bot SÍ sigue. Ver
+   *  `PantallaDelTablero` y src/lib/tablero/. */
+  tableros?: Record<string, TableroEnElEditor>;
   /** Tus productos. El papel que juega cada uno lo decide la alineación de cada
    *  modalidad, y el motor lo reparte al leer — ver `repartirPorEtiqueta`. */
   biblioteca_de_productos?: BibliotecaEditor;
@@ -26794,9 +26810,10 @@ function VistaPizarra({
    * click a PACK MASCOTAS se abre la pizarra… al lado del botón + hay una flecha de retroceso».
    * Se recuerda en este navegador, igual que la vista: al refrescar sigue donde estaba.
    */
-  const [pantalla, setPantalla] = useState<"tiendas" | "pizarra">(() => {
+  const [pantalla, setPantalla] = useState<"tiendas" | "pizarra" | "tablero">(() => {
     try {
-      return window.localStorage.getItem("pizarra-pantalla") === "pizarra" ? "pizarra" : "tiendas";
+      const guardada = window.localStorage.getItem("pizarra-pantalla");
+      return guardada === "pizarra" || guardada === "tablero" ? guardada : "tiendas";
     } catch {
       return "tiendas";
     }
@@ -26806,7 +26823,7 @@ function VistaPizarra({
     return () => onTiendaEnPantalla?.(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pantalla, tiendaId]);
-  const irA = (p: "tiendas" | "pizarra") => {
+  const irA = (p: "tiendas" | "pizarra" | "tablero") => {
     setPantalla(p);
     try {
       window.localStorage.setItem("pizarra-pantalla", p);
@@ -28954,9 +28971,22 @@ function VistaPizarra({
             setTiendaId(id);
             irA("pizarra");
           }}
+          onTablero={(id) => {
+            setTiendaId(id);
+            irA("tablero");
+          }}
           onCambiar={aplicar}
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
+        />
+      ) : pantalla === "tablero" ? (
+        <PantallaDelTablero
+          cfg={cfg}
+          tiendaId={tiendaId}
+          oscuro={fondoOscuro}
+          onTienda={setTiendaId}
+          onVolver={() => irA("tiendas")}
+          aplicar={aplicar}
         />
       ) : (
       <>
@@ -30613,15 +30643,545 @@ function VentanaFlotante({
  * pizarra. «Cambiar sus datos» abre la MISMA ficha de menú ajustes → Tiendas, no otra: así no
  * hay dos sitios que puedan decir cosas distintas de la misma tienda.
  */
+/**
+ * EL TABLERO DE UNA TIENDA (22/10/2026, solo ALBERTO 4) — la ruta que él arma con fichas y
+ * cables, y que el bot SÍ sigue. Ver PLAN-TABLERO.md y src/lib/tablero/.
+ *
+ * Doble clic en una ficha de mensaje abre el MISMO cajón de burbujas de siempre (con sus botones
+ * y cuadritos, que son las salidas). Las demás fichas abren sus ajustes. Todo va al borrador del
+ * editor: Ctrl+S guarda y Ctrl+Z deshace, como en la pizarra.
+ */
+function tableroVacio(): TableroEnElEditor {
+  return { encendido: false, fichas: [{ id: "inicio", tipo: "inicio", x: 0, y: 160 }], cables: [] };
+}
+
+function textoDeLaBurbuja(s: EditorStep | undefined): string {
+  if (!s) return "";
+  return (s.texts ?? []).find((t) => t?.trim())?.trim() ?? "";
+}
+
+function PantallaDelTablero({
+  cfg,
+  tiendaId,
+  oscuro,
+  onTienda,
+  onVolver,
+  aplicar,
+}: {
+  cfg: FullConfig;
+  tiendaId: string;
+  oscuro: boolean;
+  onTienda: (id: string) => void;
+  onVolver: () => void;
+  aplicar: (c: FullConfig) => void;
+}) {
+  const tiendas = cfg.tiendas ?? [];
+  const tienda = tiendas.find((t) => t.id === tiendaId) ?? tiendas[0];
+  const id = tienda?.id ?? "";
+  const tablero: TableroEnElEditor = cfg.tableros?.[id] ?? tableroVacio();
+  const [cajon, setCajon] = useState<string | null>(null);
+  const [ajustes, setAjustes] = useState<string | null>(null);
+  const [paisVisto, setPaisVisto] = useState<string>("PE");
+  const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
+  const nombreDelProducto = (pid?: string) => productos.find((p) => p.id === pid)?.name?.trim() || "(sin elegir)";
+
+  const guardar = (t: TableroEnElEditor) => aplicar({ ...cfg, tableros: { ...(cfg.tableros ?? {}), [id]: t } });
+  const cambiarFicha = (fid: string, cambio: Partial<FichaEnElEditor>) =>
+    guardar({ ...tablero, fichas: tablero.fichas.map((f) => (f.id === fid ? { ...f, ...cambio } : f)) });
+
+  const inicio = tablero.fichas.find((f) => f.tipo === "inicio");
+  const conectado = !!inicio && tablero.cables.some((c) => c.de === inicio.id && c.salida === "siguiente");
+  const atiende = tablero.encendido && conectado;
+
+  const resumenDe = (f: FichaEnElEditor): string => {
+    const pasos = ((f.steps ?? []) as EditorStep[]).filter((s) => s.enabled !== false);
+    switch (f.tipo) {
+      case "inicio":
+        return "Los clientes NUEVOS de esta tienda entran aquí.";
+      case "mensaje": {
+        if (pasos.length === 0) return "Sin burbujas — doble clic para escribirlas.";
+        const primero = textoDeLaBurbuja(pasos.find((s) => s.type === "text"));
+        return `${pasos.length} burbuja${pasos.length === 1 ? "" : "s"}${primero ? `\n«${primero.slice(0, 70)}${primero.length > 70 ? "…" : ""}»` : ""}`;
+      }
+      case "entregar":
+        return `Entrega: ${nombreDelProducto(f.producto_id)}`;
+      case "cobro": {
+        const c = f.cobro;
+        const burbujas = pasos.length ? `${pasos.length} burbuja${pasos.length === 1 ? "" : "s"} · ` : "Sin burbujas · ";
+        if (c?.modo === "producto") return `${burbujas}Cobra: ${nombreDelProducto(c.producto_id)}`;
+        const min = c?.minimo_por_pais?.[paisVisto];
+        const tramos = c?.tramos_por_pais?.[paisVisto]?.length ?? 0;
+        return `${burbujas}Pago abierto · ${paisVisto}: mínimo ${min ?? 0}, ${tramos} tramo${tramos === 1 ? "" : "s"}`;
+      }
+      case "condicion": {
+        const c = f.condicion;
+        if (c?.tipo === "pais") return `¿Es de ${(c.paises ?? []).join(", ") || "(elige países)"}?`;
+        if (c?.tipo === "anuncio") return "¿Vino de un anuncio?";
+        return `¿Ya compró ${nombreDelProducto(c?.producto_id)}?`;
+      }
+      case "esperar":
+        return `Espera ${minutosLegiblesDelTablero(f.minutos ?? 60)} y sigue.`;
+      case "regalo":
+        return "Arranca el regalo de siempre (el de esta tienda, si tiene).";
+      case "humano":
+        return "El bot se calla y te avisa.";
+    }
+  };
+
+  const fichaDeCajon = tablero.fichas.find((f) => f.id === cajon);
+  const fichaDeAjustes = tablero.fichas.find((f) => f.id === ajustes);
+  const paises = Object.keys(COUNTRIES);
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${oscuro ? "tema-oscuro-local" : ""}`}>
+        <button type="button" onClick={onVolver} className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta">
+          ← Mis tiendas
+        </button>
+        <select
+          value={id}
+          onChange={(e) => onTienda(e.target.value)}
+          className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
+          title="Tienda"
+        >
+          {tiendas.map((t, i) => (
+            <option key={t.id} value={t.id}>
+              🏪 {t.nombre?.trim() || `Tienda ${i + 1}`}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs font-bold">🧩 Tablero</span>
+        <button
+          type="button"
+          onClick={() => guardar({ ...tablero, encendido: !tablero.encendido })}
+          className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-500 hover:bg-slate-600"}`}
+          title="Encendido: los clientes NUEVOS de esta tienda van por el tablero. Apagado: la tienda vende como siempre."
+        >
+          {tablero.encendido ? "● Encendido" : "○ Apagado"}
+        </button>
+        <span className={`text-[11px] font-semibold ${atiende ? "text-emerald-700" : "text-tinta-suave"}`}>
+          {atiende
+            ? "Los clientes nuevos de esta tienda van por este tablero."
+            : !tablero.encendido
+              ? "Apagado: esta tienda vende con el motor de siempre."
+              : "Falta conectar el 🚀 Inicio a una ficha: mientras tanto, vende como siempre."}
+        </span>
+        <span className="ml-auto" />
+        <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
+          Montos de
+          <select value={paisVisto} onChange={(e) => setPaisVisto(e.target.value)} className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta">
+            {paises.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="min-h-0 flex-1">
+        <LienzoDelTablero
+          tablero={tablero}
+          resumenDe={resumenDe}
+          paisVisto={paisVisto}
+          oscuro={oscuro}
+          onCambiar={guardar}
+          onAbrir={(fid) => {
+            const f = tablero.fichas.find((x) => x.id === fid);
+            if (f?.tipo === "mensaje") setCajon(fid);
+            else setAjustes(fid);
+          }}
+          onAjustes={setAjustes}
+        />
+      </div>
+      {fichaDeCajon && (
+        <EnElTableroContext.Provider value={true}>
+        <VentanaDelCajon
+          key={fichaDeCajon.id}
+          titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : "💬"} ${fichaDeCajon.titulo?.trim() || (fichaDeCajon.tipo === "cobro" ? "Cobro" : "Mensaje")}`}
+          steps={(fichaDeCajon.steps ?? []) as EditorStep[]}
+          idPrefix={`tablero_${fichaDeCajon.id.replace(/[^a-z0-9]/gi, "_")}`}
+          cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
+          pais={paisVisto}
+          onGuardar={(steps) => {
+            cambiarFicha(fichaDeCajon.id, { steps });
+            setCajon(null);
+          }}
+          onCerrar={() => setCajon(null)}
+        />
+        </EnElTableroContext.Provider>
+      )}
+      {fichaDeAjustes && (
+        <AjustesDeLaFicha
+          ficha={fichaDeAjustes}
+          productos={productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id }))}
+          paises={paises}
+          paisInicial={paisVisto}
+          onAbrirBurbujas={() => {
+            setAjustes(null);
+            setCajon(fichaDeAjustes.id);
+          }}
+          onGuardar={(cambio) => {
+            cambiarFicha(fichaDeAjustes.id, cambio);
+            setAjustes(null);
+          }}
+          onCerrar={() => setAjustes(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function minutosLegiblesDelTablero(m: number): string {
+  if (m % 1440 === 0) return `${m / 1440} día${m === 1440 ? "" : "s"}`;
+  if (m % 60 === 0) return `${m / 60} h`;
+  return `${m} min`;
+}
+
+/** Un tiempo en minutos, escrito en minutos, horas o días. */
+function CampoDeTiempoDelTablero({ valor, onCambio }: { valor: number | undefined; onCambio: (m: number | undefined) => void }) {
+  const unidadInicial = !valor ? 60 : valor % 1440 === 0 ? 1440 : valor % 60 === 0 ? 60 : 1;
+  const [unidad, setUnidad] = useState(unidadInicial);
+  const cantidad = valor ? valor / unidad : "";
+  return (
+    <span className="inline-flex items-center gap-1">
+      <input
+        type="number"
+        min={0}
+        value={cantidad}
+        onChange={(e) => {
+          const n = Number(e.target.value);
+          onCambio(Number.isFinite(n) && n > 0 ? Math.round(n * unidad) : undefined);
+        }}
+        className="w-20 rounded-md border border-borde bg-relleno px-2 py-1 text-sm"
+      />
+      <select
+        value={unidad}
+        onChange={(e) => {
+          const u = Number(e.target.value);
+          setUnidad(u);
+          if (valor) onCambio(Math.round((valor / unidad) * u));
+        }}
+        className="rounded-md border border-borde bg-relleno px-1 py-1 text-sm"
+      >
+        <option value={1}>minutos</option>
+        <option value={60}>horas</option>
+        <option value={1440}>días</option>
+      </select>
+    </span>
+  );
+}
+
+function AjustesDeLaFicha({
+  ficha,
+  productos,
+  paises,
+  paisInicial,
+  onAbrirBurbujas,
+  onGuardar,
+  onCerrar,
+}: {
+  ficha: FichaEnElEditor;
+  productos: Array<{ id: string; nombre: string }>;
+  paises: string[];
+  paisInicial: string;
+  onAbrirBurbujas: () => void;
+  onGuardar: (cambio: Partial<FichaEnElEditor>) => void;
+  onCerrar: () => void;
+}) {
+  const [b, setB] = useState<FichaEnElEditor>(ficha);
+  const [pais, setPais] = useState(paisInicial);
+  const a = ASPECTO[ficha.tipo];
+  const cobro = b.cobro ?? { modo: "abierto" as const };
+  const tramos = cobro.tramos_por_pais?.[pais] ?? [];
+  const ponCobro = (c: typeof cobro) => setB({ ...b, cobro: c });
+  const ponTramos = (lista: typeof tramos) =>
+    ponCobro({ ...cobro, tramos_por_pais: { ...(cobro.tramos_por_pais ?? {}), [pais]: lista } });
+  const etiqueta = "block text-xs font-semibold text-tinta";
+  const ayuda = "mt-0.5 block text-[11px] font-normal text-tinta-suave";
+  useEffect(() => {
+    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [onCerrar]);
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" onClick={onCerrar}>
+      <div
+        className="prolijo max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-sm font-black">
+          {a.icono} {a.nombre}
+        </p>
+        <div className="mt-3 space-y-4">
+          {ficha.tipo !== "inicio" && (
+            <label className={etiqueta}>
+              Nombre de la ficha
+              <input
+                value={b.titulo ?? ""}
+                onChange={(e) => setB({ ...b, titulo: e.target.value })}
+                placeholder={a.nombre}
+                className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+              />
+            </label>
+          )}
+          {ficha.tipo === "inicio" && (
+            <p className="text-xs text-tinta-suave">
+              Por aquí entran los clientes NUEVOS de esta tienda cuando el tablero está encendido. Tira un cable desde su
+              puntito naranja a la primera ficha.
+            </p>
+          )}
+          {(ficha.tipo === "mensaje" || ficha.tipo === "cobro") && (
+            <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
+              ✏️ Escribir sus burbujas
+            </button>
+          )}
+          {ficha.tipo === "mensaje" && (
+            <div className={etiqueta}>
+              ⏰ Si no responde en
+              <span className="ml-2">
+                <CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} />
+              </span>
+              <span className={ayuda}>
+                Aparece la salida «No respondió» para tu insistencia. Si responde algo, ya no sale. Vacío = sin esa salida.
+              </span>
+            </div>
+          )}
+          {ficha.tipo === "entregar" && (
+            <label className={etiqueta}>
+              Producto que se entrega
+              <select
+                value={b.producto_id ?? ""}
+                onChange={(e) => setB({ ...b, producto_id: e.target.value || undefined })}
+                className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+              >
+                <option value="">(elige un producto)</option>
+                {productos.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
+              <span className={ayuda}>Se manda su entrega, la de la ficha del producto, en cualquier momento de la ruta.</span>
+            </label>
+          )}
+          {ficha.tipo === "esperar" && (
+            <div className={etiqueta}>
+              Esperar
+              <span className="ml-2">
+                <CampoDeTiempoDelTablero valor={b.minutos} onCambio={(m) => setB({ ...b, minutos: m })} />
+              </span>
+              <span className={ayuda}>Y sigue por su cable. Si mientras tanto paga un cobro abierto, el pago manda.</span>
+            </div>
+          )}
+          {ficha.tipo === "condicion" && (
+            <div className="space-y-2">
+              <label className={etiqueta}>
+                Pregunta
+                <select
+                  value={b.condicion?.tipo ?? "compro"}
+                  onChange={(e) => setB({ ...b, condicion: { ...(b.condicion ?? {}), tipo: e.target.value as "compro" | "pais" | "anuncio" } })}
+                  className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                >
+                  <option value="compro">¿Ya compró un producto?</option>
+                  <option value="pais">¿Es de estos países?</option>
+                  <option value="anuncio">¿Vino de un anuncio?</option>
+                </select>
+              </label>
+              {(b.condicion?.tipo ?? "compro") === "compro" && (
+                <select
+                  value={b.condicion?.producto_id ?? ""}
+                  onChange={(e) => setB({ ...b, condicion: { tipo: "compro", producto_id: e.target.value || undefined } })}
+                  className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm"
+                >
+                  <option value="">(elige un producto)</option>
+                  {productos.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nombre}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {b.condicion?.tipo === "pais" && (
+                <div className="flex flex-wrap gap-1">
+                  {paises.map((p) => {
+                    const puesto = b.condicion?.paises?.includes(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => {
+                          const ya = b.condicion?.paises ?? [];
+                          setB({ ...b, condicion: { tipo: "pais", paises: puesto ? ya.filter((x) => x !== p) : [...ya, p] } });
+                        }}
+                        className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-emerald-500 bg-emerald-50 font-bold" : "border-borde"}`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <span className={ayuda}>Salen dos cables: «Sí» y «No».</span>
+            </div>
+          )}
+          {ficha.tipo === "cobro" && (
+            <div className="space-y-3">
+              <div className="flex gap-2 text-xs">
+                {(["abierto", "producto"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => ponCobro({ ...cobro, modo: m })}
+                    className={`rounded-md border px-3 py-1 font-semibold ${cobro.modo === m ? "border-amber-500 bg-amber-50" : "border-borde"}`}
+                  >
+                    {m === "abierto" ? "Pago abierto (contribución)" : "Precio de un producto"}
+                  </button>
+                ))}
+              </div>
+              {cobro.modo === "producto" ? (
+                <label className={etiqueta}>
+                  Producto que se cobra
+                  <select
+                    value={cobro.producto_id ?? ""}
+                    onChange={(e) => ponCobro({ ...cobro, producto_id: e.target.value || undefined })}
+                    className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                  >
+                    <option value="">(elige un producto)</option>
+                    {productos.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <span className={ayuda}>Su precio del país del cliente. Salidas: «Pagó» y «Pagó de menos».</span>
+                </label>
+              ) : (
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs font-semibold">
+                    País
+                    <select value={pais} onChange={(e) => setPais(e.target.value)} className="rounded-md border border-borde bg-relleno px-1 py-0.5 text-xs">
+                      {paises.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="font-normal text-tinta-suave">cada país con sus montos y su moneda</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold">
+                    Mínimo
+                    <input
+                      type="number"
+                      min={0}
+                      value={cobro.minimo_por_pais?.[pais] ?? ""}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        const resto = { ...(cobro.minimo_por_pais ?? {}) };
+                        if (e.target.value === "" || !Number.isFinite(n)) delete resto[pais];
+                        else resto[pais] = n;
+                        ponCobro({ ...cobro, minimo_por_pais: resto });
+                      }}
+                      className="w-24 rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                    />
+                    <span className="font-normal text-tinta-suave">por debajo → salida «Menos del mínimo»</span>
+                  </label>
+                  <div className="text-xs font-semibold">Tramos ({pais})</div>
+                  {tramos.map((t, i) => (
+                    <div key={t.id} className="flex items-center gap-2 text-xs">
+                      <span className="w-14 font-semibold">Tramo {i + 1}</span>
+                      desde
+                      <input
+                        type="number"
+                        min={0}
+                        value={t.desde}
+                        onChange={(e) => ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, desde: Number(e.target.value) || 0 } : x)))}
+                        className="w-20 rounded-md border border-borde bg-relleno px-2 py-1"
+                      />
+                      hasta
+                      <input
+                        type="number"
+                        min={0}
+                        value={t.hasta ?? ""}
+                        placeholder="sin tope"
+                        onChange={(e) =>
+                          ponTramos(tramos.map((x) => (x.id === t.id ? { ...x, hasta: e.target.value === "" ? undefined : Number(e.target.value) } : x)))
+                        }
+                        className="w-20 rounded-md border border-borde bg-relleno px-2 py-1"
+                      />
+                      <button type="button" onClick={() => ponTramos(tramos.filter((x) => x.id !== t.id))} className="text-rose-600" title="Quitar tramo">
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // EL MISMO ID EN TODOS LOS PAÍSES: el tramo N de cada país sale por el mismo puntito.
+                      const n = tramos.length + 1;
+                      const ultimo = tramos[tramos.length - 1];
+                      ponTramos([...tramos, { id: `t${n}`, desde: ultimo ? (ultimo.hasta ?? ultimo.desde) + 1 : 0 }]);
+                    }}
+                    className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold hover:bg-tarjeta"
+                  >
+                    + Agregar tramo
+                  </button>
+                  <span className={ayuda}>
+                    El tramo 1 de cada país sale por el mismo puntito «Tramo 1», cada uno con sus montos. Si paga en
+                    partes, se suman.
+                  </span>
+                </div>
+              )}
+              <div className={etiqueta}>
+                ⏰ Si no paga en
+                <span className="ml-2">
+                  <CampoDeTiempoDelTablero valor={b.sin_pago_min} onCambio={(m) => setB({ ...b, sin_pago_min: m })} />
+                </span>
+                <span className={ayuda}>
+                  Salida «No pagó» para tus recordatorios. El cobro sigue abierto: si paga en cualquier momento, su monto
+                  lo lleva a su ruta.
+                </span>
+              </div>
+            </div>
+          )}
+          {ficha.tipo === "regalo" && (
+            <p className="text-xs text-tinta-suave">
+              Desde aquí sigue el regalo de siempre: su pregunta, el enlace para comentar y el premio. Se edita en la
+              pestaña Regalo (o el de la tienda, si tiene el suyo).
+            </p>
+          )}
+          {ficha.tipo === "humano" && (
+            <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>
+          )}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={() => onGuardar(b)}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
+          >
+            Listo
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MisTiendas({
   cfg,
   onAbrir,
+  onTablero,
   onCambiar,
   onConfigChange,
   onSnapshot,
 }: {
   cfg: FullConfig;
   onAbrir: (tiendaId: string) => void;
+  /** Abre el tablero de la tienda (22/10/2026). */
+  onTablero?: (tiendaId: string) => void;
   /** Un cambio de un solo paso (con su Ctrl+Z). */
   onCambiar: (c: FullConfig) => void;
   /** Un cambio sin paso propio: lo que se teclea en «Cambiar sus datos». */
@@ -30804,6 +31364,18 @@ function MisTiendas({
                 >
                   ◈ Abrir pizarra
                 </button>
+                {onTablero && (
+                  <button
+                    type="button"
+                    onClick={() => onTablero(t.id)}
+                    title="La ruta que tú armas con fichas y cables, y que el bot sigue"
+                    className={`rounded-md border px-3 py-1 text-xs font-semibold hover:bg-tarjeta ${
+                      cfg.tableros?.[t.id]?.encendido ? "border-emerald-400 bg-emerald-50 text-emerald-800" : "border-borde bg-relleno text-tinta"
+                    }`}
+                  >
+                    🧩 Tablero{cfg.tableros?.[t.id]?.encendido ? " ●" : ""}
+                  </button>
+                )}
                 <div className="relative" data-menu-tienda>
                   <button
                     type="button"
@@ -35332,6 +35904,7 @@ function BubbleDecisionModal({
   const [palabrasAbiertas, setPalabrasAbiertas] = useState(false);
   const [color, setColor] = useState(decision.color ?? "gris");
   const [pasos, setPasos] = useState<EditorStep[]>(decision.steps ?? []);
+  const enElTablero = useContext(EnElTableroContext);
   // El menú guarda la FAMILIA ("choose_product"); cuál de los tres productos
   // es va en su propio selector. Al abrir se hace el camino de vuelta: un
   // cuadrito guardado como choose_combo se enseña como "Elegir producto" + FULL.
@@ -35549,6 +36122,12 @@ function BubbleDecisionModal({
             precio correcto, pero el bot sigue sin saber qué eligió el cliente —
             y de ese apunte dependen el precio contra el que se valida el
             comprobante y el producto que se entrega. */}
+        {enElTablero ? (
+          <p className="border-b border-neutral-200 bg-sky-50/50 px-4 py-3 text-xs text-neutral-700">
+            🧩 En el tablero, este cuadrito manda sus burbujas y luego lleva a donde conectes{" "}
+            <strong>su cable</strong> (su puntito en la ficha).
+          </p>
+        ) : (
         <div className="grid gap-3 border-b border-neutral-200 bg-sky-50/50 px-4 py-3 md:grid-cols-2">
           <label className="block text-xs font-medium text-neutral-700">
             🔗 Linkear con (opcional)
@@ -35629,6 +36208,7 @@ function BubbleDecisionModal({
             </label>
           )}
         </div>
+        )}
 
         {/* Editor a la izquierda, visor de WhatsApp a la derecha — el mismo
             reparto que el resto de las burbujas del editor. */}
@@ -35673,6 +36253,7 @@ function BubbleButtonsEditor({
     onChange(buttons.map((button, i) => i === index ? { ...button, ...patch } : button));
   };
   const metodosDePagoDisponibles = useContext(PaymentMethodsContext);
+  const enElTablero = useContext(EnElTableroContext);
   // Qué botón tiene la ventana abierta. null = ninguna.
   const [botonAbierto, setBotonAbierto] = useState<number | null>(null);
   const abierto = botonAbierto !== null ? buttons[botonAbierto] : undefined;
@@ -35724,6 +36305,11 @@ function BubbleButtonsEditor({
                   preparaban para «Enviar burbujas»; ahora cualquier acción puede
                   llevar su texto delante, así que lo escrito no se pierde por
                   cambiar el selector. */}
+              {enElTablero ? (
+                <p className="self-center text-xs text-violet-800">
+                  🧩 En el tablero, este botón lleva a donde conectes <strong>su cable</strong> (su puntito en la ficha).
+                </p>
+              ) : (
               <select value={button.action} onChange={(e) => update(index, { action: e.target.value as BubbleButtonAction, steps: button.steps ?? [] })} className="min-w-0 rounded border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm">
                 <option value="send_steps">Enviar burbujas / muestras</option>
                 <option value="send_payment_method">Mandar los datos de un método de pago</option>
@@ -35746,9 +36332,10 @@ function BubbleButtonsEditor({
                 <option value="claim_gift">Regalo: entregarlo</option>
                 <option value="human">Pasar a humano</option>
               </select>
+              )}
               <button type="button" onClick={() => { if (confirm("¿Quitar este botón?")) { onSnapshot(); onChange(buttons.filter((_, i) => i !== index)); } }} className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs text-red-700">🗑️</button>
             </div>
-            {button.action === "send_payment_method" && (
+            {!enElTablero && button.action === "send_payment_method" && (
               // SE ELIGE EL MÉTODO, NO SE COPIA SU TEXTO.
               //
               // Los datos de cada método viven en Precios y pagos, por país.
@@ -35785,7 +36372,7 @@ function BubbleButtonsEditor({
                 )}
               </div>
             )}
-            {button.action !== "human" && (
+            {!enElTablero && button.action !== "human" && (
               // EL CONTENIDO DEL BOTÓN SE EDITA EN UNA VENTANA APARTE.
               //
               // Estaba abierto aquí dentro, y con dos o tres botones el panel

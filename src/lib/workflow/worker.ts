@@ -5,6 +5,7 @@ import {
   markActionFailed,
 } from "@/lib/db";
 import { executeAction } from "@/lib/workflow/engine";
+import { ejecutarAccionDelTablero } from "@/lib/tablero/motor";
 import { maybePurgeStaleConversations } from "@/lib/workflow/purge";
 import { tickComentarios } from "@/lib/meta/comments";
 
@@ -72,7 +73,9 @@ export async function tick(): Promise<void> {
           );
           continue;
         }
-        await executeAction(action);
+        // Lo programado del tablero va a su motor; lo demás, al de siempre, como antes.
+        if (action.action_type.startsWith("tablero_")) await ejecutarAccionDelTablero(action);
+        else await executeAction(action);
         markActionCompleted(action.id);
       } catch (err) {
         console.error(

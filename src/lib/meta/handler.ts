@@ -88,6 +88,7 @@ import {
   getSamplesOfferBubble,
   topeDeOrganicos,
 } from "@/lib/workflow/config";
+import { alRecibirMensaje, esDelTablero } from "@/lib/tablero/motor";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
 import { marcaDeAdjunto } from "@/lib/marca-de-adjunto";
@@ -1644,6 +1645,16 @@ async function handleIncomingMessage(
     const withCountry = getConversationById(fresh.id);
     if (withCountry) freezePricesForConvo(withCountry);
     if (gateHandled) return;
+  }
+
+  // EL TABLERO (22/10/2026, solo ALBERTO 4). Atiende SOLO las conversaciones que nacieron en una
+  // tienda con tablero encendido; para las demás devuelve false sin escribir nada y todo sigue
+  // como siempre. Ver src/lib/tablero/motor.ts y PLAN-TABLERO.md.
+  try {
+    if (await alRecibirMensaje(getConversationById(fresh.id) ?? fresh, content)) return;
+  } catch (err) {
+    console.error("[tablero] falló el turno del tablero:", err);
+    if (esDelTablero(fresh.id)) return;
   }
 
   try {

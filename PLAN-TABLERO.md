@@ -1,5 +1,11 @@
 # PLAN — EL TABLERO (el segundo motor, la ruta armable)
 
+> **ESTADO, 22/10/2026 (noche):** construidas las 8 roscas para **WhatsApp**: fichas Inicio,
+> Mensaje (botones, cuadritos, «otra cosa», «no respondió»), Cobro (producto o pago abierto con
+> tramos por país, «no pagó»), Entregar, Condición (compró / país / anuncio), Esperar, Postventa y
+> regalo, y Pasar a humano. Varias ventas por conversación: cada cobro es su propio ticket
+> (`tablero_compras`). Falta: Messenger e Instagram. Ver la sección «EL TABLERO» de CLAUDE.md.
+
 > Pedido por Alberto el 22/10/2026. **Solo en ALBERTO 4**: «el bot alberto 2 queda tal como
 > está… la nueva manera de trabajar el segundo motor lo apliques en alberto 4 mientras yo uso
 > alberto 2». **No se empieza ninguna fase sin su aprobación.**
