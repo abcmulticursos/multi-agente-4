@@ -107070,7 +107070,7 @@ tiendas:
     pixel: "2212070602975989"
     color: "#70ffee"
   - id: tienda_mve7qmyl
-    nombre: TIENDITA DE DON PEPE
+    nombre: QUIMICA EN ACCION
     numero: "1345130172015574"
     pagina: "108985518920195"
     alineacion:
@@ -109546,3 +109546,4 @@ pizarra:
       visibles:
         - intro:34
 respaldo_entre_tiendas: true
+tableros: {}
