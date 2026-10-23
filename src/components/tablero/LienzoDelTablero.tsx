@@ -357,15 +357,43 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
 
 // ── EL FONDO DE UN PAÍS Y LAS CAJAS ───────────────────────────────────────────
 
-function NodoDeFondo({ data }: NodeProps<Node<{ titulo: string; tema: "claro" | "oscuro" }>>) {
+function NodoDeFondo({ data }: NodeProps<Node<{ titulo: string; tema: "claro" | "oscuro"; mirando: boolean; alVer: () => void }>>) {
   const t = TEMA[data.tema];
   return (
     <div className="h-full w-full rounded-2xl" style={{ background: t.caja, pointerEvents: "none" }}>
-      <div className="ml-5 mt-3 inline-block rounded-md px-1 text-sm font-bold uppercase tracking-wide" style={{ color: t.tituloCaja }}>
-        {data.titulo}
+      <div className="ml-5 mt-3 flex items-center gap-2">
+        <span className="rounded-md px-1 text-sm font-bold uppercase tracking-wide" style={{ color: t.tituloCaja }}>
+          {data.titulo}
+        </span>
+        {/* «▶ VER RECORRIDO», como en la pizarra: su ruta se ilumina y lo demás queda tenue. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            data.alVer();
+          }}
+          className={`nodrag nopan rounded-md border px-2 py-0.5 text-[11px] font-semibold shadow-sm ${
+            data.mirando ? "border-amber-400 bg-amber-100 text-amber-900" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+          style={{ pointerEvents: "all" }}
+          title="Ilumina la ruta de este país (solo vista: no cambia nada)"
+        >
+          {data.mirando ? "✕ Ver todo" : "▶ Ver recorrido"}
+        </button>
       </div>
     </div>
   );
+}
+
+/** Para el buscador: sin tildes ni mayúsculas. */
+const paraBuscar = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/** Todos los textos de una ficha (título, resumen y lo escrito en sus burbujas), para el buscador. */
+function textosDe(valor: unknown, salida: string[] = []): string[] {
+  if (typeof valor === "string") salida.push(valor);
+  else if (Array.isArray(valor)) for (const v of valor) textosDe(v, salida);
+  else if (valor && typeof valor === "object") for (const v of Object.values(valor)) textosDe(v, salida);
+  return salida;
 }
 
 type DatosDeCaja = {
@@ -562,6 +590,9 @@ export default function LienzoDelTablero({
   const [cajaElegida, setCajaElegida] = useState<string | null>(null);
   const [panel, setPanel] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
+  const [mirando, setMirando] = useState<string | null>(null);
+  const [buscar, setBuscar] = useState("");
   const t = TEMA[tema];
 
   const cambiar = (n: TableroEnElEditor) => onCambiar(n);
@@ -590,7 +621,12 @@ export default function LienzoDelTablero({
         type: "fondo",
         position: { x: minX, y: minY },
         style: { width: maxX - minX, height: maxY - minY },
-        data: { titulo: inicio.pais ? `${banderaDe(inicio.pais)} ${inicio.pais}` : "🌍 Otros países", tema },
+        data: {
+          titulo: inicio.pais ? `${banderaDe(inicio.pais)} ${inicio.pais}` : "🌍 Otros países",
+          tema,
+          mirando: mirando === inicio.id,
+          alVer: () => setMirando((m) => (m === inicio.id ? null : inicio.id)),
+        },
         draggable: false,
         selectable: false,
         zIndex: -2,
@@ -616,9 +652,49 @@ export default function LienzoDelTablero({
       nodos.push({ id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: { x: f.x, y: f.y }, data: { ficha: f } });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tablero, tema, cajaElegida, paisVisto]);
+  }, [tablero, tema, cajaElegida, paisVisto, mirando]);
   const [nodos, setNodos, alCambiarNodos] = useNodesState<Node>(nodosDesdeProps);
   useEffect(() => setNodos(nodosDesdeProps), [nodosDesdeProps, setNodos]);
+
+  // Si el Inicio que se miraba ya no está (se borró o se guardó), se deja de mirar.
+  useEffect(() => {
+    if (mirando && !visibles.some((f) => f.id === mirando)) setMirando(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero, mirando]);
+  const enLaRuta = useMemo(() => (mirando ? rutaDe(tablero, mirando) : null), [tablero, mirando]);
+  // Al pulsar «▶ Ver recorrido», la vista se encuadra en esa ruta.
+  useEffect(() => {
+    if (!enLaRuta) return;
+    const r = window.setTimeout(() => instancia.current?.fitView({ nodes: [...enLaRuta].map((id) => ({ id })), padding: 0.15, maxZoom: 1, duration: 500 }), 50);
+    return () => window.clearTimeout(r);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mirando]);
+  const consulta = paraBuscar(buscar.trim());
+  const coincidentes = useMemo(() => {
+    if (consulta.length < 2) return null;
+    return new Set(
+      visibles
+        .filter((f) => paraBuscar([ASPECTO[f.tipo].nombre, resumenDe(f), ...textosDe({ t: f.titulo, s: f.steps, v: f.variantes, g: f.seguimientos })].join(" ")).includes(consulta))
+        .map((f) => f.id)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tablero, consulta]);
+  /** Lo que se dibuja: con «Ver recorrido» o el buscador, lo de fuera queda tenue (como en la pizarra). */
+  const nodosVistos = !enLaRuta && !coincidentes
+    ? nodos
+    : nodos.map((n) => {
+        if (n.type === "caja") return n;
+        if (n.type === "fondo") return enLaRuta && n.id !== `fondo:${mirando}` ? { ...n, style: { ...n.style, opacity: 0.3 } } : n;
+        const dentro = (!enLaRuta || enLaRuta.has(n.id)) && (!coincidentes || coincidentes.has(n.id));
+        return {
+          ...n,
+          style: {
+            ...n.style,
+            opacity: dentro ? 1 : 0.12,
+            ...(coincidentes?.has(n.id) ? { outline: "3px solid #f59e0b", outlineOffset: 3, borderRadius: 10 } : {}),
+          },
+        };
+      });
 
   const cables = useMemo<Edge[]>(
     () =>
@@ -752,8 +828,16 @@ export default function LienzoDelTablero({
     >
       <div className="relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
         <ReactFlow
-          nodes={nodos}
-          edges={cables}
+          nodes={nodosVistos}
+          edges={
+            enLaRuta || coincidentes
+              ? cables.map((c) =>
+                  (!enLaRuta || (enLaRuta.has(c.source) && enLaRuta.has(c.target))) && (!coincidentes || coincidentes.has(c.source) || coincidentes.has(c.target))
+                    ? c
+                    : { ...c, style: { ...c.style, opacity: 0.12 } }
+                )
+              : cables
+          }
           nodeTypes={TIPOS_DE_NODO}
           edgeTypes={TIPOS_DE_CABLE}
           onInit={(i) => {
@@ -863,6 +947,25 @@ export default function LienzoDelTablero({
               >
                 ▭ Caja
               </button>
+              <span className="mx-1 h-5 w-px bg-slate-200" />
+              {/* EL BUSCADOR, como en la pizarra: las que coinciden se marcan y lo demás queda tenue. */}
+              <input
+                value={buscar}
+                onChange={(e) => setBuscar(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setBuscar("");
+                  if (e.key === "Enter" && coincidentes && coincidentes.size > 0)
+                    instancia.current?.fitView({ nodes: [...coincidentes].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 });
+                }}
+                placeholder="🔍 Buscar"
+                className="w-36 rounded-lg border border-slate-200 px-2 py-1 text-[12px]"
+                title="Busca en los títulos y en lo que dicen las burbujas · Enter: ir a ellas · Esc: borrar"
+              />
+              {coincidentes && (
+                <span className="px-1 text-[11px] font-semibold text-amber-700">
+                  {coincidentes.size === 0 ? "ninguna" : `${coincidentes.size} ficha(s)`}
+                </span>
+              )}
               <span className="mx-1 h-5 w-px bg-slate-200" />
               <span className="px-1 text-[11px] text-slate-500">Shift + arrastrar: elegir varias · Ctrl+C / Ctrl+V · Delete</span>
             </div>

@@ -809,8 +809,13 @@ releía 5 acciones: un botón con «Elegir UPSELL», «Rechazar UPSELL», «Abri
 o las del regalo volvía a «Enviar burbujas» al reabrir el editor. Ahora relee todas
 (`ACCIONES_DE_BOTON`). Y en Instagram ya no salen los asteriscos (`sinFormatoDeWhatsApp`).
 
+**Como en la pizarra, también:** «▶ Ver recorrido» en el fondo de cada país (ilumina su ruta y
+encuadra; lo demás tenue) y «🔍 Buscar» (títulos y lo escrito en las burbujas; Enter va a ellas).
+Solo vista: no cambian nada.
+
 **Pruebas:** `prueba-el-tablero.mjs` (estática) y `recorrido-del-tablero.mjs` (vive la venta en el
-simulador y devuelve el contenido tal cual, con su huella).
+simulador y devuelve el contenido tal cual, con su huella). Su escenario `activar` prueba en vivo
+«▶ Activar un workflow» desde un botón de la venta de siempre (sin tablero → botón → workflow).
 
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 

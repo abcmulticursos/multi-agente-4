@@ -8,7 +8,7 @@
 //
 //   node scripts/recorrido-del-tablero.mjs --url=http://localhost:3000 --tienda=<id>
 //        [--comprobante=C:/ruta/yape.jpg --monto=15]   (las pruebas de pago necesitan una foto real)
-//        [--solo=contribucion,eleccion,seguimientos,cobro,workflow,messenger]
+//        [--solo=contribucion,eleccion,seguimientos,cobro,workflow,activar,messenger]
 //
 // Los tiempos son de verdad (1 y 2 minutos): tarda unos 15 minutos entero.
 import { createHash } from "node:crypto";
@@ -152,8 +152,14 @@ const WORKFLOWS = {
 
 function sembrar(nombre, canal = "whatsapp") {
   const actual = YAML.parseDocument(readFileSync(ARCHIVO, "utf8"));
-  actual.set("tableros", { [tienda.id]: { [canal]: TABLEROS[nombre] } });
+  // nombre null = SIN tablero: la tienda vende con la venta de siempre.
+  actual.set("tableros", nombre ? { [tienda.id]: { [canal]: TABLEROS[nombre] } } : {});
   actual.set("workflows", WORKFLOWS);
+  // Un botón «▶ Activar un workflow» como los del editor (el motor de siempre busca el botón por su
+  // código en toda la configuración).
+  actual.set("prueba_boton_workflow", [
+    texto("BOTON-DE-PRUEBA", { buttons: [{ ...boton("act_wf", "Ver el workflow"), action: "start_workflow", workflow_id: "wf_prueba" }] }),
+  ]);
   writeFileSync(ARCHIVO, actual.toString({ lineWidth: 0 }));
 }
 
@@ -312,6 +318,20 @@ try {
     await c.decir("hola", 20);
     comprobar("reparto (peso 1 contra 0) y país PE llevan al workflow", c.dijo("DENTRO-DEL-WORKFLOW") && !c.dijo("NUNCA-DEBE-SALIR"));
     await c.decir("si claro", 20);
+    comprobar("y dentro del workflow sus cuadritos funcionan", c.dijo("WORKFLOW-SI"));
+    await c.borrar();
+  }
+
+  if (toca("activar")) {
+    console.log("\n· «▶ Activar un workflow» desde un botón de la venta de siempre");
+    sembrar(null);
+    await esperar(3000);
+    const c = await cliente();
+    await c.decir("hola", 25);
+    comprobar("sin tablero, contesta la venta de siempre", c.bot.length > 0 && !c.dijo("DENTRO-DEL-WORKFLOW"));
+    await c.tocar("act_wf", "Ver el workflow", 25);
+    comprobar("el botón lo pasa al workflow", c.dijo("DENTRO-DEL-WORKFLOW"));
+    await c.decir("si claro", 25);
     comprobar("y dentro del workflow sus cuadritos funcionan", c.dijo("WORKFLOW-SI"));
     await c.borrar();
   }
