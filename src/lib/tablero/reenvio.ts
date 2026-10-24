@@ -18,13 +18,18 @@ export function reenviarLoDelTablero(convo: ConversationRow): boolean {
     return true;
   }
   const config = loadWorkflowConfig();
-  const pasos = productos.flatMap(
-    (id) => config?.biblioteca_de_productos?.find((p) => p.id === id)?.delivery ?? []
-  );
   console.log(`[tablero] convo ${convo.id}: REENVÍO de lo que entregó el tablero (${productos.join(", ")})`);
   // Se importa al llamarse: el motor de siempre usa este archivo y al revés habría un círculo.
-  void import("@/lib/workflow/engine")
-    .then(({ sendConfiguredSteps }) => sendConfiguredSteps(convo, pasos as never))
+  // Cada entrega con SU nombre en {{PRODUCTO_ENTREGADO}}, como la entrega de la ficha (24/10/2026:
+  // el reenvío salía «Entrega de **»).
+  void Promise.all([import("@/lib/workflow/engine"), import("./pago")])
+    .then(([{ sendConfiguredSteps }, { conElNombreDelProducto }]) => {
+      const pasos = productos.flatMap((id) => {
+        const p = config?.biblioteca_de_productos?.find((x) => x.id === id);
+        return p?.delivery ? conElNombreDelProducto(p.delivery as never, p.name) : [];
+      });
+      return sendConfiguredSteps(convo, pasos as never);
+    })
     .catch((err) => console.error(`[tablero] convo ${convo.id}: falló el reenvío`, err));
   return true;
 }

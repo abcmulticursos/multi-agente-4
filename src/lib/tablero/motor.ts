@@ -101,6 +101,7 @@ import {
   marcarComprobanteLeido,
   moverA,
   ponerSeguimiento,
+  ponerPreciosDelCobro,
   preciosDelCobro,
   proponerProducto,
   reiniciarRelojDelCobro,
@@ -1500,7 +1501,32 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       );
       await sendConfiguredSteps(fresca, pasosSeg as never);
     }
-    if (seg.activa_oferta) activarOferta(convo.id);
+    if (seg.activa_oferta) {
+      activarOferta(convo.id);
+      // EL COBRO QUE YA ESTABA ABIERTO BAJA A LA OFERTA (24/10/2026, lo cazó el recorrido de
+      // funciones): el seguimiento le decía «ahora a 15», pero el cobro seguía congelado en 20 y al
+      // pagar 15 le contestaba «no alcanza». Solo BAJA (nunca se cobra más de lo dicho), solo si ese
+      // cobro cobra «según la etapa», y no en el upgrade, donde el precio ya es una diferencia.
+      const e = estadoEnElTablero(convo.id);
+      const fc = e?.cobro_ficha_id ? t.fichas.find((x) => x.id === e.cobro_ficha_id) : undefined;
+      if (e && fc?.cobro?.modo === "producto" && fc.cobro.precio !== "normal" && !fc.cobro.diferencia) {
+        const config = loadWorkflowConfig();
+        const pais = getEffectiveCountryCode(fresca.phone, config);
+        const precios = preciosDelCobro(e);
+        let bajo = false;
+        for (const id of Object.keys(precios)) {
+          const oferta = precioDelProducto(producto(config, id), pais, true);
+          if (oferta !== null && oferta < precios[id]) {
+            precios[id] = oferta;
+            bajo = true;
+          }
+        }
+        if (bajo) {
+          ponerPreciosDelCobro(convo.id, precios);
+          console.log(`[tablero] convo ${convo.id}: la oferta baja el cobro abierto a ${JSON.stringify(precios)}`);
+        }
+      }
+    }
     // Lo que este seguimiento presenta, desde ahora la IA lo puede contar.
     anotarPresentados(convo.id, f.presenta ?? []);
     console.log(`[tablero] convo ${convo.id}: seguimiento ${idx + 1} de «${f.titulo || "Seguimientos"}»`);

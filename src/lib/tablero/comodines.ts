@@ -43,16 +43,58 @@ function reemplazarEn<T>(valor: T, cambiar: (s: string) => string, llave = ""): 
 
 /** Los comodines de producto de estas burbujas, con los productos de la ficha. */
 export function conLosComodinesDeLaFicha<T>(pasos: T, productos: ProductoConPrecio[], pais: string): T {
+  const cambiar = cambiadorDeLaFicha(productos, pais);
+  return cambiar ? reemplazarEn(pasos, cambiar) : pasos;
+}
+
+/**
+ * UN TEXTO, con los comodines de la ficha. Lo usa también el VISOR del editor (24/10/2026): enseñaba
+ * el producto de la venta automática —«LECTOESCRITURA» en la ficha de la tienda de cocina— mientras
+ * al cliente le llegaba el de la ficha. Con la misma función, no pueden enseñar cosas distintas.
+ */
+export function comodinesDeLaFichaEnTexto(texto: string, productos: ProductoConPrecio[], pais: string): string {
+  const cambiar = cambiadorDeLaFicha(productos, pais);
+  return cambiar ? cambiar(texto) : texto;
+}
+
+function cambiadorDeLaFicha(productos: ProductoConPrecio[], pais: string): ((s: string) => string) | null {
   const lista = productos.filter((p) => p && p.name);
-  if (lista.length === 0) return pasos;
+  if (lista.length === 0) return null;
   const primero = lista[0];
   const conPrecio = lista.filter((p) => typeof p.precio === "number");
   const orden = [...(conPrecio.length ? conPrecio : lista)].sort((a, b) => (a.precio ?? 0) - (b.precio ?? 0));
   const base = orden[0];
   const full = orden[orden.length - 1];
-  const dinero = (v: number | null | undefined) => (typeof v === "number" && v > 0 ? formatCurrencyAmount(v, pais as never) : "");
+  const dinero = (v: number | null | undefined, forma: "title" | "upper" | "lower" = "title") =>
+    typeof v === "number" && v > 0 ? formatCurrencyAmount(v, pais as never, undefined, forma) : "";
+  // El número pelado, como el motor de siempre ({{PRECIO_1}}, {{PRECIO_EXTRA}}…: sin moneda).
+  const numero = (v: number | null | undefined) =>
+    typeof v === "number" && v > 0 ? (Number.isInteger(v) ? String(v) : v.toFixed(2)) : "";
   const diferencia = typeof full.precio === "number" && typeof base.precio === "number" ? Math.round((full.precio - base.precio) * 100) / 100 : null;
+  // OPCIÓN 1 = el pack (el caro) y OPCIÓN 2 = el básico, como en la venta de siempre; el EXTRA es lo
+  // que va de uno al otro. Con sus mismas formas: número, «_COMPLETO», «_MAYUSCULAS», «_MINUSCULAS».
+  const formas = (prefijos: string[], v: number | null) =>
+    Object.fromEntries(
+      prefijos.flatMap((p) => [
+        [p, numero(v)],
+        [`${p}_COMPLETO`, dinero(v)],
+        [`${p}_MAYUSCULAS`, dinero(v, "upper")],
+        [`${p}_MINUSCULAS`, dinero(v, "lower")],
+      ])
+    );
   const valores: Record<string, string> = {
+    ...formas(["PRECIO_1", "PRECIO1"], full.precio),
+    ...formas(["PRECIO_2", "PRECIO2"], base.precio),
+    ...formas(["PRECIO_EXTRA", "PRECIO_ADICIONAL"], diferencia),
+    OPCION_1: full.name,
+    PRODUCTO_1: full.name,
+    OPCION_2: base.name,
+    PRODUCTO_2: base.name,
+    PRECIO_COMPLETO_MAYUSCULAS: dinero(primero.precio, "upper"),
+    PRECIO_COMPLETO_MINUSCULAS: dinero(primero.precio, "lower"),
+    PRECIO_UPSELL_COMPLETO: dinero(primero.precio),
+    PRECIO_UPSELL_MAYUSCULAS: dinero(primero.precio, "upper"),
+    PRECIO_UPSELL_MINUSCULAS: dinero(primero.precio, "lower"),
     PRODUCTO: primero.name,
     PRECIO_COMPLETO: dinero(primero.precio),
     PRECIO_MERCADO: dinero(primero.antes),
@@ -71,6 +113,8 @@ export function conLosComodinesDeLaFicha<T>(pasos: T, productos: ProductoConPrec
     PRECIO_COMPLEMENTARIO: dinero(diferencia),
     PRECIO_DIFERENCIA: dinero(diferencia),
   };
-  const patron = new RegExp(`\\{\\{\\s*(${Object.keys(valores).join("|")})\\s*\\}\\}`, "gi");
-  return reemplazarEn(pasos, (s) => s.replace(patron, (_, k: string) => valores[k.toUpperCase()] ?? ""));
+  // Los más largos primero: «PRECIO_1_COMPLETO» no debe tomarse como «PRECIO_1».
+  const llaves = Object.keys(valores).sort((a, b) => b.length - a.length);
+  const patron = new RegExp(`\\{\\{\\s*(${llaves.join("|")})\\s*\\}\\}`, "gi");
+  return (s) => s.replace(patron, (_, k: string) => valores[k.toUpperCase()] ?? "");
 }

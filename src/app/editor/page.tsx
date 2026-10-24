@@ -18,6 +18,7 @@ import {
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
 import { CEREBRO_DE_FABRICA } from "@/lib/tablero/datos";
+import { comodinesDeLaFichaEnTexto, type ProductoConPrecio } from "@/lib/tablero/comodines";
 import {
   aplicarPase,
   avisosDeNumeros,
@@ -367,6 +368,8 @@ const COUNTRY_OPTIONS: Array<{
 }));
 
 interface PreviewContext {
+  /** Ficha del tablero: sus productos llenan los comodines de producto, como en el bot. */
+  productosDeLaFicha?: ProductosDeLaFicha;
   /**
    * «LOS NOMBRES QUE TRAIGO MANDAN SOBRE EL GLOBAL.»
    *
@@ -929,6 +932,17 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
     label: "Código de moneda",
     description: "PEN, USD, COP, MXN, etc. para referencia técnica.",
   },
+  // LOS DEL CORREO DEL TABLERO (24/10/2026): solo valen en el texto del correo.
+  {
+    token: "{{ENLACES}}",
+    label: "Enlaces de lo que compró (correo)",
+    description: "Solo en el texto del correo del tablero: los enlaces de todo lo que se le entregó.",
+  },
+  {
+    token: "{{MATERIAL}}",
+    label: "Material entregado (correo)",
+    description: "Solo en el texto del correo del tablero: la entrega completa de lo que recibió, sin los adornos de WhatsApp.",
+  },
 ];
 
 const SUGGESTED_CUSTOM_PLACEHOLDERS: CustomPlaceholder[] = [
@@ -1105,6 +1119,13 @@ const PaymentMethodsContext = createContext<
  * a donde él conecte su cable. El editor de botones esconde la lista de acciones y lo dice.
  */
 const EnElTableroContext = createContext(false);
+/**
+ * LOS PRODUCTOS DE LA FICHA DEL TABLERO QUE SE ESTÁ EDITANDO (24/10/2026), con su precio en el país
+ * visto. Con ellos el visor llena {{PRODUCTO_BASE}}, {{PRECIO_FULL}}… igual que el bot
+ * (`comodinesDeLaFichaEnTexto`). null = no es una ficha del tablero, o no presenta productos.
+ */
+const ProductosDeLaFichaContext = createContext<ProductosDeLaFicha | null>(null);
+type ProductosDeLaFicha = { productos: ProductoConPrecio[]; pais: string };
 /** LOS WORKFLOWS DEL PROYECTO (23/10/2026), para «▶ Activar workflow» en botones y cuadritos. */
 const WorkflowsContext = createContext<Array<{ id: string; nombre: string }>>([]);
 /**
@@ -1226,9 +1247,13 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
   // semimodalidad se elige en la tienda) y ese filtro escondía los de básico, full y upsell que sus
   // tiendas de doble oferta y order bump sí usan, y que el tablero llena con los productos de cada
   // ficha (ver tablero/comodines.ts). La descripción de cada uno ya dice dónde se llena.
-  // Los ocultos siguen fuera: son alias repetidos y formas viejas de la moneda, y siguen
-  // funcionando si ya están escritos.
-  const base = BASE_PLACEHOLDER_OPTIONS.filter((option) => !option.oculto);
+  // Y TAMBIÉN LOS «OCULTOS» (24/10/2026): «te pedí todos los comodines y no aparecen todos». Son
+  // alias y formas de la moneda que siguen funcionando; van al final para no estorbar a los de uso
+  // diario.
+  const base = [
+    ...BASE_PLACEHOLDER_OPTIONS.filter((option) => !option.oculto),
+    ...BASE_PLACEHOLDER_OPTIONS.filter((option) => option.oculto),
+  ];
   const custom = (cfg?.custom_placeholders ?? [])
     .map((item) => {
       const key = normalizePlaceholderKey(item.key ?? "");
@@ -23634,7 +23659,9 @@ function GlobalPlaceholderAutocomplete() {
               .toLowerCase()
               .includes(state.query.toLowerCase())
           )
-          .slice(0, 60);
+          // TODOS (24/10/2026): con los «ocultos» y las cuentas por método ya pasan de 60, y el tope
+          // los cortaba sin avisar. La lista tiene su propia barra para bajar.
+          .slice(0, 400);
 
   useEffect(() => {
     const isTextTarget = (
@@ -23879,6 +23906,9 @@ function applyPreviewPrices(
   context?: PreviewContext
 ): string {
   let out = text;
+  // EN UNA FICHA DEL TABLERO, sus productos primero: la misma función que el bot.
+  if (context?.productosDeLaFicha?.productos.length)
+    out = comodinesDeLaFichaEnTexto(out, context.productosDeLaFicha.productos, context.productosDeLaFicha.pais);
   // {{METODO_DE_PAGO_1/2/3}}: expande el texto POR PAÍS PRIMERO, para que sus
   // comodines internos ({{NOMBRE_RECEPTOR}}, {{PRECIO_SEGUN_ELECCION}}…) los
   // resuelva el resto de esta función, igual que en vivo.
@@ -30945,6 +30975,7 @@ function PantallaDelTablero({
       </div>
       {fichaDeCajon && (
         <EnElTableroContext.Provider value={true}>
+          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeCajon, paisVisto, tablero)}>
           <VentanaDelCajon
             key={fichaDeCajon.id}
             titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : fichaDeCajon.tipo === "correo" ? "📧" : "💬"} ${
@@ -30960,10 +30991,12 @@ function PantallaDelTablero({
             }}
             onCerrar={() => setCajon(null)}
           />
+          </ProductosDeLaFichaContext.Provider>
         </EnElTableroContext.Provider>
       )}
       {fichaDeGestor && (
         <EnElTableroContext.Provider value={true}>
+          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeGestor, paisVisto, tablero)}>
           <GestorDeVersiones
             key={fichaDeGestor.id}
             ficha={fichaDeGestor}
@@ -30972,6 +31005,7 @@ function PantallaDelTablero({
             onCambiar={(cambio) => cambiarFicha(fichaDeGestor.id, cambio)}
             onCerrar={() => setGestor(null)}
           />
+          </ProductosDeLaFichaContext.Provider>
         </EnElTableroContext.Provider>
       )}
       {fichaDeAjustes && (
@@ -32192,6 +32226,57 @@ function VentanaDeDatosDeTienda({
  * burbujas, así que no se abren en el editor de burbujas —ahí se podría poner una imagen que el
  * bot no mandaría—: se escriben aquí, con su vista previa.
  */
+/** La vista previa con los productos de la ficha del tablero, si los hay. */
+function conProductosDeLaFicha(ctx: PreviewContext, productos: ProductosDeLaFicha | null): PreviewContext {
+  return productos?.productos.length ? { ...ctx, productosDeLaFicha: productos } : ctx;
+}
+
+/**
+ * LOS PRODUCTOS QUE EL BOT USARÁ EN LOS COMODINES DE ESTA FICHA, con el precio del país visto: los del
+ * cobro (el que cobra y los que acepta) o los que la ficha presenta. Mismo orden que el motor.
+ */
+function productosParaElVisor(
+  cfg: FullConfig,
+  f: FichaEnElEditor | undefined,
+  paisVisto: string,
+  tablero?: TableroEnElEditor
+): ProductosDeLaFicha | null {
+  if (!f) return null;
+  // EL PAÍS DE SU MANTA: si la ficha solo está en la ruta de un Inicio con país, sus precios son de
+  // ahí (una ficha de Ecuador se ve en dólares sin tocar «Montos de»). Si está en varias, «Montos de».
+  const pais = (() => {
+    if (!tablero) return paisVisto;
+    const paises = new Set<string>();
+    for (const inicio of tablero.fichas.filter((x) => x.tipo === "inicio")) {
+      const vistos = new Set([inicio.id]);
+      const cola = [inicio.id];
+      while (cola.length) {
+        const id = cola.shift()!;
+        for (const c of tablero.cables) if (c.de === id && !vistos.has(c.a)) (vistos.add(c.a), cola.push(c.a));
+      }
+      if (vistos.has(f.id)) paises.add(inicio.pais ?? "");
+    }
+    const [unico] = [...paises];
+    return paises.size === 1 && unico ? unico : paisVisto;
+  })();
+  const ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
+  const productos: ProductoConPrecio[] = [];
+  for (const id of new Set(ids.filter((x): x is string => !!x))) {
+    const p = (cfg.biblioteca_de_productos ?? []).find((x) => x.id === id);
+    if (!p?.name) continue;
+    const suyo = p.precios_por_pais?.[pais as CountryCode] as { price_soles?: number; market_price?: number } | undefined;
+    const precio = suyo?.price_soles ?? p.price_soles;
+    const antes = suyo?.market_price ?? (p as { market_price?: number }).market_price;
+    productos.push({
+      id,
+      name: p.name,
+      precio: typeof precio === "number" && precio > 0 ? precio : null,
+      antes: typeof antes === "number" && antes > 0 ? antes : null,
+    });
+  }
+  return productos.length ? { productos, pais } : null;
+}
+
 function VentanaDeTexto({
   titulo,
   valor,
@@ -32208,6 +32293,7 @@ function VentanaDeTexto({
   /** Dentro de un gestor (19/10/2026): se aplica al irse, como `VentanaDelCajon`. */
   incrustado?: boolean;
 }) {
+  const productosFicha = useContext(ProductosDeLaFichaContext);
   const [texto, setTexto] = useState(valor);
   useEffect(() => {
     if (incrustado) return;
@@ -32256,7 +32342,7 @@ function VentanaDeTexto({
               priceSoles={previewFullPriceFromConfig(cfgVista)}
               comboPrice={previewComboPriceFromConfig(cfgVista)}
               basicoPrice={previewBasicoPriceFromConfig(cfgVista)}
-              previewContext={previewContextFromConfig(cfgVista)}
+              previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
               highlightPlaceholders
             />
           </div>
@@ -32295,7 +32381,7 @@ function VentanaDeTexto({
               priceSoles={previewFullPriceFromConfig(cfgVista)}
               comboPrice={previewComboPriceFromConfig(cfgVista)}
               basicoPrice={previewBasicoPriceFromConfig(cfgVista)}
-              previewContext={previewContextFromConfig(cfgVista)}
+              previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
               highlightPlaceholders
             />
           </div>
@@ -32522,6 +32608,7 @@ function VentanaDelCajon({
   onGuardar: (steps: EditorStep[], nombre?: string, anuncios?: { claves: string[]; dirigir: boolean }) => void;
   onCerrar: () => void;
 }) {
+  const productosFicha = useContext(ProductosDeLaFichaContext);
   const [borrador, setBorradorDirecto] = useState<EditorStep[]>(steps);
   /**
    * CTRL+Z DENTRO DE LA VENTANA (19/10/2026): «acabo de mover una burbuja manualmente en el visor,
@@ -32692,7 +32779,7 @@ function VentanaDelCajon({
                 stageBasicoPrice: previewOrderBumpPriceForFollowup(cfgVista, "basico", seguimiento),
               }
             : {})}
-          previewContext={previewContextFromConfig(cfgVista)}
+          previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
           sinExpandir
         />
       </div>
@@ -32778,7 +32865,7 @@ function VentanaDelCajon({
                   stageBasicoPrice: previewOrderBumpPriceForFollowup(cfgVista, "basico", seguimiento),
                 }
               : {})}
-            previewContext={previewContextFromConfig(cfgVista)}
+            previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
             sinExpandir
           />
         </div>

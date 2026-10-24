@@ -267,6 +267,11 @@ export function cerrarCobro(conversationId: number): void {
   ).run(conversationId);
 }
 
+/** Cambia los precios congelados del cobro abierto (solo para BAJARLOS a la oferta: ver el motor). */
+export function ponerPreciosDelCobro(conversationId: number, precios: Record<string, number>): void {
+  db.prepare("UPDATE tablero_estado SET cobro_precios = ? WHERE conversation_id = ?").run(JSON.stringify(precios), conversationId);
+}
+
 export function activarOferta(conversationId: number): void {
   db.prepare("UPDATE tablero_estado SET oferta = 1 WHERE conversation_id = ?").run(conversationId);
 }
