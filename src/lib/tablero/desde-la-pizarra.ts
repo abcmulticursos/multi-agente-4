@@ -198,9 +198,14 @@ export function tableroDesdeLaPizarra(
     const cablearOpciones = (fichaId: string, pasos: Paso[] | undefined, col: number, fila: number) => {
       let extra = 0;
       for (const p of activos(pasos)) {
+        // SUS BURBUJAS PROPIAS: el bot del tablero manda las de un CUADRITO antes de seguir su cable
+        // (`actuarCuadrito`), pero no las de un BOTÓN. Así que las de un botón se pasan a una ficha
+        // Mensaje en medio (y se quitan del botón), y las de un cuadrito se quedan en él.
         const todas = [
-          ...(p.buttons ?? []).map((b) => ({ salida: `btn:${b.id}`, accion: b.action, steps: b.steps, nombre: b.label })),
-          ...(p.decisions ?? []).filter((d) => d.enabled !== false).map((d) => ({ salida: `dec:${d.id}`, accion: d.action, steps: d.steps, nombre: d.title })),
+          ...(p.buttons ?? []).map((b) => ({ salida: `btn:${b.id}`, accion: b.action, steps: b.steps, nombre: b.label, esBoton: true, quitar: () => delete b.steps })),
+          ...(p.decisions ?? [])
+            .filter((d) => d.enabled !== false)
+            .map((d) => ({ salida: `dec:${d.id}`, accion: d.action, steps: d.steps, nombre: d.title, esBoton: false, quitar: () => {} })),
         ];
         for (const o of todas) {
           if (!o.salida.includes(":") || o.salida.endsWith(":undefined")) continue;
@@ -224,13 +229,26 @@ export function tableroDesdeLaPizarra(
               destino = poner({ id: uid("humano"), tipo: "humano", titulo: "Pasa a una persona" }, col + 1, fila + 1 + extra++);
               break;
             default:
-              // «Solo su mensaje»: sus burbujas, en una ficha Mensaje.
-              if ((o.steps ?? []).length > 0)
+              // «Solo su mensaje»: el de un botón, en una ficha Mensaje; el de un cuadrito ya lo manda él.
+              if (o.esBoton && (o.steps ?? []).length > 0) {
                 destino = poner(
                   { id: uid("msg"), tipo: "mensaje", titulo: o.nombre?.trim() || "Mensaje del botón", steps: copiarPasos(o.steps) as FichaDelTablero["steps"] },
                   col + 1,
                   fila + 1 + extra++
                 );
+                o.quitar();
+              }
+          }
+          // UN BOTÓN CON MENSAJE Y ACCIÓN («💬 + Elige el FULL»): primero su mensaje y luego su acción.
+          if (destino && o.esBoton && o.accion && o.accion !== "send_steps" && (o.steps ?? []).length > 0) {
+            const antes = poner(
+              { id: uid("msg"), tipo: "mensaje", titulo: o.nombre?.trim() || "Mensaje del botón", steps: copiarPasos(o.steps) as FichaDelTablero["steps"] },
+              col + 1,
+              fila + 1 + extra++
+            );
+            cable(antes, "siguiente", destino);
+            destino = antes;
+            o.quitar();
           }
           if (destino) cable(fichaId, o.salida, destino);
         }
@@ -239,13 +257,15 @@ export function tableroDesdeLaPizarra(
 
     // LAS INTROS: una sola va directa; varias se sortean por su peso, como en la pizarra.
     const introIds: string[] = [];
+    /** La primera ficha tras el Inicio: el sorteo de intros, o la única intro. */
+    let entrada: string | undefined;
     if (misIntros.length > 1) {
       const rep = poner(
         { id: uid("rep"), tipo: "reparto", titulo: "Intros por peso", reparto: misIntros.map((g, i) => ({ id: `r${i + 1}`, nombre: g.name?.trim() || `Intro ${i + 1}`, peso: g.weight ?? 1 })) },
         1,
         0
       );
-      cable(inicio, "siguiente", rep);
+      entrada = rep;
       misIntros.forEach((g, i) => {
         const id = poner({ id: uid("intro"), tipo: "mensaje", titulo: g.name?.trim() || `Intro ${i + 1}`, presenta: semi === "dou" ? opciones : basico ? [basico] : [], steps: copiarPasos(g.steps) as FichaDelTablero["steps"] }, 2, i * 2 - 0.5);
         cable(rep, `rep:r${i + 1}`, id);
@@ -254,8 +274,30 @@ export function tableroDesdeLaPizarra(
     } else if (misIntros.length === 1) {
       const g = misIntros[0];
       const id = poner({ id: uid("intro"), tipo: "mensaje", titulo: g.name?.trim() || "Intro", presenta: semi === "dou" ? opciones : basico ? [basico] : [], steps: copiarPasos(g.steps) as FichaDelTablero["steps"] }, 1, 0);
-      cable(inicio, "siguiente", id);
+      entrada = id;
       introIds.push(id);
+    }
+    // LAS INTROS CON ETIQUETA DE ANUNCIO, como la venta de siempre (`chooseIntroSequence`): quien
+    // viene de uno de sus anuncios recibe ESA intro; los demás, el sorteo de siempre entre todas.
+    // Una «Condición: ¿vino de este anuncio?» por cada una, antes del sorteo.
+    {
+      let siguiente = entrada;
+      const etiquetadas = misIntros
+        .map((g, i) => ({ g, id: introIds[i] }))
+        .filter(({ g, id }) => id && g.adRoutingEnabled !== false && (g.adKeys ?? []).length > 0)
+        .reverse();
+      etiquetadas.forEach(({ g, id }, j) => {
+        const cond = poner(
+          { id: uid("cond"), tipo: "condicion", titulo: `¿Vino del anuncio de «${g.name?.trim() || "su intro"}»?`, condicion: { tipo: "anuncio", anuncios: [...(g.adKeys ?? [])] } },
+          // Debajo del Inicio, una sobre otra (no invaden el país de arriba).
+          0,
+          1.2 + j
+        );
+        cable(cond, "si", id);
+        if (siguiente) cable(cond, "no", siguiente);
+        siguiente = cond;
+      });
+      if (siguiente) cable(inicio, "siguiente", siguiente);
     }
     misIntros.forEach((_g, i) => {
       const id = introIds[i];
@@ -375,11 +417,28 @@ export function tableroDesdeLaPizarra(
       const siguientes: Array<[string, string]> = [[eu, "siguiente"]];
       for (const p of activos(pasos))
         for (const o of [
-          ...(p.buttons ?? []).map((b) => ({ salida: `btn:${b.id}`, accion: b.action })),
-          ...(p.decisions ?? []).filter((d) => d.enabled !== false).map((d) => ({ salida: `dec:${d.id}`, accion: d.action })),
+          ...(p.buttons ?? []).map((b) => ({ salida: `btn:${b.id}`, accion: b.action, b })),
+          ...(p.decisions ?? []).filter((d) => d.enabled !== false).map((d) => ({ salida: `dec:${d.id}`, accion: d.action, b: null })),
         ]) {
-          if (o.accion === "choose_upsell" || o.accion === "show_payment") cable(fu, o.salida, cu);
-          else if (o.accion === "decline_upsell") siguientes.push([fu, o.salida]);
+          // Un BOTÓN con mensaje propio: su mensaje en una ficha antes de seguir (el tablero no manda
+          // las burbujas de un botón; las de un cuadrito sí, solas).
+          const conMensaje = (destino: string): string => {
+            if (!o.b || !(o.b.steps ?? []).length) return destino;
+            const m = poner({ id: uid("msg"), tipo: "mensaje", titulo: o.b.label?.trim() || "Mensaje del botón", steps: copiarPasos(o.b.steps) as FichaDelTablero["steps"] }, col, 2.6);
+            delete o.b.steps;
+            cable(m, "siguiente", destino);
+            return m;
+          };
+          if (o.accion === "choose_upsell" || o.accion === "show_payment") cable(fu, o.salida, conMensaje(cu));
+          else if (o.accion === "decline_upsell") {
+            if (o.b && (o.b.steps ?? []).length) {
+              // Su despedida y luego lo que sigue (el siguiente upsell o el regalo).
+              const m = poner({ id: uid("msg"), tipo: "mensaje", titulo: o.b.label?.trim() || "Mensaje del botón", steps: copiarPasos(o.b.steps) as FichaDelTablero["steps"] }, col, 2.6);
+              delete o.b.steps;
+              cable(fu, o.salida, m);
+              siguientes.push([m, "siguiente"]);
+            } else siguientes.push([fu, o.salida]);
+          }
         }
       pendientes = siguientes;
     });

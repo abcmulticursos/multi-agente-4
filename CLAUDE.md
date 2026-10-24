@@ -970,6 +970,10 @@ tablero?». Se hizo el inventario de `AccionesDelLienzo` (pizarra) contra el tab
   Métodos de pago → cobro, «Solo su mensaje» → ficha Mensaje, persona → humano). Lo APAGADO no se
   traduce (como en la pizarra). Botones con códigos nuevos SIEMPRE (las copias de la pizarra
   conservaban los del original y se pisaban). Upsell sin «no» → se le pone un «No» al regalo (avisa).
+  Las burbujas propias de un BOTÓN van a una ficha Mensaje en medio (el motor del tablero no las
+  manda); las de un CUADRITO se quedan en él (`actuarCuadrito` sí las manda): nada sale dos veces.
+  Las intros con etiqueta de anuncio → «Condición: ¿vino del anuncio?» antes del sorteo (la regla de
+  `chooseIntroSequence`: la del anuncio para él; los demás, sorteo entre TODAS).
   Entrada: ☰ → Exportar/importar → «🔄 Armar desde la pizarra de esta tienda», o «⬆ Traer sus fichas
   a este tablero» con un JSON (también uno de ALBERTO 5). Tablero vacío: entra entero y APAGADO;
   con fichas: al lado, sin Inicio y sin conectar.

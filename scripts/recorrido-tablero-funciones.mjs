@@ -567,6 +567,16 @@ try {
     const marcaDeEntrega = (entrega.match(/PRODUCTO BASICO|https?:\/\/\S{10}/) ?? [""])[0];
     comprobar("paga 15: le entrega su básico (la entrega de su producto)", !!marcaDeEntrega && c.nuevo().includes(marcaDeEntrega), c.nuevo().slice(0, 160));
     await c.borrar();
+    // EL CLIENTE QUE VIENE DE UN ANUNCIO: recibe la intro etiquetada con ese anuncio, como siempre.
+    const etiquetada = intros.find((g) => g.adRoutingEnabled !== false && (g.adKeys ?? []).length > 0 && (!g.semimodalidad || g.semimodalidad === "dou"));
+    const idDelAnuncio = etiquetada && (datos.ad_registry ?? []).find((a) => (etiquetada.adKeys ?? []).includes(a.key))?.ids?.[0];
+    if (idDelAnuncio) {
+      const huella = String(etiquetada.steps?.[0]?.body_variants?.[0] ?? "").replace(/\{[^}]*\}/g, "").replace(/[*_~]/g, "").trim().slice(0, 14);
+      const deAnuncio = await cliente("PE", { anuncio: idDelAnuncio });
+      await deAnuncio.decir("hola", 45);
+      comprobar(`quien viene del anuncio recibe SU intro («${etiquetada.name}»)`, deAnuncio.nuevo().replace(/[*_~]/g, "").includes(huella), deAnuncio.nuevo().slice(0, 100));
+      await deAnuncio.borrar();
+    } else console.log("        (ninguna intro de Perú con anuncio que dirija: no se prueba)");
   }
 } catch (e) {
   fallos++;
