@@ -37,6 +37,19 @@ const TIPOS: TipoDeFicha[] = [
   "correo",
 ];
 
+/**
+ * EL CEREBRO GENERAL DE FÁBRICA (24/10/2026): quién es la IA y cómo habla en todo el tablero. Él lo
+ * cambia en «🧠 Cerebro» si quiere; vacío vale éste. Las reglas que protegen el dinero (nunca números
+ * de cuenta, solo los montos permitidos, solo lo presentado) no están aquí: van siempre, en el código.
+ */
+export const CEREBRO_DE_FABRICA = [
+  "Eres el asistente de ventas de esta tienda por WhatsApp: persuasivo sin presionar, cálido y breve.",
+  "Contesta primero lo que el cliente pregunta y después devuélvelo con suavidad a lo que tiene pendiente.",
+  "Si pregunta el precio, dilo de frente con una frase corta de valor y una invitación suave. No lo esquives.",
+  "Si muestra desconfianza o miedo a una estafa: primero reconoce lo que siente, luego tranquilízalo con honestidad y brevedad (la entrega es inmediata al validar el comprobante, el nombre del titular es siempre el mismo y verificable) y después invítalo con calma a seguir.",
+  "Escribe en 1 a 3 párrafos cortos separados por una línea en blanco, con un emoji como mucho. Sin listas largas. No uses el nombre del cliente.",
+].join("\n");
+
 /** La ventana de Meta: pasado esto sin que el cliente escriba, un mensaje libre no llega. */
 export const VENTANA_DE_META_MIN = 24 * 60 - 7;
 
@@ -204,6 +217,15 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         if (asunto) ficha.correo_asunto = asunto;
         if (cuerpo.trim()) ficha.correo_texto = cuerpo;
       }
+      const instrucciones = texto(f.instrucciones, 3000).trim();
+      if (instrucciones && tipo !== "inicio") ficha.instrucciones = instrucciones;
+      if (tipo === "entregar" && f.por_correo === true) {
+        ficha.por_correo = true;
+        for (const k of ["correo_pregunta", "correo_si", "correo_no", "correo_pide"] as const) {
+          const v = texto(f[k], k === "correo_si" || k === "correo_no" ? 20 : 600).trim();
+          if (v) ficha[k] = v;
+        }
+      }
       if (tipo === "intro_ob") ficha.variantes = leeVariantes(f.variantes, leerPasos);
       if (tipo === "seguimientos") ficha.seguimientos = leeSeguimientos(f.seguimientos, leerPasos);
       if (tipo === "reparto") ficha.reparto = leeReparto(f.reparto);
@@ -247,6 +269,7 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         curvas[texto(k, 140)] = { x: Math.round(x), y: Math.round(y) };
     }
   const nombre = texto(crudo.nombre, 80).trim();
+  const cerebro = texto(crudo.cerebro, 6000).trim();
   const cajas = Array.isArray(crudo.cajas)
     ? crudo.cajas.slice(0, 200).flatMap((k) => {
         if (!esObjeto(k)) return [];
@@ -260,6 +283,7 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
   return {
     encendido: crudo.encendido === true,
     ...(nombre ? { nombre } : {}),
+    ...(cerebro ? { cerebro } : {}),
     fichas,
     cables,
     ...(Object.keys(curvas).length ? { curvas } : {}),
@@ -517,7 +541,8 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
       break;
     case "correo":
       if (pasos.length === 0) avisos.push("No tiene burbujas: no le pide el correo.");
-      if (!(f.correo_texto ?? "").includes("{{MATERIAL}}")) avisos.push("El texto del correo no lleva {{MATERIAL}}: no irían sus enlaces.");
+      if ((f.correo_texto ?? "").trim() && !/\{\{(MATERIAL|ENLACES)\}\}/.test(f.correo_texto ?? ""))
+        avisos.push("El texto del correo no lleva {{ENLACES}} ni {{MATERIAL}}: no irían sus enlaces.");
       break;
   }
   // La IA solo habla de lo que ya se presentó. Se avisa en las que presentan de verdad: la intro de

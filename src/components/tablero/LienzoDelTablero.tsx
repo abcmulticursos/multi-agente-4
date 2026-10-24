@@ -323,6 +323,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {(burbujas.length === 0 || (f.tipo !== "mensaje" && f.tipo !== "intro_ob")) && (
           <div className={`whitespace-pre-line text-[11px] ${burbujas.length === 0 ? "italic" : ""} text-slate-600`}>{ctx.resumenDe(f)}</div>
         )}
+        {f.instrucciones?.trim() && (
+          <div className="truncate text-[11px] text-violet-700" title={f.instrucciones}>
+            🧠 {f.instrucciones}
+          </div>
+        )}
+        {f.tipo === "entregar" && f.por_correo && <div className="text-[11px] text-cyan-700">📧 Ofrece también por correo</div>}
         {/* Con burbujas a la vista, el resumen no sale; lo que presenta sí (la IA solo sabe eso). */}
         {burbujas.length > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && (f.presenta ?? []).length > 0 && (
           <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
@@ -746,7 +752,7 @@ export default function LienzoDelTablero({
         ? { seguimientos: [{ id: `s-${Date.now().toString(36)}`, minutos: 180, variantes: [{ id: `v-${Date.now().toString(36)}`, peso: 1, steps: [] }] }] }
         : {}),
       // El correo nace con un texto que él cambia: es contenido suyo, no del código.
-      ...(tipo === "correo" ? { correo_texto: "Hola 👋\n\nAquí tienes tu material:\n\n{{MATERIAL}}\n\n¡Gracias por tu compra!" } : {}),
+      ...(tipo === "correo" ? { correo_texto: "Hola 👋\n\nAquí tienes los enlaces de tu compra:\n\n{{ENLACES}}\n\n¡Gracias por tu compra!" } : {}),
     };
     const actual = vivo.current;
     const cablesNuevos = desde

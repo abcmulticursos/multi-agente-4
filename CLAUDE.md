@@ -881,6 +881,35 @@ textos, 1032 combinaciones, **0 diferencias**. **No probado:** que él lo apliqu
 lo hace él, con Ctrl+Z y Ctrl+S como siempre); el formato del número (espacios) sí cambia en los
 textos escritos de otra forma, y la fila lo dice antes.
 
+### El tablero, cuarta vuelta (24/10/2026): muestras, cerebros por etapa, correo y la prueba por países
+
+«Haz todas las pruebas correspondientes, para yo no tener que hacer una prueba y decirte: me entregó
+el producto incorrecto…». Lo que se añadió (solo el tablero; el motor de siempre no se tocó):
+- **Muestras con foto:** la IA las manda con `enviar_muestras`, solo de lo ya presentado, cada una
+  una vez (`tablero_estado.muestras`); una foto que falla no deja mudo al cliente.
+- **Cerebros por etapa:** «🧠 Cerebro» general por tablero (`cerebro`, vacío = `CEREBRO_DE_FABRICA`
+  en datos.ts) + «🧠 Instrucciones para la IA aquí» por ficha (`instrucciones`, opcional). Lo fijo va
+  primero (más barato como prefijo). Las reglas del dinero van siempre en el código. «LO QUE LE ESTÁS
+  OFRECIENDO AHORA» para que «¿este es otro?» se entienda por la etapa.
+- **Correo sin borrador:** «📧 Ofrecer también por correo» en Entregar (botones; pide la dirección si
+  no la dio; manda `{{ENLACES}}` de lo entregado). Apagado, si lo pide de palabra se manda igual
+  (`enviar_por_correo`). En una conversación del tablero, un mensaje con un correo y los botones del
+  correo los atiende SIEMPRE el tablero, también durante el regalo: el motor de siempre mandaba SU
+  plantilla (de su venta, no de lo comprado en el tablero).
+- **Completar al otro** en cualquier momento (`completar_al_otro`), también desde el regalo (sale de él).
+- **Durante el regalo**, lo que no es del regalo (`deQueHablaConIA`) lo contesta la IA del tablero.
+- **Pagó y la salida no tiene cable:** aviso al dueño («entrégale a mano») y al cliente «un asesor».
+- Arreglos que cazó la prueba: {{PRODUCTO_ENTREGADO}} salía vacío en la entrega («Entrega para **»);
+  el lector rechazaba un recibo argentino bueno (ahora con la herramienta obligatoria y «es_comprobante»);
+  «me quedo con el básico» no se entendía en el cobro (ahora la IA ve precio y básico/completo);
+  la IA escribía **negrita** de markdown (ahora *una* estrella, como WhatsApp); la IA prometía «ya te lo
+  envío» con el envío fallado.
+- **Tokens, medidos:** 1.632 de entrada por turno en promedio (771–3.143) contra 7.000–10.000 de la
+  venta de siempre.
+Prueba: `scripts/recorrido-tablero-paises.mjs` (PE en COMO DOU con upsell y regalo, EC en COMO OB con
+muestra, AR en COMO HOY con correo, y las desconexiones) con sus comprobantes reales.
+**No probado:** el correo real — Gmail rechazó la contraseña de aplicación que dio (535 BadCredentials).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

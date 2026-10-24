@@ -8,7 +8,7 @@
 //
 //   node scripts/recorrido-del-tablero.mjs --url=http://localhost:3000 --tienda=<id>
 //        [--comprobante=C:/ruta/yape.jpg --monto=15]   (las pruebas de pago necesitan una foto real)
-//        [--solo=contribucion,eleccion,seguimientos,cobro,metodo,ia,upgrade,correo,workflow,activar,messenger]
+//        [--solo=contribucion,eleccion,seguimientos,cobro,metodo,ia,upgrade,correo,dou,ob,workflow,activar,messenger]
 //
 // Los tiempos son de verdad (1 y 2 minutos): tarda unos 15 minutos entero.
 import { createHash } from "node:crypto";
@@ -153,6 +153,54 @@ const TABLEROS = {
       ["cobro_basico", "pagado", "entrega_basico"], ["cobro_basico", `prod:${full?.id}`, "entrega_full"],
     ].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
   },
+  // UNA VENTA COMO DOU ENTERA: los dos productos desde la intro, cobro con método, upgrade y regalo.
+  dou: {
+    encendido: true,
+    fichas: [
+      { id: "inicio", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+      {
+        id: "intro", tipo: "mensaje", x: 300, y: 0, presenta: [basico?.id, full?.id].filter(Boolean),
+        steps: [texto(`INTRO-DOU: tenemos ${basico?.name} y ${full?.name}. ¿Cuál prefieres?`, { buttons: [boton("b_basico", "El básico"), boton("b_full", "El completo")] })],
+      },
+      { id: "cobro_basico", tipo: "cobro", x: 650, y: -200, cobro: { modo: "producto", producto_id: basico?.id, acepta: [full?.id].filter(Boolean), precio: "normal", metodos: true }, steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")] },
+      { id: "cobro_full", tipo: "cobro", x: 650, y: 200, cobro: { modo: "producto", producto_id: full?.id, acepta: [basico?.id].filter(Boolean), precio: "normal", metodos: true }, steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")] },
+      { id: "entrega_basico", tipo: "entregar", x: 1000, y: -200, producto_id: basico?.id },
+      { id: "entrega_full", tipo: "entregar", x: 1000, y: 200, producto_id: full?.id },
+      { id: "ofrece", tipo: "mensaje", x: 1350, y: -200, steps: [texto("OFRECE-UPGRADE: ¿completas para el otro?", { buttons: [boton("si_full", "Sí, completo")] })] },
+      { id: "cobro_upgrade", tipo: "cobro", x: 1700, y: -200, cobro: { modo: "producto", producto_id: full?.id, acepta: [basico?.id].filter(Boolean), precio: "normal", metodos: true, diferencia: true }, steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")] },
+      { id: "regalo", tipo: "regalo", x: 1350, y: 200 },
+    ],
+    cables: [
+      ["inicio", "siguiente", "intro"], ["intro", "btn:b_basico", "cobro_basico"], ["intro", "btn:b_full", "cobro_full"],
+      ["cobro_basico", "pagado", "entrega_basico"], ["cobro_basico", `prod:${full?.id}`, "entrega_full"],
+      ["cobro_full", "pagado", "entrega_full"], ["cobro_full", `prod:${basico?.id}`, "entrega_basico"],
+      ["entrega_basico", "siguiente", "ofrece"], ["ofrece", "btn:si_full", "cobro_upgrade"], ["cobro_upgrade", "pagado", "entrega_full"], ["entrega_full", "siguiente", "regalo"],
+    ].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
+  },
+  // UNA VENTA COMO OB ENTERA: el básico primero, el completo oculto hasta «quiero pagar», muestras,
+  // cobro con método, entrega y regalo.
+  ob: {
+    encendido: true,
+    fichas: [
+      { id: "inicio", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+      { id: "intro", tipo: "mensaje", x: 300, y: 0, presenta: [basico?.id].filter(Boolean), steps: [texto(`INTRO-OB: te presento ${basico?.name}.`, { buttons: [boton("pagar", "Quiero pagar")] })] },
+      {
+        id: "ob", tipo: "intro_ob", x: 650, y: 0, presenta: [basico?.id, full?.id].filter(Boolean),
+        variantes: [{ id: "v", peso: 1, steps: [texto(`INTRO-DE-OB: también está ${full?.name}. ¿Cuál prefieres?`, { buttons: [boton("b1", "El básico"), boton("b2", "El completo")] })] }],
+      },
+      { id: "cobro_basico", tipo: "cobro", x: 1000, y: -200, cobro: { modo: "producto", producto_id: basico?.id, acepta: [full?.id].filter(Boolean), precio: "normal", metodos: true }, steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")] },
+      { id: "cobro_full", tipo: "cobro", x: 1000, y: 200, cobro: { modo: "producto", producto_id: full?.id, acepta: [basico?.id].filter(Boolean), precio: "normal", metodos: true }, steps: [texto("PREGUNTA-METODO: ¿con qué método pagas?")] },
+      { id: "entrega_basico", tipo: "entregar", x: 1350, y: -200, producto_id: basico?.id },
+      { id: "entrega_full", tipo: "entregar", x: 1350, y: 200, producto_id: full?.id },
+      { id: "regalo", tipo: "regalo", x: 1700, y: 0 },
+    ],
+    cables: [
+      ["inicio", "siguiente", "intro"], ["intro", "btn:pagar", "ob"], ["ob", "btn:b1", "cobro_basico"], ["ob", "btn:b2", "cobro_full"],
+      ["cobro_basico", "pagado", "entrega_basico"], ["cobro_basico", `prod:${full?.id}`, "entrega_full"],
+      ["cobro_full", "pagado", "entrega_full"], ["cobro_full", `prod:${basico?.id}`, "entrega_basico"],
+      ["entrega_basico", "siguiente", "regalo"], ["entrega_full", "siguiente", "regalo"],
+    ].map(([de, salida, a], i) => ({ id: `c${i}`, de, salida, a })),
+  },
   // EL UPGRADE: compra el básico y después el completo por la diferencia.
   upgrade: {
     encendido: true,
@@ -245,7 +293,8 @@ async function cliente(canal = "whatsapp") {
     const fin = Date.now() + seg * 1000;
     while (Date.now() < fin) {
       const d = await (await api(`/api/test-simulator/${conv.id}`)).json();
-      for (const m of d.messages.slice(vistos)) if (m.role !== "user") bot.push(m.content ?? "");
+      // Una foto o un video del bot quedan marcados, para ver que las muestras salen de verdad.
+      for (const m of d.messages.slice(vistos)) if (m.role !== "user") bot.push(`${m.media_type ? `[MEDIA:${m.media_type}] ` : ""}${m.content ?? ""}`);
       vistos = d.messages.length;
       await esperar(1000);
     }
@@ -387,6 +436,69 @@ try {
     await c.decir(`mejor quiero el ${full.name}`, 35);
     comprobar("«mejor el completo»: datos con el precio del completo", cifras(nuevos(antes)).includes(String(precioPE(full))), String(precioPE(full)));
     comprobar("y con el método que ya eligió, sin preguntarlo", cifras(nuevos(antes)).includes(cuentaDe(metodoB.method)) && !nuevos(antes).includes("PREGUNTA-METODO"));
+    await c.borrar();
+  }
+
+  if (toca("dou") && args.comprobante && basico && full && metodoA) {
+    const dif = Math.round((precioPE(full) - precioPE(basico)) * 100) / 100;
+    console.log(`\n· UNA VENTA COMO DOU ENTERA (básico ${precioPE(basico)}, completo ${precioPE(full)}, paga ${monto})`);
+    sembrar("dou");
+    await esperar(3000);
+    const c = await cliente();
+    const nuevos = (desde) => c.bot.slice(desde).join("\n");
+    await c.decir("hola", 15);
+    comprobar("la intro presenta los dos", c.dijo("INTRO-DOU"));
+    let antes = c.bot.length;
+    await c.decir("que diferencia hay entre los dos?", 40);
+    const r = nuevos(antes).toLowerCase();
+    comprobar("una duda: la IA contesta sobre los dos (sin elegir)", r.length > 40 && !r.includes("pregunta-metodo"));
+    await c.decir("ya, quiero el basico", 30);
+    comprobar("eligió escribiendo: le pregunta el método", c.dijo("PREGUNTA-METODO"));
+    antes = c.bot.length;
+    await c.decir(metodoA.label.toLowerCase(), 25);
+    comprobar(`«${metodoA.label}»: sus datos con el precio del básico`, cifras(nuevos(antes)).includes(cuentaDe(metodoA.method)) && cifras(nuevos(antes)).includes(String(precioPE(basico))));
+    antes = c.bot.length;
+    await c.decir("mmm mejor el otro", 35);
+    comprobar("«mejor el otro»: datos del completo, mismo método, sin repreguntar", cifras(nuevos(antes)).includes(String(precioPE(full))) && !nuevos(antes).includes("PREGUNTA-METODO"));
+    antes = c.bot.length;
+    await c.decir("no, mejor me quedo con el basico nomas", 35);
+    comprobar("y vuelve al básico: datos con su precio", cifras(nuevos(antes)).includes(String(precioPE(basico))));
+    await c.foto(60);
+    comprobar("paga el básico: le entrega y le ofrece completar", c.dijo("OFRECE-UPGRADE"));
+    antes = c.bot.length;
+    await c.tocar("si_full", "Sí, completo", 25);
+    comprobar(`upgrade: datos por la diferencia (${dif}) sin repreguntar el método`, cifras(nuevos(antes)).includes(cifras(dif)) && !nuevos(antes).includes("PREGUNTA-METODO"), nuevos(antes).slice(0, 50).replace(/\n/g, " "));
+    await c.borrar();
+  }
+
+  if (toca("ob") && args.comprobante && basico && full && metodoA) {
+    console.log(`\n· UNA VENTA COMO OB ENTERA: el completo («${full.name}») oculto hasta «quiero pagar»`);
+    sembrar("ob");
+    await esperar(3000);
+    const c = await cliente();
+    const nuevos = (desde) => c.bot.slice(desde).join("\n");
+    const oculto = String(full.name).toLowerCase();
+    await c.decir("hola", 15);
+    comprobar("la intro presenta solo el básico", c.dijo("INTRO-OB") && !c.bot.join(" ").toLowerCase().includes(oculto));
+    let antes = c.bot.length;
+    await c.decir("cuanto cuesta? hay otras opciones?", 40);
+    comprobar("el precio del básico, y el completo NI se nombra ni se cotiza", cifras(nuevos(antes)).includes(String(precioPE(basico))) && !nuevos(antes).toLowerCase().includes(oculto) && !cifras(nuevos(antes)).includes(String(precioPE(full))));
+    await c.tocar("pagar", "Quiero pagar", 20);
+    comprobar("«quiero pagar» destapa la intro de order bump", c.dijo("INTRO-DE-OB"));
+    antes = c.bot.length;
+    await c.decir(`me muestras una foto del ${full.name}?`, 60);
+    comprobar("pide ver el completo: le manda su muestra (foto)", nuevos(antes).includes("[MEDIA:"), nuevos(antes).slice(0, 40).replace(/\n/g, " "));
+    antes = c.bot.length;
+    await c.decir(`y otra foto del ${full.name} porfa`, 50);
+    comprobar("la misma muestra no se repite", (nuevos(antes).match(/\[MEDIA:/g) ?? []).length <= 1);
+    await c.tocar("b1", "El básico", 20);
+    comprobar("elige el básico: le pregunta el método", c.dijo("PREGUNTA-METODO"));
+    antes = c.bot.length;
+    await c.decir(metodoA.label.toLowerCase(), 25);
+    comprobar("sus datos con el precio del básico", cifras(nuevos(antes)).includes(cuentaDe(metodoA.method)) && cifras(nuevos(antes)).includes(String(precioPE(basico))));
+    antes = c.bot.length;
+    await c.foto(70);
+    comprobar("paga: le entrega y empieza el regalo", c.bot.length - antes >= 2 && nuevos(antes).match(/regal/i) !== null);
     await c.borrar();
   }
 

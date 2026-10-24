@@ -159,6 +159,21 @@ export interface FichaDelTablero {
   /** Ficha «Pedir correo y enviar»: el asunto y el texto del correo. {{MATERIAL}} = lo que recibió. */
   correo_asunto?: string;
   correo_texto?: string;
+  /**
+   * EL CEREBRO DE ESTA ETAPA (24/10/2026): lo que la IA debe tener en cuenta SOLO mientras el
+   * cliente está en esta ficha. Opcional: vacía, la IA usa el cerebro general del tablero.
+   */
+  instrucciones?: string;
+  /**
+   * ENTREGAR: «📧 Ofrecer también por correo». Tras entregar pregunta con botones si lo quiere por
+   * correo; si dice que sí, pide su dirección (si no la dio antes) y le manda los enlaces. La ruta
+   * sigue sin esperar. Los textos son suyos; vacíos, los de fábrica.
+   */
+  por_correo?: boolean;
+  correo_pregunta?: string;
+  correo_si?: string;
+  correo_no?: string;
+  correo_pide?: string;
 }
 
 export interface CableDelTablero {
@@ -177,6 +192,12 @@ export interface Tablero {
   encendido: boolean;
   /** Solo los workflows: su nombre. */
   nombre?: string;
+  /**
+   * EL CEREBRO GENERAL (24/10/2026): quién es y cómo habla la IA en todo este tablero. Vacío = el de
+   * fábrica. Las reglas que protegen el dinero (nunca números de cuenta ni montos ajenos) no viven
+   * aquí: van siempre, en el código, y no se pueden borrar sin querer.
+   */
+  cerebro?: string;
   fichas: FichaDelTablero[];
   cables: CableDelTablero[];
   /** Los cables que él curvó a mano (como en la pizarra): por id de cable. Solo pantalla. */

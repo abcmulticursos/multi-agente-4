@@ -17,6 +17,7 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
+import { CEREBRO_DE_FABRICA } from "@/lib/tablero/datos";
 import {
   aplicarPase,
   avisosDeNumeros,
@@ -30791,6 +30792,7 @@ function PantallaDelTablero({
     ? cfg.workflows?.[wfId] ?? tableroVacio()
     : cfg.tableros?.[tiendaId]?.[canal] ?? tableroVacio();
   const [cajon, setCajon] = useState<string | null>(null);
+  const [verCerebro, setVerCerebro] = useState(false);
   const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
   const [paisVisto, setPaisVisto] = useState<string>("PE");
@@ -30955,6 +30957,39 @@ function PantallaDelTablero({
                 ? "Apagado: esta tienda vende con la venta automática en este canal."
                 : "Falta conectar un ▶ Inicio: mientras tanto, venta automática."}
         </span>
+        {/* EL CEREBRO GENERAL (24/10/2026): uno por tablero, con el de fábrica si no se escribe. */}
+        <button
+          type="button"
+          onClick={() => setVerCerebro(true)}
+          className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
+          title="Quién es la IA y cómo habla en todo este tablero"
+        >
+          🧠 Cerebro{tablero.cerebro?.trim() ? " · tuyo" : " · de fábrica"}
+        </button>
+        {verCerebro && (
+          <VentanaFlotante
+            titulo="🧠 Cerebro general de este tablero"
+            detalle="Quién es la IA y cómo habla en todas las fichas. Lo de cada etapa va en su ficha (⚙ → Instrucciones para la IA aquí)."
+            onCerrar={() => setVerCerebro(false)}
+            ancho="max-w-3xl"
+          >
+            <textarea
+              value={tablero.cerebro ?? CEREBRO_DE_FABRICA}
+              onChange={(e) => guardar({ ...tablero, cerebro: e.target.value.trim() === CEREBRO_DE_FABRICA.trim() ? undefined : e.target.value })}
+              rows={12}
+              className="w-full rounded-md border border-borde bg-relleno px-3 py-2 text-sm"
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-tinta-suave">
+              <button type="button" onClick={() => guardar({ ...tablero, cerebro: undefined })} className="rounded border border-borde px-2 py-1 font-semibold text-tinta hover:bg-relleno">
+                Volver al de fábrica
+              </button>
+              <span>
+                Lo que protege el dinero va siempre y no está aquí: nunca da números de cuenta, solo nombra los montos permitidos y solo habla de los
+                productos ya presentados.
+              </span>
+            </div>
+          </VentanaFlotante>
+        )}
         <span className="ml-auto" />
         <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Tema">
           {(
@@ -31462,8 +31497,9 @@ function AjustesDeLaFicha({
                   className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
                 />
                 <span className={ayuda}>
-                  <strong>{"{{MATERIAL}}"}</strong> = lo que recibió por WhatsApp: el texto de la entrega de cada producto que le entregó esta ruta, con sus
-                  enlaces. Sus burbujas piden el correo; cuando lo escribe, se envía desde tu Gmail y sigue por «Correo enviado».
+                  <strong>{"{{ENLACES}}"}</strong> = solo los enlaces de lo que compró, con el nombre de cada producto.{" "}
+                  <strong>{"{{MATERIAL}}"}</strong> = el texto completo de su entrega, con sus enlaces. Sus burbujas piden el correo; cuando lo escribe, se
+                  envía desde tu Gmail y sigue por «Correo enviado».
                 </span>
               </label>
             </div>
@@ -31473,6 +31509,59 @@ function AjustesDeLaFicha({
               Producto que se entrega
               {selector(b.producto_id, (v) => setB({ ...b, producto_id: v }), productos, "(elige un producto)")}
               <span className={ayuda}>Manda la entrega de la ficha del producto, tal como está escrita. Si dice «compra aprobada», no sirve para algo gratis.</span>
+            </label>
+          )}
+          {/* «📧 OFRECER TAMBIÉN POR CORREO» (24/10/2026): sin borrador de correo; van los enlaces de su entrega. */}
+          {ficha.tipo === "entregar" && (
+            <div className="space-y-2">
+              <label className="flex items-start gap-2 text-xs font-semibold">
+                <input type="checkbox" checked={b.por_correo === true} onChange={(e) => setB({ ...b, por_correo: e.target.checked || undefined })} className="mt-0.5" />
+                <span>
+                  📧 Ofrecer también por correo
+                  <span className={ayuda}>
+                    Después de entregar pregunta con dos botones. Si elige correo, le pide su dirección (si ya la dio antes, se lo manda ahí) y le llegan los
+                    enlaces de lo que compró, desde tu Gmail. No hay borrador que llenar. Apagado: no lo ofrece, pero si el cliente lo pide de palabra, se le
+                    manda igual.
+                  </span>
+                </span>
+              </label>
+              {b.por_correo && (
+                <div className="grid gap-2 rounded-md border border-borde bg-relleno p-2 text-[11px]">
+                  <label>
+                    La pregunta
+                    <input value={b.correo_pregunta ?? ""} onChange={(e) => setB({ ...b, correo_pregunta: e.target.value })} placeholder="¿Te lo envío también a tu correo? 📧" className="mt-0.5 w-full rounded border border-borde bg-tarjeta px-2 py-1 text-xs" />
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label>
+                      Botón sí
+                      <input value={b.correo_si ?? ""} maxLength={20} onChange={(e) => setB({ ...b, correo_si: e.target.value })} placeholder="📧 Sí, por correo" className="mt-0.5 w-full rounded border border-borde bg-tarjeta px-2 py-1 text-xs" />
+                    </label>
+                    <label>
+                      Botón no
+                      <input value={b.correo_no ?? ""} maxLength={20} onChange={(e) => setB({ ...b, correo_no: e.target.value })} placeholder="Solo WhatsApp" className="mt-0.5 w-full rounded border border-borde bg-tarjeta px-2 py-1 text-xs" />
+                    </label>
+                  </div>
+                  <label>
+                    Cuando pide su dirección
+                    <input value={b.correo_pide ?? ""} onChange={(e) => setB({ ...b, correo_pide: e.target.value })} placeholder="¡Claro! ¿A qué correo te lo envío? ✍️" className="mt-0.5 w-full rounded border border-borde bg-tarjeta px-2 py-1 text-xs" />
+                  </label>
+                  <span className="text-tinta-suave">Vacíos = los de fábrica (los que ves en gris).</span>
+                </div>
+              )}
+            </div>
+          )}
+          {/* EL CEREBRO DE ESTA ETAPA (24/10/2026): opcional. */}
+          {ficha.tipo !== "inicio" && ficha.tipo !== "condicion" && ficha.tipo !== "reparto" && ficha.tipo !== "esperar" && ficha.tipo !== "workflow" && (
+            <label className={etiqueta}>
+              🧠 Instrucciones para la IA aquí (opcional)
+              <textarea
+                value={b.instrucciones ?? ""}
+                onChange={(e) => setB({ ...b, instrucciones: e.target.value || undefined })}
+                rows={3}
+                placeholder="Vacío = usa el cerebro general. Ej.: «Si duda, recuérdale que la entrega es inmediata.»"
+                className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+              />
+              <span className={ayuda}>Solo vale mientras el cliente está en esta ficha, sumado al cerebro general. Una a tres líneas bastan.</span>
             </label>
           )}
           {ficha.tipo === "esperar" && (

@@ -70,7 +70,9 @@ export function pasosDelMetodo(phone: string | null | undefined, metodo: string)
  */
 export function conElNombreDelProducto(pasos: ResponseStep[], nombre: string | undefined): ResponseStep[] {
   if (!nombre) return pasos;
-  const cambiar = (t: string | undefined) => (typeof t === "string" ? t.replace(/\{\{\s*producto\s*\}\}/gi, nombre) : t);
+  // {{PRODUCTO_ENTREGADO}} también: en la entrega es el producto que se entrega (24/10/2026: salía
+  // vacío, «Entrega para ** (Plantillas + Guía)», porque la venta de siempre lo saca de SU venta).
+  const cambiar = (t: string | undefined) => (typeof t === "string" ? t.replace(/\{\{\s*producto(_entregado)?\s*\}\}/gi, nombre) : t);
   return pasos.map((p) => {
     const x = { ...(p as Record<string, unknown>) };
     for (const k of ["body", "caption"]) if (typeof x[k] === "string") x[k] = cambiar(x[k] as string);

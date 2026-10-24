@@ -77,6 +77,11 @@ for (const [col, tipo] of [
   // Desde cuándo cuentan los seguimientos de la caja (su último mensaje, o la hora a la que se
   // aplazó un lead tardío), como el T0 del motor de siempre.
   ["seg_desde", "INTEGER"],
+  // Las muestras de la galería que ya se le enviaron («<producto>#<n>»): cada una, una sola vez.
+  ["muestras", "TEXT NOT NULL DEFAULT '[]'"],
+  // Esperando su correo para mandarle los enlaces (1 = se le pidió la dirección; 2 = se le preguntó
+  // si lo enviamos a la que ya dio).
+  ["correo_espera", "INTEGER NOT NULL DEFAULT 0"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -108,6 +113,31 @@ export interface EstadoEnElTablero {
   presentados: string;
   cobro_elegido: string | null;
   seg_desde: number | null;
+  muestras: string;
+  correo_espera: number;
+}
+
+export function esperarCorreo(conversationId: number, modo: 0 | 1 | 2): void {
+  db.prepare("UPDATE tablero_estado SET correo_espera = ? WHERE conversation_id = ?").run(modo, conversationId);
+}
+
+/** Las muestras que ya se le enviaron. */
+export function muestrasEnviadas(e: EstadoEnElTablero | null): string[] {
+  try {
+    const v = JSON.parse(e?.muestras || "[]");
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function anotarMuestras(conversationId: number, ids: string[]): void {
+  const e = estadoEnElTablero(conversationId);
+  if (!e || ids.length === 0) return;
+  db.prepare("UPDATE tablero_estado SET muestras = ? WHERE conversation_id = ?").run(
+    JSON.stringify([...new Set([...muestrasEnviadas(e), ...ids])]),
+    conversationId
+  );
 }
 
 /** Los productos que ya se le presentaron, en orden. */

@@ -44,11 +44,16 @@ const HERRAMIENTA = {
   function: {
     name: "leer_comprobante",
     description:
-      "Call it ONLY if the attachment is a real payment receipt (wallet, bank app or transfer) where the paid amount can be read.",
+      "Report what the attachment is. es_comprobante=true if it is a payment receipt or transfer proof of ANY bank, wallet or country (Yape, Plin, BCP, Pichincha, Mercado Pago, a bank transfer voucher, a PDF receipt…) where the paid amount can be read.",
     parameters: {
       type: "object",
       properties: {
-        monto: { type: "number", description: "The exact amount paid, just the number (e.g. 80, 12.5)." },
+        es_comprobante: { type: "boolean", description: "true if it is a payment receipt / transfer proof with a readable amount." },
+        monto: {
+          type: "number",
+          description:
+            "The exact amount paid, as a plain number without thousands separators (e.g. 80, 12.5, 8000). «$ 8.000» in Argentina is 8000, not 8. 0 if not a receipt.",
+        },
         fecha: { type: "string", description: "Date and time visible on the receipt, exactly as printed. Empty if none." },
         operacion: { type: "string", description: "Operation/transaction number if visible. Empty if none." },
         titular: { type: "string", description: "Recipient name exactly as printed (may be masked). Empty if none." },
@@ -57,7 +62,7 @@ const HERRAMIENTA = {
           description: "Payment app or bank as printed on the receipt, in lowercase (e.g. yape, plin, bcp, interbank, transferencia, nequi, mercadopago). Empty if unknown.",
         },
       },
-      required: ["monto"],
+      required: ["es_comprobante", "monto"],
     },
   },
 };
@@ -96,8 +101,10 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
   const mensajes: ChatCompletionMessageParam[] = [
     {
       role: "system",
+      // SIEMPRE con la herramienta (24/10/2026): dejándole contestar en texto, un recibo de
+      // Argentina se perdió como «no legible» aunque era bueno. Ahora dice sí/no en su ficha.
       content:
-        "Eres un lector de comprobantes de pago. Si el adjunto es un comprobante real y se lee el monto, llama leer_comprobante con lo visible. Si no lo es, o no se lee el monto, responde exactamente: NO_COMPROBANTE. No converses ni inventes datos.",
+        "Eres un lector de comprobantes de pago de cualquier país y banco. Llama SIEMPRE leer_comprobante: con es_comprobante=true y lo visible si el adjunto es un comprobante o constancia de pago con monto legible; con es_comprobante=false y monto 0 si no lo es. No inventes datos.",
     },
     {
       role: "user",
@@ -109,18 +116,24 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
       model: modelo,
       messages: mensajes,
       tools: [HERRAMIENTA],
+      tool_choice: { type: "function", function: { name: "leer_comprobante" } },
       temperature: 0,
     });
     const llamada = r.choices[0]?.message?.tool_calls?.find(
       (t) => t.type === "function" && t.function.name === "leer_comprobante"
     );
     if (!llamada || llamada.type !== "function") {
-      console.log(`[tablero:lector] convo ${conversationId}: no es un comprobante legible`);
+      console.log(
+        `[tablero:lector] convo ${conversationId}: no es un comprobante legible (dijo: «${(r.choices[0]?.message?.content ?? "").slice(0, 120)}»)`
+      );
       return null;
     }
     const args = JSON.parse(llamada.function.arguments || "{}") as Record<string, unknown>;
     const monto = typeof args.monto === "number" ? args.monto : Number(String(args.monto ?? "").replace(",", "."));
-    if (!Number.isFinite(monto) || monto <= 0) return null;
+    if (args.es_comprobante === false || !Number.isFinite(monto) || monto <= 0) {
+      console.log(`[tablero:lector] convo ${conversationId}: no es un comprobante legible (${llamada.function.arguments.slice(0, 160)})`);
+      return null;
+    }
     const limpio = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 120) : undefined);
     const lectura: LecturaDelComprobante = {
       monto,

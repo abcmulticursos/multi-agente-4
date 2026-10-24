@@ -31,7 +31,9 @@ comprobar(
   "atiende = encendido + Inicio con cable",
   /if \(!t\?\.encendido\) return false;/.test(datos) && /cableDeLaSalida\(t, inicio\.id, "siguiente"\)/.test(datos)
 );
-comprobar("el regalo lo sigue haciendo el motor de siempre", /if \(ESTADOS_DEL_REGALO\.has\(convo\.state \?\? ""\)\) return false;/.test(motor));
+// (24/10) Lo del regalo —su pregunta, botones, fotos— sigue en el motor de siempre; solo lo que habla
+// de OTRA cosa lo contesta el tablero (ver más abajo).
+comprobar("el regalo lo sigue haciendo el motor de siempre", /if \(ESTADOS_DEL_REGALO\.has\(convo\.state \?\? ""\)\) \{/.test(motor) && /if \(delRegalo\) return false;/.test(motor));
 
 console.log("\n— 2. entra por un solo sitio, y después de los frenos —\n");
 const gancho = manejador.indexOf("await alRecibirMensaje(");
@@ -128,6 +130,19 @@ comprobar("los seguimientos usan las reglas de Ajustes (tardío, silencio, ráfa
 comprobar("y vuelven a contar si el cliente escribe", /contarSeguimientosDesde\(convo\.id, ahora\(\)\)/.test(motor));
 comprobar("el correo no sale desde el simulador", /if \(convo\.channel === "test"\) \{\s*console\.log\(`\[tablero:correo\]/.test(motor));
 comprobar("y la ficha de correo se guarda (sus burbujas y su texto)", /tipo === "correo"\) && Array\.isArray\(f\.steps\)/.test(datos) && /ficha\.correo_texto = cuerpo/.test(datos));
+
+console.log("\n· muestras, cerebros por etapa, correo, completar y el regalo (24/10)");
+comprobar("las muestras solo de lo presentado y una sola vez", /presentadosDe\(estado\)\.flatMap/.test(motor) && /ya\.has\(id\)/.test(motor));
+comprobar("una foto que falla no deja mudo al cliente", /no se pudo enviar la muestra/.test(motor));
+comprobar("el cerebro general va primero (fijo) y las reglas del dinero siempre", /\(c\.cerebroGeneral \?\? ""\)\.trim\(\) \|\| CEREBRO_DE_FABRICA/.test(ia) && /REGLAS QUE NO SE ROMPEN/.test(ia));
+comprobar("y el de la ficha solo en su ficha", /instrucciones: ficha\?\.instrucciones/.test(motor));
+comprobar("«¿este es otro?»: la IA sabe lo que ofrece ahora", /LO QUE LE ESTÁS OFRECIENDO AHORA/.test(ia) && /ofreciendoAhora/.test(motor));
+comprobar("«completar al otro» solo hacia un cobro con upgrade y sin cobro abierto", /x\.cobro\.diferencia/.test(motor) && /!estado\?\.cobro_ficha_id && !nota/.test(motor));
+comprobar("y si estaba en el regalo, sale del regalo antes de cobrar", /cancelPendingActionsForConvo\(convo\.id\);\s*setConversationState\(convo\.id, "tablero"\);\s*\}\s*await irA\(convo\.id, t, upgrade\.id\)/.test(motor));
+comprobar("en el regalo, lo que no es del regalo lo contesta el tablero", /deQueHablaConIA\(convo\.id, contenido/.test(motor));
+comprobar("el correo: {{ENLACES}} y el de fábrica sin borrador", /enlacesParaElCorreo/.test(motor) && /CORREO_DE_FABRICA/.test(motor));
+comprobar("pagar sin cable a la entrega avisa al dueño", /no tiene cable: entrégale a mano/.test(motor));
+comprobar("se mide lo que cuesta cada turno", /\[tablero:ia:tokens\]/.test(ia));
 
 console.log(fallos === 0 ? "\nTODO OK" : `\n${fallos} FALLO(S)`);
 process.exit(fallos === 0 ? 0 : 1);
