@@ -18,7 +18,28 @@
  * casillas que BLOQUEAN «Continuar»: Meta no deja comprobarlo desde fuera.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+/**
+ * LA GUÍA CON IMAGEN, DEBAJO DE LOS BOTONES (24/10/2026). Lo pidió él: «nadie novato daría con ese
+ * botón… que esa imagen se abra abajo del botón, para que el usuario tenga referencia… que no deje
+ * sin vista el botón ni el check, sino debajo de ellos, que scrolleando se pueda ver». Las imágenes
+ * son recortes de sus capturas, sin datos de su app (public/meta-connect/guia).
+ */
+function GuiaConImagenes({ pasos }: { pasos: Array<{ texto: ReactNode; imagen: string }> }) {
+  return (
+    <div className="mt-4 space-y-3 border-t border-neutral-200 pt-3">
+      <div className="text-xs font-bold uppercase tracking-wide text-neutral-500">📷 Así se ve en Meta</div>
+      {pasos.map((p, i) => (
+        <div key={i} className="space-y-1">
+          <div className="text-[13px] text-neutral-800">{p.texto}</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={p.imagen} alt="" className="w-full rounded-lg border border-neutral-300 shadow-sm" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 type Paso = "inicio" | "app" | "facebook" | "numeros" | "token" | "listo" | "cerrar";
 const CAMINO: Paso[] = ["app", "facebook", "numeros", "token", "listo"];
@@ -691,12 +712,31 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
 
       {sub === "permiso" && (
         <>
+          {/* EL NOMBRE EXACTO QUE ENSEÑA META Y DÓNDE ESTÁ (24/10/2026): «no coincide con el texto,
+              nadie novato daría con ese botón». */}
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
-            <b>Enciende un permiso de tu app (una sola vez).</b> Tu app no deja que el CRM complete su configuración. En la página que se abre, pon en <b>«Sí»</b>{" "}
-            <i>«Permitir acceso a la API para la configuración de la app»</i> y guarda.
+            <b>ACTIVA EL INTERRUPTOR (una sola vez).</b> Tu app no deja que el CRM complete su configuración.
+            <ol className="mt-2 list-decimal space-y-1 pl-5">
+              <li>
+                Pulsa <b>«Abrir ese permiso de mi app»</b>: se abre <b>Configuración de la app → Avanzada</b>.
+              </li>
+              <li>
+                Baja hasta <b>«Permitir acceso de API a configuración de la app»</b> y <b>activa su interruptor</b> (queda azul).
+              </li>
+              <li>
+                Abajo de todo de la página, pulsa <b>«Guardar cambios»</b>.
+              </li>
+              <li>Vuelve aquí y pulsa «Ya lo encendí → Reintentar».</li>
+            </ol>
           </div>
           <Abrir href={`https://developers.facebook.com/apps/${id}/settings/advanced/`} texto="Abrir ese permiso de mi app" />
           <Botones listo={true} alSeguir={() => void preparar()} texto={ocupado ? "Reintentando…" : "Ya lo encendí → Reintentar"} />
+          <GuiaConImagenes
+            pasos={[
+              { texto: <>1. El interruptor, <b>activado</b> (azul):</>, imagen: "/meta-connect/guia/permiso-interruptor.jpg" },
+              { texto: <>2. Abajo de todo de la página, <b>«Guardar cambios»</b>:</>, imagen: "/meta-connect/guia/permiso-guardar.jpg" },
+            ]}
+          />
         </>
       )}
 
@@ -815,6 +855,14 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
           <Abrir href={`https://developers.facebook.com/apps/${id}/business-login/settings/`} texto="Abrir donde se pega la URI" />
           <Casilla id="uri" casillas={casillas} marcar={marcar} texto="Pegué la URI y guardé." />
           <Botones listo={!!casillas.uri} alSeguir={() => ir("vivo")} />
+          <GuiaConImagenes
+            pasos={[
+              {
+                texto: <>Pégala en la casilla <b>«URI de redireccionamiento de OAuth válidos»</b> y luego <b>«Guardar cambios»</b>, abajo de la página:</>,
+                imagen: "/meta-connect/guia/uri.jpg",
+              },
+            ]}
+          />
         </>
       )}
 
@@ -822,11 +870,19 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
       {sub === "vivo" && (
         <>
           <div>
-            <b>En vivo.</b> Arriba de tu app, cambia «Modo de la app» a <i>En vivo</i> (o «Publicar»). Meta pide la política de privacidad: tu CRM ya la tiene publicada.
+            <b>Ponla en vivo.</b> Arriba de tu app, en <b>«Modo de la app»</b>, mueve el interruptor de <i>Desarrollo</i> a <b>Activo</b>. Meta pide la política
+            de privacidad: tu CRM ya la tiene publicada.
+          </div>
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-2 text-[13px]">
+            Si Meta dice <b>«No cumple los requisitos»</b>, en esa misma página sube el <b>Ícono de la app</b> (1024 × 1024) y elige una <b>Categoría</b>;
+            luego <b>«Guardar cambios»</b> y vuelve a mover el interruptor.
           </div>
           <Abrir href={`https://developers.facebook.com/apps/${id}/settings/basic/`} texto="Abrir mi app para ponerla en vivo" />
           <Casilla id="vivo" casillas={casillas} marcar={marcar} texto="Puse mi app en vivo." />
           <Botones listo={!!casillas.vivo} alSeguir={alListo} />
+          <GuiaConImagenes
+            pasos={[{ texto: <>El interruptor <b>«Modo de la app»</b>, arriba de todo, en <b>Activo</b>:</>, imagen: "/meta-connect/guia/vivo.jpg" }]}
+          />
         </>
       )}
     </div>
