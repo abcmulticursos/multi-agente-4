@@ -4,7 +4,9 @@
 //
 // NO GUARDA NADA: solo usa el simulador de pruebas. Correr contra una COPIA con .env seguro.
 //   node scripts/recorrido-tiendas-ejemplo.mjs --url=http://localhost:3312 --raiz=<copia>
-//        --comprobantes=<carpeta> [--solo=cocina,ninos,taller,taller_pe,mascotas,estilista,otros]
+//        --comprobantes=<carpeta> [--solo=cocina,ninos,taller,taller_pe,mascotas,estilista,otros,no_respondio,mascotas_pago,estilista_recordatorio]
+//   (no_respondio, mascotas_pago y estilista_recordatorio piden antes `tiempos-copia.mjs` en la copia:
+//    acortan los relojes y ponen el pack de mascotas a 15)
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
@@ -27,6 +29,9 @@ const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 const cifras = (v) => String(v ?? "").replace(/\D/g, "");
 
 const datos = YAML.parse(readFileSync(join(RAIZ, "config", "intro-data.yaml"), "utf8"));
+/** El silencio del regalo de ESTA copia (en la copia de prueba se acorta) y un margen para leerlo. */
+const SILENCIO_DEL_REGALO = Number(datos.awaiting_email_timeout_seconds ?? 300);
+const ESPERA_DEL_REGALO = SILENCIO_DEL_REGALO + 30;
 const perfil = (pais) => datos.payment_profiles_by_country?.[pais] ?? {};
 const cuenta = (pais, m) => cifras(perfil(pais).cuentas_por_metodo?.[m] ?? perfil(pais).numero_de_cuenta);
 
@@ -77,6 +82,7 @@ async function cliente(tienda, pais) {
   };
   let marca = 0;
   const c = {
+    id: conv.id,
     bot,
     nuevo: () => bot.slice(marca).join("\n"),
     // Esperar sin escribir (p. ej. el silencio del regalo): lo nuevo es lo que llegue en ese rato.
@@ -136,10 +142,12 @@ try {
     comprobar("y le ofrece el upsell (COMIDAS PERUANAS a 5)", /COMIDAS PERUANAS/.test(c.nuevo()) && /5/.test(c.nuevo()), c.nuevo().slice(-160));
     await c.decir("eso es otro curso?", 35);
     comprobar("«¿es otro?»: la IA dice que es otro, sin pedir comprobante", /otro|distinto|diferente/i.test(c.nuevo()) && !/comprobante/i.test(c.nuevo()), c.nuevo());
+    // EL REGALO ESPERA SU SILENCIO (25/10/2026), como la venta de siempre (en la copia se acorta):
+    // se mira TODO lo que llegó desde el «no», porque con un silencio corto llega mientras se lee.
+    const desdeElNo = c.bot.length;
     await c.tocar("coc_pe_u1_no", "No, gracias");
-    // EL REGALO ESPERA SU SILENCIO (25/10/2026), como la venta de siempre: 180 s en su config.
-    await c.leer(210);
-    comprobar("no quiere el upsell: tras el silencio, el regalo de la tienda", /regalit|RECETAS EXPR/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.leer(ESPERA_DEL_REGALO);
+    comprobar("no quiere el upsell: tras el silencio, el regalo de la tienda", /regalit|RECETAS EXPR/i.test(c.bot.slice(desdeElNo).join("\n")), c.bot.slice(desdeElNo).join("\n").slice(0, 140));
     comprobar("y todo lo que dijo sale sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }
@@ -160,9 +168,10 @@ try {
     comprobar("y el upsell 1 (NAVIDAD EN FAMILIA) con cuadritos", /NAVIDAD EN FAMILIA/.test(c.nuevo()) && /s[ií]\*? o \*?no/i.test(c.nuevo()), c.nuevo().slice(-160));
     await c.decir("no gracias", 30);
     comprobar("«no gracias»: el upsell 2 (TARJETAS DE EMOCIONES)", /TARJETAS DE EMOCIONES/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    const desdeElNo = c.bot.length;
     await c.decir("no", 30);
-    await c.leer(210); // el regalo espera su silencio
-    comprobar("«no»: tras el silencio, el regalo de la tienda", /regalit|CUENTOS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.leer(ESPERA_DEL_REGALO); // el regalo espera su silencio
+    comprobar("«no»: tras el silencio, el regalo de la tienda", /regalit|CUENTOS/i.test(c.bot.slice(desdeElNo).join("\n")), c.bot.slice(desdeElNo).join("\n").slice(0, 140));
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }
@@ -182,9 +191,10 @@ try {
     comprobar("no: upsell 2 (CALCULADORA DE MATERIALES)", /CALCULADORA/.test(c.nuevo()), c.nuevo().slice(0, 140));
     await c.decir("no", 30);
     comprobar("no: upsell 3 (GUÍA DE SOLDADURA)", /SOLDADURA/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    const desdeElNo = c.bot.length;
     await c.tocar("tal_ar_u3_no", "No, gracias");
-    await c.leer(210); // el regalo espera su silencio
-    comprobar("no: tras el silencio, el regalo de la tienda", /regalit|HERRAMIENTAS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.leer(ESPERA_DEL_REGALO); // el regalo espera su silencio
+    comprobar("no: tras el silencio, el regalo de la tienda", /regalit|HERRAMIENTAS/i.test(c.bot.slice(desdeElNo).join("\n")), c.bot.slice(desdeElNo).join("\n").slice(0, 140));
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }
@@ -222,6 +232,67 @@ try {
     comprobar("los 7 niveles y el Yape de quien cobra", /\$69 SOLES/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")), c.nuevo().slice(-120));
     await c.foto(R.pe15, 70);
     comprobar("aporta 15: le llega el enlace del nivel 12", /nivel-12/.test(c.nuevo()) && !/nivel-19/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.borrar();
+  }
+
+  // ── CON LOS RELOJES ACORTADOS EN LA COPIA (`tiempos-copia.mjs`): lo que en vivo tarda horas ──
+  // Cada prueba mira además que lo que llega por reloj llegue DESPUÉS de lo anterior, sin pisarlo.
+  const sinPisar = async (c, patron) => {
+    const d = await (await api(`/api/test-simulator/${c.id}`)).json();
+    const del_bot = (d.messages ?? []).filter((m) => m.role !== "user");
+    const i = del_bot.findIndex((m) => patron.test(m.content ?? ""));
+    if (i <= 0) return { ok: i === 0, hueco: null };
+    const antes = new Date(del_bot[i - 1].created_at * 1000 || del_bot[i - 1].created_at).getTime();
+    const ahora = new Date(del_bot[i].created_at * 1000 || del_bot[i].created_at).getTime();
+    return { ok: ahora - antes >= 15_000, hueco: Math.round((ahora - antes) / 1000) };
+  };
+
+  if (toca("no_respondio")) {
+    console.log("\n· COCINA: si no responde a la intro (Perú) o a la oferta (Ecuador), le llega su seguimiento");
+    const SEG = /Pudiste revisar|Alcanzaste a ver|Lograste ver|Te guard[ée] el precio/i;
+    const pe = await cliente("tienda_tcocina", "PE");
+    await pe.decir("hola", 30);
+    await pe.leer(170);
+    comprobar("Perú: calla tras la intro → a los 2 min, su seguimiento", SEG.test(pe.nuevo()), pe.nuevo().slice(0, 120));
+    const h1 = await sinPisar(pe, SEG);
+    comprobar("y llega después de la intro, sin pisarla", h1.ok, `${h1.hueco ?? "?"} s tras el mensaje anterior`);
+    await pe.borrar();
+    const ec = await cliente("tienda_tcocina", "EC");
+    await ec.decir("hola", 30);
+    await ec.tocar("coc_ec_b_pagar", "Quiero pagar", 25);
+    comprobar("Ecuador: «Quiero pagar» le muestra la oferta del pack", /Espera|pack/i.test(ec.nuevo()), ec.nuevo().slice(0, 100));
+    await ec.leer(170);
+    comprobar("calla ante la oferta → a los 2 min, su seguimiento", SEG.test(ec.nuevo()), ec.nuevo().slice(0, 120));
+    const h2 = await sinPisar(ec, SEG);
+    comprobar("y llega después de la oferta, sin pisarla", h2.ok, `${h2.hueco ?? "?"} s tras el mensaje anterior`);
+    await ec.borrar();
+  }
+
+  if (toca("mascotas_pago") && R.pe15) {
+    console.log("\n· MASCOTAS (Perú): elige el pack, paga y lo recibe (en Perú sin «¿por correo?»: va solo en Argentina)");
+    const c = await cliente("tienda_tmascotas", "PE");
+    await c.decir("hola", 45);
+    await c.tocar("mas_pe_b_pack", "Opción 2 (el pack)");
+    await c.decir("yape", 30);
+    comprobar("«yape»: su cuenta y el precio del pack (15 en la copia)", cifras(c.nuevo()).includes(cuenta("PE", "yape")) && /15/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.foto(R.pe15, 80);
+    comprobar("paga 15: le entrega EL PACK", c.nuevo().includes(entregaDe("pack-mascotas")), c.nuevo().slice(0, 140));
+    // Su Entrega de Perú no tiene «📧 Ofrecer también por correo»: no debe preguntarlo.
+    comprobar("y no le pregunta por correo (apagado en Perú)", !/por correo|tu correo/i.test(c.nuevo()), c.nuevo().match(/.{0,40}correo.{0,40}/i)?.[0] ?? "");
+    comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
+    await c.borrar();
+  }
+
+  if (toca("estilista_recordatorio")) {
+    console.log("\n· ESTILISTA: acepta, recibe los PDF y no aporta → le llega su primer recordatorio");
+    const c = await cliente("tienda_testilista", "PE");
+    await c.decir("hola", 40);
+    await c.tocar("est_si", "Sí, acepto", 60);
+    await c.leer(150);
+    const REC = /Espero que ya hayas podido echarle un vistazo/i;
+    comprobar("no aporta → su recordatorio 1", REC.test(c.nuevo()), c.nuevo().slice(0, 120));
+    const h = await sinPisar(c, REC);
+    comprobar("y llega después de los PDF y los datos de pago, sin pisarlos", h.ok, `${h.hueco ?? "?"} s tras el mensaje anterior`);
     await c.borrar();
   }
 
