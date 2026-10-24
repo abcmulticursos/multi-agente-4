@@ -88,6 +88,15 @@ export interface VarianteDeFicha {
   /** Ausente = 1. 0 = apagada. */
   peso?: number;
   steps?: SequenceStep[];
+  /**
+   * SUS ANUNCIOS (24/10/2026), como las etiquetas de AD de la pizarra: claves del registro de
+   * anuncios. Con la misma regla que la venta de siempre: en la intro de order bump, quien llega por
+   * uno de esos anuncios recibe ésta y el resto se sortea entre todas; en un seguimiento, la del
+   * anuncio es solo para él y el resto se sortea entre las que no tienen anuncio.
+   */
+  anuncios?: string[];
+  /** false = las etiquetas están pero no dirigen (el interruptor «Etiquetas de AD» apagado). */
+  dirigir?: boolean;
 }
 
 /** Uno de los seguimientos de la caja «Seguimientos». */
@@ -203,7 +212,21 @@ export interface Tablero {
   /** Los cables que él curvó a mano (como en la pizarra): por id de cable. Solo pantalla. */
   curvas?: Record<string, { x: number; y: number }>;
   /** Las cajas que él dibuja detrás de las fichas, como en la pizarra. Solo pantalla. */
-  cajas?: Array<{ id: string; x: number; y: number; ancho: number; alto: number; titulo: string; color?: string }>;
+  cajas?: Array<{
+    id: string;
+    x: number;
+    y: number;
+    ancho: number;
+    alto: number;
+    titulo: string;
+    color?: string;
+    /**
+     * LA MANTA DE UN PAÍS (24/10/2026): esta caja es el fondo del Inicio con este id. «La manta no
+     * debe ser automatizada, la controlo yo desde las esquinas», como en la pizarra. Lleva su
+     * bandera y «▶ Ver recorrido». Solo pantalla: el bot no la lee.
+     */
+    inicio?: string;
+  }>;
 }
 
 /** Los canales: un tablero por canal, como la sección Canales. */

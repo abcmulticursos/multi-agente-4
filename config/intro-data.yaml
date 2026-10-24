@@ -112484,6 +112484,35 @@ tableros:
           de: coc_otros_msg
           salida: siguiente
           a: coc_otros_humano
+      cajas:
+        - id: manta-coc_pe_inicio
+          x: 20
+          y: -70
+          ancho: 2640
+          alto: 1350
+          titulo: ""
+          inicio: coc_pe_inicio
+        - id: manta-coc_ec_inicio
+          x: 20
+          y: 1530
+          ancho: 2640
+          alto: 1350
+          titulo: ""
+          inicio: coc_ec_inicio
+        - id: manta-coc_ar_inicio
+          x: 20
+          y: 3130
+          ancho: 2310
+          alto: 1020
+          titulo: ""
+          inicio: coc_ar_inicio
+        - id: manta-coc_otros
+          x: 20
+          y: 4330
+          ancho: 1280
+          alto: 620
+          titulo: ""
+          inicio: coc_otros
   tienda_tninos:
     whatsapp:
       encendido: true
@@ -114110,6 +114139,35 @@ tableros:
           de: nin_otros_msg
           salida: siguiente
           a: nin_otros_humano
+      cajas:
+        - id: manta-nin_pe_inicio
+          x: 20
+          y: -70
+          ancho: 2970
+          alto: 1350
+          titulo: ""
+          inicio: nin_pe_inicio
+        - id: manta-nin_ec_inicio
+          x: 20
+          y: 1530
+          ancho: 3300
+          alto: 1350
+          titulo: ""
+          inicio: nin_ec_inicio
+        - id: manta-nin_ar_inicio
+          x: 20
+          y: 3130
+          ancho: 2970
+          alto: 1020
+          titulo: ""
+          inicio: nin_ar_inicio
+        - id: manta-nin_otros
+          x: 20
+          y: 4330
+          ancho: 1280
+          alto: 620
+          titulo: ""
+          inicio: nin_otros
   tienda_ttaller:
     whatsapp:
       encendido: true
@@ -115932,6 +115990,35 @@ tableros:
           de: tal_otros_msg
           salida: siguiente
           a: tal_otros_humano
+      cajas:
+        - id: manta-tal_pe_inicio
+          x: 20
+          y: -70
+          ancho: 3630
+          alto: 1020
+          titulo: ""
+          inicio: tal_pe_inicio
+        - id: manta-tal_ec_inicio
+          x: 20
+          y: 1530
+          ancho: 3960
+          alto: 1350
+          titulo: ""
+          inicio: tal_ec_inicio
+        - id: manta-tal_ar_inicio
+          x: 20
+          y: 3130
+          ancho: 3630
+          alto: 1020
+          titulo: ""
+          inicio: tal_ar_inicio
+        - id: manta-tal_otros
+          x: 20
+          y: 4330
+          ancho: 1280
+          alto: 620
+          titulo: ""
+          inicio: tal_otros
   tienda_tmascotas:
     whatsapp:
       encendido: true
@@ -117110,6 +117197,35 @@ tableros:
           de: mas_otros_msg
           salida: siguiente
           a: mas_otros_humano
+      cajas:
+        - id: manta-mas_pe_inicio
+          x: 20
+          y: -70
+          ancho: 2310
+          alto: 1350
+          titulo: ""
+          inicio: mas_pe_inicio
+        - id: manta-mas_ec_inicio
+          x: 20
+          y: 1530
+          ancho: 2640
+          alto: 1350
+          titulo: ""
+          inicio: mas_ec_inicio
+        - id: manta-mas_ar_inicio
+          x: 20
+          y: 3130
+          ancho: 2310
+          alto: 1020
+          titulo: ""
+          inicio: mas_ar_inicio
+        - id: manta-mas_otros
+          x: 20
+          y: 4330
+          ancho: 1280
+          alto: 620
+          titulo: ""
+          inicio: mas_otros
   tienda_testilista:
     whatsapp:
       encendido: true
@@ -117552,3 +117668,18 @@ tableros:
           de: est_otros_msg
           salida: siguiente
           a: est_otros_humano
+      cajas:
+        - id: manta-est_inicio
+          x: 20
+          y: -400
+          ancho: 1980
+          alto: 1350
+          titulo: ""
+          inicio: est_inicio
+        - id: manta-est_otros
+          x: 20
+          y: 1430
+          ancho: 1280
+          alto: 620
+          titulo: ""
+          inicio: est_otros

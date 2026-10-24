@@ -137,11 +137,17 @@ function leeVariantes(v: unknown, leerPasos: (p: unknown[]) => unknown[]): Varia
     if (!id) return [];
     const peso = numero(x.peso);
     const nombre = texto(x.nombre, 80).trim();
+    // SUS ANUNCIOS (24/10/2026), como las etiquetas de AD de la pizarra: claves del registro.
+    const anuncios = Array.isArray(x.anuncios)
+      ? [...new Set(x.anuncios.slice(0, 40).map((a) => texto(a, 80).trim()).filter(Boolean))]
+      : [];
     return [
       {
         id,
         ...(nombre ? { nombre } : {}),
         ...(peso !== undefined && peso >= 0 ? { peso } : {}),
+        ...(anuncios.length ? { anuncios } : {}),
+        ...(x.dirigir === false ? { dirigir: false } : {}),
         steps: (Array.isArray(x.steps) ? leerPasos(x.steps.slice(0, 60)) : []) as SequenceStep[],
       },
     ];
@@ -277,7 +283,9 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         const id = texto(k.id, 80).trim();
         if (!id || x === undefined || y === undefined || !ancho || !alto) return [];
         const color = texto(k.color, 20).trim();
-        return [{ id, x: Math.round(x), y: Math.round(y), ancho: Math.round(ancho), alto: Math.round(alto), titulo: texto(k.titulo, 80), ...(color ? { color } : {}) }];
+        // LA MANTA DE UN PAÍS (24/10/2026): la caja que es el fondo de un Inicio. La maneja él.
+        const inicio = texto(k.inicio, 80).trim();
+        return [{ id, x: Math.round(x), y: Math.round(y), ancho: Math.round(ancho), alto: Math.round(alto), titulo: texto(k.titulo, 80), ...(color ? { color } : {}), ...(inicio ? { inicio } : {}) }];
       })
     : [];
   return {

@@ -185,6 +185,36 @@ function idsParaComodines(convoId: number, f: FichaDelTablero): string[] {
   return e ? presentadosDe(e) : [];
 }
 
+/** Las claves del registro de anuncios que corresponden al anuncio por el que llegó el cliente. */
+function clavesDelAnuncioDelCliente(convo: ConversationRow, config: WorkflowConfig | null): Set<string> {
+  const id = String(convo.ad_source_id ?? "").trim();
+  if (!id) return new Set();
+  return new Set(
+    (config?.ad_registry ?? [])
+      .filter((ad) => ad.enabled !== false && (ad.ids ?? []).flatMap((x) => String(x).split(/[\s,;]+/)).map((x) => x.trim()).includes(id))
+      .map((ad) => ad.key)
+  );
+}
+
+/**
+ * QUÉ VERSIÓN LE TOCA, CON SUS ANUNCIOS (24/10/2026), con la misma regla que la venta de siempre
+ * (ver «Ojo con los anuncios» en CLAUDE.md): quien llega por un anuncio recibe la versión de ese
+ * anuncio. Si no, en la intro de order bump se sortea entre TODAS; en un seguimiento, solo entre las
+ * que no tienen anuncio (y si no hay ninguna, no se manda). Sin etiquetas, el sorteo de siempre.
+ */
+function versionQueLeToca(
+  lista: VarianteDeFicha[],
+  claves: Set<string>,
+  regla: "intro" | "seguimiento"
+): VarianteDeFicha | null {
+  const dirige = (v: VarianteDeFicha) => v.dirigir !== false && (v.anuncios ?? []).length > 0;
+  const vivas = lista.filter((v) => (v.peso ?? 1) > 0);
+  const delSuAnuncio = vivas.filter((v) => dirige(v) && (v.anuncios ?? []).some((k) => claves.has(k)));
+  if (delSuAnuncio.length) return sortear(delSuAnuncio);
+  if (regla === "intro") return sortear(vivas);
+  return sortear(vivas.filter((v) => !dirige(v)));
+}
+
 function pasosActivos(pasos: SequenceStep[] | undefined): SequenceStep[] {
   return (pasos ?? []).filter((s) => (s as { enabled?: boolean }).enabled !== false);
 }
@@ -345,7 +375,7 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
     case "intro_ob": {
       let pasosAEnviar = pasosActivos(f.steps);
       if (f.tipo === "intro_ob") {
-        const v = sortear<VarianteDeFicha>(f.variantes ?? []);
+        const v = versionQueLeToca(f.variantes ?? [], clavesDelAnuncioDelCliente(convo, config), "intro");
         if (v) apuntarVariante(convoId, f.id, v.id);
         pasosAEnviar = pasosActivos(v?.steps);
       }
@@ -1489,7 +1519,7 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       return;
     }
     const seg = segs[idx];
-    const v = sortear<VarianteDeFicha>(seg.variantes);
+    const v = versionQueLeToca(seg.variantes, clavesDelAnuncioDelCliente(fresca, loadWorkflowConfig()), "seguimiento");
     if (v) {
       apuntarVariante(convo.id, `${ficha}#${idx}`, v.id);
       const paisSeg = getEffectiveCountryCode(fresca.phone, loadWorkflowConfig());

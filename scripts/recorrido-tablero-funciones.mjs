@@ -5,7 +5,7 @@
 //
 // NO GUARDA NADA DE ÉL: escribe en el config de una COPIA y lo devuelve idéntico. Correr contra una copia.
 //   node scripts/recorrido-tablero-funciones.mjs --url=http://localhost:3312 --raiz=<copia> --comprobantes=<carpeta>
-//        [--solo=oferta,congelado,incompleto,titular,compro,anuncio,inicio,apagada,variantes,tuberia]
+//        [--solo=oferta,congelado,incompleto,titular,compro,anuncio,versiones_anuncio,inicio,apagada,variantes,tuberia]
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
@@ -284,6 +284,80 @@ try {
     await b.decir("hola", 20);
     comprobar("con anuncio: sale por «sí»", b.nuevo().includes("VINO-DE-ANUNCIO"), b.nuevo());
     await b.borrar();
+  }
+
+  // 8c. LAS VERSIONES CON ETIQUETA DE ANUNCIO (24/10/2026): la misma regla que la venta de siempre.
+  // Seguimiento: el del anuncio para quien vino de él; los demás, solo entre las SIN etiqueta.
+  // Intro de order bump: la del anuncio para él; los demás, entre TODAS.
+  if (toca("versiones_anuncio")) {
+    console.log("\n· 8c. Versiones con etiqueta de anuncio (seguimiento e intro de order bump)");
+    const ID_DEL_ANUNCIO = "120200000000000077";
+    const conRegistro = () => {
+      // El registro de anuncios de la copia lleva uno de prueba mientras dura el escenario.
+      const doc = YAML.parseDocument(readFileSync(ARCHIVO, "utf8"));
+      const reg = (doc.toJS().ad_registry ?? []).filter((a) => a.key !== "ad_prueba_tablero");
+      doc.set("ad_registry", [...reg, { key: "ad_prueba_tablero", name: "AD PRUEBA TABLERO", ids: [ID_DEL_ANUNCIO], enabled: true }]);
+      writeFileSync(ARCHIVO, doc.toString({ lineWidth: 0 }));
+    };
+    sembrar({
+      fichas: [
+        { id: "i", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+        {
+          id: "segs", tipo: "seguimientos", x: 0, y: 0,
+          seguimientos: [{
+            id: "s1", minutos: 1,
+            variantes: [
+              { id: "va", peso: 1, anuncios: ["ad_prueba_tablero"], steps: [texto("SEG-DEL-ANUNCIO")] },
+              { id: "vl", peso: 1, steps: [texto("SEG-LIBRE")] },
+            ],
+          }],
+        },
+      ],
+      cables: cables([["i", "siguiente", "segs"]]),
+    });
+    conRegistro();
+    await esperar(3000);
+    for (let vuelta = 0; vuelta < 2; vuelta++) {
+      const conAd = await cliente("PE", { anuncio: ID_DEL_ANUNCIO });
+      const sinAd = await cliente("PE");
+      await conAd.decir("hola", 2);
+      await sinAd.decir("hola", 2);
+      await Promise.all([conAd.leer(110), sinAd.leer(110)]);
+      comprobar(`seguimiento (vuelta ${vuelta + 1}): el del anuncio recibe SU versión`, conAd.todo().includes("SEG-DEL-ANUNCIO") && !conAd.todo().includes("SEG-LIBRE"), conAd.todo());
+      comprobar(`seguimiento (vuelta ${vuelta + 1}): el que no vino del anuncio, nunca la del anuncio`, sinAd.todo().includes("SEG-LIBRE") && !sinAd.todo().includes("SEG-DEL-ANUNCIO"), sinAd.todo());
+      await conAd.borrar();
+      await sinAd.borrar();
+    }
+    sembrar({
+      fichas: [
+        { id: "i", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+        {
+          id: "ob", tipo: "intro_ob", x: 0, y: 0,
+          variantes: [
+            { id: "oa", peso: 1, anuncios: ["ad_prueba_tablero"], steps: [texto("OB-DEL-ANUNCIO")] },
+            { id: "ol", peso: 1, steps: [texto("OB-LIBRE")] },
+          ],
+        },
+      ],
+      cables: cables([["i", "siguiente", "ob"]]),
+    });
+    conRegistro();
+    await esperar(3000);
+    for (let vuelta = 0; vuelta < 3; vuelta++) {
+      const conAd = await cliente("PE", { anuncio: ID_DEL_ANUNCIO });
+      await conAd.decir("hola", 20);
+      comprobar(`intro de order bump (vuelta ${vuelta + 1}): el del anuncio recibe SU versión`, conAd.todo().includes("OB-DEL-ANUNCIO") && !conAd.todo().includes("OB-LIBRE"), conAd.todo());
+      await conAd.borrar();
+    }
+    const vistas = new Set();
+    for (let vuelta = 0; vuelta < 8 && vistas.size < 2; vuelta++) {
+      const sinAd = await cliente("PE");
+      await sinAd.decir("hola", 15);
+      if (sinAd.todo().includes("OB-DEL-ANUNCIO")) vistas.add("anuncio");
+      if (sinAd.todo().includes("OB-LIBRE")) vistas.add("libre");
+      await sinAd.borrar();
+    }
+    comprobar("intro de order bump: a los demás se les sortea entre TODAS (salieron las dos)", vistas.size === 2, [...vistas].join(", "));
   }
 
   // 9. INICIO «VENDER EN ESTE PAÍS» APAGADO y «EN REVISIÓN»

@@ -6,7 +6,7 @@ import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
 import { MensajesDelMes } from "@/components/MensajesDelMes";
 import { ASPECTO } from "@/components/tablero/aspecto";
-import type { FichaEnElEditor, TableroEnElEditor } from "@/components/tablero/LienzoDelTablero";
+import type { FichaEnElEditor, TableroEnElEditor, VersionEnElEditor } from "@/components/tablero/LienzoDelTablero";
 import { TwemojiText } from "@/components/TwemojiText";
 import { DEFAULT_SAMPLES_AFTER_TEXT } from "@/lib/workflow/defaults";
 import {
@@ -28999,6 +28999,8 @@ function VistaPizarra({
             irA("tiendas");
           }}
           aplicar={aplicar}
+          onConfigChange={onConfigChange}
+          onSnapshot={onSnapshot}
         />
       ) : (
       <>
@@ -30692,6 +30694,8 @@ function PantallaDelTablero({
   onTienda,
   onVolver,
   aplicar,
+  onConfigChange,
+  onSnapshot,
 }: {
   cfg: FullConfig;
   /** La tienda (su id) o un workflow (`wf:<id>`). */
@@ -30701,6 +30705,9 @@ function PantallaDelTablero({
   onTienda: (id: string) => void;
   onVolver: () => void;
   aplicar: (c: FullConfig) => void;
+  /** Para las ventanas del ☰ (Datos de la tienda, Productos): las mismas que en la pizarra. */
+  onConfigChange: (c: FullConfig) => void;
+  onSnapshot: () => void;
 }) {
   const esWorkflow = clave.startsWith("wf:");
   const wfId = esWorkflow ? clave.slice(3) : "";
@@ -30729,6 +30736,14 @@ function PantallaDelTablero({
   const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
   const [paisVisto, setPaisVisto] = useState<string>("PE");
+  // EL BUSCADOR EN LA BARRA y el ☰ HERRAMIENTAS, como en la pizarra (24/10/2026).
+  const [buscar, setBuscar] = useState("");
+  const [menuHerramientas, setMenuHerramientas] = useState(false);
+  const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "prueba" | "pagos">(null);
+  const [regaloAbierto, setRegaloAbierto] = useState<string | null>(null);
+  const [paisDePagos, setPaisDePagos] = useState<string>("PE");
+  const vivoCfg = useRef(cfg);
+  vivoCfg.current = cfg;
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
   const nombres = Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id]));
   const nombreDelProducto = (pid?: string) => (pid ? nombres[pid] : undefined) ?? "(sin elegir)";
@@ -30811,9 +30826,6 @@ function PantallaDelTablero({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
-        <button type="button" onClick={onVolver} className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta">
-          ← Mis tiendas
-        </button>
         {esWorkflow ? (
           <input
             value={cfg.workflows?.[wfId]?.nombre ?? ""}
@@ -30837,6 +30849,16 @@ function PantallaDelTablero({
           </select>
         )}
         <span className="text-xs font-bold">{esWorkflow ? "▶▶ Workflow" : "🧩 Tablero"}</span>
+        {/* EL BUSCADOR, EN LA BARRA como en la pizarra: las que coinciden se marcan y lo demás queda tenue. */}
+        <input
+          type="search"
+          value={buscar}
+          onChange={(e) => setBuscar(e.target.value)}
+          onKeyDown={(e) => e.key === "Escape" && setBuscar("")}
+          placeholder="🔍 Buscar"
+          title="Busca en los títulos y en lo que dicen las burbujas · Esc: borrar"
+          className="w-40 rounded-md border border-borde bg-relleno px-2 py-1 text-xs text-tinta"
+        />
         {!esWorkflow && (
           <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Canal">
             {CANALES_DE_TABLERO.map(([c, nombre]) => (
@@ -30968,11 +30990,141 @@ function PantallaDelTablero({
             const f = tablero.fichas.find((x) => x.id === fid);
             if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
             else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
+            else if (f?.tipo === "regalo" && tienda) setRegaloAbierto(fid);
             else setAjustes(fid);
           }}
           onAjustes={setAjustes}
+          buscar={buscar}
+          antesDelMas={
+            <button
+              type="button"
+              onClick={onVolver}
+              title="Volver a Mis tiendas"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-borde bg-tarjeta text-lg font-bold text-tinta shadow-md hover:bg-relleno"
+            >
+              ←
+            </button>
+          }
+          despuesDelMas={
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMenuHerramientas((v) => !v)}
+                title="Tienda, productos y modo prueba"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-lg font-bold text-white shadow-md hover:bg-slate-800"
+              >
+                {menuHerramientas ? "×" : "☰"}
+              </button>
+              {menuHerramientas && (
+                <div className="absolute left-0 top-11 z-50 w-72 overflow-hidden rounded-xl border border-borde bg-tarjeta py-1 text-sm text-tinta shadow-2xl">
+                  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-tinta-suave">Sin salir del tablero</div>
+                  {(
+                    [
+                      ["tienda", "🏪", "Datos de esta tienda", "Número, página, pixel, quién cobra, frases de entrada y su regalo"],
+                      ["productos", "📦", "Productos y precios", "Precio por país, entrega, contenido y muestras"],
+                      ["pagos", "💳", "Datos de pago por país", "Los textos de cada método (Yape, BCP…), las cuentas y el menú de métodos, por país"],
+                      ["prueba", "🧪", "Modo prueba", "Probar el bot sin enviar nada a Meta"],
+                    ] as const
+                  ).map(([v, icono, texto, ayuda]) => (
+                    <button
+                      key={v}
+                      type="button"
+                      title={ayuda}
+                      disabled={v === "tienda" && !tienda}
+                      onClick={() => {
+                        setMenuHerramientas(false);
+                        setVentanaDeHerramienta(v);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
+                    >
+                      <span className="w-5 text-center">{icono}</span> {texto}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          }
         />
       </div>
+      {regaloAbierto && tienda && (
+        <GestorDelRegaloDelTablero
+          cfg={cfg}
+          tiendaId={tienda.id}
+          pais={(() => {
+            const f = tablero.fichas.find((x) => x.id === regaloAbierto);
+            return f ? paisDeSuManta(tablero, f, paisVisto) : paisVisto;
+          })()}
+          aplicar={aplicar}
+          onCerrar={() => setRegaloAbierto(null)}
+        />
+      )}
+      {/* LAS VENTANAS DEL ☰, las mismas de la pizarra, encima del tablero. */}
+      {ventanaDeHerramienta === "tienda" && tienda && (
+        <VentanaDeDatosDeTienda
+          cfg={cfg}
+          tienda={tienda}
+          onConfigChange={onConfigChange}
+          onSnapshot={onSnapshot}
+          onCerrar={() => setVentanaDeHerramienta(null)}
+          alEditarProductos={() => setVentanaDeHerramienta("productos")}
+        />
+      )}
+      {ventanaDeHerramienta === "productos" && (
+        <VentanaFlotante titulo="📦 Productos y precios" detalle="Busca un producto y ábrelo: precio por país, entrega y contenido. Ctrl+Z deshace." onCerrar={() => setVentanaDeHerramienta(null)}>
+          <BibliotecaDeProductos
+            cfg={cfg}
+            productos={cfg.biblioteca_de_productos ?? []}
+            onProductos={(lista) => {
+              onSnapshot();
+              onConfigChange({ ...vivoCfg.current, biblioteca_de_productos: lista });
+            }}
+            onCfg={onConfigChange}
+            pais={paisVisto as CountryCode}
+            modalidad={activeModality(cfg)}
+            alineacion={(configComoLaVeLaTienda(cfg, tienda, "lineal").alineacion_por_modalidad?.[activeModality(cfg)] ?? {}) as AlineacionEditor}
+            precioBase={cfg.globals?.course_price_soles ?? 0}
+            comboPrice={previewComboPriceFromConfig(cfg)}
+            basicoPrice={previewBasicoPriceFromConfig(cfg)}
+            previewContext={previewContextFromConfig(cfg)}
+            onSnapshot={onSnapshot}
+            onEdit={() => onSnapshot()}
+            onMarcarPunto={() => {}}
+            onCancelarVentana={() => {}}
+          />
+        </VentanaFlotante>
+      )}
+      {/* LOS DATOS DE PAGO POR PAÍS (24/10/2026): la MISMA ventana de «Precios y pagos» de los menús,
+          aquí sin salir del tablero. Son los textos que el cobro manda al elegir cada método. */}
+      {ventanaDeHerramienta === "pagos" && (
+        <VentanaFlotante
+          titulo="💳 Datos de pago por país"
+          detalle="Lo que el cobro manda cuando el cliente elige cada método. Es lo mismo que menú ajustes → Precios y pagos: cambiarlo aquí lo cambia allá."
+          onCerrar={() => setVentanaDeHerramienta(null)}
+          ancho="max-w-6xl"
+        >
+          <label className="mb-3 flex items-center gap-2 text-xs font-semibold text-tinta">
+            País
+            <select value={paisDePagos} onChange={(e) => setPaisDePagos(e.target.value)} className="rounded border border-borde bg-relleno px-2 py-1 text-xs">
+              {paises.map((p) => (
+                <option key={p} value={p}>
+                  {banderaDe(p)} {p}
+                </option>
+              ))}
+            </select>
+          </label>
+          <DatosDePagoDelTablero key={paisDePagos} cfg={cfg} pais={paisDePagos as CountryCode} onConfigChange={onConfigChange} onSnapshot={onSnapshot} />
+        </VentanaFlotante>
+      )}
+      {ventanaDeHerramienta === "prueba" && (
+        <VentanaFlotante
+          titulo="🧪 Modo prueba"
+          detalle="Prueba el bot sin enviar nada a Meta. Lo que no hayas guardado no entra en la prueba."
+          onCerrar={() => setVentanaDeHerramienta(null)}
+          ancho="max-w-6xl"
+        >
+          <iframe src="/simulador" title="Modo prueba" className="h-[75vh] w-full rounded-md border border-borde bg-white" />
+        </VentanaFlotante>
+      )}
       {fichaDeCajon && (
         <EnElTableroContext.Provider value={true}>
           <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeCajon, paisVisto, tablero)}>
@@ -31001,9 +31153,10 @@ function PantallaDelTablero({
             key={fichaDeGestor.id}
             ficha={fichaDeGestor}
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
-            pais={paisVisto}
+            pais={paisDeSuManta(tablero, fichaDeGestor, paisVisto)}
             onCambiar={(cambio) => cambiarFicha(fichaDeGestor.id, cambio)}
             onCerrar={() => setGestor(null)}
+            onRegistroDeAnuncios={(ad_registry) => aplicar({ ...vivoCfg.current, ad_registry })}
           />
           </ProductosDeLaFichaContext.Provider>
         </EnElTableroContext.Provider>
@@ -31015,10 +31168,16 @@ function PantallaDelTablero({
           anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
           workflows={workflows.filter((w) => w.id !== wfId)}
           paises={paises}
-          paisInicial={paisVisto}
+          paisInicial={paisDeSuManta(tablero, fichaDeAjustes, paisVisto)}
+          onAbrirPagos={(p) => {
+            setAjustes(null);
+            setPaisDePagos(p);
+            setVentanaDeHerramienta("pagos");
+          }}
           onAbrirBurbujas={() => {
             setAjustes(null);
             if (fichaDeAjustes.tipo === "seguimientos" || fichaDeAjustes.tipo === "intro_ob") setGestor(fichaDeAjustes.id);
+            else if (fichaDeAjustes.tipo === "regalo") setRegaloAbierto(fichaDeAjustes.id);
             else setCajon(fichaDeAjustes.id);
           }}
           onGuardar={(cambio) => {
@@ -31043,18 +31202,25 @@ function GestorDeVersiones({
   pais,
   onCambiar,
   onCerrar,
+  onRegistroDeAnuncios,
 }: {
   ficha: FichaEnElEditor;
   cfgVista: FullConfig;
+  /** El país de su manta (el de la vista previa y el del título). "" = otros países. */
   pais: string;
   onCambiar: (cambio: Partial<FichaEnElEditor>) => void;
   onCerrar: () => void;
+  /** Al crear un anuncio desde las etiquetas, como en la pizarra. */
+  onRegistroDeAnuncios: (r: AdRegistryEntry[]) => void;
 }) {
+  // COMO EL GESTOR DE SEGUIMIENTOS DE LA PIZARRA (24/10/2026): «el cuadro es un desastre, no se
+  // entiende… me gusta mucho como está hecho en modo pizarra». A la izquierda solo la lista; a la
+  // derecha el elegido: su tiempo, sus casillas, sus versiones en pestañas y, debajo, sus burbujas con
+  // las ETIQUETAS DE AD («aquí no veo las textareas para las etiquetas de los ads»).
   const esSeg = ficha.tipo === "seguimientos";
-  type Version = { id: string; nombre?: string; peso?: number; steps?: unknown[] };
+  type Version = VersionEnElEditor;
   type Seg = NonNullable<FichaEnElEditor["seguimientos"]>[number];
-  // UN BORRADOR, como el cajón: lo de aquí se aplica al ficha al ir cambiando, sin tener que pulsar
-  // «Listo» en cada versión.
+  // UN BORRADOR, como el cajón: lo de aquí se aplica a la ficha al ir cambiando.
   const [segs, setSegs] = useState<Seg[]>(() => JSON.parse(JSON.stringify(ficha.seguimientos ?? [])));
   const [versiones, setVersiones] = useState<Version[]>(() => JSON.parse(JSON.stringify(ficha.variantes ?? [])));
   const [elegida, setElegida] = useState<{ seg: number; ver: number }>({ seg: 0, ver: 0 });
@@ -31070,163 +31236,176 @@ function GestorDeVersiones({
     setVersiones(v);
     aplicar(vivo.current.segs, v);
   };
-  const listaActual: Version[] = esSeg ? segs[elegida.seg]?.variantes ?? [] : versiones;
-  const version = listaActual[elegida.ver];
+  const s = esSeg ? segs[elegida.seg] : undefined;
+  const lista: Version[] = esSeg ? s?.variantes ?? [] : versiones;
+  const version = lista[elegida.ver];
+  const ponerLista = (nueva: Version[]) =>
+    esSeg ? ponerSegs(vivo.current.segs.map((x, i) => (i === elegida.seg ? { ...x, variantes: nueva } : x))) : ponerVersiones(nueva);
   const cambiarVersion = (cambio: Partial<Version>) => {
-    if (esSeg) ponerSegs(vivo.current.segs.map((s, i) => (i === elegida.seg ? { ...s, variantes: s.variantes.map((v, j) => (j === elegida.ver ? { ...v, ...cambio } : v)) } : s)));
-    else ponerVersiones(vivo.current.versiones.map((v, j) => (j === elegida.ver ? { ...v, ...cambio } : v)));
+    const actual = esSeg ? vivo.current.segs[elegida.seg]?.variantes ?? [] : vivo.current.versiones;
+    ponerLista(actual.map((v, j) => (j === elegida.ver ? { ...v, ...cambio } : v)));
   };
-  useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  const ponerSeg = (cambio: Partial<Seg>) => ponerSegs(vivo.current.segs.map((x, i) => (i === elegida.seg ? { ...x, ...cambio } : x)));
   const letra = (j: number) => String.fromCharCode(65 + j);
+  const pesoTotal = lista.reduce((t, v) => t + (v.peso ?? 1), 0) || 1;
+  const porcentaje = (v: Version) => Math.round((100 * (v.peso ?? 1)) / pesoTotal);
+  const bandera = pais ? `${banderaDe(pais)} ${pais}` : "🌍 Otros países";
+  const conAnuncio = (v: Version) => v.dirigir !== false && (v.anuncios ?? []).length > 0;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={onCerrar}>
-      <div className="prolijo flex h-[88vh] w-full max-w-[1400px] overflow-hidden rounded-2xl border border-borde bg-tarjeta text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex w-72 shrink-0 flex-col gap-2 overflow-y-auto border-r border-borde p-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-black">{esSeg ? "🔁 Seguimientos" : "🎁 Intro de order bump"}</p>
-            <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-2 py-0.5 text-xs font-semibold">
-              Listo
-            </button>
-          </div>
-          <p className="text-[11px] text-tinta-suave">
-            {esSeg
-              ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar), como tus seguimientos de siempre. Respeta las 24 h, las horas de silencio, el lead tardío y la cola antirráfaga de Ajustes, y se detiene si paga."
-              : "Antes de esta ficha la IA no sabe nada del producto oculto. Con varias versiones, el bot sortea por peso."}
-          </p>
-          {esSeg &&
-            segs.map((s, i) => (
-              <div key={s.id} className={`rounded-xl border p-2 ${elegida.seg === i ? "border-orange-400 bg-orange-50/60" : "border-borde"}`}>
-                <div className="flex items-center gap-2">
-                  <button type="button" className="text-xs font-bold" onClick={() => setElegida({ seg: i, ver: 0 })}>
-                    Seguimiento {i + 1}
-                  </button>
+    <VentanaFlotante
+      titulo={esSeg ? `⏱ Seguimientos · ${bandera}` : `🎁 Intro de order bump · ${bandera}`}
+      detalle={
+        esSeg
+          ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar) y se detiene si paga. Respeta las 24 h, las horas de silencio, el lead tardío y la cola antirráfaga de Ajustes."
+          : "Destapa el producto oculto. Antes de esta ficha la IA no sabe nada de él. Con varias versiones, el bot sortea por peso."
+      }
+      onCerrar={onCerrar}
+      ancho={ANCHO_DEL_GESTOR}
+    >
+      <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="flex flex-col gap-1.5">
+          {esSeg ? (
+            <>
+              {segs.map((x, i) => (
+                <div key={x.id} className="flex items-center gap-1">
+                  <div className="min-w-0 flex-1">
+                    <PasoDelGestor
+                      n={String(i + 1)}
+                      titulo={`Seguimiento ${i + 1}`}
+                      detalle={`a los ${minutosLegiblesDelTablero(x.minutos)} · ${x.variantes.length} versión(es)`}
+                      elegido={elegida.seg === i}
+                      onElegir={() => setElegida({ seg: i, ver: 0 })}
+                    />
+                  </div>
                   <button
                     type="button"
-                    className="ml-auto text-xs text-rose-600"
                     title="Quitar este seguimiento"
+                    className="rounded px-1.5 py-1 text-sm text-red-600 hover:bg-red-50"
                     onClick={() => {
                       if (!window.confirm(`¿Quitar el seguimiento ${i + 1}?`)) return;
-                      ponerSegs(segs.filter((_, k) => k !== i));
+                      ponerSegs(vivo.current.segs.filter((_, k) => k !== i));
                       setElegida({ seg: 0, ver: 0 });
                     }}
                   >
-                    ✕
+                    🗑
                   </button>
                 </div>
-                <div className="mt-1 text-[11px]">
-                  a los <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, minutos: m ?? 60 } : x)))} />
-                  {s.minutos >= 24 * 60 - 7 && <span className="block text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
-                </div>
-                <label className="mt-1 flex items-center gap-1 text-[11px]">
-                  <input
-                    type="checkbox"
-                    checked={s.activa_oferta === true}
-                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, activa_oferta: e.target.checked } : x)))}
-                  />
-                  Activa el precio de oferta
-                </label>
-                <label className="mt-0.5 flex items-center gap-1 text-[11px]" title="Sale aunque caiga en las horas de silencio de Ajustes">
-                  <input
-                    type="checkbox"
-                    checked={s.ignora_silencio === true}
-                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, ignora_silencio: e.target.checked || undefined } : x)))}
-                  />
-                  Ignora las horas de silencio
-                </label>
-                <label className="mt-0.5 flex items-center gap-1 text-[11px]" title="No se aplaza a la mañana aunque el cliente llegue tarde (Ajustes → lead tardío)">
-                  <input
-                    type="checkbox"
-                    checked={s.ignora_tardio === true}
-                    onChange={(e) => ponerSegs(segs.map((x, k) => (k === i ? { ...x, ignora_tardio: e.target.checked || undefined } : x)))}
-                  />
-                  Ignora el aplazamiento del lead tardío
-                </label>
-                <div className="mt-1 flex flex-col gap-1">
-                  {s.variantes.map((v, j) => (
-                    <div key={v.id} className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] ${elegida.seg === i && elegida.ver === j ? "bg-orange-100 font-bold" : "hover:bg-relleno"}`}>
-                      <button type="button" className="flex-1 text-left" onClick={() => setElegida({ seg: i, ver: j })}>
-                        Versión {letra(j)} · {((v.steps ?? []) as EditorStep[]).length} burbuja(s)
-                      </button>
-                      ⚖
-                      <input
-                        type="number"
-                        min={0}
-                        value={v.peso ?? 1}
-                        onChange={(e) =>
-                          ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: x.variantes.map((y, l) => (l === j ? { ...y, peso: Math.max(0, Number(e.target.value) || 0) } : y)) } : x)))
-                        }
-                        className="w-10 rounded border border-borde px-1"
-                        title="Peso en el sorteo (0 = apagada)"
-                      />
-                      {s.variantes.length > 1 && (
-                        <button
-                          type="button"
-                          className="text-rose-600"
-                          onClick={() => ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: x.variantes.filter((_, l) => l !== j) } : x)))}
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="rounded-md border border-dashed border-borde px-1.5 py-0.5 text-left text-[11px]"
-                    onClick={() => ponerSegs(segs.map((x, k) => (k === i ? { ...x, variantes: [...x.variantes, { id: nuevoId("v"), peso: 1, steps: JSON.parse(JSON.stringify(x.variantes[0]?.steps ?? [])) }] } : x)))}
-                  >
-                    + Versión (copia de la A)
-                  </button>
-                </div>
-              </div>
-            ))}
-          {esSeg && (
-            <button
-              type="button"
-              className="rounded-xl border border-dashed border-borde px-2 py-1.5 text-left text-xs font-semibold"
-              onClick={() => {
-                const ultimo = segs[segs.length - 1]?.minutos ?? 0;
-                ponerSegs([...segs, { id: nuevoId("s"), minutos: ultimo ? ultimo + 1440 : 180, variantes: [{ id: nuevoId("v"), peso: 1, steps: [] }] }]);
-              }}
-            >
-              + Seguimiento
-            </button>
-          )}
-          {!esSeg &&
-            versiones.map((v, j) => (
-              <div key={v.id} className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] ${elegida.ver === j ? "bg-violet-100 font-bold" : "hover:bg-relleno"}`}>
-                <button type="button" className="flex-1 text-left" onClick={() => setElegida({ seg: 0, ver: j })}>
-                  Versión {letra(j)} · {((v.steps ?? []) as EditorStep[]).length} burbuja(s)
-                </button>
-                ⚖
-                <input
-                  type="number"
-                  min={0}
-                  value={v.peso ?? 1}
-                  onChange={(e) => ponerVersiones(versiones.map((y, l) => (l === j ? { ...y, peso: Math.max(0, Number(e.target.value) || 0) } : y)))}
-                  className="w-10 rounded border border-borde px-1"
+              ))}
+              <button
+                type="button"
+                className="mt-1 rounded-lg border border-dashed border-borde bg-tarjeta px-2 py-2 text-left text-xs font-semibold text-tinta hover:bg-relleno"
+                onClick={() => {
+                  const ultimo = vivo.current.segs[vivo.current.segs.length - 1]?.minutos ?? 0;
+                  const nuevos = [...vivo.current.segs, { id: nuevoId("s"), minutos: ultimo ? ultimo + 120 : 180, variantes: [{ id: nuevoId("v"), peso: 1, steps: [] }] }];
+                  ponerSegs(nuevos);
+                  setElegida({ seg: nuevos.length - 1, ver: 0 });
+                }}
+              >
+                + Agregar seguimiento
+              </button>
+              <p className="mt-1 text-[11px] text-tinta-suave">🗑 lo quita de esta caja. Salen en el orden de sus tiempos.</p>
+            </>
+          ) : (
+            <>
+              {versiones.map((v, j) => (
+                <PasoDelGestor
+                  key={v.id}
+                  n={letra(j)}
+                  titulo={`Versión ${letra(j)}`}
+                  detalle={`${porcentaje(v)}% · ${((v.steps ?? []) as EditorStep[]).length} burbuja(s)${conAnuncio(v) ? " · 📣 con anuncio" : ""}`}
+                  elegido={elegida.ver === j}
+                  onElegir={() => setElegida({ seg: 0, ver: j })}
+                  apagado={(v.peso ?? 1) === 0}
                 />
-                {versiones.length > 1 && (
-                  <button type="button" className="text-rose-600" onClick={() => ponerVersiones(versiones.filter((_, l) => l !== j))}>
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
-          {!esSeg && (
-            <button
-              type="button"
-              className="rounded-md border border-dashed border-borde px-1.5 py-0.5 text-left text-[11px]"
-              onClick={() => ponerVersiones([...versiones, { id: nuevoId("v"), peso: 1, steps: JSON.parse(JSON.stringify(versiones[0]?.steps ?? [])) }])}
-            >
-              + Versión (copia de la A)
-            </button>
+              ))}
+            </>
           )}
         </div>
-        <div className="min-w-0 flex-1 overflow-y-auto">
+        <div className="flex min-w-0 flex-col gap-3">
+          {esSeg && s && (
+            <>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-tinta">
+                <h4 className="text-sm font-bold">
+                  {elegida.seg + 1}. Seguimiento {elegida.seg + 1}
+                </h4>
+                · sale a los
+                <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
+                del último mensaje del cliente
+                {s.minutos >= 24 * 60 - 7 && <span className="font-semibold text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-tinta">
+                <label className="flex items-center gap-1">
+                  <input type="checkbox" checked={s.activa_oferta === true} onChange={(e) => ponerSeg({ activa_oferta: e.target.checked || undefined })} />
+                  Activa el precio de oferta
+                </label>
+                <label className="flex items-center gap-1" title="Sale aunque caiga en las horas de silencio de Ajustes">
+                  <input type="checkbox" checked={s.ignora_silencio === true} onChange={(e) => ponerSeg({ ignora_silencio: e.target.checked || undefined })} />
+                  Ignora las horas de silencio
+                </label>
+                <label className="flex items-center gap-1" title="No se aplaza a la mañana aunque el cliente llegue tarde (Ajustes → lead tardío)">
+                  <input type="checkbox" checked={s.ignora_tardio === true} onChange={(e) => ponerSeg({ ignora_tardio: e.target.checked || undefined })} />
+                  Ignora el aplazamiento del lead tardío
+                </label>
+              </div>
+            </>
+          )}
+          {lista.length > 1 && (
+            <PestanasDelGestor
+              opciones={lista.map((v, j) => ({ id: v.id, texto: `Versión ${letra(j)} · ${porcentaje(v)}%${conAnuncio(v) ? " · 📣" : ""}`, apagada: (v.peso ?? 1) === 0 }))}
+              valor={version?.id ?? ""}
+              onCambiar={(id) => setElegida({ ...elegida, ver: Math.max(0, lista.findIndex((v) => v.id === id)) })}
+            />
+          )}
+          {version && (
+            <div className="flex flex-wrap items-center gap-2 text-xs text-tinta">
+              <button
+                type="button"
+                onClick={() => cambiarVersion({ peso: (version.peso ?? 1) === 0 ? 1 : 0 })}
+                className={`rounded px-1.5 py-0.5 text-[11px] font-bold text-white ${(version.peso ?? 1) === 0 ? "bg-slate-400" : "bg-emerald-600"}`}
+                title={(version.peso ?? 1) === 0 ? "Apagada: el bot no la manda. Clic para encenderla." : "Encendida. Clic para apagarla."}
+              >
+                {(version.peso ?? 1) === 0 ? "APAGADA" : "ENCENDIDA"}
+              </button>
+              {lista.length > 1 && (
+                <label className="flex items-center gap-1">
+                  Peso
+                  <input
+                    type="number"
+                    min={0}
+                    value={version.peso ?? 1}
+                    onChange={(e) => cambiarVersion({ peso: Math.max(0, Math.floor(Number(e.target.value) || 0)) })}
+                    className="w-14 rounded border border-borde bg-tarjeta px-1 py-0.5"
+                  />
+                </label>
+              )}
+              <button
+                type="button"
+                className="rounded border border-borde px-2 py-0.5 text-[11px] font-semibold hover:bg-relleno"
+                title="Una copia de esta versión, aquí mismo"
+                onClick={() => {
+                  const copia = { ...JSON.parse(JSON.stringify(version)), id: nuevoId("v") } as Version;
+                  const actual = esSeg ? vivo.current.segs[elegida.seg]?.variantes ?? [] : vivo.current.versiones;
+                  ponerLista([...actual, copia]);
+                  setElegida({ ...elegida, ver: actual.length });
+                }}
+              >
+                ⧉ Duplicar versión
+              </button>
+              {lista.length > 1 && (
+                <button
+                  type="button"
+                  className="rounded border border-red-200 px-2 py-0.5 text-[11px] font-semibold text-red-700 hover:bg-red-50"
+                  onClick={() => {
+                    const actual = esSeg ? vivo.current.segs[elegida.seg]?.variantes ?? [] : vivo.current.versiones;
+                    ponerLista(actual.filter((_, j) => j !== elegida.ver));
+                    setElegida({ ...elegida, ver: 0 });
+                  }}
+                >
+                  🗑 Quitar versión
+                </button>
+              )}
+            </div>
+          )}
           {version ? (
             <VentanaDelCajon
               key={`${elegida.seg}|${version.id}`}
@@ -31236,14 +31415,231 @@ function GestorDeVersiones({
               idPrefix={`tablero_${ficha.id.replace(/[^a-z0-9]/gi, "_")}_${version.id.replace(/[^a-z0-9]/gi, "_")}`}
               cfgVista={cfgVista}
               pais={pais}
-              onGuardar={(steps) => cambiarVersion({ steps })}
+              anuncios={{
+                claves: version.anuncios ?? [],
+                dirigir: version.dirigir !== false,
+                registro: cfgVista.ad_registry ?? [],
+                alCambiarRegistro: onRegistroDeAnuncios,
+              }}
+              onGuardar={(steps, _nombre, anunciosNuevos) =>
+                cambiarVersion({
+                  steps,
+                  ...(anunciosNuevos ? { anuncios: anunciosNuevos.claves, dirigir: anunciosNuevos.dirigir === false ? false : undefined } : {}),
+                })
+              }
               onCerrar={onCerrar}
             />
           ) : (
-            <div className="p-8 text-sm text-tinta-suave">{esSeg ? "Agrega un seguimiento a la izquierda." : "Agrega una versión a la izquierda."}</div>
+            <div className="p-8 text-sm text-tinta-suave">{esSeg ? "Agrega un seguimiento a la izquierda." : "Esta ficha no tiene versiones."}</div>
+          )}
+          <button
+            type="button"
+            className="self-start rounded-md border border-dashed border-borde px-2.5 py-1 text-xs font-semibold text-tinta hover:bg-relleno"
+            onClick={() => {
+              const actual = esSeg ? vivo.current.segs[elegida.seg]?.variantes ?? [] : vivo.current.versiones;
+              if (esSeg && !vivo.current.segs[elegida.seg]) return;
+              ponerLista([...actual, { id: nuevoId("v"), peso: 1, steps: [] }]);
+              setElegida({ ...elegida, ver: actual.length });
+            }}
+          >
+            + Otra versión {esSeg ? "de este seguimiento" : ""}
+          </button>
+        </div>
+      </div>
+    </VentanaFlotante>
+  );
+}
+
+/**
+ * EL REGALO, EDITABLE DESDE EL TABLERO (24/10/2026): antes su ficha mandaba «a la pestaña Regalo».
+ * Es el MISMO regalo de la tienda que edita la pizarra (`piezaEditable` «regalo» / «regalo-pedido» y
+ * `conRegaloDeLaTienda`): si la tienda aún no tiene el suyo se ve el de todas, y al guardar pasa a ser
+ * suyo; las demás tiendas no cambian.
+ */
+function GestorDelRegaloDelTablero({
+  cfg,
+  tiendaId,
+  pais,
+  aplicar,
+  onCerrar,
+}: {
+  cfg: FullConfig;
+  tiendaId: string;
+  pais: string;
+  aplicar: (c: FullConfig) => void;
+  onCerrar: () => void;
+}) {
+  const vivo = useRef(cfg);
+  vivo.current = cfg;
+  const [paso, setPaso] = useState<"regalo" | "regalo-pedido" | "premio" | "no">("regalo");
+  const tienda = (cfg.tiendas ?? []).find((t) => t.id === tiendaId);
+  const suyo = tienda?.regalo ?? {};
+  const pasos = [
+    ["regalo", "Ofrecimiento del regalo", "La pregunta: «¿deseas recibir un regalito?»"],
+    ["regalo-pedido", "Enlace para comentar", "Lo que recibe al aceptar: dónde comentar"],
+    ["premio", "El premio", "Lo que recibe cuando ya comentó"],
+    ["no", "Si dice que no", "La respuesta cuando no lo quiere"],
+  ] as const;
+  const cfgVista = configComoLaVeLaTienda(cfg, tienda, "lineal");
+  return (
+    <VentanaFlotante
+      titulo={`🎁 Regalo de ${tienda?.nombre?.trim() || "esta tienda"}`}
+      detalle={
+        Object.keys(suyo).length > 0
+          ? "Es el regalo propio de esta tienda. Las demás tiendas no cambian."
+          : "Esta tienda usa el regalo de todas. Al guardar un cambio aquí, pasa a tener el suyo; las demás no cambian."
+      }
+      onCerrar={onCerrar}
+      ancho={ANCHO_DEL_GESTOR}
+    >
+      <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="flex flex-col gap-1.5">
+          {pasos.map(([id, titulo, detalle], i) => (
+            <PasoDelGestor key={id} n={String(i + 1)} titulo={titulo} detalle={detalle} elegido={paso === id} onElegir={() => setPaso(id)} />
+          ))}
+          <p className="mt-1 text-[11px] text-tinta-suave">El enlace según el anuncio del cliente ({"{{ENLACE_ANUNCIO}}"}) sale del registro de anuncios, como siempre.</p>
+        </div>
+        <div className="min-w-0">
+          {(paso === "regalo" || paso === "regalo-pedido") &&
+            (() => {
+              const pieza = piezaEditable(cfg, "whatsapp", paso, tiendaId);
+              if (!pieza) return <p className="text-sm text-tinta-suave">Este paso todavía no tiene burbujas en el regalo de siempre (menú ajustes → Regalo).</p>;
+              return (
+                <VentanaDelCajon
+                  key={paso}
+                  incrustado
+                  titulo={pieza.titulo}
+                  steps={pieza.steps}
+                  idPrefix={`tablero_regalo_${paso.replace(/[^a-z]/g, "_")}`}
+                  cfgVista={cfgVista}
+                  pais={pais}
+                  onGuardar={(steps) => {
+                    const p = piezaEditable(vivo.current, "whatsapp", paso, tiendaId);
+                    if (p) aplicar(p.conPasos(steps));
+                  }}
+                  onCerrar={onCerrar}
+                />
+              );
+            })()}
+          {(paso === "premio" || paso === "no") && (
+            <VentanaDeTexto
+              key={paso}
+              incrustado
+              titulo={paso === "premio" ? "🎁 El premio (lo que recibe al comentar)" : "Si dice que no"}
+              valor={(paso === "premio" ? suyo.reward_message ?? cfg.gift?.reward_message : suyo.decline_message ?? cfg.gift?.decline_message) ?? ""}
+              cfgVista={cfgVista}
+              onGuardar={(texto) =>
+                aplicar(conRegaloDeLaTienda(vivo.current, tiendaId, paso === "premio" ? { reward_message: texto } : { decline_message: texto }))
+              }
+              onCerrar={onCerrar}
+            />
           )}
         </div>
       </div>
+    </VentanaFlotante>
+  );
+}
+
+/**
+ * LOS DATOS DE PAGO DESDE EL TABLERO (24/10/2026). El cobro con «Preguntar el método» manda, al
+ * elegir un método, SUS respuestas de ese país (`pasosDelMetodo` en tablero/pago.ts): la capa de la
+ * modalidad activa, o la base del país. Aquí se leen y se escriben en ese MISMO sitio, como lo hace
+ * el editor principal (`selectedCountryProfile` / `setCountryProfile`); la lista de métodos es la del
+ * país (sus botones), más lo escrito de un método que ya no está, para poder vaciarlo.
+ */
+function DatosDePagoDelTablero({
+  cfg,
+  pais,
+  onConfigChange,
+  onSnapshot,
+}: {
+  cfg: FullConfig;
+  pais: CountryCode;
+  onConfigChange: (c: FullConfig) => void;
+  onSnapshot: () => void;
+}) {
+  const [parte, setParte] = useState<"respuestas" | "comodines">("respuestas");
+  const mode = activeModality(cfg);
+  const perfil = mergeCountryPaymentProfileForEditor(
+    pais,
+    cfg,
+    cfg.modality_payment_profiles?.[mode]?.[pais] ?? cfg.payment_profiles_by_country?.[pais]
+  );
+  const escritas = perfil.payment_responses ?? {};
+  const metodos: Array<[string, string, EditorStep[]]> = [
+    ...(perfil.payment_buttons ?? []).map((b, i): [string, string, EditorStep[]] => {
+      const m = b.method || `metodo_${i + 1}`;
+      return [m, b.label || m, escritas[m] ?? []];
+    }),
+  ];
+  for (const [m, pasos] of Object.entries(escritas)) {
+    if (!metodos.some(([x]) => x === m) && (pasos ?? []).length > 0) metodos.push([m, m, pasos ?? []]);
+  }
+  const [elegido, setElegido] = useState(0);
+  const actual = metodos[Math.min(elegido, metodos.length - 1)];
+  const ponerPasos = (metodo: string, pasos: EditorStep[]) =>
+    onConfigChange({
+      ...cfg,
+      country_sales_enabled: { ...(cfg.country_sales_enabled ?? {}), [pais]: perfil.enabled !== false },
+      modality_payment_profiles: {
+        ...cfg.modality_payment_profiles,
+        [mode]: {
+          ...cfg.modality_payment_profiles?.[mode],
+          [pais]: { ...perfil, payment_responses: { ...escritas, [metodo]: pasos } },
+        },
+      },
+    });
+  return (
+    <div className="space-y-3">
+      <PestanasDelGestor
+        opciones={[
+          { id: "respuestas" as const, texto: "Al elegir cada método" },
+          { id: "comodines" as const, texto: "Comodines {{METODO_DE_PAGO}}" },
+        ]}
+        valor={parte}
+        onCambiar={setParte}
+      />
+      {parte === "comodines" && (
+        <CountryPaymentProfilesEditor cfg={cfg} selectedCountry={pais} onChange={onConfigChange} onSnapshot={onSnapshot} onEdit={() => onSnapshot()} soloDatosDePago />
+      )}
+      {parte === "respuestas" && (
+        <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+          <div className="flex flex-col gap-1.5">
+            {metodos.length === 0 && (
+              <p className="text-xs text-tinta-suave">Este país no tiene métodos todavía (menú ajustes → Precios y pagos → Métodos de pago).</p>
+            )}
+            {metodos.map(([m, etiqueta, pasos], i) => (
+              <PasoDelGestor
+                key={m}
+                n={String(i + 1)}
+                titulo={etiqueta}
+                detalle={pasos.length ? `${pasos.length} burbuja(s)` : "sin escribir: no manda nada"}
+                elegido={actual?.[0] === m}
+                onElegir={() => setElegido(i)}
+              />
+            ))}
+            <p className="mt-1 text-[11px] text-tinta-suave">
+              Es lo que el cobro manda cuando el cliente elige ese método. {"{{PRODUCTO}}"} es el producto de ese cobro, y el precio
+              es el de lo que eligió (el de la vista previa es de ejemplo).
+            </p>
+          </div>
+          {actual && (
+            <div className="min-w-0">
+              <StepEditorPreviewPair
+                key={`${pais}_${actual[0]}`}
+                steps={actual[2]}
+                onChange={(pasos) => ponerPasos(actual[0], pasos)}
+                onSnapshot={onSnapshot}
+                onEdit={() => onSnapshot()}
+                idPrefix={`tablero_pm_${pais}_${actual[0]}`}
+                priceSoles={perfil.course_price_soles || 0}
+                previewContext={previewContextFromConfig(cfg, pais)}
+                className="lg:grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(220px,300px)]"
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -31326,7 +31722,10 @@ function AjustesDeLaFicha({
   onAbrirBurbujas,
   onGuardar,
   onCerrar,
+  onAbrirPagos,
 }: {
+  /** Abre «Datos de pago por país» en ese país (los textos que el cobro manda por método). */
+  onAbrirPagos?: (pais: string) => void;
   ficha: FichaEnElEditor;
   productos: Array<{ id: string; nombre: string }>;
   anuncios: Array<{ id: string; nombre: string }>;
@@ -31619,6 +32018,15 @@ function AjustesDeLaFicha({
                       </span>
                     </span>
                   </label>
+                  {onAbrirPagos && (
+                    <button
+                      type="button"
+                      onClick={() => onAbrirPagos(pais)}
+                      className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta"
+                    >
+                      💳 Ver y editar los datos de pago de {banderaDe(pais)} {pais}
+                    </button>
+                  )}
                   <label className="flex items-start gap-2 text-xs font-semibold">
                     <input type="checkbox" checked={cobro.diferencia === true} onChange={(e) => ponCobro({ ...cobro, diferencia: e.target.checked || undefined })} className="mt-0.5" />
                     <span>
@@ -31701,9 +32109,14 @@ function AjustesDeLaFicha({
             </div>
           )}
           {ficha.tipo === "regalo" && (
-            <p className="text-xs text-tinta-suave">
-              Sigue el regalo de siempre: su pregunta, el enlace para comentar y el premio (se edita en la pestaña Regalo, o el de la tienda si tiene el suyo). Su salida «Al terminar el regalo» deja seguir la ruta después.
-            </p>
+            <div className="space-y-2">
+              <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
+                🎁 Editar el regalo de esta tienda
+              </button>
+              <p className="text-xs text-tinta-suave">
+                Su pregunta, el enlace para comentar, el premio y la respuesta si dice que no. Es el regalo de esta tienda (el mismo que ves en la pizarra). Su salida «Al terminar el regalo» deja seguir la ruta después.
+              </p>
+            </div>
           )}
           {ficha.tipo === "humano" && <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>}
         </div>
@@ -32235,6 +32648,25 @@ function conProductosDeLaFicha(ctx: PreviewContext, productos: ProductosDeLaFich
  * LOS PRODUCTOS QUE EL BOT USARÁ EN LOS COMODINES DE ESTA FICHA, con el precio del país visto: los del
  * cobro (el que cobra y los que acepta) o los que la ficha presenta. Mismo orden que el motor.
  */
+/**
+ * EL PAÍS DE SU MANTA: si la ficha solo está en la ruta de un Inicio con país, es de ahí (una ficha de
+ * Ecuador se ve en dólares sin tocar «Montos de»). Si está en varias, o en ninguna, «Montos de».
+ */
+function paisDeSuManta(tablero: TableroEnElEditor, f: FichaEnElEditor, paisVisto: string): string {
+  const paises = new Set<string>();
+  for (const inicio of tablero.fichas.filter((x) => x.tipo === "inicio")) {
+    const vistos = new Set([inicio.id]);
+    const cola = [inicio.id];
+    while (cola.length) {
+      const id = cola.shift()!;
+      for (const c of tablero.cables) if (c.de === id && !vistos.has(c.a)) (vistos.add(c.a), cola.push(c.a));
+    }
+    if (vistos.has(f.id)) paises.add(inicio.pais ?? "");
+  }
+  const [unico] = [...paises];
+  return paises.size === 1 && unico ? unico : paisVisto;
+}
+
 function productosParaElVisor(
   cfg: FullConfig,
   f: FichaEnElEditor | undefined,
@@ -32242,23 +32674,7 @@ function productosParaElVisor(
   tablero?: TableroEnElEditor
 ): ProductosDeLaFicha | null {
   if (!f) return null;
-  // EL PAÍS DE SU MANTA: si la ficha solo está en la ruta de un Inicio con país, sus precios son de
-  // ahí (una ficha de Ecuador se ve en dólares sin tocar «Montos de»). Si está en varias, «Montos de».
-  const pais = (() => {
-    if (!tablero) return paisVisto;
-    const paises = new Set<string>();
-    for (const inicio of tablero.fichas.filter((x) => x.tipo === "inicio")) {
-      const vistos = new Set([inicio.id]);
-      const cola = [inicio.id];
-      while (cola.length) {
-        const id = cola.shift()!;
-        for (const c of tablero.cables) if (c.de === id && !vistos.has(c.a)) (vistos.add(c.a), cola.push(c.a));
-      }
-      if (vistos.has(f.id)) paises.add(inicio.pais ?? "");
-    }
-    const [unico] = [...paises];
-    return paises.size === 1 && unico ? unico : paisVisto;
-  })();
+  const pais = tablero ? paisDeSuManta(tablero, f, paisVisto) : paisVisto;
   const ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
   const productos: ProductoConPrecio[] = [];
   for (const id of new Set(ids.filter((x): x is string => !!x))) {
@@ -46002,10 +46418,17 @@ function CountryPaymentProfilesEditor({
   onEdit,
   bloqueDeMetodos,
   esencial = false,
+  soloDatosDePago = false,
 }: {
   /** Modo esencial: las ayudas largas van en una línea o no van. Solo cambia lo que se
    *  ve. Ver `modoEsencial` en el editor. */
   esencial?: boolean;
+  /**
+   * EL TABLERO (24/10/2026): solo los textos de cada método, los mismos de «Datos de pago». Ahí los
+   * precios salen de cada producto, así que «Precios de producto» y su aviso rojo de «le falta el
+   * precio» solo confundirían.
+   */
+  soloDatosDePago?: boolean;
   cfg: FullConfig;
   selectedCountry: CountryCode;
   onChange: (cfg: FullConfig) => void;
@@ -46573,6 +46996,8 @@ function CountryPaymentProfilesEditor({
         })}
       </div>
   );
+
+  if (soloDatosDePago) return <div className="space-y-3">{datosDePagoDelPais}</div>;
 
   return (
     <div className="mt-4 space-y-3 rounded-lg border border-neutral-300 bg-tarjeta p-3">

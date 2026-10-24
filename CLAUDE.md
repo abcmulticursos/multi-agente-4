@@ -930,6 +930,28 @@ Son ficticias y están para probar en el simulador; él pidió NO borrarlas.
 caro = full, el primero = producto/upsell), con el precio del país del cliente. La lista del «{{» del
 editor ya no se filtra por modalidad (el editor está siempre en lineal y escondía esos comodines).
 
+### El tablero, quinta vuelta (24/10/2026): «ya puedes editar»
+
+Lo pidió así: «avísame cuando ya pueda al menos editar… no quiero entrar al visor y el comodín esté mal».
+- **El lienzo, como la pizarra:** ya no está la barra de arriba (Ficha · País · Caja · Buscar) que tapaba;
+  ahora hay botones redondos ← (Mis tiendas), «+» (fichas, «🌎 Área de un país», caja libre) y ☰
+  (Datos de esta tienda, Productos y precios, Datos de pago por país, Modo prueba), y el buscador va en
+  la barra de arriba. Shift + arrastrar elige y la selección se queda al mover; Shift + clic suma o quita.
+- **Las mantas las maneja él:** cada país es una caja con `inicio` (`cajas[].inicio`), se estira por la
+  esquina y no se mueve sola. Clic derecho en un Inicio sin manta: «🌎 Ponerle su manta».
+- **Seguimientos e intro de order bump con el gestor de la pizarra:** lista a la izquierda, tiempo y
+  casillas, versiones en pestañas con su %, encendida/apagada, duplicar, y **etiquetas de anuncio**
+  por versión (`anuncios`, `dirigir`). El motor las usa con la regla de siempre (`versionQueLeToca`):
+  intro de order bump → la del anuncio para quien vino de él, si no sorteo entre TODAS; seguimiento →
+  la del anuncio para él, si no solo entre las SIN etiqueta (ninguna = no sale).
+- **El regalo, editable dentro del tablero** (doble clic o ⚙): ofrecimiento, enlace para comentar,
+  premio y «si dice que no». Es el regalo de la tienda (`conRegaloDeLaTienda`), el mismo de la pizarra.
+- **Los datos de pago** (☰ o el botón del cobro): lo que el cobro manda al elegir cada método, por país,
+  en la capa de la modalidad activa (la misma que lee `pasosDelMetodo`), y los comodines {{METODO_DE_PAGO}}.
+- Los ajustes, el gestor y el visor de una ficha abren en el país de SU manta (`paisDeSuManta`).
+Pruebas: la de pantalla (CDP, en el scratchpad, sobre la copia) y `recorrido-tablero-funciones.mjs
+--solo=versiones_anuncio`.
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

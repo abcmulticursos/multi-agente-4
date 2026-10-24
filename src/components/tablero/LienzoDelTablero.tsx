@@ -12,7 +12,7 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -23,11 +23,13 @@ import {
   Handle,
   MiniMap,
   NodeResizeControl,
-  Panel,
   Position,
   ReactFlow,
+  SelectionMode,
+  useNodes,
   useNodesState,
   useStore,
+  ViewportPortal,
   type Edge,
   type EdgeProps,
   type Node,
@@ -41,16 +43,18 @@ import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
 
 /** El tablero tal como lo tiene el editor: igual que el del bot, con las burbujas del editor. */
+/** Una versión, como la tiene el editor (con sus etiquetas de anuncios). */
+export type VersionEnElEditor = { id: string; nombre?: string; peso?: number; steps?: unknown[]; anuncios?: string[]; dirigir?: boolean };
 export interface FichaEnElEditor extends Omit<FichaDelTablero, "steps" | "variantes" | "seguimientos"> {
   steps?: unknown[];
-  variantes?: Array<{ id: string; nombre?: string; peso?: number; steps?: unknown[] }>;
+  variantes?: VersionEnElEditor[];
   seguimientos?: Array<{
     id: string;
     minutos: number;
     activa_oferta?: boolean;
     ignora_silencio?: boolean;
     ignora_tardio?: boolean;
-    variantes: Array<{ id: string; nombre?: string; peso?: number; steps?: unknown[] }>;
+    variantes: VersionEnElEditor[];
   }>;
 }
 export interface TableroEnElEditor extends Omit<Tablero, "fichas"> {
@@ -374,32 +378,48 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
 
 // ── EL FONDO DE UN PAÍS Y LAS CAJAS ───────────────────────────────────────────
 
-function NodoDeFondo({ data }: NodeProps<Node<{ titulo: string; tema: "claro" | "oscuro"; mirando: boolean; alVer: () => void }>>) {
-  const t = TEMA[data.tema];
+/**
+ * LA ZONA SOMBREADA DE LO ELEGIDO (24/10/2026), la misma de la pizarra (`ZonaDeLaSeleccion` en
+ * LienzoDePizarra): «sí se selecciona, solo que no se ve bien». Con dos o más fichas elegidas se
+ * pinta el recuadro que las abarca, también al elegir con Shift + clic. Solo dibuja: no atrapa clics.
+ */
+function ZonaDeLaSeleccion() {
+  const nodos = useNodes();
+  const laSuya = useStore((s) => s.nodesSelectionActive || s.userSelectionActive);
+  const elegidas = nodos.filter((n) => n.selected && n.type !== "caja");
+  if (laSuya || elegidas.length < 2) return null;
+  const x0 = Math.min(...elegidas.map((n) => n.position.x));
+  const y0 = Math.min(...elegidas.map((n) => n.position.y));
+  const x1 = Math.max(...elegidas.map((n) => n.position.x + (n.measured?.width ?? 250)));
+  const y1 = Math.max(...elegidas.map((n) => n.position.y + (n.measured?.height ?? 200)));
   return (
-    <div className="h-full w-full rounded-2xl" style={{ background: t.caja, pointerEvents: "none" }}>
-      <div className="ml-5 mt-3 flex items-center gap-2">
-        <span className="rounded-md px-1 text-sm font-bold uppercase tracking-wide" style={{ color: t.tituloCaja }}>
-          {data.titulo}
-        </span>
-        {/* «▶ VER RECORRIDO», como en la pizarra: su ruta se ilumina y lo demás queda tenue. */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            data.alVer();
-          }}
-          className={`nodrag nopan rounded-md border px-2 py-0.5 text-[11px] font-semibold shadow-sm ${
-            data.mirando ? "border-amber-400 bg-amber-100 text-amber-900" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-          }`}
-          style={{ pointerEvents: "all" }}
-          title="Ilumina la ruta de este país (solo vista: no cambia nada)"
-        >
-          {data.mirando ? "✕ Ver todo" : "▶ Ver recorrido"}
-        </button>
-      </div>
-    </div>
+    <ViewportPortal>
+      <div
+        className="react-flow__nodesselection-rect"
+        style={{ position: "absolute", transform: `translate(${x0}px, ${y0}px)`, width: x1 - x0, height: y1 - y0, pointerEvents: "none" }}
+      />
+    </ViewportPortal>
   );
+}
+
+/** La manta nueva de un Inicio: alrededor de su ruta si ya tiene fichas, o un hueco a su derecha. */
+export function mantaPara(t: TableroEnElEditor, inicio: FichaEnElEditor): NonNullable<Tablero["cajas"]>[number] {
+  const ids = rutaDe(t, inicio.id);
+  const enLaRuta = t.fichas.filter((f) => ids.has(f.id) && !f.guardada);
+  const suyas = enLaRuta.length ? enLaRuta : [inicio];
+  const minX = Math.min(...suyas.map((f) => f.x)) - 40;
+  const minY = Math.min(...suyas.map((f) => f.y)) - 70;
+  const maxX = Math.max(...suyas.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250)), inicio.x + 1200) + 40;
+  const maxY = Math.max(...suyas.map((f) => f.y + 260), inicio.y + 520) + 30;
+  return {
+    id: `manta-${inicio.id}`,
+    x: Math.round(minX),
+    y: Math.round(minY),
+    ancho: Math.round(maxX - minX),
+    alto: Math.round(maxY - minY),
+    titulo: "",
+    inicio: inicio.id,
+  };
 }
 
 /** Para el buscador: sin tildes ni mayúsculas. */
@@ -419,9 +439,12 @@ type DatosDeCaja = {
   elegida: boolean;
   alElegir: () => void;
   alCambiar: (c: NonNullable<Tablero["cajas"]>[number]) => void;
+  /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
+  manta?: { titulo: string; mirando: boolean; alVer: () => void };
 };
 function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
   const t = TEMA[data.tema];
+  const manta = data.manta;
   return (
     <div className="h-full w-full" style={{ pointerEvents: "none" }}>
       {ESQUINAS.map((esquina) => (
@@ -441,15 +464,38 @@ function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
             data.alElegir();
           }}
           onDoubleClick={() => {
+            // La manta de un país se llama por su bandera: no se renombra.
+            if (manta) return;
             const nuevo = window.prompt("Nombre de la caja", data.caja.titulo);
             if (nuevo !== null) data.alCambiar({ ...data.caja, titulo: nuevo.slice(0, 80) });
           }}
           className={`ml-5 mt-3 inline-block cursor-pointer rounded-md px-1 text-sm font-bold uppercase tracking-wide ${data.elegida ? "underline" : ""}`}
           style={{ color: t.tituloCaja, pointerEvents: "all" }}
-          title="Clic para elegirla (Delete la borra) · doble clic para renombrarla · arrástrala desde sus esquinas"
+          title={
+            manta
+              ? "La manta de este país · clic para elegirla (Delete la borra; las fichas se quedan) · estírala desde sus esquinas"
+              : "Clic para elegirla (Delete la borra) · doble clic para renombrarla · arrástrala desde sus esquinas"
+          }
         >
-          {data.caja.titulo || "Caja"}
+          {manta ? manta.titulo : data.caja.titulo || "Caja"}
         </div>
+        {/* «▶ VER RECORRIDO», como en la pizarra: su ruta se ilumina y lo demás queda tenue. */}
+        {manta && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              manta.alVer();
+            }}
+            className={`nodrag nopan ml-2 mt-3 inline-block rounded-md border px-2 py-0.5 align-top text-[11px] font-semibold shadow-sm ${
+              manta.mirando ? "border-amber-400 bg-amber-100 text-amber-900" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+            style={{ pointerEvents: "all" }}
+            title="Ilumina la ruta de este país (solo vista: no cambia nada)"
+          >
+            {manta.mirando ? "✕ Ver todo" : "▶ Ver recorrido"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -556,7 +602,7 @@ function CableDelTablero({ id, sourceX, sourceY, targetX, targetY, sourcePositio
   );
 }
 
-const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, fondo: NodoDeFondo, caja: NodoDeCaja };
+const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja };
 const TIPOS_DE_CABLE = { cable: CableDelTablero };
 
 /** Las fichas a las que llega un Inicio siguiendo sus cables: su ruta, para dibujarle su fondo. */
@@ -587,6 +633,9 @@ export default function LienzoDelTablero({
   onCambiar,
   onAbrir,
   onAjustes,
+  buscar = "",
+  antesDelMas,
+  despuesDelMas,
 }: {
   tablero: TableroEnElEditor;
   resumenDe: (f: FichaEnElEditor) => string;
@@ -599,6 +648,11 @@ export default function LienzoDelTablero({
   onCambiar: (t: TableroEnElEditor) => void;
   onAbrir: (id: string) => void;
   onAjustes: (id: string) => void;
+  /** EL BUSCADOR VIVE ARRIBA, EN LA BARRA, como en la pizarra (24/10/2026). */
+  buscar?: string;
+  /** LOS BOTONES REDONDOS DE ARRIBA A LA IZQUIERDA, como en la pizarra: ← antes del «+», ☰ después. */
+  antesDelMas?: ReactNode;
+  despuesDelMas?: ReactNode;
 }) {
   const instancia = useRef<ReactFlowInstance<Node, Edge> | null>(null);
   const vivo = useRef(tablero);
@@ -609,7 +663,7 @@ export default function LienzoDelTablero({
   const [aviso, setAviso] = useState<string | null>(null);
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
-  const [buscar, setBuscar] = useState("");
+  const [menuMas, setMenuMas] = useState(false);
   const t = TEMA[tema];
 
   const cambiar = (n: TableroEnElEditor) => onCambiar(n);
@@ -623,55 +677,62 @@ export default function LienzoDelTablero({
   const visibles = tablero.fichas.filter((f) => !f.guardada);
   const nodosDesdeProps = useMemo<Node[]>(() => {
     const nodos: Node[] = [];
-    // EL FONDO DE CADA PAÍS: la caja semitransparente detrás de su ruta, como los carriles de la
-    // pizarra. Se calcula de las fichas a las que llega su Inicio.
-    for (const inicio of visibles.filter((f) => f.tipo === "inicio")) {
-      const ids = rutaDe(tablero, inicio.id);
-      const suyas = visibles.filter((f) => ids.has(f.id));
-      if (suyas.length === 0) continue;
-      const minX = Math.min(...suyas.map((f) => f.x)) - 40;
-      const minY = Math.min(...suyas.map((f) => f.y)) - 70;
-      const maxX = Math.max(...suyas.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250))) + 40;
-      const maxY = Math.max(...suyas.map((f) => f.y + 260)) + 30;
-      nodos.push({
-        id: `fondo:${inicio.id}`,
-        type: "fondo",
-        position: { x: minX, y: minY },
-        style: { width: maxX - minX, height: maxY - minY },
-        data: {
-          titulo: inicio.pais ? `${banderaDe(inicio.pais)} ${inicio.pais}` : "🌍 Otros países",
-          tema,
-          mirando: mirando === inicio.id,
-          alVer: () => setMirando((m) => (m === inicio.id ? null : inicio.id)),
-        },
-        draggable: false,
-        selectable: false,
-        zIndex: -2,
-      });
-    }
-    for (const c of tablero.cajas ?? [])
+    // LAS MANTAS YA NO SE DIBUJAN SOLAS (24/10/2026): «la manta no debe ser automatizada, la controlo
+    // yo desde las esquinas», como en la pizarra. Cada país tiene su caja (`inicio`), que nace con su
+    // Inicio y se estira a mano; las fichas entran y salen de ella libremente.
+    for (const c of tablero.cajas ?? []) {
+      const ini = c.inicio ? tablero.fichas.find((f) => f.id === c.inicio && f.tipo === "inicio") : undefined;
       nodos.push({
         id: `caja:${c.id}`,
         type: "caja",
         position: { x: c.x, y: c.y },
-        style: { width: c.ancho, height: c.alto },
+        // COMO LA CAJA DE LA PIZARRA: no se queda el ratón (arrastrar dentro mueve la vista, y con
+        // Shift dibuja el recuadro: «tampoco selecciona con shift»). Solo esquinas y título responden.
+        // Entra en la selección si queda entera dentro, y se mueve con el grupo.
+        style: { width: c.ancho, height: c.alto, pointerEvents: "none" as const },
+        draggable: true,
+        selectable: true,
         data: {
           caja: c,
           tema,
           elegida: cajaElegida === c.id,
           alElegir: () => setCajaElegida(c.id),
           alCambiar: (n: typeof c) => cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).map((x) => (x.id === c.id ? n : x)) }),
+          ...(ini
+            ? {
+                manta: {
+                  titulo: ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países",
+                  mirando: mirando === ini.id,
+                  alVer: () => setMirando((m) => (m === ini.id ? null : ini.id)),
+                },
+              }
+            : {}),
         } satisfies DatosDeCaja,
-        zIndex: -1,
-        dragHandle: ".no-se-arrastra",
+        zIndex: -10,
       });
+    }
     for (const f of visibles)
       nodos.push({ id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: { x: f.x, y: f.y }, data: { ficha: f } });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tablero, tema, cajaElegida, paisVisto, mirando]);
   const [nodos, setNodos, alCambiarNodos] = useNodesState<Node>(nodosDesdeProps);
-  useEffect(() => setNodos(nodosDesdeProps), [nodosDesdeProps, setNodos]);
+  // LO ELEGIDO SIGUE ELEGIDO AL REDIBUJAR (24/10/2026): «al mover se deseleccionan». Cada cambio
+  // (soltar lo que se movió, por ejemplo) rehace las fichas desde el tablero, y se rehacían sin
+  // elegir. Como en la pizarra, se conserva la elección.
+  useEffect(
+    () =>
+      setNodos((antes) => {
+        const elegidos = new Set(antes.filter((n) => n.selected).map((n) => n.id));
+        return elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps;
+      }),
+    [nodosDesdeProps, setNodos]
+  );
+  // SHIFT + ARRASTRAR SUMA A LO YA ELEGIDO (como en la pizarra): React Flow suelta todo al empezar el
+  // recuadro; aquí se vuelve a elegir lo que ya estaba.
+  const sumando = useRef<Set<string> | null>(null);
+  const nodosVivos = useRef<Node[]>([]);
+  nodosVivos.current = nodos;
 
   // Si el Inicio que se miraba ya no está (se borró o se guardó), se deja de mirar.
   useEffect(() => {
@@ -700,8 +761,11 @@ export default function LienzoDelTablero({
   const nodosVistos = !enLaRuta && !coincidentes
     ? nodos
     : nodos.map((n) => {
-        if (n.type === "caja") return n;
-        if (n.type === "fondo") return enLaRuta && n.id !== `fondo:${mirando}` ? { ...n, style: { ...n.style, opacity: 0.3 } } : n;
+        if (n.type === "caja") {
+          // La manta de otro país, tenue mientras se mira un recorrido.
+          const c = (n.data as DatosDeCaja).caja;
+          return enLaRuta && c.inicio && c.inicio !== mirando ? { ...n, style: { ...n.style, opacity: 0.3 } } : n;
+        }
         const dentro = (!enLaRuta || enLaRuta.has(n.id)) && (!coincidentes || coincidentes.has(n.id));
         return {
           ...n,
@@ -862,7 +926,26 @@ export default function LienzoDelTablero({
           onInit={(i) => {
             instancia.current = i;
           }}
-          onNodesChange={alCambiarNodos}
+          onNodesChange={(cambios) => {
+            const previas = sumando.current;
+            if (!previas) {
+              alCambiarNodos(cambios);
+              return;
+            }
+            const sueltas = new Set(cambios.flatMap((c) => (c.type === "select" && !c.selected && previas.has(c.id) ? [c.id] : [])));
+            alCambiarNodos(cambios.filter((c) => !(c.type === "select" && sueltas.has(c.id))));
+            if (sueltas.size > 0) setNodos((ns) => ns.map((n) => (sueltas.has(n.id) ? { ...n, selected: true } : n)));
+          }}
+          onSelectionStart={() => {
+            const previas = new Set(nodosVivos.current.filter((n) => n.selected).map((n) => n.id));
+            sumando.current = previas;
+            if (previas.size > 0) setNodos((ns) => ns.map((n) => (previas.has(n.id) ? { ...n, selected: true } : n)));
+          }}
+          onSelectionEnd={() => {
+            const previas = sumando.current;
+            sumando.current = null;
+            if (previas && previas.size > 0) setNodos((ns) => ns.map((n) => (previas.has(n.id) ? { ...n, selected: true } : n)));
+          }}
           onNodeDragStop={(_, __, movidos) => {
             const actual = vivo.current;
             const donde = new Map(movidos.filter((n) => !n.id.startsWith("caja:")).map((n) => [n.id, n.position]));
@@ -908,8 +991,12 @@ export default function LienzoDelTablero({
           deleteKeyCode={null}
           // El doble clic abre la ficha; no acerca el lienzo (se comía el doble clic de las cajas).
           zoomOnDoubleClick={false}
+          // COMO EN LA PIZARRA: Shift + arrastrar en el vacío dibuja el recuadro (arrastrar sin Shift
+          // mueve la vista), Shift + clic suma o quita una ficha, y solo cuenta lo que queda ENTERO
+          // dentro del recuadro.
           selectionKeyCode="Shift"
-          multiSelectionKeyCode={["Control", "Meta"]}
+          multiSelectionKeyCode={["Shift", "Control", "Meta"]}
+          selectionMode={SelectionMode.Full}
           fitView
           fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
           minZoom={0.1}
@@ -919,77 +1006,98 @@ export default function LienzoDelTablero({
           <Background variant={BackgroundVariant.Dots} gap={22} size={1.6} color={t.puntos} />
           <Controls showInteractive={false} />
           <MiniMap pannable={false} zoomable={false} nodeStrokeWidth={3} style={{ pointerEvents: "none" }} />
-          <Panel position="top-left">
-            <div className="flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 p-1.5 text-slate-800 shadow-md">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                  setMenu({ x: r.left, y: r.bottom + 4, m: { tipo: "crear", donde: centroDeLaVista() } });
-                }}
-                className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[12px] font-bold text-white hover:bg-emerald-700"
-              >
-                ＋ Ficha
-              </button>
-              <select
-                value=""
-                onChange={(e) => {
-                  const p = e.target.value;
-                  if (!p) return;
-                  const c = centroDeLaVista();
-                  const id = `inicio-${p}-${Date.now().toString(36)}`;
-                  cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, { id, tipo: "inicio", pais: p, x: Math.round(c.x - 400), y: Math.round(c.y) }] });
-                  setAviso(`Inicio de ${p} agregado: conéctalo a la primera ficha de su ruta.`);
-                }}
-                className="rounded-lg border border-slate-200 px-1.5 py-1 text-[12px] font-semibold"
-                title="Un Inicio por país, como los carriles de la pizarra"
-              >
-                <option value="">＋ País</option>
-                {paisesDisponibles
-                  .filter((p) => !paisesConInicio.has(p))
-                  .map((p) => (
-                    <option key={p} value={p}>
-                      {banderaDe(p)} {p}
-                    </option>
-                  ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => {
-                  const c = centroDeLaVista();
-                  const caja = { id: `k-${Date.now().toString(36)}`, x: Math.round(c.x - 300), y: Math.round(c.y - 200), ancho: 600, alto: 400, titulo: "Nueva caja" };
-                  cambiar({ ...vivo.current, cajas: [...(vivo.current.cajas ?? []), caja] });
-                }}
-                className="rounded-lg px-2 py-1 text-[12px] font-semibold hover:bg-slate-100"
-                title="Una caja detrás de las fichas, para ordenar a la vista (el bot no la lee)"
-              >
-                ▭ Caja
-              </button>
-              <span className="mx-1 h-5 w-px bg-slate-200" />
-              {/* EL BUSCADOR, como en la pizarra: las que coinciden se marcan y lo demás queda tenue. */}
-              <input
-                value={buscar}
-                onChange={(e) => setBuscar(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") setBuscar("");
-                  if (e.key === "Enter" && coincidentes && coincidentes.size > 0)
-                    instancia.current?.fitView({ nodes: [...coincidentes].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 });
-                }}
-                placeholder="🔍 Buscar"
-                className="w-36 rounded-lg border border-slate-200 px-2 py-1 text-[12px]"
-                title="Busca en los títulos y en lo que dicen las burbujas · Enter: ir a ellas · Esc: borrar"
-              />
-              {coincidentes && (
-                <span className="px-1 text-[11px] font-semibold text-amber-700">
-                  {coincidentes.size === 0 ? "ninguna" : `${coincidentes.size} ficha(s)`}
-                </span>
-              )}
-              <span className="mx-1 h-5 w-px bg-slate-200" />
-              <span className="px-1 text-[11px] text-slate-500">Shift + arrastrar: elegir varias · Ctrl+C / Ctrl+V · Delete</span>
-            </div>
-          </Panel>
+          <ZonaDeLaSeleccion />
         </ReactFlow>
+
+        {/* ← + ☰, DENTRO DEL LIENZO, arriba a la izquierda, como en la pizarra (24/10/2026): «el selector
+            de ficha, país, caja, buscar, están en una posición que me tapa, guíate de cómo se hizo en el
+            modo automático». Lo demás se abre al pulsarlos. */}
+        <div className="absolute left-3 top-3 z-20 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          {antesDelMas}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuMas((v) => !v)}
+              title="Agregar"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-xl font-bold text-white shadow-md hover:bg-violet-700"
+            >
+              {menuMas ? "×" : "+"}
+            </button>
+            {menuMas && (
+              <div className="absolute left-0 top-11 z-50 max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
+                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">Agregar al tablero</div>
+                {TIPOS_PARA_CREAR.map((tipo) => (
+                  <button
+                    key={tipo}
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-slate-100"
+                    onClick={() => {
+                      setMenuMas(false);
+                      crearFicha(tipo, centroDeLaVista());
+                    }}
+                  >
+                    <span className="w-5 text-center">{ASPECTO[tipo].icono}</span> {ASPECTO[tipo].nombre}
+                  </button>
+                ))}
+                <div className="my-1 border-t border-slate-200" />
+                {/* EL ÁREA DE UN PAÍS, como en la pizarra: su Inicio con su manta. */}
+                <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">🌎 Área de un país</div>
+                <div className="max-h-40 overflow-y-auto">
+                  {[...paisesDisponibles.filter((p) => !paisesConInicio.has(p)), ...(paisesConInicio.has("") ? [] : [""])].map((p) => (
+                    <button
+                      key={p || "otros"}
+                      type="button"
+                      className="flex w-full items-center gap-2 px-5 py-1 text-left text-xs hover:bg-slate-100"
+                      onClick={() => {
+                        setMenuMas(false);
+                        const c = centroDeLaVista();
+                        const inicio: FichaEnElEditor = { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: Math.round(c.x - 500), y: Math.round(c.y - 150) };
+                        const conInicio = { ...vivo.current, fichas: [...vivo.current.fichas, inicio] };
+                        cambiar({ ...conInicio, cajas: [...(conInicio.cajas ?? []), mantaPara(conInicio, inicio)] });
+                        setAviso(`${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: su Inicio y su manta. Conecta el Inicio a la primera ficha de su ruta.`);
+                      }}
+                    >
+                      {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
+                    </button>
+                  ))}
+                </div>
+                <div className="my-1 border-t border-slate-200" />
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-slate-100"
+                  title="Solo un fondo para ordenar, sin país: se estira por las esquinas y se borra con Delete"
+                  onClick={() => {
+                    setMenuMas(false);
+                    const c = centroDeLaVista();
+                    const caja = { id: `k-${Date.now().toString(36)}`, x: Math.round(c.x - 300), y: Math.round(c.y - 200), ancho: 600, alto: 400, titulo: "Nueva caja" };
+                    cambiar({ ...vivo.current, cajas: [...(vivo.current.cajas ?? []), caja] });
+                  }}
+                >
+                  <span className="h-2.5 w-3.5 rounded-sm border-2 border-dashed border-slate-400" /> Caja libre (solo fondo, sin país)
+                </button>
+              </div>
+            )}
+          </div>
+          {despuesDelMas}
+          {coincidentes && (
+            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow">
+              {coincidentes.size === 0 ? (
+                "🔍 ninguna ficha"
+              ) : (
+                <>
+                  🔍 {coincidentes.size} ficha(s) ·{" "}
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => instancia.current?.fitView({ nodes: [...coincidentes].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 })}
+                  >
+                    ir a ellas
+                  </button>
+                </>
+              )}
+            </span>
+          )}
+        </div>
 
         {/* «FICHAS GUARDADAS», como en la pizarra: fuera del lienzo, a un clic de volver. */}
         <button
@@ -1059,6 +1167,19 @@ export default function LienzoDelTablero({
             )}
             {menu.m.tipo === "ficha" && fichaDelMenu && (
               <>
+                {/* Un Inicio sin manta (de antes del 24/10, o porque se borró): se le pone una. */}
+                {fichaDelMenu.tipo === "inicio" && !(tablero.cajas ?? []).some((c) => c.inicio === fichaDelMenu.id) && (
+                  <button
+                    type="button"
+                    className={opcionDeMenu}
+                    onClick={() => {
+                      cambiar({ ...vivo.current, cajas: [...(vivo.current.cajas ?? []), mantaPara(vivo.current, fichaDelMenu)] });
+                      setMenu(null);
+                    }}
+                  >
+                    🌎 Ponerle su manta
+                  </button>
+                )}
                 {fichaDelMenu.tipo !== "inicio" && (
                   <button type="button" className={opcionDeMenu} onClick={() => (onAbrir(fichaDelMenu.id), setMenu(null))}>
                     ✏️ Abrir
