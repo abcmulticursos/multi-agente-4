@@ -111372,6 +111372,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 0
+          sin_respuesta_min: 30
         - id: coc_pe_cobro_b
           tipo: cobro
           titulo: Cobro · RECETARIO DIETAS FIT
@@ -111544,7 +111545,7 @@ tableros:
           y: 0
         - id: coc_pe_cobro_up
           tipo: cobro
-          titulo: Cobro · diferencia
+          titulo: Cobro · upgrade (diferencia)
           sin_pago_min: 60
           cobro:
             modo: producto
@@ -111732,6 +111733,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 1600
+          sin_respuesta_min: 30
         - id: coc_ec_ob
           tipo: intro_ob
           titulo: Order bump
@@ -111771,6 +111773,7 @@ tableros:
                       action: send_steps
           x: 720
           y: 1600
+          sin_respuesta_min: 30
         - id: coc_ec_cobro_b
           tipo: cobro
           titulo: Cobro · RECETARIO DIETAS FIT
@@ -112088,6 +112091,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 3200
+          sin_respuesta_min: 30
         - id: coc_ar_cobro
           tipo: cobro
           titulo: Cobro · RECETARIO DIETAS FIT
@@ -112484,6 +112488,22 @@ tableros:
           de: coc_otros_msg
           salida: siguiente
           a: coc_otros_humano
+        - id: coc_pe_intro_sinresp
+          de: coc_pe_intro
+          salida: sin_respuesta
+          a: coc_pe_seg_b
+        - id: coc_ec_intro_sinresp
+          de: coc_ec_intro
+          salida: sin_respuesta
+          a: coc_ec_seg_b
+        - id: coc_ec_ob_sinresp
+          de: coc_ec_ob
+          salida: sin_respuesta
+          a: coc_ec_seg_b
+        - id: coc_ar_intro_sinresp
+          de: coc_ar_intro
+          salida: sin_respuesta
+          a: coc_ar_seg_b
       cajas:
         - id: manta-coc_pe_inicio
           x: 20
@@ -112608,6 +112628,7 @@ tableros:
                     - los dos
           x: 390
           y: 0
+          sin_respuesta_min: 30
         - id: nin_pe_cobro_b
           tipo: cobro
           titulo: Cobro · ADIÓS RABIETAS
@@ -113061,6 +113082,7 @@ tableros:
                     - comprar
           x: 390
           y: 1600
+          sin_respuesta_min: 30
         - id: nin_ec_ob
           tipo: intro_ob
           titulo: Order bump
@@ -113115,6 +113137,7 @@ tableros:
                         - los dos
           x: 720
           y: 1600
+          sin_respuesta_min: 30
         - id: nin_ec_cobro_b
           tipo: cobro
           titulo: Cobro · ADIÓS RABIETAS
@@ -113568,6 +113591,7 @@ tableros:
                     - comprar
           x: 390
           y: 3200
+          sin_respuesta_min: 30
         - id: nin_ar_cobro
           tipo: cobro
           titulo: Cobro · ADIÓS RABIETAS
@@ -114139,6 +114163,22 @@ tableros:
           de: nin_otros_msg
           salida: siguiente
           a: nin_otros_humano
+        - id: nin_pe_intro_sinresp
+          de: nin_pe_intro
+          salida: sin_respuesta
+          a: nin_pe_seg_b
+        - id: nin_ec_intro_sinresp
+          de: nin_ec_intro
+          salida: sin_respuesta
+          a: nin_ec_seg_b
+        - id: nin_ec_ob_sinresp
+          de: nin_ec_ob
+          salida: sin_respuesta
+          a: nin_ec_seg_b
+        - id: nin_ar_intro_sinresp
+          de: nin_ar_intro
+          salida: sin_respuesta
+          a: nin_ar_seg_b
       cajas:
         - id: manta-nin_pe_inicio
           x: 20
@@ -114240,6 +114280,7 @@ tableros:
               delay_after_sec: 4
           x: 390
           y: 0
+          sin_respuesta_min: 30
         - id: tal_pe_cobro_b
           tipo: cobro
           titulo: Cobro · PLANOS MÁQUINAS DE GIMNASIO
@@ -114713,6 +114754,7 @@ tableros:
                     - comprar
           x: 390
           y: 1600
+          sin_respuesta_min: 30
         - id: tal_ec_ob
           tipo: intro_ob
           titulo: Order bump
@@ -114767,6 +114809,7 @@ tableros:
                         - los dos
           x: 720
           y: 1600
+          sin_respuesta_min: 30
         - id: tal_ec_cobro_b
           tipo: cobro
           titulo: Cobro · PLANOS MÁQUINAS DE GIMNASIO
@@ -115290,6 +115333,7 @@ tableros:
               delay_after_sec: 4
           x: 390
           y: 3200
+          sin_respuesta_min: 30
         - id: tal_ar_cobro
           tipo: cobro
           titulo: Cobro · PLANOS MÁQUINAS DE GIMNASIO
@@ -115990,6 +116034,22 @@ tableros:
           de: tal_otros_msg
           salida: siguiente
           a: tal_otros_humano
+        - id: tal_pe_intro_sinresp
+          de: tal_pe_intro
+          salida: sin_respuesta
+          a: tal_pe_seg_b
+        - id: tal_ec_intro_sinresp
+          de: tal_ec_intro
+          salida: sin_respuesta
+          a: tal_ec_seg_b
+        - id: tal_ec_ob_sinresp
+          de: tal_ec_ob
+          salida: sin_respuesta
+          a: tal_ec_seg_b
+        - id: tal_ar_intro_sinresp
+          de: tal_ar_intro
+          salida: sin_respuesta
+          a: tal_ar_seg_b
       cajas:
         - id: manta-tal_pe_inicio
           x: 20
@@ -116098,6 +116158,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 0
+          sin_respuesta_min: 30
         - id: mas_pe_cobro_b
           tipo: cobro
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
@@ -116429,6 +116490,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 1600
+          sin_respuesta_min: 30
         - id: mas_ec_ob
           tipo: intro_ob
           titulo: Order bump
@@ -116468,6 +116530,7 @@ tableros:
                       action: send_steps
           x: 720
           y: 1600
+          sin_respuesta_min: 30
         - id: mas_ec_cobro_b
           tipo: cobro
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
@@ -116799,6 +116862,7 @@ tableros:
                   action: send_steps
           x: 390
           y: 3200
+          sin_respuesta_min: 30
         - id: mas_ar_cobro
           tipo: cobro
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
@@ -117197,6 +117261,22 @@ tableros:
           de: mas_otros_msg
           salida: siguiente
           a: mas_otros_humano
+        - id: mas_pe_intro_sinresp
+          de: mas_pe_intro
+          salida: sin_respuesta
+          a: mas_pe_seg_b
+        - id: mas_ec_intro_sinresp
+          de: mas_ec_intro
+          salida: sin_respuesta
+          a: mas_ec_seg_b
+        - id: mas_ec_ob_sinresp
+          de: mas_ec_ob
+          salida: sin_respuesta
+          a: mas_ec_seg_b
+        - id: mas_ar_intro_sinresp
+          de: mas_ar_intro
+          salida: sin_respuesta
+          a: mas_ar_seg_b
       cajas:
         - id: manta-mas_pe_inicio
           x: 20

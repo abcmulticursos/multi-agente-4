@@ -41,6 +41,8 @@ import { avisosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
+import { copiarFichas, mantaPara, rutaDe } from "@/lib/tablero/copiar";
+export { copiarFichas, mantaPara };
 
 /** El tablero tal como lo tiene el editor: igual que el del bot, con las burbujas del editor. */
 /** Una versión, como la tiene el editor (con sus etiquetas de anuncios). */
@@ -75,59 +77,17 @@ const ESQUINAS = ["top-left", "top-right", "bottom-left", "bottom-right"] as con
 const BURBUJAS_A_LA_VISTA = 5;
 
 /** Lo que hay dentro de una ficha, en filas cortas como en la pizarra. */
-function resumenDeBurbujas(pasos: unknown[] | undefined): Array<{ icono: string; texto: string; espera: number }> {
+function resumenDeBurbujas(pasos: unknown[] | undefined): Array<{ icono: string; texto: string; espera: number; indice: number }> {
   return ((pasos ?? []) as BurbujaDelEditor[])
-    .filter((s) => s?.enabled !== false)
-    .map((s) => ({
+    .map((s, indice) => ({ s, indice }))
+    .filter(({ s }) => s?.enabled !== false)
+    .map(({ s, indice }) => ({
       icono: ICONO[s.type ?? "text"] ?? "💬",
       texto: (s.texts ?? []).find((t) => t?.trim())?.trim() ?? "",
       espera: Number(s.delay_after_sec ?? 0) || 0,
+      // Su lugar entre TODAS las burbujas (también las apagadas): para abrir la ficha en ella.
+      indice,
     }));
-}
-
-/** Copia de fichas con códigos NUEVOS (fichas, botones y cuadritos), y sus cables de dentro. */
-export function copiarFichas(
-  fichas: FichaEnElEditor[],
-  cables: CableDelTablero[],
-  desplazar: Punto
-): { fichas: FichaEnElEditor[]; cables: CableDelTablero[] } {
-  const nuevo = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-  const idDe = new Map<string, string>();
-  const salidaDe = new Map<string, string>();
-  const renombrarPasos = (pasos: unknown[] | undefined) =>
-    (pasos ?? []).map((s) => {
-      const p = JSON.parse(JSON.stringify(s)) as { buttons?: Array<{ id: string }>; decisions?: Array<{ id: string }> };
-      for (const b of p.buttons ?? []) {
-        const n = nuevo("b");
-        salidaDe.set(`btn:${b.id}`, `btn:${n}`);
-        b.id = n;
-      }
-      for (const d of p.decisions ?? []) {
-        const n = nuevo("d");
-        salidaDe.set(`dec:${d.id}`, `dec:${n}`);
-        d.id = n;
-      }
-      return p;
-    });
-  // Un Inicio no se copia: hay uno por país, y dos del mismo país no sabrían a quién recibir.
-  const copias = fichas.filter((f) => f.tipo !== "inicio").map((f) => {
-    const id = nuevo("f");
-    idDe.set(f.id, id);
-    const c: FichaEnElEditor = { ...JSON.parse(JSON.stringify(f)), id, x: f.x + desplazar.x, y: f.y + desplazar.y };
-    if (c.steps) c.steps = renombrarPasos(c.steps);
-    if (c.variantes) c.variantes = c.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(v.steps) }));
-    if (c.seguimientos)
-      c.seguimientos = c.seguimientos.map((s) => ({
-        ...s,
-        id: nuevo("s"),
-        variantes: s.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(v.steps) })),
-      }));
-    return c;
-  });
-  const copiasDeCables = cables
-    .filter((c) => idDe.has(c.de) && idDe.has(c.a))
-    .map((c) => ({ id: nuevo("c"), de: idDe.get(c.de)!, a: idDe.get(c.a)!, salida: salidaDe.get(c.salida) ?? c.salida }));
-  return { fichas: copias, cables: copiasDeCables };
 }
 
 // ── EL CONTEXTO: lo que los nodos y cables le piden al lienzo ─────────────────
@@ -144,12 +104,29 @@ const Contexto = createContext<{
   paisVisto: string;
   nombres: Record<string, string>;
   resumenDe: (f: FichaEnElEditor) => string;
-  abrir: (id: string) => void;
+  abrir: (id: string, burbuja?: number) => void;
   ajustes: (id: string) => void;
   menu: (x: number, y: number, m: Menu) => void;
   cambiar: (t: TableroEnElEditor) => void;
   curvar: (cableId: string, p: Punto | null) => void;
+  /** Por ficha: cuántos clientes llegaron y cuántos pagaron (de verdad, sin las pruebas). */
+  numeros?: Record<string, { clientes: number; ventas: number }>;
 } | null>(null);
+
+/** «👥 12 · 💰 3»: los números de una ficha, como los de las rutas de la pizarra. Nada si no hay. */
+function NumerosDeLaFicha({ id }: { id: string }) {
+  const ctx = useContext(Contexto);
+  const n = ctx?.numeros?.[id];
+  if (!n || n.clientes === 0) return null;
+  return (
+    <div
+      className="mt-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700"
+      title={`${n.clientes} cliente(s) llegaron a esta ficha y ${n.ventas} de ellos pagaron algo en el tablero. No cuenta las pruebas del simulador.`}
+    >
+      👥 {n.clientes} · 💰 {n.ventas} pagaron ({Math.round((n.ventas / n.clientes) * 100)}%)
+    </div>
+  );
+}
 
 // ── EL INICIO DE UN PAÍS ──────────────────────────────────────────────────────
 
@@ -211,6 +188,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
             {estado === "revision" ? "⚪ Pasar a apagado" : "🔵 Pasar a revisión"}
           </button>
         )}
+        <NumerosDeLaFicha id={f.id} />
       </div>
     </div>
   );
@@ -314,7 +292,19 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       <div className="flex flex-col gap-1 px-2 pt-1.5">
         {burbujas.slice(0, BURBUJAS_A_LA_VISTA).map((b, i) => (
           <div key={i}>
-            <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[11px]">
+            <div
+              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[11px]"
+              // DOBLE CLIC EN UNA BURBUJA: la ficha se abre en ella, como en la pizarra.
+              onDoubleClick={
+                f.tipo === "intro_ob"
+                  ? undefined
+                  : (e) => {
+                      e.stopPropagation();
+                      ctx.abrir(f.id, b.indice);
+                    }
+              }
+              title={f.tipo === "intro_ob" ? undefined : "Doble clic: abrir la ficha en esta burbuja"}
+            >
               <span className="shrink-0">{b.icono}</span>
               <span className="truncate">{b.texto || "(sin texto)"}</span>
             </div>
@@ -333,6 +323,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           </div>
         )}
         {f.tipo === "entregar" && f.por_correo && <div className="text-[11px] text-cyan-700">📧 Ofrece también por correo</div>}
+        <NumerosDeLaFicha id={f.id} />
         {/* Con burbujas a la vista, el resumen no sale; lo que presenta sí (la IA solo sabe eso). */}
         {burbujas.length > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && (f.presenta ?? []).length > 0 && (
           <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
@@ -400,26 +391,6 @@ function ZonaDeLaSeleccion() {
       />
     </ViewportPortal>
   );
-}
-
-/** La manta nueva de un Inicio: alrededor de su ruta si ya tiene fichas, o un hueco a su derecha. */
-export function mantaPara(t: TableroEnElEditor, inicio: FichaEnElEditor): NonNullable<Tablero["cajas"]>[number] {
-  const ids = rutaDe(t, inicio.id);
-  const enLaRuta = t.fichas.filter((f) => ids.has(f.id) && !f.guardada);
-  const suyas = enLaRuta.length ? enLaRuta : [inicio];
-  const minX = Math.min(...suyas.map((f) => f.x)) - 40;
-  const minY = Math.min(...suyas.map((f) => f.y)) - 70;
-  const maxX = Math.max(...suyas.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250)), inicio.x + 1200) + 40;
-  const maxY = Math.max(...suyas.map((f) => f.y + 260), inicio.y + 520) + 30;
-  return {
-    id: `manta-${inicio.id}`,
-    x: Math.round(minX),
-    y: Math.round(minY),
-    ancho: Math.round(maxX - minX),
-    alto: Math.round(maxY - minY),
-    titulo: "",
-    inicio: inicio.id,
-  };
 }
 
 /** Para el buscador: sin tildes ni mayúsculas. */
@@ -605,19 +576,25 @@ function CableDelTablero({ id, sourceX, sourceY, targetX, targetY, sourcePositio
 const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja };
 const TIPOS_DE_CABLE = { cable: CableDelTablero };
 
-/** Las fichas a las que llega un Inicio siguiendo sus cables: su ruta, para dibujarle su fondo. */
-function rutaDe(t: TableroEnElEditor, inicioId: string): Set<string> {
-  const vistas = new Set<string>([inicioId]);
-  const cola = [inicioId];
-  while (cola.length) {
-    const id = cola.shift()!;
-    for (const c of t.cables)
-      if (c.de === id && !vistas.has(c.a)) {
-        vistas.add(c.a);
-        cola.push(c.a);
-      }
-  }
-  return vistas;
+/** Quitar fichas con sus cables. Si se va un Inicio, se va también su manta (las fichas se quedan). */
+function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
+  return {
+    ...t,
+    fichas: t.fichas.filter((f) => !ids.has(f.id)),
+    cables: t.cables.filter((c) => !ids.has(c.de) && !ids.has(c.a)),
+    cajas: (t.cajas ?? []).filter((c) => !c.inicio || !ids.has(c.inicio)),
+  };
+}
+
+/** El Inicio de un país ("" = otros países). */
+function inicioDe(t: TableroEnElEditor, pais: string): string | undefined {
+  return t.fichas.find((f) => f.tipo === "inicio" && (f.pais ?? "") === pais)?.id;
+}
+
+/** La manta de un país (la caja de su Inicio), para dejar ahí una copia. */
+function mantaDelPais(t: TableroEnElEditor, pais: string): NonNullable<Tablero["cajas"]>[number] | undefined {
+  const ini = inicioDe(t, pais);
+  return ini ? (t.cajas ?? []).find((c) => c.inicio === ini) : undefined;
 }
 
 /** El portapapeles del tablero: sirve entre tiendas, canales y workflows de esta pestaña. */
@@ -636,6 +613,7 @@ export default function LienzoDelTablero({
   buscar = "",
   antesDelMas,
   despuesDelMas,
+  numeros,
 }: {
   tablero: TableroEnElEditor;
   resumenDe: (f: FichaEnElEditor) => string;
@@ -646,13 +624,16 @@ export default function LienzoDelTablero({
   nombres: Record<string, string>;
   paisesDisponibles: string[];
   onCambiar: (t: TableroEnElEditor) => void;
-  onAbrir: (id: string) => void;
+  /** `burbuja`: la que se quiere ver al abrir (doble clic sobre ella en la ficha). */
+  onAbrir: (id: string, burbuja?: number) => void;
   onAjustes: (id: string) => void;
   /** EL BUSCADOR VIVE ARRIBA, EN LA BARRA, como en la pizarra (24/10/2026). */
   buscar?: string;
   /** LOS BOTONES REDONDOS DE ARRIBA A LA IZQUIERDA, como en la pizarra: ← antes del «+», ☰ después. */
   antesDelMas?: ReactNode;
   despuesDelMas?: ReactNode;
+  /** LOS NÚMEROS DE CADA FICHA (25/10/2026), como los de las rutas de la pizarra. */
+  numeros?: Record<string, { clientes: number; ventas: number }>;
 }) {
   const instancia = useRef<ReactFlowInstance<Node, Edge> | null>(null);
   const vivo = useRef(tablero);
@@ -841,6 +822,15 @@ export default function LienzoDelTablero({
       if (document.querySelector("[data-ventana-del-tablero]")) return;
       const tecla = e.key.toLowerCase();
       const actual = vivo.current;
+      // ESCAPE, como en la pizarra: cierra el menú abierto y suelta lo elegido.
+      if (tecla === "escape") {
+        setMenu(null);
+        setMenuMas(false);
+        setPanel(false);
+        setCajaElegida(null);
+        setNodos((ns) => (ns.some((n) => n.selected) ? ns.map((n) => (n.selected ? { ...n, selected: false } : n)) : ns));
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && tecla === "c") {
         const ids = new Set(elegidas());
         if (ids.size === 0) return;
@@ -869,11 +859,7 @@ export default function LienzoDelTablero({
         const ids = new Set(elegidas());
         if (ids.size === 0) return;
         if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) y sus cables?`)) return;
-        cambiar({
-          ...actual,
-          fichas: actual.fichas.filter((f) => !ids.has(f.id)),
-          cables: actual.cables.filter((c) => !ids.has(c.de) && !ids.has(c.a)),
-        });
+        cambiar(sinFichas(actual, ids));
         e.preventDefault();
       }
     };
@@ -907,6 +893,7 @@ export default function LienzoDelTablero({
         menu: (x, y, m) => setMenu({ x, y, m }),
         cambiar,
         curvar,
+        numeros,
       }}
     >
       <div className="relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
@@ -1140,8 +1127,8 @@ export default function LienzoDelTablero({
         {/* EL MENÚ DEL CLIC DERECHO */}
         {menu && (
           <div
-            className="fixed z-50 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-slate-800 shadow-2xl"
-            style={{ left: Math.min(menu.x, window.innerWidth - 250), top: Math.min(menu.y, window.innerHeight - 380) }}
+            className="fixed z-50 max-h-[85vh] w-64 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-slate-800 shadow-2xl"
+            style={{ left: Math.min(menu.x, window.innerWidth - 270), top: Math.max(8, Math.min(menu.y, window.innerHeight - 480)) }}
             onClick={(e) => e.stopPropagation()}
           >
             {menu.m.tipo === "crear" && (
@@ -1167,6 +1154,12 @@ export default function LienzoDelTablero({
             )}
             {menu.m.tipo === "ficha" && fichaDelMenu && (
               <>
+                {/* El nombre arriba, como en la pizarra: se sabe sobre qué ficha se está. */}
+                <div className="truncate border-b border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
+                  {fichaDelMenu.tipo === "inicio"
+                    ? `▶ Inicio · ${fichaDelMenu.pais ? `${banderaDe(fichaDelMenu.pais)} ${fichaDelMenu.pais}` : "🌍 Otros países"}`
+                    : `${ASPECTO[fichaDelMenu.tipo].icono} ${fichaDelMenu.titulo?.trim() || ASPECTO[fichaDelMenu.tipo].nombre}`}
+                </div>
                 {/* Un Inicio sin manta (de antes del 24/10, o porque se borró): se le pone una. */}
                 {fichaDelMenu.tipo === "inicio" && !(tablero.cajas ?? []).some((c) => c.inicio === fichaDelMenu.id) && (
                   <button
@@ -1201,6 +1194,66 @@ export default function LienzoDelTablero({
                     >
                       ⧉ Duplicar aquí al lado
                     </button>
+                    {/* «DUPLICAR PARA…», como en la pizarra: la copia queda en la manta de ese país,
+                        sin conectar («nada se conecta solo»); él le tira el cable. */}
+                    {(() => {
+                      const otros = [...paisesConInicio].filter((p) => mantaDelPais(tablero, p) && !rutaDe(tablero, inicioDe(tablero, p) ?? "").has(fichaDelMenu.id));
+                      if (otros.length === 0) return null;
+                      return (
+                        <div className="border-t border-slate-200 pt-1">
+                          <div className="px-3 py-1 text-[11px] font-semibold text-slate-500">⧉ Duplicar para… (sin conectar)</div>
+                          {otros.map((p) => (
+                            <button
+                              key={p || "otros"}
+                              type="button"
+                              className={`${opcionDeMenu} pl-6`}
+                              onClick={() => {
+                                const m = mantaDelPais(vivo.current, p)!;
+                                const original = vivo.current.fichas.find((x) => x.id === fichaDelMenu.id)!;
+                                const c = copiarFichas([original], [], { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y });
+                                cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
+                                setMenu(null);
+                                setAviso(`Copia puesta en la manta de ${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}, abajo a la izquierda. Conéctala con su cable.`);
+                                const nueva = c.fichas[0]?.id;
+                                if (nueva) window.setTimeout(() => instancia.current?.fitView({ nodes: [{ id: nueva }], padding: 1.2, maxZoom: 1, duration: 500 }), 80);
+                              }}
+                            >
+                              {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                    {/* «DUPLICAR PARA…», como en la pizarra: la copia queda en la manta de ese país,
+                        sin conectar («nada se conecta solo»); él le tira el cable. */}
+                    {(() => {
+                      const otros = [...paisesConInicio].filter((p) => mantaDelPais(tablero, p) && !rutaDe(tablero, inicioDe(tablero, p) ?? "").has(fichaDelMenu.id));
+                      if (otros.length === 0) return null;
+                      return (
+                        <div className="border-t border-slate-200 pt-1">
+                          <div className="px-3 py-1 text-[11px] font-semibold text-slate-500">⧉ Duplicar para… (sin conectar)</div>
+                          {otros.map((p) => (
+                            <button
+                              key={p || "otros"}
+                              type="button"
+                              className={`${opcionDeMenu} pl-6`}
+                              onClick={() => {
+                                const m = mantaDelPais(vivo.current, p)!;
+                                const original = vivo.current.fichas.find((x) => x.id === fichaDelMenu.id)!;
+                                const c = copiarFichas([original], [], { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y });
+                                cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
+                                setMenu(null);
+                                setAviso(`Copia puesta en la manta de ${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}, abajo a la izquierda. Conéctala con su cable.`);
+                                const nueva = c.fichas[0]?.id;
+                                if (nueva) window.setTimeout(() => instancia.current?.fitView({ nodes: [{ id: nueva }], padding: 1.2, maxZoom: 1, duration: 500 }), 80);
+                              }}
+                            >
+                              {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
                     <button
                       type="button"
                       className={opcionDeMenu}
@@ -1228,16 +1281,13 @@ export default function LienzoDelTablero({
                   type="button"
                   className={`${opcionDeMenu} text-rose-600`}
                   onClick={() => {
-                    if (!window.confirm("¿Eliminar esta ficha y sus cables?")) return;
-                    cambiar({
-                      ...vivo.current,
-                      fichas: vivo.current.fichas.filter((x) => x.id !== fichaDelMenu.id),
-                      cables: vivo.current.cables.filter((c) => c.de !== fichaDelMenu.id && c.a !== fichaDelMenu.id),
-                    });
+                    const esInicio = fichaDelMenu.tipo === "inicio";
+                    if (!window.confirm(esInicio ? "¿Quitar este país? Se van su Inicio y su manta; las fichas se quedan donde están." : "¿Eliminar esta ficha y sus cables?")) return;
+                    cambiar(sinFichas(vivo.current, new Set([fichaDelMenu.id])));
                     setMenu(null);
                   }}
                 >
-                  🗑 Eliminar
+                  {fichaDelMenu.tipo === "inicio" ? "🗑 Quitar país (las fichas se quedan)" : "🗑 Eliminar"}
                 </button>
               </>
             )}

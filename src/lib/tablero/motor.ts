@@ -99,6 +99,7 @@ import {
   entrarAlTablero,
   estadoEnElTablero,
   marcarComprobanteLeido,
+  anotarVisita,
   moverA,
   ponerSeguimiento,
   ponerPreciosDelCobro,
@@ -355,6 +356,7 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
   // Al salir de la caja «Seguimientos», sus relojes dejan de valer.
   if (antes?.seg_ficha && antes.seg_ficha !== f.id) ponerSeguimiento(convoId, null, 0);
   const vuelta = moverA(convoId, f.id);
+  anotarVisita(convoId, f.id);
   const config = loadWorkflowConfig();
   const pais = getEffectiveCountryCode(convo.phone, config);
   console.log(`[tablero] convo ${convoId} → ficha «${f.titulo || f.tipo}» (${f.id})${f.apagada ? " [apagada]" : ""}`);
@@ -480,6 +482,9 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo);
         if (yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre))) {
           // (los datos ya salieron)
+        } else if (f.cobro.sin_preguntar) {
+          // El mensaje de antes ya preguntó el método: se espera su respuesta sin repetir la pregunta.
+          console.log(`[tablero] convo ${convoId}: cobro abierto en silencio (el método ya se preguntó)`);
         } else await preguntarElMetodo(convo, pasosDelCobro as never, precio, nombre);
       } else await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
       void sendInitiateCheckoutEvent({
@@ -549,7 +554,16 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
       // puede seguir por «Al terminar el regalo».
       if (!convo.paid_at) setPaidAt(convoId, ahora());
       setConversationState(convoId, "payment_approved");
-      scheduleGiftConsentWithDelay(convoId, 0);
+      {
+        // CON EL SILENCIO DE SIEMPRE (25/10/2026): salía en el acto. La venta de siempre lo ofrece tras
+        // «Se ofrece tras X min» de silencio (`awaiting_email_timeout_seconds`), contado desde el
+        // último mensaje del cliente; aquí, igual.
+        const segundos = Math.max(1, Math.floor(config?.awaiting_email_timeout_seconds ?? 300));
+        const ultimo = getLastUserMessageTime(convoId) ?? ahora();
+        const falta = Math.max(1, ultimo + segundos - ahora());
+        console.log(`[tablero] convo ${convoId}: el regalo se ofrece en ${falta} s (silencio de ${segundos} s)`);
+        scheduleGiftConsentWithDelay(convoId, falta);
+      }
       return;
 
     case "humano":

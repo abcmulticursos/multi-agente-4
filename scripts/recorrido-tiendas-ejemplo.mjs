@@ -79,6 +79,11 @@ async function cliente(tienda, pais) {
   const c = {
     bot,
     nuevo: () => bot.slice(marca).join("\n"),
+    // Esperar sin escribir (p. ej. el silencio del regalo): lo nuevo es lo que llegue en ese rato.
+    leer: async (seg) => {
+      marca = bot.length;
+      await leer(seg);
+    },
     decir: (t, seg = 30) => {
       marca = bot.length;
       const f = new FormData();
@@ -132,7 +137,9 @@ try {
     await c.decir("eso es otro curso?", 35);
     comprobar("«¿es otro?»: la IA dice que es otro, sin pedir comprobante", /otro|distinto|diferente/i.test(c.nuevo()) && !/comprobante/i.test(c.nuevo()), c.nuevo());
     await c.tocar("coc_pe_u1_no", "No, gracias");
-    comprobar("no quiere el upsell: le ofrece el regalo de la tienda", /regalit|RECETAS EXPR/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    // EL REGALO ESPERA SU SILENCIO (25/10/2026), como la venta de siempre: 180 s en su config.
+    await c.leer(210);
+    comprobar("no quiere el upsell: tras el silencio, el regalo de la tienda", /regalit|RECETAS EXPR/i.test(c.nuevo()), c.nuevo().slice(0, 140));
     comprobar("y todo lo que dijo sale sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }
@@ -154,7 +161,8 @@ try {
     await c.decir("no gracias", 30);
     comprobar("«no gracias»: el upsell 2 (TARJETAS DE EMOCIONES)", /TARJETAS DE EMOCIONES/.test(c.nuevo()), c.nuevo().slice(0, 140));
     await c.decir("no", 30);
-    comprobar("«no»: el regalo de la tienda", /regalit|CUENTOS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.leer(210); // el regalo espera su silencio
+    comprobar("«no»: tras el silencio, el regalo de la tienda", /regalit|CUENTOS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }
@@ -175,7 +183,8 @@ try {
     await c.decir("no", 30);
     comprobar("no: upsell 3 (GUÍA DE SOLDADURA)", /SOLDADURA/.test(c.nuevo()), c.nuevo().slice(0, 140));
     await c.tocar("tal_ar_u3_no", "No, gracias");
-    comprobar("no: el regalo de la tienda", /regalit|HERRAMIENTAS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.leer(210); // el regalo espera su silencio
+    comprobar("no: tras el silencio, el regalo de la tienda", /regalit|HERRAMIENTAS/i.test(c.nuevo()), c.nuevo().slice(0, 140));
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
   }

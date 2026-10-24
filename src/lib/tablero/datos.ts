@@ -109,6 +109,7 @@ function leeCobro(v: unknown): CobroDeLaFicha | undefined {
     ...(Object.keys(minimo_por_pais).length ? { minimo_por_pais } : {}),
     ...(Object.keys(tramos_por_pais).length ? { tramos_por_pais } : {}),
     ...(modo === "producto" && v.metodos === true ? { metodos: true } : {}),
+    ...(modo === "producto" && v.metodos === true && v.sin_preguntar === true ? { sin_preguntar: true } : {}),
     ...(modo === "producto" && v.diferencia === true ? { diferencia: true } : {}),
   };
 }

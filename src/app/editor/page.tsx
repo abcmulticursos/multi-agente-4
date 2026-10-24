@@ -7,6 +7,8 @@ import QualityBadge from "@/components/QualityBadge";
 import { MensajesDelMes } from "@/components/MensajesDelMes";
 import { ASPECTO } from "@/components/tablero/aspecto";
 import type { FichaEnElEditor, TableroEnElEditor, VersionEnElEditor } from "@/components/tablero/LienzoDelTablero";
+import { tableroDesdeLaPizarra, type TiendaExportada } from "@/lib/tablero/desde-la-pizarra";
+import { copiarFichas, mantaPara } from "@/lib/tablero/copiar";
 import { TwemojiText } from "@/components/TwemojiText";
 import { DEFAULT_SAMPLES_AFTER_TEXT } from "@/lib/workflow/defaults";
 import {
@@ -2287,6 +2289,21 @@ interface NotificationSettingsEditor {
  * Se identifica por NOMBRE y el número se le asigna dentro, así que una tienda
  * puede quedarse preparada SIN número hasta el día que se active.
  */
+/**
+ * UN REGALO GUARDADO (25/10/2026): «un selector ¿Qué regalo?… los regalos guardados en un solo
+ * sitio». Al elegirlo en una tienda, sus piezas se COPIAN en `tienda.regalo` (lo único que lee el
+ * bot) y la tienda recuerda de cuál salió (`regalo_origen`). Al cambiarlo, cambia en todas las que
+ * lo usan (`conRegaloGuardado`).
+ */
+interface RegaloGuardado {
+  id: string;
+  nombre?: string;
+  consent_sequence?: EditorStep[];
+  ask_sequence?: EditorStep[];
+  reward_message?: string;
+  decline_message?: string;
+}
+
 interface TiendaEditor {
   id: string;
   /** EL UPSELL 1 APAGADO (19/10/2026): su producto, guardado aquí mientras está apagado. El bot
@@ -2301,6 +2318,8 @@ interface TiendaEditor {
     reward_message?: string;
     decline_message?: string;
   };
+  /** «¿QUÉ REGALO?» (25/10/2026): de cuál de `regalos_guardados` salió su regalo. Ver `RegaloGuardado`. */
+  regalo_origen?: string;
   nombre?: string;
   /** El `phone_number_id` de Meta. Vacío = preparada, todavía no vende. */
   numero?: string;
@@ -2401,6 +2420,8 @@ interface FullConfig {
   tiendas?: TiendaEditor[];
   /** EL ALMACÉN DE USUARIOS QUE COBRAN. Vacío = cobra la cuenta del país. */
   cobradores?: CobradorEditor[];
+  /** LOS REGALOS GUARDADOS (25/10/2026), en un solo sitio; cada tienda elige uno. El bot no los lee. */
+  regalos_guardados?: RegaloGuardado[];
   /** LA PIZARRA: dónde dejó cada ficha y sus cajas, por «tienda|canal». El bot no la lee.
    *  Ver `leePizarra` en la ruta de guardado. */
   pizarra?: { vistas?: Record<string, DisposicionDePizarra> };
@@ -6993,11 +7014,20 @@ export default function EditorPage() {
   /** La tienda cuya pizarra está abierta (la avisa la pizarra). Para el aviso al guardar. */
   const tiendaEnLaPizarra = useRef<string | null>(null);
   useEffect(() => {
-    try {
-      if (localStorage.getItem("editor-vista") === "pizarra") setShowPizarraEstado(true);
-    } catch {
-      // Sin almacenamiento: se abre en menús.
-    }
+    // «/editor?vista=pizarra» (25/10/2026): el botón «🧭 Pizarra» del chat entra directo a la pizarra,
+    // «sin pasar por el menú». Manda sobre lo recordado, y se recuerda.
+    const pedida = new URLSearchParams(window.location.search).get("vista");
+    if (pedida === "pizarra" || pedida === "menus") {
+      setShowPizarraEstado(pedida === "pizarra");
+      try {
+        localStorage.setItem("editor-vista", pedida);
+      } catch {}
+    } else
+      try {
+        if (localStorage.getItem("editor-vista") === "pizarra") setShowPizarraEstado(true);
+      } catch {
+        // Sin almacenamiento: se abre en menús.
+      }
     setVistaLeida(true);
   }, []);
   const setShowPizarra = (si: boolean) => {
@@ -29473,6 +29503,7 @@ function VistaPizarra({
             editor={(piezaId) => editorIncrustado(piezaId, gestorAbierto.pais || undefined)}
             texto={textoDelRegaloIncrustado}
             onCerrar={() => setGestorAbierto(null)}
+            selector={tienda ? <SelectorDeRegalo cfg={cfg} tiendaId={tienda.id} aplicar={aplicar} /> : undefined}
           />
         ) : (
           <GestorDeUpsells
@@ -29785,6 +29816,7 @@ function GestorDelRegalo({
   editor,
   texto,
   onCerrar,
+  selector,
 }: {
   pv: PostventaDeLaPizarra;
   acciones: AccionesDelLienzo;
@@ -29792,11 +29824,14 @@ function GestorDelRegalo({
   editor: (piezaId: string) => React.ReactNode;
   texto: (cual: "regalo-premio" | "regalo-despedida") => React.ReactNode;
   onCerrar: () => void;
+  /** «¿Qué regalo?» de la tienda (25/10/2026), arriba. */
+  selector?: React.ReactNode;
 }) {
   const rg = pv.regalo;
   const [paso, setPaso] = useState<"ofrece" | "enlace" | "comento" | "premio" | "despedida">("ofrece");
   return (
     <VentanaFlotante titulo="🎁 Regalo" detalle={rg?.deEstaTienda ? "El regalo de esta tienda." : "El de todas las tiendas: si lo editas aquí, esta tienda tendrá el suyo."} onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR}>
+      {selector}
       <div className="mb-3 flex items-center gap-2">
         <button
           type="button"
@@ -30732,6 +30767,7 @@ function PantallaDelTablero({
     ? cfg.workflows?.[wfId] ?? tableroVacio()
     : cfg.tableros?.[tiendaId]?.[canal] ?? tableroVacio();
   const [cajon, setCajon] = useState<string | null>(null);
+  const [burbujaDelCajon, setBurbujaDelCajon] = useState<number | null>(null);
   const [verCerebro, setVerCerebro] = useState(false);
   const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
@@ -30739,8 +30775,32 @@ function PantallaDelTablero({
   // EL BUSCADOR EN LA BARRA y el ☰ HERRAMIENTAS, como en la pizarra (24/10/2026).
   const [buscar, setBuscar] = useState("");
   const [menuHerramientas, setMenuHerramientas] = useState(false);
-  const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "prueba" | "pagos">(null);
+  const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "prueba" | "pagos" | "anuncios" | "exportar">(null);
   const [regaloAbierto, setRegaloAbierto] = useState<string | null>(null);
+  const [avisoDelTablero, setAvisoDelTablero] = useState<string | null>(null);
+  // LOS NÚMEROS DE CADA FICHA (25/10/2026): clientes que llegaron y cuántos pagaron, como en la
+  // pizarra. Se piden al abrir y cada minuto; si falla, simplemente no se muestran.
+  const [numeros, setNumeros] = useState<Record<string, { clientes: number; ventas: number }>>({});
+  useEffect(() => {
+    if (!tiendaId) return;
+    let vivo = true;
+    const pedir = () =>
+      fetch(`/api/tablero-numeros?tienda=${encodeURIComponent(tiendaId)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => vivo && d?.numeros && setNumeros(d.numeros))
+        .catch(() => {});
+    pedir();
+    const reloj = window.setInterval(pedir, 60_000);
+    return () => {
+      vivo = false;
+      window.clearInterval(reloj);
+    };
+  }, [tiendaId]);
+  useEffect(() => {
+    if (!avisoDelTablero) return;
+    const r = window.setTimeout(() => setAvisoDelTablero(null), 9000);
+    return () => window.clearTimeout(r);
+  }, [avisoDelTablero]);
   const [paisDePagos, setPaisDePagos] = useState<string>("PE");
   const vivoCfg = useRef(cfg);
   vivoCfg.current = cfg;
@@ -30757,6 +30817,44 @@ function PantallaDelTablero({
     );
   const cambiarFicha = (fid: string, cambio: Partial<FichaEnElEditor>) =>
     guardar({ ...tablero, fichas: tablero.fichas.map((f) => (f.id === fid ? { ...f, ...cambio } : f)) });
+
+  /**
+   * TRAER FICHAS DE UN ARCHIVO O DE LA PIZARRA (25/10/2026). Con el tablero vacío, entra entero:
+   * sus Inicios con sus mantas, listo para revisar (apagado). Con fichas ya puestas, entra al lado,
+   * sin Inicios y sin conectar («nada se conecta solo»): lo suyo no se toca.
+   */
+  const traerAlTablero = (r: ReturnType<typeof fichasDeUnArchivo>) => {
+    if ("error" in r) {
+      setAvisoDelTablero(r.error);
+      return;
+    }
+    const actual = tablero;
+    const vacio = actual.fichas.every((f) => f.tipo === "inicio") && actual.cables.length === 0;
+    let nuevo: TableroEnElEditor;
+    let dicho: string;
+    if (vacio) {
+      const t = { ...r.tablero, encendido: false, cerebro: actual.cerebro ?? r.tablero.cerebro };
+      nuevo = { ...t, cajas: [...(t.cajas ?? []).filter((c) => !c.inicio), ...t.fichas.filter((f) => f.tipo === "inicio").map((i) => mantaPara(t, i))] };
+      const paisesNuevos = t.fichas.filter((f) => f.tipo === "inicio").map((f) => (f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países"));
+      dicho = `Tablero armado: ${t.fichas.length} fichas en ${paisesNuevos.join(", ")}. Queda APAGADO hasta que lo revises y lo enciendas.`;
+    } else {
+      const derecha = Math.max(...actual.fichas.map((f) => f.x + 250)) + 300;
+      const arriba = Math.min(...actual.fichas.map((f) => f.y));
+      const minX = Math.min(...r.tablero.fichas.map((f) => f.x));
+      const minY = Math.min(...r.tablero.fichas.map((f) => f.y));
+      const copia = copiarFichas(r.tablero.fichas, r.tablero.cables, { x: derecha - minX, y: arriba - minY });
+      nuevo = { ...actual, fichas: [...actual.fichas, ...copia.fichas], cables: [...actual.cables, ...copia.cables] };
+      dicho = `${copia.fichas.length} ficha(s) traídas a la derecha de lo tuyo, sin Inicio y sin conectar: cablea la primera a tu Inicio.`;
+    }
+    onSnapshot();
+    aplicar(
+      esWorkflow
+        ? { ...r.cfg, workflows: { ...(r.cfg.workflows ?? {}), [wfId]: nuevo } }
+        : { ...r.cfg, tableros: { ...(r.cfg.tableros ?? {}), [tiendaId]: { ...(r.cfg.tableros?.[tiendaId] ?? {}), [canal]: nuevo } } }
+    );
+    setVentanaDeHerramienta(null);
+    setAvisoDelTablero([dicho, ...r.avisos].join(" "));
+  };
 
   const inicios = tablero.fichas.filter((f) => f.tipo === "inicio");
   const conectados = inicios.filter((f) => !f.sin_venta && !f.en_revision && tablero.cables.some((c) => c.de === f.id && c.salida === "siguiente"));
@@ -30986,8 +31084,9 @@ function PantallaDelTablero({
           nombres={nombres}
           paisesDisponibles={paises}
           onCambiar={guardar}
-          onAbrir={(fid) => {
+          onAbrir={(fid, burbuja) => {
             const f = tablero.fichas.find((x) => x.id === fid);
+            setBurbujaDelCajon(burbuja ?? null);
             if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
             else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
             else if (f?.tipo === "regalo" && tienda) setRegaloAbierto(fid);
@@ -30995,6 +31094,7 @@ function PantallaDelTablero({
           }}
           onAjustes={setAjustes}
           buscar={buscar}
+          numeros={esWorkflow ? undefined : numeros}
           antesDelMas={
             <button
               type="button"
@@ -31023,14 +31123,16 @@ function PantallaDelTablero({
                       ["tienda", "🏪", "Datos de esta tienda", "Número, página, pixel, quién cobra, frases de entrada y su regalo"],
                       ["productos", "📦", "Productos y precios", "Precio por país, entrega, contenido y muestras"],
                       ["pagos", "💳", "Datos de pago por país", "Los textos de cada método (Yape, BCP…), las cuentas y el menú de métodos, por país"],
+                      ["anuncios", "📣", "Anuncios", "Tus campañas y anuncios, y a qué ficha de este tablero lleva cada uno"],
                       ["prueba", "🧪", "Modo prueba", "Probar el bot sin enviar nada a Meta"],
+                      ["exportar", "⇅", "Exportar / importar tienda", "La tienda entera (con su tablero) en un archivo JSON, y traerla de vuelta"],
                     ] as const
                   ).map(([v, icono, texto, ayuda]) => (
                     <button
                       key={v}
                       type="button"
                       title={ayuda}
-                      disabled={v === "tienda" && !tienda}
+                      disabled={(v === "tienda" || v === "exportar") && !tienda}
                       onClick={() => {
                         setMenuHerramientas(false);
                         setVentanaDeHerramienta(v);
@@ -31125,6 +31227,186 @@ function PantallaDelTablero({
           <iframe src="/simulador" title="Modo prueba" className="h-[75vh] w-full rounded-md border border-borde bg-white" />
         </VentanaFlotante>
       )}
+      {/* LOS ANUNCIOS, como en la pizarra (25/10/2026): por BM y campaña, a qué ficha de ESTE tablero
+          lleva cada anuncio (las versiones con su etiqueta y las condiciones «¿vino de un anuncio?»). */}
+      {ventanaDeHerramienta === "anuncios" && (
+        <VentanaFlotante
+          titulo="📣 Anuncios"
+          detalle="Por BM y campaña: a qué ficha de este tablero lleva cada anuncio. Abajo, para importar y administrar."
+          onCerrar={() => setVentanaDeHerramienta(null)}
+          ancho="max-w-6xl"
+        >
+          <GuiaDeAnuncios
+            registro={cfg.ad_registry ?? []}
+            destinos={tablero.fichas.flatMap((f) => {
+              const pais = paisDeSuManta(tablero, f, "");
+              const paisesDeLaFicha = pais ? [pais] : [];
+              const nombre = f.titulo?.trim() || (f.tipo === "intro_ob" ? "Intro de order bump" : f.tipo === "seguimientos" ? "Seguimientos" : "Condición");
+              const deVersiones = (vs: VersionEnElEditor[], tipo: string) =>
+                vs
+                  .filter((v) => (v.anuncios ?? []).length > 0)
+                  .map((v, i) => ({
+                    piezaId: f.id,
+                    titulo: `${nombre} · ${v.nombre?.trim() || `Versión ${String.fromCharCode(65 + i)}`}`,
+                    tipo,
+                    paises: paisesDeLaFicha,
+                    apagada: !!f.apagada,
+                    claves: v.anuncios ?? [],
+                    dirige: v.dirigir !== false,
+                  }));
+              if (f.tipo === "intro_ob") return deVersiones(f.variantes ?? [], "Intro de order bump");
+              if (f.tipo === "seguimientos")
+                return (f.seguimientos ?? []).flatMap((s) => deVersiones(s.variantes, `Seguimiento · ${minutosLegiblesDelTablero(s.minutos)}`));
+              if (f.tipo === "condicion" && f.condicion?.tipo === "anuncio" && (f.condicion.anuncios ?? []).length > 0)
+                return [{ piezaId: f.id, titulo: nombre, tipo: "Condición «¿vino de un anuncio?»", paises: paisesDeLaFicha, apagada: !!f.apagada, claves: f.condicion.anuncios ?? [], dirige: true }];
+              return [];
+            })}
+            onAbrir={(fid) => {
+              setVentanaDeHerramienta(null);
+              const f = tablero.fichas.find((x) => x.id === fid);
+              if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
+              else setAjustes(fid);
+            }}
+          />
+          <div className="mt-4">
+            <AdRegistryManager
+              entries={cfg.ad_registry ?? []}
+              palette={cfg.ad_color_palette ?? []}
+              onPaletteChange={(ad_color_palette) => onConfigChange({ ...vivoCfg.current, ad_color_palette })}
+              onChange={(ad_registry) => {
+                // Lo MISMO que en la pizarra y en menú ajustes: quitar un anuncio quita su bloque del regalo, con aviso.
+                const c = vivoCfg.current;
+                const activeIds = new Set(ad_registry.flatMap((ad) => ad.ids));
+                const removed = c.gift.variants.filter((variant) => variant.registry_ad_id && !activeIds.has(variant.registry_ad_id));
+                if (
+                  removed.some((variant) => variant.text.trim() || variant.ad_link?.trim() || variant.ads_reader_id) &&
+                  !confirm("Al quitar este ID se borrara tambien su bloque configurado en Regalo. ¿Continuar?")
+                )
+                  return;
+                onSnapshot();
+                onConfigChange({ ...c, ad_registry, gift: syncGiftVariantsWithRegistry(c.gift, ad_registry) });
+              }}
+            />
+          </div>
+        </VentanaFlotante>
+      )}
+      {/* EXPORTAR / IMPORTAR, como en la pizarra (25/10/2026). El archivo lleva también el tablero. */}
+      {ventanaDeHerramienta === "exportar" && tienda && (
+        <VentanaFlotante titulo="⇅ Exportar / importar tienda" detalle="Un archivo JSON con la tienda entera, con su tablero." onCerrar={() => setVentanaDeHerramienta(null)} ancho="max-w-xl">
+          <div className="space-y-4 text-sm text-tinta">
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  const datos = exportarTienda(vivoCfg.current, tienda.id);
+                  if (!datos) return;
+                  const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `tienda-${(tienda.nombre || tienda.id || "tienda").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.json`;
+                  a.click();
+                  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+                }}
+                className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                ⬇ Exportar «{tienda.nombre?.trim() || "esta tienda"}»
+              </button>
+              <p className="mt-1 text-xs text-tinta-suave">
+                Lleva sus datos, sus productos (también los que usan los cobros y entregas del tablero), su pizarra y su tablero de cada canal.
+              </p>
+            </div>
+            <div className="border-t border-borde pt-4">
+              <label className="inline-block cursor-pointer rounded-md border border-borde bg-tarjeta px-3 py-2 text-sm font-semibold hover:bg-relleno">
+                ⬆ Importar una tienda (JSON)
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  data-importar-tienda
+                  className="hidden"
+                  onChange={async (e) => {
+                    const archivo = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!archivo) return;
+                    let datos: unknown;
+                    try {
+                      datos = JSON.parse(await archivo.text());
+                    } catch {
+                      setAvisoDelTablero("Ese archivo no es un JSON válido.");
+                      return;
+                    }
+                    const r = importarTienda(vivoCfg.current, datos);
+                    if ("error" in r) {
+                      setAvisoDelTablero(r.error);
+                      return;
+                    }
+                    onSnapshot();
+                    onConfigChange(r.cfg);
+                    setVentanaDeHerramienta(null);
+                    setAvisoDelTablero(
+                      `Tienda importada como nueva, sin número: búscala en Mis tiendas. Guarda para que quede.${r.avisos.length > 0 ? ` ${r.avisos.join(" ")}` : ""}`
+                    );
+                  }}
+                />
+              </label>
+              <p className="mt-1 text-xs text-tinta-suave">
+                Entra como una tienda NUEVA, sin número ni página, con su tablero apagado: nunca pisa una que ya exista.
+              </p>
+            </div>
+            <div className="border-t border-borde pt-4">
+              <label className="inline-block cursor-pointer rounded-md border border-sky-300 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100">
+                ⬆ Traer sus fichas a este tablero (JSON)
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  data-importar-fichas
+                  className="hidden"
+                  onChange={async (e) => {
+                    const archivo = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!archivo) return;
+                    let datos: unknown;
+                    try {
+                      datos = JSON.parse(await archivo.text());
+                    } catch {
+                      setAvisoDelTablero("Ese archivo no es un JSON válido.");
+                      return;
+                    }
+                    traerAlTablero(fichasDeUnArchivo(vivoCfg.current, datos, canal));
+                  }}
+                />
+              </label>
+              <p className="mt-1 text-xs text-tinta-suave">
+                Con el tablero vacío entra entero, con sus países y mantas. Si ya tienes fichas, aparecen a la derecha, sin conectar: lo tuyo no se
+                toca. Si el archivo es de una tienda que trabajaste en la pizarra (por ejemplo, la de ALBERTO 5), se arma desde su pizarra.
+              </p>
+            </div>
+            <div className="border-t border-borde pt-4">
+              <button
+                type="button"
+                data-armar-desde-la-pizarra
+                onClick={() => {
+                  const datos = exportarTienda(vivoCfg.current, tienda.id);
+                  if (!datos) return;
+                  delete (datos as { tablero?: unknown }).tablero;
+                  traerAlTablero(fichasDeUnArchivo(vivoCfg.current, datos, canal));
+                }}
+                className="rounded-md border border-violet-300 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-900 hover:bg-violet-100"
+              >
+                🔄 Armar desde la pizarra de esta tienda
+              </button>
+              <p className="mt-1 text-xs text-tinta-suave">
+                Lee lo que esta tienda tiene en la pizarra (intros, oferta, upsells, seguimientos con sus anuncios) y lo arma aquí por país. La pizarra no
+                cambia. Ctrl+Z lo deshace.
+              </p>
+            </div>
+          </div>
+        </VentanaFlotante>
+      )}
+      {avisoDelTablero && (
+        <div className="fixed bottom-6 left-1/2 z-[60] max-w-xl -translate-x-1/2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950 shadow-lg" onClick={() => setAvisoDelTablero(null)}>
+          {avisoDelTablero}
+        </div>
+      )}
       {fichaDeCajon && (
         <EnElTableroContext.Provider value={true}>
           <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeCajon, paisVisto, tablero)}>
@@ -31136,7 +31418,11 @@ function PantallaDelTablero({
             steps={(fichaDeCajon.steps ?? []) as EditorStep[]}
             idPrefix={`tablero_${fichaDeCajon.id.replace(/[^a-z0-9]/gi, "_")}`}
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
-            pais={paisVisto}
+            // EL PAÍS DE SU MANTA (25/10/2026), como el gestor y los ajustes: una intro de Ecuador
+            // enseña sus precios en dólares aunque «Montos de» diga Perú.
+            pais={paisDeSuManta(tablero, fichaDeCajon, paisVisto)}
+            // Doble clic en una burbuja de la ficha: se abre en ESA burbuja, como en la pizarra.
+            burbuja={burbujaDelCajon ?? undefined}
             onGuardar={(steps) => {
               cambiarFicha(fichaDeCajon.id, { steps });
               setCajon(null);
@@ -31456,6 +31742,75 @@ function GestorDeVersiones({
  * `conRegaloDeLaTienda`): si la tienda aún no tiene el suyo se ve el de todas, y al guardar pasa a ser
  * suyo; las demás tiendas no cambian.
  */
+/**
+ * «¿QUÉ REGALO?» (25/10/2026): el selector de arriba del gestor del regalo. Elige uno de los
+ * regalos guardados (o el general), guarda el de ahora como uno nuevo, y renombra el elegido. Dice
+ * qué tiendas lo usan: cambiarlo aquí lo cambia en todas ellas.
+ */
+function SelectorDeRegalo({ cfg, tiendaId, aplicar }: { cfg: FullConfig; tiendaId: string; aplicar: (c: FullConfig) => void }) {
+  const tienda = (cfg.tiendas ?? []).find((t) => t.id === tiendaId);
+  const lista = cfg.regalos_guardados ?? [];
+  const elegido = tienda?.regalo_origen && lista.some((r) => r.id === tienda.regalo_origen) ? tienda.regalo_origen : "";
+  const propio = !elegido && Object.keys(tienda?.regalo ?? {}).length > 0;
+  const usan = elegido ? (cfg.tiendas ?? []).filter((t) => t.regalo_origen === elegido) : [];
+  return (
+    <div data-selector-de-regalo className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-pink-200 bg-pink-50 px-3 py-2 text-xs text-tinta">
+      <span className="font-bold text-pink-900">🎁 ¿Qué regalo?</span>
+      <select
+        value={elegido || (propio ? "__propio" : "")}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === "__propio") return;
+          if (propio && !window.confirm("Esta tienda tiene un regalo propio sin guardar en la lista. Si eliges otro, se reemplaza. ¿Seguir?")) return;
+          aplicar(conRegaloElegido(cfg, tiendaId, v));
+        }}
+        className="rounded-md border border-borde bg-tarjeta px-2 py-1 text-xs font-semibold"
+      >
+        <option value="">🌐 El regalo general del bot</option>
+        {propio && <option value="__propio">✏️ Propio de esta tienda (sin guardar en la lista)</option>}
+        {lista.map((r) => (
+          <option key={r.id} value={r.id}>
+            🎁 {r.nombre?.trim() || "Regalo sin nombre"}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={() => {
+          const nombre = window.prompt("Nombre para guardar este regalo en la lista", `Regalo de ${tienda?.nombre?.trim() || "la tienda"}`);
+          if (nombre === null) return;
+          aplicar(conRegaloGuardadoDeLaTienda(cfg, tiendaId, nombre));
+        }}
+        className="rounded-md border border-borde bg-tarjeta px-2 py-1 font-semibold hover:bg-relleno"
+        title="Guarda el regalo que ves ahora como uno nuevo de la lista, para usarlo en otras tiendas"
+      >
+        💾 Guardar como regalo nuevo
+      </button>
+      {elegido && (
+        <button
+          type="button"
+          onClick={() => {
+            const r = lista.find((x) => x.id === elegido)!;
+            const nombre = window.prompt("Nuevo nombre del regalo", r.nombre ?? "");
+            if (nombre === null || !nombre.trim()) return;
+            aplicar(conRegaloGuardado(cfg, { ...r, nombre: nombre.trim() }));
+          }}
+          className="rounded-md border border-borde bg-tarjeta px-2 py-1 font-semibold hover:bg-relleno"
+        >
+          ✏️ Renombrar
+        </button>
+      )}
+      <span className="text-[11px] text-tinta-suave">
+        {elegido
+          ? `Lo usan: ${usan.map((t) => t.nombre?.trim() || t.id).join(", ")}. Lo que cambies aquí cambia en todas ellas.`
+          : propio
+            ? "Lo que cambies aquí es solo de esta tienda."
+            : "Usa el general. Al cambiar algo aquí, esta tienda pasa a tener el suyo propio."}
+      </span>
+    </div>
+  );
+}
+
 function GestorDelRegaloDelTablero({
   cfg,
   tiendaId,
@@ -31492,6 +31847,7 @@ function GestorDelRegaloDelTablero({
       onCerrar={onCerrar}
       ancho={ANCHO_DEL_GESTOR}
     >
+      <SelectorDeRegalo cfg={cfg} tiendaId={tiendaId} aplicar={aplicar} />
       <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           {pasos.map(([id, titulo, detalle], i) => (
@@ -32018,6 +32374,18 @@ function AjustesDeLaFicha({
                       </span>
                     </span>
                   </label>
+                  {cobro.metodos && (
+                    <label className="ml-6 flex items-start gap-2 text-xs font-semibold">
+                      <input type="checkbox" checked={cobro.sin_preguntar === true} onChange={(e) => ponCobro({ ...cobro, sin_preguntar: e.target.checked || undefined })} className="mt-0.5" />
+                      <span>
+                        🤫 No volver a preguntar el método al llegar
+                        <span className={ayuda}>
+                          Para cuando el mensaje de antes YA preguntó «¿con qué método pagas?». El cobro se abre en silencio: cuando el cliente dice el método
+                          (o manda el comprobante), sigue igual que siempre. Así no le llega la misma pregunta dos veces.
+                        </span>
+                      </span>
+                    </label>
+                  )}
                   {onAbrirPagos && (
                     <button
                       type="button"
@@ -33343,10 +33711,70 @@ function conRegaloDeLaTienda(
   tiendaId: string,
   cambio: NonNullable<TiendaEditor["regalo"]>
 ): FullConfig {
+  // Si su regalo salió de uno GUARDADO, el cambio va a ese guardado y a todas las tiendas que lo usan
+  // («los regalos guardados en un solo sitio»): editarlo en una tienda lo cambia en todas.
+  const origen = (cfg.tiendas ?? []).find((t) => t.id === tiendaId)?.regalo_origen;
+  const guardado = origen ? (cfg.regalos_guardados ?? []).find((r) => r.id === origen) : undefined;
+  if (guardado) return conRegaloGuardado(cfg, { ...guardado, ...cambio });
   return {
     ...cfg,
     tiendas: (cfg.tiendas ?? []).map((t) => (t.id === tiendaId ? { ...t, regalo: { ...(t.regalo ?? {}), ...cambio } } : t)),
   };
+}
+
+/** Las cuatro piezas de un regalo (sin su id ni su nombre), tal cual las lee el bot en una tienda. */
+function piezasDelRegalo(r: RegaloGuardado): NonNullable<TiendaEditor["regalo"]> {
+  return {
+    ...(r.consent_sequence ? { consent_sequence: r.consent_sequence } : {}),
+    ...(r.ask_sequence ? { ask_sequence: r.ask_sequence } : {}),
+    ...(r.reward_message !== undefined ? { reward_message: r.reward_message } : {}),
+    ...(r.decline_message !== undefined ? { decline_message: r.decline_message } : {}),
+  };
+}
+
+/** UN REGALO GUARDADO, cambiado: en la lista y en cada tienda que lo usa (la copia que lee el bot). */
+function conRegaloGuardado(cfg: FullConfig, r: RegaloGuardado): FullConfig {
+  const lista = cfg.regalos_guardados ?? [];
+  return {
+    ...cfg,
+    regalos_guardados: lista.some((x) => x.id === r.id) ? lista.map((x) => (x.id === r.id ? r : x)) : [...lista, r],
+    tiendas: (cfg.tiendas ?? []).map((t) => (t.regalo_origen === r.id ? { ...t, regalo: piezasDelRegalo(r) } : t)),
+  };
+}
+
+/**
+ * «¿QUÉ REGALO?» DE UNA TIENDA (25/10/2026). `id` vacío = el regalo general del bot (la tienda deja
+ * de tener el suyo). Si no, el guardado con ese id: sus piezas se copian en la tienda.
+ */
+function conRegaloElegido(cfg: FullConfig, tiendaId: string, id: string): FullConfig {
+  const r = (cfg.regalos_guardados ?? []).find((x) => x.id === id);
+  return {
+    ...cfg,
+    tiendas: (cfg.tiendas ?? []).map((t) => {
+      if (t.id !== tiendaId) return t;
+      const { regalo: _r, regalo_origen: _o, ...resto } = t;
+      void _r;
+      void _o;
+      return r ? { ...resto, regalo: piezasDelRegalo(r), regalo_origen: r.id } : resto;
+    }),
+  };
+}
+
+/** Guarda el regalo que tiene ahora la tienda como uno nuevo de la lista, y la tienda pasa a usarlo. */
+function conRegaloGuardadoDeLaTienda(cfg: FullConfig, tiendaId: string, nombre: string): FullConfig {
+  const t = (cfg.tiendas ?? []).find((x) => x.id === tiendaId);
+  const g = cfg.gift;
+  // Lo que se ve en la tienda: lo suyo, y lo que no tenga, del general.
+  const r: RegaloGuardado = {
+    id: `regalo_${Date.now().toString(36)}`,
+    nombre: nombre.trim() || "Regalo",
+    consent_sequence: (t?.regalo?.consent_sequence?.length ? t.regalo.consent_sequence : g?.consent_sequence) as EditorStep[] | undefined,
+    ask_sequence: (t?.regalo?.ask_sequence?.length ? t.regalo.ask_sequence : g?.ask_sequence) as EditorStep[] | undefined,
+    reward_message: t?.regalo?.reward_message?.trim() ? t.regalo.reward_message : g?.reward_message,
+    decline_message: t?.regalo?.decline_message?.trim() ? t.regalo.decline_message : g?.decline_message,
+  };
+  const conLista = { ...cfg, regalos_guardados: [...(cfg.regalos_guardados ?? []), JSON.parse(JSON.stringify(r)) as RegaloGuardado] };
+  return conRegaloElegido(conLista, tiendaId, r.id);
 }
 
 function piezaEditable(
@@ -34007,10 +34435,23 @@ function exportarTienda(cfg: FullConfig, tiendaId: string): Record<string, unkno
     }
   }
   const fila = (cfg.filas_de_upsell ?? []).find((f) => (f.tiendas ?? []).includes(tiendaId));
+  // SU TABLERO TAMBIÉN (25/10/2026), con los productos que nombran sus fichas (cobros, entregas,
+  // lo que presenta cada mensaje): sin ellos, la tienda importada cobraría productos que no existen.
+  const suTablero = cfg.tableros?.[tiendaId];
+  const todosLosIds = new Set((cfg.biblioteca_de_productos ?? []).map((p) => p?.id).filter(Boolean));
+  const delTablero: string[] = [];
+  const recorrer = (v: unknown) => {
+    if (typeof v === "string") {
+      if (todosLosIds.has(v)) delTablero.push(v);
+    } else if (Array.isArray(v)) v.forEach(recorrer);
+    else if (v && typeof v === "object") Object.values(v).forEach(recorrer);
+  };
+  recorrer(suTablero);
   const idsDeProductos = new Set<string>([
     ...Object.values(tienda.alineacion ?? {}).filter(Boolean),
     ...(tienda.upsell_apagado ? [tienda.upsell_apagado] : []),
     ...(fila?.puestos ?? []).map((p) => p.producto_id).filter(Boolean),
+    ...delTablero,
   ]);
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p?.id && idsDeProductos.has(p.id));
   const vistas = Object.fromEntries(
@@ -34028,6 +34469,15 @@ function exportarTienda(cfg: FullConfig, tiendaId: string): Record<string, unkno
     ...(fila ? { filaDeUpsell: JSON.parse(JSON.stringify(fila)) } : {}),
     fichas,
     vistas: JSON.parse(JSON.stringify(vistas)),
+    // La espera antes del upsell 1 (los de la fila llevan la suya en `filaDeUpsell`).
+    ...(typeof cfg.upsell?.retraso_minutos === "number" ? { retrasoDelUpsell: cfg.upsell.retraso_minutos } : {}),
+    // Los minutos de cada seguimiento: con ellos el tablero arma sus tiempos iguales.
+    tiemposDeSeguimiento: Object.fromEntries(
+      channelContentForMode(cfg, "whatsapp", mode).followups.flatMap((f, i) =>
+        typeof f.delay_minutes_from_first_message === "number" ? [[String(i), f.delay_minutes_from_first_message]] : []
+      )
+    ),
+    ...(suTablero ? { tablero: JSON.parse(JSON.stringify(suTablero)) } : {}),
   };
 }
 
@@ -34046,6 +34496,7 @@ function importarTienda(cfg: FullConfig, datos: unknown): { cfg: FullConfig; id:
     filaDeUpsell?: FilaDeUpsellEditor;
     fichas?: Array<{ canal: ChannelKey; piezaId: string; obj: Record<string, unknown> }>;
     vistas?: Record<string, DisposicionDePizarra>;
+    tablero?: NonNullable<FullConfig["tableros"]>[string];
   } | null;
   if (!d || d.formato !== FORMATO_DE_TIENDA || !d.tienda) return { error: "Este archivo no es una tienda exportada desde aquí." };
   const id = `tienda_${Date.now().toString(36)}`;
@@ -34109,7 +34560,43 @@ function importarTienda(cfg: FullConfig, datos: unknown): { cfg: FullConfig; id:
     Object.entries(d.vistas ?? {}).map(([sufijo, v]) => [`${id}|${sufijo}`, JSON.parse(renombrar(JSON.stringify(v)))])
   );
   if (Object.keys(vistas).length > 0) c = { ...c, pizarra: { vistas: { ...(c.pizarra?.vistas ?? {}), ...vistas } } };
+  // Su tablero, apagado como al duplicar: la tienda nueva no tiene número todavía.
+  if (d.tablero && typeof d.tablero === "object") {
+    const copia = JSON.parse(JSON.stringify(d.tablero)) as NonNullable<FullConfig["tableros"]>[string];
+    for (const k of Object.keys(copia) as Array<keyof typeof copia>) {
+      const tb = copia[k];
+      if (tb) tb.encendido = false;
+    }
+    c = { ...c, tableros: { ...(c.tableros ?? {}), [id]: copia } };
+  }
   return { cfg: c, id, avisos };
+}
+
+/**
+ * LAS FICHAS DE UN ARCHIVO, PARA EL TABLERO (25/10/2026). Si el archivo trae su tablero de este
+ * canal, ése; si es una tienda que se trabajó en la pizarra (sin tablero), se arma desde su pizarra
+ * con `tableroDesdeLaPizarra`. Los productos que el archivo trae y aquí faltan se agregan (los que
+ * ya están no se tocan), para que sus cobros y entregas tengan qué cobrar y qué entregar.
+ */
+function fichasDeUnArchivo(
+  cfg: FullConfig,
+  datos: unknown,
+  canal: ChannelKey
+): { cfg: FullConfig; tablero: TableroEnElEditor; avisos: string[] } | { error: string } {
+  const d = datos as (TiendaExportada & { formato?: string; productos?: ProductoEditor[]; tablero?: NonNullable<FullConfig["tableros"]>[string] }) | null;
+  if (!d || d.formato !== FORMATO_DE_TIENDA) return { error: "Este archivo no es una tienda exportada desde la pizarra o el tablero." };
+  const yaEstan = new Set((cfg.biblioteca_de_productos ?? []).map((p) => p?.id));
+  const nuevos = (d.productos ?? []).filter((p) => p?.id && !yaEstan.has(p.id));
+  const c: FullConfig = nuevos.length > 0 ? { ...cfg, biblioteca_de_productos: [...(cfg.biblioteca_de_productos ?? []), ...nuevos] } : cfg;
+  const avisos = nuevos.length > 0 ? [`Se agregaron ${nuevos.length} producto(s) que no estaban.`] : [];
+  const suyo = d.tablero?.[canal as "whatsapp" | "messenger" | "instagram"];
+  if (suyo && (suyo.fichas ?? []).length > 0) return { cfg: c, tablero: JSON.parse(JSON.stringify(suyo)) as TableroEnElEditor, avisos };
+  const existen = new Set((c.biblioteca_de_productos ?? []).map((p) => p?.id).filter(Boolean) as string[]);
+  const pago = (channelContentForMode(c, canal, activeModality(c)).payment ?? []) as unknown[];
+  const nombres = Object.fromEntries((c.biblioteca_de_productos ?? []).filter((p) => p?.id).map((p) => [p.id, p.name ?? ""]));
+  const r = tableroDesdeLaPizarra(d, canal, existen, pago, nombres);
+  if (r.tablero.fichas.length === 0) return { error: r.avisos.join(" ") || "El archivo no trae nada que armar en este canal." };
+  return { cfg: c, tablero: r.tablero as unknown as TableroEnElEditor, avisos: ["Armado desde su pizarra.", ...avisos, ...r.avisos] };
 }
 
 /** El «dirigir por país» encendido, en el nombre de campo que use esa lista. */

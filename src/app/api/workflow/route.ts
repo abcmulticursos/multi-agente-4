@@ -595,6 +595,40 @@ function leeTiendas(
           ? { avisos_ignorados: strList(t?.avisos_ignorados) }
           : {}),
         ...(suRegalo(t?.regalo) ? { regalo: suRegalo(t?.regalo) } : {}),
+        // «¿QUÉ REGALO?» (25/10/2026): de cuál de los regalos guardados salió el suyo. El bot no lo
+        // lee (lee `regalo`, que es la copia); el editor lo usa para mantenerlos iguales.
+        ...(str(t?.regalo_origen).trim() ? { regalo_origen: str(t.regalo_origen).trim() } : {}),
+      };
+    });
+}
+
+/**
+ * LOS REGALOS GUARDADOS (25/10/2026): «un selector ¿Qué regalo?… los regalos guardados en un solo
+ * sitio». Cada uno con su nombre y las mismas cuatro piezas que el regalo de una tienda. El bot no
+ * los lee: al elegir uno, el editor lo copia en `tiendas[].regalo` (lo de siempre).
+ */
+function leeRegalosGuardados(v: unknown, sentido: "leer" | "escribir"): Record<string, unknown>[] {
+  if (!Array.isArray(v)) return [];
+  const pasos = (x: unknown) =>
+    Array.isArray(x) && x.length > 0
+      ? sentido === "leer"
+        ? (x as Record<string, unknown>[]).map(readStep)
+        : (x as EditorStep[]).map(writeStep)
+      : null;
+  return (v as Record<string, unknown>[])
+    .filter((r) => String(r?.id ?? "").trim())
+    .map((r) => {
+      const consent = pasos(r.consent_sequence);
+      const ask = pasos(r.ask_sequence);
+      const premio = str(r.reward_message).replace(/\r\n/g, "\n");
+      const despedida = str(r.decline_message).replace(/\r\n/g, "\n");
+      return {
+        id: String(r.id).trim(),
+        nombre: str(r.nombre),
+        ...(consent ? { consent_sequence: consent } : {}),
+        ...(ask ? { ask_sequence: ask } : {}),
+        ...(premio.trim() ? { reward_message: premio } : {}),
+        ...(despedida.trim() ? { decline_message: despedida } : {}),
       };
     });
 }
@@ -2840,6 +2874,7 @@ export async function GET() {
       tiendas,
       filas_de_upsell,
       cobradores,
+      regalos_guardados: leeRegalosGuardados(config?.regalos_guardados, "leer"),
       // LA PIZARRA (16/10/2026): dónde dejó cada ficha y sus cajas. El bot no la lee nunca.
       pizarra: leePizarra(config?.pizarra),
       // EL TABLERO (22/10/2026): a diferencia de la pizarra, el bot SÍ lo lee. Las burbujas van
@@ -3127,6 +3162,11 @@ export async function POST(req: NextRequest) {
   // campo y lo que no se nombre no llega al bot.
   if (Array.isArray(body.tiendas)) {
     doc.set("tiendas", leeTiendas(body.tiendas, "escribir"));
+  }
+  // LOS REGALOS GUARDADOS, por el mismo carril. Solo si el panel los manda.
+  if (Array.isArray(body.regalos_guardados)) {
+    const lista = leeRegalosGuardados(body.regalos_guardados, "escribir");
+    if (lista.length > 0 || doc.has("regalos_guardados")) doc.set("regalos_guardados", lista);
   }
   // EL TABLERO, por el mismo carril. Solo si el panel lo manda: un editor viejo no lo borra.
   if (body.tableros && typeof body.tableros === "object") {

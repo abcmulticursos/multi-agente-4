@@ -47,6 +47,16 @@ db.exec(`
     at INTEGER NOT NULL DEFAULT (unixepoch())
   );
   CREATE INDEX IF NOT EXISTS idx_tablero_entregas_convo ON tablero_entregas(conversation_id);
+  -- POR QUÉ FICHAS PASÓ CADA CLIENTE (25/10/2026), una vez por ficha: los números de cada ruta,
+  -- como los de la pizarra («clientes que entraron y cuántos pagaron»).
+  CREATE TABLE IF NOT EXISTS tablero_visitas (
+    conversation_id INTEGER NOT NULL,
+    tienda_id TEXT NOT NULL,
+    ficha_id TEXT NOT NULL,
+    at INTEGER NOT NULL DEFAULT (unixepoch()),
+    PRIMARY KEY (conversation_id, ficha_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_tablero_visitas_tienda ON tablero_visitas(tienda_id);
 `);
 
 // Columnas que llegaron después: se añaden si faltan.
@@ -380,11 +390,38 @@ export function avisarFinDelRegalo(conversationId: number): void {
   scheduleAction(conversationId, "tablero_tras_regalo", {}, ahora() + 3);
 }
 
+/** Anota que el cliente llegó a esta ficha (una vez por ficha). Para los números de cada ruta. */
+export function anotarVisita(conversationId: number, fichaId: string): void {
+  db.prepare(
+    "INSERT OR IGNORE INTO tablero_visitas (conversation_id, tienda_id, ficha_id) SELECT conversation_id, tienda_id, ? FROM tablero_estado WHERE conversation_id = ?"
+  ).run(fichaId, conversationId);
+}
+
+/**
+ * LOS NÚMEROS DE CADA FICHA de una tienda: cuántos clientes llegaron y cuántos de ellos pagaron
+ * algo en el tablero. Sin las conversaciones del simulador (sus pruebas no inflan los números).
+ */
+export function numerosDelTablero(tiendaId: string): Record<string, { clientes: number; ventas: number }> {
+  const filas = db
+    .prepare(
+      `SELECT v.ficha_id AS ficha,
+              COUNT(DISTINCT v.conversation_id) AS clientes,
+              COUNT(DISTINCT CASE WHEN EXISTS (SELECT 1 FROM tablero_compras k WHERE k.conversation_id = v.conversation_id AND k.monto > 0) THEN v.conversation_id END) AS ventas
+         FROM tablero_visitas v
+         JOIN conversations c ON c.id = v.conversation_id
+        WHERE v.tienda_id = ? AND c.channel <> 'test'
+        GROUP BY v.ficha_id`
+    )
+    .all(tiendaId) as Array<{ ficha: string; clientes: number; ventas: number }>;
+  return Object.fromEntries(filas.map((f) => [f.ficha, { clientes: f.clientes, ventas: f.ventas }]));
+}
+
 /**
  * Para «/reiniciar» una conversación: la saca del tablero y olvida sus compras, entregas y
  * comprobantes, como hace el motor de siempre al reiniciar.
  */
 export function salirDelTablero(conversationId: number): void {
+  db.prepare("DELETE FROM tablero_visitas WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_estado WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_compras WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_pagos WHERE conversation_id = ?").run(conversationId);

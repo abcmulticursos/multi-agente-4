@@ -952,6 +952,56 @@ Lo pidió así: «avísame cuando ya pueda al menos editar… no quiero entrar a
 Pruebas: la de pantalla (CDP, en el scratchpad, sobre la copia) y `recorrido-tablero-funciones.mjs
 --solo=versiones_anuncio`.
 
+### El tablero, sexta vuelta (25/10/2026): todo lo de la pizarra, y la pizarra que llega armada
+
+Lo pidió así: «revisaste que tenga todas las funciones… de pizarra pero completo adaptado a modo
+tablero?». Se hizo el inventario de `AccionesDelLienzo` (pizarra) contra el tablero y se completó:
+- **Escape** cierra menús y suelta lo elegido. **Clic derecho** con el nombre de la ficha arriba,
+  **«⧉ Duplicar para…»** (la copia queda en la manta de ese país, sin conectar) y, en un Inicio,
+  **«🗑 Quitar país»** (se van su Inicio y su manta; las fichas se quedan — `sinFichas`).
+- **☰ → 📣 Anuncios** (la guía por BM/campaña con las fichas de ESTE tablero que llevan cada anuncio,
+  y el gestor del registro) y **☰ → ⇅ Exportar / importar**: el JSON de la tienda lleva ahora su
+  `tablero` (todos los canales), los productos que nombran sus cobros/entregas y
+  `tiemposDeSeguimiento`; importar una tienda trae su tablero (apagado).
+- **DE LA PIZARRA AL TABLERO** (`src/lib/tablero/desde-la-pizarra.ts`, `tableroDesdeLaPizarra`): lee
+  una tienda exportada (intros, oferta de 2 opciones, upsells, seguimientos con sus anuncios) y arma
+  un Inicio con manta por país, en su semimodalidad. Cada ACCIÓN de botón/cuadrito de la pizarra se
+  vuelve un cable (Elige el BÁSICO/FULL → su cobro, Oferta de 2 opciones → intro de order bump,
+  Métodos de pago → cobro, «Solo su mensaje» → ficha Mensaje, persona → humano). Lo APAGADO no se
+  traduce (como en la pizarra). Botones con códigos nuevos SIEMPRE (las copias de la pizarra
+  conservaban los del original y se pisaban). Upsell sin «no» → se le pone un «No» al regalo (avisa).
+  Entrada: ☰ → Exportar/importar → «🔄 Armar desde la pizarra de esta tienda», o «⬆ Traer sus fichas
+  a este tablero» con un JSON (también uno de ALBERTO 5). Tablero vacío: entra entero y APAGADO;
+  con fichas: al lado, sin Inicio y sin conectar.
+- **Cobro «🤫 No volver a preguntar el método al llegar»** (`cobro.sin_preguntar`): para cuando el
+  mensaje anterior ya preguntó el método (las intros de GRAFISMO terminan así, con sus cuadritos de
+  método APAGADOS: el bot de siempre los reconoce solo). El cobro se abre en silencio; al nombrar el
+  método llegan sus datos. `leeCobro` lo conserva.
+- **Los números de cada ficha** (como los de las rutas de la pizarra): `tablero_visitas` (una fila por
+  cliente y ficha, en `irA`), `numerosDelTablero`, `GET /api/tablero-numeros?tienda=`; cada ficha
+  muestra «👥 N · 💰 M pagaron (x%)». Sin las conversaciones del simulador.
+- `copiarFichas`, `mantaPara` y `rutaDe` viven ahora en `src/lib/tablero/copiar.ts` (el lienzo las re-exporta).
+- `layout.tsx`: `suppressHydrationWarning` en `<html>` (el script del tema la tocaba antes de React:
+  el «1 Issue» rojo de desarrollo).
+- **«🎁 ¿Qué regalo?»** (arriba del gestor del regalo, en el tablero y en la pizarra): `regalos_guardados`
+  (lista con nombre) y `tiendas[].regalo_origen`. Elegir uno COPIA sus piezas en `tiendas[].regalo`
+  (lo único que lee el bot: la venta de siempre no se tocó); editarlo desde cualquier tienda que lo
+  usa lo cambia en la lista y en todas (`conRegaloDeLaTienda` → `conRegaloGuardado`). La ruta de
+  guardado conserva los dos campos (`leeRegalosGuardados`, `leeTiendas`).
+- **El regalo del tablero espera su silencio** (`awaiting_email_timeout_seconds`, desde el último
+  mensaje del cliente), como la venta de siempre; antes salía en el acto.
+- **El traductor pone «Esperar» antes de cada upsell** (el retraso del upsell 1 y los minutos de cada
+  puesto de la fila); los seguimientos conservan sus minutos (la caja cuenta desde el último mensaje).
+- **Tiendas de ejemplo:** intro y oferta con «no respondió en 30 min» → sus seguimientos; el cobro del
+  upgrade se llama «Cobro · upgrade (diferencia)».
+- **Doble clic en una burbuja** de una ficha la abre en esa burbuja; el cajón de un Mensaje/Cobro
+  muestra los precios del país de SU manta.
+- **🧭 Pizarra** en la barra del chat: `/editor?vista=pizarra`.
+Pruebas: `recorrido-tablero-funciones.mjs --solo=traducida,regalo_anuncio` (GRAFISMO desde su pizarra:
+intro → «yape» → datos a 15 → comprobante → entrega; y el enlace del anuncio en el regalo),
+`recorrido-tiendas-ejemplo.mjs` (ahora espera el silencio del regalo) y las dos de pantalla del
+scratchpad (prueba-ui-tablero y -2).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

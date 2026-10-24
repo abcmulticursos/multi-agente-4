@@ -128,8 +128,12 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    // suppressHydrationWarning: el script de abajo pone `data-tema` en <html> ANTES de que React
+    // la arme (a propósito, para que no haya fogonazo); React lo veía distinto y lo marcaba como
+    // error en desarrollo («1 Issue»). Solo afecta a los atributos de esta etiqueta.
     <html
       lang="es"
+      suppressHydrationWarning
       className={`${fuenteDeTitulos.variable} ${fuenteDeEmojis.variable} ${fuenteProlija.variable}`}
     >
       <head>

@@ -5,7 +5,7 @@
 //
 // NO GUARDA NADA DE ÉL: escribe en el config de una COPIA y lo devuelve idéntico. Correr contra una copia.
 //   node scripts/recorrido-tablero-funciones.mjs --url=http://localhost:3312 --raiz=<copia> --comprobantes=<carpeta>
-//        [--solo=oferta,congelado,incompleto,titular,compro,anuncio,versiones_anuncio,inicio,apagada,variantes,tuberia]
+//        [--solo=oferta,congelado,incompleto,titular,compro,anuncio,versiones_anuncio,inicio,apagada,variantes,tuberia,traducida,regalo_anuncio,de_palabra]
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
@@ -444,6 +444,129 @@ try {
     comprobar("un cliente nuevo entra por la B", nuevo.nuevo().includes("TUBERIA-B paso 1"), nuevo.nuevo());
     await viejo.borrar();
     await nuevo.borrar();
+  }
+
+  // 15. EL REGALO DEL TABLERO CON EL ENLACE DEL ANUNCIO (25/10/2026): el cliente que vino de un
+  // anuncio recibe, al aceptar el regalo, el enlace para comentar de SU anuncio ({{ENLACE_ANUNCIO}}).
+  if (toca("regalo_anuncio")) {
+    console.log("\n· 15. Regalo del tablero: el enlace para comentar es el de su anuncio");
+    const AD = "120200000000000088";
+    sembrar({
+      fichas: [
+        { id: "i", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+        { id: "m", tipo: "mensaje", x: 0, y: 0, steps: [texto("HOLA-DEL-TABLERO")] },
+        { id: "reg", tipo: "regalo", x: 0, y: 0 },
+      ],
+      cables: cables([["i", "siguiente", "m"], ["m", "siguiente", "reg"]]),
+    });
+    {
+      // Solo en esta copia: un enlace para ese anuncio, el silencio del regalo corto y la tienda sin
+      // regalo propio (que use el general con sus enlaces por anuncio).
+      const doc = YAML.parseDocument(readFileSync(ARCHIVO, "utf8"));
+      const js = doc.toJS();
+      const g = js.gift_mechanic ?? {};
+      doc.set("gift_mechanic", {
+        ...g,
+        registry_sync_enabled: true,
+        ask_sequence: [],
+        ask_text: "COMENTA-GENERAL",
+        ask_text_variants: [{ text: "COMENTA-AQUI: {{ENLACE_ANUNCIO}}", ad_ids: [AD], ad_link: "https://example.com/post-del-anuncio-88", enabled: true }],
+      });
+      doc.set("awaiting_email_timeout_seconds", 5);
+      doc.set("tiendas", js.tiendas.map((t) => (t.id === tienda.id ? (({ regalo, regalo_origen, ...r }) => r)(t) : t)));
+      writeFileSync(ARCHIVO, doc.toString({ lineWidth: 0 }));
+    }
+    await esperar(3000);
+    const c = await cliente("PE", { anuncio: AD });
+    await c.decir("hola", 40);
+    comprobar("saluda con su mensaje y, tras el silencio, ofrece el regalo", c.todo().includes("HOLA-DEL-TABLERO") && /regal/i.test(c.todo()), c.nuevo().slice(0, 140));
+    await c.decir("si quiero", 40);
+    comprobar("al aceptar, le llega el enlace de SU anuncio", c.todo().includes("https://example.com/post-del-anuncio-88"), c.nuevo().slice(0, 200));
+    await c.borrar();
+    const otro = await cliente("PE");
+    await otro.decir("hola", 40);
+    await otro.decir("si quiero", 40);
+    // Como la venta de siempre (`pickWeightedGiftText`): sin anuncio, el enlace sale sorteado entre
+    // TODOS los encendidos —también los de anuncios—. Aquí solo hay uno, así que le toca ese.
+    comprobar("el que no vino de un anuncio recibe un enlace del sorteo (como siempre)", /COMENTA-(AQUI|GENERAL)/.test(otro.todo()), otro.nuevo().slice(0, 160));
+    await otro.borrar();
+  }
+
+  // 16. «DE PALABRA» (25/10/2026): el cliente ESCRIBE su decisión en vez de tocar el botón, y dice
+  // «ya pagué» sin mandar la foto. Lo primero lo lleva igual; lo segundo no entrega nada.
+  if (toca("de_palabra")) {
+    console.log("\n· 16. «De palabra»: escribe en vez de tocar, y «ya pagué» sin comprobante");
+    sembrar({
+      fichas: [
+        { id: "i", tipo: "inicio", pais: "PE", x: 0, y: 0 },
+        { id: "up", tipo: "mensaje", x: 0, y: 0, presenta: ["pfprueba_b"], steps: [texto("OFERTA-B: ¿lo agregas?", { buttons: [boton("up_si", "Sí, lo quiero"), boton("up_no", "No, gracias")] })] },
+        cobro("cob", "pfprueba_b"),
+        { id: "no", tipo: "mensaje", x: 0, y: 0, steps: [texto("DIJO-QUE-NO")] },
+        { id: "ent", tipo: "entregar", x: 0, y: 0, producto_id: "pfprueba_b" },
+      ],
+      cables: cables([["i", "siguiente", "up"], ["up", "btn:up_si", "cob"], ["up", "btn:up_no", "no"], ["cob", "pagado", "ent"]]),
+    });
+    await esperar(3000);
+    const c = await cliente();
+    await c.decir("hola", 25);
+    comprobar("le ofrece B con sus dos botones", c.nuevo().includes("OFERTA-B"), c.nuevo().slice(0, 80));
+    await c.decir("si dale, lo quiero", 35);
+    comprobar("escribe «si dale, lo quiero»: va al cobro de B (como si tocara «Sí»)", /COBRO:.*PRODUCTO PRUEBA B/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.decir("ya te pague", 35);
+    comprobar("«ya te pagué» sin foto: no le entrega nada", !c.todo().includes(entregaB), c.nuevo().slice(0, 140));
+    comprobar("y le pide el comprobante", /comprobante|captura|foto|imagen/i.test(c.nuevo()), c.nuevo().slice(0, 160));
+    await c.borrar();
+    const d = await cliente();
+    await d.decir("hola", 25);
+    await d.decir("no gracias", 35);
+    comprobar("escribe «no gracias»: va por el «No» (como si tocara «No, gracias»)", d.nuevo().includes("DIJO-QUE-NO"), d.nuevo().slice(0, 120));
+    await d.borrar();
+  }
+
+  // 14. LA TIENDA ARMADA DESDE SU PIZARRA (25/10/2026): «si yo armase un workflow en modo Pizarra…
+  // que aparezca en modo tablero». Se traduce SU contenido de la pizarra (el de esta copia) y se vende.
+  if (toca("traducida") && R.pe15) {
+    console.log("\n· 14. La tienda armada desde su pizarra vende en el tablero");
+    const ts = require("typescript");
+    const fuente = readFileSync(join(RAIZ, "src", "lib", "tablero", "desde-la-pizarra.ts"), "utf8");
+    const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+    const { tableroDesdeLaPizarra } = await import(`data:text/javascript;base64,${Buffer.from(js).toString("base64")}`);
+    // Lo que exporta la pizarra de esta tienda (como `exportarTienda`), leído de la copia.
+    const plantilla = datos.channels?.whatsapp?.modality_templates?.lineal ?? {};
+    const suya = (x) => (x.tiendas ?? []).includes(tienda.id);
+    const fichasDeLaPizarra = [];
+    (plantilla.intro_groups ?? []).forEach((g, i) => suya(g) && fichasDeLaPizarra.push({ canal: "whatsapp", piezaId: `intro:${i}`, obj: g }));
+    (plantilla.order_bump_intro_groups ?? []).forEach((g, i) => suya(g) && fichasDeLaPizarra.push({ canal: "whatsapp", piezaId: `ob:${i}`, obj: g }));
+    (plantilla.upsell_intro_groups ?? []).forEach((g, i) => suya(g) && fichasDeLaPizarra.push({ canal: "whatsapp", piezaId: `up:${i}`, obj: g }));
+    (plantilla.followups ?? []).forEach((f, fi) => (f.variants ?? []).forEach((v, vi) => suya(v) && fichasDeLaPizarra.push({ canal: "whatsapp", piezaId: `seg:${fi}:${vi}`, obj: v })));
+    const existen = new Set((datos.biblioteca_de_productos ?? []).map((p) => p.id));
+    const nombres = Object.fromEntries((datos.biblioteca_de_productos ?? []).map((p) => [p.id, p.name]));
+    const r = tableroDesdeLaPizarra({ tienda, fichas: fichasDeLaPizarra, filaDeUpsell: (datos.filas_de_upsell ?? []).find((f) => (f.tiendas ?? []).includes(tienda.id)) }, "whatsapp", existen, plantilla.payment ?? [], nombres);
+    comprobar("se arma: un Inicio por país, sin cables rotos", r.tablero.fichas.filter((f) => f.tipo === "inicio").length > 0 && r.tablero.cables.every((c) => r.tablero.fichas.some((f) => f.id === c.de) && r.tablero.fichas.some((f) => f.id === c.a)), `${r.tablero.fichas.length} fichas, ${r.tablero.cables.length} cables`);
+    // Su básico de Perú a 15 SOLO en esta copia, para pagar con el comprobante de 15.
+    const basico = tienda.alineacion?.basico;
+    sembrar({ ...r.tablero, encendido: true });
+    {
+      const doc = YAML.parseDocument(readFileSync(ARCHIVO, "utf8"));
+      const js2 = doc.toJS();
+      doc.set("biblioteca_de_productos", js2.biblioteca_de_productos.map((p) => (p.id === basico ? { ...p, precios_por_pais: { ...(p.precios_por_pais ?? {}), PE: { price_soles: 15, discount_price_soles: 15, market_price: 45 } } } : p)));
+      writeFileSync(ARCHIVO, doc.toString({ lineWidth: 0 }));
+    }
+    await esperar(3000);
+    const intros = (plantilla.intro_groups ?? []).filter((g) => suya(g) && (g.paises ?? []).includes("PE") && g.enabled !== false);
+    const huellasDeIntro = intros.map((g) => String(g.steps?.[0]?.body_variants?.[0] ?? "").replace(/\{[^}]*\}/g, "").replace(/[*_~]/g, "").trim().slice(0, 14)).filter(Boolean);
+    const c = await cliente("PE");
+    await c.decir("hola", 45);
+    comprobar("saluda con una intro de Perú de su pizarra", huellasDeIntro.some((h) => c.nuevo().replace(/[*_~]/g, "").includes(h)), c.nuevo().slice(0, 120));
+    await c.decir("yape", 40);
+    comprobar("al decir «yape» le cobra el básico a 15", /15/.test(c.nuevo()), c.nuevo().slice(0, 160));
+    if (args.ver) console.log(`        bot dijo: ${c.nuevo().replace(/\n+/g, " ⏎ ").slice(0, 900)}`);
+    await c.foto(R.pe15, 90);
+    if (args.ver) console.log(`        bot dijo: ${c.nuevo().replace(/\n+/g, " ⏎ ").slice(0, 900)}`);
+    const entrega = String(datos.biblioteca_de_productos.find((p) => p.id === basico)?.delivery?.[0]?.body_variants?.[0] ?? "");
+    const marcaDeEntrega = (entrega.match(/PRODUCTO BASICO|https?:\/\/\S{10}/) ?? [""])[0];
+    comprobar("paga 15: le entrega su básico (la entrega de su producto)", !!marcaDeEntrega && c.nuevo().includes(marcaDeEntrega), c.nuevo().slice(0, 160));
+    await c.borrar();
   }
 } catch (e) {
   fallos++;

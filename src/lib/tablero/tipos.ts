@@ -66,6 +66,12 @@ export interface CobroDeLaFicha {
    */
   metodos?: boolean;
   /**
+   * NO VOLVER A PREGUNTAR EL MÉTODO AL LLEGAR (25/10/2026): el mensaje de antes ya lo preguntó (como
+   * las intros de la pizarra que terminan en «¿con qué método pagas?»). El cobro se abre en silencio
+   * y espera: al nombrar el método le llegan sus datos, igual que con `metodos`.
+   */
+  sin_preguntar?: boolean;
+  /**
    * EL UPGRADE: si ya compró uno más barato de los de este cobro, se cobra solo la diferencia.
    */
   diferencia?: boolean;
