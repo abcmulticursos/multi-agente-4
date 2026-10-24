@@ -202,8 +202,7 @@ export async function elegirOpcionConIA(
           content:
             "Decides cuál de las opciones ELIGIÓ el cliente con su último mensaje. Responde SOLO con el id de la opción, o con NINGUNA. " +
             "Es NINGUNA si pregunta, duda, compara, pide más información, dice que no quiere algo, o no queda claro. " +
-            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer. " +
-            "«Me quedo con X», «mejor X», «dame X» SÍ es elegir X; «el básico», «el barato», «el simple» es el más barato; «el completo», «el full», «el grande» es el más caro.",
+            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer.",
         },
         {
           role: "user",

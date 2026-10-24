@@ -910,6 +910,26 @@ Prueba: `scripts/recorrido-tablero-paises.mjs` (PE en COMO DOU con upsell y rega
 muestra, AR en COMO HOY con correo, y las desconexiones) con sus comprobantes reales.
 **No probado:** el correo real — Gmail rechazó la contraseña de aplicación que dio (535 BadCredentials).
 
+### Las tiendas de ejemplo (24/10/2026)
+
+Las pidió Alberto «para aprender» el tablero: todo lo que dice **TIENDA** en el nombre lo armó Claude.
+Son ficticias y están para probar en el simulador; él pidió NO borrarlas.
+- **TIENDA COCINA FÁCIL** (botones, 1 upsell, upgrade), **TIENDA PEQUEÑOS FELICES** (cuadritos,
+  2 upsells), **TIENDA TALLER MAESTRO** (elección escrita, 3 upsells), **TIENDA MASCOTAS FELICES**
+  (botones, 1 upsell con cuadritos, correo) y **TIENDA PEQUEÑA ESTILISTA** (venta por contribución:
+  5 PDF, 7 niveles de 12 a 69, 4 recordatorios dentro de las 24 h).
+- Cada tablero tiene 4 mantas: 🇵🇪 tubería doble oferta, 🇪🇨 order bump, 🇦🇷 lineal y 🌍 otros países
+  (no vende, pasa a un asesor). Precios hechos para sus comprobantes: PE 15/20/5, EC 3/4/3, AR 8000.
+- 20 productos nuevos con ids `pt…` (los suyos, intactos). Enlaces de entrega en example.com.
+- Número: el de su tienda GRAFISMO + una frase de entrada con el nombre de la tienda, así el
+  simulador las encuentra y en vivo solo entra quien escriba esa frase.
+- Prueba: `scripts/recorrido-tiendas-ejemplo.mjs` (vende en las 5, con sus comprobantes).
+
+**Comodines en el tablero** (`src/lib/tablero/comodines.ts`): {{PRODUCTO_BASE}}, {{PRECIO_FULL}},
+{{PRECIO_UPSELL}}… se llenan con los productos que presenta CADA ficha (el más barato = base, el más
+caro = full, el primero = producto/upsell), con el precio del país del cliente. La lista del «{{» del
+editor ya no se filtra por modalidad (el editor está siempre en lineal y escondía esos comodines).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

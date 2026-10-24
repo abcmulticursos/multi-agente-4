@@ -59,6 +59,7 @@ import {
 import { messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
 import { adjustForQuietHours, cumulativeBurstOffset, isAtOrAfterLocalTime, isQuietHour, nextLocalTime } from "@/lib/workflow/quiet-hours";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
+import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, preguntarElMetodo } from "./pago";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import {
@@ -147,6 +148,40 @@ function precioDelProducto(p: ProductoDeLaBiblioteca | null, pais: string, deOfe
   const oferta = suyo?.discount_price_soles ?? p.discount_price_soles;
   const v = deOferta && typeof oferta === "number" && oferta > 0 ? oferta : normal;
   return typeof v === "number" && v > 0 ? v : null;
+}
+
+/**
+ * LOS PRODUCTOS DE UNA FICHA, con su precio en el país del cliente, para sus comodines (ver
+ * comodines.ts). `precios` = los congelados de un cobro abierto, que mandan sobre el de hoy.
+ */
+function productosDeLaFicha(
+  config: WorkflowConfig | null,
+  ids: (string | undefined)[],
+  pais: string,
+  deOferta: boolean,
+  precios?: Record<string, number>
+): ProductoConPrecio[] {
+  const fuera: ProductoConPrecio[] = [];
+  for (const id of new Set(ids.filter((x): x is string => !!x))) {
+    const p = producto(config, id);
+    if (!p) continue;
+    const suyo = p.precios_por_pais?.[pais] as { market_price?: number } | undefined;
+    const antes = suyo?.market_price ?? (p as { market_price?: number }).market_price;
+    fuera.push({
+      id,
+      name: p.name ?? "",
+      precio: precios && id in precios ? precios[id] : precioDelProducto(p, pais, deOferta),
+      antes: typeof antes === "number" && antes > 0 ? antes : null,
+    });
+  }
+  return fuera;
+}
+
+/** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente. */
+function idsParaComodines(convoId: number, f: FichaDelTablero): string[] {
+  if (f.presenta?.length) return f.presenta;
+  const e = estadoEnElTablero(convoId);
+  return e ? presentadosDe(e) : [];
 }
 
 function pasosActivos(pasos: SequenceStep[] | undefined): SequenceStep[] {
@@ -313,6 +348,11 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
         if (v) apuntarVariante(convoId, f.id, v.id);
         pasosAEnviar = pasosActivos(v?.steps);
       }
+      pasosAEnviar = conLosComodinesDeLaFicha(
+        pasosAEnviar,
+        productosDeLaFicha(config, idsParaComodines(convoId, f), pais, estadoEnElTablero(convoId)?.oferta === 1),
+        pais
+      );
       await sendConfiguredSteps(convo, pasosAEnviar as never);
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta.
       anotarPresentados(convoId, f.presenta ?? []);
@@ -398,13 +438,19 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
       if (principal && principal !== f.cobro?.producto_id) elegirEnElCobro(convoId, principal);
       const precio = principal ? precios[principal] : undefined;
       const nombre = producto(config, principal)?.name;
+      // Sus comodines: el que se cobra primero, con los precios congelados (y la diferencia del upgrade).
+      const pasosDelCobro = conLosComodinesDeLaFicha(
+        pasosActivos(f.steps),
+        productosDeLaFicha(config, [principal, ...Object.keys(precios)], pais, deOferta, precios),
+        pais
+      );
       if (f.cobro?.metodos) {
         // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése.
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo);
         if (yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre))) {
           // (los datos ya salieron)
-        } else await preguntarElMetodo(convo, pasosActivos(f.steps) as never, precio, nombre);
-      } else await sendConfiguredSteps(convo, pasosActivos(f.steps) as never, precio);
+        } else await preguntarElMetodo(convo, pasosDelCobro as never, precio, nombre);
+      } else await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
       void sendInitiateCheckoutEvent({
         conversationId: convoId,
         userData: buildMessagingUserData({
@@ -1191,8 +1237,16 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           const nombre = producto(config, decide)?.name;
           const yaElegido = metodoVigente(getConversationById(convo.id) ?? convo);
           console.log(`[tablero] convo ${convo.id}: cambia a «${nombre ?? decide}» en el cobro`);
+          // Sin método aún: SUS burbujas del cobro con el nuevo producto y su precio (24/10/2026: solo
+          // le llegaba el menú de métodos y no se enteraba de que ya era el otro ni de cuánto costaba).
+          const pais = getEffectiveCountryCode(convo.phone, config);
+          const pasos = conLosComodinesDeLaFicha(
+            pasosActivos(cobro.steps),
+            productosDeLaFicha(config, [decide, ...Object.keys(precios)], pais, false, precios),
+            pais
+          );
           if (!yaElegido || !(await mandarDatosDelMetodo(convo, yaElegido, precios[decide], nombre)))
-            await preguntarElMetodo(convo, [], precios[decide], nombre);
+            await preguntarElMetodo(convo, pasos as never, precios[decide], nombre);
           return true;
         }
       }
@@ -1437,7 +1491,14 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
     const v = sortear<VarianteDeFicha>(seg.variantes);
     if (v) {
       apuntarVariante(convo.id, `${ficha}#${idx}`, v.id);
-      await sendConfiguredSteps(fresca, pasosActivos(v.steps) as never);
+      const paisSeg = getEffectiveCountryCode(fresca.phone, loadWorkflowConfig());
+      const pasosSeg = conLosComodinesDeLaFicha(
+        pasosActivos(v.steps),
+        // El que activa la oferta ya habla con el precio de oferta.
+        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
+        paisSeg
+      );
+      await sendConfiguredSteps(fresca, pasosSeg as never);
     }
     if (seg.activa_oferta) activarOferta(convo.id);
     // Lo que este seguimiento presenta, desde ahora la IA lo puede contar.

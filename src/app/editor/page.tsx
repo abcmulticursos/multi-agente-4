@@ -1221,111 +1221,14 @@ function normalizePlaceholderKey(value: string): string {
 }
 
 function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption[] {
-  const mode = cfg ? activeModality(cfg) : null;
-  // CADA MODALIDAD VE LOS SUYOS.
-  //
-  // Ofrecer un comodín donde no significa nada es invitar a escribirlo, y el
-  // día que sale al cliente sale VACÍO. No se rompe: se queda la frase a
-  // medias, que es peor porque nadie lo nota.
-  //
-  // Comodines de las modalidades con DOS opciones. En Lineal y en Upsell no hay
-  // dos opciones que comparar, así que ninguno de estos tiene con qué llenarse.
-  const SOLO_DOS_OPCIONES =
-    /\{\{\s*(PRODUCTO2|PRODUCT2|PRODUCTO_SECUNDARIO|PRODUCTO_COMPLEMENTARIO|PRODUCTO_1|PRODUCT_1|OPCION_1|OPTION_1|PRECIO_1|PRICE_1|PRODUCTO_2|PRODUCT_2|OPCION_2|OPTION_2|PRECIO_2|PRICE_2|PRECIO_EXTRA|PRICE_EXTRA|OPCION_ELEGIDA|PRECIO_OPCION_ELEGIDA|PRECIO_SEGUN_ELECCION|PRECIO_PRE_ELECCION|MONTO_FALTANTE|MONTO_ABONADO|PRECIO_MERCADO_BASICO|PRECIO_MERCADO_FULL|PRECIO_BASE|PRECIO_FULL|PRECIO_ANTES_BASE|PRECIO_ANTES_FULL|PRECIO_DIFERENCIA|PRECIO_COMPLEMENTARIO)/i;
-  // Los alias PRODUCTO_1/PRODUCTO_2 son nombres de Order Bump para las opciones,
-  // y el precio extra es la diferencia entre combo y básico, que en "Doble
-  // Oferta + Upsell" no se anuncia.
-  const SOLO_ORDER_BUMP =
-    /\{\{\s*(PRODUCTO_1|PRODUCT_1|PRODUCTO_2|PRODUCT_2|PRECIO_EXTRA|PRICE_EXTRA|PRECIO_ADICIONAL|PRECIO_DIFERENCIA|PRECIO_COMPLEMENTARIO)/i;
-  // El del tercer producto solo tiene sentido donde ese producto existe: en
-  // "Doble Oferta + Upsell" y en "Upsell". Antes también se escondía en Upsell
-  // —la modalidad que se llama así— y eso obligaba a escribir su precio a mano
-  // en cada burbuja, con lo que se queda viejo el día que cambia el precio.
-  const SOLO_CON_UPSELL =
-    /\{\{\s*(PRECIO_UPSELL|PRODUCTO_UPSELL|PRECIO_MERCADO_UPSELL|PRECIO_ANTES_UPSELL)/i;
-
-  // LOS PRODUCTOS, CON EL NOMBRE QUE TIENEN EN CADA MODALIDAD.
-  //
-  // Cada modalidad guarda su propio producto (modality_templates), así que el
-  // dato ya es suyo. Lo que no lo era es el NOMBRE: {{PRODUCTO}} quiere decir
-  // "el producto de la modalidad activa", y en Doble Oferta + Upsell eso es el
-  // FULL mientras que en Order Bump es el básico. Había que traducirlo de
-  // cabeza cada vez, y así se llena el cajón equivocado.
-  //
-  // Las DOS modalidades que tienen básico y full —Order Bump y Doble Oferta +
-  // Upsell— ofrecen los mismos nombres: {{PRODUCTO_BASE}} y {{PRODUCTO_FULL}},
-  // y esconden los genéricos. Están empatados: se escriben igual en las dos y
-  // cada una devuelve SU producto, así que copiar un texto de una a otra ya no
-  // cambia de producto ni obliga a traducir el nombre.
-  //
-  // El COMPLEMENTARIO solo se ofrece en Order Bump, que es la única donde hay
-  // algo que sumarle al básico. En las demás sale en blanco, así que ofrecerlo
-  // sería mandar a usar una herramienta que no hace nada.
-  //
-  // En el resto de modalidades se esconden los tres: ahí "base", "full" y
-  // "complementario" no significan nada y ofrecerlos sería el error al revés.
-  const NOMBRES_DE_ESTA_MODALIDAD =
-    mode === "order_bump"
-      ? new Set(["{{PRODUCTO}}", "{{PRODUCTO_SECUNDARIO}}"])
-      : mode === "doble_oferta_upsell"
-        ? new Set([
-            "{{PRODUCTO}}",
-            "{{PRODUCTO_SECUNDARIO}}",
-            "{{PRODUCTO_COMPLEMENTARIO}}",
-          ])
-        : // LINEAL Y UPSELL: AQUÍ SÍ SE OFRECE {{PRODUCTO_BASE}}.
-          //
-          // Con un solo producto, «el barato» y «el caro» son él, así que los
-          // tres nombres dan lo mismo y el comodín ya no sale en blanco. Se
-          // ofrece para no obligar a escribir los textos dos veces: unos con
-          // {{PRODUCTO}} para Lineal y otros con {{PRODUCTO_BASE}} para las de
-          // dos opciones, diciendo exactamente lo mismo.
-          //
-          // El COMPLEMENTARIO se sigue escondiendo: ese no existe fuera de Order
-          // Bump y ahí sí saldría en blanco.
-          mode === "lineal" || mode === "upsell"
-          ? new Set(["{{PRODUCTO_COMPLEMENTARIO}}"])
-          : new Set([
-              "{{PRODUCTO_FULL}}",
-              "{{PRODUCTO_BASE}}",
-              "{{PRODUCTO_COMPLEMENTARIO}}",
-            ]);
-  // El precio "a secas" y su «antes» son los de un producto único. Donde hay
-  // dos opciones, ese producto es el base y ya tiene sus propios comodines
-  // ({{PRECIO_BASE}}, {{PRECIO_ANTES_BASE}}): ofrecer los dos juegos para el
-  // mismo dato es justo lo que hacía imposible elegir.
-  const DE_UN_SOLO_PRODUCTO = new Set([
-    "{{PRECIO_COMPLETO}}",
-    "{{PRECIO_COMPLETO_MAYUSCULAS}}",
-    "{{PRECIO_COMPLETO_MINUSCULAS}}",
-    "{{PRECIO_MERCADO}}",
-  ]);
-  const sobranAqui =
-    mode === "lineal" || mode === "upsell"
-      ? new Set<string>()
-      : DE_UN_SOLO_PRODUCTO;
-  // Los ocultos no se ofrecen en ninguna modalidad. Siguen funcionando si ya
-  // están escritos; solo dejan de proponerse para textos nuevos.
-  const visibles = BASE_PLACEHOLDER_OPTIONS.filter(
-    (option) =>
-      !option.oculto &&
-      !NOMBRES_DE_ESTA_MODALIDAD.has(option.token) &&
-      !sobranAqui.has(option.token)
-  );
-  const base =
-    mode === "lineal"
-      ? visibles.filter(
-          (option) =>
-            !SOLO_DOS_OPCIONES.test(option.token) &&
-            !SOLO_CON_UPSELL.test(option.token)
-        )
-      : mode === "upsell"
-        ? visibles.filter((option) => !SOLO_DOS_OPCIONES.test(option.token))
-        : mode === "doble_oferta_upsell"
-          ? visibles.filter((option) => !SOLO_ORDER_BUMP.test(option.token))
-          : visibles.filter(
-              (option) => !SOLO_CON_UPSELL.test(option.token)
-            );
+  // TODOS, SIN FILTRO DE MODALIDAD (24/10/2026). Lo vio el dueño: «no aparecen todos los
+  // comodines». Antes cada modalidad veía solo los suyos, pero el editor está siempre en lineal (la
+  // semimodalidad se elige en la tienda) y ese filtro escondía los de básico, full y upsell que sus
+  // tiendas de doble oferta y order bump sí usan, y que el tablero llena con los productos de cada
+  // ficha (ver tablero/comodines.ts). La descripción de cada uno ya dice dónde se llena.
+  // Los ocultos siguen fuera: son alias repetidos y formas viejas de la moneda, y siguen
+  // funcionando si ya están escritos.
+  const base = BASE_PLACEHOLDER_OPTIONS.filter((option) => !option.oculto);
   const custom = (cfg?.custom_placeholders ?? [])
     .map((item) => {
       const key = normalizePlaceholderKey(item.key ?? "");
