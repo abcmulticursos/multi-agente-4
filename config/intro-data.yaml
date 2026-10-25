@@ -121178,55 +121178,6 @@ tableros:
             acepta:
               - ptmascotas_pack
             metodos: true
-        - id: mas_pe_seg_b
-          tipo: seguimientos
-          x: 1163
-          y: 376
-          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
-          presenta:
-            - ptmascotas_comida
-          seguimientos:
-            - id: mas_pe_seg_b_1
-              minutos: 120
-              variantes:
-                - id: mas_pe_seg_b_1a
-                  nombre: Versión A
-                  peso: 1
-                  steps:
-                    - type: text
-                      body_variants:
-                        - |-
-                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
-
-                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
-                      delay_after_sec: 4
-                - id: mas_pe_seg_b_1b
-                  nombre: Versión B
-                  peso: 1
-                  steps:
-                    - type: text
-                      body_variants:
-                        - |-
-                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
-
-                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
-                      delay_after_sec: 4
-            - id: mas_pe_seg_b_2
-              minutos: 600
-              variantes:
-                - id: mas_pe_seg_b_2a
-                  nombre: Versión A
-                  peso: 1
-                  steps:
-                    - type: text
-                      body_variants:
-                        - |-
-                          Paso rapidito por aquí ✨
-
-                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
-
-                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
-                      delay_after_sec: 4
         - id: mas_pe_cobro_p
           tipo: cobro
           x: 789
@@ -121251,8 +121202,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_p
           tipo: seguimientos
-          x: 1178
-          y: 742
+          x: 1199
+          y: 716
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121271,6 +121222,13 @@ tableros:
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
                       delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
                 - id: mas_pe_seg_p_1b
                   nombre: Versión B
                   peso: 1
@@ -121298,6 +121256,13 @@ tableros:
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
         - id: mas_pe_ent_b
           tipo: entregar
           x: 2020
@@ -122123,8 +122088,8 @@ tableros:
           titulo: Pasa a un asesor
         - id: mas_pe_caja
           tipo: cobro
-          x: 828
-          y: 1162
+          x: 827
+          y: 1087
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122197,10 +122162,6 @@ tableros:
           de: mas_pe_intro
           salida: btn:mas_pe_b_basico
           a: mas_pe_cobro_b
-        - id: c3
-          de: mas_pe_cobro_b
-          salida: sin_pago
-          a: mas_pe_seg_b
         - id: c4
           de: mas_pe_intro
           salida: btn:mas_pe_b_pack
@@ -122393,10 +122354,6 @@ tableros:
           de: mas_pe_caja
           salida: prod:ptmascotas_pack
           a: mas_pe_ent_p
-        - id: mas_pe_caja_sin_pago
-          de: mas_pe_caja
-          salida: sin_pago
-          a: mas_pe_seg_b
         - id: mas_ec_caja_pagado
           de: mas_ec_caja
           salida: pagado
@@ -122441,6 +122398,14 @@ tableros:
           de: mas_ar_seg_u1
           salida: fin
           a: mas_ar_regalo
+        - id: c-mvnlw5to-06q
+          de: mas_pe_caja
+          salida: sin_pago
+          a: mas_pe_seg_p
+        - id: c-mvnlwdhg-90u
+          de: mas_pe_cobro_b
+          salida: sin_pago
+          a: mas_pe_seg_p
       curvas:
         c3:
           x: 121
