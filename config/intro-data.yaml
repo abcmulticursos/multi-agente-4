@@ -121433,6 +121433,8 @@ tableros:
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: mas_pe_seg_u1_2
               minutos: 600
               variantes:
@@ -121449,6 +121451,8 @@ tableros:
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
         - id: mas_pe_ent_u1
           tipo: entregar
           x: 3414
@@ -121631,6 +121635,8 @@ tableros:
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: mas_ec_seg_b_2
               minutos: 600
               variantes:
@@ -121654,6 +121660,8 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
         - id: mas_ec_cobro_p
           tipo: cobro
           x: 1579
