@@ -121171,7 +121171,7 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 60
+          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_comida
@@ -121193,7 +121193,7 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 60
+          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_pack
@@ -121300,8 +121300,8 @@ tableros:
                       delay_after_sec: 6
         - id: mas_pe_ent_b
           tipo: entregar
-          x: 2123
-          y: 758
+          x: 2110
+          y: 779
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_pe_ent_p
