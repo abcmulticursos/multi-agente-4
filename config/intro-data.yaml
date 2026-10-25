@@ -122760,8 +122760,8 @@ tableros:
           sin_respuesta_min: 3
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
-          x: 3402
-          y: 3571
+          x: 3394
+          y: 3488
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122780,8 +122780,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-92jl4
           tipo: entregar
-          x: 3826
-          y: 3657
+          x: 3805
+          y: 3543
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
@@ -122953,8 +122953,8 @@ tableros:
           sin_respuesta_min: 3
         - id: f-mvnq43x5-que6q
           tipo: cobro
-          x: 3318
-          y: 4640
+          x: 3331
+          y: 4566
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122973,8 +122973,8 @@ tableros:
             metodos: true
         - id: f-mvnq6181-losm1
           tipo: entregar
-          x: 3741
-          y: 4763
+          x: 3782
+          y: 4617
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnq6s0x-ooeg
@@ -123380,6 +123380,18 @@ tableros:
         - id: c-mvo5pdz2-k7k
           de: f-mvnq6181-losm1
           salida: siguiente
+          a: f-mvnq83le-l5tfb
+        - id: c-mvo5zb4z-cld
+          de: f-mvnpmsvw-jxg9n
+          salida: sin_respuesta
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvo5zsyr-6ip
+          de: f-mvnq2nch-l7c8p
+          salida: sin_respuesta
+          a: f-mvnq83le-l5tfb
+        - id: c-mvo6058b-jfa
+          de: f-mvnq43x5-que6q
+          salida: sin_pago
           a: f-mvnq83le-l5tfb
       curvas:
         c3:
