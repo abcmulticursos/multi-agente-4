@@ -256,6 +256,13 @@ try {
     comprobar("Perú: calla tras la intro → a los 2 min, su seguimiento", SEG.test(pe.nuevo()), pe.nuevo().slice(0, 120));
     const h1 = await sinPisar(pe, SEG);
     comprobar("y llega después de la intro, sin pisarla", h1.ok, `${h1.hueco ?? "?"} s tras el mensaje anterior`);
+    // EN MEDIO DE LOS SEGUIMIENTOS SE PUEDE PAGAR: la caja quedó abierta (en silencio) al no responder.
+    await pe.decir("yape", 30);
+    comprobar("contesta «yape» a un seguimiento: le llegan su cuenta y el precio", cifras(pe.nuevo()).includes(cuenta("PE", "yape")) && /15/.test(pe.nuevo()), pe.nuevo().slice(0, 140));
+    if (R.pe15) {
+      await pe.foto(R.pe15, 80);
+      comprobar("y paga 15: le entrega DIETAS FIT", pe.nuevo().includes(entregaDe("dietas-fit")), pe.nuevo().slice(0, 140));
+    }
     await pe.borrar();
     const ec = await cliente("tienda_tcocina", "EC");
     await ec.decir("hola", 30);

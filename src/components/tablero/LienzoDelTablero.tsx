@@ -645,6 +645,17 @@ export default function LienzoDelTablero({
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
   const [menuMas, setMenuMas] = useState(false);
+  // EL «+» SE CIERRA AL HACER CLIC FUERA (25/10/2026): «solo se colapsa presionando nuevamente el +».
+  // (Con Escape también: ver el teclado, más abajo.)
+  const cajaDelMas = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuMas) return;
+    const fuera = (e: PointerEvent) => {
+      if (cajaDelMas.current && !cajaDelMas.current.contains(e.target as globalThis.Node | null)) setMenuMas(false);
+    };
+    document.addEventListener("pointerdown", fuera, true);
+    return () => document.removeEventListener("pointerdown", fuera, true);
+  }, [menuMas]);
   const t = TEMA[tema];
 
   const cambiar = (n: TableroEnElEditor) => onCambiar(n);
@@ -844,10 +855,18 @@ export default function LienzoDelTablero({
         if (!portapapeles) return;
         const minX = Math.min(...portapapeles.fichas.map((f) => f.x));
         const minY = Math.min(...portapapeles.fichas.map((f) => f.y));
-        const c = centroDeLaVista();
-        const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, { x: c.x - minX, y: c.y - minY });
+        // A LA DERECHA DE TODO, SIN CAER ENCIMA (25/10/2026): «se están superponiendo sobre elementos
+        // existentes, debería estar fuera del área, a la derecha… que mantenga su estructura y
+        // cableado». La copia conserva su forma (cada ficha en su sitio relativo) y sus cables de dentro.
+        const enElLienzo = actual.fichas.filter((f) => !f.guardada);
+        const derecha = enElLienzo.length ? Math.max(...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250))) + 200 : centroDeLaVista().x;
+        const arriba = enElLienzo.length ? Math.min(...enElLienzo.map((f) => f.y)) : centroDeLaVista().y;
+        const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, { x: derecha - minX, y: arriba - minY });
         cambiar({ ...actual, fichas: [...actual.fichas, ...copia.fichas], cables: [...actual.cables, ...copia.cables] });
-        setAviso(`${copia.fichas.length} ficha(s) pegada(s), con sus cables de dentro. Quedan sin conectar.`);
+        setAviso(`${copia.fichas.length} ficha(s) pegada(s) a la derecha, con su forma y sus cables de dentro. Quedan sin conectar.`);
+        // La vista va hasta ellas.
+        const ids = copia.fichas.map((f) => ({ id: f.id }));
+        window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
         e.preventDefault();
       } else if (tecla === "delete" || tecla === "backspace") {
         if (cajaElegida) {
@@ -896,7 +915,7 @@ export default function LienzoDelTablero({
         numeros,
       }}
     >
-      <div className="relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
+      <div className="lienzo-del-tablero relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
         <ReactFlow
           nodes={nodosVistos}
           edges={
@@ -976,6 +995,8 @@ export default function LienzoDelTablero({
           }}
           connectionLineStyle={{ stroke: "#f97316", strokeWidth: 2.5, strokeDasharray: "6 6" }}
           deleteKeyCode={null}
+          // Como la pizarra: con fondo oscuro, los recuadros de selección y los controles en oscuro.
+          colorMode={tema === "oscuro" ? "dark" : "light"}
           // El doble clic abre la ficha; no acerca el lienzo (se comía el doble clic de las cajas).
           zoomOnDoubleClick={false}
           // COMO EN LA PIZARRA: Shift + arrastrar en el vacío dibuja el recuadro (arrastrar sin Shift
@@ -1001,7 +1022,7 @@ export default function LienzoDelTablero({
             modo automático». Lo demás se abre al pulsarlos. */}
         <div className="absolute left-3 top-3 z-20 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {antesDelMas}
-          <div className="relative">
+          <div className="relative" ref={cajaDelMas}>
             <button
               type="button"
               onClick={() => setMenuMas((v) => !v)}

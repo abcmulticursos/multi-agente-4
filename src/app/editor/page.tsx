@@ -30799,6 +30799,23 @@ function PantallaDelTablero({
   // EL BUSCADOR EN LA BARRA y el ☰ HERRAMIENTAS, como en la pizarra (24/10/2026).
   const [buscar, setBuscar] = useState("");
   const [menuHerramientas, setMenuHerramientas] = useState(false);
+  // ESCAPE O UN CLIC AFUERA CIERRAN EL ☰ (25/10/2026), como en la pizarra (`refDeHerramientas`).
+  const refDeHerramientasDelTablero = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuHerramientas) return;
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuHerramientas(false);
+    };
+    const alPulsar = (e: PointerEvent) => {
+      if (!refDeHerramientasDelTablero.current?.contains(e.target as globalThis.Node | null)) setMenuHerramientas(false);
+    };
+    window.addEventListener("keydown", alTeclear);
+    window.addEventListener("pointerdown", alPulsar);
+    return () => {
+      window.removeEventListener("keydown", alTeclear);
+      window.removeEventListener("pointerdown", alPulsar);
+    };
+  }, [menuHerramientas]);
   const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "prueba" | "pagos" | "anuncios" | "exportar">(null);
   const [regaloAbierto, setRegaloAbierto] = useState<string | null>(null);
   const [avisoDelTablero, setAvisoDelTablero] = useState<string | null>(null);
@@ -31130,7 +31147,7 @@ function PantallaDelTablero({
             </button>
           }
           despuesDelMas={
-            <div className="relative">
+            <div className="relative" ref={refDeHerramientasDelTablero}>
               <button
                 type="button"
                 onClick={() => setMenuHerramientas((v) => !v)}

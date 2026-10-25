@@ -572,6 +572,17 @@ input,
   pointer-events: none !important;
 }
 
+/* LO ELEGIDO EN EL TABLERO, BIEN VISIBLE (25/10/2026): «el recuadro que muestra los elementos
+   seleccionados es demasiado tenue; en el modo pizarra es más clara y notoria». El recuadro que se
+   arrastra con Shift y la zona de lo ya elegido, con borde celeste y relleno que se ven en claro y
+   en oscuro. */
+.lienzo-del-tablero .react-flow__selection,
+.lienzo-del-tablero .react-flow__nodesselection-rect {
+  background: rgba(14, 165, 233, 0.14) !important;
+  border: 2px dashed #0ea5e9 !important;
+  border-radius: 8px;
+}
+
 /* EL MINIMAPA, SIEMPRE EN SU ESQUINA Y SIN ATRAPAR EL RATÓN (19/10/2026). */
 .react-flow__panel.react-flow__minimap {
   pointer-events: none !important;
