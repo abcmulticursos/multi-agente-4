@@ -121210,7 +121210,7 @@ tableros:
             - ptmascotas_comida
           seguimientos:
             - id: mas_pe_seg_p_1
-              minutos: 120
+              minutos: 2
               variantes:
                 - id: mas_pe_seg_p_1a
                   nombre: Versión A
@@ -121276,7 +121276,7 @@ tableros:
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
             - id: mas_pe_seg_p_2
-              minutos: 600
+              minutos: 5
               variantes:
                 - id: mas_pe_seg_p_2a
                   nombre: Versión A
