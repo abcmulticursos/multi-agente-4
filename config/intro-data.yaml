@@ -123287,10 +123287,6 @@ tableros:
               - ptmascotas_comida
             metodos: true
       cables:
-        - id: c1
-          de: mas_pe_inicio
-          salida: siguiente
-          a: mas_pe_intro
         - id: c2
           de: mas_pe_intro
           salida: btn:mas_pe_b_basico
@@ -123679,10 +123675,6 @@ tableros:
           de: f-mvnpmsvw-p7yu2
           salida: sin_pago
           a: f-mvnpmsvw-u9oq3
-        - id: c-mvo6b8cx-x8e
-          de: mas_ec_inicio
-          salida: siguiente
-          a: f-mvnpmsvw-ph32e
         - id: c-mvo7evwe-kgx
           de: f-mvnpmsvw-ph32e
           salida: dec:b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
