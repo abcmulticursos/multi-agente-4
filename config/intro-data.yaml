@@ -121081,14 +121081,14 @@ tableros:
       fichas:
         - id: mas_pe_inicio
           tipo: inicio
-          x: 60
-          y: 0
+          x: 34
+          y: -266
           titulo: Tubería doble oferta
           pais: PE
         - id: mas_pe_intro
           tipo: mensaje
-          x: 380
-          y: -23
+          x: 354
+          y: -289
           titulo: Intro
           steps:
             - type: text
@@ -121158,8 +121158,8 @@ tableros:
           sin_respuesta_min: 30
         - id: mas_pe_cobro_b
           tipo: cobro
-          x: 769
-          y: -38
+          x: 791
+          y: -381
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121180,8 +121180,8 @@ tableros:
             metodos: true
         - id: mas_pe_cobro_p
           tipo: cobro
-          x: 789
-          y: 475
+          x: 763
+          y: 209
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -121202,8 +121202,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_p
           tipo: seguimientos
-          x: 1217
-          y: 838
+          x: 1160
+          y: -129
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121326,20 +121326,20 @@ tableros:
               ignora_tardio: true
         - id: mas_pe_ent_b
           tipo: entregar
-          x: 2110
-          y: 779
+          x: 2084
+          y: 513
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_pe_ent_p
           tipo: entregar
-          x: 2114
-          y: 603
+          x: 2088
+          y: 337
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_pe_upsell1
           tipo: mensaje
-          x: 2411
-          y: 94
+          x: 2466
+          y: 38
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121386,8 +121386,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_pe_cobro_u1
           tipo: cobro
-          x: 2794
-          y: 348
+          x: 2768
+          y: 82
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121406,8 +121406,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_u1
           tipo: seguimientos
-          x: 2710
-          y: 757
+          x: 2684
+          y: 491
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121459,14 +121459,14 @@ tableros:
               ignora_tardio: true
         - id: mas_pe_ent_u1
           tipo: entregar
-          x: 3414
-          y: 498
+          x: 3388
+          y: 232
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_pe_regalo
           tipo: regalo
-          x: 3663
-          y: 8
+          x: 3637
+          y: -258
           titulo: Regalo
         - id: mas_ec_inicio
           tipo: inicio
@@ -122171,8 +122171,8 @@ tableros:
           titulo: Pasa a un asesor
         - id: mas_pe_caja
           tipo: cobro
-          x: 827
-          y: 1087
+          x: 768
+          y: 822
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122236,6 +122236,266 @@ tableros:
             producto_id: ptmascotas_comida
             metodos: true
             sin_preguntar: true
+        - id: f-mvnp4een-2cqak
+          tipo: seguimientos
+          x: 1163
+          y: 481
+          titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
+          presenta:
+            - ptmascotas_pack
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvnp4eeo-iyfq5
+              minutos: 2
+              variantes:
+                - id: v-mvnp4eeo-n0dk3
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola! 👋🏼 Quería compartirte esto rápido ⚡
+
+                          Muchos emprendedores como vos ya están usando el pack para vender más y ahorrar horas de diseño. Mira sus comentarios 💬👇
+
+                          🎁 Recordá que podés llevarte +3.000 plantillas editables desde solo *{{PRECIO_BASE}}*
+
+                          ¿Querés que te guarde tu acceso antes de que termine la promo? 📲🔥
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
+                      buttons:
+                        - id: b-mvnp4eeo-npaie
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: b-mvnp4eeo-rs56i
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
+                - id: v-mvnp4eeo-1wf83
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvnp4eeo-x5vyr
+              minutos: 5
+              variantes:
+                - id: v-mvnp4eeo-tu8iv
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
+                      buttons:
+                        - id: b-mvnp4eeo-aexdq
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: b-mvnp4eeo-y4ghr
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvnp5qv3-3x1h7
+          tipo: seguimientos
+          x: 1264
+          y: 1080
+          titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
+          presenta:
+            - ptmascotas_pack
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvnp5qv3-vuaie
+              minutos: 2
+              variantes:
+                - id: v-mvnp5qv3-xyrc5
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola! 👋🏼 Quería compartirte esto rápido ⚡
+
+                          Muchos emprendedores como vos ya están usando el pack para vender más y ahorrar horas de diseño. Mira sus comentarios 💬👇
+
+                          🎁 Recordá que podés llevarte +3.000 plantillas editables desde solo *{{PRECIO_BASE}}*
+
+                          ¿Querés que te guarde tu acceso antes de que termine la promo? 📲🔥
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
+                      buttons:
+                        - id: b-mvnp5qv3-i74gx
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: b-mvnp5qv3-cjkzi
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
+                - id: v-mvnp5qv3-n1axw
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvnp5qv3-h2mei
+              minutos: 5
+              variantes:
+                - id: v-mvnp5qv3-zqtb0
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          Elige tu método de pago favorito
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
+                      buttons:
+                        - id: b-mvnp5qv3-fcbe4
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: b-mvnp5qv3-did8x
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvnp6uw7-amghp
+          tipo: entregar
+          x: 1919
+          y: -180
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
+        - id: f-mvnp7cc7-k3s0b
+          tipo: entregar
+          x: 1915
+          y: -363
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -122249,18 +122509,6 @@ tableros:
           de: mas_pe_intro
           salida: btn:mas_pe_b_pack
           a: mas_pe_cobro_p
-        - id: c5
-          de: mas_pe_cobro_p
-          salida: sin_pago
-          a: mas_pe_seg_p
-        - id: c6
-          de: mas_pe_cobro_b
-          salida: pagado
-          a: mas_pe_ent_b
-        - id: c7
-          de: mas_pe_cobro_b
-          salida: prod:ptmascotas_pack
-          a: mas_pe_ent_p
         - id: c8
           de: mas_pe_cobro_p
           salida: pagado
@@ -122481,32 +122729,56 @@ tableros:
           de: mas_ar_seg_u1
           salida: fin
           a: mas_ar_regalo
-        - id: c-mvnlw5to-06q
-          de: mas_pe_caja
-          salida: sin_pago
-          a: mas_pe_seg_p
         - id: c-mvnlwdhg-90u
           de: mas_pe_cobro_b
           salida: sin_pago
           a: mas_pe_seg_p
-        - id: c-mvnnary3-8mx
-          de: mas_pe_seg_p
-          salida: btn:7936ca87-12ab-4657-91d2-d5c00f6c5779
-          a: mas_pe_ent_p
-        - id: c-mvnnatr7-pbw
-          de: mas_pe_seg_p
-          salida: btn:b7e241da-e903-497c-a86a-9fce0084e26f
-          a: mas_pe_ent_b
+        - id: c-mvnp56ih-rbh
+          de: mas_pe_cobro_p
+          salida: sin_pago
+          a: f-mvnp4een-2cqak
+        - id: c-mvnp5vhb-h6a
+          de: mas_pe_caja
+          salida: sin_pago
+          a: f-mvnp5qv3-3x1h7
+        - id: c-mvnp7mo7-aal
+          de: mas_pe_cobro_b
+          salida: pagado
+          a: f-mvnp7cc7-k3s0b
+        - id: c-mvnp7qw6-myo
+          de: mas_pe_cobro_b
+          salida: prod:ptmascotas_pack
+          a: f-mvnp6uw7-amghp
+        - id: c-mvnp7wc7-a3d
+          de: f-mvnp6uw7-amghp
+          salida: siguiente
+          a: mas_pe_upsell1
+        - id: c-mvnp7y26-li8
+          de: f-mvnp7cc7-k3s0b
+          salida: siguiente
+          a: mas_pe_upsell1
       curvas:
         c3:
           x: 121
           y: 96
+        c7:
+          x: 30
+          y: -112
+        c6:
+          x: 159
+          y: -124
+        mas_pe_caja_pagado:
+          x: 19
+          y: 54
+        mas_pe_caja_prod_ptmascotas_pack:
+          x: 67
+          y: 10
       cajas:
         - id: manta-mas_pe_inicio
-          x: 20
-          y: -70
-          ancho: 4098
-          alto: 1541
+          x: -61
+          y: -657
+          ancho: 4179
+          alto: 2128
           titulo: ""
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
