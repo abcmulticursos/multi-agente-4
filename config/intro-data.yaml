@@ -121326,14 +121326,14 @@ tableros:
               ignora_tardio: true
         - id: mas_pe_ent_b
           tipo: entregar
-          x: 2084
-          y: 513
+          x: 2088
+          y: 578
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_pe_ent_p
           tipo: entregar
-          x: 2088
-          y: 337
+          x: 2093
+          y: 380
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_pe_upsell1
@@ -121386,8 +121386,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_pe_cobro_u1
           tipo: cobro
-          x: 2768
-          y: 82
+          x: 2903
+          y: 276
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121406,8 +121406,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_u1
           tipo: seguimientos
-          x: 3058
-          y: 389
+          x: 3373
+          y: 413
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121459,14 +121459,14 @@ tableros:
               ignora_tardio: true
         - id: mas_pe_ent_u1
           tipo: entregar
-          x: 3073
-          y: 143
+          x: 3257
+          y: 136
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_pe_regalo
           tipo: regalo
-          x: 3637
-          y: -258
+          x: 3777
+          y: -220
           titulo: Regalo
         - id: mas_ec_inicio
           tipo: inicio
@@ -122238,8 +122238,8 @@ tableros:
             sin_preguntar: true
         - id: f-mvnp4een-2cqak
           tipo: seguimientos
-          x: 1163
-          y: 481
+          x: 1102
+          y: 487
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -122786,8 +122786,8 @@ tableros:
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 3891
-          y: 4024
+          x: 4343
+          y: 3834
           titulo: Regalo
         - id: f-mvnpmsvw-pozfa
           tipo: cobro
@@ -122893,14 +122893,14 @@ tableros:
               ignora_tardio: true
         - id: f-mvnq00lf-oig8l
           tipo: entregar
-          x: 1734
-          y: 4640
+          x: 1920
+          y: 4569
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnq00lf-586io
           tipo: entregar
-          x: 1743
-          y: 4778
+          x: 1986
+          y: 4831
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnq2nch-l7c8p
@@ -122988,8 +122988,8 @@ tableros:
               delay_after_sec: 6
         - id: f-mvnq83le-l5tfb
           tipo: regalo
-          x: 3821
-          y: 5197
+          x: 4205
+          y: 4929
           titulo: Regalo
         - id: f-mvnq83le-lscae
           tipo: mensaje
@@ -123357,6 +123357,30 @@ tableros:
           de: f-mvnq2nch-l7c8p
           salida: dec:d-mvnq2nch-d9bml
           a: f-mvnq83le-lscae
+        - id: c-mvo5kgcx-a9a
+          de: mas_pe_seg_p
+          salida: btn:b7e241da-e903-497c-a86a-9fce0084e26f
+          a: f-mvnp7cc7-k3s0b
+        - id: c-mvo5km4p-xdf
+          de: mas_pe_seg_p
+          salida: btn:7936ca87-12ab-4657-91d2-d5c00f6c5779
+          a: f-mvnp6uw7-amghp
+        - id: c-mvo5mbvs-rhr
+          de: f-mvnp4een-2cqak
+          salida: btn:b-mvnp4eeo-rs56i
+          a: mas_pe_ent_p
+        - id: c-mvo5meno-lpx
+          de: f-mvnp4een-2cqak
+          salida: btn:b-mvnp4eeo-aexdq
+          a: mas_pe_ent_b
+        - id: c-mvo5p3e6-zlu
+          de: f-mvnpmsvw-92jl4
+          salida: siguiente
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvo5pdz2-k7k
+          de: f-mvnq6181-losm1
+          salida: siguiente
+          a: f-mvnq83le-l5tfb
       curvas:
         c3:
           x: 121
