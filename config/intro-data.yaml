@@ -121406,8 +121406,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_u1
           tipo: seguimientos
-          x: 2684
-          y: 491
+          x: 3058
+          y: 389
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121459,8 +121459,8 @@ tableros:
               ignora_tardio: true
         - id: mas_pe_ent_u1
           tipo: entregar
-          x: 3388
-          y: 232
+          x: 3073
+          y: 143
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_pe_regalo
@@ -121579,8 +121579,8 @@ tableros:
           sin_respuesta_min: 1
         - id: mas_ec_cobro_b
           tipo: cobro
-          x: 1438
-          y: 1651
+          x: 1317
+          y: 1702
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121601,8 +121601,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_b
           tipo: seguimientos
-          x: 1429
-          y: 2112
+          x: 1596
+          y: 2129
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121690,8 +121690,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_p
           tipo: seguimientos
-          x: 1560
-          y: 3446
+          x: 1971
+          y: 2765
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121745,8 +121745,8 @@ tableros:
           producto_id: ptmascotas_comida
         - id: mas_ec_ent_p
           tipo: entregar
-          x: 2000
-          y: 2427
+          x: 2140
+          y: 2244
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_ec_upsell1
@@ -122773,6 +122773,12 @@ tableros:
         mas_pe_caja_prod_ptmascotas_pack:
           x: 67
           y: 10
+        mas_ec_caja_prod_ptmascotas_pack:
+          x: 83
+          y: 73
+        c20:
+          x: -5
+          y: -12
       cajas:
         - id: manta-mas_pe_inicio
           x: -61
