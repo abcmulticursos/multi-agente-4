@@ -116673,17 +116673,9 @@ tableros:
           titulo: Pasa a un asesor
         - id: coc_pe_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
           x: 720
           y: 630
-          sin_pago_min: 1
-          cobro:
-            modo: producto
-            producto_id: ptcocina_dietas
-            acepta:
-              - ptcocina_pack
-            metodos: true
-            sin_preguntar: true
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
           steps:
             - type: text
               body_variants:
@@ -116694,11 +116686,29 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+            acepta:
+              - ptcocina_pack
+            metodos: true
+            sin_preguntar: true
         - id: coc_ec_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
           x: 1050
           y: 2230
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
           sin_pago_min: 1
           cobro:
             modo: producto
@@ -116707,6 +116717,11 @@ tableros:
               - ptcocina_pack
             metodos: true
             sin_preguntar: true
+        - id: coc_ar_caja
+          tipo: cobro
+          x: 720
+          y: 3830
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
           steps:
             - type: text
               body_variants:
@@ -116717,27 +116732,12 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-        - id: coc_ar_caja
-          tipo: cobro
-          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
-          x: 720
-          y: 3830
           sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptcocina_dietas
             metodos: true
             sin_preguntar: true
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
-                  ¿Con qué método prefieres pagar? 👇
-
-                  {{LISTA_METODOS_POR_PAIS}}
-              delay_after_sec: 4
       cables:
         - id: c1
           de: coc_pe_inicio
@@ -118508,17 +118508,9 @@ tableros:
           titulo: Pasa a un asesor
         - id: nin_pe_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
           x: 720
           y: 630
-          sin_pago_min: 1
-          cobro:
-            modo: producto
-            producto_id: ptninos_rabietas
-            acepta:
-              - ptninos_pack
-            metodos: true
-            sin_preguntar: true
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
           steps:
             - type: text
               body_variants:
@@ -118529,11 +118521,29 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptninos_rabietas
+            acepta:
+              - ptninos_pack
+            metodos: true
+            sin_preguntar: true
         - id: nin_ec_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
           x: 1050
           y: 2230
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
           sin_pago_min: 1
           cobro:
             modo: producto
@@ -118542,6 +118552,11 @@ tableros:
               - ptninos_pack
             metodos: true
             sin_preguntar: true
+        - id: nin_ar_caja
+          tipo: cobro
+          x: 720
+          y: 3830
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
           steps:
             - type: text
               body_variants:
@@ -118552,27 +118567,12 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-        - id: nin_ar_caja
-          tipo: cobro
-          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
-          x: 720
-          y: 3830
           sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptninos_rabietas
             metodos: true
             sin_preguntar: true
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
-                  ¿Con qué método prefieres pagar? 👇
-
-                  {{LISTA_METODOS_POR_PAIS}}
-              delay_after_sec: 4
       cables:
         - id: c1
           de: nin_pe_inicio
@@ -120575,17 +120575,9 @@ tableros:
           titulo: Pasa a un asesor
         - id: tal_pe_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
           x: 720
           y: 630
-          sin_pago_min: 1
-          cobro:
-            modo: producto
-            producto_id: pttaller_gimnasio
-            acepta:
-              - pttaller_pack
-            metodos: true
-            sin_preguntar: true
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
           steps:
             - type: text
               body_variants:
@@ -120596,11 +120588,29 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: pttaller_gimnasio
+            acepta:
+              - pttaller_pack
+            metodos: true
+            sin_preguntar: true
         - id: tal_ec_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
           x: 1050
           y: 2230
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
           sin_pago_min: 1
           cobro:
             modo: producto
@@ -120609,6 +120619,11 @@ tableros:
               - pttaller_pack
             metodos: true
             sin_preguntar: true
+        - id: tal_ar_caja
+          tipo: cobro
+          x: 720
+          y: 3830
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
           steps:
             - type: text
               body_variants:
@@ -120619,27 +120634,12 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-        - id: tal_ar_caja
-          tipo: cobro
-          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
-          x: 720
-          y: 3830
           sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: pttaller_gimnasio
             metodos: true
             sin_preguntar: true
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
-                  ¿Con qué método prefieres pagar? 👇
-
-                  {{LISTA_METODOS_POR_PAIS}}
-              delay_after_sec: 4
       cables:
         - id: c1
           de: tal_pe_inicio
@@ -121087,8 +121087,8 @@ tableros:
           pais: PE
         - id: mas_pe_intro
           tipo: mensaje
-          x: 390
-          y: 0
+          x: 380
+          y: -23
           titulo: Intro
           steps:
             - type: text
@@ -121158,8 +121158,8 @@ tableros:
           sin_respuesta_min: 30
         - id: mas_pe_cobro_b
           tipo: cobro
-          x: 720
-          y: 0
+          x: 769
+          y: -38
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121180,8 +121180,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_b
           tipo: seguimientos
-          x: 720
-          y: 330
+          x: 1163
+          y: 376
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121229,8 +121229,8 @@ tableros:
                       delay_after_sec: 4
         - id: mas_pe_cobro_p
           tipo: cobro
-          x: 720
-          y: 660
+          x: 789
+          y: 475
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -121251,8 +121251,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_p
           tipo: seguimientos
-          x: 720
-          y: 990
+          x: 1178
+          y: 742
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121300,20 +121300,20 @@ tableros:
                       delay_after_sec: 4
         - id: mas_pe_ent_b
           tipo: entregar
-          x: 1050
-          y: 0
+          x: 2020
+          y: 118
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_pe_ent_p
           tipo: entregar
-          x: 1050
-          y: 660
+          x: 1964
+          y: 625
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_pe_upsell1
           tipo: mensaje
-          x: 1380
-          y: 0
+          x: 2411
+          y: 94
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121341,7 +121341,7 @@ tableros:
                     - ok
                     - bueno
                     - va
-                  color: ""
+                  color: esmeralda
                   steps: []
                 - id: mas_pe_du1_no
                   title: No
@@ -121352,7 +121352,7 @@ tableros:
                     - despues
                     - luego
                     - paso
-                  color: ""
+                  color: rojo
                   steps: []
           presenta:
             - ptmascotas_citas
@@ -121360,8 +121360,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_pe_cobro_u1
           tipo: cobro
-          x: 1380
-          y: 330
+          x: 2794
+          y: 348
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121380,8 +121380,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_u1
           tipo: seguimientos
-          x: 1380
-          y: 660
+          x: 2710
+          y: 757
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121429,14 +121429,14 @@ tableros:
                       delay_after_sec: 4
         - id: mas_pe_ent_u1
           tipo: entregar
-          x: 1710
-          y: 330
+          x: 3414
+          y: 498
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_pe_regalo
           tipo: regalo
-          x: 2040
-          y: 0
+          x: 3663
+          y: 8
           titulo: Regalo
         - id: mas_ec_inicio
           tipo: inicio
@@ -122123,17 +122123,9 @@ tableros:
           titulo: Pasa a un asesor
         - id: mas_pe_caja
           tipo: cobro
+          x: 828
+          y: 1162
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
-          x: 720
-          y: 630
-          sin_pago_min: 1
-          cobro:
-            modo: producto
-            producto_id: ptmascotas_comida
-            acepta:
-              - ptmascotas_pack
-            metodos: true
-            sin_preguntar: true
           steps:
             - type: text
               body_variants:
@@ -122144,11 +122136,29 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+            sin_preguntar: true
         - id: mas_ec_caja
           tipo: cobro
-          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           x: 1050
           y: 2230
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
           sin_pago_min: 1
           cobro:
             modo: producto
@@ -122157,6 +122167,11 @@ tableros:
               - ptmascotas_pack
             metodos: true
             sin_preguntar: true
+        - id: mas_ar_caja
+          tipo: cobro
+          x: 720
+          y: 3830
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
               body_variants:
@@ -122167,27 +122182,12 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-        - id: mas_ar_caja
-          tipo: cobro
-          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
-          x: 720
-          y: 3830
           sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_comida
             metodos: true
             sin_preguntar: true
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
-                  ¿Con qué método prefieres pagar? 👇
-
-                  {{LISTA_METODOS_POR_PAIS}}
-              delay_after_sec: 4
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -122943,9 +122943,6 @@ tableros:
           x: 390
           y: 0
           titulo: Presentación (botón SÍ)
-          presenta:
-            - ptfig_figurarte
-          sin_respuesta_min: 120
           steps:
             - type: text
               body_variants:
@@ -122974,6 +122971,7 @@ tableros:
               delay_after_sec: 4
             - type: image
               drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+              caption_variants: []
               delay_after_sec: 4
             - type: text
               body_variants:
@@ -123002,11 +123000,14 @@ tableros:
                   label: SÍ
                   action: send_steps
                   steps: []
+          presenta:
+            - ptfig_figurarte
           instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
+          sin_respuesta_min: 120
         - id: fig_insiste
           tipo: mensaje
-          x: 390
-          y: 330
+          x: 392
+          y: 463
           titulo: Si no contesta
           steps:
             - type: text
@@ -123036,7 +123037,6 @@ tableros:
           x: 1380
           y: 0
           titulo: Contribución
-          sin_pago_min: 60
           steps:
             - type: text
               body_variants:
@@ -123078,6 +123078,8 @@ tableros:
 
                   🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
               delay_after_sec: 4
+          instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
+          sin_pago_min: 60
           cobro:
             modo: abierto
             minimo_por_pais:
@@ -123094,7 +123096,6 @@ tableros:
                   desde: 25
                 - id: t30
                   desde: 30
-          instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
         - id: fig_recordatorios
           tipo: seguimientos
           x: 1380
@@ -123303,9 +123304,6 @@ tableros:
           x: 390
           y: 0
           titulo: Presentación (responde SÍ, sin botón)
-          presenta:
-            - ptfig_figurarte
-          sin_respuesta_min: 120
           steps:
             - type: text
               body_variants:
@@ -123334,6 +123332,7 @@ tableros:
               delay_after_sec: 4
             - type: image
               drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+              caption_variants: []
               delay_after_sec: 4
             - type: text
               body_variants:
@@ -123374,13 +123373,16 @@ tableros:
                     - me interesa
                     - enviamelo
                     - mandamelo
-                  action: send_steps
+                  color: ""
                   steps: []
+          presenta:
+            - ptfig_figurarte
           instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
+          sin_respuesta_min: 120
         - id: fg3_insiste
           tipo: mensaje
-          x: 390
-          y: 330
+          x: 809
+          y: 488
           titulo: Si no contesta
           steps:
             - type: text
@@ -123410,7 +123412,6 @@ tableros:
           x: 1380
           y: 0
           titulo: Contribución
-          sin_pago_min: 60
           steps:
             - type: text
               body_variants:
@@ -123452,6 +123453,8 @@ tableros:
 
                   🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
               delay_after_sec: 4
+          instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
+          sin_pago_min: 60
           cobro:
             modo: abierto
             minimo_por_pais:
@@ -123468,11 +123471,10 @@ tableros:
                   desde: 25
                 - id: t30
                   desde: 30
-          instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
         - id: fg3_recordatorios
           tipo: seguimientos
-          x: 1380
-          y: 330
+          x: 1811
+          y: 691
           titulo: Recordatorios (si no aporta)
           presenta:
             - ptfig_figurarte
@@ -123535,40 +123537,40 @@ tableros:
                       delay_after_sec: 4
         - id: fg3_ent10
           tipo: entregar
-          x: 1710
-          y: -660
+          x: 1798
+          y: -31
           titulo: Entrega S/10 · Semilla
           producto_id: ptfig_figurarte
           entregas:
             - ptfig_figurarte
         - id: fg3_ent15
           tipo: entregar
-          x: 1710
-          y: -330
+          x: 1793
+          y: 92
           titulo: Entrega S/15 · Apoyo
           producto_id: ptfig_figurarte
           entregas:
             - ptfig_figurarte#nivel15
         - id: fg3_ent20
           tipo: entregar
-          x: 1710
-          y: 0
+          x: 1792
+          y: 232
           titulo: Entrega S/20 · Especial
           producto_id: ptfig_figurarte
           entregas:
             - ptfig_figurarte#nivel20
         - id: fg3_ent25
           tipo: entregar
-          x: 1710
-          y: 330
+          x: 1795
+          y: 371
           titulo: Entrega S/25 · Bendición
           producto_id: ptfig_figurarte
           entregas:
             - ptfig_figurarte#nivel25
         - id: fg3_ent30
           tipo: entregar
-          x: 1710
-          y: 660
+          x: 1795
+          y: 509
           titulo: Entrega S/30 · Generosa
           producto_id: ptfig_figurarte
           entregas:
@@ -123649,9 +123651,9 @@ tableros:
       cajas:
         - id: manta-fg3_inicio
           x: 20
-          y: -760
-          ancho: 2000
-          alto: 1960
+          y: -801
+          ancho: 3130
+          alto: 2001
           titulo: ""
           inicio: fg3_inicio
         - id: manta-fg3_otros
@@ -123662,309 +123664,328 @@ tableros:
           titulo: ""
           inicio: fg3_otros
 workflows:
-  {
-    figurarte2:
-      {
-        nombre: FIGURARTE 2,
-        encendido: true,
-        cerebro: "Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro.",
-        fichas:
-          [
-            { id: fg2_inicio, tipo: inicio, x: 60, y: 0, titulo: Venta por contribución },
-            {
-                id: fg2_presenta,
-                tipo: mensaje,
-                x: 390,
-                y: 0,
-                titulo: Presentación (botón SÍ),
-                presenta: [ ptfig_figurarte ],
-                sin_respuesta_min: 120,
+  figurarte2:
+    encendido: true
+    nombre: FIGURARTE 2
+    cerebro: "Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro."
+    fichas:
+      - id: fg2_inicio
+        tipo: inicio
+        x: 60
+        y: 0
+        titulo: Venta por contribución
+      - id: fg2_presenta
+        tipo: mensaje
+        x: 390
+        y: 0
+        titulo: Presentación (botón SÍ)
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                ¡Hola! Rubén aquí, tu asesor de la página Impulso 360 Digital 👋 hoy te presento ARTEFIGURA 🎨✨.
+
+                🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️
+            delay_after_sec: 4
+          - type: text
+            body_variants:
+              - |-
+                🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
+
+                Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
+
+                ¡Incluye todo lo siguiente
+
+                🐯 Más de 80 animales para descubrir y colorear.
+                🦸 Más de 30 personajes formados por figuras geométricas.
+                🔵 Círculos, cuadrados, triángulos y rectángulos.
+                🎨 Una forma diferente de colorear, ¡sin utilizar números!
+                🟨 Figuras que se transforman en increíbles dibujos.
+                🧠 Actividades que estimulan la creatividad y la atención.
+                ✏️ Una experiencia divertida para aprender mientras coloreas.
+                🌈 Diseños originales para dar vida con tus colores.
+            delay_after_sec: 4
+          - type: image
+            drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+            caption_variants: []
+            delay_after_sec: 4
+          - type: text
+            body_variants:
+              - |-
+                🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
+
+                🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
+
+                📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+
+                ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨
+            delay_after_sec: 4
+          - type: text
+            body_variants:
+              - |-
+                🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
+
+                📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
+
+                ❤️ ¡Lo recibes primero y pagas después!
+
+                Solo responde SÍ y te explico cómo recibirlo. 🥰
+            delay_after_sec: 4
+            buttons:
+              - id: fg2_si
+                label: SÍ
+                action: send_steps
+                steps: []
+        presenta:
+          - ptfig_figurarte
+        instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
+        sin_respuesta_min: 120
+      - id: fg2_insiste
+        tipo: mensaje
+        x: 390
+        y: 330
+        titulo: Si no contesta
+        steps:
+          - type: text
+            body_variants:
+              - ¿Sigues por ahí? 😊 Si quieres recibir *FIGURARTE*, solo responde *SÍ* y te envío las muestras gratuitas ahora mismo 🎨
+            delay_after_sec: 4
+      - id: fg2_si_msg
+        tipo: mensaje
+        x: 720
+        y: 0
+        titulo: Dijo que sí
+        steps:
+          - type: text
+            body_variants:
+              - ¡Perfecto! 😊 Te enviaré parte del material para que puedas revisarlos y comprobar la calidad del contenido. ✨
+            delay_after_sec: 3
+      - id: fg2_muestras
+        tipo: entregar
+        x: 1050
+        y: 0
+        titulo: Muestras gratuitas
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte#muestras
+      - id: fg2_cobro
+        tipo: cobro
+        x: 1380
+        y: 0
+        titulo: Contribución
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🎨✨ ¡Ya tienes FIGURARTE! 🦁🌈
+
+                💖 Si deseas apoyar este proyecto, puedes elegir una de las siguientes contribuciones:
+
+                🎁 S/10 — CONTRIBUCIÓN SEMILLA
+                📘 Material completo de FIGURARTE.
+
+                🎁 S/15 — CONTRIBUCIÓN DE APOYO
+                📘 Material completo + 🎁 1 bono.
+
+                🎁 S/20 — CONTRIBUCIÓN ESPECIAL
+                📘 Material completo + 🎁 los 2 bonos.
+
+                🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
+                📘 Material completo + 🎁 3 bonos incluidos.
+
+                🎁 S/30 — CONTRIBUCIÓN GENEROSA
+                📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
+
+                🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
+
+                🥰 ¡Gracias por tu generosidad y por apoyar este proyecto!
+            delay_after_sec: 5
+          - type: text
+            body_variants:
+              - |-
+                🟣 Yape | 🟢 Plin
+                {{CUENTA_YAPE}}
+                Titular: {{NOMBRE_COMPLETO}}
+            delay_after_sec: 3
+          - type: text
+            body_variants:
+              - |-
+                En cuanto realices tu aporte, envía tu comprobante por aquí, por WhatsApp. 📲
+
+                🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
+            delay_after_sec: 4
+        instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
+        sin_pago_min: 60
+        cobro:
+          modo: abierto
+          minimo_por_pais:
+            PE: 10
+          tramos_por_pais:
+            PE:
+              - id: t10
+                desde: 10
+              - id: t15
+                desde: 15
+              - id: t20
+                desde: 20
+              - id: t25
+                desde: 25
+              - id: t30
+                desde: 30
+      - id: fg2_recordatorios
+        tipo: seguimientos
+        x: 1380
+        y: 330
+        titulo: Recordatorios (si no aporta)
+        presenta:
+          - ptfig_figurarte
+        seguimientos:
+          - id: fg2_rec1
+            minutos: 120
+            variantes:
+              - id: fg2_rec1a
+                nombre: Recordatorio 1
+                peso: 1
                 steps:
-                  [
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "¡Hola! Rubén aquí, tu asesor de la página Impulso 360 Digital 👋 hoy te presento ARTEFIGURA 🎨✨.
+                  - type: text
+                    body_variants:
+                      - |-
+                        ¡Hola! 😊 ¿Pudiste ver las *muestras gratuitas* de FIGURARTE? 🎨
 
-
-                              🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️"
-                          ],
-                        delay_after_sec: 4
-                      },
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
-
-
-                              Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
-
-
-                              ¡Incluye todo lo siguiente
-
-
-                              🐯 Más de 80 animales para descubrir y colorear.
-
-                              🦸 Más de 30 personajes formados por figuras geométricas.
-
-                              🔵 Círculos, cuadrados, triángulos y rectángulos.
-
-                              🎨 Una forma diferente de colorear, ¡sin utilizar números!
-
-                              🟨 Figuras que se transforman en increíbles dibujos.
-
-                              🧠 Actividades que estimulan la creatividad y la atención.
-
-                              ✏️ Una experiencia divertida para aprender mientras coloreas.
-
-                              🌈 Diseños originales para dar vida con tus colores."
-                          ],
-                        delay_after_sec: 4
-                      },
-                    { type: image, drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link, delay_after_sec: 4 },
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
-
-
-                              🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
-
-
-                              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
-
-
-                              ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨"
-                          ],
-                        delay_after_sec: 4
-                      },
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
-
-
-                              📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
-
-
-                              ❤️ ¡Lo recibes primero y pagas después!
-
-
-                              Solo responde SÍ y te explico cómo recibirlo. 🥰"
-                          ],
-                        delay_after_sec: 4,
-                        buttons: [ { id: fg2_si, label: SÍ, action: send_steps, steps: [] } ]
-                      }
-                  ],
-                instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
-              },
-            { id: fg2_insiste, tipo: mensaje, x: 390, y: 330, titulo: Si no contesta, steps: [ { type: text, body_variants: [ "¿Sigues por ahí? 😊 Si quieres recibir *FIGURARTE*, solo responde *SÍ* y te envío las muestras gratuitas ahora mismo 🎨" ], delay_after_sec: 4 } ] },
-            { id: fg2_si_msg, tipo: mensaje, x: 720, y: 0, titulo: Dijo que sí, steps: [ { type: text, body_variants: [ ¡Perfecto! 😊 Te enviaré parte del material para que puedas revisarlos y comprobar la calidad del contenido. ✨ ], delay_after_sec: 3 } ] },
-            { id: fg2_muestras, tipo: entregar, x: 1050, y: 0, titulo: Muestras gratuitas, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte#muestras ] },
-            {
-                id: fg2_cobro,
-                tipo: cobro,
-                x: 1380,
-                y: 0,
-                titulo: Contribución,
-                sin_pago_min: 60,
+                        Si no te llegaron bien, dime y te las vuelvo a enviar.
+                    delay_after_sec: 4
+          - id: fg2_rec2
+            minutos: 360
+            variantes:
+              - id: fg2_rec2a
+                nombre: Recordatorio 2
+                peso: 1
                 steps:
-                  [
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "🎨✨ ¡Ya tienes FIGURARTE! 🦁🌈
+                  - type: text
+                    body_variants:
+                      - |-
+                        Hola 💛 Paso rapidito por aquí: gracias a las contribuciones de personas como tú, este proyecto sigue creando material para colorear y aprender 🎨✨
 
+                        Cuando puedas, haz tu aporte y envíame tu comprobante por aquí 📲
+                    delay_after_sec: 4
+          - id: fg2_rec3
+            minutos: 720
+            variantes:
+              - id: fg2_rec3a
+                nombre: Recordatorio 3
+                peso: 1
+                steps:
+                  - type: text
+                    body_variants:
+                      - |-
+                        Hola de nuevo ✨ Te recuerdo que con un aporte desde *S/15* recibes también los *bonos sorpresa* de FIGURARTE 🎁
 
-                              💖 Si deseas apoyar este proyecto, puedes elegir una de las siguientes contribuciones:
+                        Envía tu comprobante por aquí y te mando todo al instante 📲
+                    delay_after_sec: 4
+          - id: fg2_rec4
+            minutos: 1380
+            variantes:
+              - id: fg2_rec4a
+                nombre: Recordatorio 4
+                peso: 1
+                steps:
+                  - type: text
+                    body_variants:
+                      - |-
+                        Hola ✨ Paso por última vez para cerrar los registros de aportes 🙏
 
-
-                              🎁 S/10 — CONTRIBUCIÓN SEMILLA
-
-                              📘 Material completo de FIGURARTE.
-
-
-                              🎁 S/15 — CONTRIBUCIÓN DE APOYO
-
-                              📘 Material completo + 🎁 1 bono.
-
-
-                              🎁 S/20 — CONTRIBUCIÓN ESPECIAL
-
-                              📘 Material completo + 🎁 los 2 bonos.
-
-
-                              🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
-
-                              📘 Material completo + 🎁 3 bonos incluidos.
-
-
-                              🎁 S/30 — CONTRIBUCIÓN GENEROSA
-
-                              📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
-
-
-                              🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
-
-
-                              🥰 ¡Gracias por tu generosidad y por apoyar este proyecto!"
-                          ],
-                        delay_after_sec: 5
-                      },
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "🟣 Yape | 🟢 Plin
-
-                              {{CUENTA_YAPE}}
-
-                              Titular: {{NOMBRE_COMPLETO}}"
-                          ],
-                        delay_after_sec: 3
-                      },
-                    {
-                        type: text,
-                        body_variants:
-                          [
-                            "En cuanto realices tu aporte, envía tu comprobante por aquí, por WhatsApp. 📲
-
-
-                              🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución."
-                          ],
-                        delay_after_sec: 4
-                      }
-                  ],
-                cobro: { modo: abierto, minimo_por_pais: { PE: 10 }, tramos_por_pais: { PE: [ { id: t10, desde: 10 }, { id: t15, desde: 15 }, { id: t20, desde: 20 }, { id: t25, desde: 25 }, { id: t30, desde: 30 } ] } },
-                instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
-              },
-            {
-                id: fg2_recordatorios,
-                tipo: seguimientos,
-                x: 1380,
-                y: 330,
-                titulo: Recordatorios (si no aporta),
-                presenta: [ ptfig_figurarte ],
-                seguimientos:
-                  [
-                    {
-                        id: fg2_rec1,
-                        minutos: 120,
-                        variantes:
-                          [
-                            {
-                                id: fg2_rec1a,
-                                nombre: Recordatorio 1,
-                                peso: 1,
-                                steps:
-                                  [
-                                    {
-                                        type: text,
-                                        body_variants:
-                                          [
-                                            "¡Hola! 😊 ¿Pudiste ver las *muestras gratuitas* de FIGURARTE? 🎨
-
-
-                                              Si no te llegaron bien, dime y te las vuelvo a enviar."
-                                          ],
-                                        delay_after_sec: 4
-                                      }
-                                  ]
-                              }
-                          ]
-                      },
-                    {
-                        id: fg2_rec2,
-                        minutos: 360,
-                        variantes:
-                          [
-                            {
-                                id: fg2_rec2a,
-                                nombre: Recordatorio 2,
-                                peso: 1,
-                                steps:
-                                  [
-                                    {
-                                        type: text,
-                                        body_variants:
-                                          [
-                                            "Hola 💛 Paso rapidito por aquí: gracias a las contribuciones de personas como tú, este proyecto sigue creando material para colorear y aprender 🎨✨
-
-
-                                              Cuando puedas, haz tu aporte y envíame tu comprobante por aquí 📲"
-                                          ],
-                                        delay_after_sec: 4
-                                      }
-                                  ]
-                              }
-                          ]
-                      },
-                    {
-                        id: fg2_rec3,
-                        minutos: 720,
-                        variantes:
-                          [
-                            {
-                                id: fg2_rec3a,
-                                nombre: Recordatorio 3,
-                                peso: 1,
-                                steps:
-                                  [
-                                    {
-                                        type: text,
-                                        body_variants:
-                                          [
-                                            Hola de nuevo ✨ Te recuerdo que con un aporte desde *S/15* recibes también los *bonos sorpresa* de FIGURARTE 🎁
-
-
-                                              Envía tu comprobante por aquí y te mando todo al instante 📲
-                                          ],
-                                        delay_after_sec: 4
-                                      }
-                                  ]
-                              }
-                          ]
-                      },
-                    {
-                        id: fg2_rec4,
-                        minutos: 1380,
-                        variantes:
-                          [
-                            {
-                                id: fg2_rec4a,
-                                nombre: Recordatorio 4,
-                                peso: 1,
-                                steps:
-                                  [
-                                    {
-                                        type: text,
-                                        body_variants:
-                                          [
-                                            "Hola ✨ Paso por última vez para cerrar los registros de aportes 🙏
-
-
-                                              Te compartí el material por adelantado con mucha confianza. Si te gustó, tu contribución hace posible que este proyecto siga creciendo 💖"
-                                          ],
-                                        delay_after_sec: 4
-                                      }
-                                  ]
-                              }
-                          ]
-                      }
-                  ]
-              },
-            { id: fg2_ent10, tipo: entregar, x: 1710, y: -660, titulo: Entrega S/10 · Semilla, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte ] },
-            { id: fg2_ent15, tipo: entregar, x: 1710, y: -330, titulo: Entrega S/15 · Apoyo, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte#nivel15 ] },
-            { id: fg2_ent20, tipo: entregar, x: 1710, y: 0, titulo: Entrega S/20 · Especial, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte#nivel20 ] },
-            { id: fg2_ent25, tipo: entregar, x: 1710, y: 330, titulo: Entrega S/25 · Bendición, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte#nivel25 ] },
-            { id: fg2_ent30, tipo: entregar, x: 1710, y: 660, titulo: Entrega S/30 · Generosa, producto_id: ptfig_figurarte, entregas: [ ptfig_figurarte#nivel30 ] }
-          ],
-        cables: [ { id: fg2c1, de: fg2_inicio, salida: siguiente, a: fg2_presenta }, { id: fg2c2, de: fg2_presenta, salida: btn:fg2_si, a: fg2_si_msg }, { id: fg2c3, de: fg2_presenta, salida: sin_respuesta, a: fg2_insiste }, { id: fg2c4, de: fg2_si_msg, salida: siguiente, a: fg2_muestras }, { id: fg2c5, de: fg2_muestras, salida: siguiente, a: fg2_cobro }, { id: fg2c6, de: fg2_cobro, salida: sin_pago, a: fg2_recordatorios }, { id: fg2c7, de: fg2_cobro, salida: tramo:t10, a: fg2_ent10 }, { id: fg2c8, de: fg2_cobro, salida: tramo:t15, a: fg2_ent15 }, { id: fg2c9, de: fg2_cobro, salida: tramo:t20, a: fg2_ent20 }, { id: fg2c10, de: fg2_cobro, salida: tramo:t25, a: fg2_ent25 }, { id: fg2c11, de: fg2_cobro, salida: tramo:t30, a: fg2_ent30 } ],
-        cajas: [ { id: manta-fg2_inicio, x: 20, y: -760, ancho: 2000, alto: 1960, titulo: "", inicio: fg2_inicio } ]
-      }
-  }
+                        Te compartí el material por adelantado con mucha confianza. Si te gustó, tu contribución hace posible que este proyecto siga creciendo 💖
+                    delay_after_sec: 4
+      - id: fg2_ent10
+        tipo: entregar
+        x: 1710
+        y: -660
+        titulo: Entrega S/10 · Semilla
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte
+      - id: fg2_ent15
+        tipo: entregar
+        x: 1710
+        y: -330
+        titulo: Entrega S/15 · Apoyo
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte#nivel15
+      - id: fg2_ent20
+        tipo: entregar
+        x: 1710
+        y: 0
+        titulo: Entrega S/20 · Especial
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte#nivel20
+      - id: fg2_ent25
+        tipo: entregar
+        x: 1710
+        y: 330
+        titulo: Entrega S/25 · Bendición
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte#nivel25
+      - id: fg2_ent30
+        tipo: entregar
+        x: 1710
+        y: 660
+        titulo: Entrega S/30 · Generosa
+        producto_id: ptfig_figurarte
+        entregas:
+          - ptfig_figurarte#nivel30
+    cables:
+      - id: fg2c1
+        de: fg2_inicio
+        salida: siguiente
+        a: fg2_presenta
+      - id: fg2c2
+        de: fg2_presenta
+        salida: btn:fg2_si
+        a: fg2_si_msg
+      - id: fg2c3
+        de: fg2_presenta
+        salida: sin_respuesta
+        a: fg2_insiste
+      - id: fg2c4
+        de: fg2_si_msg
+        salida: siguiente
+        a: fg2_muestras
+      - id: fg2c5
+        de: fg2_muestras
+        salida: siguiente
+        a: fg2_cobro
+      - id: fg2c6
+        de: fg2_cobro
+        salida: sin_pago
+        a: fg2_recordatorios
+      - id: fg2c7
+        de: fg2_cobro
+        salida: tramo:t10
+        a: fg2_ent10
+      - id: fg2c8
+        de: fg2_cobro
+        salida: tramo:t15
+        a: fg2_ent15
+      - id: fg2c9
+        de: fg2_cobro
+        salida: tramo:t20
+        a: fg2_ent20
+      - id: fg2c10
+        de: fg2_cobro
+        salida: tramo:t25
+        a: fg2_ent25
+      - id: fg2c11
+        de: fg2_cobro
+        salida: tramo:t30
+        a: fg2_ent30
+    cajas:
+      - id: manta-fg2_inicio
+        x: 20
+        y: -760
+        ancho: 2000
+        alto: 1960
+        titulo: ""
+        inicio: fg2_inicio
