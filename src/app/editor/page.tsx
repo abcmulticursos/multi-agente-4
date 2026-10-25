@@ -18439,6 +18439,9 @@ type ProductoEditor = {
     }
   >;
   delivery?: EditorStep[];
+  /** Otras partes de este producto que se mandan en otro momento (muestras, niveles…): las usa la
+   *  ficha Entregar del tablero. Ver `entregas_extra` en `config.ts`. */
+  entregas_extra?: Array<{ id: string; nombre: string; steps: EditorStep[] }>;
   image_gallery?: GalleryItem[];
   course_content?: string;
   etiqueta?: PapelDeProducto;
@@ -20717,6 +20720,7 @@ function BibliotecaDeProductos({
                   <span className="mt-0.5 block text-xs text-tinta-suave">
                     {producto.price_soles ? `${producto.price_soles} · ` : ""}
                     {(producto.delivery ?? []).length} paso(s) de entrega
+                    {(producto.entregas_extra ?? []).length ? ` · 📦 ${(producto.entregas_extra ?? []).length} entrega(s) extra` : ""}
                   </span>
                   {/* EL ROJO SE VE SIN ABRIR NADA.
                       Un aviso que solo sale dentro de la ventana es un aviso
@@ -21060,6 +21064,73 @@ function BibliotecaDeProductos({
                     nombreEntregado: producto.name?.trim() || "",
                   }}
                 />
+              </div>
+
+              {/* 📦 ENTREGAS EXTRA (25/10/2026): otras partes de ESTE producto que se mandan en otro
+                  momento (muestras gratis, un nivel de contribución…). No son productos: viven aquí y
+                  las elige la ficha «Entregar» del tablero. La venta de siempre no las usa. */}
+              <div className="rounded-xl border border-dashed border-borde p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">📦 Entregas extra</p>
+                <p className="mb-2 mt-0.5 text-[11px] text-neutral-500">
+                  Otras partes de este producto que se envían en otro momento: muestras gratis, un nivel de contribución, un bono… Se eligen en la
+                  ficha «Entregar» del tablero. La venta automática no las usa.
+                </p>
+                {(producto.entregas_extra ?? []).map((e, j) => {
+                  const lista = producto.entregas_extra ?? [];
+                  const cambiar = (cambio: Partial<(typeof lista)[number]>) => {
+                    onEdit("biblioteca");
+                    parchar(producto.id, { entregas_extra: lista.map((x, k) => (k === j ? { ...x, ...cambio } : x)) });
+                  };
+                  return (
+                    <div key={e.id} className="mb-3 rounded-lg border border-borde bg-relleno p-2">
+                      <div className="mb-2 flex items-center gap-2">
+                        <input
+                          value={e.nombre}
+                          onChange={(ev) => cambiar({ nombre: ev.target.value })}
+                          placeholder="Nombre de la entrega (ej.: Muestras gratuitas)"
+                          className="w-full rounded-md border border-neutral-300 bg-tarjeta px-2 py-1 text-sm font-semibold text-neutral-900"
+                        />
+                        <button
+                          type="button"
+                          title="Quitar esta entrega"
+                          onClick={() => {
+                            if (!window.confirm(`¿Quitar la entrega «${e.nombre || "sin nombre"}»? Una ficha Entregar que la use dejará de mandarla.`)) return;
+                            onSnapshot?.();
+                            onEdit("biblioteca");
+                            parchar(producto.id, { entregas_extra: lista.filter((_, k) => k !== j) });
+                          }}
+                          className="shrink-0 rounded px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+                        >
+                          🗑 Quitar
+                        </button>
+                      </div>
+                      <StepEditorPreviewPair
+                        steps={e.steps ?? []}
+                        onChange={(pasos) => cambiar({ steps: pasos })}
+                        onSnapshot={onSnapshot}
+                        onEdit={onEdit}
+                        idPrefix={`bib_${producto.id}_ent_${e.id}`}
+                        priceSoles={producto.price_soles || precioBase}
+                        comboPrice={comboPrice}
+                        basicoPrice={basicoPrice}
+                        previewContext={{ ...previewContext, nombreEntregado: producto.name?.trim() || "" }}
+                      />
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSnapshot?.();
+                    onEdit("biblioteca");
+                    parchar(producto.id, {
+                      entregas_extra: [...(producto.entregas_extra ?? []), { id: `ent_${Date.now().toString(36)}`, nombre: "", steps: [emptyStep()] }],
+                    });
+                  }}
+                  className="rounded-md border border-borde bg-tarjeta px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-relleno"
+                >
+                  + Agregar entrega extra
+                </button>
               </div>
 
               <GalleryEditor
@@ -30848,6 +30919,32 @@ function PantallaDelTablero({
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
   const nombres = Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id]));
   const nombreDelProducto = (pid?: string) => (pid ? nombres[pid] : undefined) ?? "(sin elegir)";
+  /** «FIGURARTE» o «FIGURARTE · Muestras gratuitas»: el nombre de una entrega por su clave. */
+  const nombreDeLaEntrega = (clave: string) => {
+    const [pid, eid] = clave.split("#");
+    if (!eid) return nombreDelProducto(pid);
+    const e = productos.find((p) => p.id === pid)?.entregas_extra?.find((x) => x.id === eid);
+    return `${nombreDelProducto(pid)} · ${e?.nombre?.trim() || "(entrega borrada)"}`;
+  };
+  // LAS ENTREGAS PARA ELEGIR EN UNA FICHA «ENTREGAR» (25/10/2026), agrupadas por producto: primero los
+  // de esta tienda (su selector y los que ya usa este tablero) y al final los demás, para que nada
+  // quede escondido. Cada producto: su entrega principal y sus entregas extra.
+  const enEsteTablero = new Set<string>(Object.values(tienda?.alineacion ?? {}).filter((v): v is string => typeof v === "string" && !!v));
+  {
+    const texto = JSON.stringify(tablero.fichas ?? []);
+    for (const p of productos) if (texto.includes(`"${p.id}"`) || texto.includes(`"${p.id}#`)) enEsteTablero.add(p.id);
+  }
+  const entregasPorProducto = [...productos]
+    .sort((x, y) => Number(enEsteTablero.has(y.id)) - Number(enEsteTablero.has(x.id)))
+    .map((p) => ({
+      id: p.id,
+      nombre: p.name?.trim() || p.id,
+      propio: enEsteTablero.has(p.id),
+      opciones: [
+        { clave: p.id, nombre: "Entrega principal" },
+        ...(p.entregas_extra ?? []).map((e) => ({ clave: `${p.id}#${e.id}`, nombre: e.nombre?.trim() || "Entrega sin nombre" })),
+      ],
+    }));
   const workflows = Object.entries(cfg.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }));
 
   const guardar = (t: TableroEnElEditor) =>
@@ -30920,7 +31017,9 @@ function PantallaDelTablero({
       case "correo":
         return `Pide el correo y le manda lo que recibió.${f.sin_respuesta_min ? `\nSi no lo da en ${minutosLegiblesDelTablero(f.sin_respuesta_min)}, sigue por «No dio su correo».` : ""}`;
       case "entregar":
-        return `Entrega: ${nombreDelProducto(f.producto_id)}`;
+        return f.entregas?.length
+          ? `Entrega: ${f.entregas.map(nombreDeLaEntrega).join(" + ")}`
+          : `Entrega: ${nombreDelProducto(f.producto_id)}`;
       case "cobro": {
         const c = f.cobro;
         const precio = c?.precio === "normal" ? "precio normal" : c?.precio === "oferta" ? "precio de oferta" : "precio según la etapa";
@@ -31492,6 +31591,7 @@ function PantallaDelTablero({
         <AjustesDeLaFicha
           ficha={fichaDeAjustes}
           productos={productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id }))}
+          entregasPorProducto={entregasPorProducto}
           anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
           workflows={workflows.filter((w) => w.id !== wfId)}
           paises={paises}
@@ -32130,6 +32230,7 @@ function ListaDeEleccion({
 function AjustesDeLaFicha({
   ficha,
   productos,
+  entregasPorProducto = [],
   anuncios,
   workflows,
   paises,
@@ -32143,6 +32244,8 @@ function AjustesDeLaFicha({
   onAbrirPagos?: (pais: string) => void;
   ficha: FichaEnElEditor;
   productos: Array<{ id: string; nombre: string }>;
+  /** Para la ficha Entregar: las entregas de cada producto, los de esta tienda primero (`propio`). */
+  entregasPorProducto?: Array<{ id: string; nombre: string; propio: boolean; opciones: Array<{ clave: string; nombre: string }> }>;
   anuncios: Array<{ id: string; nombre: string }>;
   workflows: Array<{ id: string; nombre: string }>;
   paises: string[];
@@ -32255,13 +32358,74 @@ function AjustesDeLaFicha({
               </label>
             </div>
           )}
-          {ficha.tipo === "entregar" && (
-            <label className={etiqueta}>
-              Producto que se entrega
-              {selector(b.producto_id, (v) => setB({ ...b, producto_id: v }), productos, "(elige un producto)")}
-              <span className={ayuda}>Manda la entrega de la ficha del producto, tal como está escrita. Si dice «compra aprobada», no sirve para algo gratis.</span>
-            </label>
-          )}
+          {ficha.tipo === "entregar" &&
+            (() => {
+              // LAS ENTREGAS DE LA FICHA (25/10/2026): una o varias, en orden, de uno o varios productos.
+              // Se guarda la lista y, para lo de antes, el producto de la primera.
+              const lista = b.entregas?.length ? b.entregas : b.producto_id ? [b.producto_id] : [""];
+              const poner = (nueva: string[]) => {
+                const limpias = nueva.filter(Boolean);
+                setB({ ...b, entregas: limpias.length ? nueva : undefined, producto_id: limpias[0]?.split("#")[0] || undefined });
+              };
+              const propios = entregasPorProducto.filter((g) => g.propio);
+              const otros = entregasPorProducto.filter((g) => !g.propio);
+              return (
+                <div className={etiqueta}>
+                  Lo que se entrega
+                  <span className={ayuda}>
+                    Elige qué entrega de qué producto. Arriba, los productos de esta tienda; abajo, los demás. Las entregas extra (muestras, niveles…)
+                    se escriben en la ficha del producto, en «📦 Entregas extra».
+                  </span>
+                  <div className="mt-1 space-y-1">
+                    {lista.map((clave, i) => (
+                      <div key={i} className="flex items-center gap-1">
+                        <select
+                          value={clave}
+                          onChange={(e) => poner(lista.map((x, j) => (j === i ? e.target.value : x)))}
+                          className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                        >
+                          <option value="">(elige una entrega)</option>
+                          {propios.map((g) => (
+                            <optgroup key={g.id} label={`── ${g.nombre} ──`}>
+                              {g.opciones.map((o) => (
+                                <option key={o.clave} value={o.clave}>
+                                  {o.nombre}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                          {otros.map((g) => (
+                            <optgroup key={g.id} label={`Otros productos · ${g.nombre}`}>
+                              {g.opciones.map((o) => (
+                                <option key={o.clave} value={o.clave}>
+                                  {o.nombre}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                        {lista.length > 1 && (
+                          <button
+                            type="button"
+                            title="Quitar esta entrega"
+                            onClick={() => poner(lista.filter((_, j) => j !== i))}
+                            className="rounded px-1.5 text-sm text-tinta-suave hover:bg-red-100 hover:text-red-700"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {lista.some(Boolean) && (
+                    <button type="button" onClick={() => poner([...lista, ""])} className="mt-1 text-xs font-semibold text-sky-700 hover:underline">
+                      + Agregar otra entrega
+                    </button>
+                  )}
+                  <span className={ayuda}>Salen en este orden. Si dice «compra aprobada», no sirve para algo gratis: para eso usa una entrega extra.</span>
+                </div>
+              );
+            })()}
           {/* «📧 OFRECER TAMBIÉN POR CORREO» (24/10/2026): sin borrador de correo; van los enlaces de su entrega. */}
           {ficha.tipo === "entregar" && (
             <div className="space-y-2">

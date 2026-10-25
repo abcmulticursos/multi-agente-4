@@ -159,6 +159,12 @@ export interface FichaDelTablero {
   sin_pago_min?: number;
   /** Entregar: qué producto de la biblioteca. */
   producto_id?: string;
+  /**
+   * Entregar: QUÉ ENTREGAS manda, en orden (25/10/2026). Cada una es «producto» (su entrega principal)
+   * o «producto#entrega» (una de sus entregas extra); se pueden mezclar de varios productos. Sin esta
+   * lista vale `producto_id` (su entrega principal), como antes.
+   */
+  entregas?: string[];
   cobro?: CobroDeLaFicha;
   condicion?: CondicionDeLaFicha;
   /** Esperar: cuántos minutos. */

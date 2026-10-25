@@ -242,6 +242,10 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       if (tipo === "cobro" && sp) ficha.sin_pago_min = sp;
       const producto = texto(f.producto_id, 120).trim();
       if (tipo === "entregar" && producto) ficha.producto_id = producto;
+      if (tipo === "entregar" && Array.isArray(f.entregas)) {
+        const lista = f.entregas.map((x) => texto(x, 200).trim()).filter(Boolean).slice(0, 10);
+        if (lista.length) ficha.entregas = lista;
+      }
       if (tipo === "cobro") ficha.cobro = leeCobro(f.cobro) ?? { modo: "producto" };
       if (tipo === "condicion") ficha.condicion = leeCondicion(f.condicion) ?? { tipo: "compro" };
       const min = positivo(f.minutos);
@@ -382,6 +386,12 @@ export function opcionesDe(pasos: SequenceStep[]): { botones: BubbleButton[]; cu
 }
 
 const FICHAS_CON_RESPUESTA: TipoDeFicha[] = ["mensaje", "intro_ob", "seguimientos"];
+
+/** LO QUE MANDA UNA FICHA «ENTREGAR», en orden: su lista de entregas, o la principal de su producto. */
+export function entregasDeLaFicha(f: FichaDelTablero): string[] {
+  if (f.entregas?.length) return f.entregas;
+  return f.producto_id ? [f.producto_id] : [];
+}
 
 /**
  * LAS SALIDAS DE UNA FICHA: los puntitos de los que él tira cables. Las mismas para la pantalla y
@@ -526,7 +536,7 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
         avisos.push("Un seguimiento pasa las 24 h desde el último mensaje: por WhatsApp no llegaría.");
       break;
     case "entregar":
-      if (!f.producto_id) avisos.push("No tiene producto elegido.");
+      if (entregasDeLaFicha(f).length === 0) avisos.push("No tiene ninguna entrega elegida.");
       break;
     case "cobro":
       if (f.cobro?.modo === "abierto") {

@@ -78,7 +78,9 @@ import {
   leeTablerosPorTienda,
   opcionesDe,
   pasosDeLaFicha,
+  entregasDeLaFicha,
 } from "./datos";
+import { laEntrega } from "./entregas";
 import {
   abrirCobro,
   activarOferta,
@@ -411,13 +413,25 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
     }
 
     case "entregar": {
-      const p = producto(config, f.producto_id);
-      if (!p?.delivery?.length) {
-        console.warn(`[tablero] convo ${convoId}: la ficha Entregar no tiene producto con entrega`);
+      // SUS ENTREGAS, EN ORDEN (25/10/2026): la principal de un producto o una de sus entregas extra,
+      // también de varios productos. Cada una se anota con su clave: el reenvío y el correo mandan
+      // exactamente lo que salió.
+      let salio = 0;
+      for (const clave of entregasDeLaFicha(f)) {
+        const e = laEntrega(config, clave);
+        const pasos = pasosActivos(e?.pasos);
+        if (!e || !pasos.length) {
+          console.warn(`[tablero] convo ${convoId}: la entrega «${clave}» no existe o no tiene burbujas`);
+          continue;
+        }
+        await sendConfiguredSteps(convo, conElNombreDelProducto(pasos as never, e.producto.name) as never);
+        anotarEntrega(convoId, clave);
+        anotarPresentados(convoId, [e.producto.id]);
+        salio++;
+      }
+      if (salio === 0) {
+        console.warn(`[tablero] convo ${convoId}: la ficha Entregar no tiene entregas con burbujas`);
       } else {
-        await sendConfiguredSteps(convo, conElNombreDelProducto(p.delivery as never, p.name) as never);
-        anotarEntrega(convoId, p.id);
-        anotarPresentados(convoId, [p.id]);
         // «📧 OFRECER TAMBIÉN POR CORREO»: la pregunta con sus dos botones. La ruta sigue sin esperar;
         // la respuesta se atiende cuando llegue (ver `turnoDelTablero`).
         if (f.por_correo)
@@ -989,7 +1003,10 @@ async function cerrarLaVenta(
  * cambia por su nombre, de cada {a|b} sale la primera, sin asteriscos, y un comodín que el correo
  * no sabe llenar se quita (mejor una línea más corta que «{{ALGO}}» delante del cliente).
  */
-function materialParaElCorreo(productos: ProductoDeLaBiblioteca[]): string {
+/** Lo que va en el correo: cada entrega que salió (la principal de un producto o una extra suya). */
+type LoEntregado = { name?: string; delivery?: SequenceStep[] };
+
+function materialParaElCorreo(productos: LoEntregado[]): string {
   const limpiar = (t: string, nombre: string) =>
     t
       .replace(/\{\{\s*producto(_entregado)?\s*\}\}/gi, nombre)
@@ -1017,7 +1034,7 @@ function materialParaElCorreo(productos: ProductoDeLaBiblioteca[]): string {
  * enviar por correo yo no mando nada más que los enlaces de compra». Salen de las burbujas de entrega
  * de cada producto (los enlaces de su texto y sus archivos de Drive), sin repetir.
  */
-function enlacesParaElCorreo(productos: ProductoDeLaBiblioteca[]): string {
+function enlacesParaElCorreo(productos: LoEntregado[]): string {
   return productos
     .map((p) => {
       const enlaces = new Set<string>();
@@ -1074,9 +1091,10 @@ async function quiereSuCorreo(convo: ConversationRow, t: Tablero, mensaje: strin
  */
 async function enviarElCorreo(convo: ConversationRow, correo: string, f?: FichaDelTablero): Promise<boolean> {
   const config = loadWorkflowConfig();
-  const productos = entregasDelCliente(convo.id)
-    .map((id) => producto(config, id))
-    .filter((p): p is ProductoDeLaBiblioteca => !!p);
+  const productos: LoEntregado[] = entregasDelCliente(convo.id).flatMap((clave) => {
+    const e = laEntrega(config, clave);
+    return e ? [{ name: e.nombre, delivery: e.pasos }] : [];
+  });
   setClientEmail(convo.id, correo);
   if (productos.length === 0) {
     console.warn(`[tablero:correo] convo ${convo.id}: pidió el correo pero aún no se le entregó nada`);

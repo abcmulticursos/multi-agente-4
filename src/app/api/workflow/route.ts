@@ -2155,6 +2155,17 @@ export async function GET() {
           delivery: Array.isArray(item?.delivery)
             ? (item.delivery as Record<string, unknown>[]).map(readStep)
             : [],
+          // LAS ENTREGAS EXTRA (25/10/2026): partes de ESTE producto que se mandan en otro momento
+          // (muestras gratis, un nivel de contribución…). Sus burbujas, traducidas como la entrega.
+          ...(Array.isArray(item?.entregas_extra)
+            ? {
+                entregas_extra: (item.entregas_extra as Record<string, unknown>[]).map((e, j) => ({
+                  id: str(e?.id) || `entrega_${j + 1}`,
+                  nombre: str(e?.nombre),
+                  steps: Array.isArray(e?.steps) ? (e.steps as Record<string, unknown>[]).map(readStep) : [],
+                })),
+              }
+            : {}),
           // SU PRESENTACIÓN COMO UPSELL, con sus burbujas traducidas igual que la
           // entrega. Ver `limpiaPresentacionUpsell`.
           presentacion_upsell: limpiaPresentacionUpsell(
@@ -4026,13 +4037,24 @@ export async function POST(req: NextRequest) {
         pasosParaElArchivo,
         writeGruposDeIntro
       );
-      const { presentacion_upsell: _descartada, ...resto } = producto;
+      const { presentacion_upsell: _descartada, entregas_extra: _extras, ...resto } = producto;
       void _descartada;
+      void _extras;
+      // Las entregas extra, con sus burbujas al formato del motor. Sin ninguna, no se escribe la clave.
+      const extras = Array.isArray(producto?.entregas_extra)
+        ? (producto.entregas_extra as Record<string, unknown>[])
+            .map((e, j) => ({
+              id: str(e?.id) || `entrega_${j + 1}`,
+              nombre: str(e?.nombre),
+              steps: Array.isArray(e?.steps) ? (e.steps as EditorStep[]).map(writeStep) : [],
+            }))
+        : [];
       return {
         ...resto,
         delivery: Array.isArray(producto?.delivery)
           ? (producto.delivery as EditorStep[]).map(writeStep)
           : [],
+        ...(extras.length ? { entregas_extra: extras } : {}),
         ...(presentacion ? { presentacion_upsell: presentacion } : {}),
       };
     });

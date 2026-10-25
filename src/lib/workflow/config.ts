@@ -815,6 +815,12 @@ export interface ProductoDeLaBiblioteca {
   regalos?: string;
   /** Lo que recibe quien lo compra. */
   delivery?: SequenceStep[];
+  /**
+   * ENTREGAS EXTRA (25/10/2026): otras partes de ESTE producto que se mandan en otro momento (muestras
+   * gratis, un nivel de contribución…). Solo las usa la ficha «Entregar» del tablero; la venta de
+   * siempre no las lee.
+   */
+  entregas_extra?: Array<{ id: string; nombre?: string; steps?: SequenceStep[] }>;
   /** Su galería, con la misma forma que las demás. */
   image_gallery?: UpsellConfig["image_gallery"];
   /** Qué incluye / cómo se estudia, para que el bot sepa responder. */

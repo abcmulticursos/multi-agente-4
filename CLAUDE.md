@@ -1026,6 +1026,28 @@ scratchpad (prueba-ui-tablero y -2).
 Prueba: `recorrido-tiendas-ejemplo.mjs --solo=upsell_silencio,upsell_paga_en_regalo,rechazos,emergencia`
 (piden `tiempos-upsell-copia` del scratchpad en la copia).
 
+### Las entregas extra y FIGURARTE (25/10/2026)
+
+«No es producto… se llenaría muy rápido y habría confusión». Un producto tiene su entrega principal
+(`delivery`) y puede tener **📦 Entregas extra** (`entregas_extra: [{id, nombre, steps}]`): otras partes
+SUYAS que se mandan en otro momento (muestras gratis, un nivel de contribución, un bono). Se editan en
+la ficha del producto, debajo de «Lo que recibe al pagar». La venta de siempre NO las lee.
+- **Clave de una entrega:** «producto» = la principal; «producto#entrega» = una extra (`tablero/entregas.ts`).
+- **Ficha Entregar:** `entregas: string[]` (en orden, se pueden mezclar productos); sin la lista vale
+  `producto_id` como antes. Su lista agrupa por producto: los de esa tienda arriba (su selector y los
+  que usa su tablero), «Otros productos · …» abajo. «+ Agregar otra entrega».
+- `tablero_entregas.producto_id` guarda la CLAVE: el reenvío («no me llegaron las muestras») y el correo
+  mandan exactamente lo que salió. Las filas viejas (solo «producto») se leen igual.
+- La ruta de guardado traduce sus burbujas como la entrega (`readStep`/`writeStep`).
+- **TIENDA FIGURARTE** (botón «SÍ», frase «figurarte»), **workflow FIGURARTE 2** (sin tienda; se entra con
+  «Ir a un workflow» o «▶ Activar un workflow») y **TIENDA FIGURARTE 3** (sin botón: «Solo responde SÍ»
+  + un cuadrito escondido con las palabras del sí; frase «colorea por figuras»). En Productos solo queda
+  FIGURARTE, con 5 entregas extra (muestras y niveles S/15–30; su principal = S/10).
+- Contribución: la IA puede reenviar las burbujas del cobro si pide los datos otra vez; la herramienta
+  de datos ya no se usa para contestar una duda (el «dejavu» que vio en otro sistema).
+Prueba: `recorrido-tiendas-ejemplo.mjs --solo=figurarte,figurarte2,figurarte3` (figurarte2 pide
+`prueba-wf-copia.cjs` del scratchpad en la copia) y la de pantalla `prueba-ui-entregas.mjs` (scratchpad).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

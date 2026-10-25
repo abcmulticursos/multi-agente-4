@@ -401,19 +401,41 @@ try {
     await c.borrar();
   }
 
-  // ── TIENDA FIGURARTE (25/10/2026): contribución con muestras gratis, pedida por Alberto ──
-  if (toca("figurarte") && R.pe15 && R.pe5) {
-    console.log("\n· 🇵🇪 TIENDA FIGURARTE — muestras gratis, niveles de S/10 a S/30");
-    const c = await cliente("tienda_tfigurarte", "PE");
+  // ── FIGURARTE (25/10/2026): contribución con muestras gratis, pedida por Alberto. Las muestras y los
+  // niveles son ENTREGAS EXTRA del producto FIGURARTE. Tres formas de armarlo, la misma venta:
+  //   figurarte  → TIENDA FIGURARTE, con botón «SÍ»
+  //   figurarte2 → el workflow FIGURARTE 2 (en la copia se entra por una ficha «Ir a un workflow» de
+  //                `tienda_tprueba_wf`, que pone `prueba-wf-copia.cjs` del scratchpad)
+  //   figurarte3 → TIENDA FIGURARTE 3, sin botón: escribe «si quiero» y lo toma el cuadrito
+  for (const [nombre, tiendaDeFig, si] of [
+    ["figurarte", "tienda_tfigurarte", "si"],
+    ["figurarte2", "tienda_tprueba_wf", "si"],
+    ["figurarte3", "tienda_tfigurarte3", "si quiero"],
+  ]) {
+  if (!(toca(nombre) && R.pe15 && R.pe5)) continue;
+  {
+    console.log(`\n· 🇵🇪 ${nombre.toUpperCase()} — muestras gratis, niveles de S/10 a S/30 (dice «${si}»)`);
+    const c = await cliente(tiendaDeFig, "PE");
     await c.decir("hola figurarte", 50);
     comprobar("la presentación: Rubén, la foto y «Solo responde SÍ»", /Rub[ée]n aqu[ií]/.test(c.nuevo()) && c.nuevo().includes("[MEDIA:image]") && /Solo responde S[ÍI]/.test(c.nuevo()), c.nuevo().slice(-100));
-    await c.decir("si", 60);
+    await c.decir(si, 60);
     const docs = (c.nuevo().match(/\[MEDIA:document\]/g) ?? []).length;
     comprobar("«sí»: «¡Perfecto!» y las 2 muestras gratuitas", /Perfecto/.test(c.nuevo()) && docs === 2, `${docs} archivos`);
     comprobar("los 5 niveles y el Yape/Plin de Alberto", /S\/30 — CONTRIBUCI[ÓO]N GENEROSA/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")) && /Alberto/i.test(c.nuevo()), c.nuevo().slice(-160));
     comprobar("y «envía tu comprobante», sin comodines vacíos", /env[ií]a tu comprobante/i.test(c.nuevo()) && limpio(c.nuevo()), "");
     await c.decir("no entiendo, si pago alguno de estos precios me envian algo mas", 40);
-    comprobar("su duda: la IA la explica (bonos) SIN volver a mandar los datos ni los niveles", /bono/i.test(c.nuevo()) && !cifras(c.nuevo()).includes(cuenta("PE", "yape")) && !/CONTRIBUCI[ÓO]N GENEROSA/.test(c.nuevo()), c.nuevo().slice(0, 160));
+    // El dejavu es que le VUELVAN A LLEGAR los datos (la cuenta o la burbuja de los niveles entera);
+    // nombrar un nivel al explicar no lo es.
+    {
+      const r = c.nuevo();
+      const conCuenta = cifras(r).includes(cuenta("PE", "yape"));
+      const nivelesOtraVez = /Si deseas apoyar este proyecto, puedes elegir/.test(r);
+      comprobar(
+        "su duda: la IA la explica (bonos) SIN volver a mandar los datos ni los niveles",
+        /bono/i.test(r) && !conCuenta && !nivelesOtraVez,
+        `${!/bono/i.test(r) ? "[no habla de bonos] " : ""}${conCuenta ? "[mandó la cuenta] " : ""}${nivelesOtraVez ? "[volvió a mandar los niveles] " : ""}${r.slice(0, 120)}`
+      );
+    }
     await c.decir("no me llegaron las muestras", 50);
     const docs2 = (c.nuevo().match(/\[MEDIA:document\]/g) ?? []).length;
     comprobar("«no me llegaron las muestras»: se reenvían", docs2 === 2, `${docs2} archivos · ${c.nuevo().slice(0, 80)}`);
@@ -426,6 +448,7 @@ try {
     comprobar("aporta 15 más (suma 20): FIGURARTE + 2 BONOS", /FIGURARTE \+ 2 BONOS/.test(t) && /FIGURARTE-bono2/.test(t) && !/FIGURARTE-bono3/.test(t), t.slice(0, 160));
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
     await c.borrar();
+  }
   }
 
   if (toca("otros")) {

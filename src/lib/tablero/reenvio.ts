@@ -9,6 +9,7 @@
 import type { ConversationRow } from "@/lib/db";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { entregasDelCliente, estadoEnElTablero } from "./estado";
+import { laEntrega } from "./entregas";
 
 export function reenviarLoDelTablero(convo: ConversationRow): boolean {
   if (!estadoEnElTablero(convo.id)) return false;
@@ -24,9 +25,10 @@ export function reenviarLoDelTablero(convo: ConversationRow): boolean {
   // el reenvío salía «Entrega de **»).
   void Promise.all([import("@/lib/workflow/engine"), import("./pago")])
     .then(([{ sendConfiguredSteps }, { conElNombreDelProducto }]) => {
-      const pasos = productos.flatMap((id) => {
-        const p = config?.biblioteca_de_productos?.find((x) => x.id === id);
-        return p?.delivery ? conElNombreDelProducto(p.delivery as never, p.name) : [];
+      // Cada clave es una entrega: la principal de un producto o una extra suya (muestras, un nivel…).
+      const pasos = productos.flatMap((clave) => {
+        const e = laEntrega(config, clave);
+        return e?.pasos?.length ? conElNombreDelProducto(e.pasos as never, e.producto.name) : [];
       });
       return sendConfiguredSteps(convo, pasos as never);
     })
