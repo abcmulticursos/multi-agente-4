@@ -121207,6 +121207,7 @@ tableros:
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
+            - ptmascotas_comida
           seguimientos:
             - id: mas_pe_seg_p_1
               minutos: 120
