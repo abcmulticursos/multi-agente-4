@@ -121593,8 +121593,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_b
           tipo: seguimientos
-          x: 1423
-          y: 2088
+          x: 1429
+          y: 2112
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121612,6 +121612,13 @@ tableros:
                           Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
                 - id: mas_ec_seg_b_1b
                   nombre: Versión B
@@ -121639,6 +121646,13 @@ tableros:
                           Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
         - id: mas_ec_cobro_p
           tipo: cobro
@@ -121719,8 +121733,8 @@ tableros:
           producto_id: ptmascotas_comida
         - id: mas_ec_ent_p
           tipo: entregar
-          x: 1941
-          y: 2283
+          x: 2000
+          y: 2427
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_ec_upsell1
