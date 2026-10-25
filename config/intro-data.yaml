@@ -122549,10 +122549,45 @@ tableros:
 
                   *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
               delay_after_sec: 4
-              buttons:
-                - id: b-mvnpmsvw-w1t1o
-                  label: Quiero pagar
-                  action: send_steps
+            - type: text
+              body_variants:
+                - |-
+                  ELIGE UN METODO DE PAGO:
+
+                  {{LISTA_METODOS_POR_PAIS}}
+
+                  🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+              delay_after_sec: 4
+              decisions:
+                - id: b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+                  title: VECINO
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: esmeralda
+                  steps: []
+                - id: 4f959a96-3db6-45ae-8e41-fb003b747bfc
+                  title: PICHINCHA
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: azul
+                  steps: []
+                - id: ab6256e4-7b03-4745-a463-ddb8e2a6645d
+                  title: GUAYAQUIL
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: ambar
                   steps: []
           presenta:
             - ptmascotas_comida
@@ -122623,8 +122658,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-u6enj
           tipo: seguimientos
-          x: 1350
-          y: 5026
+          x: 1353
+          y: 5563
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -122650,6 +122685,47 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: 4f959a96-3db6-45ae-8e41-fb003b747bfc
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: ab6256e4-7b03-4745-a463-ddb8e2a6645d
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
                 - id: v-mvnpmsvw-4nekm
                   nombre: Versión B
                   peso: 1
@@ -122712,8 +122788,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-jxg9n
           tipo: mensaje
-          x: 2885
-          y: 3550
+          x: 4146
+          y: 3393
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122760,8 +122836,8 @@ tableros:
           sin_respuesta_min: 3
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
-          x: 3394
-          y: 3488
+          x: 5233
+          y: 3313
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122780,19 +122856,19 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-92jl4
           tipo: entregar
-          x: 3805
-          y: 3543
+          x: 5644
+          y: 3368
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 4343
-          y: 3834
+          x: 6182
+          y: 3659
           titulo: Regalo
         - id: f-mvnpmsvw-pozfa
           tipo: cobro
-          x: 913
-          y: 4580
+          x: 916
+          y: 5117
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122814,20 +122890,20 @@ tableros:
             sin_preguntar: true
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 2368
-          y: 3370
+          x: 3715
+          y: 3388
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 2381
-          y: 3727
+          x: 3752
+          y: 3722
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
           tipo: seguimientos
-          x: 2153
-          y: 3954
+          x: 2043
+          y: 4003
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -122853,6 +122929,47 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: 4f959a96-3db6-45ae-8e41-fb003b747bfc
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: ab6256e4-7b03-4745-a463-ddb8e2a6645d
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
                 - id: v-mvnpwgvn-jg54s
                   nombre: Versión B
                   peso: 1
@@ -122889,24 +123006,65 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: 4f959a96-3db6-45ae-8e41-fb003b747bfc
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: ab6256e4-7b03-4745-a463-ddb8e2a6645d
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
               ignora_silencio: true
               ignora_tardio: true
         - id: f-mvnq00lf-oig8l
           tipo: entregar
-          x: 1920
-          y: 4569
+          x: 2197
+          y: 5116
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnq00lf-586io
           tipo: entregar
-          x: 1986
-          y: 4831
+          x: 2217
+          y: 5396
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnq2nch-l7c8p
           tipo: mensaje
-          x: 2817
-          y: 4624
+          x: 2820
+          y: 5161
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122953,8 +123111,8 @@ tableros:
           sin_respuesta_min: 3
         - id: f-mvnq43x5-que6q
           tipo: cobro
-          x: 3331
-          y: 4566
+          x: 3334
+          y: 5103
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122973,14 +123131,14 @@ tableros:
             metodos: true
         - id: f-mvnq6181-losm1
           tipo: entregar
-          x: 3782
-          y: 4617
+          x: 3785
+          y: 5154
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnq6s0x-ooeg
           tipo: mensaje
-          x: 3386
-          y: 3940
+          x: 5225
+          y: 3765
           steps:
             - type: text
               body_variants:
@@ -122988,18 +123146,146 @@ tableros:
               delay_after_sec: 6
         - id: f-mvnq83le-l5tfb
           tipo: regalo
-          x: 4205
-          y: 4929
+          x: 4208
+          y: 5466
           titulo: Regalo
         - id: f-mvnq83le-lscae
           tipo: mensaje
-          x: 3316
-          y: 5113
+          x: 3319
+          y: 5650
           steps:
             - type: text
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
+        - id: f-mvo7g67a-vlta3
+          tipo: intro_ob
+          x: 2558
+          y: 4002
+          titulo: Order bump
+          presenta:
+            - ptmascotas_comida
+            - ptmascotas_pack
+          variantes:
+            - id: v-mvo7g67a-w1rso
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                      Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                      ✅ TODAS las 70 RECETAS CASERAS PARA MASCOTAS.
+                      ✅ MÁS los 40 MOLDES DE ROPA PARA MASCOTAS.
+                      ✅ Bonus: calendario de vacunas y desparasitación.
+                  delay_after_sec: 4
+                - type: text
+                  body_variants:
+                    - |-
+                      *¿Cuál prefieres?*
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mvo7g67a-bwwcs
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mvo7g67a-ybmge
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+          sin_respuesta_min: 1
+        - id: f-mvo7gmp2-6y8pb
+          tipo: intro_ob
+          x: 1864
+          y: 5587
+          titulo: Order bump
+          presenta:
+            - ptmascotas_comida
+            - ptmascotas_pack
+          variantes:
+            - id: v-mvo7gmp2-7ol5b
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                      Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                      ✅ TODAS las 70 RECETAS CASERAS PARA MASCOTAS.
+                      ✅ MÁS los 40 MOLDES DE ROPA PARA MASCOTAS.
+                      ✅ Bonus: calendario de vacunas y desparasitación.
+                  delay_after_sec: 4
+                - type: text
+                  body_variants:
+                    - |-
+                      *¿Cuál prefieres?*
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mvo7gmp2-ppnjs
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mvo7gmp2-3xeim
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+          sin_respuesta_min: 1
+        - id: f-mvo7hddp-ow7zr
+          tipo: cobro
+          x: 3047
+          y: 3899
+          titulo: Cobro · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+        - id: f-mvo7hh6u-vasar
+          tipo: cobro
+          x: 3048
+          y: 4231
+          titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_pack
+            acepta:
+              - ptmascotas_comida
+            metodos: true
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -123397,6 +123683,74 @@ tableros:
           de: mas_ec_inicio
           salida: siguiente
           a: f-mvnpmsvw-ph32e
+        - id: c-mvo7evwe-kgx
+          de: f-mvnpmsvw-ph32e
+          salida: dec:b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+          a: f-mvnpmsvw-fa2fp
+        - id: c-mvo7exhh-n6r
+          de: f-mvnpmsvw-ph32e
+          salida: dec:4f959a96-3db6-45ae-8e41-fb003b747bfc
+          a: f-mvnpmsvw-fa2fp
+        - id: c-mvo7ez25-wat
+          de: f-mvnpmsvw-ph32e
+          salida: dec:ab6256e4-7b03-4745-a463-ddb8e2a6645d
+          a: f-mvnpmsvw-fa2fp
+        - id: c-mvo7gdou-7id
+          de: f-mvnpwgvn-c9ae9
+          salida: dec:b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+          a: f-mvo7g67a-vlta3
+        - id: c-mvo7gfg6-lsj
+          de: f-mvnpwgvn-c9ae9
+          salida: dec:4f959a96-3db6-45ae-8e41-fb003b747bfc
+          a: f-mvo7g67a-vlta3
+        - id: c-mvo7gglx-2a3
+          de: f-mvnpwgvn-c9ae9
+          salida: dec:ab6256e4-7b03-4745-a463-ddb8e2a6645d
+          a: f-mvo7g67a-vlta3
+        - id: c-mvo7gzla-hjq
+          de: f-mvnpmsvw-u6enj
+          salida: dec:b1d40bdb-c8ea-4399-9656-a6d6cade1fa7
+          a: f-mvo7gmp2-6y8pb
+        - id: c-mvo7h0gd-wgj
+          de: f-mvnpmsvw-u6enj
+          salida: dec:4f959a96-3db6-45ae-8e41-fb003b747bfc
+          a: f-mvo7gmp2-6y8pb
+        - id: c-mvo7h1id-yeg
+          de: f-mvnpmsvw-u6enj
+          salida: dec:ab6256e4-7b03-4745-a463-ddb8e2a6645d
+          a: f-mvo7gmp2-6y8pb
+        - id: c-mvo7hpbx-a87
+          de: f-mvo7g67a-vlta3
+          salida: btn:b-mvo7g67a-bwwcs
+          a: f-mvo7hddp-ow7zr
+        - id: c-mvo7hqq5-nz6
+          de: f-mvo7g67a-vlta3
+          salida: btn:b-mvo7g67a-ybmge
+          a: f-mvo7hh6u-vasar
+        - id: c-mvo7ipgd-moi
+          de: f-mvo7hddp-ow7zr
+          salida: pagado
+          a: f-mvnpsqoc-avwwz
+        - id: c-mvo7it7p-2kj
+          de: f-mvo7hddp-ow7zr
+          salida: prod:ptmascotas_pack
+          a: f-mvnpsqoc-9kqjp
+        - id: c-mvo7j3v1-k8f
+          de: f-mvo7hh6u-vasar
+          salida: pagado
+          a: f-mvnpsqoc-avwwz
+        - id: c-mvo7j8cu-6qi
+          de: f-mvo7hh6u-vasar
+          salida: prod:ptmascotas_comida
+          a: f-mvnpsqoc-9kqjp
+        - id: c-mvo7juum-752
+          de: f-mvo7gmp2-6y8pb
+          salida: btn:b-mvo7gmp2-ppnjs
+          a: f-mvnq00lf-oig8l
+        - id: c-mvo7jyby-jxv
+          de: f-mvo7gmp2-6y8pb
+          salida: btn:b-mvo7gmp2-3xeim
+          a: f-mvnq00lf-586io
       curvas:
         c3:
           x: 121
