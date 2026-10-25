@@ -122441,6 +122441,10 @@ tableros:
           de: mas_ar_seg_u1
           salida: fin
           a: mas_ar_regalo
+      curvas:
+        c3:
+          x: 121
+          y: 96
       cajas:
         - id: manta-mas_pe_inicio
           x: 20
