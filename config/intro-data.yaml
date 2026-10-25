@@ -122833,7 +122833,7 @@ tableros:
             - ptmascotas_comida
           seguimientos:
             - id: s-mvnpwgvn-ut2l4
-              minutos: 120
+              minutos: 2
               variantes:
                 - id: v-mvnpwgvn-k1x1g
                   nombre: Versión A
@@ -122867,7 +122867,7 @@ tableros:
               ignora_silencio: true
               ignora_tardio: true
             - id: s-mvnpwgvn-tazfo
-              minutos: 600
+              minutos: 4
               variantes:
                 - id: v-mvnpwgvn-62ni3
                   nombre: Versión A
