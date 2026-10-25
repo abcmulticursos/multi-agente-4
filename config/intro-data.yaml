@@ -121470,8 +121470,8 @@ tableros:
           titulo: Regalo
         - id: mas_ec_inicio
           tipo: inicio
-          x: 60
-          y: 1600
+          x: -511
+          y: 2892
           titulo: Tubería order bump
           pais: EC
         - id: mas_ec_intro
@@ -123265,10 +123265,6 @@ tableros:
           de: f-mvnpmsvw-ph32e
           salida: sin_respuesta
           a: f-mvnpmsvw-pozfa
-        - id: c-mvnpqd3w-tra
-          de: mas_ec_inicio
-          salida: siguiente
-          a: mas_ec_intro
         - id: c-mvnpsgeb-1o7
           de: f-mvnpmsvw-pozfa
           salida: sin_pago
@@ -123397,6 +123393,10 @@ tableros:
           de: f-mvnpmsvw-p7yu2
           salida: sin_pago
           a: f-mvnpmsvw-u9oq3
+        - id: c-mvo6b8cx-x8e
+          de: mas_ec_inicio
+          salida: siguiente
+          a: f-mvnpmsvw-ph32e
       curvas:
         c3:
           x: 121
