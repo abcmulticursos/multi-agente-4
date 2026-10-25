@@ -121601,8 +121601,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_b
           tipo: seguimientos
-          x: 1596
-          y: 2129
+          x: 1629
+          y: 2106
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121739,14 +121739,14 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ec_ent_b
           tipo: entregar
-          x: 1941
-          y: 1623
+          x: 2404
+          y: 1954
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_ec_ent_p
           tipo: entregar
-          x: 2140
-          y: 2244
+          x: 2405
+          y: 2147
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_ec_upsell1
@@ -121799,8 +121799,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_ec_cobro_u1
           tipo: cobro
-          x: 3099
-          y: 2031
+          x: 3475
+          y: 1895
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121819,8 +121819,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_u1
           tipo: seguimientos
-          x: 3290
-          y: 2360
+          x: 3779
+          y: 2185
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121868,25 +121868,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ec_ent_u1
           tipo: entregar
-          x: 4293
-          y: 2357
+          x: 3800
+          y: 1936
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_ec_regalo
           tipo: regalo
-          x: 4258
-          y: 1586
+          x: 4353
+          y: 1587
           titulo: Regalo
         - id: mas_ar_inicio
           tipo: inicio
-          x: 264
-          y: 5029
+          x: 238
+          y: 6357
           titulo: Tubería lineal
           pais: AR
         - id: mas_ar_intro
           tipo: mensaje
-          x: 594
-          y: 5029
+          x: 568
+          y: 6357
           titulo: Intro
           steps:
             - type: text
@@ -121946,8 +121946,8 @@ tableros:
           sin_respuesta_min: 30
         - id: mas_ar_cobro
           tipo: cobro
-          x: 924
-          y: 5029
+          x: 898
+          y: 6357
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121966,8 +121966,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_b
           tipo: seguimientos
-          x: 924
-          y: 5359
+          x: 898
+          y: 6687
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -122015,15 +122015,15 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_b
           tipo: entregar
-          x: 1254
-          y: 5029
+          x: 1228
+          y: 6357
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           por_correo: true
           producto_id: ptmascotas_comida
         - id: mas_ar_upsell1
           tipo: mensaje
-          x: 1584
-          y: 5029
+          x: 1558
+          y: 6357
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122070,8 +122070,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_ar_cobro_u1
           tipo: cobro
-          x: 1584
-          y: 5359
+          x: 1558
+          y: 6687
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122090,8 +122090,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_u1
           tipo: seguimientos
-          x: 1584
-          y: 5689
+          x: 1558
+          y: 7017
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -122139,25 +122139,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_u1
           tipo: entregar
-          x: 1914
-          y: 5359
+          x: 1888
+          y: 6687
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           por_correo: true
           producto_id: ptmascotas_citas
         - id: mas_ar_regalo
           tipo: regalo
-          x: 2244
-          y: 5029
+          x: 2218
+          y: 6357
           titulo: Regalo
         - id: mas_otros
           tipo: inicio
-          x: 264
-          y: 6229
+          x: 238
+          y: 7557
           titulo: Otros países
         - id: mas_otros_msg
           tipo: mensaje
-          x: 594
-          y: 6229
+          x: 568
+          y: 7557
           titulo: No vendemos aquí
           steps:
             - type: text
@@ -122166,8 +122166,8 @@ tableros:
               delay_after_sec: 4
         - id: mas_otros_humano
           tipo: humano
-          x: 924
-          y: 6229
+          x: 898
+          y: 7557
           titulo: Pasa a un asesor
         - id: mas_pe_caja
           tipo: cobro
@@ -122217,8 +122217,8 @@ tableros:
             sin_preguntar: true
         - id: mas_ar_caja
           tipo: cobro
-          x: 924
-          y: 5659
+          x: 898
+          y: 6987
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122496,6 +122496,487 @@ tableros:
           y: -363
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
+        - id: f-mvnpmsvw-ph32e
+          tipo: mensaje
+          x: 370
+          y: 3623
+          titulo: Intro
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+                  🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+              caption_variants:
+                - |-
+                  Este es nuestro producto
+
+                  *{{PRODUCTO_BASE}}* 📚
+
+                  ✅ 70 recetas caseras para perros y gatos.
+                  ✅ Porciones según peso y edad.
+                  ✅ Alimentos prohibidos (lista para la refri).
+                  ✅ Snacks y premios saludables.
+
+                  (Imagen referencial)
+              delay_after_sec: 5
+            - type: image
+              drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+              caption_variants:
+                - |-
+                  *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+                  - 🎁 Guía de inicio rápido
+                  - 🎁 Plantillas para imprimir
+                  - 🎁 Acceso de por vida
+
+                  *Bonitos complementos para empezar hoy* 🤗
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+                  ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+                  🟣 *¿CÓMO ADQUIRIRLO?*
+
+                  - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+                  - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+                  *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+              delay_after_sec: 4
+              buttons:
+                - id: b-mvnpmsvw-w1t1o
+                  label: Quiero pagar
+                  action: send_steps
+                  steps: []
+          presenta:
+            - ptmascotas_comida
+          sin_respuesta_min: 1
+        - id: f-mvnpmsvw-fa2fp
+          tipo: intro_ob
+          x: 950
+          y: 3511
+          titulo: Order bump
+          presenta:
+            - ptmascotas_comida
+            - ptmascotas_pack
+          variantes:
+            - id: v-mvnpmsvw-a0kom
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                      Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                      ✅ TODAS las 70 RECETAS CASERAS PARA MASCOTAS.
+                      ✅ MÁS los 40 MOLDES DE ROPA PARA MASCOTAS.
+                      ✅ Bonus: calendario de vacunas y desparasitación.
+                  delay_after_sec: 4
+                - type: text
+                  body_variants:
+                    - |-
+                      *¿Cuál prefieres?*
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mvnpmsvw-fzpte
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mvnpmsvw-2qgjr
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+          sin_respuesta_min: 1
+        - id: f-mvnpmsvw-cg6i5
+          tipo: cobro
+          x: 1508
+          y: 3263
+          titulo: Cobro · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+        - id: f-mvnpmsvw-u6enj
+          tipo: seguimientos
+          x: 1350
+          y: 5026
+          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvnpmsvw-kodfo
+              minutos: 120
+              variantes:
+                - id: v-mvnpmsvw-52lws
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                - id: v-mvnpmsvw-4nekm
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvnpmsvw-5kbo8
+              minutos: 600
+              variantes:
+                - id: v-mvnpmsvw-3pu92
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvnpmsvw-tq1yb
+          tipo: cobro
+          x: 1508
+          y: 3569
+          titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_pack
+            acepta:
+              - ptmascotas_comida
+            metodos: true
+        - id: f-mvnpmsvw-jxg9n
+          tipo: mensaje
+          x: 2885
+          y: 3550
+          titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvnpmsvw-idh78
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-mvnpmsvw-fasqz
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - ptmascotas_citas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+        - id: f-mvnpmsvw-p7yu2
+          tipo: cobro
+          x: 3402
+          y: 3571
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_citas
+            metodos: true
+        - id: f-mvnpmsvw-92jl4
+          tipo: entregar
+          x: 3826
+          y: 3657
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
+        - id: f-mvnpmsvw-u9oq3
+          tipo: regalo
+          x: 3559
+          y: 3897
+          titulo: Regalo
+        - id: f-mvnpmsvw-pozfa
+          tipo: cobro
+          x: 913
+          y: 4580
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+            sin_preguntar: true
+        - id: f-mvnpsqoc-avwwz
+          tipo: entregar
+          x: 2368
+          y: 3370
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
+        - id: f-mvnpsqoc-9kqjp
+          tipo: entregar
+          x: 2381
+          y: 3727
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
+        - id: f-mvnpwgvn-c9ae9
+          tipo: seguimientos
+          x: 2153
+          y: 3954
+          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvnpwgvn-ut2l4
+              minutos: 120
+              variantes:
+                - id: v-mvnpwgvn-k1x1g
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                - id: v-mvnpwgvn-jg54s
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvnpwgvn-tazfo
+              minutos: 600
+              variantes:
+                - id: v-mvnpwgvn-62ni3
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvnq00lf-oig8l
+          tipo: entregar
+          x: 1734
+          y: 4640
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
+        - id: f-mvnq00lf-586io
+          tipo: entregar
+          x: 1743
+          y: 4778
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
+        - id: f-mvnq2nch-l7c8p
+          tipo: mensaje
+          x: 2817
+          y: 4624
+          titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvnq2nch-rtahi
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-mvnq2nch-d9bml
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - ptmascotas_citas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+        - id: f-mvnq43x5-que6q
+          tipo: cobro
+          x: 3318
+          y: 4640
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_citas
+            metodos: true
+        - id: f-mvnq6181-losm1
+          tipo: entregar
+          x: 3741
+          y: 4763
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -122545,10 +123026,6 @@ tableros:
           de: mas_pe_ent_u1
           salida: siguiente
           a: mas_pe_regalo
-        - id: c17
-          de: mas_ec_inicio
-          salida: siguiente
-          a: mas_ec_intro
         - id: c18
           de: mas_ec_intro
           salida: btn:mas_ec_b_pagar
@@ -122757,6 +123234,94 @@ tableros:
           de: f-mvnp7cc7-k3s0b
           salida: siguiente
           a: mas_pe_upsell1
+        - id: c-mvnpp10s-hwl
+          de: f-mvnpmsvw-ph32e
+          salida: btn:b-mvnpmsvw-w1t1o
+          a: f-mvnpmsvw-fa2fp
+        - id: c-mvnpq37n-5de
+          de: f-mvnpmsvw-ph32e
+          salida: sin_respuesta
+          a: f-mvnpmsvw-pozfa
+        - id: c-mvnpqd3w-tra
+          de: mas_ec_inicio
+          salida: siguiente
+          a: mas_ec_intro
+        - id: c-mvnpsgeb-1o7
+          de: f-mvnpmsvw-pozfa
+          salida: sin_pago
+          a: f-mvnpmsvw-u6enj
+        - id: c-mvnpub83-rn7
+          de: f-mvnpmsvw-fa2fp
+          salida: btn:b-mvnpmsvw-fzpte
+          a: f-mvnpmsvw-cg6i5
+        - id: c-mvnpujlv-eem
+          de: f-mvnpmsvw-fa2fp
+          salida: btn:b-mvnpmsvw-2qgjr
+          a: f-mvnpmsvw-tq1yb
+        - id: c-mvnpuz1f-19i
+          de: f-mvnpmsvw-cg6i5
+          salida: pagado
+          a: f-mvnpsqoc-avwwz
+        - id: c-mvnpv4kr-axj
+          de: f-mvnpmsvw-tq1yb
+          salida: pagado
+          a: f-mvnpsqoc-9kqjp
+        - id: c-mvnpy57e-10l
+          de: f-mvnpmsvw-fa2fp
+          salida: sin_respuesta
+          a: f-mvnpmsvw-pozfa
+        - id: c-mvnpzkf6-ac6
+          de: f-mvnpmsvw-cg6i5
+          salida: sin_pago
+          a: f-mvnpwgvn-c9ae9
+        - id: c-mvnpzmmy-jpe
+          de: f-mvnpmsvw-tq1yb
+          salida: sin_pago
+          a: f-mvnpwgvn-c9ae9
+        - id: c-mvnq0nb7-l5z
+          de: f-mvnpmsvw-pozfa
+          salida: pagado
+          a: f-mvnq00lf-oig8l
+        - id: c-mvnq0otm-tdy
+          de: f-mvnpmsvw-pozfa
+          salida: prod:ptmascotas_pack
+          a: f-mvnq00lf-586io
+        - id: c-mvnq2i22-7fq
+          de: f-mvnpsqoc-avwwz
+          salida: siguiente
+          a: f-mvnpmsvw-jxg9n
+        - id: c-mvnq2jfl-5x9
+          de: f-mvnpsqoc-9kqjp
+          salida: siguiente
+          a: f-mvnpmsvw-jxg9n
+        - id: c-mvnq2u49-ql3
+          de: f-mvnq00lf-oig8l
+          salida: siguiente
+          a: f-mvnq2nch-l7c8p
+        - id: c-mvnq2vnd-or7
+          de: f-mvnq00lf-586io
+          salida: siguiente
+          a: f-mvnq2nch-l7c8p
+        - id: c-mvnq41m1-o7x
+          de: f-mvnpmsvw-jxg9n
+          salida: dec:d-mvnpmsvw-idh78
+          a: f-mvnpmsvw-p7yu2
+        - id: c-mvnq48ex-zgx
+          de: f-mvnq2nch-l7c8p
+          salida: dec:d-mvnq2nch-rtahi
+          a: f-mvnq43x5-que6q
+        - id: c-mvnq55yp-d55
+          de: f-mvnpmsvw-jxg9n
+          salida: dec:d-mvnpmsvw-fasqz
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvnq5u7t-eth
+          de: f-mvnpmsvw-p7yu2
+          salida: pagado
+          a: f-mvnpmsvw-92jl4
+        - id: c-mvnq64qp-rmt
+          de: f-mvnq43x5-que6q
+          salida: pagado
+          a: f-mvnq6181-losm1
       curvas:
         c3:
           x: 121
@@ -122790,20 +123355,20 @@ tableros:
         - id: manta-mas_ec_inicio
           x: 20
           y: 1519
-          ancho: 4842
-          alto: 2361
+          ancho: 5720
+          alto: 4474
           titulo: ""
           inicio: mas_ec_inicio
         - id: manta-mas_ar_inicio
-          x: 224
-          y: 4959
+          x: 198
+          y: 6287
           ancho: 2310
           alto: 1020
           titulo: ""
           inicio: mas_ar_inicio
         - id: manta-mas_otros
-          x: 224
-          y: 6159
+          x: 198
+          y: 7487
           ancho: 1280
           alto: 620
           titulo: ""
