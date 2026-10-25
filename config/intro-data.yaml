@@ -115205,14 +115205,14 @@ pizarra:
           x: -254
           y: -1604
         inicio:EC:
-          x: -10
-          y: 264
+          x: -124
+          y: 1660
         inicio:AR:
-          x: -10
-          y: 508
+          x: -124
+          y: 1904
         inicio:CO:
-          x: -10
-          y: 752
+          x: -124
+          y: 2148
         suelta:intro:44:
           x: 410
           y: -832
@@ -115301,8 +115301,8 @@ pizarra:
           x: 1355
           y: -204
         dest:pz:PE:seg:0:seg:0:37:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
-          x: 1079
-          y: -2196
+          x: 1249
+          y: -2192
         dest:pz:PE:ob:ob:15:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvn44pcg0:
           x: 2197
           y: -579
@@ -115353,27 +115353,27 @@ pizarra:
           y: -1770
       cajas:
         - id: caja:carril:PE
-          x: 240
+          x: 224
           y: -2523
-          ancho: 3649
-          alto: 2697
+          ancho: 3736
+          alto: 2944
           titulo: "🇵🇪 🇵🇪 Peru · vacío: conecta su intro desde el Inicio"
         - id: caja:carril:EC
-          x: 290
-          y: 234
-          ancho: 2410
+          x: 176
+          y: 1630
+          ancho: 2524
           alto: 184
           titulo: "🇪🇨 🇪🇨 Ecuador · vacío: conecta su intro desde el Inicio"
         - id: caja:carril:AR
-          x: 290
-          y: 478
-          ancho: 2410
+          x: 176
+          y: 1874
+          ancho: 2524
           alto: 184
           titulo: "🇦🇷 🇦🇷 Argentina · vacío: conecta su intro desde el Inicio"
         - id: caja:carril:CO
-          x: 290
-          y: 722
-          ancho: 2410
+          x: 176
+          y: 2118
+          ancho: 2524
           alto: 184
           titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
       visibles:
