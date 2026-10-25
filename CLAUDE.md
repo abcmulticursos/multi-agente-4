@@ -1006,6 +1006,26 @@ intro → «yape» → datos a 15 → comprobante → entrega; y el enlace del a
 `recorrido-tiendas-ejemplo.mjs` (ahora espera el silencio del regalo) y las dos de pantalla del
 scratchpad (prueba-ui-tablero y -2).
 
+### El tablero, séptima vuelta (25/10/2026): los 3 esenciales para vender con él
+
+«Termina esos 3 que faltan… si me vas a entregar algo que después necesite arreglo, mejor nada».
+- **3 comprobantes rechazados → el aviso de siempre** (`trackFailedPaymentAttempt` en `atenderComprobante`:
+  ilegible, sin fecha, titular equivocado). Pagar lo reinicia (`resetPaymentAttemptsFailed`). Un pago
+  incompleto no cuenta (se suma), como en la venta de siempre.
+- **Emergencia y pedido de asesor:** la IA del tablero tiene `notify_admin_emergency` y
+  `notify_admin_advisor_request` (las de `emergency.ts`), con la regla de siempre: primero intentar
+  resolver, ofrecer el asesor y SOLO con el «sí» avisar. Marca el reclamo (`had_emergency`).
+- **El silencio cuenta desde el ÚLTIMO mensaje del cliente** (`respondio`): antes, quien escribía algo y
+  se callaba no recibía nunca su «no respondió» (ni seguimientos tras la intro, ni regalo tras el upsell).
+- **El upsell sin respuesta → el regalo**, como `upsell_timeout`: el traductor le pone «no respondió» y a
+  su cobro «no pagó» → Regalo, con el silencio de la sección Regalo (`silencioDelRegalo`); la fila no
+  ofrece más. Las tiendas de ejemplo recibieron los mismos cables (y sus recordatorios del upsell,
+  «terminaron» → Regalo; ese final espera ≥ 60 min tras el último, como siempre).
+- **El cobro sigue abierto durante el regalo:** un comprobante de pago ahí lo atiende el tablero (lo
+  demás sigue siendo del regalo); se entrega y la ruta NO sigue (ni upsell siguiente ni regalo repetido).
+Prueba: `recorrido-tiendas-ejemplo.mjs --solo=upsell_silencio,upsell_paga_en_regalo,rechazos,emergencia`
+(piden `tiempos-upsell-copia` del scratchpad en la copia).
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

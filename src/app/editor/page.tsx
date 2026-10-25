@@ -34538,6 +34538,8 @@ function exportarTienda(cfg: FullConfig, tiendaId: string): Record<string, unkno
     vistas: JSON.parse(JSON.stringify(vistas)),
     // La espera antes del upsell 1 (los de la fila llevan la suya en `filaDeUpsell`).
     ...(typeof cfg.upsell?.retraso_minutos === "number" ? { retrasoDelUpsell: cfg.upsell.retraso_minutos } : {}),
+    // El silencio antes del regalo: el tablero lo usa para «el upsell sin respuesta → regalo».
+    ...(typeof cfg.globals?.awaiting_email_timeout_seconds === "number" ? { silencioDelRegalo: cfg.globals.awaiting_email_timeout_seconds } : {}),
     // Los minutos de cada seguimiento: con ellos el tablero arma sus tiempos iguales.
     tiemposDeSeguimiento: Object.fromEntries(
       channelContentForMode(cfg, "whatsapp", mode).followups.flatMap((f, i) =>

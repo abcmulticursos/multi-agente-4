@@ -41,6 +41,8 @@ export interface TiendaExportada {
   filaDeUpsell?: { enabled?: boolean; puestos?: Array<{ producto_id?: string; enabled?: boolean; minutos?: number }> };
   /** Minutos tras la entrega antes del upsell 1 (el «retraso» del upsell de la pizarra). */
   retrasoDelUpsell?: number;
+  /** Segundos de silencio antes del regalo («Se ofrece tras X min» de la sección Regalo). */
+  silencioDelRegalo?: number;
   fichas?: Array<{ canal: string; piezaId: string; obj: Grupo }>;
   /** Minutos de cada seguimiento (índice del seguimiento → minutos). Si falta, los de siempre. */
   tiemposDeSeguimiento?: Record<string, number>;
@@ -384,6 +386,11 @@ export function tableroDesdeLaPizarra(
       for (const otro of opciones) if (otro !== pid) cable(c, `prod:${otro}`, entregaDe(otro, 4, otro === basico ? 0 : 2));
     }
     pendientes = pendientes.filter(([e], i, l) => l.findIndex(([x]) => x === e) === i);
+    // EL SILENCIO ANTE UN UPSELL LLEVA AL REGALO, como en la venta de siempre (`upsell_timeout`): sin
+    // contestar, o con el «sí» y sin pagar, tras el silencio de la sección Regalo sale el regalo, y la
+    // fila no ofrece más. El cobro sigue abierto: si paga después, se le entrega igual.
+    const minutosDelRegalo = Math.max(1, Math.round((datos.silencioDelRegalo ?? 300) / 60));
+    const alRegaloPorSilencio: Array<[string, string]> = [];
     upsells.forEach((pid, i) => {
       const col = 5 + i * 2;
       const g = misUps[i] ?? misUps[0];
@@ -414,7 +421,12 @@ export function tableroDesdeLaPizarra(
           avisos.push(`${pais || "Otros países"}: al upsell ${i + 1} le puse un «No» (en la pizarra lo detectaba el bot solo), que lleva al regalo.`);
         }
       }
-      const fu = poner({ id: uid("up"), tipo: "mensaje", titulo: `Upsell ${i + 1} · ${nombreDe(pid)}`, presenta: [pid], steps: pasos as FichaDelTablero["steps"] }, col, 0);
+      const fu = poner(
+        { id: uid("up"), tipo: "mensaje", titulo: `Upsell ${i + 1} · ${nombreDe(pid)}`, presenta: [pid], steps: pasos as FichaDelTablero["steps"], sin_respuesta_min: minutosDelRegalo },
+        col,
+        0
+      );
+      alRegaloPorSilencio.push([fu, "sin_respuesta"]);
       // LA ESPERA DE SIEMPRE antes de ofrecerlo (en la pizarra, «minutos tras la entrega»). Solo
       // tras la entrega: quien dijo «no» al anterior no espera.
       const minutos = Math.max(1, Math.round(conEspera[i]?.minutos ?? 5));
@@ -422,12 +434,13 @@ export function tableroDesdeLaPizarra(
       cable(espera, "siguiente", fu);
       for (const [de, salida] of pendientes) cable(de, salida, salida === "siguiente" && fichas.find((x) => x.id === de)?.tipo === "entregar" ? espera : fu);
       const cu = poner(
-        { id: uid("cobro"), tipo: "cobro", titulo: `Cobro · ${nombreDe(pid)}`, sin_pago_min: 60, cobro: { modo: "producto", producto_id: pid, acepta: [], precio: "etapa", metodos: true }, steps: copiarPasos(pasosDelCobro as Paso[]) as FichaDelTablero["steps"] },
+        { id: uid("cobro"), tipo: "cobro", titulo: `Cobro · ${nombreDe(pid)}`, sin_pago_min: minutosDelRegalo, cobro: { modo: "producto", producto_id: pid, acepta: [], precio: "etapa", metodos: true }, steps: copiarPasos(pasosDelCobro as Paso[]) as FichaDelTablero["steps"] },
         col,
         1
       );
       const eu = poner({ id: uid("entrega"), tipo: "entregar", titulo: `Entrega · ${nombreDe(pid)}`, producto_id: pid }, col + 1, 1);
       cable(cu, "pagado", eu);
+      alRegaloPorSilencio.push([cu, "sin_pago"]);
       const siguientes: Array<[string, string]> = [[eu, "siguiente"]];
       for (const p of activos(pasos))
         for (const o of [
@@ -457,7 +470,7 @@ export function tableroDesdeLaPizarra(
       pendientes = siguientes;
     });
     const regalo = poner({ id: uid("regalo"), tipo: "regalo", titulo: "Regalo" }, 5 + upsells.length * 2, 0);
-    for (const [de, salida] of pendientes) cable(de, salida, regalo);
+    for (const [de, salida] of [...pendientes, ...alRegaloPorSilencio]) cable(de, salida, regalo);
   });
 
   const tablero: Tablero = { encendido: false, fichas, cables, cajas: [] };

@@ -303,6 +303,104 @@ try {
     await c.borrar();
   }
 
+  // ── EL UPSELL SIN RESPUESTA LLEVA AL REGALO (25/10/2026), como la venta de siempre ──
+  // Piden antes `tiempos-upsell-copia.mjs` en la copia (el «no pagó» del upsell 1 y sus recordatorios a
+  // 1–2 minutos; su «no respondió» se queda en los 3 min reales).
+  const REGALO = /regalit|CUENTOS/i;
+  if (toca("upsell_silencio") && R.ec3) {
+    console.log("\n· 🇪🇨 PEQUEÑOS FELICES: pregunta por el upsell y se calla → le llega el regalo, sin el upsell 2");
+    const c = await cliente("tienda_tninos", "EC");
+    await c.decir("hola", 45);
+    await c.decir("quiero pagar", 35);
+    await c.decir("1", 30);
+    await c.decir("pichincha", 30);
+    await c.foto(R.ec3, 70);
+    comprobar("paga 3: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", c.nuevo().includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(c.nuevo()), c.nuevo().slice(-120));
+    await c.decir("y ese que trae", 35);
+    comprobar("pregunta: le contesta la IA", c.nuevo().trim().length > 0, c.nuevo().slice(0, 120));
+    comprobar("todavía sin regalo (no pasó su «no respondió» de 3 min)", !REGALO.test(c.bot.join("\n")), "");
+    const desde = c.bot.length;
+    // «No respondió» del upsell: 3 min desde su pregunta (si contara desde la oferta, ya habría salido).
+    await c.leer(Math.max(180, SILENCIO_DEL_REGALO) + 60);
+    const tras = c.bot.slice(desde).join("\n");
+    comprobar("se calla: el reloj volvió a contar desde su pregunta y le llega el regalo", REGALO.test(tras), tras.slice(0, 140));
+    comprobar("y NO le ofrece el upsell 2 (la fila se para, como la venta de siempre)", !/TARJETAS DE EMOCIONES/.test(tras), "");
+    await c.borrar();
+  }
+
+  if (toca("upsell_paga_en_regalo") && R.pe15 && R.pe5) {
+    console.log("\n· 🇵🇪 PEQUEÑOS FELICES: dice «sí» al upsell, no paga, le llega el regalo y AHÍ paga");
+    const c = await cliente("tienda_tninos", "PE");
+    await c.decir("hola", 45);
+    await c.decir("1", 30);
+    await c.decir("yape", 30);
+    await c.foto(R.pe15, 70);
+    comprobar("paga 15: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", c.nuevo().includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(c.nuevo()), c.nuevo().slice(-120));
+    await c.decir("si", 35);
+    comprobar("«sí»: los datos con 5", /5/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")), c.nuevo().slice(0, 140));
+    const desde = c.bot.length;
+    // no pagó (1 min) → el regalo (en la copia, el cable como lo arma el traductor; espera su silencio)
+    let tras = "";
+    for (let i = 0; i < 14 && !REGALO.test(tras); i++) {
+      await c.leer(30);
+      tras = c.bot.slice(desde).join("\n");
+    }
+    comprobar("no paga: le llega el regalo", REGALO.test(tras), tras.slice(-140));
+    const regalos = () => (c.bot.join("\n").match(REGALO) ?? []).length;
+    const antes = regalos();
+    await c.foto(R.pe5, 80);
+    comprobar("paga 5 en medio del regalo: le entrega NAVIDAD EN FAMILIA", c.nuevo().includes(entregaDe("navidad-familia")), c.nuevo().slice(0, 160));
+    await c.leer(Math.max(30, SILENCIO_DEL_REGALO) + 30);
+    comprobar("y no le ofrece el upsell 2 en medio del regalo", !/TARJETAS DE EMOCIONES/.test(c.bot.slice(desde).join("\n")), "");
+    comprobar("ni le repite el regalo", regalos() === antes, `${antes} → ${regalos()}`);
+    await c.borrar();
+  }
+
+  // ── LOS AVISOS AL DUEÑO, como la venta de siempre (25/10/2026) ──
+  // La base de datos de la copia: el contador de rechazos y la marca de reclamo.
+  const db = () => new (require("better-sqlite3"))(join(RAIZ, "data", "messages.db"), { readonly: true });
+  const fila = (id) => {
+    const d = db();
+    try {
+      return d.prepare("SELECT payment_attempts_failed AS fallos, had_emergency AS reclamo FROM conversations WHERE id = ?").get(id) ?? {};
+    } finally {
+      d.close();
+    }
+  };
+  const NO_ES_COMPROBANTE = join(RAIZ, "public", "meta-app-logo.png");
+  if (toca("rechazos") && R.pe15 && existsSync(NO_ES_COMPROBANTE)) {
+    console.log("\n· 🇵🇪 COCINA: 3 imágenes que no son comprobantes → el aviso de siempre; paga bien → vuelve a cero");
+    const c = await cliente("tienda_tcocina", "PE");
+    await c.decir("hola", 45);
+    await c.tocar("coc_pe_b_basico", "Opción 1");
+    await c.decir("yape", 30);
+    for (let i = 0; i < 3; i++) await c.foto(NO_ES_COMPROBANTE, 40);
+    comprobar("3 rechazos seguidos: el contador del aviso llega a 3", fila(c.id).fallos === 3, `${fila(c.id).fallos}`);
+    comprobar("y al cliente le contesta (otra foto o qué es esa imagen)", /foto|captura|comprobante|imagen/i.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.foto(R.pe15, 70);
+    comprobar("paga 15: le entrega DIETAS FIT", c.nuevo().includes(entregaDe("dietas-fit")), c.nuevo().slice(0, 120));
+    comprobar("y el contador vuelve a 0", fila(c.id).fallos === 0, `${fila(c.id).fallos}`);
+    await c.borrar();
+  }
+
+  if (toca("emergencia")) {
+    console.log("\n· 🇵🇪 COCINA (con la IA): un problema que no se resuelve → ofrece un asesor → «sí» → te avisa");
+    const c = await cliente("tienda_tcocina", "PE");
+    await c.decir("hola", 45);
+    const turnos = ["no puedo pagar, el yape me sale error", "sigue igual, ya intente varias veces y nada", "ya probe todo y no funciona, estoy cansado", "si por favor", "si"];
+    let ofrecio = false;
+    for (const t of turnos) {
+      if (fila(c.id).reclamo === 1) break;
+      if (/^si/.test(t) && !ofrecio) continue;
+      await c.decir(t, 35);
+      if (/asesor/i.test(c.nuevo())) ofrecio = true;
+    }
+    comprobar("la IA le ofrece un asesor (no en el primer mensaje)", ofrecio, "");
+    comprobar("dice «sí»: queda marcado como reclamo (y en vivo te llega el aviso 🚨)", fila(c.id).reclamo === 1, `${fila(c.id).reclamo}`);
+    comprobar("y al cliente le dice que un asesor lo contactará", /se contactar|comunicar[aá]|asesor/i.test(c.bot.slice(-6).join("\n")), c.bot.slice(-2).join(" ").slice(0, 140));
+    await c.borrar();
+  }
+
   if (toca("otros")) {
     console.log("\n· 🌍 OTROS PAÍSES (Colombia): no vende y pasa a un asesor");
     const c = await cliente("tienda_tcocina", "CO");

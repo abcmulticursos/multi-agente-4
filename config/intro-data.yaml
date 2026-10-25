@@ -115766,6 +115766,7 @@ tableros:
           presenta:
             - ptcocina_peruanas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: coc_pe_cobro_u1
           tipo: cobro
           x: 1710
@@ -116140,6 +116141,7 @@ tableros:
           presenta:
             - ptcocina_peruanas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: coc_ec_cobro_u1
           tipo: cobro
           x: 1710
@@ -116394,6 +116396,7 @@ tableros:
           presenta:
             - ptcocina_peruanas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: coc_ar_cobro_u1
           tipo: cobro
           x: 1380
@@ -116495,6 +116498,73 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: coc_pe_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
+          x: 720
+          y: 630
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+            acepta:
+              - ptcocina_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: coc_ec_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
+          x: 1050
+          y: 2230
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+            acepta:
+              - ptcocina_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: coc_ar_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · RECETARIO DIETAS FIT
+          x: 720
+          y: 3830
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
       cables:
         - id: c1
           de: coc_pe_inicio
@@ -116691,19 +116761,75 @@ tableros:
         - id: coc_pe_intro_sinresp
           de: coc_pe_intro
           salida: sin_respuesta
-          a: coc_pe_seg_b
+          a: coc_pe_caja
         - id: coc_ec_intro_sinresp
           de: coc_ec_intro
           salida: sin_respuesta
-          a: coc_ec_seg_b
+          a: coc_ec_caja
         - id: coc_ec_ob_sinresp
           de: coc_ec_ob
           salida: sin_respuesta
-          a: coc_ec_seg_b
+          a: coc_ec_caja
         - id: coc_ar_intro_sinresp
           de: coc_ar_intro
           salida: sin_respuesta
+          a: coc_ar_caja
+        - id: coc_pe_caja_pagado
+          de: coc_pe_caja
+          salida: pagado
+          a: coc_pe_ent_b
+        - id: coc_pe_caja_prod_ptcocina_pack
+          de: coc_pe_caja
+          salida: prod:ptcocina_pack
+          a: coc_pe_ent_p
+        - id: coc_pe_caja_sin_pago
+          de: coc_pe_caja
+          salida: sin_pago
+          a: coc_pe_seg_b
+        - id: coc_ec_caja_pagado
+          de: coc_ec_caja
+          salida: pagado
+          a: coc_ec_ent_b
+        - id: coc_ec_caja_prod_ptcocina_pack
+          de: coc_ec_caja
+          salida: prod:ptcocina_pack
+          a: coc_ec_ent_p
+        - id: coc_ec_caja_sin_pago
+          de: coc_ec_caja
+          salida: sin_pago
+          a: coc_ec_seg_b
+        - id: coc_ar_caja_pagado
+          de: coc_ar_caja
+          salida: pagado
+          a: coc_ar_ent_b
+        - id: coc_ar_caja_sin_pago
+          de: coc_ar_caja
+          salida: sin_pago
           a: coc_ar_seg_b
+        - id: c_coc_pe_upsell1_sin_respuesta
+          de: coc_pe_upsell1
+          salida: sin_respuesta
+          a: coc_pe_regalo
+        - id: c_coc_pe_seg_u1_fin
+          de: coc_pe_seg_u1
+          salida: fin
+          a: coc_pe_regalo
+        - id: c_coc_ec_upsell1_sin_respuesta
+          de: coc_ec_upsell1
+          salida: sin_respuesta
+          a: coc_ec_regalo
+        - id: c_coc_ec_seg_u1_fin
+          de: coc_ec_seg_u1
+          salida: fin
+          a: coc_ec_regalo
+        - id: c_coc_ar_upsell1_sin_respuesta
+          de: coc_ar_upsell1
+          salida: sin_respuesta
+          a: coc_ar_regalo
+        - id: c_coc_ar_seg_u1_fin
+          de: coc_ar_seg_u1
+          salida: fin
+          a: coc_ar_regalo
       cajas:
         - id: manta-coc_pe_inicio
           x: 20
@@ -117034,6 +117160,7 @@ tableros:
           presenta:
             - ptninos_navidad
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_pe_cobro_u1
           tipo: cobro
           x: 1380
@@ -117156,6 +117283,7 @@ tableros:
           presenta:
             - ptninos_emociones
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_pe_cobro_u2
           tipo: cobro
           x: 2040
@@ -117574,6 +117702,7 @@ tableros:
           presenta:
             - ptninos_navidad
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_ec_cobro_u1
           tipo: cobro
           x: 1710
@@ -117696,6 +117825,7 @@ tableros:
           presenta:
             - ptninos_emociones
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_ec_cobro_u2
           tipo: cobro
           x: 2370
@@ -117977,6 +118107,7 @@ tableros:
           presenta:
             - ptninos_navidad
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_ar_cobro_u1
           tipo: cobro
           x: 1380
@@ -118100,6 +118231,7 @@ tableros:
           presenta:
             - ptninos_emociones
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: nin_ar_cobro_u2
           tipo: cobro
           x: 2040
@@ -118201,6 +118333,73 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: nin_pe_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
+          x: 720
+          y: 630
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptninos_rabietas
+            acepta:
+              - ptninos_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: nin_ec_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
+          x: 1050
+          y: 2230
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptninos_rabietas
+            acepta:
+              - ptninos_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: nin_ar_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · ADIÓS RABIETAS
+          x: 720
+          y: 3830
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptninos_rabietas
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
       cables:
         - id: c1
           de: nin_pe_inicio
@@ -118445,19 +118644,99 @@ tableros:
         - id: nin_pe_intro_sinresp
           de: nin_pe_intro
           salida: sin_respuesta
-          a: nin_pe_seg_b
+          a: nin_pe_caja
         - id: nin_ec_intro_sinresp
           de: nin_ec_intro
           salida: sin_respuesta
-          a: nin_ec_seg_b
+          a: nin_ec_caja
         - id: nin_ec_ob_sinresp
           de: nin_ec_ob
           salida: sin_respuesta
-          a: nin_ec_seg_b
+          a: nin_ec_caja
         - id: nin_ar_intro_sinresp
           de: nin_ar_intro
           salida: sin_respuesta
+          a: nin_ar_caja
+        - id: nin_pe_caja_pagado
+          de: nin_pe_caja
+          salida: pagado
+          a: nin_pe_ent_b
+        - id: nin_pe_caja_prod_ptninos_pack
+          de: nin_pe_caja
+          salida: prod:ptninos_pack
+          a: nin_pe_ent_p
+        - id: nin_pe_caja_sin_pago
+          de: nin_pe_caja
+          salida: sin_pago
+          a: nin_pe_seg_b
+        - id: nin_ec_caja_pagado
+          de: nin_ec_caja
+          salida: pagado
+          a: nin_ec_ent_b
+        - id: nin_ec_caja_prod_ptninos_pack
+          de: nin_ec_caja
+          salida: prod:ptninos_pack
+          a: nin_ec_ent_p
+        - id: nin_ec_caja_sin_pago
+          de: nin_ec_caja
+          salida: sin_pago
+          a: nin_ec_seg_b
+        - id: nin_ar_caja_pagado
+          de: nin_ar_caja
+          salida: pagado
+          a: nin_ar_ent_b
+        - id: nin_ar_caja_sin_pago
+          de: nin_ar_caja
+          salida: sin_pago
           a: nin_ar_seg_b
+        - id: c_nin_pe_upsell1_sin_respuesta
+          de: nin_pe_upsell1
+          salida: sin_respuesta
+          a: nin_pe_regalo
+        - id: c_nin_pe_seg_u1_fin
+          de: nin_pe_seg_u1
+          salida: fin
+          a: nin_pe_regalo
+        - id: c_nin_pe_upsell2_sin_respuesta
+          de: nin_pe_upsell2
+          salida: sin_respuesta
+          a: nin_pe_regalo
+        - id: c_nin_pe_seg_u2_fin
+          de: nin_pe_seg_u2
+          salida: fin
+          a: nin_pe_regalo
+        - id: c_nin_ec_upsell1_sin_respuesta
+          de: nin_ec_upsell1
+          salida: sin_respuesta
+          a: nin_ec_regalo
+        - id: c_nin_ec_seg_u1_fin
+          de: nin_ec_seg_u1
+          salida: fin
+          a: nin_ec_regalo
+        - id: c_nin_ec_upsell2_sin_respuesta
+          de: nin_ec_upsell2
+          salida: sin_respuesta
+          a: nin_ec_regalo
+        - id: c_nin_ec_seg_u2_fin
+          de: nin_ec_seg_u2
+          salida: fin
+          a: nin_ec_regalo
+        - id: c_nin_ar_upsell1_sin_respuesta
+          de: nin_ar_upsell1
+          salida: sin_respuesta
+          a: nin_ar_regalo
+        - id: c_nin_ar_seg_u1_fin
+          de: nin_ar_seg_u1
+          salida: fin
+          a: nin_ar_regalo
+        - id: c_nin_ar_upsell2_sin_respuesta
+          de: nin_ar_upsell2
+          salida: sin_respuesta
+          a: nin_ar_regalo
+        - id: c_nin_ar_seg_u2_fin
+          de: nin_ar_seg_u2
+          salida: fin
+          a: nin_ar_regalo
       cajas:
         - id: manta-nin_pe_inicio
           x: 20
@@ -118674,6 +118953,7 @@ tableros:
           presenta:
             - pttaller_madera
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_pe_cobro_u1
           tipo: cobro
           x: 1380
@@ -118796,6 +119076,7 @@ tableros:
           presenta:
             - pttaller_calculadora
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_pe_cobro_u2
           tipo: cobro
           x: 2040
@@ -118902,6 +119183,7 @@ tableros:
           presenta:
             - pttaller_soldadura
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_pe_cobro_u3
           tipo: cobro
           x: 2700
@@ -119304,6 +119586,7 @@ tableros:
           presenta:
             - pttaller_madera
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ec_cobro_u1
           tipo: cobro
           x: 1710
@@ -119426,6 +119709,7 @@ tableros:
           presenta:
             - pttaller_calculadora
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ec_cobro_u2
           tipo: cobro
           x: 2370
@@ -119532,6 +119816,7 @@ tableros:
           presenta:
             - pttaller_soldadura
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ec_cobro_u3
           tipo: cobro
           x: 3030
@@ -119781,6 +120066,7 @@ tableros:
           presenta:
             - pttaller_madera
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ar_cobro_u1
           tipo: cobro
           x: 1380
@@ -119904,6 +120190,7 @@ tableros:
           presenta:
             - pttaller_calculadora
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ar_cobro_u2
           tipo: cobro
           x: 2040
@@ -120011,6 +120298,7 @@ tableros:
           presenta:
             - pttaller_soldadura
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: tal_ar_cobro_u3
           tipo: cobro
           x: 2700
@@ -120112,6 +120400,73 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: tal_pe_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
+          x: 720
+          y: 630
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: pttaller_gimnasio
+            acepta:
+              - pttaller_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: tal_ec_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
+          x: 1050
+          y: 2230
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: pttaller_gimnasio
+            acepta:
+              - pttaller_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: tal_ar_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · PLANOS MÁQUINAS DE GIMNASIO
+          x: 720
+          y: 3830
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: pttaller_gimnasio
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
       cables:
         - id: c1
           de: tal_pe_inicio
@@ -120400,19 +120755,123 @@ tableros:
         - id: tal_pe_intro_sinresp
           de: tal_pe_intro
           salida: sin_respuesta
-          a: tal_pe_seg_b
+          a: tal_pe_caja
         - id: tal_ec_intro_sinresp
           de: tal_ec_intro
           salida: sin_respuesta
-          a: tal_ec_seg_b
+          a: tal_ec_caja
         - id: tal_ec_ob_sinresp
           de: tal_ec_ob
           salida: sin_respuesta
-          a: tal_ec_seg_b
+          a: tal_ec_caja
         - id: tal_ar_intro_sinresp
           de: tal_ar_intro
           salida: sin_respuesta
+          a: tal_ar_caja
+        - id: tal_pe_caja_pagado
+          de: tal_pe_caja
+          salida: pagado
+          a: tal_pe_ent_b
+        - id: tal_pe_caja_prod_pttaller_pack
+          de: tal_pe_caja
+          salida: prod:pttaller_pack
+          a: tal_pe_ent_p
+        - id: tal_pe_caja_sin_pago
+          de: tal_pe_caja
+          salida: sin_pago
+          a: tal_pe_seg_b
+        - id: tal_ec_caja_pagado
+          de: tal_ec_caja
+          salida: pagado
+          a: tal_ec_ent_b
+        - id: tal_ec_caja_prod_pttaller_pack
+          de: tal_ec_caja
+          salida: prod:pttaller_pack
+          a: tal_ec_ent_p
+        - id: tal_ec_caja_sin_pago
+          de: tal_ec_caja
+          salida: sin_pago
+          a: tal_ec_seg_b
+        - id: tal_ar_caja_pagado
+          de: tal_ar_caja
+          salida: pagado
+          a: tal_ar_ent_b
+        - id: tal_ar_caja_sin_pago
+          de: tal_ar_caja
+          salida: sin_pago
           a: tal_ar_seg_b
+        - id: c_tal_pe_upsell1_sin_respuesta
+          de: tal_pe_upsell1
+          salida: sin_respuesta
+          a: tal_pe_regalo
+        - id: c_tal_pe_seg_u1_fin
+          de: tal_pe_seg_u1
+          salida: fin
+          a: tal_pe_regalo
+        - id: c_tal_pe_upsell2_sin_respuesta
+          de: tal_pe_upsell2
+          salida: sin_respuesta
+          a: tal_pe_regalo
+        - id: c_tal_pe_seg_u2_fin
+          de: tal_pe_seg_u2
+          salida: fin
+          a: tal_pe_regalo
+        - id: c_tal_pe_upsell3_sin_respuesta
+          de: tal_pe_upsell3
+          salida: sin_respuesta
+          a: tal_pe_regalo
+        - id: c_tal_pe_seg_u3_fin
+          de: tal_pe_seg_u3
+          salida: fin
+          a: tal_pe_regalo
+        - id: c_tal_ec_upsell1_sin_respuesta
+          de: tal_ec_upsell1
+          salida: sin_respuesta
+          a: tal_ec_regalo
+        - id: c_tal_ec_seg_u1_fin
+          de: tal_ec_seg_u1
+          salida: fin
+          a: tal_ec_regalo
+        - id: c_tal_ec_upsell2_sin_respuesta
+          de: tal_ec_upsell2
+          salida: sin_respuesta
+          a: tal_ec_regalo
+        - id: c_tal_ec_seg_u2_fin
+          de: tal_ec_seg_u2
+          salida: fin
+          a: tal_ec_regalo
+        - id: c_tal_ec_upsell3_sin_respuesta
+          de: tal_ec_upsell3
+          salida: sin_respuesta
+          a: tal_ec_regalo
+        - id: c_tal_ec_seg_u3_fin
+          de: tal_ec_seg_u3
+          salida: fin
+          a: tal_ec_regalo
+        - id: c_tal_ar_upsell1_sin_respuesta
+          de: tal_ar_upsell1
+          salida: sin_respuesta
+          a: tal_ar_regalo
+        - id: c_tal_ar_seg_u1_fin
+          de: tal_ar_seg_u1
+          salida: fin
+          a: tal_ar_regalo
+        - id: c_tal_ar_upsell2_sin_respuesta
+          de: tal_ar_upsell2
+          salida: sin_respuesta
+          a: tal_ar_regalo
+        - id: c_tal_ar_seg_u2_fin
+          de: tal_ar_seg_u2
+          salida: fin
+          a: tal_ar_regalo
+        - id: c_tal_ar_upsell3_sin_respuesta
+          de: tal_ar_upsell3
+          salida: sin_respuesta
+          a: tal_ar_regalo
+        - id: c_tal_ar_seg_u3_fin
+          de: tal_ar_seg_u3
+          salida: fin
+          a: tal_ar_regalo
       cajas:
         - id: manta-tal_pe_inicio
           x: 20
@@ -120725,6 +121184,7 @@ tableros:
           presenta:
             - ptmascotas_citas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: mas_pe_cobro_u1
           tipo: cobro
           x: 1380
@@ -121115,6 +121575,7 @@ tableros:
           presenta:
             - ptmascotas_citas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: mas_ec_cobro_u1
           tipo: cobro
           x: 1710
@@ -121385,6 +121846,7 @@ tableros:
           presenta:
             - ptmascotas_citas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
         - id: mas_ar_cobro_u1
           tipo: cobro
           x: 1380
@@ -121486,6 +121948,73 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: mas_pe_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
+          x: 720
+          y: 630
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: mas_ec_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
+          x: 1050
+          y: 2230
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+        - id: mas_ar_caja
+          tipo: cobro
+          titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
+          x: 720
+          y: 3830
+          sin_pago_min: 1
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            metodos: true
+            sin_preguntar: true
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -121670,19 +122199,75 @@ tableros:
         - id: mas_pe_intro_sinresp
           de: mas_pe_intro
           salida: sin_respuesta
-          a: mas_pe_seg_b
+          a: mas_pe_caja
         - id: mas_ec_intro_sinresp
           de: mas_ec_intro
           salida: sin_respuesta
-          a: mas_ec_seg_b
+          a: mas_ec_caja
         - id: mas_ec_ob_sinresp
           de: mas_ec_ob
           salida: sin_respuesta
-          a: mas_ec_seg_b
+          a: mas_ec_caja
         - id: mas_ar_intro_sinresp
           de: mas_ar_intro
           salida: sin_respuesta
+          a: mas_ar_caja
+        - id: mas_pe_caja_pagado
+          de: mas_pe_caja
+          salida: pagado
+          a: mas_pe_ent_b
+        - id: mas_pe_caja_prod_ptmascotas_pack
+          de: mas_pe_caja
+          salida: prod:ptmascotas_pack
+          a: mas_pe_ent_p
+        - id: mas_pe_caja_sin_pago
+          de: mas_pe_caja
+          salida: sin_pago
+          a: mas_pe_seg_b
+        - id: mas_ec_caja_pagado
+          de: mas_ec_caja
+          salida: pagado
+          a: mas_ec_ent_b
+        - id: mas_ec_caja_prod_ptmascotas_pack
+          de: mas_ec_caja
+          salida: prod:ptmascotas_pack
+          a: mas_ec_ent_p
+        - id: mas_ec_caja_sin_pago
+          de: mas_ec_caja
+          salida: sin_pago
+          a: mas_ec_seg_b
+        - id: mas_ar_caja_pagado
+          de: mas_ar_caja
+          salida: pagado
+          a: mas_ar_ent_b
+        - id: mas_ar_caja_sin_pago
+          de: mas_ar_caja
+          salida: sin_pago
           a: mas_ar_seg_b
+        - id: c_mas_pe_upsell1_sin_respuesta
+          de: mas_pe_upsell1
+          salida: sin_respuesta
+          a: mas_pe_regalo
+        - id: c_mas_pe_seg_u1_fin
+          de: mas_pe_seg_u1
+          salida: fin
+          a: mas_pe_regalo
+        - id: c_mas_ec_upsell1_sin_respuesta
+          de: mas_ec_upsell1
+          salida: sin_respuesta
+          a: mas_ec_regalo
+        - id: c_mas_ec_seg_u1_fin
+          de: mas_ec_seg_u1
+          salida: fin
+          a: mas_ec_regalo
+        - id: c_mas_ar_upsell1_sin_respuesta
+          de: mas_ar_upsell1
+          salida: sin_respuesta
+          a: mas_ar_regalo
+        - id: c_mas_ar_seg_u1_fin
+          de: mas_ar_seg_u1
+          salida: fin
+          a: mas_ar_regalo
       cajas:
         - id: manta-mas_pe_inicio
           x: 20

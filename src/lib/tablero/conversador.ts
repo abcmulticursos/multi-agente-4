@@ -13,6 +13,7 @@ import { getClient } from "@/lib/openrouter";
 import { sendBotText } from "@/lib/workflow/sender";
 import { ultimosMensajes } from "./lector";
 import { CEREBRO_DE_FABRICA } from "./datos";
+import { NOTIFY_ADVISOR_TOOL, NOTIFY_EMERGENCY_TOOL, executeNotifyAdvisor, executeNotifyEmergency } from "@/lib/workflow/emergency";
 
 /** Lo que la IA sabe de un producto YA PRESENTADO al cliente (sale de su ficha en Productos). */
 export interface ProductoParaLaIA {
@@ -145,6 +146,9 @@ function cerebro(c: ContextoDeLaIA): string {
     c.instrucciones?.trim() ? `EN ESTA ETAPA, ADEMÁS: ${c.instrucciones.trim().slice(0, 3000)}` : "",
     c.completar ? `Si dice que quiere completar, pagar la diferencia o pasarse a «${c.completar.para}», usa la herramienta completar_al_otro.` : "",
     c.pedirCorreo ? "Si pide que le envíes lo que ya recibió a su correo (email), usa la herramienta enviar_por_correo." : "",
+    // LOS AVISOS AL DUEÑO, con la misma regla que la venta de siempre (25/10/2026).
+    "PROBLEMAS DEL CLIENTE (pago, descarga, acceso, uso…): primero intenta resolverlo tú, al menos 2 veces, con lo que sabes. Si sigue sin resolverse o está molesto, pregúntale: «¿Deseas que un asesor especializado se comunique contigo?». SOLO si responde que sí, usa notify_admin_emergency con el problema concreto. Nunca en su primer mensaje sobre el problema.",
+    "SI PIDE HABLAR CON UNA PERSONA (o quiere comprar pero algo no le queda claro y eso lo frena): ofrécele un asesor con la misma pregunta y, SOLO si dice que sí, usa notify_admin_advisor_request. No lo uses para dudas normales (precio, contenido, formato): esas las contestas tú.",
     c.preguntaPendiente
       ? `Al final, invítalo con naturalidad a responder lo que quedó pendiente: «${c.preguntaPendiente.slice(0, 300)}».`
       : "Cierra con una frase corta que invite a seguir.",
@@ -332,6 +336,9 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
               ...(conMuestras ? [herramientaDeMuestras(c.muestras!.map((m) => m.id))] : []),
               ...(c.pedirCorreo ? [HERRAMIENTA_DE_CORREO] : []),
               ...(c.completar ? [HERRAMIENTA_DE_COMPLETAR] : []),
+              // Los avisos al dueño, las MISMAS herramientas de la venta de siempre (emergency.ts).
+              NOTIFY_EMERGENCY_TOOL,
+              NOTIFY_ADVISOR_TOOL,
             ]
           : [];
       const r = await getClient().chat.completions.create({
@@ -347,6 +354,27 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       if (r.usage) console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} · salida ${r.usage.completion_tokens}`);
       const pidio = (nombre: string) =>
         r.choices[0]?.message?.tool_calls?.some((t) => t.type === "function" && t.function.name === nombre) ?? false;
+      // EL AVISO AL DUEÑO (emergencia o pedido de asesor), como la venta de siempre: se te avisa por
+      // WhatsApp y la IA le dice al cliente el texto acordado.
+      const aviso1 = r.choices[0]?.message?.tool_calls?.find(
+        (x) => x.type === "function" && (x.function.name === "notify_admin_emergency" || x.function.name === "notify_admin_advisor_request")
+      );
+      if (aviso1 && aviso1.type === "function") {
+        let razon = "";
+        try {
+          razon = String(JSON.parse(aviso1.function.arguments || "{}").reason ?? "");
+        } catch {}
+        const res =
+          aviso1.function.name === "notify_admin_emergency"
+            ? await executeNotifyEmergency(convo.id, { reason: razon })
+            : await executeNotifyAdvisor(convo.id, { reason: razon });
+        console.log(`[tablero:ia] convo ${convo.id}: ${aviso1.function.name} → ${res.status} (${razon.slice(0, 80)})`);
+        aviso +=
+          res.status === "sent"
+            ? "\n\nACABAS DE AVISAR AL EQUIPO. Respóndele UNA vez, con naturalidad: «Un asesor especializado se contactará contigo en unos momentos. Mantente pendiente de este chat.»"
+            : "";
+        continue;
+      }
       // «QUIERO COMPLETAR PARA EL OTRO»: lo lleva al cobro con upgrade; de ahí sale lo que toca.
       if (pidio("completar_al_otro") && c.completar) {
         console.log(`[tablero:ia] convo ${convo.id}: quiere completar para «${c.completar.para}»`);

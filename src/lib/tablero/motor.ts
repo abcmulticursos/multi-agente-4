@@ -11,8 +11,10 @@
  *     producto, regalo, avisos, registro en Meta, horas de silencio y la ventana de 24 h.
  *  4. Lo programado lleva su dueño: los `tablero_*` van aquí desde el obrero, nunca al de siempre.
  */
+import { trackFailedPaymentAttempt } from "@/lib/workflow/payment";
 import {
   addToPaidTotal,
+  resetPaymentAttemptsFailed,
   cancelPendingActionsForConvo,
   countPendingActionsInWindow,
   getConversationById,
@@ -424,6 +426,14 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
             { id: `bubble:${BOTON_CORREO_NO}`, title: (f.correo_no || CORREO_NO).slice(0, 20) },
           ]);
       }
+      // PAGÓ DURANTE EL REGALO (el upsell que dijo que sí y pagó tarde): se le entrega y la ruta NO
+      // sigue (no se le ofrece el upsell siguiente en medio del regalo). Como la venta de siempre:
+      // cuando el silencio lleva al regalo, la fila ya no ofrece más. Sigue en el regalo (25/10/2026).
+      if (ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
+        if (antes?.ficha_id && t.fichas.find((x) => x.id === antes.ficha_id)?.tipo === "regalo") moverA(convoId, antes.ficha_id);
+        console.log(`[tablero] convo ${convoId}: entregado durante el regalo → la ruta no sigue`);
+        return;
+      }
       await seguir("siguiente");
       return;
     }
@@ -553,6 +563,12 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
       // El regalo de siempre, tal cual: se pone la conversación donde él lo espera y se programa
       // su pregunta. Al terminar, el motor de siempre avisa (`avisarFinDelRegalo`) y la ruta
       // puede seguir por «Al terminar el regalo».
+      // YA ESTÁ EN EL REGALO (o lo terminó): no se repite. Pasa cuando paga el upsell después de que
+      // el silencio lo llevó al regalo: se le entrega y el regalo sigue donde iba (25/10/2026).
+      if (ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
+        console.log(`[tablero] convo ${convoId}: ya está en el regalo (${convo.state}) → no se repite`);
+        return;
+      }
       if (!convo.paid_at) setPaidAt(convoId, ahora());
       setConversationState(convoId, "payment_approved");
       {
@@ -789,11 +805,20 @@ const SIN_PISTAS =
   "No pude validar ese comprobante. Pídele con amabilidad una foto más clara, donde se vea el comprobante completo. No le digas qué faltó.";
 
 /** Un comprobante con el cobro abierto: se lee, se revisa, se cuenta y se sigue la salida de su monto. */
-async function atenderComprobante(convo: ConversationRow, t: Tablero, estado: EstadoEnElTablero): Promise<void> {
+async function atenderComprobante(
+  convo: ConversationRow,
+  t: Tablero,
+  estado: EstadoEnElTablero,
+  yaLeido?: Awaited<ReturnType<typeof leerComprobante>>
+): Promise<void> {
   const f = t.fichas.find((x) => x.id === estado.cobro_ficha_id);
   if (!f?.cobro) return;
-  const lectura = await leerComprobante(convo.id);
+  const lectura = yaLeido !== undefined ? yaLeido : await leerComprobante(convo.id);
+  // UN COMPROBANTE RECHAZADO SE CUENTA, como en la venta de siempre (`trackFailedPaymentAttempt`):
+  // al tercero seguido te avisa que el cliente no logra pagar. Se reinicia cuando paga.
+  const fallo = (razon: string) => trackFailedPaymentAttempt(getConversationById(convo.id) ?? convo, razon);
   if (!lectura) {
+    fallo("comprobante ilegible o que no es un comprobante");
     await contestarConIA(
       convo,
       t,
@@ -812,6 +837,7 @@ async function atenderComprobante(convo: ConversationRow, t: Tablero, estado: Es
     false;
   if (exigeFecha && !lectura.fecha) {
     console.warn(`[tablero] convo ${convo.id}: comprobante SIN FECHA y el país la exige → no se cuenta`);
+    fallo("comprobante sin fecha visible");
     await contestarConIA(convo, t, SIN_PISTAS);
     return;
   }
@@ -819,6 +845,7 @@ async function atenderComprobante(convo: ConversationRow, t: Tablero, estado: Es
     const esperado = elCobroDelPais(pais as never, config).titular;
     if (esperado && (!lectura.titular || !titularCoincide(esperado, lectura.titular))) {
       console.warn(`[tablero] convo ${convo.id}: comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}» → no se cuenta`);
+      fallo(`comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}»`);
       await contestarConIA(
         convo,
         t,
@@ -902,6 +929,8 @@ async function cerrarLaVenta(
   // lo leen el kanban (comprador y su dinero), los resultados y la autopurga (que NUNCA borra a quien
   // pagó). Sin esto, quien compraba por el tablero se veía como si no hubiera comprado.
   addToPaidTotal(convo.id, Math.round(total * 100));
+  // Pagó: los comprobantes rechazados de antes ya no cuentan (como en la venta de siempre).
+  resetPaymentAttemptsFailed(convo.id);
   if (!convo.paid_at) setPaidAt(convo.id, ahora());
   void sendPurchaseEvent({
     conversationId: convo.id,
@@ -1157,6 +1186,20 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       }
       return true;
     }
+    // EL COMPROBANTE DEL UPSELL QUE LLEGA DURANTE EL REGALO (25/10/2026): dijo que sí, se calló, el
+    // silencio lo llevó al regalo y después paga. El cobro sigue abierto (como en la venta de
+    // siempre, la oferta sigue viva): si la imagen ES un comprobante de pago, la atiende el tablero.
+    // Cualquier otra imagen (la captura del comentario) sigue siendo del regalo.
+    if (t && estado.cobro_ficha_id && estado.cobro_pagado <= 0 && hayComprobantePendiente(convo.id, estado.comprobante_leido)) {
+      marcarComprobanteLeido(convo.id, idDelComprobantePendiente(convo.id));
+      const lectura = await leerComprobante(convo.id);
+      if (lectura) {
+        console.log(`[tablero] convo ${convo.id}: comprobante durante el regalo, con el cobro abierto → lo atiende el tablero`);
+        await atenderComprobante(convo, t, estadoEnElTablero(convo.id) ?? estado, lectura);
+        return true;
+      }
+      return false;
+    }
     const delRegalo =
       !t ||
       !contenido.trim() ||
@@ -1260,7 +1303,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // de la venta de siempre (`messageHasPaymentConcern`), y contesta la IA con empatía.
       const metodo = messageHasPaymentConcern(contenido) ? null : metodoQueNombra(contenido, convo.phone);
       if (metodo) {
-        tocarVuelta(convo.id);
+        respondio(convo, t);
         if (await mandarDatosDelMetodo(convo, metodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
       }
       // Solo entre los que ya se le presentaron: el que sigue oculto no se elige por aquí.
@@ -1283,7 +1326,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         );
         if (decide && decide !== elegidoId) {
           elegirEnElCobro(convo.id, decide);
-          tocarVuelta(convo.id);
+          respondio(convo, t);
           const nombre = producto(config, decide)?.name;
           const yaElegido = metodoVigente(getConversationById(convo.id) ?? convo);
           console.log(`[tablero] convo ${convo.id}: cambia a «${nombre ?? decide}» en el cobro`);
@@ -1308,7 +1351,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // 2-ter. LA FICHA «PEDIR CORREO»: cuando escribe su correo, se le manda el material.
   if (ficha?.tipo === "correo" && !contenido.startsWith("bubble:")) {
     const correo = contenido.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
-    tocarVuelta(convo.id);
+    respondio(convo, t);
     if (!correo) {
       await contestarConIA(convo, t, "Estás esperando su correo electrónico para enviarle el material. Contesta con naturalidad lo que escribió y vuelve a pedirle su correo.");
       return true;
@@ -1392,9 +1435,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (await seguirPor(convo.id, t, ficha.id, "otra", 0)) return true;
   }
 
-  // 8. LO DEMÁS LO CONTESTA LA IA, y el cliente sigue en su ficha. Como sí respondió, el reloj de
-  // «no respondió» ya no sale, y los seguimientos vuelven a contar desde ahora.
-  if (ficha?.tipo === "mensaje" || ficha?.tipo === "intro_ob") tocarVuelta(convo.id);
+  // 8. LO DEMÁS LO CONTESTA LA IA, y el cliente sigue en su ficha. Como respondió, el reloj de
+  // «no respondió» vuelve a contar desde ahora, y los seguimientos también.
+  if (ficha?.tipo === "mensaje" || ficha?.tipo === "intro_ob") respondio(convo, t);
   if (ficha?.tipo === "seguimientos") reprogramarSeguimiento(convo, ficha);
   estado = estadoEnElTablero(convo.id) ?? estado;
   await contestarConIA(convo, t);
@@ -1405,9 +1448,23 @@ async function actuarCuadrito(convo: ConversationRow, t: Tablero, ficha: FichaDe
   if (d.steps?.length) await sendConfiguredSteps(convo, d.steps as never);
   if (await seguirPor(convo.id, t, ficha.id, `dec:${d.id}`, 0)) return;
   if (ficha.tipo === "seguimientos") reprogramarSeguimiento(convo, ficha);
-  else tocarVuelta(convo.id);
+  else respondio(convo, t);
   // Un cuadrito sin burbujas ni cable: que no se quede sin respuesta.
   if (!d.steps?.length) await contestarConIA(convo, t);
+}
+
+/**
+ * EL CLIENTE ESCRIBIÓ Y SIGUE EN SU FICHA: el reloj de «no respondió» vuelve a contar desde ahora
+ * (25/10/2026). Antes solo contaba si NUNCA escribía: quien preguntaba algo y se callaba no recibía
+ * jamás sus seguimientos ni su regalo. La venta de siempre cuenta el silencio desde el último mensaje
+ * del cliente; aquí, igual. El reloj viejo ya no sale (lleva la vuelta anterior).
+ */
+function respondio(convo: ConversationRow, t: Tablero): void {
+  tocarVuelta(convo.id);
+  const e = estadoEnElTablero(convo.id);
+  const f = e ? t.fichas.find((x) => x.id === e.ficha_id) : undefined;
+  if (e && f?.sin_respuesta_min && (f.tipo === "mensaje" || f.tipo === "intro_ob" || f.tipo === "correo"))
+    programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
 }
 
 /** El cliente escribió estando en la caja «Seguimientos»: el que tocaba vuelve a contar desde ahora. */
