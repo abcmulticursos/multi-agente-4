@@ -112022,6 +112022,220 @@ biblioteca_de_productos:
         price_soles: 12
         discount_price_soles: 12
         market_price: 0
+  - id: ptfig_figurarte
+    name: FIGURARTE
+    aliases:
+      - figurarte
+      - artefigura
+      - colorea por figuras
+      - figuras geometricas
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
+
+            Aquí tienes *FIGURARTE* 🎨✨
+
+            📘 *Material completo de FIGURARTE:*
+            https://www.youtube.com/watch?v=FIGURARTE-material
+
+            ¡A disfrutar coloreando! 🌈
+        delay_after_sec: 5
+    image_gallery: []
+    course_content: |-
+      🎨 FIGURARTE: COLOREA POR FIGURAS. Una nueva forma de colorear donde las figuras geométricas se convierten en animales y personajes.
+      ✅ Más de 80 animales para descubrir y colorear.
+      ✅ Más de 30 personajes formados por figuras geométricas.
+      ✅ Círculos, cuadrados, triángulos y rectángulos.
+      ✅ Una forma diferente de colorear, sin utilizar números.
+      ✅ Figuras que se transforman en dibujos.
+      ✅ Actividades que estimulan la creatividad y la atención.
+      ✅ Una experiencia divertida para aprender mientras colorea.
+      ✅ Diseños originales para dar vida con sus colores.
+      🎁 Incluye 4 BONOS SORPRESA según la contribución.
+      📚 Todo digital, en PDF, listo para recibir e imprimir.
+      Funciona así: primero recibe unas muestras gratuitas; luego, si desea, hace una contribución (S/10 a S/30) y recibe el material completo y los bonos de su nivel.
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 10
+        discount_price_soles: 10
+        market_price: 0
+  - id: ptfig_muestras
+    name: FIGURARTE · MUESTRAS GRATUITAS
+    aliases:
+      - muestras
+      - muestra gratis
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - 🎁✨ ¡Aquí tienes tu material!
+        delay_after_sec: 3
+      - type: document
+        drive_url: https://drive.google.com/file/d/1QClNTnkb-vqW4Hf_5b-Epi9-VBAgGLSp/view?usp=sharing
+        caption_variants:
+          - 📄 Muestra 1
+        delay_after_sec: 3
+      - type: document
+        drive_url: https://drive.google.com/file/d/1_kI2R5R7z8KNtSBoMVX3WW9rpRlAKCRf/view?usp=drive_link
+        caption_variants:
+          - 📄 Muestra 2
+        delay_after_sec: 4
+    image_gallery: []
+    course_content: Muestras gratuitas de FIGURARTE para revisar la calidad del material antes de contribuir.
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 0
+        discount_price_soles: 0
+        market_price: 0
+  - id: ptfig_apoyo
+    name: FIGURARTE + 1 BONO
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
+
+            Aquí tienes *FIGURARTE + 1 BONO* 🎨✨
+
+            📘 *Material completo de FIGURARTE:*
+            https://www.youtube.com/watch?v=FIGURARTE-material
+
+            🎁 *Bono 1:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono1
+
+            ¡A disfrutar coloreando! 🌈
+        delay_after_sec: 5
+    image_gallery: []
+    course_content: "FIGURARTE + 1 BONO: el material completo de FIGURARTE con sus bonos, para quien contribuye S/15."
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 15
+        discount_price_soles: 15
+        market_price: 0
+  - id: ptfig_especial
+    name: FIGURARTE + 2 BONOS
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
+
+            Aquí tienes *FIGURARTE + 2 BONOS* 🎨✨
+
+            📘 *Material completo de FIGURARTE:*
+            https://www.youtube.com/watch?v=FIGURARTE-material
+
+            🎁 *Bono 1:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono1
+
+            🎁 *Bono 2:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono2
+
+            ¡A disfrutar coloreando! 🌈
+        delay_after_sec: 5
+    image_gallery: []
+    course_content: "FIGURARTE + 2 BONOS: el material completo de FIGURARTE con sus bonos, para quien contribuye S/20."
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 20
+        discount_price_soles: 20
+        market_price: 0
+  - id: ptfig_bendicion
+    name: FIGURARTE + 3 BONOS
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
+
+            Aquí tienes *FIGURARTE + 3 BONOS* 🎨✨
+
+            📘 *Material completo de FIGURARTE:*
+            https://www.youtube.com/watch?v=FIGURARTE-material
+
+            🎁 *Bono 1:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono1
+
+            🎁 *Bono 2:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono2
+
+            🎁 *Bono 3:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono3
+
+            ¡A disfrutar coloreando! 🌈
+        delay_after_sec: 5
+    image_gallery: []
+    course_content: "FIGURARTE + 3 BONOS: el material completo de FIGURARTE con sus bonos, para quien contribuye S/25."
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 25
+        discount_price_soles: 25
+        market_price: 0
+  - id: ptfig_generosa
+    name: FIGURARTE + TODOS LOS BONOS
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
+
+            Aquí tienes *FIGURARTE + TODOS LOS BONOS* 🎨✨
+
+            📘 *Material completo de FIGURARTE:*
+            https://www.youtube.com/watch?v=FIGURARTE-material
+
+            🎁 *Bono 1:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono1
+
+            🎁 *Bono 2:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono2
+
+            🎁 *Bono 3:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono3
+
+            🎁 *Bono 4:*
+            https://www.youtube.com/watch?v=FIGURARTE-bono4
+
+            💖 *Y tu aporte especial al proyecto. ¡Gracias por tanta generosidad!*
+
+            ¡A disfrutar coloreando! 🌈
+        delay_after_sec: 5
+    image_gallery: []
+    course_content: "FIGURARTE + TODOS LOS BONOS: el material completo de FIGURARTE con sus bonos, para quien contribuye S/30."
+    etiqueta: ""
+    discount_price_soles: 0
+    market_price: 0
+    precios_por_pais:
+      PE:
+        price_soles: 30
+        discount_price_soles: 30
+        market_price: 0
 alineacion_por_modalidad:
   lineal:
     upsell: pmtxy45s7
@@ -112697,6 +112911,16 @@ tiendas:
 
         ¡Que tengas un excelente día!
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
+  - id: tienda_tfigurarte
+    nombre: TIENDA FIGURARTE
+    numero: "1345130172015574"
+    pagina: ""
+    frases_de_entrada:
+      - figurarte
+    alineacion:
+      basico: ptfig_figurarte
+      unico: ptfig_figurarte
+    color: "#f97316"
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -122754,4 +122978,352 @@ tableros:
           alto: 620
           titulo: ""
           inicio: est_otros
+  tienda_tfigurarte:
+    whatsapp:
+      encendido: true
+      cerebro: "Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro."
+      fichas:
+        - id: fig_inicio
+          tipo: inicio
+          x: 60
+          y: 0
+          titulo: Venta por contribución
+          pais: PE
+        - id: fig_presenta
+          tipo: mensaje
+          x: 390
+          y: 0
+          titulo: Presentación
+          presenta:
+            - ptfig_figurarte
+          sin_respuesta_min: 120
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  ¡Hola! Rubén aquí, tu asesor de la página Impulso 360 Digital 👋 hoy te presento ARTEFIGURA 🎨✨.
+
+                  🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
+
+                  Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
+
+                  ¡Incluye todo lo siguiente
+
+                  🐯 Más de 80 animales para descubrir y colorear.
+                  🦸 Más de 30 personajes formados por figuras geométricas.
+                  🔵 Círculos, cuadrados, triángulos y rectángulos.
+                  🎨 Una forma diferente de colorear, ¡sin utilizar números!
+                  🟨 Figuras que se transforman en increíbles dibujos.
+                  🧠 Actividades que estimulan la creatividad y la atención.
+                  ✏️ Una experiencia divertida para aprender mientras coloreas.
+                  🌈 Diseños originales para dar vida con tus colores.
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
+
+                  🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
+
+                  📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+
+                  ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
+
+                  📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
+
+                  ❤️ ¡Lo recibes primero y pagas después!
+
+                  Solo responde SÍ y te explico cómo recibirlo. 🥰
+              delay_after_sec: 4
+              buttons:
+                - id: fig_si
+                  label: SÍ
+                  action: send_steps
+                  steps: []
+          instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
+        - id: fig_insiste
+          tipo: mensaje
+          x: 390
+          y: 330
+          titulo: Si no contesta
+          steps:
+            - type: text
+              body_variants:
+                - ¿Sigues por ahí? 😊 Si quieres recibir *FIGURARTE*, solo responde *SÍ* y te envío las muestras gratuitas ahora mismo 🎨
+              delay_after_sec: 4
+        - id: fig_si_msg
+          tipo: mensaje
+          x: 720
+          y: 0
+          titulo: Dijo que sí
+          steps:
+            - type: text
+              body_variants:
+                - ¡Perfecto! 😊 Te enviaré parte del material para que puedas revisarlos y comprobar la calidad del contenido. ✨
+              delay_after_sec: 3
+        - id: fig_muestras
+          tipo: entregar
+          x: 1050
+          y: 0
+          titulo: Muestras gratuitas
+          producto_id: ptfig_muestras
+        - id: fig_cobro
+          tipo: cobro
+          x: 1380
+          y: 0
+          titulo: Contribución
+          sin_pago_min: 60
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎨✨ ¡Ya tienes FIGURARTE! 🦁🌈
+
+                  💖 Si deseas apoyar este proyecto, puedes elegir una de las siguientes contribuciones:
+
+                  🎁 S/10 — CONTRIBUCIÓN SEMILLA
+                  📘 Material completo de FIGURARTE.
+
+                  🎁 S/15 — CONTRIBUCIÓN DE APOYO
+                  📘 Material completo + 🎁 1 bono.
+
+                  🎁 S/20 — CONTRIBUCIÓN ESPECIAL
+                  📘 Material completo + 🎁 los 2 bonos.
+
+                  🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
+                  📘 Material completo + 🎁 3 bonos incluidos.
+
+                  🎁 S/30 — CONTRIBUCIÓN GENEROSA
+                  📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
+
+                  🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
+
+                  🥰 ¡Gracias por tu generosidad y por apoyar este proyecto!
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  🟣 Yape | 🟢 Plin
+                  {{CUENTA_YAPE}}
+                  Titular: {{NOMBRE_COMPLETO}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  En cuanto realices tu aporte, envía tu comprobante por aquí, por WhatsApp. 📲
+
+                  🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
+              delay_after_sec: 4
+          cobro:
+            modo: abierto
+            minimo_por_pais:
+              PE: 10
+            tramos_por_pais:
+              PE:
+                - id: t10
+                  desde: 10
+                - id: t15
+                  desde: 15
+                - id: t20
+                  desde: 20
+                - id: t25
+                  desde: 25
+                - id: t30
+                  desde: 30
+          instrucciones: "Ya recibió las muestras gratuitas y los datos para contribuir. Si pregunta qué recibe o si tiene que pagar algo más, explícale con calma que con su aporte recibe el material completo de FIGURARTE y, según el monto, los bonos: S/10 el material; S/15 + 1 bono; S/20 + 2 bonos; S/25 + 3 bonos; S/30 todos los bonos + un aporte especial al proyecto. Contesta la duda con palabras: NO le vuelvas a ofrecer los métodos de pago ni le reenvíes los datos salvo que te los pida. Si dice que no vio o no le llegaron las muestras, reenvíaselas."
+        - id: fig_recordatorios
+          tipo: seguimientos
+          x: 1380
+          y: 330
+          titulo: Recordatorios (si no aporta)
+          presenta:
+            - ptfig_figurarte
+          seguimientos:
+            - id: fig_rec1
+              minutos: 120
+              variantes:
+                - id: fig_rec1a
+                  nombre: Recordatorio 1
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola! 😊 ¿Pudiste ver las *muestras gratuitas* de FIGURARTE? 🎨
+
+                          Si no te llegaron bien, dime y te las vuelvo a enviar.
+                      delay_after_sec: 4
+            - id: fig_rec2
+              minutos: 360
+              variantes:
+                - id: fig_rec2a
+                  nombre: Recordatorio 2
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola 💛 Paso rapidito por aquí: gracias a las contribuciones de personas como tú, este proyecto sigue creando material para colorear y aprender 🎨✨
+
+                          Cuando puedas, haz tu aporte y envíame tu comprobante por aquí 📲
+                      delay_after_sec: 4
+            - id: fig_rec3
+              minutos: 720
+              variantes:
+                - id: fig_rec3a
+                  nombre: Recordatorio 3
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola de nuevo ✨ Te recuerdo que con un aporte desde *S/15* recibes también los *bonos sorpresa* de FIGURARTE 🎁
+
+                          Envía tu comprobante por aquí y te mando todo al instante 📲
+                      delay_after_sec: 4
+            - id: fig_rec4
+              minutos: 1380
+              variantes:
+                - id: fig_rec4a
+                  nombre: Recordatorio 4
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola ✨ Paso por última vez para cerrar los registros de aportes 🙏
+
+                          Te compartí el material por adelantado con mucha confianza. Si te gustó, tu contribución hace posible que este proyecto siga creciendo 💖
+                      delay_after_sec: 4
+        - id: fig_ent10
+          tipo: entregar
+          x: 1710
+          y: -660
+          titulo: Entrega S/10 · Semilla
+          producto_id: ptfig_figurarte
+        - id: fig_ent15
+          tipo: entregar
+          x: 1710
+          y: -330
+          titulo: Entrega S/15 · Apoyo
+          producto_id: ptfig_apoyo
+        - id: fig_ent20
+          tipo: entregar
+          x: 1710
+          y: 0
+          titulo: Entrega S/20 · Especial
+          producto_id: ptfig_especial
+        - id: fig_ent25
+          tipo: entregar
+          x: 1710
+          y: 330
+          titulo: Entrega S/25 · Bendición
+          producto_id: ptfig_bendicion
+        - id: fig_ent30
+          tipo: entregar
+          x: 1710
+          y: 660
+          titulo: Entrega S/30 · Generosa
+          producto_id: ptfig_generosa
+        - id: fig_otros
+          tipo: inicio
+          x: 60
+          y: 1500
+          titulo: Otros países
+        - id: fig_otros_msg
+          tipo: mensaje
+          x: 390
+          y: 1500
+          titulo: No vendemos aquí
+          steps:
+            - type: text
+              body_variants:
+                - ¡Hola! 😊 Por ahora *FIGURARTE* solo está disponible en Perú 🇵🇪. Te paso con un asesor para ayudarte 🙌
+              delay_after_sec: 4
+        - id: fig_otros_humano
+          tipo: humano
+          x: 720
+          y: 1500
+          titulo: Pasa a un asesor
+      cables:
+        - id: figc1
+          de: fig_inicio
+          salida: siguiente
+          a: fig_presenta
+        - id: figc2
+          de: fig_presenta
+          salida: btn:fig_si
+          a: fig_si_msg
+        - id: figc3
+          de: fig_presenta
+          salida: sin_respuesta
+          a: fig_insiste
+        - id: figc4
+          de: fig_si_msg
+          salida: siguiente
+          a: fig_muestras
+        - id: figc5
+          de: fig_muestras
+          salida: siguiente
+          a: fig_cobro
+        - id: figc6
+          de: fig_cobro
+          salida: sin_pago
+          a: fig_recordatorios
+        - id: figc7
+          de: fig_cobro
+          salida: tramo:t10
+          a: fig_ent10
+        - id: figc8
+          de: fig_cobro
+          salida: tramo:t15
+          a: fig_ent15
+        - id: figc9
+          de: fig_cobro
+          salida: tramo:t20
+          a: fig_ent20
+        - id: figc10
+          de: fig_cobro
+          salida: tramo:t25
+          a: fig_ent25
+        - id: figc11
+          de: fig_cobro
+          salida: tramo:t30
+          a: fig_ent30
+        - id: figc12
+          de: fig_otros
+          salida: siguiente
+          a: fig_otros_msg
+        - id: figc13
+          de: fig_otros_msg
+          salida: siguiente
+          a: fig_otros_humano
+      cajas:
+        - id: manta-fig_inicio
+          x: 20
+          y: -760
+          ancho: 2000
+          alto: 1960
+          titulo: ""
+          inicio: fig_inicio
+        - id: manta-fig_otros
+          x: 20
+          y: 1430
+          ancho: 1000
+          alto: 620
+          titulo: ""
+          inicio: fig_otros
 workflows: {}

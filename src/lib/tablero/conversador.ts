@@ -264,7 +264,7 @@ const HERRAMIENTA_DE_REENVIO = {
   function: {
     name: "reenviar_material",
     description:
-      "Use ONLY when the customer says they did not receive, lost, or wants again the material/links they were ALREADY sent. It resends what was delivered.",
+      "Use ONLY when the customer says they did not receive, could not open, lost, or wants again the material/links/free samples they were ALREADY sent. It resends what was delivered.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
 };
@@ -309,7 +309,7 @@ const HERRAMIENTA_DE_DATOS = {
   function: {
     name: "reenviar_datos_de_pago",
     description:
-      "Use when the customer asks for the payment details again (account, number, where to pay) or says yes to paying now. The system sends the payment details of the method they already chose, with the right price.",
+      "Use when the customer asks for the payment details again (account, number, where to pay) or says yes to paying now. The system sends the payment details again, with the right price. Do NOT use it when the customer only has a doubt or asks a question (what they receive, how it works): answer the doubt with words instead.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
 };

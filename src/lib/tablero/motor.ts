@@ -694,7 +694,22 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
             await reenviarDatosDelCobro(convo, t, metodo);
           },
         }
-      : {}),
+      : // UN COBRO QUE NO PREGUNTA MÉTODO (la contribución, 25/10/2026): sus datos son SUS burbujas (los
+        // niveles y la cuenta). Si los pide otra vez («pásame el yape»), se reenvían tal cual; antes la
+        // IA no tenía cómo y daba vueltas. Solo sin nada pagado aún.
+        cobro?.cobro && !cobro.cobro.metodos && estado && estado.cobro_pagado <= 0 && !nota && pasosActivos(cobro.steps).length
+        ? {
+            reenviarDatos: async () => {
+              const pasos = conLosComodinesDeLaFicha(
+                pasosActivos(cobro.steps),
+                productosDeLaFicha(config, idsParaComodines(convo.id, cobro), pais, estado.oferta === 1),
+                pais
+              );
+              console.log(`[tablero] convo ${convo.id}: reenvío las burbujas de su cobro «${cobro.titulo || cobro.id}»`);
+              await sendConfiguredSteps(convo, pasos as never);
+            },
+          }
+        : {}),
     ...(!nota && muestras.length
       ? {
           muestras: muestras.map(({ id, producto: p, tema, cuando }) => ({ id, producto: p, tema, cuando })),

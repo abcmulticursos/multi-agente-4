@@ -401,6 +401,33 @@ try {
     await c.borrar();
   }
 
+  // ── TIENDA FIGURARTE (25/10/2026): contribución con muestras gratis, pedida por Alberto ──
+  if (toca("figurarte") && R.pe15 && R.pe5) {
+    console.log("\n· 🇵🇪 TIENDA FIGURARTE — muestras gratis, niveles de S/10 a S/30");
+    const c = await cliente("tienda_tfigurarte", "PE");
+    await c.decir("hola figurarte", 50);
+    comprobar("la presentación: Rubén, la foto y «Solo responde SÍ»", /Rub[ée]n aqu[ií]/.test(c.nuevo()) && c.nuevo().includes("[MEDIA:image]") && /Solo responde S[ÍI]/.test(c.nuevo()), c.nuevo().slice(-100));
+    await c.decir("si", 60);
+    const docs = (c.nuevo().match(/\[MEDIA:document\]/g) ?? []).length;
+    comprobar("«sí»: «¡Perfecto!» y las 2 muestras gratuitas", /Perfecto/.test(c.nuevo()) && docs === 2, `${docs} archivos`);
+    comprobar("los 5 niveles y el Yape/Plin de Alberto", /S\/30 — CONTRIBUCI[ÓO]N GENEROSA/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")) && /Alberto/i.test(c.nuevo()), c.nuevo().slice(-160));
+    comprobar("y «envía tu comprobante», sin comodines vacíos", /env[ií]a tu comprobante/i.test(c.nuevo()) && limpio(c.nuevo()), "");
+    await c.decir("no entiendo, si pago alguno de estos precios me envian algo mas", 40);
+    comprobar("su duda: la IA la explica (bonos) SIN volver a mandar los datos ni los niveles", /bono/i.test(c.nuevo()) && !cifras(c.nuevo()).includes(cuenta("PE", "yape")) && !/CONTRIBUCI[ÓO]N GENEROSA/.test(c.nuevo()), c.nuevo().slice(0, 160));
+    await c.decir("no me llegaron las muestras", 50);
+    const docs2 = (c.nuevo().match(/\[MEDIA:document\]/g) ?? []).length;
+    comprobar("«no me llegaron las muestras»: se reenvían", docs2 === 2, `${docs2} archivos · ${c.nuevo().slice(0, 80)}`);
+    await c.decir("pasame el yape otra vez porfa", 40);
+    comprobar("«pásame el yape»: se reenvía la cuenta", cifras(c.nuevo()).includes(cuenta("PE", "yape")), c.nuevo().slice(0, 140));
+    await c.foto(R.pe5, 70);
+    comprobar("aporta 5 (menos del mínimo): no entrega nada aún", !/youtube\.com/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.foto(R.pe15, 70);
+    const t = c.nuevo();
+    comprobar("aporta 15 más (suma 20): FIGURARTE + 2 BONOS", /FIGURARTE \+ 2 BONOS/.test(t) && /FIGURARTE-bono2/.test(t) && !/FIGURARTE-bono3/.test(t), t.slice(0, 160));
+    comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
+    await c.borrar();
+  }
+
   if (toca("otros")) {
     console.log("\n· 🌍 OTROS PAÍSES (Colombia): no vende y pasa a un asesor");
     const c = await cliente("tienda_tcocina", "CO");
