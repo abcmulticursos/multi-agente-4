@@ -114428,8 +114428,8 @@ pizarra:
           x: 692
           y: -2399
         pz:PE:intro:intro:40:
-          x: 345
-          y: -1875
+          x: 293
+          y: -1846
         pz:PE:ob:ob:14:
           x: 1701
           y: -1868
@@ -114454,6 +114454,69 @@ pizarra:
         pv:CO:entrega:full:
           x: 2795
           y: 8003
+        dest:pz:PE:seg:0:seg:0:15:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 920
+          y: -944
+        dest:pz:PE:seg:0:seg:0:28:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1243
+          y: -204
+        dest:pz:PE:seg:0:seg:0:29:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 967
+          y: -2196
+        dest:pz:PE:ob:ob:13:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvgeared0:
+          x: 1933
+          y: -35
+        dest:pz:PE:ob:ob:13:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvgeared1:
+          x: 1933
+          y: -1
+        dest:pz:PE:ob:ob:14:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvgedpn70:
+          x: 1976
+          y: -1690
+        dest:pz:PE:ob:ob:14:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvgedpn71:
+          x: 1976
+          y: -1656
+        dest:pz:EC:seg:0:seg:0:16:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 822
+          y: 1549
+        dest:pz:EC:seg:0:seg:0:24:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 896
+          y: 2653
+        dest:pz:EC:ob:ob:9:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmveps41m0:
+          x: 2061
+          y: 3210
+        dest:pz:EC:ob:ob:9:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmveps41m1:
+          x: 2057
+          y: 3281
+        dest:pz:AR:seg:0:seg:0:17:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1032
+          y: 4706
+        dest:pz:AR:seg:0:seg:0:25:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1023
+          y: 5820
+        dest:pz:AR:ob:ob:10:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvewyqps0:
+          x: 1978
+          y: 6139
+        dest:pz:AR:ob:ob:10:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvewyqps1:
+          x: 1978
+          y: 6173
+        dest:pz:CO:seg:0:seg:0:26:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1291
+          y: 8323
+        dest:pz:CO:seg:0:seg:0:27:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1282
+          y: 9383
+        dest:pz:CO:ob:ob:11:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvf1et8o0:
+          x: 2246
+          y: 8588
+        dest:pz:CO:ob:ob:11:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvf1et8o1:
+          x: 2246
+          y: 8622
+        dest:pz:CO:ob:ob:12:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvf1et8p0:
+          x: 2237
+          y: 9702
+        dest:pz:CO:ob:ob:12:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvf1et8p1:
+          x: 2237
+          y: 9736
       cajas:
         - id: caja:carril:PE
           x: 168
@@ -115202,8 +115265,8 @@ pizarra:
             y: 212
       posiciones:
         inicio:PE:
-          x: -254
-          y: -1604
+          x: -350
+          y: -1609
         inicio:EC:
           x: -124
           y: 1660
