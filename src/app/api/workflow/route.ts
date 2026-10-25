@@ -1666,6 +1666,57 @@ function annotateSteps(node: unknown, steps: { type?: string }[]) {
   });
 }
 
+/**
+ * EL CONTENIDO YA LEÍDO, MIENTRAS EL ARCHIVO NO CAMBIE (25/10/2026): «¿por qué se demora mucho en
+ * cargar la página?». Leer el YAML de 5,5 MB tarda segundos; abrir el editor lo leía cada vez. Se
+ * guarda como JSON (liviano en memoria) junto a la fecha y el tamaño del archivo: si el archivo
+ * cambió (un guardado, un despliegue, una edición a mano), se vuelve a leer.
+ */
+let contenidoYaLeido: { mtimeMs: number; size: number; json: string } | null = null;
+/**
+ * Y EL DOCUMENTO YA LEÍDO, PARA GUARDAR (25/10/2026): leer el YAML cuesta ~3,5 s; clonar el ya leído,
+ * ~0,6 s (y ocupa ~40 MB). Solo vale mientras el archivo sea el mismo (fecha y tamaño). Nunca se
+ * cambia el guardado: cada guardado trabaja sobre un CLON.
+ */
+let documentoYaLeido: { mtimeMs: number; size: number; doc: ReturnType<typeof parseDocument> } | null = null;
+function documentoDelArchivo(raw: string): ReturnType<typeof parseDocument> {
+  try {
+    const st = fs.statSync(CONFIG_PATH);
+    if (documentoYaLeido && documentoYaLeido.mtimeMs === st.mtimeMs && documentoYaLeido.size === st.size) return documentoYaLeido.doc.clone();
+    const doc = parseDocument(raw);
+    documentoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, doc };
+    return doc.clone();
+  } catch {
+    return parseDocument(raw);
+  }
+}
+function recordarDocumento(doc: ReturnType<typeof parseDocument>): void {
+  try {
+    const st = fs.statSync(CONFIG_PATH);
+    documentoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, doc };
+  } catch {
+    documentoYaLeido = null;
+  }
+}
+function recordarContenido(js: unknown): void {
+  try {
+    const st = fs.statSync(CONFIG_PATH);
+    contenidoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, json: JSON.stringify(js) };
+  } catch {
+    contenidoYaLeido = null;
+  }
+}
+function contenidoRecordado(): Record<string, unknown> | null {
+  if (!contenidoYaLeido) return null;
+  try {
+    const st = fs.statSync(CONFIG_PATH);
+    if (st.mtimeMs !== contenidoYaLeido.mtimeMs || st.size !== contenidoYaLeido.size) return null;
+    return JSON.parse(contenidoYaLeido.json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET() {
   let raw: string;
   try {
@@ -1679,7 +1730,12 @@ export async function GET() {
 
   let config: Record<string, unknown>;
   try {
-    config = parseDocument(raw).toJS() as Record<string, unknown>;
+    const recordado = contenidoRecordado();
+    if (recordado) config = recordado;
+    else {
+      config = parseDocument(raw).toJS() as Record<string, unknown>;
+      recordarContenido(config);
+    }
   } catch {
     return NextResponse.json(
       { error: "El YAML actual no es válido, revísalo antes de editar" },
@@ -3046,7 +3102,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const doc = parseDocument(raw);
+  const doc = documentoDelArchivo(raw);
+  // LO QUE HABÍA, para el seguro contra el vaciado (más abajo). Se toma AQUÍ, del documento ya leído
+  // y antes de cambiarlo, en vez de volver a leer el archivo entero (25/10/2026: cada lectura de 5 MB
+  // son segundos de espera al guardar).
+  const loQueHabia = doc.toJS() as Record<string, unknown>;
 
   // intro_sequence
   if (Array.isArray(body.intro_sequence)) {
@@ -4863,8 +4923,11 @@ export async function POST(req: NextRequest) {
   }
 
   const output = doc.toString({ lineWidth: 0 });
+  // UNA SOLA RELECTURA del resultado: comprueba que es YAML válido y sirve también al seguro y a la
+  // carga siguiente (antes se releía tres veces: aquí, y dos en el seguro).
+  let loQueQueda: Record<string, unknown>;
   try {
-    parseDocument(output);
+    loQueQueda = parseDocument(output).toJS() as Record<string, unknown>;
   } catch {
     return NextResponse.json(
       { error: "El resultado no sería YAML válido, no se guardó" },
@@ -4879,10 +4942,8 @@ export async function POST(req: NextRequest) {
   if (body.confirmar_vaciado !== true) {
     let seVaciarian: string[] = [];
     try {
-      seVaciarian = seccionesQueSeVaciarian(
-        parseDocument(raw).toJS() as Record<string, unknown>,
-        parseDocument(output).toJS() as Record<string, unknown>
-      );
+      // Los mismos dos lados de siempre (lo que había y lo que queda), ya leídos una vez.
+      seVaciarian = seccionesQueSeVaciarian(loQueHabia, loQueQueda);
     } catch {
       // Si la comparación falla, NO se bloquea el guardado: el seguro no puede
       // convertirse en un motivo para no poder guardar.
@@ -4931,6 +4992,9 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+  // La próxima vez que se abra el editor (o se guarde), el contenido nuevo ya está leído.
+  recordarContenido(loQueQueda);
+  recordarDocumento(doc);
 
   // La huella nueva: el siguiente guardado de ESTA pestaña compara contra lo que ella escribió.
   return NextResponse.json({ ok: true, tokenConfigured, persisted: true, version_del_archivo: huellaDelArchivo(output) });
