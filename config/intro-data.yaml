@@ -15043,7 +15043,7 @@ channels:
               - type: text
                 body_variants:
                   - |-
-                    OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+                    *CAMINO A* OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
 
                     ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
                     _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
@@ -15435,7 +15435,8 @@ channels:
               - type: text
                 body_variants:
                   - |-
-                    OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+                    *CAMINO B*
+                     OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
 
                     ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
                     _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
