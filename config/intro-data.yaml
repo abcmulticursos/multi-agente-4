@@ -121202,8 +121202,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_p
           tipo: seguimientos
-          x: 1200
-          y: 780
+          x: 1217
+          y: 838
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121222,6 +121222,18 @@ tableros:
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
                       delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola! 👋🏼 Quería compartirte esto rápido ⚡
+
+                          Muchos emprendedores como vos ya están usando el pack para vender más y ahorrar horas de diseño. Mira sus comentarios 💬👇
+
+                          🎁 Recordá que podés llevarte +3.000 plantillas editables desde solo *{{PRECIO_BASE}}*
+
+                          ¿Querés que te guarde tu acceso antes de que termine la promo? 📲🔥
+                      delay_after_sec: 4
                     - type: text
                       body_variants:
                         - |-
@@ -121229,6 +121241,19 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
                 - id: mas_pe_seg_p_1b
                   nombre: Versión B
                   peso: 1
@@ -122414,8 +122439,8 @@ tableros:
         - id: manta-mas_pe_inicio
           x: 20
           y: -70
-          ancho: 2310
-          alto: 1350
+          ancho: 4098
+          alto: 1541
           titulo: ""
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
