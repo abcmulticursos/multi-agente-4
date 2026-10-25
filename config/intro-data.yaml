@@ -121298,6 +121298,28 @@ tableros:
 
                           {{LISTA_METODOS_POR_PAIS}}
                       delay_after_sec: 6
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          1️⃣ *{{PRODUCTO_BASE}}*
+                          ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+                          2️⃣ *{{PRODUCTO_FULL}}*
+                          ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+                          *¿Cuál prefieres?* 😊
+                      delay_after_sec: 4
+                      buttons:
+                        - id: b7e241da-e903-497c-a86a-9fce0084e26f
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: 7936ca87-12ab-4657-91d2-d5c00f6c5779
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
         - id: mas_pe_ent_b
           tipo: entregar
           x: 2110
