@@ -121526,11 +121526,11 @@ tableros:
                   steps: []
           presenta:
             - ptmascotas_comida
-          sin_respuesta_min: 30
+          sin_respuesta_min: 1
         - id: mas_ec_ob
           tipo: intro_ob
-          x: 720
-          y: 1600
+          x: 817
+          y: 1574
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -121568,11 +121568,11 @@ tableros:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
-          sin_respuesta_min: 30
+          sin_respuesta_min: 1
         - id: mas_ec_cobro_b
           tipo: cobro
-          x: 1050
-          y: 1600
+          x: 1438
+          y: 1651
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121584,7 +121584,7 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 60
+          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_comida
@@ -121593,8 +121593,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_b
           tipo: seguimientos
-          x: 1050
-          y: 1930
+          x: 1423
+          y: 2088
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121642,8 +121642,8 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ec_cobro_p
           tipo: cobro
-          x: 1050
-          y: 2260
+          x: 1579
+          y: 2533
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -121655,7 +121655,7 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 60
+          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_pack
@@ -121664,8 +121664,8 @@ tableros:
             metodos: true
         - id: mas_ec_seg_p
           tipo: seguimientos
-          x: 1050
-          y: 2590
+          x: 1560
+          y: 3446
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121713,20 +121713,20 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ec_ent_b
           tipo: entregar
-          x: 1380
-          y: 1600
+          x: 1941
+          y: 1623
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_ec_ent_p
           tipo: entregar
-          x: 1380
-          y: 2260
+          x: 1941
+          y: 2283
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_ec_upsell1
           tipo: mensaje
-          x: 1710
-          y: 1600
+          x: 3152
+          y: 1607
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121773,8 +121773,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_ec_cobro_u1
           tipo: cobro
-          x: 1710
-          y: 1930
+          x: 3099
+          y: 2031
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -121786,15 +121786,15 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 60
+          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_citas
             metodos: true
         - id: mas_ec_seg_u1
           tipo: seguimientos
-          x: 1710
-          y: 2260
+          x: 3290
+          y: 2360
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -121842,25 +121842,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ec_ent_u1
           tipo: entregar
-          x: 2040
-          y: 1930
+          x: 4293
+          y: 2357
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: mas_ec_regalo
           tipo: regalo
-          x: 2370
-          y: 1600
+          x: 4258
+          y: 1586
           titulo: Regalo
         - id: mas_ar_inicio
           tipo: inicio
-          x: 60
-          y: 3200
+          x: 264
+          y: 5029
           titulo: Tubería lineal
           pais: AR
         - id: mas_ar_intro
           tipo: mensaje
-          x: 390
-          y: 3200
+          x: 594
+          y: 5029
           titulo: Intro
           steps:
             - type: text
@@ -121920,8 +121920,8 @@ tableros:
           sin_respuesta_min: 30
         - id: mas_ar_cobro
           tipo: cobro
-          x: 720
-          y: 3200
+          x: 924
+          y: 5029
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -121940,8 +121940,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_b
           tipo: seguimientos
-          x: 720
-          y: 3530
+          x: 924
+          y: 5359
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -121989,15 +121989,15 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_b
           tipo: entregar
-          x: 1050
-          y: 3200
+          x: 1254
+          y: 5029
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           por_correo: true
           producto_id: ptmascotas_comida
         - id: mas_ar_upsell1
           tipo: mensaje
-          x: 1380
-          y: 3200
+          x: 1584
+          y: 5029
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122044,8 +122044,8 @@ tableros:
           sin_respuesta_min: 3
         - id: mas_ar_cobro_u1
           tipo: cobro
-          x: 1380
-          y: 3530
+          x: 1584
+          y: 5359
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -122064,8 +122064,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_u1
           tipo: seguimientos
-          x: 1380
-          y: 3860
+          x: 1584
+          y: 5689
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -122113,25 +122113,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_u1
           tipo: entregar
-          x: 1710
-          y: 3530
+          x: 1914
+          y: 5359
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           por_correo: true
           producto_id: ptmascotas_citas
         - id: mas_ar_regalo
           tipo: regalo
-          x: 2040
-          y: 3200
+          x: 2244
+          y: 5029
           titulo: Regalo
         - id: mas_otros
           tipo: inicio
-          x: 60
-          y: 4400
+          x: 264
+          y: 6229
           titulo: Otros países
         - id: mas_otros_msg
           tipo: mensaje
-          x: 390
-          y: 4400
+          x: 594
+          y: 6229
           titulo: No vendemos aquí
           steps:
             - type: text
@@ -122140,8 +122140,8 @@ tableros:
               delay_after_sec: 4
         - id: mas_otros_humano
           tipo: humano
-          x: 720
-          y: 4400
+          x: 924
+          y: 6229
           titulo: Pasa a un asesor
         - id: mas_pe_caja
           tipo: cobro
@@ -122168,8 +122168,8 @@ tableros:
             sin_preguntar: true
         - id: mas_ec_caja
           tipo: cobro
-          x: 1050
-          y: 2230
+          x: 777
+          y: 2071
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122191,8 +122191,8 @@ tableros:
             sin_preguntar: true
         - id: mas_ar_caja
           tipo: cobro
-          x: 720
-          y: 3830
+          x: 924
+          y: 5659
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122485,21 +122485,21 @@ tableros:
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
           x: 20
-          y: 1530
-          ancho: 2640
-          alto: 1350
+          y: 1519
+          ancho: 4842
+          alto: 2361
           titulo: ""
           inicio: mas_ec_inicio
         - id: manta-mas_ar_inicio
-          x: 20
-          y: 3130
+          x: 224
+          y: 4959
           ancho: 2310
           alto: 1020
           titulo: ""
           inicio: mas_ar_inicio
         - id: manta-mas_otros
-          x: 20
-          y: 4330
+          x: 224
+          y: 6159
           ancho: 1280
           alto: 620
           titulo: ""
