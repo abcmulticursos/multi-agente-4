@@ -121275,6 +121275,8 @@ tableros:
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: mas_pe_seg_p_2
               minutos: 5
               variantes:
@@ -121320,6 +121322,8 @@ tableros:
                           label: PACK COMIDA Y ROPA
                           action: send_steps
                           steps: []
+              ignora_silencio: true
+              ignora_tardio: true
         - id: mas_pe_ent_b
           tipo: entregar
           x: 2110
