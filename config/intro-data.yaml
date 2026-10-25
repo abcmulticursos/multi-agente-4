@@ -121202,8 +121202,8 @@ tableros:
             metodos: true
         - id: mas_pe_seg_p
           tipo: seguimientos
-          x: 1199
-          y: 716
+          x: 1200
+          y: 780
           titulo: Seguimientos · PACK COMIDA + ROPA MASCOTAS
           presenta:
             - ptmascotas_pack
@@ -121265,14 +121265,14 @@ tableros:
                       delay_after_sec: 6
         - id: mas_pe_ent_b
           tipo: entregar
-          x: 2020
-          y: 118
+          x: 2123
+          y: 758
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: mas_pe_ent_p
           tipo: entregar
-          x: 1964
-          y: 625
+          x: 2114
+          y: 603
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: mas_pe_upsell1
