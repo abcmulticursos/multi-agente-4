@@ -90883,7 +90883,7 @@ intro_sequence:
 #     El seguimiento 1 ignora quiet_hours — dispara siempre.
 # ─────────────────────────────────────────────────────────────────────────
 followup_schedule:
-  quiet_hours_enabled: true
+  quiet_hours_enabled: false
   slots_peru:
     - 12:00
     - 18:00
