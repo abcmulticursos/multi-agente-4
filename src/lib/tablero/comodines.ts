@@ -25,6 +25,8 @@ export interface ProductoConPrecio {
   name: string;
   precio: number | null;
   antes: number | null;
+  /** Su precio de oferta (solo para el visor del editor: lo enseña cuando a esa etapa le toca). */
+  oferta?: number | null;
 }
 
 /** Las llaves que no son texto para el cliente: no se tocan aunque traigan llaves. */

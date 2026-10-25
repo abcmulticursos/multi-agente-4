@@ -157,7 +157,7 @@ export function tableroDesdeLaPizarra(
         {
           id: uid("cobro"),
           tipo: "cobro",
-          titulo: `Cobro · ${nombreDe(pid)}${callado ? " (tras la intro)" : ""}`,
+          titulo: `Cobro · ${nombreDe(pid)}${callado ? " (caja abierta, sin preguntar)" : ""}`,
           sin_pago_min: 60,
           cobro: { modo: "producto", producto_id: pid, acepta: acepta.filter((a) => a !== pid), precio: "etapa", metodos: true, ...(callado ? { sin_preguntar: true } : {}) },
           steps: copiarPasos(pasosDelCobro as Paso[]) as FichaDelTablero["steps"],
@@ -347,7 +347,21 @@ export function tableroDesdeLaPizarra(
       });
     if (seguimientos.length > 0) {
       const s = poner({ id: uid("seg"), tipo: "seguimientos", titulo: "Seguimientos", presenta: opciones, seguimientos }, 2, 3);
-      for (const i of introIds) cable(i, "sin_respuesta", s);
+      // «NO RESPONDIÓ» → LA CAJA ABIERTA EN SILENCIO → SEGUIMIENTOS (25/10/2026). Con la caja (el cobro)
+      // abierta, un «yape» o un comprobante en medio de los seguimientos se atiende como siempre; sin
+      // ella no había con qué. No le llega nada: abre el cobro sin preguntar y a 1 min pasa a la caja.
+      const caja = cobroDe(basico, 3, 0, opciones, true);
+      if (caja) {
+        const f = fichas.find((x) => x.id === caja)!;
+        f.sin_pago_min = 1;
+      }
+      const sinRespuesta = caja ?? s;
+      for (const i of introIds) cable(i, "sin_respuesta", sinRespuesta);
+      if (fichaOb) {
+        const ob = fichas.find((x) => x.id === fichaOb)!;
+        ob.sin_respuesta_min = CALLADO_TRAS_LA_INTRO;
+        cable(fichaOb, "sin_respuesta", sinRespuesta);
+      }
       // Los botones de los seguimientos (p. ej. «Quiero pagar») también llevan a su sitio.
       for (const seg of seguimientos) for (const v of seg.variantes) cablearOpciones(s, v.steps as Paso[], 3, 4);
       // Y TODOS los cobros de la venta (también los que acaban de nacer de esos botones): si no paga.

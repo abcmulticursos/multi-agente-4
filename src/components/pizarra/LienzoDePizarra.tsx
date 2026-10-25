@@ -348,6 +348,8 @@ export interface AccionesDelLienzo {
   /** COPIAR Y PEGAR (17/10/2026): copias sueltas en `donde`, con sus cables entre ellas
    *  (`enlaces`, por posición en la lista). Devuelve los ids de las copias. */
   pegar?: (items: Array<{ piezaId: string; donde: Punto; recuadros?: Array<Punto | null> }>, enlaces: Array<[number, number]>) => string[];
+  /** Al copiar (Ctrl+C): el editor anota en qué semimodalidad se copió, para avisar si se pega en otra. */
+  alCopiar?: () => void;
   /** Cortar el cable entre dos copias sueltas. */
   quitarEnlace?: (de: string, a: string) => void;
   /** UN CABLE ENTRE DOS FICHAS SUELTAS (18/10/2026): quedan en grupo y en el mismo camino. */
@@ -4358,6 +4360,8 @@ export default function LienzoDePizarra({
           piezas: lista.map(([piezaId, v]) => ({ piezaId, x: v.x, y: v.y, recuadros: recuadrosDelNodo(v.nodo) })),
           enlaces,
         };
+        // Se anota DÓNDE se copió (la semimodalidad que se está viendo): al pegar en otra, se avisa.
+        acciones.alCopiar?.();
         e.preventDefault();
         setAviso(`${lista.length === 1 ? "1 ficha copiada" : `${lista.length} fichas copiadas`}. Ctrl+V para pegarlas.`);
         return;

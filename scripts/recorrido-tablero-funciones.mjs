@@ -119,6 +119,7 @@ async function cliente(pais = "PE", { anuncio } = {}) {
   };
   let marca = 0;
   const c = {
+    id: conv.id,
     bot,
     nuevo: () => bot.slice(marca).join("\n"),
     todo: () => bot.join("\n"),
@@ -566,6 +567,13 @@ try {
     const entrega = String(datos.biblioteca_de_productos.find((p) => p.id === basico)?.delivery?.[0]?.body_variants?.[0] ?? "");
     const marcaDeEntrega = (entrega.match(/PRODUCTO BASICO|https?:\/\/\S{10}/) ?? [""])[0];
     comprobar("paga 15: le entrega su básico (la entrega de su producto)", !!marcaDeEntrega && c.nuevo().includes(marcaDeEntrega), c.nuevo().slice(0, 160));
+    {
+      // EL KANBAN Y LA AUTOPURGA leen lo pagado de la conversación: tiene que estar anotado.
+      const db = new Database(join(RAIZ, "data", "messages.db"), { readonly: true });
+      const fila = db.prepare("SELECT paid_total_cents, paid_at FROM conversations WHERE id = ?").get(c.id);
+      db.close();
+      comprobar("y queda como COMPRADOR para el kanban (15 pagados, con fecha)", fila?.paid_total_cents === 1500 && !!fila?.paid_at, JSON.stringify(fila));
+    }
     await c.borrar();
     // EL CLIENTE QUE VIENE DE UN ANUNCIO: recibe la intro etiquetada con ese anuncio, como siempre.
     const etiquetada = intros.find((g) => g.adRoutingEnabled !== false && (g.adKeys ?? []).length > 0 && (!g.semimodalidad || g.semimodalidad === "dou"));

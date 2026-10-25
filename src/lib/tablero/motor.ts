@@ -12,6 +12,7 @@
  *  4. Lo programado lleva su dueño: los `tablero_*` van aquí desde el obrero, nunca al de siempre.
  */
 import {
+  addToPaidTotal,
   cancelPendingActionsForConvo,
   countPendingActionsInWindow,
   getConversationById,
@@ -897,6 +898,10 @@ async function cerrarLaVenta(
 ): Promise<void> {
   cerrarCobro(convo.id);
   anotarCompra({ conversationId: convo.id, fichaId: f.id, productoId, salida, monto: total, moneda });
+  // LO PAGADO, EN LA CONVERSACIÓN (25/10/2026), como la venta de siempre (`addToPaidTotal`): de ahí
+  // lo leen el kanban (comprador y su dinero), los resultados y la autopurga (que NUNCA borra a quien
+  // pagó). Sin esto, quien compraba por el tablero se veía como si no hubiera comprado.
+  addToPaidTotal(convo.id, Math.round(total * 100));
   if (!convo.paid_at) setPaidAt(convo.id, ahora());
   void sendPurchaseEvent({
     conversationId: convo.id,

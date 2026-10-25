@@ -27197,6 +27197,7 @@ function VistaPizarra({
     return null;
   };
   const SEMI_CORTA: Record<string, string> = { "": "lineal", dos_juntas: "dou", segunda_oculta: "ob" };
+  const NOMBRE_DE_LA_SEMI: Record<string, string> = { lineal: "COMOHOY (lineal)", dou: "COMO DOU (doble oferta)", ob: "COMO OB (order bump)" };
   const claveDeVista = claveDeLaVista(tiendaId, canal, semi);
   /**
    * LA CONFIGURACIÓN CON LA PIZARRA DE ESTA TIENDA CAMBIADA, en el MISMO paso que el contenido:
@@ -27607,12 +27608,13 @@ function VistaPizarra({
   };
 
   /** Conecta una ficha a un país sobre una configuración dada (para encadenar con crear). */
-  /** La semimodalidad que lleva una copia: la que se está viendo, si la original es de otra. */
-  const semiParaLaCopia = (piezaId: string): string | undefined => {
-    const suya = vivo.current.piezas.find((x) => x.id === piezaId)?.semimodalidad;
-    const actual = SEMI_CORTA[vivo.current.semi];
-    return suya && suya !== actual ? actual : undefined;
-  };
+  /**
+   * LA SEMIMODALIDAD DE UNA COPIA: SIEMPRE la que se está viendo (25/10/2026). Antes, la copia de
+   * una ficha general (sin semimodalidad) salía general también, y una ficha general aparece en las
+   * TRES (lineal, COMO OB y COMO DOU): «se pega en las 3 semimodalidades, es un caos». Lo que se pega
+   * o se duplica aquí es de aquí.
+   */
+  const semiParaLaCopia = (_piezaId: string): string | undefined => SEMI_CORTA[vivo.current.semi] || undefined;
   const conectarSobre = (
     c: FullConfig,
     piezaId: string,
@@ -28410,8 +28412,27 @@ function VistaPizarra({
       // guardados en la pizarra («enlaces»). Cada copia, igual que «Duplicar»: al final de su
       // lista, apagada y sin país —hasta que la conecte, el bot no la manda— y con botones de
       // código propio (`conBotonesNuevos`).
+      // DÓNDE SE COPIÓ (25/10/2026): «copiaste en COMO OB pero estás pegando en LINEAL…».
+      alCopiar: () => {
+        semiDelPortapapeles = SEMI_CORTA[vivo.current.semi] ?? null;
+      },
       pegar: (items: Array<{ piezaId: string; donde: { x: number; y: number }; recuadros?: Array<{ x: number; y: number } | null> }>, enlaces: Array<[number, number]>) => {
         const { canal: k } = vivo.current;
+        // PEGAR EN OTRA FORMA DE VENDER: se avisa antes. La tubería de COMO OB lleva la oferta de 2
+        // opciones; en LINEAL eso no existe, y al revés faltaría. Si dice que sí, se pega aquí.
+        const aqui = SEMI_CORTA[vivo.current.semi];
+        if (semiDelPortapapeles && aqui && semiDelPortapapeles !== aqui) {
+          const nombre = (s: string) => NOMBRE_DE_LA_SEMI[s] ?? s;
+          const seguir = window.confirm(
+            `Copiaste en ${nombre(semiDelPortapapeles)} y estás pegando en ${nombre(aqui)}.\n\n` +
+              `Puede haber incompatibilidad: cada forma de vender tiene sus pasos (por ejemplo, la oferta de 2 opciones solo existe en COMO OB).\n\n` +
+              `¿Pegar igual aquí, en ${nombre(aqui)}? Las copias quedan solo en ${nombre(aqui)}.`
+          );
+          if (!seguir) {
+            setAviso("No se pegó nada.");
+            return [];
+          }
+        }
         let c: FullConfig = vivo.current.cfg;
         const nuevas: string[] = [];
         const deCadaUna: (string | null)[] = [];
@@ -29726,6 +29747,9 @@ function VistaPizarra({
 }
 
 type PostventaDeLaPizarra = NonNullable<ModeloDePizarra["postventa"]>;
+
+/** En qué semimodalidad se copió lo que hay en el portapapeles de la pizarra (vive mientras la pestaña). */
+let semiDelPortapapeles: string | null = null;
 
 /** Los gestores llevan el editor completo dentro: casi toda la pantalla, como Sendy. */
 const ANCHO_DEL_GESTOR = "max-w-[1500px]";
@@ -31537,6 +31561,17 @@ function GestorDeVersiones({
   const porcentaje = (v: Version) => Math.round((100 * (v.peso ?? 1)) / pesoTotal);
   const bandera = pais ? `${banderaDe(pais)} ${pais}` : "🌍 Otros países";
   const conAnuncio = (v: Version) => v.dirigir !== false && (v.anuncios ?? []).length > 0;
+  // EL PRECIO DE OFERTA EN SU VISTA PREVIA (25/10/2026): desde el seguimiento que «activa el precio de
+  // oferta» (ese mismo y los siguientes), el bot cobra el de oferta; la vista previa enseña ése.
+  const productosDeLaFicha = useContext(ProductosDeLaFichaContext);
+  const ofertaDesde = esSeg ? (() => {
+    const i = segs.findIndex((x) => x.activa_oferta === true);
+    return i >= 0 && i <= elegida.seg ? i : null;
+  })() : null;
+  const productosDeEsteSeguimiento =
+    ofertaDesde !== null && productosDeLaFicha
+      ? { ...productosDeLaFicha, productos: productosDeLaFicha.productos.map((p) => ({ ...p, precio: p.oferta ?? p.precio })) }
+      : productosDeLaFicha;
   return (
     <VentanaFlotante
       titulo={esSeg ? `⏱ Seguimientos · ${bandera}` : `🎁 Intro de order bump · ${bandera}`}
@@ -31692,9 +31727,15 @@ function GestorDeVersiones({
               )}
             </div>
           )}
+          {esSeg && ofertaDesde !== null && (
+            <div className="rounded-md border border-emerald-300 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-900">
+              💲 La vista previa enseña el PRECIO DE OFERTA: lo activa el seguimiento {ofertaDesde + 1}, y desde ahí el bot cobra ese.
+            </div>
+          )}
           {version ? (
+            <ProductosDeLaFichaContext.Provider value={productosDeEsteSeguimiento}>
             <VentanaDelCajon
-              key={`${elegida.seg}|${version.id}`}
+              key={`${elegida.seg}|${version.id}|${ofertaDesde ?? "-"}`}
               incrustado
               titulo={esSeg ? `Seguimiento ${elegida.seg + 1} · Versión ${letra(elegida.ver)}` : `Intro de order bump · Versión ${letra(elegida.ver)}`}
               steps={(version.steps ?? []) as EditorStep[]}
@@ -31715,6 +31756,7 @@ function GestorDeVersiones({
               }
               onCerrar={onCerrar}
             />
+            </ProductosDeLaFichaContext.Provider>
           ) : (
             <div className="p-8 text-sm text-tinta-suave">{esSeg ? "Agrega un seguimiento a la izquierda." : "Esta ficha no tiene versiones."}</div>
           )}
@@ -33044,18 +33086,26 @@ function productosParaElVisor(
   if (!f) return null;
   const pais = tablero ? paisDeSuManta(tablero, f, paisVisto) : paisVisto;
   const ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
+  // EL PRECIO QUE COBRARÁ EL BOT (25/10/2026): «¿en los visores se pueden ver los precios ya rebajados
+  // según la etapa?». Un cobro «Siempre el de oferta» enseña el de oferta; los demás, el normal (y el
+  // gestor de seguimientos lo cambia al de oferta desde el que lo activa, ver `GestorDeVersiones`).
+  const deOferta = f.tipo === "cobro" && f.cobro?.precio === "oferta";
   const productos: ProductoConPrecio[] = [];
   for (const id of new Set(ids.filter((x): x is string => !!x))) {
     const p = (cfg.biblioteca_de_productos ?? []).find((x) => x.id === id);
     if (!p?.name) continue;
-    const suyo = p.precios_por_pais?.[pais as CountryCode] as { price_soles?: number; market_price?: number } | undefined;
-    const precio = suyo?.price_soles ?? p.price_soles;
+    const suyo = p.precios_por_pais?.[pais as CountryCode] as { price_soles?: number; market_price?: number; discount_price_soles?: number } | undefined;
+    const normal = suyo?.price_soles ?? p.price_soles;
+    const rebajado = suyo?.discount_price_soles ?? (p as { discount_price_soles?: number }).discount_price_soles;
+    const oferta = typeof rebajado === "number" && rebajado > 0 ? rebajado : null;
+    const precio = deOferta && oferta !== null ? oferta : normal;
     const antes = suyo?.market_price ?? (p as { market_price?: number }).market_price;
     productos.push({
       id,
       name: p.name,
       precio: typeof precio === "number" && precio > 0 ? precio : null,
       antes: typeof antes === "number" && antes > 0 ? antes : null,
+      oferta,
     });
   }
   return productos.length ? { productos, pais } : null;
