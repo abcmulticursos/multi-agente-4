@@ -122194,8 +122194,8 @@ tableros:
             sin_preguntar: true
         - id: mas_ec_caja
           tipo: cobro
-          x: 777
-          y: 2071
+          x: 985
+          y: 2082
           titulo: Caja abierta (no respondió) · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -122786,8 +122786,8 @@ tableros:
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 3559
-          y: 3897
+          x: 3891
+          y: 4024
           titulo: Regalo
         - id: f-mvnpmsvw-pozfa
           tipo: cobro
@@ -122977,6 +122977,29 @@ tableros:
           y: 4763
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
+        - id: f-mvnq6s0x-ooeg
+          tipo: mensaje
+          x: 3386
+          y: 3940
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
+        - id: f-mvnq83le-l5tfb
+          tipo: regalo
+          x: 3821
+          y: 5197
+          titulo: Regalo
+        - id: f-mvnq83le-lscae
+          tipo: mensaje
+          x: 3316
+          y: 5113
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
       cables:
         - id: c1
           de: mas_pe_inicio
@@ -123310,10 +123333,6 @@ tableros:
           de: f-mvnq2nch-l7c8p
           salida: dec:d-mvnq2nch-rtahi
           a: f-mvnq43x5-que6q
-        - id: c-mvnq55yp-d55
-          de: f-mvnpmsvw-jxg9n
-          salida: dec:d-mvnpmsvw-fasqz
-          a: f-mvnpmsvw-u9oq3
         - id: c-mvnq5u7t-eth
           de: f-mvnpmsvw-p7yu2
           salida: pagado
@@ -123322,6 +123341,22 @@ tableros:
           de: f-mvnq43x5-que6q
           salida: pagado
           a: f-mvnq6181-losm1
+        - id: c-mvnq7q69-p0i
+          de: f-mvnpmsvw-jxg9n
+          salida: dec:d-mvnpmsvw-fasqz
+          a: f-mvnq6s0x-ooeg
+        - id: c-mvnq7sq8-kw2
+          de: f-mvnq6s0x-ooeg
+          salida: siguiente
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvnq83le-1vysj
+          de: f-mvnq83le-lscae
+          salida: siguiente
+          a: f-mvnq83le-l5tfb
+        - id: c-mvnq8r09-0he
+          de: f-mvnq2nch-l7c8p
+          salida: dec:d-mvnq2nch-d9bml
+          a: f-mvnq83le-lscae
       curvas:
         c3:
           x: 121
