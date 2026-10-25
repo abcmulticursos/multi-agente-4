@@ -121255,6 +121255,15 @@ tableros:
 
                           *¿Cuál prefieres?* 😊
                       delay_after_sec: 4
+                      buttons:
+                        - id: b7e241da-e903-497c-a86a-9fce0084e26f
+                          label: SOLO COMIDA CASERA
+                          action: send_steps
+                          steps: []
+                        - id: 7936ca87-12ab-4657-91d2-d5c00f6c5779
+                          label: PACK COMIDA Y ROPA
+                          action: send_steps
+                          steps: []
                 - id: mas_pe_seg_p_1b
                   nombre: Versión B
                   peso: 1
@@ -122432,6 +122441,14 @@ tableros:
           de: mas_pe_cobro_b
           salida: sin_pago
           a: mas_pe_seg_p
+        - id: c-mvnnary3-8mx
+          de: mas_pe_seg_p
+          salida: btn:7936ca87-12ab-4657-91d2-d5c00f6c5779
+          a: mas_pe_ent_p
+        - id: c-mvnnatr7-pbw
+          de: mas_pe_seg_p
+          salida: btn:b7e241da-e903-497c-a86a-9fce0084e26f
+          a: mas_pe_ent_b
       curvas:
         c3:
           x: 121
