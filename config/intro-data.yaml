@@ -126663,8 +126663,8 @@ tableros:
             - ptmascotas_comida
         - id: f-mvnpmsvw-fa2fp
           tipo: intro_ob
-          x: 950
-          y: 3511
+          x: 860
+          y: 3494
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -127169,6 +127169,155 @@ tableros:
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
+        - id: f-mvp3cgba-l9skj
+          tipo: seguimientos
+          x: 3061
+          y: 4616
+          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvp3cgba-kknnh
+              minutos: 2
+              variantes:
+                - id: v-mvp3cgba-79h18
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvp3cgba-n9frp
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvp3cgba-apy9x
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvp3cgba-9qc8f
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                - id: v-mvp3cgba-4dqdd
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvp3cgba-ygog9
+              minutos: 4
+              variantes:
+                - id: v-mvp3cgba-idxaf
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvp3cgba-1oioc
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvp3cgba-1i51f
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvp3cgba-80aj9
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+              ignora_silencio: true
+              ignora_tardio: true
       cables:
         - id: c2
           de: mas_pe_intro
@@ -127554,6 +127703,18 @@ tableros:
           de: f-mvp20a4l-r8g78
           salida: sin_pago
           a: f-mvnpmsvw-u9oq3
+        - id: c-mvp3bm6e-fxh
+          de: f-mvnpmsvw-ph32e
+          salida: siguiente
+          a: f-mvnpwgvn-c9ae9
+        - id: c-mvp3bubi-6r4
+          de: f-mvnpmsvw-fa2fp
+          salida: siguiente
+          a: f-mvnpwgvn-c9ae9
+        - id: c-mvp3gqwl-7e2
+          de: f-mvo7g67a-vlta3
+          salida: siguiente
+          a: f-mvp3cgba-l9skj
       curvas:
         c3:
           x: 121
