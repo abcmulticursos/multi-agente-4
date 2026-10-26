@@ -126826,14 +126826,14 @@ tableros:
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 3682
-          y: 4011
+          x: 3841
+          y: 4051
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 3676
-          y: 4324
+          x: 3834
+          y: 4385
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
@@ -127051,7 +127051,6 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_comida
@@ -127073,7 +127072,6 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_pack
@@ -127401,14 +127399,6 @@ tableros:
           de: f-mvo7hddp-ow7zr
           salida: prod:ptmascotas_pack
           a: f-mvnpsqoc-9kqjp
-        - id: c-mvo7j3v1-k8f
-          de: f-mvo7hh6u-vasar
-          salida: pagado
-          a: f-mvnpsqoc-avwwz
-        - id: c-mvo7j8cu-6qi
-          de: f-mvo7hh6u-vasar
-          salida: prod:ptmascotas_comida
-          a: f-mvnpsqoc-9kqjp
         - id: mas_pe_intro_sinresp_sig
           de: mas_pe_intro
           salida: siguiente
@@ -127453,6 +127443,14 @@ tableros:
           de: mas_ec_inicio
           salida: siguiente
           a: f-mvnpmsvw-ph32e
+        - id: c-mvp1dx9u-5t5
+          de: f-mvo7hh6u-vasar
+          salida: prod:ptmascotas_comida
+          a: f-mvnpsqoc-avwwz
+        - id: c-mvp1dzeo-s6o
+          de: f-mvo7hh6u-vasar
+          salida: pagado
+          a: f-mvnpsqoc-9kqjp
       curvas:
         c3:
           x: 121
