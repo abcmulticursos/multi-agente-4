@@ -140,6 +140,31 @@ const REGALO = /regalit|regalo/i;
 try {
   await entrar();
 
+  // FIGURARTE y FIGURARTE 3 (Perú, contribución): uno con botón SÍ, otro con cuadrito por palabra.
+  // Para «se calla» pide en la copia el «Si no responde» de la presentación a 1 min (es de 120).
+  if (toca("figurarte"))
+    for (const [tienda, p, si] of [
+      ["tienda_tfigurarte", "fig", "boton"],
+      ["tienda_tfigurarte3", "fg3", "palabra"],
+    ]) {
+      console.log(`\n· 🇵🇪 ${tienda} — contribución: SÍ → muestras → aporta 15 → su entrega; y si se calla, «Si no contesta»`);
+      const c = await cliente(tienda, "PE");
+      await c.decir("hola", 45);
+      comprobar("le llega la presentación", c.fichas().includes(`${p}_presenta`) && c.nuevo().trim().length > 40, c.nuevo().slice(0, 80));
+      if (si === "boton") await c.tocar(`${p}_si`, "SÍ", 60);
+      else await c.decir("sí", 60);
+      comprobar("dice que sí: le llegan las muestras y queda en la contribución", c.fichas().includes(`${p}_muestras`) && c.fichas().includes(`${p}_cobro`), c.fichas().join(", "));
+      await c.foto(R.pe15, 80);
+      comprobar("aporta 15: le llega la entrega de S/15", c.fichas().includes(`${p}_ent15`) && c.nuevo().trim().length > 20, c.nuevo().slice(0, 100));
+      comprobar("y no la de otro monto", !c.fichas().some((f) => /_ent(10|20|25|30)$/.test(f)), c.fichas().join(", "));
+      await c.borrar();
+      const d = await cliente(tienda, "PE");
+      await d.decir("hola", 45);
+      await d.leer(100);
+      comprobar("se calla en la presentación: le llega «Si no contesta»", d.fichas().includes(`${p}_insiste`), d.fichas().join(", "));
+      await d.borrar();
+    }
+
   if (toca("seg_no_repite")) {
     console.log("\n· 🇪🇨 COCINA (order bump) — un seguimiento que ya salió no se repite, caiga donde caiga");
     const c = await cliente("tienda_tcocina", "EC");
