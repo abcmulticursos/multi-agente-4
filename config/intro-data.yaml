@@ -127320,8 +127320,8 @@ tableros:
               ignora_tardio: true
         - id: f-rec26-05ny
           tipo: mensaje
-          x: 370
-          y: 5676
+          x: 121
+          y: 5459
           titulo: Intro (versión recomendada)
           steps:
             - type: text
@@ -127498,8 +127498,8 @@ tableros:
             metodos: true
         - id: f-rec26-abwg
           tipo: seguimientos
-          x: 1948
-          y: 6398
+          x: 451
+          y: 5890
           titulo: Seguimientos · si no elige en la Intro
           presenta:
             - ptmascotas_comida
@@ -127830,8 +127830,8 @@ tableros:
           titulo: Regalo
         - id: f-rec26-b0rhv
           tipo: seguimientos
-          x: 2328
-          y: 6778
+          x: 2117
+          y: 6248
           titulo: Seguimientos · si no elige o no paga
           presenta:
             - ptmascotas_comida
@@ -128260,10 +128260,6 @@ tableros:
           de: f-mvp0wa4s-2dfnw
           salida: siguiente
           a: f-mvnpmsvw-jxg9n
-        - id: c-mvp1com0-he7
-          de: mas_ec_inicio
-          salida: siguiente
-          a: f-mvnpmsvw-ph32e
         - id: c-mvp1dx9u-5t5
           de: f-mvo7hh6u-vasar
           salida: prod:ptmascotas_comida
@@ -128440,6 +128436,10 @@ tableros:
           de: f-rec26-9k6z
           salida: sin_pago
           a: f-rec26-b0rhv
+        - id: c-mvp4hqtb-y1g
+          de: mas_ec_inicio
+          salida: siguiente
+          a: f-rec26-05ny
       curvas:
         c3:
           x: 121
