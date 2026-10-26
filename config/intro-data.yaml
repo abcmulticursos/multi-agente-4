@@ -126934,14 +126934,14 @@ tableros:
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 3759
-          y: 3416
+          x: 3682
+          y: 4011
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 3753
-          y: 3729
+          x: 3676
+          y: 4324
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
@@ -127331,6 +127331,18 @@ tableros:
             acepta:
               - ptmascotas_comida
             metodos: true
+        - id: f-mvp0wa4s-tadqn
+          tipo: entregar
+          x: 2457
+          y: 3410
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
+        - id: f-mvp0wa4s-2dfnw
+          tipo: entregar
+          x: 2451
+          y: 3723
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
       cables:
         - id: c2
           de: mas_pe_intro
@@ -127540,14 +127552,6 @@ tableros:
           de: f-mvnpmsvw-fa2fp
           salida: btn:b-mvnpmsvw-2qgjr
           a: f-mvnpmsvw-tq1yb
-        - id: c-mvnpuz1f-19i
-          de: f-mvnpmsvw-cg6i5
-          salida: pagado
-          a: f-mvnpsqoc-avwwz
-        - id: c-mvnpv4kr-axj
-          de: f-mvnpmsvw-tq1yb
-          salida: pagado
-          a: f-mvnpsqoc-9kqjp
         - id: c-mvnpzkf6-ac6
           de: f-mvnpmsvw-cg6i5
           salida: sin_pago
@@ -127736,14 +127740,30 @@ tableros:
           de: f-mvnpmsvw-fa2fp
           salida: siguiente
           a: f-mvnpmsvw-u6enj
-        - id: c-mvp0rzec-8ge
+        - id: c-mvp0x6ur-xov
+          de: f-mvnpmsvw-cg6i5
+          salida: pagado
+          a: f-mvp0wa4s-tadqn
+        - id: c-mvp0x8oz-u6a
           de: f-mvnpmsvw-cg6i5
           salida: prod:ptmascotas_pack
-          a: f-mvnpsqoc-9kqjp
-        - id: c-mvp0s3cc-t3y
+          a: f-mvp0wa4s-2dfnw
+        - id: c-mvp0xaxq-ias
+          de: f-mvnpmsvw-tq1yb
+          salida: pagado
+          a: f-mvp0wa4s-2dfnw
+        - id: c-mvp0xdbf-rj5
           de: f-mvnpmsvw-tq1yb
           salida: prod:ptmascotas_comida
-          a: f-mvnpsqoc-avwwz
+          a: f-mvp0wa4s-tadqn
+        - id: c-mvp0xv68-wrv
+          de: f-mvp0wa4s-tadqn
+          salida: siguiente
+          a: f-mvnpmsvw-jxg9n
+        - id: c-mvp0xwrw-7s0
+          de: f-mvp0wa4s-2dfnw
+          salida: siguiente
+          a: f-mvnpmsvw-jxg9n
       curvas:
         c3:
           x: 121
