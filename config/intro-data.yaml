@@ -127411,6 +127411,25 @@ tableros:
                     - guayaquil
                   color: ambar
                   steps: []
+                - id: d-rec26-c0w8i
+                  title: Quiere comprar o pregunta cómo pagar
+                  keywords: &a1
+                    - quiero comprar
+                    - lo quiero
+                    - lo compro
+                    - lo llevo
+                    - quiero llevarlo
+                    - quiero pagar
+                    - como pago
+                    - como compro
+                    - como lo compro
+                    - como hago el pago
+                    - donde pago
+                    - donde deposito
+                    - quiero adquirir
+                    - me animo
+                  color: esmeralda
+                  steps: []
           presenta:
             - ptmascotas_comida
         - id: f-rec26-4ddo
@@ -127566,6 +127585,11 @@ tableros:
                             - guayaquil
                           color: ambar
                           steps: []
+                        - id: d-rec26-c2zit
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords: *a1
+                          color: esmeralda
+                          steps: []
                 - id: v-rec26-gj1a
                   nombre: Versión B
                   peso: 1
@@ -127642,6 +127666,11 @@ tableros:
                             - transferencia
                             - guayaquil
                           color: ambar
+                          steps: []
+                        - id: d-rec26-c2zit
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords: *a1
+                          color: esmeralda
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
@@ -127734,6 +127763,7 @@ tableros:
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
+          titulo: Si dice que no
         - id: f-rec26-q3sw
           tipo: entregar
           x: 4854
@@ -127744,7 +127774,7 @@ tableros:
           tipo: mensaje
           x: 5329
           y: 5332
-          titulo: Upsell 2 · 100 CITAS CON TU MASCOTA
+          titulo: Upsell 2 · TINTAS PEPITO
           steps:
             - type: text
               body_variants:
@@ -127793,7 +127823,7 @@ tableros:
           tipo: cobro
           x: 5663
           y: 5340
-          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          titulo: Cobro · TINTAS PEPITO
           steps:
             - type: text
               body_variants:
@@ -127817,12 +127847,13 @@ tableros:
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
+          titulo: Si dice que no
         - id: f-rec26-w13f
           tipo: entregar
           x: 5958
           y: 5342
-          titulo: Entrega · 100 CITAS CON TU MASCOTA
-          producto_id: ptmascotas_citas
+          titulo: Entrega · TINTAS PEPITO
+          producto_id: pmtxy45s7
         - id: f-rec26-xpt8
           tipo: regalo
           x: 7871
@@ -128440,6 +128471,14 @@ tableros:
           de: mas_ec_inicio
           salida: siguiente
           a: f-rec26-05ny
+        - id: c-rec26-c122u
+          de: f-rec26-05ny
+          salida: dec:d-rec26-c0w8i
+          a: f-rec26-4ddo
+        - id: c-rec26-c3lpn
+          de: f-rec26-abwg
+          salida: dec:d-rec26-c2zit
+          a: f-rec26-4ddo
       curvas:
         c3:
           x: 121
