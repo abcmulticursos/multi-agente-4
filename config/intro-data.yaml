@@ -126795,8 +126795,8 @@ tableros:
           espera_min: 2
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
-          x: 5233
-          y: 3313
+          x: 4539
+          y: 3295
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126815,14 +126815,14 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-92jl4
           tipo: entregar
-          x: 5644
-          y: 3368
+          x: 4854
+          y: 3350
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 6182
-          y: 3659
+          x: 7871
+          y: 3845
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
@@ -126987,8 +126987,8 @@ tableros:
               ignora_tardio: true
         - id: f-mvnq6s0x-ooeg
           tipo: mensaje
-          x: 4848
-          y: 3790
+          x: 4864
+          y: 4003
           steps:
             - type: text
               body_variants:
@@ -127090,6 +127090,88 @@ tableros:
           y: 3723
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
+        - id: f-mvp1zc5h-z0ta7
+          tipo: mensaje
+          x: 5329
+          y: 3279
+          titulo: Upsell 2 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvp1zc5h-j24rv
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-mvp1zc5h-iomwl
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - pmtxy45s7
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          espera_min: 2
+        - id: f-mvp20a4l-r8g78
+          tipo: cobro
+          x: 5663
+          y: 3287
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: pmtxy45s7
+            metodos: true
+        - id: f-mvp22hzh-yylux
+          tipo: entregar
+          x: 5958
+          y: 3289
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
+        - id: f-mvp24b6s-zh4sx
+          tipo: mensaje
+          x: 5723
+          y: 3778
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
       cables:
         - id: c2
           de: mas_pe_intro
@@ -127347,10 +127429,6 @@ tableros:
           de: f-mvnp4een-2cqak
           salida: btn:b-mvnp4eeo-aexdq
           a: mas_pe_ent_b
-        - id: c-mvo5p3e6-zlu
-          de: f-mvnpmsvw-92jl4
-          salida: siguiente
-          a: f-mvnpmsvw-u9oq3
         - id: c-mvo5zb4z-cld
           de: f-mvnpmsvw-jxg9n
           salida: sin_respuesta
@@ -127451,6 +127529,30 @@ tableros:
           de: f-mvo7hh6u-vasar
           salida: pagado
           a: f-mvnpsqoc-9kqjp
+        - id: c-mvp207bx-670
+          de: f-mvnpmsvw-92jl4
+          salida: siguiente
+          a: f-mvp1zc5h-z0ta7
+        - id: c-mvp20s0l-row
+          de: f-mvp1zc5h-z0ta7
+          salida: dec:d-mvp1zc5h-j24rv
+          a: f-mvp20a4l-r8g78
+        - id: c-mvp236kt-gaf
+          de: f-mvp20a4l-r8g78
+          salida: pagado
+          a: f-mvp22hzh-yylux
+        - id: c-mvp23eyc-l9p
+          de: f-mvp22hzh-yylux
+          salida: siguiente
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvp24i7x-0qe
+          de: f-mvp1zc5h-z0ta7
+          salida: dec:d-mvp1zc5h-iomwl
+          a: f-mvp24b6s-zh4sx
+        - id: c-mvp24t51-xeh
+          de: f-mvp24b6s-zh4sx
+          salida: siguiente
+          a: f-mvnpmsvw-u9oq3
       curvas:
         c3:
           x: 121
@@ -127473,6 +127575,9 @@ tableros:
         c20:
           x: -5
           y: -12
+        c-mvnq7sq8-kw2:
+          x: 335
+          y: 4
       cajas:
         - id: manta-mas_pe_inicio
           x: -61
