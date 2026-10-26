@@ -127504,8 +127504,8 @@ tableros:
             metodos: true
         - id: f-rec26-9k6z
           tipo: cobro
-          x: 1508
-          y: 5622
+          x: 1598
+          y: 5609
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -127897,8 +127897,8 @@ tableros:
           titulo: Regalo
         - id: f-rec26-b0rhv
           tipo: seguimientos
-          x: 2117
-          y: 6248
+          x: 2173
+          y: 6188
           titulo: Seguimientos · si no elige o no paga
           presenta:
             - ptmascotas_comida
