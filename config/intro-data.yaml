@@ -127421,7 +127421,7 @@ tableros:
                   steps: []
                 - id: d-rec26-c0w8i
                   title: Quiere comprar o pregunta cómo pagar
-                  keywords: &a1
+                  keywords:
                     - quiero comprar
                     - lo quiero
                     - lo compro
@@ -127442,8 +127442,8 @@ tableros:
             - ptmascotas_comida
         - id: f-rec26-4ddo
           tipo: intro_ob
-          x: 860
-          y: 5547
+          x: 968
+          y: 5543
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -127525,8 +127525,8 @@ tableros:
             metodos: true
         - id: f-rec26-abwg
           tipo: seguimientos
-          x: 451
-          y: 5890
+          x: 529
+          y: 5944
           titulo: Seguimientos · si no elige en la Intro
           presenta:
             - ptmascotas_comida
@@ -127595,7 +127595,21 @@ tableros:
                           steps: []
                         - id: d-rec26-c2zit
                           title: Quiere comprar o pregunta cómo pagar
-                          keywords: *a1
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
                           color: esmeralda
                           steps: []
                 - id: v-rec26-gj1a
@@ -127677,21 +127691,35 @@ tableros:
                           steps: []
                         - id: d-rec26-c2zit
                           title: Quiere comprar o pregunta cómo pagar
-                          keywords: *a1
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
                           color: esmeralda
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
         - id: f-rec26-jcxt
           tipo: entregar
-          x: 2457
-          y: 5463
+          x: 2666
+          y: 5472
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-rec26-k3r2
           tipo: entregar
-          x: 2451
-          y: 5776
+          x: 2660
+          y: 5785
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-rec26-lu28
@@ -127766,12 +127794,12 @@ tableros:
           tipo: mensaje
           x: 4864
           y: 6056
+          titulo: Si dice que no
           steps:
             - type: text
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
-          titulo: Si dice que no
         - id: f-rec26-q3sw
           tipo: entregar
           x: 4854
@@ -127850,12 +127878,12 @@ tableros:
           tipo: mensaje
           x: 5723
           y: 5831
+          titulo: Si dice que no
           steps:
             - type: text
               body_variants:
                 - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
               delay_after_sec: 6
-          titulo: Si dice que no
         - id: f-rec26-w13f
           tipo: entregar
           x: 5958
@@ -127864,8 +127892,8 @@ tableros:
           producto_id: pmtxy45s7
         - id: f-rec26-xpt8
           tipo: regalo
-          x: 7871
-          y: 5898
+          x: 6778
+          y: 5640
           titulo: Regalo
         - id: f-rec26-b0rhv
           tipo: seguimientos
