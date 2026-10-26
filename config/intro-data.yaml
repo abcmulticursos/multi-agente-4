@@ -126018,14 +126018,14 @@ tableros:
           titulo: Regalo
         - id: mas_ar_inicio
           tipo: inicio
-          x: 238
-          y: 6357
+          x: 210
+          y: 7376
           titulo: Tubería lineal
           pais: AR
         - id: mas_ar_intro
           tipo: mensaje
-          x: 568
-          y: 6357
+          x: 540
+          y: 7376
           titulo: Intro
           steps:
             - type: text
@@ -126084,8 +126084,8 @@ tableros:
             - ptmascotas_comida
         - id: mas_ar_cobro
           tipo: cobro
-          x: 898
-          y: 6357
+          x: 870
+          y: 7376
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -126103,8 +126103,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_b
           tipo: seguimientos
-          x: 898
-          y: 6687
+          x: 870
+          y: 7706
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -126152,15 +126152,15 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_b
           tipo: entregar
-          x: 1228
-          y: 6357
+          x: 1200
+          y: 7376
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           por_correo: true
           producto_id: ptmascotas_comida
         - id: mas_ar_upsell1
           tipo: mensaje
-          x: 1558
-          y: 6357
+          x: 1530
+          y: 7376
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126208,8 +126208,8 @@ tableros:
           espera_min: 2
         - id: mas_ar_cobro_u1
           tipo: cobro
-          x: 1558
-          y: 6687
+          x: 1530
+          y: 7706
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126227,8 +126227,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_u1
           tipo: seguimientos
-          x: 1558
-          y: 7017
+          x: 1530
+          y: 8036
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -126276,25 +126276,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_u1
           tipo: entregar
-          x: 1888
-          y: 6687
+          x: 1860
+          y: 7706
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           por_correo: true
           producto_id: ptmascotas_citas
         - id: mas_ar_regalo
           tipo: regalo
-          x: 2218
-          y: 6357
+          x: 2190
+          y: 7376
           titulo: Regalo
         - id: mas_otros
           tipo: inicio
-          x: 238
-          y: 7557
+          x: 254
+          y: 8334
           titulo: Otros países
         - id: mas_otros_msg
           tipo: mensaje
-          x: 568
-          y: 7557
+          x: 584
+          y: 8334
           titulo: No vendemos aquí
           steps:
             - type: text
@@ -126303,8 +126303,8 @@ tableros:
               delay_after_sec: 4
         - id: mas_otros_humano
           tipo: humano
-          x: 898
-          y: 7557
+          x: 914
+          y: 8334
           titulo: Pasa a un asesor
         - id: f-mvnp4een-2cqak
           tipo: seguimientos
@@ -127498,8 +127498,8 @@ tableros:
             metodos: true
         - id: f-rec26-abwg
           tipo: seguimientos
-          x: 1995
-          y: 6249
+          x: 1948
+          y: 6398
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -127704,8 +127704,8 @@ tableros:
           presenta:
             - ptmascotas_citas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
-          espera_min: 2
           sin_respuesta_min: 3
+          espera_min: 2
         - id: f-rec26-oute
           tipo: cobro
           x: 4539
@@ -127787,8 +127787,8 @@ tableros:
           presenta:
             - pmtxy45s7
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
-          espera_min: 2
           sin_respuesta_min: 3
+          espera_min: 2
         - id: f-rec26-ul0n
           tipo: cobro
           x: 5663
@@ -128227,96 +128227,96 @@ tableros:
           a: f-mvp3cgba-l9skj
         - id: c-rec26-y4bf
           de: f-rec26-4ddo
-          a: f-rec26-8mi7
           salida: btn:b-rec26-6lk0
+          a: f-rec26-8mi7
         - id: c-rec26-zup6
           de: f-rec26-4ddo
-          a: f-rec26-9k6z
           salida: btn:b-rec26-7u11
+          a: f-rec26-9k6z
         - id: c-rec26-12e4w
           de: f-rec26-lu28
-          a: f-rec26-oute
           salida: dec:d-rec26-m51f
+          a: f-rec26-oute
         - id: c-rec26-13hir
           de: f-rec26-oute
-          a: f-rec26-q3sw
           salida: pagado
+          a: f-rec26-q3sw
         - id: c-rec26-14z8z
           de: f-rec26-lu28
-          a: f-rec26-pq7d
           salida: dec:d-rec26-n2bp
+          a: f-rec26-pq7d
         - id: c-rec26-15rea
           de: f-rec26-pq7d
-          a: f-rec26-xpt8
           salida: siguiente
+          a: f-rec26-xpt8
         - id: c-rec26-17s5s
           de: f-rec26-oute
-          a: f-rec26-xpt8
           salida: sin_pago
+          a: f-rec26-xpt8
         - id: c-rec26-18ubx
           de: f-rec26-05ny
-          a: f-rec26-4ddo
           salida: dec:d-rec26-1ol0
+          a: f-rec26-4ddo
         - id: c-rec26-1979m
           de: f-rec26-05ny
-          a: f-rec26-4ddo
           salida: dec:d-rec26-2xjm
+          a: f-rec26-4ddo
         - id: c-rec26-1ai22
           de: f-rec26-05ny
-          a: f-rec26-4ddo
           salida: dec:d-rec26-3vu2
+          a: f-rec26-4ddo
         - id: c-rec26-1b9kr
           de: f-rec26-8mi7
-          a: f-rec26-jcxt
           salida: pagado
+          a: f-rec26-jcxt
         - id: c-rec26-1czus
           de: f-rec26-8mi7
-          a: f-rec26-k3r2
           salida: prod:ptmascotas_pack
+          a: f-rec26-k3r2
         - id: c-rec26-1drqc
           de: f-rec26-9k6z
-          a: f-rec26-k3r2
           salida: pagado
+          a: f-rec26-k3r2
         - id: c-rec26-1emjr
           de: f-rec26-9k6z
-          a: f-rec26-jcxt
           salida: prod:ptmascotas_comida
+          a: f-rec26-jcxt
         - id: c-rec26-1fdwy
           de: f-rec26-jcxt
-          a: f-rec26-lu28
           salida: siguiente
+          a: f-rec26-lu28
         - id: c-rec26-1gjp0
           de: f-rec26-k3r2
-          a: f-rec26-lu28
           salida: siguiente
+          a: f-rec26-lu28
         - id: c-rec26-1hxcf
           de: f-rec26-q3sw
-          a: f-rec26-rkpy
           salida: siguiente
+          a: f-rec26-rkpy
         - id: c-rec26-1il9g
           de: f-rec26-rkpy
-          a: f-rec26-ul0n
           salida: dec:d-rec26-srz2
+          a: f-rec26-ul0n
         - id: c-rec26-1j2aw
           de: f-rec26-ul0n
-          a: f-rec26-w13f
           salida: pagado
+          a: f-rec26-w13f
         - id: c-rec26-1kyo4
           de: f-rec26-w13f
-          a: f-rec26-xpt8
           salida: siguiente
+          a: f-rec26-xpt8
         - id: c-rec26-1ljl9
           de: f-rec26-rkpy
-          a: f-rec26-vcl5
           salida: dec:d-rec26-tjz4
+          a: f-rec26-vcl5
         - id: c-rec26-1mxu6
           de: f-rec26-vcl5
-          a: f-rec26-xpt8
           salida: siguiente
+          a: f-rec26-xpt8
         - id: c-rec26-1ngjq
           de: f-rec26-ul0n
-          a: f-rec26-xpt8
           salida: sin_pago
+          a: f-rec26-xpt8
         - id: c-rec26-1q2l2
           de: f-rec26-05ny
           salida: siguiente
@@ -128387,22 +128387,22 @@ tableros:
           titulo: ""
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
-          x: 20
+          x: 23
           y: 1431
-          ancho: 9045
-          alto: 4562
+          ancho: 9042
+          alto: 5271
           titulo: ""
           inicio: mas_ec_inicio
         - id: manta-mas_ar_inicio
-          x: 198
-          y: 6287
-          ancho: 2310
-          alto: 1020
+          x: 178
+          y: 7255
+          ancho: 2308
+          alto: 958
           titulo: ""
           inicio: mas_ar_inicio
         - id: manta-mas_otros
-          x: 198
-          y: 7487
+          x: 214
+          y: 8264
           ancho: 1280
           alto: 620
           titulo: ""
