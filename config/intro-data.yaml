@@ -127318,6 +127318,516 @@ tableros:
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
+        - id: f-rec26-05ny
+          tipo: mensaje
+          x: 370
+          y: 5676
+          titulo: Intro (versión recomendada)
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+                  🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+              caption_variants:
+                - |-
+                  Este es nuestro producto
+
+                  *{{PRODUCTO_BASE}}* 📚
+
+                  ✅ 70 recetas caseras para perros y gatos.
+                  ✅ Porciones según peso y edad.
+                  ✅ Alimentos prohibidos (lista para la refri).
+                  ✅ Snacks y premios saludables.
+
+                  (Imagen referencial)
+              delay_after_sec: 5
+            - type: image
+              drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+              caption_variants:
+                - |-
+                  *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+                  - 🎁 Guía de inicio rápido
+                  - 🎁 Plantillas para imprimir
+                  - 🎁 Acceso de por vida
+
+                  *Bonitos complementos para empezar hoy* 🤗
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+                  ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+                  🟣 *¿CÓMO ADQUIRIRLO?*
+
+                  - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+                  - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+                  *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  ELIGE UN METODO DE PAGO:
+
+                  {{LISTA_METODOS_POR_PAIS}}
+
+                  🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+              delay_after_sec: 4
+              decisions:
+                - id: d-rec26-1ol0
+                  title: VECINO
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: esmeralda
+                  steps: []
+                - id: d-rec26-2xjm
+                  title: PICHINCHA
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: azul
+                  steps: []
+                - id: d-rec26-3vu2
+                  title: GUAYAQUIL
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: ambar
+                  steps: []
+          presenta:
+            - ptmascotas_comida
+        - id: f-rec26-4ddo
+          tipo: intro_ob
+          x: 860
+          y: 5547
+          titulo: Order bump
+          presenta:
+            - ptmascotas_comida
+            - ptmascotas_pack
+          variantes:
+            - id: v-rec26-5l72
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                      Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                      ✅ TODAS las 70 RECETAS CASERAS PARA MASCOTAS.
+                      ✅ MÁS los 40 MOLDES DE ROPA PARA MASCOTAS.
+                      ✅ Bonus: calendario de vacunas y desparasitación.
+                  delay_after_sec: 4
+                - type: text
+                  body_variants:
+                    - |-
+                      *¿Cuál prefieres?*
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-rec26-6lk0
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-rec26-7u11
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: f-rec26-8mi7
+          tipo: cobro
+          x: 1508
+          y: 5316
+          titulo: Cobro · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+        - id: f-rec26-9k6z
+          tipo: cobro
+          x: 1508
+          y: 5622
+          titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_pack
+            acepta:
+              - ptmascotas_comida
+            metodos: true
+        - id: f-rec26-abwg
+          tipo: seguimientos
+          x: 1995
+          y: 6249
+          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-rec26-bwxe
+              minutos: 2
+              variantes:
+                - id: v-rec26-cpgk
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-rec26-d8td
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-rec26-ebsn
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-rec26-f6es
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                - id: v-rec26-gj1a
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-rec26-hkm0
+              minutos: 4
+              variantes:
+                - id: v-rec26-iaud
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-rec26-d8td
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-rec26-ebsn
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-rec26-f6es
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-rec26-jcxt
+          tipo: entregar
+          x: 2457
+          y: 5463
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
+        - id: f-rec26-k3r2
+          tipo: entregar
+          x: 2451
+          y: 5776
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
+        - id: f-rec26-lu28
+          tipo: mensaje
+          x: 4153
+          y: 5444
+          titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-rec26-m51f
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-rec26-n2bp
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - ptmascotas_citas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          espera_min: 2
+          sin_respuesta_min: 3
+        - id: f-rec26-oute
+          tipo: cobro
+          x: 4539
+          y: 5348
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_citas
+            metodos: true
+        - id: f-rec26-pq7d
+          tipo: mensaje
+          x: 4864
+          y: 6056
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
+        - id: f-rec26-q3sw
+          tipo: entregar
+          x: 4854
+          y: 5403
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
+        - id: f-rec26-rkpy
+          tipo: mensaje
+          x: 5329
+          y: 5332
+          titulo: Upsell 2 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-rec26-srz2
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-rec26-tjz4
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - pmtxy45s7
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          espera_min: 2
+          sin_respuesta_min: 3
+        - id: f-rec26-ul0n
+          tipo: cobro
+          x: 5663
+          y: 5340
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: pmtxy45s7
+            metodos: true
+        - id: f-rec26-vcl5
+          tipo: mensaje
+          x: 5723
+          y: 5831
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
+        - id: f-rec26-w13f
+          tipo: entregar
+          x: 5958
+          y: 5342
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
+        - id: f-rec26-xpt8
+          tipo: regalo
+          x: 7871
+          y: 5898
+          titulo: Regalo
       cables:
         - id: c2
           de: mas_pe_intro
@@ -127715,6 +128225,134 @@ tableros:
           de: f-mvo7g67a-vlta3
           salida: siguiente
           a: f-mvp3cgba-l9skj
+        - id: c-rec26-y4bf
+          de: f-rec26-4ddo
+          a: f-rec26-8mi7
+          salida: btn:b-rec26-6lk0
+        - id: c-rec26-zup6
+          de: f-rec26-4ddo
+          a: f-rec26-9k6z
+          salida: btn:b-rec26-7u11
+        - id: c-rec26-12e4w
+          de: f-rec26-lu28
+          a: f-rec26-oute
+          salida: dec:d-rec26-m51f
+        - id: c-rec26-13hir
+          de: f-rec26-oute
+          a: f-rec26-q3sw
+          salida: pagado
+        - id: c-rec26-14z8z
+          de: f-rec26-lu28
+          a: f-rec26-pq7d
+          salida: dec:d-rec26-n2bp
+        - id: c-rec26-15rea
+          de: f-rec26-pq7d
+          a: f-rec26-xpt8
+          salida: siguiente
+        - id: c-rec26-17s5s
+          de: f-rec26-oute
+          a: f-rec26-xpt8
+          salida: sin_pago
+        - id: c-rec26-18ubx
+          de: f-rec26-05ny
+          a: f-rec26-4ddo
+          salida: dec:d-rec26-1ol0
+        - id: c-rec26-1979m
+          de: f-rec26-05ny
+          a: f-rec26-4ddo
+          salida: dec:d-rec26-2xjm
+        - id: c-rec26-1ai22
+          de: f-rec26-05ny
+          a: f-rec26-4ddo
+          salida: dec:d-rec26-3vu2
+        - id: c-rec26-1b9kr
+          de: f-rec26-8mi7
+          a: f-rec26-jcxt
+          salida: pagado
+        - id: c-rec26-1czus
+          de: f-rec26-8mi7
+          a: f-rec26-k3r2
+          salida: prod:ptmascotas_pack
+        - id: c-rec26-1drqc
+          de: f-rec26-9k6z
+          a: f-rec26-k3r2
+          salida: pagado
+        - id: c-rec26-1emjr
+          de: f-rec26-9k6z
+          a: f-rec26-jcxt
+          salida: prod:ptmascotas_comida
+        - id: c-rec26-1fdwy
+          de: f-rec26-jcxt
+          a: f-rec26-lu28
+          salida: siguiente
+        - id: c-rec26-1gjp0
+          de: f-rec26-k3r2
+          a: f-rec26-lu28
+          salida: siguiente
+        - id: c-rec26-1hxcf
+          de: f-rec26-q3sw
+          a: f-rec26-rkpy
+          salida: siguiente
+        - id: c-rec26-1il9g
+          de: f-rec26-rkpy
+          a: f-rec26-ul0n
+          salida: dec:d-rec26-srz2
+        - id: c-rec26-1j2aw
+          de: f-rec26-ul0n
+          a: f-rec26-w13f
+          salida: pagado
+        - id: c-rec26-1kyo4
+          de: f-rec26-w13f
+          a: f-rec26-xpt8
+          salida: siguiente
+        - id: c-rec26-1ljl9
+          de: f-rec26-rkpy
+          a: f-rec26-vcl5
+          salida: dec:d-rec26-tjz4
+        - id: c-rec26-1mxu6
+          de: f-rec26-vcl5
+          a: f-rec26-xpt8
+          salida: siguiente
+        - id: c-rec26-1ngjq
+          de: f-rec26-ul0n
+          a: f-rec26-xpt8
+          salida: sin_pago
+        - id: c-rec26-1q2l2
+          de: f-rec26-05ny
+          salida: siguiente
+          a: f-rec26-abwg
+        - id: c-rec26-1rh4x
+          de: f-rec26-4ddo
+          salida: siguiente
+          a: f-rec26-abwg
+        - id: c-rec26-1s24u
+          de: f-rec26-abwg
+          salida: dec:d-rec26-d8td
+          a: f-rec26-4ddo
+        - id: c-rec26-1ty6c
+          de: f-rec26-abwg
+          salida: dec:d-rec26-ebsn
+          a: f-rec26-4ddo
+        - id: c-rec26-1u8ky
+          de: f-rec26-abwg
+          salida: dec:d-rec26-f6es
+          a: f-rec26-4ddo
+        - id: c-rec26-1vtk8
+          de: f-rec26-8mi7
+          salida: sin_pago
+          a: f-rec26-abwg
+        - id: c-rec26-1w2q3
+          de: f-rec26-9k6z
+          salida: sin_pago
+          a: f-rec26-abwg
+        - id: c-rec26-1xfyq
+          de: f-rec26-lu28
+          salida: sin_respuesta
+          a: f-rec26-xpt8
+        - id: c-rec26-1yn3d
+          de: f-rec26-rkpy
+          salida: sin_respuesta
+          a: f-rec26-xpt8
       curvas:
         c3:
           x: 121

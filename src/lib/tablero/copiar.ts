@@ -11,20 +11,22 @@ type FichaCopiable = { id: string; tipo: string; x: number; y: number; guardada?
 export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: CableDelTablero[], desplazar: Punto): { fichas: F[]; cables: CableDelTablero[] } {
   const nuevo = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
   const idDe = new Map<string, string>();
+  // LAS SALIDAS SE RENOMBRAN POR FICHA (26/10/2026). Antes: un código nuevo por cada aparición, así
+  // que unos Seguimientos con VECINO/PICHINCHA/GUAYAQUIL en sus 2 seguimientos (los MISMOS 3 cuadritos)
+  // salían con 6 círculos. Ahora, dentro de una ficha, el mismo código viejo → el mismo nuevo. Y la
+  // clave lleva la ficha: dos fichas con los mismos cuadritos (su Intro y sus Seguimientos) no se
+  // pisan los cables al copiarlas juntas.
   const salidaDe = new Map<string, string>();
-  const renombrarPasos = (pasos: unknown[] | undefined) =>
+  const renombrarPasos = (fichaVieja: string, pasos: unknown[] | undefined) =>
     (pasos ?? []).map((s) => {
       const p = JSON.parse(JSON.stringify(s)) as { buttons?: Array<{ id: string }>; decisions?: Array<{ id: string }> };
-      for (const b of p.buttons ?? []) {
-        const n = nuevo("b");
-        salidaDe.set(`btn:${b.id}`, `btn:${n}`);
-        b.id = n;
-      }
-      for (const d of p.decisions ?? []) {
-        const n = nuevo("d");
-        salidaDe.set(`dec:${d.id}`, `dec:${n}`);
-        d.id = n;
-      }
+      const renombrar = (tipo: "btn" | "dec", prefijo: string, viejo: string) => {
+        const clave = `${fichaVieja}|${tipo}:${viejo}`;
+        if (!salidaDe.has(clave)) salidaDe.set(clave, `${tipo}:${nuevo(prefijo)}`);
+        return salidaDe.get(clave)!.slice(4);
+      };
+      for (const b of p.buttons ?? []) b.id = renombrar("btn", "b", b.id);
+      for (const d of p.decisions ?? []) d.id = renombrar("dec", "d", d.id);
       return p;
     });
   // Un Inicio no se copia: hay uno por país, y dos del mismo país no sabrían a quién recibir.
@@ -34,13 +36,13 @@ export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: Cable
       const id = nuevo("f");
       idDe.set(f.id, id);
       const c = { ...JSON.parse(JSON.stringify(f)), id, x: f.x + desplazar.x, y: f.y + desplazar.y } as F;
-      if (c.steps) c.steps = renombrarPasos(c.steps);
-      if (c.variantes) c.variantes = c.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(v.steps) }));
+      if (c.steps) c.steps = renombrarPasos(f.id, c.steps);
+      if (c.variantes) c.variantes = c.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(f.id, v.steps) }));
       if (c.seguimientos)
         c.seguimientos = c.seguimientos.map((s) => ({
           ...s,
           id: nuevo("s"),
-          variantes: s.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(v.steps) })),
+          variantes: s.variantes.map((v) => ({ ...v, id: nuevo("v"), steps: renombrarPasos(f.id, v.steps) })),
         }));
       return c;
     });
@@ -48,7 +50,7 @@ export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: Cable
   // otra salida fija queda igual.
   const copiasDeCables = cables
     .filter((c) => idDe.has(c.de) && idDe.has(c.a))
-    .map((c) => ({ id: nuevo("c"), de: idDe.get(c.de)!, a: idDe.get(c.a)!, salida: salidaDe.get(c.salida) ?? c.salida }));
+    .map((c) => ({ id: nuevo("c"), de: idDe.get(c.de)!, a: idDe.get(c.a)!, salida: salidaDe.get(`${c.de}|${c.salida}`) ?? c.salida }));
   return { fichas: copias, cables: copiasDeCables };
 }
 
