@@ -126808,7 +126808,6 @@ tableros:
 
                   {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 4
-          sin_pago_min: 1
           cobro:
             modo: producto
             producto_id: ptmascotas_citas
