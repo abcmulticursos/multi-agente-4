@@ -1048,6 +1048,39 @@ la ficha del producto, debajo de «Lo que recibe al pagar». La venta de siempre
 Prueba: `recorrido-tiendas-ejemplo.mjs --solo=figurarte,figurarte2,figurarte3` (figurarte2 pide
 `prueba-wf-copia.cjs` del scratchpad en la copia) y la de pantalla `prueba-ui-entregas.mjs` (scratchpad).
 
+### El tablero, ronda del 25/10/2026: «que se comporte como el automático»
+
+Sus observaciones revisadas una por una (lista en la memoria `puntos-confirmados-tablero-25-10`). Los
+necesarios para vender, hechos juntos y probados en una sola ronda («las cuatro llantas»):
+- **Seguimientos colgados** (motor `fichaDeSeguimientos`/`colgarSeguimientos`): una ficha que espera
+  respuesta (Mensaje/Order bump con opciones, o un Cobro) cuyo «→» / «no respondió» / «si no paga» va
+  a unos Seguimientos los cuelga: salen a sus tiempos mientras el cliente sigue en ESA ficha, y sus
+  opciones y el cobro abierto siguen valiendo; moverse los suelta. Sin «Caja abierta» ni «no pagó en
+  1 h». Seguimiento 1 a sus minutos, reiniciándose si escribe; los 2+ a los **horarios fijos de Ajustes**
+  (`computeNextFollowupSlot`, como el automático; en el simulador, a sus minutos). Un comprobante sin
+  cobro abierto se lee contra el cobro que encaja con su monto (`cobroQueEncajaConElPago`).
+- **La IA cierra como el automático** por etapa (venta / datos / postventa), sin copiar textos de
+  botones; el bot revisa que cierre con pregunta y se la pide otra vez UNA vez.
+- **Galería como el automático**: la IA contesta por escrito; el BOT añade tu oferta
+  (`getSamplesOfferBubble`) y con el «sí» del turno siguiente manda la galería completa + tu cierre
+  (`getSamplesAfterSequence`). Interruptor por producto **«📷 Ofrecer imágenes»** (`ofrecer_imagenes`,
+  vale también en el automático vía `conGaleriasApagadas`).
+- **Método**: se anota donde lo diga; al llegar a un cobro con método, datos de frente; con una sola
+  opción de pagar en la ficha, nombrar el método la elige (COMO OB suelta el order bump por palabra).
+  **Manda la ficha donde está**: sus cuadritos (y los de sus seguimientos colgados) antes que el cobro
+  de atrás.
+- **«Ok» seco con los datos enviados → el bot se calla** (`esUnAcuseSeco`, mismas guardas).
+- **Upsell con «⏳ espera» dentro de su ficha** (`espera_min`, se reinicia si escribe).
+- **Regalo**: «¿qué es esto?» sin otro tema es del regalo; si pregunta otra cosa, la IA contesta y lo
+  invita de vuelta. **Postventa**: tus textos de `post_sale` del canal, solo tras comprar.
+- **«Pagó el otro» sin cable** → la Entrega de ese producto en su misma ruta (`entregaDelProductoEnSuRuta`).
+- **Pausas entre burbujas de la IA**: `sendChunkedBotText` («Delay entre mensajes» de Ajustes).
+- Traductor «Armar desde la pizarra»: rutas nuevas (sin caja; upsell 1 con espera dentro).
+- Contenido: tiendas de ejemplo, sus carriles y FIGURARTE pasados a la forma nueva
+  (`migrar-ronda-25-10.cjs` del scratchpad).
+Prueba: `scripts/recorrido-ronda.mjs` (sus casos) + `recorrido-tiendas-ejemplo.mjs` adaptado; en la
+copia, `ronda-copia.cjs` y `tiempos-upsell-copia.mjs` del scratchpad.
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

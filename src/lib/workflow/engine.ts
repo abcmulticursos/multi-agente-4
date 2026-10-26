@@ -10274,7 +10274,7 @@ function elBotOfrecioEnsenarAlgo(
  * «listo» y «ya está» NO están en la lista a propósito: los reclama
  * `looksLikePaymentEcho`, porque en este bot suelen significar «ya pagué».
  */
-function esUnAcuseSeco(msg: string): boolean {
+export function esUnAcuseSeco(msg: string): boolean {
   const t = (msg ?? "")
     .toLowerCase()
     .normalize("NFD")

@@ -155,6 +155,12 @@ export interface FichaDelTablero {
   reparto?: OpcionDeReparto[];
   /** Mensaje e intro de order bump: «no respondió en X minutos» → su salida `sin_respuesta`. */
   sin_respuesta_min?: number;
+  /**
+   * Mensaje: espera X minutos antes de mandar sus burbujas (el upsell tras la entrega, 25/10/2026),
+   * contados desde el último mensaje del cliente: si escribe, vuelve a contar. Va dentro de la ficha,
+   * sin nada a la vista en la tarjeta.
+   */
+  espera_min?: number;
   /** Cobro: «no pagó en X minutos» → su salida `sin_pago`. Se cuenta desde su último mensaje. */
   sin_pago_min?: number;
   /** Entregar: qué producto de la biblioteca. */

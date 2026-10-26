@@ -238,6 +238,8 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       if (tipo === "reparto") ficha.reparto = leeReparto(f.reparto);
       const sr = positivo(f.sin_respuesta_min);
       if ((tipo === "mensaje" || tipo === "intro_ob" || tipo === "correo") && sr) ficha.sin_respuesta_min = sr;
+      const em = positivo(f.espera_min);
+      if (tipo === "mensaje" && em) ficha.espera_min = em;
       const sp = positivo(f.sin_pago_min);
       if (tipo === "cobro" && sp) ficha.sin_pago_min = sp;
       const producto = texto(f.producto_id, 120).trim();
@@ -446,8 +448,10 @@ export function salidasDeLaFicha(
         salidas.push({ clave: "fin", etiqueta: "🏁 Terminaron sin respuesta" });
         return salidas;
       }
+      // «→» TAMBIÉN EN UNA FICHA CON OPCIONES (25/10/2026): su cable va a los Seguimientos, que salen
+      // mientras el cliente no elige; sus botones y cuadritos siguen valiendo todo ese tiempo.
+      salidas.push({ clave: "siguiente", etiqueta: "→" });
       if (pregunta) salidas.push({ clave: "otra", etiqueta: "✍️ Otra cosa" });
-      else salidas.push({ clave: "siguiente", etiqueta: "→" });
       if (f.sin_respuesta_min) salidas.push({ clave: "sin_respuesta", etiqueta: `⏰ No respondió en ${minutosLegibles(f.sin_respuesta_min)}` });
       return salidas;
     }
@@ -478,7 +482,10 @@ export function salidasDeLaFicha(
           salidas.push({ clave: `prod:${otro}`, etiqueta: `✅ Pagó ${nombres?.[otro] ?? "otro producto"}` });
         salidas.push({ clave: "menos", etiqueta: "↓ Pagó de menos" });
       }
-      if (f.sin_pago_min) salidas.push({ clave: "sin_pago", etiqueta: `⏰ No pagó en ${minutosLegibles(f.sin_pago_min)}` });
+      // «SI NO PAGA» (25/10/2026): siempre está. Hacia unos Seguimientos salen enseguida, a sus minutos
+      // desde el último mensaje del cliente; hacia otra ficha, a los minutos puestos (o al silencio del
+      // regalo si no hay).
+      salidas.push({ clave: "sin_pago", etiqueta: f.sin_pago_min ? `⏰ No pagó en ${minutosLegibles(f.sin_pago_min)}` : "⏳ Si no paga" });
       return salidas;
     }
   }

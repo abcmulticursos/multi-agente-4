@@ -50,8 +50,6 @@ export interface TiendaExportada {
 
 /** Los minutos de siempre si el archivo no los trae: 2 h, 10 h y 23 h. */
 const MINUTOS_DE_SIEMPRE = [120, 600, 1380];
-/** El seguimiento arranca cuando el cliente se queda callado este rato tras la intro. */
-const CALLADO_TRAS_LA_INTRO = 15;
 
 const COL = 330;
 const FIL = 330;
@@ -315,7 +313,6 @@ export function tableroDesdeLaPizarra(
         const siguiente = semi === "ob" ? obDelPais() ?? cobroDe(basico, 3, 0, opciones, yaPregunta) : cobroDe(basico, 3, 0, opciones, yaPregunta);
         if (siguiente) cable(id, "siguiente", siguiente);
       }
-      f.sin_respuesta_min = CALLADO_TRAS_LA_INTRO;
     });
     // La oferta: sus versiones (ya copiadas, con sus códigos) eligen cobro con sus botones.
     const cablearOferta = () => {
@@ -349,27 +346,23 @@ export function tableroDesdeLaPizarra(
       });
     if (seguimientos.length > 0) {
       const s = poner({ id: uid("seg"), tipo: "seguimientos", titulo: "Seguimientos", presenta: opciones, seguimientos }, 2, 3);
-      // «NO RESPONDIÓ» → LA CAJA ABIERTA EN SILENCIO → SEGUIMIENTOS (25/10/2026). Con la caja (el cobro)
-      // abierta, un «yape» o un comprobante en medio de los seguimientos se atiende como siempre; sin
-      // ella no había con qué. No le llega nada: abre el cobro sin preguntar y a 1 min pasa a la caja.
-      const caja = cobroDe(basico, 3, 0, opciones, true);
-      if (caja) {
-        const f = fichas.find((x) => x.id === caja)!;
-        f.sin_pago_min = 1;
+      // LOS SEGUIMIENTOS SE CUELGAN DEL CABLE NORMAL (25/10/2026, punto 4): la intro con opciones y la
+      // oferta llevan su «→» a los Seguimientos, que salen a sus tiempos mientras el cliente no elige;
+      // sus botones siguen valiendo. Sin «no respondió en 15 min» y sin caja abierta: un comprobante en
+      // medio se lee contra el cobro que encaja con su monto (`cobroQueEncajaConElPago`).
+      for (const i of introIds) {
+        const f = fichas.find((x) => x.id === i)!;
+        if (tieneOpciones((f.steps ?? []) as Paso[])) cable(i, "siguiente", s);
       }
-      const sinRespuesta = caja ?? s;
-      for (const i of introIds) cable(i, "sin_respuesta", sinRespuesta);
-      if (fichaOb) {
-        const ob = fichas.find((x) => x.id === fichaOb)!;
-        ob.sin_respuesta_min = CALLADO_TRAS_LA_INTRO;
-        cable(fichaOb, "sin_respuesta", sinRespuesta);
-      }
+      if (fichaOb) cable(fichaOb, "siguiente", s);
       // Los botones de los seguimientos (p. ej. «Quiero pagar») también llevan a su sitio.
       for (const seg of seguimientos) for (const v of seg.variantes) cablearOpciones(s, v.steps as Paso[], 3, 4);
-      // Y TODOS los cobros de la venta (también los que acaban de nacer de esos botones): si no paga.
-      for (const c of cobros.values()) cable(c, "sin_pago", s);
-    } else {
-      for (const i of introIds) delete fichas.find((x) => x.id === i)!.sin_respuesta_min;
+      // Y TODOS los cobros de la venta (también los que acaban de nacer de esos botones): «si no paga»,
+      // colgados desde que llegan (sin «no pagó en 1 h»).
+      for (const c of cobros.values()) {
+        delete fichas.find((x) => x.id === c)!.sin_pago_min;
+        cable(c, "sin_pago", s);
+      }
     }
 
     // Si la oferta nació recién de un botón de los seguimientos, también se cablea.
@@ -427,12 +420,19 @@ export function tableroDesdeLaPizarra(
         0
       );
       alRegaloPorSilencio.push([fu, "sin_respuesta"]);
-      // LA ESPERA DE SIEMPRE antes de ofrecerlo (en la pizarra, «minutos tras la entrega»). Solo
-      // tras la entrega: quien dijo «no» al anterior no espera.
+      // LA ESPERA DE SIEMPRE antes de ofrecerlo (en la pizarra, «minutos tras la entrega»).
       const minutos = Math.max(1, Math.round(conEspera[i]?.minutos ?? 5));
-      const espera = poner({ id: uid("espera"), tipo: "esperar", titulo: `Espera ${minutos} min`, minutos }, col - 1, 1.6);
-      cable(espera, "siguiente", fu);
-      for (const [de, salida] of pendientes) cable(de, salida, salida === "siguiente" && fichas.find((x) => x.id === de)?.tipo === "entregar" ? espera : fu);
+      if (i === 0) {
+        // EL UPSELL 1, SIEMPRE TRAS LA ENTREGA: la espera va DENTRO de su ficha (25/10/2026, punto 9),
+        // sin ficha «Esperar» aparte; si el cliente escribe mientras tanto, vuelve a contar.
+        fichas.find((x) => x.id === fu)!.espera_min = minutos;
+        for (const [de, salida] of pendientes) cable(de, salida, fu);
+      } else {
+        // Los de la fila: solo espera quien llega tras la entrega del anterior; quien dijo «no», no.
+        const espera = poner({ id: uid("espera"), tipo: "esperar", titulo: `Espera ${minutos} min`, minutos }, col - 1, 1.6);
+        cable(espera, "siguiente", fu);
+        for (const [de, salida] of pendientes) cable(de, salida, salida === "siguiente" && fichas.find((x) => x.id === de)?.tipo === "entregar" ? espera : fu);
+      }
       const cu = poner(
         { id: uid("cobro"), tipo: "cobro", titulo: `Cobro · ${nombreDe(pid)}`, sin_pago_min: minutosDelRegalo, cobro: { modo: "producto", producto_id: pid, acepta: [], precio: "etapa", metodos: true }, steps: copiarPasos(pasosDelCobro as Paso[]) as FichaDelTablero["steps"] },
         col,

@@ -27,6 +27,7 @@ import {
   setIntroPausedIndex,
   setMode,
   setPaidAt,
+  setSelectedPaymentMethod,
   type ConversationRow,
   type ScheduledActionRow,
 } from "@/lib/db";
@@ -48,6 +49,8 @@ import {
   decisionQueCoincide,
   elCobroDelPais,
   getEffectiveCountryCode,
+  getSamplesAfterSequence,
+  getSamplesOfferBubble,
   laTiendaDeLaConversacion,
   laTiendaDelTurno,
   loadWorkflowConfig,
@@ -59,8 +62,16 @@ import {
   type Tienda,
   type WorkflowConfig,
 } from "@/lib/workflow/config";
-import { messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
-import { adjustForQuietHours, cumulativeBurstOffset, isAtOrAfterLocalTime, isQuietHour, nextLocalTime } from "@/lib/workflow/quiet-hours";
+import { esUnAcuseSeco, messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
+import {
+  adjustForQuietHours,
+  computeNextFollowupSlot,
+  cumulativeBurstOffset,
+  isAtOrAfterLocalTime,
+  isQuietHour,
+  nextLocalTime,
+} from "@/lib/workflow/quiet-hours";
+import { looksLikeMediaTurn, looksLikeProductContentTurn } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, preguntarElMetodo } from "./pago";
@@ -105,7 +116,9 @@ import {
   estadoEnElTablero,
   marcarComprobanteLeido,
   anotarVisita,
+  apuntarImagenesOfrecidas,
   moverA,
+  ponerEspera,
   ponerSeguimiento,
   ponerPreciosDelCobro,
   preciosDelCobro,
@@ -185,10 +198,16 @@ function productosDeLaFicha(
 }
 
 /** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente. */
-function idsParaComodines(convoId: number, f: FichaDelTablero): string[] {
-  if (f.presenta?.length) return f.presenta;
+function idsParaComodines(convoId: number, f: FichaDelTablero, t?: Tablero): string[] {
   const e = estadoEnElTablero(convoId);
-  return e ? presentadosDe(e) : [];
+  const base = f.presenta?.length ? f.presenta : e ? presentadosDe(e) : [];
+  // EN LOS SEGUIMIENTOS, EL QUE ESTÁ PAGANDO VA PRIMERO (25/10/2026, punto 23): una sola ficha de
+  // seguimientos sirve para el básico y el pack — {{PRODUCTO}} y {{PRECIO}} dicen lo que ESTE cliente
+  // eligió (el del cobro abierto). Base/full siguen saliendo del más barato y el más caro.
+  if (f.tipo !== "seguimientos" || !e?.cobro_ficha_id || !t) return base;
+  const cobro = t.fichas.find((x) => x.id === e.cobro_ficha_id);
+  const elegido = e.cobro_elegido ?? cobro?.cobro?.producto_id ?? null;
+  return elegido ? [elegido, ...base.filter((x) => x !== elegido)] : base;
 }
 
 /** Las claves del registro de anuncios que corresponden al anuncio por el que llegó el cliente. */
@@ -297,6 +316,8 @@ function programar(convo: ConversationRow, tipo: string, payload: Record<string,
 }
 
 const RAFAGA_DE_FABRICA = [15, 21, 27, 32];
+/** Las franjas de fábrica del motor de siempre (`DEFAULT_FOLLOWUP_SLOTS`), si Ajustes no tiene. */
+const FRANJAS_DE_FABRICA = ["12:00", "18:00", "21:45"];
 
 /**
  * CUÁNDO SALE UN SEGUIMIENTO DE LA CAJA — las reglas de `scheduleFollowupSequences` del motor de
@@ -318,6 +339,27 @@ function cuandoSaleElSeguimiento(
 ): { cuando: number; sinSilencio: boolean } {
   if (convo.channel === "test") return { cuando: desde + seg.minutos * 60, sinSilencio: true };
   const sched = loadWorkflowConfig()?.followup_schedule;
+  // DEL 2 EN ADELANTE, A SUS HORARIOS FIJOS DE AJUSTES (25/10/2026, punto 4): «seguimiento 1 por
+  // minutos, reiniciándose si el cliente escribe; seguimientos 2 a mis horarios fijos». La misma regla
+  // del motor de siempre para los 2+ (`computeNextFollowupSlot`): la próxima franja, al menos «horas
+  // mínimas entre seguimientos» después del anterior, nunca en horas de silencio. Si no hay franja,
+  // sus minutos, como hasta hoy. (En el simulador salen a sus minutos, para poder probarlos.)
+  if (idx >= 1) {
+    const conSilencioEste = sched?.quiet_hours_enabled !== false && seg.ignora_silencio !== true;
+    const franja = computeNextFollowupSlot({
+      nowSec: ahora(),
+      lastFollowupAtSec: ahora(),
+      slotsHHMM: sched?.slots_peru?.length ? sched.slots_peru : FRANJAS_DE_FABRICA,
+      minGapHours: sched?.min_gap_hours_between ?? 4,
+      quietHoursEnabled: conSilencioEste,
+    });
+    if (franja !== null) {
+      const enEsaHora =
+        countPendingActionsInWindow(ACCION_SEGUIMIENTO, franja, franja + 3600) + countPendingActionsInWindow("start_followup", franja, franja + 3600);
+      const rafaga = sched?.burst_delays_seconds?.length ? sched.burst_delays_seconds : RAFAGA_DE_FABRICA;
+      return { cuando: franja + cumulativeBurstOffset(enEsaHora, rafaga), sinSilencio: true };
+    }
+  }
   const tardio =
     sched?.defer_late_leads_enabled === true &&
     typeof sched.defer_late_leads_after === "string" &&
@@ -345,10 +387,58 @@ async function seguirPor(convoId: number, t: Tablero, fichaId: string, salida: s
 }
 
 /**
+ * LOS SEGUIMIENTOS COLGADOS (25/10/2026, punto 4). «Lo normal es que continúe por su cable normal…
+ * y solo setear en la ficha el tiempo que debe avanzar el primer seguimiento». Una ficha que espera
+ * respuesta (Mensaje u Order bump con opciones, o un Cobro) cuyo cable «→» / «no respondió» / «si no
+ * paga» va a unos Seguimientos los CUELGA: salen a sus tiempos mientras el cliente sigue en ESA ficha,
+ * y sus botones y cuadritos —y el cobro abierto— siguen valiendo. Si elige o paga, va por su cable y
+ * los seguimientos se cortan (irA los suelta al moverse). Sin «no respondió en 30 min», sin «no pagó
+ * en 1 h» y sin caja abierta: esos relojes extra retrasaban sus seguimientos.
+ */
+function fichaDeSeguimientos(t: Tablero, desde: string, salida: string): FichaDelTablero | null {
+  const cable = cableDeLaSalida(t, desde, salida);
+  const f = cable ? t.fichas.find((x) => x.id === cable.a) : undefined;
+  return f?.tipo === "seguimientos" && !f.apagada && (f.seguimientos ?? []).length > 0 ? f : null;
+}
+
+function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero): void {
+  const segs = seg.seguimientos ?? [];
+  if (segs.length === 0) return;
+  const token = ponerSeguimiento(convo.id, seg.id, 0);
+  const desde = getLastUserMessageTime(convo.id) ?? ahora();
+  contarSeguimientosDesde(convo.id, desde);
+  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[0], 0, desde);
+  programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx: 0, token }, cuando, sinSilencio);
+  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (el 1 a ${segs[0].minutos} min de su último mensaje)`);
+}
+
+/** «Si no paga» hacia otra ficha que no son Seguimientos: sus minutos, o el silencio del regalo. */
+function minutosSinPago(f: FichaDelTablero): number {
+  if (f.sin_pago_min) return f.sin_pago_min;
+  const seg = loadWorkflowConfig()?.awaiting_email_timeout_seconds ?? 300;
+  return Math.max(1, Math.round(seg / 60));
+}
+
+/** La señal del reloj de una ficha con «⏳ espera»: se cumplió y manda sus burbujas. */
+const ESPERA_CUMPLIDA = "__espera_cumplida";
+
+/**
  * LLEVA AL CLIENTE A UNA FICHA y hace lo que esa ficha hace. Las que no esperan nada siguen solas
  * por su cable; un tope de pasos impide que un círculo sin pausa mande burbujas para siempre.
  */
-async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Promise<void> {
+async function irA(
+  convoId: number,
+  t: Tablero,
+  fichaId: string,
+  pasos = 0,
+  opciones: {
+    /** La espera de la ficha ya se cumplió: ahora sí manda sus burbujas. */
+    yaEspero?: boolean;
+    /** Solo un Cobro: se abre callado (sin burbujas ni seguimientos), para atender un comprobante. */
+    enSilencio?: boolean;
+  } = {}
+): Promise<void> {
+  const { yaEspero = false, enSilencio = false } = opciones;
   const convo = getConversationById(convoId);
   if (!convo || noSeLeEscribe(convo)) return;
   if (pasos > 25) {
@@ -358,8 +448,10 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
   const f = t.fichas.find((x) => x.id === fichaId);
   if (!f) return;
   const antes = estadoEnElTablero(convoId);
-  // Al salir de la caja «Seguimientos», sus relojes dejan de valer.
+  // Al salir de la caja «Seguimientos» (o de la ficha que los tenía colgados), sus relojes dejan de valer.
   if (antes?.seg_ficha && antes.seg_ficha !== f.id) ponerSeguimiento(convoId, null, 0);
+  // Y una espera que no se cumplió deja de valer si se va a otra ficha.
+  if (antes?.espera_ficha && antes.espera_ficha !== f.id) ponerEspera(convoId, null);
   const vuelta = moverA(convoId, f.id);
   anotarVisita(convoId, f.id);
   const config = loadWorkflowConfig();
@@ -380,6 +472,16 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
 
     case "mensaje":
     case "intro_ob": {
+      // «⏳ ESPERA» DENTRO DE LA FICHA (25/10/2026, punto 9): el upsell no sale en el mismo segundo de
+      // la entrega. Se queda esperando sus minutos (si el cliente escribe, vuelven a contar, ver
+      // `rearmarEspera`) y recién entonces manda sus burbujas. Mientras, la ficha no está presentada.
+      if (f.tipo === "mensaje" && f.espera_min && !yaEspero) {
+        ponerEspera(convoId, f.id);
+        programar(convo, ACCION_RELOJ, { ficha: f.id, salida: ESPERA_CUMPLIDA, vuelta }, ahora() + f.espera_min * 60, true);
+        console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» espera ${f.espera_min} min antes de salir`);
+        return;
+      }
+      if (yaEspero) ponerEspera(convoId, null);
       let pasosAEnviar = pasosActivos(f.steps);
       if (f.tipo === "intro_ob") {
         const v = versionQueLeToca(f.variantes ?? [], clavesDelAnuncioDelCliente(convo, config), "intro");
@@ -394,10 +496,17 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
       await sendConfiguredSteps(convo, pasosAEnviar as never);
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta.
       anotarPresentados(convoId, f.presenta ?? []);
-      if (f.sin_respuesta_min)
-        programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + f.sin_respuesta_min * 60);
       const { botones, cuadritos } = opcionesDe(pasosAEnviar);
-      if (botones.length + cuadritos.length === 0) await seguir("siguiente");
+      if (botones.length + cuadritos.length === 0) {
+        await seguir("siguiente");
+        return;
+      }
+      // CON OPCIONES: espera la respuesta, con sus Seguimientos colgados si su «→» (o su «no respondió»)
+      // va a ellos. Un «no respondió» hacia otra ficha sigue funcionando como siempre.
+      const colgados = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
+      if (colgados) colgarSeguimientos(convo, colgados);
+      if (f.sin_respuesta_min && !fichaDeSeguimientos(t, f.id, "sin_respuesta"))
+        programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + f.sin_respuesta_min * 60);
       return;
     }
 
@@ -502,6 +611,12 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
         productosDeLaFicha(config, [principal, ...Object.keys(precios)], pais, deOferta, precios),
         pais
       );
+      // ABIERTO EN SILENCIO: llegó un comprobante sin cobro abierto y éste es el que encaja con su monto.
+      // No se le manda nada: se lee su comprobante contra este cobro (ver `cobroQueEncajaConElPago`).
+      if (enSilencio) {
+        console.log(`[tablero] convo ${convoId}: cobro «${f.titulo || f.id}» abierto en silencio para su comprobante`);
+        return;
+      }
       if (f.cobro?.metodos) {
         // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése.
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo);
@@ -522,9 +637,13 @@ async function irA(convoId: number, t: Tablero, fichaId: string, pasos = 0): Pro
         }),
         ...(precio ? { value: precio, currency: getCountryInfo(pais).currency } : {}),
       }).catch(() => {});
-      if (f.sin_pago_min) {
+      // «SI NO PAGA»: hacia unos Seguimientos, colgados desde ya (el cobro sigue abierto y sus tiempos
+      // cuentan desde el último mensaje del cliente); hacia otra ficha, su reloj de siempre.
+      const colgadosDelCobro = fichaDeSeguimientos(t, f.id, "sin_pago");
+      if (colgadosDelCobro) colgarSeguimientos(convo, colgadosDelCobro);
+      else if (cableDeLaSalida(t, f.id, "sin_pago")) {
         const e = estadoEnElTablero(convoId);
-        programar(convo, ACCION_SIN_PAGO, { ficha: f.id, cobro_desde: e?.cobro_desde, reloj: e?.cobro_reloj }, ahora() + f.sin_pago_min * 60);
+        programar(convo, ACCION_SIN_PAGO, { ficha: f.id, cobro_desde: e?.cobro_desde, reloj: e?.cobro_reloj }, ahora() + minutosSinPago(f) * 60);
       }
       return;
     }
@@ -629,7 +748,8 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   const estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
   const pais = getEffectiveCountryCode(convo.phone, config);
-  const ficha = t.fichas.find((x) => x.id === estado?.ficha_id);
+  // Una ficha que todavía ESPERA su tiempo (el upsell) no se ha presentado: la IA no habla de ella.
+  const ficha = estado?.espera_ficha && estado.espera_ficha === estado.ficha_id ? undefined : t.fichas.find((x) => x.id === estado?.ficha_id);
   // EL REENVÍO SOLO SI HAY ALGO QUE REENVIAR Y NO HAY UNA INSTRUCCIÓN: con una nota («pregúntale si
   // fue un error…») la IA tiene un encargo concreto, y ofrecerle el reenvío lo desviaba (lo midió el
   // recorrido del 23/10: el cliente se quedó sin la pregunta).
@@ -665,7 +785,30 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
           [x.cobro.producto_id, ...(x.cobro.acepta ?? [])].some((id) => comprados.has(id))
       )
     : undefined;
-  await responderConIA(convo, {
+  // LA ETAPA (25/10/2026): vendiendo (lo que se le ofrece aún no lo compró), con los datos de pago ya
+  // enviados (espera su comprobante), o después de comprar sin nada nuevo delante.
+  const fresca = getConversationById(convo.id) ?? convo;
+  const datosEnviados = !!cobro && (estado?.cobro_pagado ?? 0) <= 0 && (!cobro.cobro?.metodos || !!fresca.selected_payment_method?.trim());
+  const yaCompro = comprados.size > 0 || entregasDelCliente(convo.id).length > 0;
+  const nombresComprados = new Set([...comprados].map((id) => nombreDe(id)));
+  const ofreceAlgoNuevo = ofrece.some((n) => !!n && !nombresComprados.has(n));
+  const etapa: "venta" | "datos" | "postventa" = datosEnviados ? "datos" : yaCompro && !ofreceAlgoNuevo ? "postventa" : "venta";
+  const postventa = etapa === "postventa" ? textoDePostventa(config, estado?.canal || "whatsapp") : "";
+  // ¿TOCA OFRECER LAS IMÁGENES? Pregunta por el contenido, quedan muestras por ver y en esta ficha aún
+  // no se ofrecieron (como la venta de siempre: una vez por etapa).
+  // (Un PROBLEMA no es una pregunta por el contenido: «ya probé todo y no funciona» ofrecía fotos.)
+  const ultimo = ultimoDelCliente(convo.id);
+  const hablaDeUnProblema = /\b(no funciona|no me funciona|error|no puedo|no me (llega|deja|sale|abre|carga)|problema|falla)\b/.test(ultimo);
+  const ofrecerImagenes =
+    !nota &&
+    muestras.length > 0 &&
+    looksLikeProductContentTurn(ultimo) &&
+    !hablaDeUnProblema &&
+    // Ya compró: tiene el material, no se le ofrecen fotos (salía en «¿hasta cuándo tengo acceso?»).
+    !yaCompro &&
+    !muestrasEnviadas(estado).includes(`oferta:${estado?.ficha_id ?? ""}`);
+  const ofertaDeImagenes = ofrecerImagenes ? getSamplesOfferBubble() : "";
+  const salio = await responderConIA(convo, {
     cerebroGeneral: t.cerebro,
     instrucciones: ficha?.instrucciones,
     ...(ofreciendoAhora ? { ofreciendoAhora } : {}),
@@ -689,7 +832,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     ...(!nota && entregasDelCliente(convo.id).length > 0
       ? { pedirCorreo: () => quiereSuCorreo(convo, t, ultimosMensajes(convo.id, 4).filter((m) => m.role === "user").pop()?.content ?? "") }
       : {}),
-    preguntaPendiente: ficha && ficha.tipo !== "cobro" ? textoDeLaUltimaBurbuja(pasosVistos(ficha, estado)) : undefined,
+    preguntaPendiente: ficha && ficha.tipo !== "cobro" && etapa === "venta" ? textoDeLaUltimaBurbuja(pasosVistos(ficha, estado)) : undefined,
     montosPermitidos: [...new Set([...(estado ? montosDelCobro(t, estado, pais) : []), ...montos])],
     moneda: getCountryInfo(pais).currency,
     nota,
@@ -716,7 +859,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
             reenviarDatos: async () => {
               const pasos = conLosComodinesDeLaFicha(
                 pasosActivos(cobro.steps),
-                productosDeLaFicha(config, idsParaComodines(convo.id, cobro), pais, estado.oferta === 1),
+                productosDeLaFicha(config, idsParaComodines(convo.id, cobro, t), pais, estado.oferta === 1),
                 pais
               );
               console.log(`[tablero] convo ${convo.id}: reenvío las burbujas de su cobro «${cobro.titulo || cobro.id}»`);
@@ -724,29 +867,72 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
             },
           }
         : {}),
-    ...(!nota && muestras.length
-      ? {
-          muestras: muestras.map(({ id, producto: p, tema, cuando }) => ({ id, producto: p, tema, cuando })),
-          enviarMuestras: async (ids: string[]) => {
-            let n = 0;
-            for (const id of ids) {
-              const m = muestras.find((x) => x.id === id);
-              if (!m) continue;
-              // Una foto que no se puede bajar no deja al cliente sin respuesta: se salta y se avisa.
-              try {
-                await sendBotMediaFromDrive(convo, m.tipo, m.url, m.pie);
-                if (m.extra.length) await sendConfiguredSteps(convo, m.extra as never);
-                n++;
-              } catch (err) {
-                console.error(`[tablero] convo ${convo.id}: no se pudo enviar la muestra ${id} (${m.url})`, err);
-              }
-            }
-            if (n > 0) anotarMuestras(convo.id, ids.filter((id) => muestras.some((x) => x.id === id)));
-            return n;
-          },
-        }
-      : {}),
+    // LA ETAPA, para que cierre como la venta de siempre (punto 6) y la postventa (punto 11).
+    etapa,
+    ...(etapa === "postventa" && postventa ? { postventa } : {}),
+    // LA OFERTA DE IMÁGENES LA PONE EL BOT, no la IA (punto 7, como la venta de siempre): pregunta por
+    // el contenido y quedan muestras por ver → tras su respuesta, tu burbuja «¿Deseas ver unas
+    // imágenes…?», al FINAL de la fila (después de la última burbuja de la IA). Su «sí» del turno
+    // siguiente manda la galería (`mandarLaGaleria`). Una vez por ficha.
+    ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true, alFinal: [ofertaDeImagenes] } : {}),
   });
+  if (salio && ofrecerImagenes) {
+    if (ofertaDeImagenes) {
+      apuntarImagenesOfrecidas(convo.id, true);
+      anotarMuestras(convo.id, [`oferta:${estado?.ficha_id ?? ""}`]);
+      console.log(`[tablero] convo ${convo.id}: pregunta por el contenido → ofrece ver las imágenes`);
+    }
+  }
+}
+
+/** Lo último que escribió el cliente (texto), para saber de qué habla en este turno. */
+function ultimoDelCliente(conversationId: number): string {
+  return (ultimosMensajes(conversationId, 4).filter((m) => m.role === "user").pop()?.content ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "");
+}
+
+/**
+ * TUS TEXTOS DE POSTVENTA (cómo usar la entrega, acceso de por vida, preferencias), los mismos de la
+ * venta de siempre: los del canal del cliente, de la primera modalidad que los tenga escritos.
+ */
+function textoDePostventa(config: WorkflowConfig | null, canal: string): string {
+  const porModalidad = config?.channels?.[canal as "whatsapp"]?.modality_templates ?? {};
+  for (const modo of ["lineal", "doble_oferta_upsell", "order_bump", "doble_oferta_dos", "bioferta"]) {
+    const ps = (porModalidad as Record<string, { post_sale?: Record<string, string | undefined> } | undefined>)[modo]?.post_sale;
+    const partes = [ps?.deliveryUsage, ps?.lifetimeAccess, ps?.whatsappPreference].map((x) => (x ?? "").trim()).filter(Boolean);
+    if (partes.length) return partes.join("\n");
+  }
+  return "";
+}
+
+/**
+ * MANDA LA GALERÍA (25/10/2026, punto 7), como la venta de siempre: TODAS las muestras que le quedan
+ * por ver de lo ya presentado, en orden, una sola vez, y al final tu burbuja de cierre de las muestras
+ * (la misma de la venta de siempre, `getSamplesAfterSequence`). Un solo camino: ya no manda una suelta.
+ * Sin muestras por ver (o con «📷 Ofrecer imágenes» apagado), false y no manda nada.
+ */
+async function mandarLaGaleria(convo: ConversationRow): Promise<boolean> {
+  const muestras = muestrasDisponibles(estadoEnElTablero(convo.id));
+  if (muestras.length === 0) return false;
+  const salieron: string[] = [];
+  for (const m of muestras) {
+    // Una foto que no se puede bajar no deja al cliente sin respuesta: se salta y queda escrito.
+    try {
+      await sendBotMediaFromDrive(convo, m.tipo, m.url, m.pie);
+      if (m.extra.length) await sendConfiguredSteps(convo, m.extra as never);
+      salieron.push(m.id);
+    } catch (err) {
+      console.error(`[tablero] convo ${convo.id}: no se pudo enviar la muestra ${m.id} (${m.url})`, err);
+    }
+  }
+  if (salieron.length === 0) return false;
+  anotarMuestras(convo.id, salieron);
+  const cierre = getSamplesAfterSequence();
+  if (cierre.length) await sendConfiguredSteps(convo, cierre as never);
+  console.log(`[tablero] convo ${convo.id}: galería enviada (${salieron.join(", ")})`);
+  return true;
 }
 
 /**
@@ -943,6 +1129,64 @@ async function atenderComprobante(
   await cerrarLaVenta(convo, t, f, salida, productoPagado, total, moneda);
 }
 
+/** Las fichas a las que se llega por cables desde `desde` (incluida), en orden de cercanía. */
+function alcanzables(t: Tablero, desde: string[]): string[] {
+  const vistas = new Set<string>(desde);
+  const cola = [...desde];
+  for (let i = 0; i < cola.length; i++)
+    for (const c of t.cables)
+      if (c.de === cola[i] && !vistas.has(c.a)) {
+        vistas.add(c.a);
+        cola.push(c.a);
+      }
+  return cola;
+}
+
+/**
+ * LA ENTREGA DE UN PRODUCTO EN LA MISMA RUTA que ese cobro: primero lo que sale del cobro, después lo
+ * que sale de los Inicios que llegan a él (así no se entrega con la ficha de otro país o de otro
+ * carril que no le corresponde). Su entrega principal (`entregasDeLaFicha` con la clave del producto).
+ */
+function entregaDelProductoEnSuRuta(t: Tablero, cobroId: string, productoId: string): FichaDelTablero | null {
+  const esLaSuya = (id: string) => {
+    const f = t.fichas.find((x) => x.id === id);
+    return f?.tipo === "entregar" && !f.apagada && entregasDeLaFicha(f).includes(productoId) ? f : null;
+  };
+  for (const id of alcanzables(t, [cobroId])) {
+    const f = esLaSuya(id);
+    if (f) return f;
+  }
+  const inicios = t.fichas.filter((x) => x.tipo === "inicio" && alcanzables(t, [x.id]).includes(cobroId)).map((x) => x.id);
+  for (const id of alcanzables(t, inicios)) {
+    const f = esLaSuya(id);
+    if (f) return f;
+  }
+  return null;
+}
+
+/**
+ * UN COMPROBANTE SIN COBRO ABIERTO (25/10/2026): antes lo atendía la «Caja abierta». Ahora se busca,
+ * entre los cobros a los que el cliente puede llegar desde donde está (sus opciones y las de sus
+ * seguimientos), el que cobra (o acepta) un producto con ESE precio. Ese se abre en silencio y su
+ * comprobante se lee contra él. Ninguno encaja: null (se te avisa, como antes).
+ */
+function cobroQueEncajaConElPago(t: Tablero, desde: string[], monto: number, pais: string): FichaDelTablero | null {
+  const config = loadWorkflowConfig();
+  const casi = (a: number, b: number) => Math.abs(a - b) < 0.01;
+  for (const id of alcanzables(t, desde)) {
+    const f = t.fichas.find((x) => x.id === id);
+    if (f?.tipo !== "cobro" || f.apagada || f.cobro?.modo !== "producto") continue;
+    for (const pid of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
+      if (!pid) continue;
+      const p = producto(config, pid);
+      const normal = precioDelProducto(p, pais, false);
+      const oferta = precioDelProducto(p, pais, true);
+      if ((normal !== null && casi(normal, monto)) || (oferta !== null && casi(oferta, monto))) return f;
+    }
+  }
+  return null;
+}
+
 async function cerrarLaVenta(
   convo: ConversationRow,
   t: Tablero,
@@ -979,6 +1223,14 @@ async function cerrarLaVenta(
       `💰 *Pago en el tablero:* ${convo.client_name ?? convo.name ?? convo.phone} — ${total} ${moneda} (${f.titulo || "Cobro"}).`
     ).catch(() => {});
   if (!(await seguirPor(convo.id, t, f.id, salida, 0))) {
+    // «PAGÓ EL PRECIO DEL OTRO» SIN CABLE (25/10/2026, punto 21), como la venta de siempre: se le entrega
+    // lo que pagó. El bot busca la ficha Entregar de ESE producto en su misma ruta y sigue por ahí.
+    const entrega = productoId ? entregaDelProductoEnSuRuta(t, f.id, productoId) : null;
+    if (entrega) {
+      console.log(`[tablero] convo ${convo.id}: «${salida}» sin cable → su entrega «${entrega.titulo || entrega.id}» de la misma ruta`);
+      await irA(convo.id, t, entrega.id, 1);
+      return;
+    }
     // PAGÓ Y SU RUTA NO SIGUE (24/10/2026): esa salida no tiene cable —se cortó o nunca se tiró—.
     // El pago queda registrado, pero nadie le entrega nada: se te avisa para que lo hagas a mano, y al
     // cliente se le dice que un asesor le escribe (no un «gracias» a secas, que parece que ya terminó).
@@ -1239,11 +1491,27 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       contenido.startsWith("bubble:") ||
       hayComprobantePendiente(convo.id, estado.comprobante_leido) ||
       (await deQueHablaConIA(convo.id, contenido, [
-        { id: "regalo", etiqueta: "Contesta o habla del REGALO: lo acepta o no, su comentario, su captura, cómo reclamarlo, o responde a la pregunta del regalo" },
-        { id: "otra", etiqueta: "Habla de OTRA cosa: un producto que se le ofreció o que compró (¿qué es?, ¿es otro?, precio), completar o pagar la diferencia, recibirlo por correo, que no le llegó algo" },
+        {
+          id: "regalo",
+          etiqueta:
+            "Contesta o habla del REGALO: lo acepta o no, su comentario, su captura, cómo reclamarlo, responde a la pregunta del regalo, o pregunta algo SIN NOMBRAR otra cosa («¿qué es esto?», «¿cómo es?», «¿y eso?»): lo último que se le ofreció es el regalo",
+        },
+        {
+          id: "otra",
+          etiqueta:
+            "Habla CLARAMENTE de OTRA cosa: nombra un producto que se le ofreció o que compró, completar o pagar la diferencia, recibirlo por correo, que no le llegó algo",
+        },
       ])) !== "otra";
     if (delRegalo) return false;
-    await contestarConIA(convo, t!);
+    // COMO LA VENTA DE SIEMPRE: contesta lo que preguntó y lo devuelve con amabilidad al regalo, que
+    // sigue pendiente (25/10/2026, punto 10).
+    const vuelta =
+      convo.state === "awaiting_gift_consent"
+        ? "Contesta lo que preguntó y, al final, invítalo con amabilidad y con tus palabras a aceptar el regalo que se le acaba de ofrecer."
+        : convo.state === "awaiting_facebook_comment"
+          ? "Contesta lo que preguntó y, al final, recuérdale con amabilidad que cuando deje su comentario le envías su regalo."
+          : undefined;
+    await contestarConIA(convo, t!, vuelta);
     return true;
   }
   if (!t) {
@@ -1255,9 +1523,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // EL CLIENTE ESCRIBIÓ: el reloj del «no pagó» vuelve a empezar (como los seguimientos de hoy).
   if (estado.cobro_ficha_id && estado.cobro_pagado <= 0) {
     const cobro = t.fichas.find((x) => x.id === estado!.cobro_ficha_id);
-    if (cobro?.sin_pago_min) {
+    // Con sus Seguimientos colgados no hay reloj de «no pagó»: los tiempos son los de los seguimientos.
+    if (cobro && cableDeLaSalida(t, cobro.id, "sin_pago") && !fichaDeSeguimientos(t, cobro.id, "sin_pago")) {
       const reloj = reiniciarRelojDelCobro(convo.id);
-      programar(convo, ACCION_SIN_PAGO, { ficha: cobro.id, cobro_desde: estado.cobro_desde, reloj }, ahora() + cobro.sin_pago_min * 60);
+      programar(convo, ACCION_SIN_PAGO, { ficha: cobro.id, cobro_desde: estado.cobro_desde, reloj }, ahora() + minutosSinPago(cobro) * 60);
     }
   }
 
@@ -1272,6 +1541,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // 1-bis. UN COMPROBANTE SIN NINGÚN COBRO ABIERTO: no se cuenta solo; se te avisa.
   if (!estado.cobro_ficha_id && pendiente) {
     const lectura = await leerComprobante(convo.id);
+    // EL COBRO QUE ENCAJA CON SU MONTO, desde donde está (lo que hacía la «Caja abierta»).
+    const encaja = lectura
+      ? cobroQueEncajaConElPago(t, [estado.ficha_id, ...(estado.seg_ficha ? [estado.seg_ficha] : [])], lectura.monto, pais)
+      : null;
+    if (lectura && encaja) {
+      await irA(convo.id, t, encaja.id, 0, { enSilencio: true });
+      const abierto = estadoEnElTablero(convo.id);
+      if (abierto?.cobro_ficha_id === encaja.id) {
+        await atenderComprobante(convo, t, abierto, lectura);
+        return true;
+      }
+    }
     if (lectura) {
       console.log(`[tablero] convo ${convo.id}: mandó un comprobante de ${lectura.monto} sin cobro abierto → aviso al dueño`);
       if (convo.channel !== "test")
@@ -1321,6 +1602,115 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const nota = await quiereSuCorreo(convo, t, contenido);
     if (nota) await contestarConIA(convo, t, nota);
     return true;
+  }
+
+  // ── LO DE LA RONDA DEL 25/10/2026: como la venta de siempre ──
+  const fichaAqui = t.fichas.find((x) => x.id === estado!.ficha_id);
+  const segAqui = estado.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado!.seg_ficha) : undefined;
+  const texto = contenido.startsWith("bubble:") ? "" : contenido;
+  const normal = texto.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+  const metodoDicho = texto && !messageHasPaymentConcern(texto) ? metodoQueNombra(texto, convo.phone) : null;
+
+  // 1-quater. EL UPSELL QUE TODAVÍA ESPERA SU TIEMPO (punto 9): no se ha presentado. Lo que escriba lo
+  // contesta la IA sin hablar de él, y la espera vuelve a contar desde ahora.
+  if (fichaAqui && estado.espera_ficha === fichaAqui.id && !contenido.startsWith("bubble:")) {
+    rearmarEspera(convo, fichaAqui);
+    await contestarConIA(convo, t);
+    return true;
+  }
+
+  // 1-quinquies. «OK», «GRACIAS» CON LOS DATOS YA ENVIADOS: el bot se calla, como la venta de siempre
+  // (`esUnAcuseSeco`). Solo con un cobro abierto cuyos datos ya salieron, sin una pregunta suya abierta,
+  // sin imágenes ofrecidas y si no es un «ya pagué». Meta cobra por mensaje; el bot ya dijo lo único
+  // que había que decir y espera su comprobante. El seguimiento 1 vuelve a contar igual.
+  if (texto && estado.cobro_ficha_id && estado.cobro_pagado <= 0 && estado.imagenes_ofrecidas !== 1 && esUnAcuseSeco(texto)) {
+    const cobro = t.fichas.find((x) => x.id === estado!.cobro_ficha_id);
+    const datosEnviados = !!cobro && (!cobro.cobro?.metodos || !!(getConversationById(convo.id) ?? convo).selected_payment_method?.trim());
+    const ecoDePago = /\b(listo|ya\s+esta|ahi\s+esta|ya\s+pague|ya\s+abone|ya\s+te\s+pase|te\s+pase|comprobante|voucher|capture|captura|pago\s+hecho)\b/.test(normal);
+    const ultimaDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+    if (datosEnviados && !ecoDePago && !/[?¿]/.test(ultimaDelBot)) {
+      console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 30)}» con los datos ya enviados → no se contesta (como la venta de siempre)`);
+      respondio(convo, t);
+      return true;
+    }
+  }
+
+  // 1-sexies. LAS IMÁGENES (punto 7), como la venta de siempre: se ofrecieron en su turno anterior y
+  // acepta (en cualquier forma) → el bot manda la galería completa, en orden, una vez, con tu burbuja
+  // de cierre. Dura UN turno: un «sí» de otra cosa más adelante no suelta fotos.
+  if (estado.imagenes_ofrecidas === 1) {
+    apuntarImagenesOfrecidas(convo.id, false);
+    if (texto) {
+      const acepta = await elegirOpcionConIA(convo.id, texto, [
+        { id: "ver", etiqueta: "Acepta ver las imágenes que se le acaban de ofrecer (sí, dale, a ver, ok, muéstramelas, un emoji de aprobación…)" },
+      ]);
+      if (acepta === "ver" && (await mandarLaGaleria(convo))) {
+        respondio(convo, t);
+        return true;
+      }
+    }
+  }
+  // Y si él mismo pide verlas («¿tienes fotos?», «mándame imágenes»), por el mismo camino. Pedir verlas,
+  // no mandar él una foto: «te mando la foto del comprobante» no suelta la galería.
+  const pideVerImagenes =
+    /\b(ver|veo|vea|verlas?|manda\w*|envia\w*|mostrar|muestrame|ensena\w*|tienes|tiene|hay|pasa\w*)\b[^.?!]{0,25}\b(fotos?|imagen(es)?|muestras?)\b/.test(normal) &&
+    !/\b(no|comprobante|pago|pague|yape\w*|plin|deposit\w*|transfer\w*|captura|voucher)\b/.test(normal);
+  if (texto && pideVerImagenes) {
+    if (await mandarLaGaleria(convo)) {
+      respondio(convo, t);
+      return true;
+    }
+  }
+
+  // 1-septies. MANDA LA FICHA DONDE ESTÁ (punto 15): si un cuadrito suyo —o de sus seguimientos
+  // colgados— reconoce el mensaje, se sigue SU cable, antes que el cobro abierto de atrás. Y si el
+  // mensaje nombra un método, queda anotado (punto 8): al elegir producto le llegan sus datos de frente.
+  if (texto) {
+    for (const duena of [fichaAqui, segAqui]) {
+      if (!duena || !(duena.tipo === "mensaje" || duena.tipo === "intro_ob" || duena.tipo === "seguimientos")) continue;
+      const d = decisionQueCoincide(texto, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
+      if (!d || !cableDeLaSalida(t, duena.id, `dec:${d.id}`)) continue;
+      if (metodoDicho) setSelectedPaymentMethod(convo.id, metodoDicho);
+      await actuarCuadrito(convo, t, duena, d);
+      return true;
+    }
+  }
+  // 1-octies. EL MÉTODO, DONDE LO DIGA (punto 8): sin un cobro abierto, se anota igual. Y si la ficha
+  // donde está tiene UNA sola opción que lleva a pagar (un Cobro o el Order bump), decir el método es
+  // elegirla: «quiero pagar con yape» suelta el order bump, como en la venta de siempre.
+  // (Con DOS o más opciones de compra —doble oferta— decir el método NO elige producto: se anota y la
+  // IA le pregunta cuál quiere. Lo cazó la ronda del 25/10: «yape» elegía el básico solo.)
+  let variasOpcionesDeCompra = false;
+  if (metodoDicho && !estado.cobro_ficha_id) {
+    setSelectedPaymentMethod(convo.id, metodoDicho);
+    console.log(`[tablero] convo ${convo.id}: nombra el método «${metodoDicho}» → queda anotado`);
+    const duenas = [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x);
+    const haciaPagar = duenas.flatMap((duena) => {
+      const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
+      return [
+        ...botones.map((b) => ({ duena, salida: `btn:${b.id}`, boton: b.id as string | null, cuadrito: null as BubbleDecision | null })),
+        ...cuadritos.map((d) => ({ duena, salida: `dec:${d.id}`, boton: null as string | null, cuadrito: d as BubbleDecision | null })),
+      ].filter((o) => {
+        const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, o.salida)?.a);
+        return destino?.tipo === "cobro" || destino?.tipo === "intro_ob";
+      });
+    });
+    const destinos = new Set(haciaPagar.map((o) => cableDeLaSalida(t, o.duena.id, o.salida)?.a));
+    // Solo si dijo NADA MÁS que el método («yape», «quiero pagar con yape»); «el pack con yape» sí elige.
+    const loDemas = normal
+      .replace(/[^a-z0-9ñ\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w && !/^(quiero|quisiera|deseo|puedo|voy|a|pagar|pago|pagare|pagaria|con|por|en|mi|el|la|lo|si|ok|dale|bueno|hola|metodo|mediante|via)$/.test(w));
+    variasOpcionesDeCompra = destinos.size > 1 && loDemas.length <= 1;
+    if (haciaPagar.length > 0 && destinos.size === 1) {
+      const o = haciaPagar[0];
+      if (o.cuadrito) await actuarCuadrito(convo, t, o.duena, o.cuadrito);
+      else {
+        apuntarBoton(convo.id, o.boton!);
+        await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
+      }
+      return true;
+    }
   }
 
   // 2-bis. EL MÉTODO Y EL PRODUCTO, con un cobro abierto que pide método — como la venta de siempre:
@@ -1434,44 +1824,54 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     }
   }
 
-  if (conRespuesta && ficha) {
-    // 5. UN CUADRITO DE SU FICHA, por sus palabras: sus burbujas, y luego su cable.
-    const decision = contenido.startsWith("bubble:") ? null : decisionQueCoincide(contenido, todas.cuadritos);
-    if (decision) {
-      await actuarCuadrito(convo, t, ficha, decision);
-      return true;
-    }
-    // 6. NINGUNO ACERTÓ: la IA decide cuál eligió («el de 10», «el otro»…), sin escribir nada.
-    // Desde ahí sale lo mismo que si hubiera tocado o escrito esa opción.
-    if (!contenido.startsWith("bubble:") && todas.botones.length + todas.cuadritos.length > 0) {
-      const opciones: OpcionParaLaIA[] = [
-        ...todas.botones.map((b) => ({ id: `btn:${b.id}`, etiqueta: b.label })),
-        ...todas.cuadritos.map((d) => ({ id: `dec:${d.id}`, etiqueta: d.title || (d.keywords ?? []).join(", "), palabras: d.keywords })),
-      ];
-      const elegida = await elegirOpcionConIA(convo.id, contenido, opciones);
-      if (elegida?.startsWith("btn:")) {
-        const cable = cableDeLaSalida(t, ficha.id, elegida);
-        if (cable) {
-          apuntarBoton(convo.id, elegida.slice(4));
-          await irA(convo.id, t, cable.a);
+  // LAS OPCIONES QUE VALEN AHORA: las de su ficha y las de sus seguimientos colgados (25/10/2026).
+  const duenas = [conRespuesta ? ficha : undefined, segAqui].filter((x): x is FichaDelTablero => !!x);
+  if (duenas.length > 0) {
+    // 5. UN CUADRITO, por sus palabras: sus burbujas, y luego su cable.
+    if (!contenido.startsWith("bubble:"))
+      for (const duena of duenas) {
+        const decision = decisionQueCoincide(contenido, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
+        if (decision) {
+          await actuarCuadrito(convo, t, duena, decision);
           return true;
         }
-      } else if (elegida?.startsWith("dec:")) {
-        const d = todas.cuadritos.find((x) => `dec:${x.id}` === elegida);
-        if (d) {
-          await actuarCuadrito(convo, t, ficha, d);
+      }
+    // 6. NINGUNO ACERTÓ: la IA decide cuál eligió («el de 10», «el otro», «quiero pagar con yape»…), sin
+    // escribir nada. Desde ahí sale lo mismo que si hubiera tocado o escrito esa opción.
+    const lista = duenas.flatMap((duena) => {
+      const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
+      return [
+        ...botones.map((b) => ({ duena, op: { id: `btn:${b.id}`, etiqueta: b.label } as OpcionParaLaIA, d: null as BubbleDecision | null })),
+        ...cuadritos.map((d) => ({
+          duena,
+          op: { id: `dec:${d.id}`, etiqueta: d.title || (d.keywords ?? []).join(", "), palabras: d.keywords } as OpcionParaLaIA,
+          d: d as BubbleDecision | null,
+        })),
+      ];
+    });
+    if (!contenido.startsWith("bubble:") && lista.length > 0 && !variasOpcionesDeCompra) {
+      const elegida = await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
+      const cual = lista.find((x) => x.op.id === elegida);
+      if (cual?.d) {
+        await actuarCuadrito(convo, t, cual.duena, cual.d);
+        return true;
+      }
+      if (cual) {
+        const cable = cableDeLaSalida(t, cual.duena.id, cual.op.id);
+        if (cable) {
+          apuntarBoton(convo.id, cual.op.id.slice(4));
+          await irA(convo.id, t, cable.a);
           return true;
         }
       }
     }
-    // 7. «OTRA COSA»: su cable, si lo tiene.
-    if (await seguirPor(convo.id, t, ficha.id, "otra", 0)) return true;
+    // 7. «OTRA COSA»: su cable, si lo tiene (solo la de su ficha).
+    if (conRespuesta && ficha && (await seguirPor(convo.id, t, ficha.id, "otra", 0))) return true;
   }
 
   // 8. LO DEMÁS LO CONTESTA LA IA, y el cliente sigue en su ficha. Como respondió, el reloj de
-  // «no respondió» vuelve a contar desde ahora, y los seguimientos también.
-  if (ficha?.tipo === "mensaje" || ficha?.tipo === "intro_ob") respondio(convo, t);
-  if (ficha?.tipo === "seguimientos") reprogramarSeguimiento(convo, ficha);
+  // «no respondió» vuelve a contar desde ahora, y el seguimiento 1 también (colgado o en su caja).
+  if (ficha) respondio(convo, t);
   estado = estadoEnElTablero(convo.id) ?? estado;
   await contestarConIA(convo, t);
   return true;
@@ -1480,8 +1880,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
 async function actuarCuadrito(convo: ConversationRow, t: Tablero, ficha: FichaDelTablero, d: BubbleDecision): Promise<void> {
   if (d.steps?.length) await sendConfiguredSteps(convo, d.steps as never);
   if (await seguirPor(convo.id, t, ficha.id, `dec:${d.id}`, 0)) return;
-  if (ficha.tipo === "seguimientos") reprogramarSeguimiento(convo, ficha);
-  else respondio(convo, t);
+  respondio(convo, t);
   // Un cuadrito sin burbujas ni cable: que no se quede sin respuesta.
   if (!d.steps?.length) await contestarConIA(convo, t);
 }
@@ -1493,11 +1892,31 @@ async function actuarCuadrito(convo: ConversationRow, t: Tablero, ficha: FichaDe
  * del cliente; aquí, igual. El reloj viejo ya no sale (lleva la vuelta anterior).
  */
 function respondio(convo: ConversationRow, t: Tablero): void {
-  tocarVuelta(convo.id);
+  const e0 = estadoEnElTablero(convo.id);
+  const f0 = e0 ? t.fichas.find((x) => x.id === e0.ficha_id) : undefined;
+  // Una ficha «Esperar» cuenta su tiempo aunque el cliente escriba: su reloj no se toca.
+  if (f0?.tipo !== "esperar") tocarVuelta(convo.id);
   const e = estadoEnElTablero(convo.id);
   const f = e ? t.fichas.find((x) => x.id === e.ficha_id) : undefined;
-  if (e && f?.sin_respuesta_min && (f.tipo === "mensaje" || f.tipo === "intro_ob" || f.tipo === "correo"))
+  if (
+    e &&
+    f?.sin_respuesta_min &&
+    (f.tipo === "mensaje" || f.tipo === "intro_ob" || f.tipo === "correo") &&
+    !fichaDeSeguimientos(t, f.id, "sin_respuesta")
+  )
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
+  // SUS SEGUIMIENTOS (en la caja o colgados de esta ficha): el 1 vuelve a contar desde ahora.
+  const seg = e?.seg_ficha ? t.fichas.find((x) => x.id === e.seg_ficha) : undefined;
+  if (seg) reprogramarSeguimiento(convo, seg);
+}
+
+/** EL UPSELL QUE ESPERA SU TIEMPO Y EL CLIENTE ESCRIBE: la espera vuelve a contar desde ahora. */
+function rearmarEspera(convo: ConversationRow, f: FichaDelTablero): void {
+  if (!f.espera_min) return;
+  tocarVuelta(convo.id);
+  const e = estadoEnElTablero(convo.id);
+  if (!e) return;
+  programar(convo, ACCION_RELOJ, { ficha: f.id, salida: ESPERA_CUMPLIDA, vuelta: e.vuelta }, ahora() + f.espera_min * 60, true);
 }
 
 /** El cliente escribió estando en la caja «Seguimientos»: el que tocaba vuelve a contar desde ahora. */
@@ -1505,6 +1924,9 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero):
   const e = estadoEnElTablero(convo.id);
   const segs = ficha.seguimientos ?? [];
   if (!e || e.seg_ficha !== ficha.id || e.seg_idx >= segs.length) return;
+  // SOLO EL 1 VUELVE A CONTAR (25/10/2026, punto 4): es el que cae en medio de la conversación. Los
+  // 2+ ya están en su horario fijo y se quedan ahí (en el simulador, a sus minutos: tampoco se mueven).
+  if (e.seg_idx >= 1) return;
   const token = ponerSeguimiento(convo.id, ficha.id, e.seg_idx);
   // EL RELOJ VUELVE A CERO, como `renovarEsperaDeLosSeguimientos` del motor de siempre: los que
   // faltan cuentan sus minutos desde ahora.
@@ -1604,6 +2026,12 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
   if (accion.action_type === ACCION_RELOJ) {
     // Solo si el cliente sigue en esa ficha desde entonces: si respondió o se movió, nada.
     if (estado.ficha_id !== ficha || estado.vuelta !== payload.vuelta) return;
+    // LA ESPERA DE LA FICHA SE CUMPLIÓ: ahora sí manda sus burbujas.
+    if (payload.salida === ESPERA_CUMPLIDA) {
+      if (estado.espera_ficha !== ficha) return;
+      await irA(convo.id, t, ficha, 0, { yaEspero: true });
+      return;
+    }
     await seguirPor(convo.id, t, ficha, String(payload.salida ?? ""), 0);
     return;
   }
@@ -1615,8 +2043,9 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
     return;
   }
   if (accion.action_type === ACCION_SEGUIMIENTO) {
-    // Solo si sigue en la caja de seguimientos y nadie cambió su turno (escribió o se movió).
-    if (estado.ficha_id !== ficha || estado.seg_ficha !== ficha || estado.seg_token !== payload.token) return;
+    // Solo si sus seguimientos siguen puestos (en la caja, o colgados de la ficha donde espera) y nadie
+    // cambió su turno: si se movió a otra ficha, `irA` los soltó; si escribió, el turno es otro.
+    if (estado.seg_ficha !== ficha || estado.seg_token !== payload.token) return;
     const f = t.fichas.find((x) => x.id === ficha);
     const segs = f?.seguimientos ?? [];
     const idx = Number(payload.idx ?? 0);
@@ -1635,7 +2064,7 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       const pasosSeg = conLosComodinesDeLaFicha(
         pasosActivos(v.steps),
         // El que activa la oferta ya habla con el precio de oferta.
-        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
+        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f, t), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
         paisSeg
       );
       await sendConfiguredSteps(fresca, pasosSeg as never);

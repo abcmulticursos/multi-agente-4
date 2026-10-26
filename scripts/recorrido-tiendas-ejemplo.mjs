@@ -32,6 +32,16 @@ const datos = YAML.parse(readFileSync(join(RAIZ, "config", "intro-data.yaml"), "
 /** El silencio del regalo de ESTA copia (en la copia de prueba se acorta) y un margen para leerlo. */
 const SILENCIO_DEL_REGALO = Number(datos.awaiting_email_timeout_seconds ?? 300);
 const ESPERA_DEL_REGALO = SILENCIO_DEL_REGALO + 30;
+/** La espera del upsell 1 (dentro de su ficha, 25/10/2026) más un margen: la mayor de la copia. */
+const ESPERA_DEL_UPSELL =
+  Math.max(
+    0,
+    ...Object.values(datos.tableros ?? {}).flatMap((porCanal) =>
+      Object.values(porCanal ?? {}).flatMap((t) => (t?.fichas ?? []).map((f) => Number(f.espera_min ?? 0)))
+    )
+  ) *
+    60 +
+  30;
 const perfil = (pais) => datos.payment_profiles_by_country?.[pais] ?? {};
 const cuenta = (pais, m) => cifras(perfil(pais).cuentas_por_metodo?.[m] ?? perfil(pais).numero_de_cuenta);
 
@@ -137,9 +147,13 @@ try {
     comprobar("y le ofrece completar al pack por la diferencia (5)", /diferencia/i.test(c.nuevo()) && /S\/\.?\s?5\b/.test(c.nuevo()), c.nuevo().slice(-160));
     await c.tocar("coc_pe_up_si", "Sí, completar");
     comprobar("sí: datos por 5 sin repreguntar el método", /5/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")), c.nuevo());
+    const desdePack = c.bot.length;
     await c.foto(R.pe5, 70);
-    comprobar("paga 5: le entrega EL PACK", c.nuevo().includes(entregaDe("pack-cocina")), c.nuevo().slice(0, 120));
-    comprobar("y le ofrece el upsell (COMIDAS PERUANAS a 5)", /COMIDAS PERUANAS/.test(c.nuevo()) && /5/.test(c.nuevo()), c.nuevo().slice(-160));
+    // EL UPSELL ESPERA SU TIEMPO DENTRO DE SU FICHA (25/10/2026): se lee hasta que llegue.
+    await c.leer(ESPERA_DEL_UPSELL);
+    const trasPack = c.bot.slice(desdePack).join("\n");
+    comprobar("paga 5: le entrega EL PACK", trasPack.includes(entregaDe("pack-cocina")), trasPack.slice(0, 120));
+    comprobar("y tras su espera le ofrece el upsell (COMIDAS PERUANAS a 5)", /COMIDAS PERUANAS/.test(trasPack) && /5/.test(trasPack), trasPack.slice(-160));
     await c.decir("eso es otro curso?", 35);
     comprobar("«¿es otro?»: la IA dice que es otro, sin pedir comprobante", /otro|distinto|diferente/i.test(c.nuevo()) && !/comprobante/i.test(c.nuevo()), c.nuevo());
     // EL REGALO ESPERA SU SILENCIO (25/10/2026), como la venta de siempre (en la copia se acorta):
@@ -163,9 +177,12 @@ try {
     comprobar("escribe «1»: el básico a 3 y le pregunta el método", /ADI[ÓO]S RABIETAS/.test(c.nuevo()) && /\$\s?3\b/.test(c.nuevo()), c.nuevo());
     await c.decir("pichincha", 30);
     comprobar("«pichincha»: su cuenta de Ecuador", cifras(c.nuevo()).includes(cuenta("EC", "transferencia")), c.nuevo());
+    const desdeEc = c.bot.length;
     await c.foto(R.ec3, 70);
-    comprobar("paga 3: le entrega ADIÓS RABIETAS", c.nuevo().includes(entregaDe("adios-rabietas")), c.nuevo().slice(0, 120));
-    comprobar("y el upsell 1 (NAVIDAD EN FAMILIA) con cuadritos", /NAVIDAD EN FAMILIA/.test(c.nuevo()) && /s[ií]\*? o \*?no/i.test(c.nuevo()), c.nuevo().slice(-160));
+    await c.leer(ESPERA_DEL_UPSELL);
+    const trasEc = c.bot.slice(desdeEc).join("\n");
+    comprobar("paga 3: le entrega ADIÓS RABIETAS", trasEc.includes(entregaDe("adios-rabietas")), trasEc.slice(0, 120));
+    comprobar("y tras su espera el upsell 1 (NAVIDAD EN FAMILIA) con cuadritos", /NAVIDAD EN FAMILIA/.test(trasEc) && /s[ií]\*? o \*?no/i.test(trasEc), trasEc.slice(-160));
     await c.decir("no gracias", 30);
     comprobar("«no gracias»: el upsell 2 (TARJETAS DE EMOCIONES)", /TARJETAS DE EMOCIONES/.test(c.nuevo()), c.nuevo().slice(0, 140));
     const desdeElNo = c.bot.length;
@@ -183,10 +200,13 @@ try {
     comprobar("la intro en pesos (8.000) y sigue al cobro solo", /8[.,]?000/.test(c.nuevo()) && /m[eé]todo/i.test(c.nuevo()), c.nuevo().slice(-160));
     await c.decir("transferencia", 30);
     comprobar("«transferencia»: su cuenta de Argentina", cifras(c.nuevo()).includes(cuenta("AR", "transferencia_bancaria")), c.nuevo());
+    const desdeAr = c.bot.length;
     await c.foto(R.ar8000, 70);
-    comprobar("paga 8000: le entrega PLANOS DE GIMNASIO", c.nuevo().includes(entregaDe("planos-gimnasio")), c.nuevo().slice(0, 120));
-    comprobar("le pregunta si lo quiere por correo", /correo/i.test(c.nuevo()), "");
-    comprobar("y el upsell 1 (CARPINTERÍA EN MADERA) con botones", /CARPINTER[ÍI]A EN MADERA/.test(c.nuevo()), c.nuevo().slice(-160));
+    await c.leer(ESPERA_DEL_UPSELL);
+    const trasAr = c.bot.slice(desdeAr).join("\n");
+    comprobar("paga 8000: le entrega PLANOS DE GIMNASIO", trasAr.includes(entregaDe("planos-gimnasio")), trasAr.slice(0, 120));
+    comprobar("le pregunta si lo quiere por correo", /correo/i.test(trasAr), "");
+    comprobar("y tras su espera el upsell 1 (CARPINTERÍA EN MADERA) con botones", /CARPINTER[ÍI]A EN MADERA/.test(trasAr), trasAr.slice(-160));
     await c.tocar("tal_ar_u1_no", "No, gracias");
     comprobar("no: upsell 2 (CALCULADORA DE MATERIALES)", /CALCULADORA/.test(c.nuevo()), c.nuevo().slice(0, 140));
     await c.decir("no", 30);
@@ -253,12 +273,16 @@ try {
     const pe = await cliente("tienda_tcocina", "PE");
     await pe.decir("hola", 30);
     await pe.leer(170);
-    comprobar("Perú: calla tras la intro → a los 2 min, su seguimiento", SEG.test(pe.nuevo()), pe.nuevo().slice(0, 120));
+    // Se mira toda la charla: la intro tarda en salir y el seguimiento puede caer mientras se lee el «hola».
+    comprobar("Perú: calla tras la intro → su seguimiento", SEG.test(pe.bot.join("\n")), pe.bot.join("\n").slice(-120));
     const h1 = await sinPisar(pe, SEG);
     comprobar("y llega después de la intro, sin pisarla", h1.ok, `${h1.hueco ?? "?"} s tras el mensaje anterior`);
-    // EN MEDIO DE LOS SEGUIMIENTOS SE PUEDE PAGAR: la caja quedó abierta (en silencio) al no responder.
+    // EN MEDIO DE LOS SEGUIMIENTOS (colgados de la intro, 25/10/2026): en doble oferta primero se elige
+    // el producto, como la venta de siempre; el método que dijo queda anotado y al elegir le llegan sus
+    // datos de frente.
     await pe.decir("yape", 30);
-    comprobar("contesta «yape» a un seguimiento: le llegan su cuenta y el precio", cifras(pe.nuevo()).includes(cuenta("PE", "yape")) && /15/.test(pe.nuevo()), pe.nuevo().slice(0, 140));
+    await pe.tocar("coc_pe_b_basico", "Opción 1", 30);
+    comprobar("dijo «yape» en un seguimiento y elige el básico: su cuenta y 15", cifras(pe.nuevo()).includes(cuenta("PE", "yape")) && /15/.test(pe.nuevo()), pe.nuevo().slice(0, 140));
     if (R.pe15) {
       await pe.foto(R.pe15, 80);
       comprobar("y paga 15: le entrega DIETAS FIT", pe.nuevo().includes(entregaDe("dietas-fit")), pe.nuevo().slice(0, 140));
@@ -281,9 +305,14 @@ try {
     await c.decir("hola", 45);
     await c.tocar("mas_pe_b_pack", "Opción 2 (el pack)");
     await c.decir("yape", 30);
-    comprobar("«yape»: su cuenta y el precio del pack (15 en la copia)", cifras(c.nuevo()).includes(cuenta("PE", "yape")) && /15/.test(c.nuevo()), c.nuevo().slice(0, 140));
+    // El precio del pack de Perú, el que tenga la copia (`tiempos-copia.mjs` lo pone a 15).
+    const precioPack = String(datos.biblioteca_de_productos?.find((p) => p.id === "ptmascotas_pack")?.precios_por_pais?.PE?.price_soles ?? 15);
+    comprobar(`«yape»: su cuenta y el precio del pack (${precioPack})`, cifras(c.nuevo()).includes(cuenta("PE", "yape")) && c.nuevo().includes(precioPack), c.nuevo().slice(0, 140));
     await c.foto(R.pe15, 80);
-    comprobar("paga 15: le entrega EL PACK", c.nuevo().includes(entregaDe("pack-mascotas")), c.nuevo().slice(0, 140));
+    // Con el pack a 15 (copia acortada) se le entrega; si el pack cuesta más, 15 no alcanza y le pregunta
+    // si quiere el que sí cubre (lo de «pagó el otro» lo prueba `recorrido-ronda.mjs`).
+    if (precioPack === "15") comprobar("paga 15: le entrega EL PACK", c.nuevo().includes(entregaDe("pack-mascotas")), c.nuevo().slice(0, 140));
+    else comprobar(`paga 15 con el pack a ${precioPack}: no le entrega el pack, le pregunta`, !c.nuevo().includes(entregaDe("pack-mascotas")) && /\?/.test(c.nuevo()), c.nuevo().slice(0, 140));
     // Su Entrega de Perú no tiene «📧 Ofrecer también por correo»: no debe preguntarlo.
     comprobar("y no le pregunta por correo (apagado en Perú)", !/por correo|tu correo/i.test(c.nuevo()), c.nuevo().match(/.{0,40}correo.{0,40}/i)?.[0] ?? "");
     comprobar("todo sin comodines vacíos", limpio(c.bot.join("\n")), c.bot.join("\n").match(/.{0,30}(\{\{|\*\s*\*).{0,30}/)?.[0]);
@@ -297,7 +326,8 @@ try {
     await c.tocar("est_si", "Sí, acepto", 60);
     await c.leer(150);
     const REC = /Espero que ya hayas podido echarle un vistazo/i;
-    comprobar("no aporta → su recordatorio 1", REC.test(c.nuevo()), c.nuevo().slice(0, 120));
+    // En la copia el recordatorio sale al minuto: puede caer mientras se leen los PDF. Se mira toda la charla.
+    comprobar("no aporta → su recordatorio 1", REC.test(c.bot.join("\n")), c.bot.join("\n").slice(-120));
     const h = await sinPisar(c, REC);
     comprobar("y llega después de los PDF y los datos de pago, sin pisarlos", h.ok, `${h.hueco ?? "?"} s tras el mensaje anterior`);
     await c.borrar();
@@ -314,8 +344,11 @@ try {
     await c.decir("quiero pagar", 35);
     await c.decir("1", 30);
     await c.decir("pichincha", 30);
+    const desdeUp = c.bot.length;
     await c.foto(R.ec3, 70);
-    comprobar("paga 3: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", c.nuevo().includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(c.nuevo()), c.nuevo().slice(-120));
+    await c.leer(ESPERA_DEL_UPSELL);
+    const trasUp = c.bot.slice(desdeUp).join("\n");
+    comprobar("paga 3: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", trasUp.includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(trasUp), trasUp.slice(-120));
     await c.decir("y ese que trae", 35);
     comprobar("pregunta: le contesta la IA", c.nuevo().trim().length > 0, c.nuevo().slice(0, 120));
     comprobar("todavía sin regalo (no pasó su «no respondió» de 3 min)", !REGALO.test(c.bot.join("\n")), "");
@@ -334,8 +367,11 @@ try {
     await c.decir("hola", 45);
     await c.decir("1", 30);
     await c.decir("yape", 30);
+    const desdeUp = c.bot.length;
     await c.foto(R.pe15, 70);
-    comprobar("paga 15: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", c.nuevo().includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(c.nuevo()), c.nuevo().slice(-120));
+    await c.leer(ESPERA_DEL_UPSELL);
+    const trasUp = c.bot.slice(desdeUp).join("\n");
+    comprobar("paga 15: le entrega ADIÓS RABIETAS y le ofrece NAVIDAD EN FAMILIA", trasUp.includes(entregaDe("adios-rabietas")) && /NAVIDAD EN FAMILIA/.test(trasUp), trasUp.slice(-120));
     await c.decir("si", 35);
     comprobar("«sí»: los datos con 5", /5/.test(c.nuevo()) && cifras(c.nuevo()).includes(cuenta("PE", "yape")), c.nuevo().slice(0, 140));
     const desde = c.bot.length;

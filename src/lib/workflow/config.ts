@@ -821,6 +821,11 @@ export interface ProductoDeLaBiblioteca {
    * siempre no las lee.
    */
   entregas_extra?: Array<{ id: string; nombre?: string; steps?: SequenceStep[] }>;
+  /**
+   * «📷 OFRECER IMÁGENES» (25/10/2026). `false` = su galería se queda guardada pero el bot no la
+   * ofrece ni la manda, ni en la venta de siempre ni en el tablero. Ausente = encendida, como antes.
+   */
+  ofrecer_imagenes?: boolean;
   /** Su galería, con la misma forma que las demás. */
   image_gallery?: UpsellConfig["image_gallery"];
   /** Qué incluye / cómo se estudia, para que el bot sepa responder. */
@@ -4678,6 +4683,21 @@ export function burbujasDeLaFicha(
   });
 }
 
+/**
+ * LAS GALERÍAS APAGADAS NO LLEGAN AL BOT (25/10/2026, «📷 Ofrecer imágenes»). Un producto con
+ * `ofrecer_imagenes: false` entra al reparto con la galería vacía: ninguna caja la recibe, así que ni
+ * la venta de siempre ni el tablero la ofrecen ni la mandan. Su galería sigue guardada en el archivo
+ * (el editor la lee de ahí, no de aquí). Sin ninguno apagado devuelve el MISMO objeto: nada cambia.
+ */
+export function conGaleriasApagadas(config: WorkflowConfig): WorkflowConfig {
+  const biblioteca = config.biblioteca_de_productos;
+  if (!Array.isArray(biblioteca) || !biblioteca.some((p) => p?.ofrecer_imagenes === false)) return config;
+  return {
+    ...config,
+    biblioteca_de_productos: biblioteca.map((p) => (p?.ofrecer_imagenes === false ? { ...p, image_gallery: [] } : p)),
+  };
+}
+
 export function repartirPorEtiqueta(config: WorkflowConfig): WorkflowConfig {
   const biblioteca = config.biblioteca_de_productos;
   if (!Array.isArray(biblioteca) || biblioteca.length === 0) return config;
@@ -5208,7 +5228,7 @@ export function loadWorkflowConfig(): WorkflowConfig | null {
   // Y EL REGALO DE SU TIENDA, al final: es lo más concreto (17/10/2026). Sin tienda, o con una
   // sin regalo propio, devuelve el mismo objeto y nada cambia.
   const runtimeConfig = conElRegaloDeLaTienda(
-    applyChannelContent(aplicarVersionActiva(repartirPorEtiqueta(config)), channel),
+    applyChannelContent(aplicarVersionActiva(repartirPorEtiqueta(conGaleriasApagadas(config))), channel),
     suTienda ?? null
   );
   cached =

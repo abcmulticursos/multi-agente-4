@@ -516,7 +516,7 @@ export function olvidarLaOfertaDeImagenes(conversationId: number): void {
   laOfertaDeImagenesQuedoPedida.delete(conversationId);
 }
 
-function looksLikeProductContentTurn(text: string): boolean {
+export function looksLikeProductContentTurn(text: string): boolean {
   if (!text) return false;
   // Incluye formulaciones naturales y errores comunes de "¿qué voy a recibir?".
   // Sin esto el contenido editable no se adjunta al prompt y el modelo tendría
@@ -591,7 +591,7 @@ function elOrderBumpSigueOculto(
   return diferido || transicion;
 }
 
-function looksLikeMediaTurn(text: string): boolean {
+export function looksLikeMediaTurn(text: string): boolean {
   if (!text) return false;
   return /\b(imagen|imagenes|foto|fotos|muestra|muestras|ver|vea|verlo|verla|verlos|verlas|mostrar|muestrame|muÃ©strame|ensena|enseÃ±a|ejemplo|captura|video|videos)\b/.test(
     text

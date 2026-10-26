@@ -10,7 +10,7 @@
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { ConversationRow } from "@/lib/db";
 import { getClient } from "@/lib/openrouter";
-import { sendBotText } from "@/lib/workflow/sender";
+import { sendChunkedBotText } from "@/lib/workflow/engine";
 import { ultimosMensajes } from "./lector";
 import { CEREBRO_DE_FABRICA } from "./datos";
 import { NOTIFY_ADVISOR_TOOL, NOTIFY_EMERGENCY_TOOL, executeNotifyAdvisor, executeNotifyEmergency } from "@/lib/workflow/emergency";
@@ -72,6 +72,20 @@ export interface ContextoDeLaIA {
    * otro. Lo lleva a ese cobro (sus burbujas o los datos le llegan de ahí).
    */
   completar?: { para: string; ir: () => Promise<void> };
+  /**
+   * LA ETAPA (25/10/2026), para cerrar como la venta de siempre: «venta» (lo que se le ofrece aún no
+   * lo compró), «datos» (ya tiene los datos de pago y se espera su comprobante) o «postventa».
+   */
+  etapa?: "venta" | "datos" | "postventa";
+  /** Tus textos de postventa (cómo usar la entrega, acceso de por vida…), solo después de comprar. */
+  postventa?: string;
+  /** El bot añadirá él mismo la oferta de ver las imágenes tras esta respuesta: la IA no la escribe. */
+  noOfrezcasImagenes?: boolean;
+  /**
+   * Burbujas del BOT que salen DESPUÉS de la última de la IA, en la misma fila y con la misma pausa
+   * (la oferta de imágenes). Si salieran aparte, caerían en medio de las burbujas de la IA.
+   */
+  alFinal?: string[];
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -136,6 +150,9 @@ function cerebro(c: ContextoDeLaIA): string {
     "REGLAS QUE NO SE ROMPEN: la conversación sigue una ruta armada por el dueño; contesta y devuélvelo a ella. No des datos de pago, números de cuenta, nombres de titular ni enlaces: eso lo envía el sistema. No inventes contenido, beneficios, plazos ni condiciones. Escribe en español neutro.",
     // El mismo formato que pide la venta de siempre: en WhatsApp la negrita es UN asterisco.
     "FORMATO: en WhatsApp *palabra* va en negrita (UN asterisco a cada lado, nunca dos). Resalta solo 1 a 3 palabras clave por mensaje.",
+    // EL ESTILO DE LA VENTA DE SIEMPRE (25/10/2026, punto 6): sus mismas reglas de código, no frases fijas.
+    "ESTILO: contesta primero lo que te preguntan, en párrafos cortos de WhatsApp separados por una línea en blanco (máximo 3), cálido y profesional, nunca un bloque denso. Si desconfía, tranquilízalo con naturalidad, sin sonar a la defensiva ni inventar pruebas.",
+    "IMÁGENES: no ofrezcas ni prometas fotos, imágenes ni videos por tu cuenta: de eso se encarga el sistema.",
     c.dialecto ? `DIALECTO (manda sobre todo lo demás): ${c.dialecto}` : "",
     // ── LO DE ESTE TURNO ──
     loQueSabe(c),
@@ -149,21 +166,53 @@ function cerebro(c: ContextoDeLaIA): string {
     // LOS AVISOS AL DUEÑO, con la misma regla que la venta de siempre (25/10/2026).
     "PROBLEMAS DEL CLIENTE (pago, descarga, acceso, uso…): primero intenta resolverlo tú, al menos 2 veces, con lo que sabes. Si sigue sin resolverse o está molesto, pregúntale: «¿Deseas que un asesor especializado se comunique contigo?». SOLO si responde que sí, usa notify_admin_emergency con el problema concreto. Nunca en su primer mensaje sobre el problema.",
     "SI PIDE HABLAR CON UNA PERSONA (o quiere comprar pero algo no le queda claro y eso lo frena): ofrécele un asesor con la misma pregunta y, SOLO si dice que sí, usa notify_admin_advisor_request. No lo uses para dudas normales (precio, contenido, formato): esas las contestas tú.",
-    c.preguntaPendiente
-      ? `Al final, invítalo con naturalidad a responder lo que quedó pendiente: «${c.preguntaPendiente.slice(0, 300)}».`
-      : "Cierra con una frase corta que invite a seguir.",
+    c.postventa?.trim()
+      ? `DESPUÉS DE LA COMPRA, lo que sabes de su material (úsalo si pregunta cómo usarlo, descargarlo o hasta cuándo lo tiene):\n${c.postventa.trim().slice(0, 1500)}`
+      : "",
+    c.noOfrezcasImagenes
+      ? "EN ESTE TURNO: contesta por escrito lo que pregunta sobre el contenido y termina ahí. No menciones imágenes, fotos ni muestras: el sistema añade él mismo la oferta de verlas justo después de tu respuesta."
+      : "",
+    cierre(c),
     c.nota ? `LO QUE ACABA DE PASAR (dilo con tus palabras): ${c.nota}` : "",
   ]
     .filter(Boolean)
     .join("\n");
 }
 
+/**
+ * CÓMO TERMINA LA RESPUESTA, POR ETAPA (25/10/2026, punto 6): las reglas de cierre de la venta de
+ * siempre («close with a soft next step», CTA sin «quisieras», no repetir datos ya enviados, no
+ * presionar; en la postventa, sin pregunta de venta). Son reglas, no frases: la IA redacta. Y nunca
+ * copia el texto de los botones del dueño (un «ELIGE UNA OPCIÓN…» dicho por la IA suena a presión).
+ */
+function cierre(c: ContextoDeLaIA): string {
+  if (c.nota) return "";
+  if (c.etapa === "postventa")
+    return "CIERRE: ya compró. Contesta breve y positivo. No le vuelvas a vender lo que ya compró ni termines con una pregunta de venta.";
+  if (c.etapa === "datos")
+    return "CIERRE: ya tiene los datos de pago. Contesta lo que preguntó y termina con UNA invitación breve y amable a enviar su comprobante cuando pague. No repitas los datos ni el precio, y no presiones.";
+  return [
+    "CIERRE: termina SIEMPRE con UNA sola pregunta breve, cálida y con tus propias palabras que lo lleve al siguiente paso (llevarlo, elegir una de las opciones, o que le indiques cómo adquirirlo). Nunca cierres con «¿te quedó claro?» ni con una pregunta vacía, y no uses «quisieras».",
+    "No presiones: nada de «solo falta que…», «elige una opción para…» ni de recordarle lo que ya te dijo. Si hay dos opciones y pregunta el precio, nombra las dos con su precio y pregúntale cuál prefiere. Preguntar el precio no es decidir comprar.",
+    c.preguntaPendiente
+      ? `Lo que quedó pendiente en la conversación es esto (NO copies este texto ni el de sus botones; invítalo con tus palabras): «${c.preguntaPendiente.slice(0, 300)}».`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/**
+ * LA CONVERSACIÓN QUE LEE LA IA (25/10/2026, ahorro de tokens acordado: «leer menos historial»): los
+ * 12 mensajes más recientes, los del bot recortados (sus burbujas de venta son largas y ya están
+ * resumidas en «lo que sabe»); los del cliente casi enteros. Antes: 24 mensajes de hasta 1.500 letras.
+ */
 function historial(conversationId: number): ChatCompletionMessageParam[] {
-  return ultimosMensajes(conversationId, 24)
+  return ultimosMensajes(conversationId, 12)
     .filter((m) => (m.content ?? "").trim())
     .map((m) => ({
       role: m.role === "user" ? ("user" as const) : ("assistant" as const),
-      content: m.content.slice(0, 1500),
+      content: m.content.slice(0, m.role === "user" ? 600 : 500),
     }));
 }
 
@@ -206,7 +255,11 @@ export async function elegirOpcionConIA(
           content:
             "Decides cuál de las opciones ELIGIÓ el cliente con su último mensaje. Responde SOLO con el id de la opción, o con NINGUNA. " +
             "Es NINGUNA si pregunta, duda, compara, pide más información, dice que no quiere algo, o no queda claro. " +
-            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer.",
+            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer. " +
+            // COMO LA VENTA DE SIEMPRE (25/10/2026, punto 8): elegir método o decir que quiere pagar ES
+            // decidir comprar (en COMO OB eso suelta el order bump); preguntar el precio no lo es.
+            "Si una opción es la de PAGAR o COMPRAR (por ejemplo «Quiero pagar», «Lo quiero», «Sí»), el cliente la ELIGE cuando dice claramente que quiere pagar o comprarlo, nombra un método de pago, o pregunta a dónde o cómo pagar. Preguntar el precio, qué trae o cómo funciona NO es elegirla. " +
+            "Pero si las opciones son PRODUCTOS distintos (el básico, el pack…), nombrar un método de pago o decir «quiero pagar» NO elige ninguno: es NINGUNA.",
         },
         {
           role: "user",
@@ -429,9 +482,21 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       return false;
     }
     const malos = prohibidos(texto);
-    if (malos.length === 0) break;
-    console.log(`[tablero:ia] convo ${convo.id}: nombró montos que no son suyos (${malos.join(", ")}), se le pide otra vez`);
-    aviso += `\n\nIMPORTANTE: tu respuesta anterior nombró montos no permitidos (${malos.join(", ")}). No los repitas.`;
+    // EL CIERRE LO REVISA EL BOT (25/10/2026, punto 6): vendiendo o esperando el pago, la respuesta
+    // tiene que terminar invitando con una pregunta, como la venta de siempre. Si no, se le pide otra
+    // vez UNA sola (si insiste, sale como está: mejor sin pregunta que sin respuesta).
+    const debeCerrarConPregunta = !c.nota && (c.etapa === "venta" || c.etapa === "datos");
+    const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).slice(0, 3).pop() ?? "";
+    const sinPregunta = debeCerrarConPregunta && !!texto && !/[?¿]/.test(ultimaBurbuja);
+    if (malos.length === 0 && !(sinPregunta && intento === 0)) break;
+    if (malos.length > 0) {
+      console.log(`[tablero:ia] convo ${convo.id}: nombró montos que no son suyos (${malos.join(", ")}), se le pide otra vez`);
+      aviso += `\n\nIMPORTANTE: tu respuesta anterior nombró montos no permitidos (${malos.join(", ")}). No los repitas.`;
+    }
+    if (sinPregunta) {
+      console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta, se le pide otra vez`);
+      aviso += "\n\nIMPORTANTE: tu respuesta anterior no terminó con una pregunta. Escríbela de nuevo terminando con UNA pregunta breve y amable que lo lleve al siguiente paso.";
+    }
   }
   const malos = prohibidos(texto);
   if (malos.length > 0) {
@@ -450,6 +515,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     .map((b) => b.trim())
     .filter(Boolean)
     .slice(0, 3);
-  for (const b of burbujas) await sendBotText(convo, b);
+  // CON LAS PAUSAS DE TUS AJUSTES (25/10/2026, punto 17), como la venta de siempre: la primera enseguida
+  // y las demás separadas por «Delay entre mensajes» (Menús → Ajustes → Tiempos generales).
+  if (burbujas.length > 0) await sendChunkedBotText(convo, burbujas.join("\n\n"), c.alFinal);
   return burbujas.length > 0;
 }

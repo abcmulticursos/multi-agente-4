@@ -92,6 +92,11 @@ for (const [col, tipo] of [
   // Esperando su correo para mandarle los enlaces (1 = se le pidió la dirección; 2 = se le preguntó
   // si lo enviamos a la que ya dio).
   ["correo_espera", "INTEGER NOT NULL DEFAULT 0"],
+  // La ficha que espera su tiempo antes de mandar sus burbujas (el upsell: «⏳ espera» dentro de la
+  // ficha, 25/10/2026). Mientras está, la ficha no se presentó todavía.
+  ["espera_ficha", "TEXT"],
+  // 1 = en su turno anterior se le ofreció ver las imágenes (dura UN turno, como el de siempre).
+  ["imagenes_ofrecidas", "INTEGER NOT NULL DEFAULT 0"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -125,6 +130,16 @@ export interface EstadoEnElTablero {
   seg_desde: number | null;
   muestras: string;
   correo_espera: number;
+  espera_ficha: string | null;
+  imagenes_ofrecidas: number;
+}
+
+export function ponerEspera(conversationId: number, fichaId: string | null): void {
+  db.prepare("UPDATE tablero_estado SET espera_ficha = ? WHERE conversation_id = ?").run(fichaId, conversationId);
+}
+
+export function apuntarImagenesOfrecidas(conversationId: number, si: boolean): void {
+  db.prepare("UPDATE tablero_estado SET imagenes_ofrecidas = ? WHERE conversation_id = ?").run(si ? 1 : 0, conversationId);
 }
 
 export function esperarCorreo(conversationId: number, modo: 0 | 1 | 2): void {

@@ -18442,6 +18442,8 @@ type ProductoEditor = {
   /** Otras partes de este producto que se mandan en otro momento (muestras, niveles…): las usa la
    *  ficha Entregar del tablero. Ver `entregas_extra` en `config.ts`. */
   entregas_extra?: Array<{ id: string; nombre: string; steps: EditorStep[] }>;
+  /** «📷 Ofrecer imágenes»: `false` = la galería queda guardada pero el bot no la ofrece ni la manda. */
+  ofrecer_imagenes?: boolean;
   image_gallery?: GalleryItem[];
   course_content?: string;
   etiqueta?: PapelDeProducto;
@@ -21133,6 +21135,26 @@ function BibliotecaDeProductos({
                 </button>
               </div>
 
+              {/* «📷 OFRECER IMÁGENES» (25/10/2026): apagar la galería entera sin borrarla. Vale para la
+                  venta automática y para el tablero (el bot la recibe vacía, ver `conGaleriasApagadas`). */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSnapshot?.();
+                    onEdit("biblioteca");
+                    parchar(producto.id, { ofrecer_imagenes: producto.ofrecer_imagenes === false ? undefined : false });
+                  }}
+                  className={`rounded px-2 py-1 text-xs font-bold text-white ${producto.ofrecer_imagenes === false ? "bg-slate-400" : "bg-emerald-600"}`}
+                  title={
+                    producto.ofrecer_imagenes === false
+                      ? "Apagado: las imágenes quedan guardadas, pero el bot no las ofrece ni las manda. Clic para encender."
+                      : "Encendido: el bot ofrece las imágenes cuando preguntan qué contiene. Clic para apagar."
+                  }
+                >
+                  📷 Ofrecer imágenes: {producto.ofrecer_imagenes === false ? "APAGADO" : "ENCENDIDO"}
+                </button>
+              </div>
               <GalleryEditor
                 items={producto.image_gallery ?? []}
                 onChange={(items) =>
@@ -31012,7 +31034,7 @@ function PantallaDelTablero({
         const s = f.seguimientos ?? [];
         return s.length === 0
           ? "Sin seguimientos — doble clic para crearlos."
-          : `${s.length} seguimiento(s) · ${s.map((x) => minutosLegiblesDelTablero(x.minutos)).join(" · ")}\nDesde su último mensaje; se detienen si paga.${presenta}`;
+          : `${s.length} seguimiento(s) · el 1 a ${minutosLegiblesDelTablero(s[0].minutos)}${s.length > 1 ? " · los demás en tu horario fijo" : ""}\nSe detienen si elige o paga.${presenta}`;
       }
       case "correo":
         return `Pide el correo y le manda lo que recibió.${f.sin_respuesta_min ? `\nSi no lo da en ${minutosLegiblesDelTablero(f.sin_respuesta_min)}, sigue por «No dio su correo».` : ""}`;
@@ -31766,10 +31788,21 @@ function GestorDeVersiones({
                 <h4 className="text-sm font-bold">
                   {elegida.seg + 1}. Seguimiento {elegida.seg + 1}
                 </h4>
-                · sale a los
-                <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
-                del último mensaje del cliente
-                {s.minutos >= 24 * 60 - 7 && <span className="font-semibold text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
+                {elegida.seg === 0 ? (
+                  <>
+                    · sale a los
+                    <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
+                    del último mensaje del cliente (si escribe, vuelve a contar)
+                    {s.minutos >= 24 * 60 - 7 && <span className="font-semibold text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
+                  </>
+                ) : (
+                  // DEL 2 EN ADELANTE, A TUS HORARIOS FIJOS (25/10/2026, punto 4). Los minutos valen solo en el
+                  // simulador, para poder probarlo sin esperar a la franja.
+                  <>
+                    · sale en tu <strong>horario fijo</strong> (Menús → Ajustes) · en el simulador, a los
+                    <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
+                  </>
+                )}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-tinta">
                 <label className="flex items-center gap-1">
@@ -32325,10 +32358,24 @@ function AjustesDeLaFicha({
               </span>
             </div>
           )}
+          {/* «⏳ ESPERA ANTES DE SALIR» (25/10/2026, punto 9): el upsell no sale en el mismo segundo de la
+              entrega. Vive aquí dentro; la tarjeta no muestra nada. */}
+          {ficha.tipo === "mensaje" && (
+            <div className={etiqueta}>
+              ⏳ Espera antes de salir <span className="ml-2"><CampoDeTiempoDelTablero valor={b.espera_min} onCambio={(m) => setB({ ...b, espera_min: m })} /></span>
+              <span className={ayuda}>
+                Para el upsell después de la entrega: espera estos minutos antes de mandar sus burbujas. Si el cliente escribe mientras tanto, vuelve a
+                contar. Vacío = sale enseguida.
+              </span>
+            </div>
+          )}
           {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
             <div className={etiqueta}>
               ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
-              <span className={ayuda}>Aparece la salida «No respondió» para tu insistencia. Si responde algo, ya no sale. Vacío = sin esa salida.</span>
+              <span className={ayuda}>
+                Aparece la salida «No respondió», contada desde su último mensaje. Para tus seguimientos no hace falta: conecta el «→» de esta ficha a la
+                ficha Seguimientos y salen a sus tiempos. Vacío = sin esa salida.
+              </span>
             </div>
           )}
           {ficha.tipo === "correo" && (
@@ -32694,7 +32741,11 @@ function AjustesDeLaFicha({
               )}
               <div className={etiqueta}>
                 ⏰ Si no paga en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_pago_min} onCambio={(m) => setB({ ...b, sin_pago_min: m })} /></span>
-                <span className={ayuda}>Desde su último mensaje: si escribe, vuelve a contar. El cobro sigue abierto: si paga cuando sea, su monto lo lleva a su ruta.</span>
+                <span className={ayuda}>
+                  Si «Si no paga» va a una ficha Seguimientos, este tiempo no se usa: los seguimientos salen a sus propios tiempos. Hacia otra ficha:
+                  estos minutos desde su último mensaje (vacío = el silencio del regalo). El cobro sigue abierto: si paga cuando sea, su monto lo lleva
+                  a su ruta.
+                </span>
               </div>
               <span className={ayuda}>Se revisa como en la venta de siempre: comprobante repetido, fecha (si el país la exige) y, en Yape/Plin, que esté a nombre de quien cobra.</span>
             </div>
