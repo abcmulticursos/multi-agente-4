@@ -126934,14 +126934,14 @@ tableros:
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 3715
-          y: 3388
+          x: 3759
+          y: 3416
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 3752
-          y: 3722
+          x: 3753
+          y: 3729
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
@@ -127736,6 +127736,14 @@ tableros:
           de: f-mvnpmsvw-fa2fp
           salida: siguiente
           a: f-mvnpmsvw-u6enj
+        - id: c-mvp0rzec-8ge
+          de: f-mvnpmsvw-cg6i5
+          salida: prod:ptmascotas_pack
+          a: f-mvnpsqoc-9kqjp
+        - id: c-mvp0s3cc-t3y
+          de: f-mvnpmsvw-tq1yb
+          salida: prod:ptmascotas_comida
+          a: f-mvnpsqoc-avwwz
       curvas:
         c3:
           x: 121
