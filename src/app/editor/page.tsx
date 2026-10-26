@@ -30939,7 +30939,11 @@ function PantallaDelTablero({
   const vivoCfg = useRef(cfg);
   vivoCfg.current = cfg;
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
-  const nombres = Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id]));
+  const nombres: Record<string, string> = {
+    ...Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id])),
+    // Los anuncios por su nombre, para las salidas del Inicio «📣 anuncio» (26/10/2026).
+    ...Object.fromEntries(((cfg as { ad_registry?: Array<{ key: string; name?: string }> }).ad_registry ?? []).map((a) => [`anuncio:${a.key}`, a.name?.trim() || a.key])),
+  };
   const nombreDelProducto = (pid?: string) => (pid ? nombres[pid] : undefined) ?? "(sin elegir)";
   /** «FIGURARTE» o «FIGURARTE · Muestras gratuitas»: el nombre de una entrega por su clave. */
   const nombreDeLaEntrega = (clave: string) => {
@@ -32040,6 +32044,29 @@ function GestorDelRegaloDelTablero({
       ancho={ANCHO_DEL_GESTOR}
     >
       <SelectorDeRegalo cfg={cfg} tiendaId={tiendaId} aplicar={aplicar} />
+      {/* EL TIEMPO DEL REGALO, AQUÍ MISMO (26/10/2026): el mismo dato del menú ajustes («Espera del correo /
+          regalo»), en minutos. Uno solo para todo el bot. */}
+      <label className="mb-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-tinta">
+        ⏳ Se ofrece tras
+        <input
+          key={cfg.globals?.awaiting_email_timeout_seconds ?? 0}
+          type="number"
+          min={0}
+          step={0.5}
+          defaultValue={Math.round(((cfg.globals?.awaiting_email_timeout_seconds ?? 0) / 60) * 10) / 10}
+          onBlur={(e) => {
+            const seg = Math.max(0, Math.round((Number(e.target.value) || 0) * 60));
+            const c = vivo.current;
+            if (seg !== (c.globals?.awaiting_email_timeout_seconds ?? 0)) aplicar({ ...c, globals: { ...c.globals, awaiting_email_timeout_seconds: seg } });
+          }}
+          className="w-16 rounded border border-borde bg-tarjeta px-1 py-0.5 text-sm font-normal"
+        />
+        min de silencio
+        <span className="w-full text-xs font-normal text-tinta-suave">
+          Contado desde el último mensaje del cliente. Vale para todo el bot (todas las tiendas y países), y también es la espera de «⏳ Si no paga» y
+          «⏳ Si no responde» cuando van al Regalo sin minutos propios.
+        </span>
+      </label>
       <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           {pasos.map(([id, titulo, detalle], i) => (
@@ -32373,8 +32400,9 @@ function AjustesDeLaFicha({
             <div className={etiqueta}>
               ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
               <span className={ayuda}>
-                Aparece la salida «No respondió», contada desde su último mensaje. Para tus seguimientos no hace falta: conecta el «→» de esta ficha a la
-                ficha Seguimientos y salen a sus tiempos. Vacío = sin esa salida.
+                {ficha.tipo === "correo"
+                  ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
+                  : "Con botones o cuadritos, la salida «⏳ Si no responde» siempre se ve. Aquí pones cuánto espera, contado desde su último mensaje; vacío = el silencio del regalo de tus Ajustes. Si su «⏳ Si no elige» va a Seguimientos, mandan ellos."}
               </span>
             </div>
           )}
@@ -32739,14 +32767,33 @@ function AjustesDeLaFicha({
                   <span className={ayuda}>El tramo 1 de cada país sale por el mismo puntito «Tramo 1», cada uno con sus montos. Si paga en partes, se suman.</span>
                 </div>
               )}
-              <div className={etiqueta}>
-                ⏰ Si no paga en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_pago_min} onCambio={(m) => setB({ ...b, sin_pago_min: m })} /></span>
-                <span className={ayuda}>
-                  Si «Si no paga» va a una ficha Seguimientos, este tiempo no se usa: los seguimientos salen a sus propios tiempos. Hacia otra ficha:
-                  estos minutos desde su último mensaje (vacío = el silencio del regalo). El cobro sigue abierto: si paga cuando sea, su monto lo lleva
-                  a su ruta.
-                </span>
-              </div>
+              {cobro.modo === "producto" && (
+                <label className={etiqueta}>
+                  Precio especial ({pais}) para el downsell
+                  <input
+                    type="number"
+                    min={0}
+                    value={cobro.precio_por_pais?.[pais] ?? ""}
+                    placeholder="el de su ficha"
+                    onChange={(e) => {
+                      const n = Number(e.target.value);
+                      const resto = { ...(cobro.precio_por_pais ?? {}) };
+                      if (e.target.value === "" || !Number.isFinite(n) || n <= 0) delete resto[pais];
+                      else resto[pais] = n;
+                      ponCobro({ ...cobro, precio_por_pais: Object.keys(resto).length ? resto : undefined });
+                    }}
+                    className="ml-2 w-24 rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                  />
+                  <span className={ayuda}>
+                    Vacío = el precio de su ficha de producto. Pon un precio aquí para cobrar el mismo producto más barato (el downsell, si dijo que no
+                    al upsell). Cada país con el suyo.
+                  </span>
+                </label>
+              )}
+              <span className={ayuda}>
+                «⏳ Si no paga»: hacia tus Seguimientos, salen a sus tiempos; hacia otra ficha (el Regalo), tras el silencio del regalo. El cobro sigue
+                abierto: si paga cuando sea, su monto lo lleva a su ruta.
+              </span>
               <span className={ayuda}>Se revisa como en la venta de siempre: comprobante repetido, fecha (si el país la exige) y, en Yape/Plin, que esté a nombre de quien cobra.</span>
             </div>
           )}

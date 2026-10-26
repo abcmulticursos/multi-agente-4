@@ -121381,6 +121381,14 @@ tableros:
           de: coc_ar_intro
           salida: siguiente
           a: coc_ar_seg_b
+        - id: c-tub26-coc_pe_upgrade-sin_respuesta
+          de: coc_pe_upgrade
+          salida: sin_respuesta
+          a: coc_pe_upsell1
+        - id: c-tub26-coc_pe_cobro_up-sin_pago
+          de: coc_pe_cobro_up
+          salida: sin_pago
+          a: coc_pe_upsell1
       cajas:
         - id: manta-coc_pe_inicio
           x: 20

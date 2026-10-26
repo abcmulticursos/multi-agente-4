@@ -97,6 +97,10 @@ for (const [col, tipo] of [
   ["espera_ficha", "TEXT"],
   // 1 = en su turno anterior se le ofreció ver las imágenes (dura UN turno, como el de siempre).
   ["imagenes_ofrecidas", "INTEGER NOT NULL DEFAULT 0"],
+  // Los seguimientos que ya le salieron en esta etapa de la venta (26/10/2026), por su HUELLA (su
+  // texto): uno que ya recibió no se repite aunque vuelva a caer en esos Seguimientos o en un
+  // duplicado; unos Seguimientos con otros textos salen completos. Se vacía cuando compra.
+  ["segs_enviados", "TEXT NOT NULL DEFAULT '[]'"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -132,6 +136,36 @@ export interface EstadoEnElTablero {
   correo_espera: number;
   espera_ficha: string | null;
   imagenes_ofrecidas: number;
+  segs_enviados: string;
+}
+
+/** Las huellas de los seguimientos que ya le salieron en esta etapa. */
+export function seguimientosEnviados(e: EstadoEnElTablero | null): string[] {
+  try {
+    const v = JSON.parse(e?.segs_enviados || "[]");
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Este seguimiento (por su huella) ya le salió: no se le vuelve a mandar en esta etapa. */
+export function marcarSeguimientoHecho(conversationId: number, huella: string): void {
+  const e = estadoEnElTablero(conversationId);
+  if (!e) return;
+  const ya = seguimientosEnviados(e);
+  if (ya.includes(huella)) return;
+  db.prepare("UPDATE tablero_estado SET segs_enviados = ? WHERE conversation_id = ?").run(JSON.stringify([...ya, huella]), conversationId);
+}
+
+/** Compró: empieza otra etapa (el upsell) y sus seguimientos salen desde el 1. */
+export function reiniciarSeguimientosHechos(conversationId: number): void {
+  db.prepare("UPDATE tablero_estado SET segs_enviados = '[]' WHERE conversation_id = ?").run(conversationId);
+}
+
+/** ¿Ya pasó antes por esta ficha (en esta conversación)? */
+export function yaVisito(conversationId: number, fichaId: string): boolean {
+  return !!db.prepare("SELECT 1 FROM tablero_visitas WHERE conversation_id = ? AND ficha_id = ?").get(conversationId, fichaId);
 }
 
 export function ponerEspera(conversationId: number, fichaId: string | null): void {

@@ -1048,6 +1048,48 @@ la ficha del producto, debajo de «Lo que recibe al pagar». La venta de siempre
 Prueba: `recorrido-tiendas-ejemplo.mjs --solo=figurarte,figurarte2,figurarte3` (figurarte2 pide
 `prueba-wf-copia.cjs` del scratchpad en la copia) y la de pantalla `prueba-ui-entregas.mjs` (scratchpad).
 
+### El tablero, 26/10/2026: lo que le faltaba frente al automático + pizarra tipo Sendy
+
+Comparado función por función con el automático (COMO HOY, COMO DOU, COMO OB). Lo que faltaba:
+
+- **Seguimientos que no se repiten.** Cada seguimiento enviado queda marcado por su HUELLA (sus
+  textos, `huellaDelSeguimiento`) en `tablero_estado.segs_enviados`. Caiga en los mismos Seguimientos
+  o en un duplicado, sigue con el que le falta (`siguienteSinEnviar`); si ya recibió todos, no sale
+  ninguno (y si tienen «Terminaron sin respuesta», sigue por ahí tras el silencio). Al comprar se
+  vacía (el upsell es otra venta). Unos Seguimientos con OTROS textos salen completos.
+- **Volver a una ficha con opciones no la repite** (`yaVisito`): el Order bump no se muestra dos
+  veces; la IA le pregunta cuál prefiere y sus seguimientos siguen desde el que falta.
+- **«⏳ Si no responde» siempre visible** en Mensaje/Order bump con opciones; sin minutos = el
+  silencio del regalo. Con seguimientos colgados, mandan ellos.
+- **Cobro sin minutos**: «⏳ Si no paga» siempre igual; hacia otra ficha, el silencio del regalo
+  (`sin_pago_min` ya no se lee ni se edita).
+- **Precio especial por país en el Cobro** (`cobro.precio_por_pais`), para armar el DOWNSELL.
+- **Varias tuberías en un país**: el Inicio separa por anuncio (`inicio.anuncios`, salidas
+  `anuncio:<clave>`, «→ Los demás»).
+- **El tiempo del Regalo en su ficha** (mismo dato que «Espera del correo / regalo»).
+- Decidido NO trasladar: las reglas fijas por palabra (atajos del automático atados a sus estados)
+  y el aviso de novedad (solo sirve al pasar de 1 a 2 productos con clientes a medias). El
+  recordatorio del upsell y el downsell del automático están VACÍOS en su configuración, así que las
+  tuberías de ejemplo tampoco los llevan (el tablero puede: Regalo «Al terminar» → Condición →
+  Mensaje; Mensaje + Cobro con precio especial).
+
+Pizarra (solo cómo se ve): número en cada ficha (orden del camino), cables al Regalo y regresos como
+etiqueta («🎁 Regalo», «↩ 7»; la línea completa al pasar el ratón), cables a Seguimientos finos;
+«Otra cosa» solo si ya tiene cable; «⏳ Si no elige» en vez de «→» con opciones; NO se conecta donde
+no debe (`porQueNoSeConecta`): a un Inicio, «Pagó» a algo que no es Entrega/Condición, «Si no elige»
+a algo que no son Seguimientos, Seguimientos → Seguimientos. Duplicar ya no multiplica los cuadritos
+(`copiarFichas` renombra por ficha).
+
+- **La IA nunca confirma un pago con una imagen rechazada**: el recorrido la cazó diciendo «Confirmo
+  el Yape recibido» ante un logo; las dos notas de rechazo (`SIN_PISTAS` y la de imagen ilegible)
+  lo prohíben.
+
+Pruebas: `scripts/recorrido-26.mjs` (con `ronda-copia.cjs` + `ronda-copia-26.cjs` en la copia).
+Ojo en la copia: con el «Si no responde» del Upsell 1 de NIÑOS EC sin minutos, el recorrido de
+tiendas «ninos» falla a propósito (el regalo llega a los 40 s, antes del «no gracias»); para ese
+recorrido devolverle sus 3 min. El recordatorio de ESTILISTA a 1 min cae mientras salen los 5 PDF
+(tardan ~53 s): en la copia, a 2 min.
+
 ### El tablero, ronda del 25/10/2026: «que se comporte como el automático»
 
 Sus observaciones revisadas una por una (lista en la memoria `puntos-confirmados-tablero-25-10`). Los

@@ -75,6 +75,12 @@ export interface CobroDeLaFicha {
    * EL UPGRADE: si ya compró uno más barato de los de este cobro, se cobra solo la diferencia.
    */
   diferencia?: boolean;
+  /**
+   * PRECIO ESPECIAL POR PAÍS (26/10/2026), para el DOWNSELL: el mismo producto, otra vez, a un precio
+   * menor puesto por ti (como el downsell de la venta de siempre). Si el país del cliente lo tiene,
+   * este Cobro cobra ese precio por su producto; si no, el de su ficha.
+   */
+  precio_por_pais?: Record<string, number>;
 }
 
 export interface CondicionDeLaFicha {
@@ -141,6 +147,11 @@ export interface FichaDelTablero {
   sin_venta?: boolean;
   /** INICIO: «En revisión»: no recibe clientes, pero se ve normal. Solo para él. */
   en_revision?: boolean;
+  /**
+   * INICIO: VARIAS TUBERÍAS EN UN PAÍS (26/10/2026). Claves del registro de anuncios: cada una tiene su
+   * salida («📣 anuncio»); quien vino de ese anuncio va por ahí. Los demás, por «→ Los demás».
+   */
+  anuncios?: string[];
   /** Apagada: no manda nada y el cliente sigue por su «→». Se ve tenue, en su sitio. */
   apagada?: boolean;
   /** Guardada en «Fichas guardadas»: fuera del lienzo. El bot no lo mira. */

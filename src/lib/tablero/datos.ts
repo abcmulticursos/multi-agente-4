@@ -91,6 +91,13 @@ function leeCobro(v: unknown): CobroDeLaFicha | undefined {
       const m = numero(n);
       if (p && m !== undefined && m >= 0) minimo_por_pais[p] = m;
     }
+  const precio_por_pais: Record<string, number> = {};
+  if (esObjeto(v.precio_por_pais))
+    for (const [k, n] of Object.entries(v.precio_por_pais).slice(0, 60)) {
+      const p = pais(k);
+      const m = numero(n);
+      if (p && m !== undefined && m > 0) precio_por_pais[p] = m;
+    }
   const tramos_por_pais: Record<string, TramoDeCobro[]> = {};
   if (esObjeto(v.tramos_por_pais))
     for (const [k, lista] of Object.entries(v.tramos_por_pais).slice(0, 60)) {
@@ -111,6 +118,7 @@ function leeCobro(v: unknown): CobroDeLaFicha | undefined {
     ...(modo === "producto" && v.metodos === true ? { metodos: true } : {}),
     ...(modo === "producto" && v.metodos === true && v.sin_preguntar === true ? { sin_preguntar: true } : {}),
     ...(modo === "producto" && v.diferencia === true ? { diferencia: true } : {}),
+    ...(modo === "producto" && Object.keys(precio_por_pais).length ? { precio_por_pais } : {}),
   };
 }
 
@@ -211,6 +219,9 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         if (p) ficha.pais = p;
         if (f.sin_venta === true) ficha.sin_venta = true;
         if (f.en_revision === true) ficha.en_revision = true;
+        // Sus anuncios (26/10/2026): cada uno con su salida, para llevarlo a otra tubería.
+        const anuncios = ids(f.anuncios, 40);
+        if (anuncios.length) ficha.anuncios = anuncios;
       }
       if (f.apagada === true && tipo !== "inicio") ficha.apagada = true;
       if (f.guardada === true && tipo !== "inicio") ficha.guardada = true;
@@ -406,6 +417,11 @@ export function salidasDeLaFicha(
 ): SalidaDeFicha[] {
   switch (f.tipo) {
     case "inicio":
+      // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): una salida por cada anuncio marcado, y «→» para los demás.
+      return [
+        ...(f.anuncios ?? []).map((k) => ({ clave: `anuncio:${k}`, etiqueta: `📣 ${nombres?.[`anuncio:${k}`] ?? k}` })),
+        { clave: "siguiente", etiqueta: (f.anuncios ?? []).length ? "→ Los demás" : "→" },
+      ];
     case "entregar":
     case "esperar":
       return [{ clave: "siguiente", etiqueta: "→" }];
@@ -448,11 +464,21 @@ export function salidasDeLaFicha(
         salidas.push({ clave: "fin", etiqueta: "🏁 Terminaron sin respuesta" });
         return salidas;
       }
-      // «→» TAMBIÉN EN UNA FICHA CON OPCIONES (25/10/2026): su cable va a los Seguimientos, que salen
-      // mientras el cliente no elige; sus botones y cuadritos siguen valiendo todo ese tiempo.
-      salidas.push({ clave: "siguiente", etiqueta: "→" });
-      if (pregunta) salidas.push({ clave: "otra", etiqueta: "✍️ Otra cosa" });
-      if (f.sin_respuesta_min) salidas.push({ clave: "sin_respuesta", etiqueta: `⏰ No respondió en ${minutosLegibles(f.sin_respuesta_min)}` });
+      // SIN OPCIONES, «→» es continuar. CON OPCIONES (26/10/2026) ese mismo puntito dice lo que hace:
+      // «⏳ Si no elige» va a sus Seguimientos (salen mientras no elige; sus opciones siguen valiendo), y
+      // «⏳ Si no responde» siempre se ve (a sus minutos, o al silencio del regalo si no tiene).
+      if (!pregunta) {
+        salidas.push({ clave: "siguiente", etiqueta: "→" });
+        return salidas;
+      }
+      salidas.push({ clave: "siguiente", etiqueta: "⏳ Si no elige · seguimientos" });
+      salidas.push({
+        clave: "sin_respuesta",
+        etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde",
+      });
+      // «Otra cosa» ya no aparece sola: solo se ve en la ficha que ya la tiene conectada (el lienzo la
+      // filtra), así nada de lo que existe se rompe.
+      salidas.push({ clave: "otra", etiqueta: "✍️ Otra cosa" });
       return salidas;
     }
     case "cobro": {
@@ -482,10 +508,9 @@ export function salidasDeLaFicha(
           salidas.push({ clave: `prod:${otro}`, etiqueta: `✅ Pagó ${nombres?.[otro] ?? "otro producto"}` });
         salidas.push({ clave: "menos", etiqueta: "↓ Pagó de menos" });
       }
-      // «SI NO PAGA» (25/10/2026): siempre está. Hacia unos Seguimientos salen enseguida, a sus minutos
-      // desde el último mensaje del cliente; hacia otra ficha, a los minutos puestos (o al silencio del
-      // regalo si no hay).
-      salidas.push({ clave: "sin_pago", etiqueta: f.sin_pago_min ? `⏰ No pagó en ${minutosLegibles(f.sin_pago_min)}` : "⏳ Si no paga" });
+      // «SI NO PAGA»: siempre está y siempre se llama igual (26/10/2026: sin minutos sueltos). Hacia unos
+      // Seguimientos salen a sus tiempos; hacia otra ficha (el Regalo), tras el silencio del regalo.
+      salidas.push({ clave: "sin_pago", etiqueta: "⏳ Si no paga" });
       return salidas;
     }
   }
@@ -510,7 +535,7 @@ export function elTableroAtiende(t: Tablero | null | undefined, pais?: string): 
   if (!t?.encendido) return false;
   const inicio = pais ? inicioDelPais(t, pais) : t.fichas.find((f) => f.tipo === "inicio");
   if (!inicio || inicio.sin_venta || inicio.en_revision) return false;
-  return !!cableDeLaSalida(t, inicio.id, "siguiente");
+  return !!cableDeLaSalida(t, inicio.id, "siguiente") || (inicio.anuncios ?? []).some((k) => !!cableDeLaSalida(t, inicio.id, `anuncio:${k}`));
 }
 
 /**

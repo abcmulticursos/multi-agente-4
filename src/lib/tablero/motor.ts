@@ -117,6 +117,10 @@ import {
   marcarComprobanteLeido,
   anotarVisita,
   apuntarImagenesOfrecidas,
+  marcarSeguimientoHecho,
+  reiniciarSeguimientosHechos,
+  seguimientosEnviados,
+  yaVisito,
   moverA,
   ponerEspera,
   ponerSeguimiento,
@@ -401,22 +405,80 @@ function fichaDeSeguimientos(t: Tablero, desde: string, salida: string): FichaDe
   return f?.tipo === "seguimientos" && !f.apagada && (f.seguimientos ?? []).length > 0 ? f : null;
 }
 
-function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero): void {
-  const segs = seg.seguimientos ?? [];
-  if (segs.length === 0) return;
-  const token = ponerSeguimiento(convo.id, seg.id, 0);
-  const desde = getLastUserMessageTime(convo.id) ?? ahora();
-  contarSeguimientosDesde(convo.id, desde);
-  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[0], 0, desde);
-  programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx: 0, token }, cuando, sinSilencio);
-  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (el 1 a ${segs[0].minutos} min de su último mensaje)`);
+/**
+ * LA HUELLA DE UN SEGUIMIENTO: sus textos (de todas sus versiones). Un duplicado tiene la misma; otro
+ * seguimiento, otra. Así «no repetir» vale para la copia y no se come unos Seguimientos distintos.
+ */
+function huellaDelSeguimiento(s: { variantes?: Array<{ steps?: unknown[] }> }): string {
+  const textos = (s.variantes ?? [])
+    .flatMap((v) => (v.steps ?? []) as Array<{ body?: string; body_variants?: string[]; caption_variants?: string[]; drive_url?: string }>)
+    .flatMap((p) => [p.body ?? "", ...(p.body_variants ?? []), ...(p.caption_variants ?? []), p.drive_url ?? ""])
+    .map((x) => x.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join("|");
+  let h = 0;
+  for (let i = 0; i < textos.length; i++) h = (Math.imul(31, h) + textos.charCodeAt(i)) | 0;
+  return `${textos.length}:${(h >>> 0).toString(36)}`;
 }
 
-/** «Si no paga» hacia otra ficha que no son Seguimientos: sus minutos, o el silencio del regalo. */
-function minutosSinPago(f: FichaDelTablero): number {
-  if (f.sin_pago_min) return f.sin_pago_min;
+/** El primer seguimiento de esta ficha, desde `desde`, que todavía no le salió (o -1). */
+function siguienteSinEnviar(convoId: number, segs: NonNullable<FichaDelTablero["seguimientos"]>, desde: number): number {
+  const ya = new Set(seguimientosEnviados(estadoEnElTablero(convoId)));
+  for (let i = desde; i < segs.length; i++) if (!ya.has(huellaDelSeguimiento(segs[i]))) return i;
+  return -1;
+}
+
+/**
+ * CUELGA LOS SEGUIMIENTOS DESDE EL QUE LE FALTA (26/10/2026): los que ya le salieron en esta etapa
+ * quedan marcados por su texto y no se repiten, aunque vuelva a caer en éstos o en un duplicado. Si
+ * ya recibió todos, no se cuelga nada. Al comprar se vacía la marca (el upsell es otra venta).
+ */
+function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero, t?: Tablero): void {
+  const segs = seg.seguimientos ?? [];
+  if (segs.length === 0) return;
+  const idx = siguienteSinEnviar(convo.id, segs, 0);
+  if (idx < 0) {
+    console.log(`[tablero] convo ${convo.id}: «${seg.titulo || seg.id}» — ya recibió sus ${segs.length} seguimientos, no se repiten`);
+    // Si tienen «Terminaron sin respuesta» (al Regalo, p. ej.), el cliente sigue por ahí tras el
+    // silencio: que no repitan no puede dejarlo sin su camino.
+    if (t && cableDeLaSalida(t, seg.id, "fin")) {
+      const token = ponerSeguimiento(convo.id, seg.id, segs.length);
+      programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx: segs.length, token }, ahora() + minutosDelSilencio() * 60);
+    } else ponerSeguimiento(convo.id, null, 0);
+    return;
+  }
+  const token = ponerSeguimiento(convo.id, seg.id, idx);
+  const desde = getLastUserMessageTime(convo.id) ?? ahora();
+  contarSeguimientosDesde(convo.id, desde);
+  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[idx], idx, desde);
+  programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx, token }, cuando, sinSilencio);
+  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (sigue con el ${idx + 1}, a ${segs[idx].minutos} min de su último mensaje)`);
+}
+
+/**
+ * «Si no paga» o «Si no responde» hacia otra ficha que no son Seguimientos: el silencio del regalo
+ * de tus Ajustes, como la venta de siempre (26/10/2026: los minutos sueltos del Cobro confundían y
+ * ya no se usan; «Si no responde» usa los suyos si los tiene).
+ */
+function minutosDelSilencio(): number {
   const seg = loadWorkflowConfig()?.awaiting_email_timeout_seconds ?? 300;
   return Math.max(1, Math.round(seg / 60));
+}
+const minutosSinPago = (_f: FichaDelTablero): number => minutosDelSilencio();
+const minutosSinRespuesta = (f: FichaDelTablero): number => f.sin_respuesta_min || minutosDelSilencio();
+
+/** Las claves del registro de anuncios de las que vino el cliente (para el Inicio por anuncio). */
+function anunciosDelCliente(convo: ConversationRow, claves: string[], config: WorkflowConfig | null): string[] {
+  if (!convo.ad_source_id) return [];
+  return (config?.ad_registry ?? [])
+    .filter((ad) => claves.includes(ad.key) && ad.enabled !== false)
+    .filter((ad) =>
+      (ad.ids ?? [])
+        .flatMap((x) => String(x).split(/[\s,;]+/))
+        .map((x) => x.trim())
+        .includes(convo.ad_source_id!)
+    )
+    .map((ad) => ad.key);
 }
 
 /** La señal del reloj de una ficha con «⏳ espera»: se cumplió y manda sus burbujas. */
@@ -453,6 +515,9 @@ async function irA(
   // Y una espera que no se cumplió deja de valer si se va a otra ficha.
   if (antes?.espera_ficha && antes.espera_ficha !== f.id) ponerEspera(convoId, null);
   const vuelta = moverA(convoId, f.id);
+  // ¿VUELVE A UNA FICHA QUE YA VIO? (26/10/2026) Se mira antes de anotar esta visita. La segunda
+  // llamada de una ficha con «⏳ espera» no cuenta: es la misma visita que se cumple.
+  const volvio = !yaEspero && yaVisito(convoId, f.id);
   anotarVisita(convoId, f.id);
   const config = loadWorkflowConfig();
   const pais = getEffectiveCountryCode(convo.phone, config);
@@ -466,9 +531,14 @@ async function irA(
   }
 
   switch (f.tipo) {
-    case "inicio":
+    case "inicio": {
+      // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): el Inicio puede separar por anuncio. Si el cliente vino
+      // de uno de los anuncios marcados y esa salida tiene cable, va por ahí; si no, por «→ los demás».
+      const deSuAnuncio = (f.anuncios ?? []).length ? anunciosDelCliente(convo, f.anuncios!, config) : [];
+      for (const clave of deSuAnuncio) if (await seguir(`anuncio:${clave}`)) return;
       await seguir("siguiente");
       return;
+    }
 
     case "mensaje":
     case "intro_ob": {
@@ -482,6 +552,27 @@ async function irA(
         return;
       }
       if (yaEspero) ponerEspera(convoId, null);
+      // VOLVER A UNA FICHA CON OPCIONES NO LA REPITE (26/10/2026), como la venta de siempre: después del
+      // destape, el order bump no se vuelve a mostrar. El cliente ya vio esas opciones: se queda en ella
+      // (sus botones y cuadritos valen), sus seguimientos siguen desde el que le falta, y la IA le
+      // pregunta con sus palabras cuál prefiere.
+      if (volvio) {
+        const ya = opcionesDe(pasosDeLaFicha(f));
+        if (ya.botones.length + ya.cuadritos.length > 0) {
+          console.log(`[tablero] convo ${convoId}: vuelve a «${f.titulo || f.id}», que ya vio → no se repite`);
+          const colgadosOtraVez = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
+          if (colgadosOtraVez) colgarSeguimientos(convo, colgadosOtraVez, t);
+          else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+            programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
+          const nombres = [...ya.botones.map((b) => b.label), ...ya.cuadritos.map((d) => d.title)].filter(Boolean).join(", ");
+          await contestarConIA(
+            convo,
+            t,
+            `Ya le mostraste antes estas opciones: ${nombres}. No se las vuelvas a presentar enteras: con tus palabras y en una frase corta, pregúntale cuál prefiere.`
+          );
+          return;
+        }
+      }
       let pasosAEnviar = pasosActivos(f.steps);
       if (f.tipo === "intro_ob") {
         const v = versionQueLeToca(f.variantes ?? [], clavesDelAnuncioDelCliente(convo, config), "intro");
@@ -504,22 +595,19 @@ async function irA(
       // CON OPCIONES: espera la respuesta, con sus Seguimientos colgados si su «→» (o su «no respondió»)
       // va a ellos. Un «no respondió» hacia otra ficha sigue funcionando como siempre.
       const colgados = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
-      if (colgados) colgarSeguimientos(convo, colgados);
-      if (f.sin_respuesta_min && !fichaDeSeguimientos(t, f.id, "sin_respuesta"))
-        programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + f.sin_respuesta_min * 60);
+      if (colgados) colgarSeguimientos(convo, colgados, t);
+      // «SI NO RESPONDE» hacia otra ficha (el Regalo tras un upsell): a sus minutos, o al silencio del
+      // regalo si no tiene (26/10/2026: la salida siempre se ve, también sin minutos). Con seguimientos
+      // colgados, mandan ellos.
+      else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+        programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
       return;
     }
 
-    case "seguimientos": {
-      const segs = f.seguimientos ?? [];
-      if (segs.length === 0) return;
-      const token = ponerSeguimiento(convoId, f.id, 0);
-      const desde = getLastUserMessageTime(convoId) ?? ahora();
-      contarSeguimientosDesde(convoId, desde);
-      const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[0], 0, desde);
-      programar(convo, ACCION_SEGUIMIENTO, { ficha: f.id, idx: 0, token }, cuando, sinSilencio);
+    case "seguimientos":
+      // La caja de Seguimientos: desde el que le falta (los ya recibidos no se repiten).
+      colgarSeguimientos(convo, f, t);
       return;
-    }
 
     case "entregar": {
       // SUS ENTREGAS, EN ORDEN (25/10/2026): la principal de un producto o una de sus entregas extra,
@@ -580,6 +668,9 @@ async function irA(
           const v = id ? precioDelProducto(producto(config, id), pais, deOferta) : null;
           if (id && v !== null) precios[id] = v;
         }
+      // EL PRECIO ESPECIAL DEL DOWNSELL (26/10/2026): el suyo, para su producto, en el país del cliente.
+      const especial = f.cobro?.precio_por_pais?.[pais];
+      if (f.cobro?.modo === "producto" && f.cobro.producto_id && especial) precios[f.cobro.producto_id] = especial;
       // EL UPGRADE: si ya compró uno de éstos más barato, los más caros cuestan la diferencia y lo
       // que ya tiene (o uno más barato) ya no se cobra.
       if (f.cobro?.modo === "producto" && f.cobro.diferencia) {
@@ -640,7 +731,7 @@ async function irA(
       // «SI NO PAGA»: hacia unos Seguimientos, colgados desde ya (el cobro sigue abierto y sus tiempos
       // cuentan desde el último mensaje del cliente); hacia otra ficha, su reloj de siempre.
       const colgadosDelCobro = fichaDeSeguimientos(t, f.id, "sin_pago");
-      if (colgadosDelCobro) colgarSeguimientos(convo, colgadosDelCobro);
+      if (colgadosDelCobro) colgarSeguimientos(convo, colgadosDelCobro, t);
       else if (cableDeLaSalida(t, f.id, "sin_pago")) {
         const e = estadoEnElTablero(convoId);
         programar(convo, ACCION_SIN_PAGO, { ficha: f.id, cobro_desde: e?.cobro_desde, reloj: e?.cobro_reloj }, ahora() + minutosSinPago(f) * 60);
@@ -1017,7 +1108,7 @@ async function reenviarDatosDelCobro(convo: ConversationRow, t: Tablero, metodo:
 
 /** LA MISMA FRASE QUE EL VALIDADOR DE SIEMPRE: al cliente no se le dan pistas de qué falló. */
 const SIN_PISTAS =
-  "No pude validar ese comprobante. Pídele con amabilidad una foto más clara, donde se vea el comprobante completo. No le digas qué faltó.";
+  "No pude validar ese comprobante. Pídele con amabilidad una foto más clara, donde se vea el comprobante completo. No le digas qué faltó. NO hay ningún pago recibido: nunca digas que lo recibiste, confirmaste o aprobaste.";
 
 /** Un comprobante con el cobro abierto: se lee, se revisa, se cuenta y se sigue la salida de su monto. */
 async function atenderComprobante(
@@ -1037,7 +1128,7 @@ async function atenderComprobante(
     await contestarConIA(
       convo,
       t,
-      "El cliente mandó una imagen que no se ve como un comprobante de pago legible. Pídele con amabilidad una captura clara del comprobante donde se vea el monto."
+      "El cliente mandó una imagen que no se ve como un comprobante de pago legible. Pídele con amabilidad una captura clara del comprobante donde se vea el monto. NO hay ningún pago recibido: nunca digas que lo recibiste, confirmaste o aprobaste."
     );
     return;
   }
@@ -1198,6 +1289,8 @@ async function cerrarLaVenta(
 ): Promise<void> {
   cerrarCobro(convo.id);
   anotarCompra({ conversationId: convo.id, fichaId: f.id, productoId, salida, monto: total, moneda });
+  // COMPRÓ: lo que venga (el upsell) es otra venta, con sus seguimientos desde el 1.
+  reiniciarSeguimientosHechos(convo.id);
   // LO PAGADO, EN LA CONVERSACIÓN (25/10/2026), como la venta de siempre (`addToPaidTotal`): de ahí
   // lo leen el kanban (comprador y su dinero), los resultados y la autopurga (que NUNCA borra a quien
   // pagó). Sin esto, quien compraba por el tablero se veía como si no hubiera comprado.
@@ -1898,12 +1991,12 @@ function respondio(convo: ConversationRow, t: Tablero): void {
   if (f0?.tipo !== "esperar") tocarVuelta(convo.id);
   const e = estadoEnElTablero(convo.id);
   const f = e ? t.fichas.find((x) => x.id === e.ficha_id) : undefined;
-  if (
-    e &&
-    f?.sin_respuesta_min &&
-    (f.tipo === "mensaje" || f.tipo === "intro_ob" || f.tipo === "correo") &&
-    !fichaDeSeguimientos(t, f.id, "sin_respuesta")
-  )
+  // «SI NO RESPONDE» vuelve a contar desde ahora (en Mensaje y Order bump, también sin minutos: el
+  // silencio del regalo). Con seguimientos colgados de esta ficha no hay ese reloj: mandan ellos.
+  const conColgados = !!f && !!(fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta"));
+  if (e && f && (f.tipo === "mensaje" || f.tipo === "intro_ob") && !conColgados && cableDeLaSalida(t, f.id, "sin_respuesta"))
+    programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + minutosSinRespuesta(f) * 60);
+  else if (e && f?.sin_respuesta_min && f.tipo === "correo")
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
   // SUS SEGUIMIENTOS (en la caja o colgados de esta ficha): el 1 vuelve a contar desde ahora.
   const seg = e?.seg_ficha ? t.fichas.find((x) => x.id === e.seg_ficha) : undefined;
@@ -2097,19 +2190,23 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
     }
     // Lo que este seguimiento presenta, desde ahora la IA lo puede contar.
     anotarPresentados(convo.id, f.presenta ?? []);
+    // QUEDA MARCADO (por su texto): no se le vuelve a mandar en esta etapa, ni desde un duplicado.
+    marcarSeguimientoHecho(convo.id, huellaDelSeguimiento(seg));
     console.log(`[tablero] convo ${convo.id}: seguimiento ${idx + 1} de «${f.titulo || "Seguimientos"}»`);
     // EL SIGUIENTE, a sus minutos desde el mismo punto que los demás (el último mensaje del
     // cliente, o la hora a la que se aplazó un lead tardío), como el motor de siempre; tras el
     // último, «Terminaron sin respuesta» con la misma espera que el último.
-    const token = ponerSeguimiento(convo.id, ficha, idx + 1);
+    // (Se salta los que ya le salieron desde otros Seguimientos con los mismos textos.)
+    const proximo = siguienteSinEnviar(convo.id, segs, idx + 1);
+    const token = ponerSeguimiento(convo.id, ficha, proximo >= 0 ? proximo : idx + 1);
     const desde = estadoEnElTablero(convo.id)?.seg_desde ?? getLastUserMessageTime(convo.id) ?? ahora();
-    const siguiente = segs[idx + 1];
+    const siguiente = proximo >= 0 ? segs[proximo] : undefined;
     if (siguiente) {
-      const { cuando, sinSilencio } = cuandoSaleElSeguimiento(fresca, siguiente, idx + 1, desde);
-      programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: idx + 1, token }, cuando, sinSilencio);
+      const { cuando, sinSilencio } = cuandoSaleElSeguimiento(fresca, siguiente, proximo, desde);
+      programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: proximo, token }, cuando, sinSilencio);
     } else {
       const espera = Math.max(seg.minutos - (segs[idx - 1]?.minutos ?? 0), 60);
-      programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: idx + 1, token }, ahora() + espera * 60);
+      programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: segs.length, token }, ahora() + espera * 60);
     }
   }
 }

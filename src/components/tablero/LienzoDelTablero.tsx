@@ -37,7 +37,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, opcionesDe, pasosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -98,6 +98,27 @@ type Menu =
   | { tipo: "crear"; donde: Punto; desde?: { ficha: string; salida: string } }
   | { tipo: "caja"; cajaId: string };
 
+/**
+ * LO QUE NO SE PUEDE CONECTAR (26/10/2026), con su porqué en una línea. Son conexiones que nunca
+ * hacen lo que parecen: el cable no se pone.
+ */
+function porQueNoSeConecta(t: TableroEnElEditor, de: string, salida: string, a: string): string | null {
+  const origen = t.fichas.find((f) => f.id === de);
+  const destino = t.fichas.find((f) => f.id === a);
+  if (!origen || !destino) return null;
+  if (destino.tipo === "inicio") return "Un cable no puede llegar a un Inicio: el Inicio es donde entra el cliente.";
+  if (origen.tipo === "cobro" && (salida === "pagado" || salida.startsWith("prod:")) && destino.tipo !== "entregar" && destino.tipo !== "condicion")
+    return "«Pagó» va a una Entrega: es lo que recibe el cliente que pagó.";
+  if ((origen.tipo === "mensaje" || origen.tipo === "intro_ob") && salida === "siguiente") {
+    const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(origen as FichaDelTablero));
+    if (botones.length + cuadritos.length > 0 && destino.tipo !== "seguimientos")
+      return "«⏳ Si no elige» solo va a unos Seguimientos. Para llevarlo a otra ficha usa sus botones o cuadritos, o «⏳ Si no responde».";
+  }
+  if (origen.tipo === "seguimientos" && destino.tipo === "seguimientos")
+    return "Unos Seguimientos no llevan a otros: los seguimientos ya enviados no se repiten.";
+  return null;
+}
+
 const Contexto = createContext<{
   tablero: TableroEnElEditor;
   tema: "claro" | "oscuro";
@@ -111,6 +132,8 @@ const Contexto = createContext<{
   curvar: (cableId: string, p: Punto | null) => void;
   /** Por ficha: cuántos clientes llegaron y cuántos pagaron (de verdad, sin las pruebas). */
   numeros?: Record<string, { clientes: number; ventas: number }>;
+  /** El número de cada ficha (tipo Kommo), para ubicarlas y para los regresos «↩ 7». */
+  numeroDe: Record<string, number>;
 } | null>(null);
 
 /** «👥 12 · 💰 3»: los números de una ficha, como los de las rutas de la pizarra. Nada si no hay. */
@@ -133,7 +156,13 @@ function NumerosDeLaFicha({ id }: { id: string }) {
 function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
   const ctx = useContext(Contexto);
   const f = data.ficha;
-  const conectado = !!ctx?.tablero.cables.some((c) => c.de === f.id && c.salida === "siguiente");
+  const conectado = !!ctx?.tablero.cables.some((c) => c.de === f.id && (c.salida === "siguiente" || c.salida.startsWith("anuncio:")));
+  // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): el Inicio separa por anuncio, cada uno con su salida.
+  const [eligiendoAnuncios, setEligiendoAnuncios] = useState(false);
+  const anunciosDisponibles = Object.entries(ctx?.nombres ?? {})
+    .filter(([k]) => k.startsWith("anuncio:"))
+    .map(([k, nombre]) => ({ clave: k.slice(8), nombre }));
+  const suyos = f.anuncios ?? [];
   const estado = f.en_revision ? "revision" : f.sin_venta ? "apagado" : "venta";
   const color = !conectado
     ? { borde: "border-orange-400", banda: "bg-orange-500" }
@@ -164,10 +193,54 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5 p-2">
-        <div className="relative rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800">
-          {etiqueta}
+        <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800">{etiqueta}</div>
+        {suyos.map((k) => (
+          <div
+            key={k}
+            className="relative rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-900"
+            title="Quien vino de este anuncio va por este cable (su tubería)."
+          >
+            📣 {ctx?.nombres[`anuncio:${k}`] ?? k}
+            <Handle type="source" position={Position.Right} id={`anuncio:${k}`} className={PUNTO_NARANJA} />
+          </div>
+        ))}
+        <div className="relative rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700">
+          {suyos.length ? "→ Los demás" : "→ Empieza aquí"}
           <Handle type="source" position={Position.Right} id="siguiente" className={PUNTO_NARANJA} />
         </div>
+        {anunciosDisponibles.length > 0 && (
+          <button
+            type="button"
+            className="nodrag rounded-md border border-violet-300 bg-white px-2 py-1 text-left text-[11px] font-semibold text-violet-800 hover:bg-violet-50"
+            title="Varias tuberías en este país: cada anuncio marcado tiene su salida."
+            onClick={() => setEligiendoAnuncios((v) => !v)}
+          >
+            📣 Separar por anuncio{suyos.length ? ` (${suyos.length})` : ""}
+          </button>
+        )}
+        {eligiendoAnuncios && (
+          <div className="nodrag nowheel max-h-40 overflow-y-auto rounded-md border border-violet-200 bg-white p-1.5">
+            {anunciosDisponibles.map((a) => (
+              <label key={a.clave} className="flex cursor-pointer items-center gap-1.5 py-0.5 text-[11px] text-slate-800">
+                <input
+                  type="checkbox"
+                  checked={suyos.includes(a.clave)}
+                  onChange={(e) => {
+                    const nuevos = e.target.checked ? [...suyos, a.clave] : suyos.filter((x) => x !== a.clave);
+                    if (!ctx) return;
+                    // Al quitar un anuncio, su cable se va con él (lo que se agrega, se quita).
+                    ctx.cambiar({
+                      ...ctx.tablero,
+                      fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, anuncios: nuevos.length ? nuevos : undefined } : x)),
+                      cables: e.target.checked ? ctx.tablero.cables : ctx.tablero.cables.filter((c) => !(c.de === f.id && c.salida === `anuncio:${a.clave}`)),
+                    });
+                  }}
+                />
+                {a.nombre}
+              </label>
+            ))}
+          </div>
+        )}
         <button
           type="button"
           className={`nodrag rounded-md border px-2 py-1 text-left text-[11px] font-bold ${
@@ -239,6 +312,11 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             onDoubleClick={(e) => e.stopPropagation()}
           >
             ⚠
+          </span>
+        )}
+        {ctx.numeroDe[f.id] !== undefined && (
+          <span className="shrink-0 rounded-full bg-white/90 px-1.5 text-[11px] font-black leading-[18px] text-slate-900" title="Número de la ficha">
+            {ctx.numeroDe[f.id]}
           </span>
         )}
         <span className="shrink-0 text-xs">{a.icono}</span>
@@ -331,10 +409,14 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       </div>
       {salidas.length > 0 && (
         <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
-          {salidas.map((s) => {
+          {salidas
+            // «Otra cosa» solo en la ficha que ya la tiene conectada (26/10/2026): sin cable no hace nada.
+            .filter((s) => s.clave !== "otra" || conCable.has("otra"))
+            .map((s) => {
             const boton = s.clave.startsWith("btn:");
             const cuadrito = s.clave.startsWith("dec:");
-            const pide = (boton || cuadrito) && !conCable.has(s.clave);
+            // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
+            const pide = (boton || cuadrito || s.clave === "sin_pago") && !conCable.has(s.clave);
             return (
               <div
                 key={s.clave}
@@ -482,7 +564,59 @@ function caminoDeGoma(sx: number, sy: number, tx: number, ty: number, corrimient
   return [d, (sx + tx) / 2 + corrimiento.x, (sy + ty) / 2 + corrimiento.y];
 }
 
-function CableDelTablero({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }: EdgeProps) {
+function CableDelTablero(props: EdgeProps) {
+  // EL CABLE COMO ETIQUETA (26/10/2026, tipo Sendy/Kommo): un regreso («↩ 7») o el que va al Regalo
+  // («🎁 Regalo») no cruza la pizarra. Se ve un trazo corto con su etiqueta; al pasar el ratón, la línea
+  // completa. El cable es el mismo: solo cambia cómo se dibuja.
+  const etiqueta = (props.data as { etiqueta?: string } | undefined)?.etiqueta;
+  if (etiqueta) return <CableComoEtiqueta {...props} etiqueta={etiqueta} />;
+  return <CableCompleto {...props} />;
+}
+
+function CableComoEtiqueta({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, etiqueta }: EdgeProps & { etiqueta: string }) {
+  const ctx = useContext(Contexto);
+  const [encima, setEncima] = useState(false);
+  const [completo] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  const corto = `M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`;
+  return (
+    <>
+      <BaseEdge id={id} path={corto} interactionWidth={0} style={{ ...style, strokeWidth: 3, strokeDasharray: undefined }} />
+      {encima && <BaseEdge id={`${id}-completo`} path={completo} interactionWidth={0} style={{ ...style, strokeWidth: 2, opacity: 0.55 }} />}
+      <EdgeLabelRenderer>
+        <div
+          className="nodrag nopan absolute flex items-center gap-1 rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
+          style={{ transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`, pointerEvents: "all", borderColor: String(style?.stroke ?? "#94a3b8") }}
+          onMouseEnter={() => setEncima(true)}
+          onMouseLeave={() => setEncima(false)}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            ctx?.menu(e.clientX, e.clientY, { tipo: "cable", cableId: id });
+          }}
+          title="Pasa el ratón para ver a dónde llega · clic derecho: cortar"
+        >
+          {etiqueta}
+          {encima && (
+            <button
+              type="button"
+              title="Cortar esta conexión"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!ctx) return;
+                ctx.cambiar({ ...ctx.tablero, cables: ctx.tablero.cables.filter((c) => c.id !== id) });
+              }}
+              className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] text-white"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+}
+
+function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }: EdgeProps) {
   const ctx = useContext(Contexto);
   const [encima, setEncimaYa] = useState(false);
   const reloj = useRef<number | null>(null);
@@ -584,6 +718,33 @@ function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
     cables: t.cables.filter((c) => !ids.has(c.de) && !ids.has(c.a)),
     cajas: (t.cajas ?? []).filter((c) => !c.inicio || !ids.has(c.inicio)),
   };
+}
+
+/** Los números de las fichas: el camino desde cada Inicio (en orden de cables), luego las sueltas. */
+function numerarFichas(t: TableroEnElEditor): Record<string, number> {
+  const numero: Record<string, number> = {};
+  let n = 0;
+  const vivas = t.fichas.filter((f) => !f.guardada && f.tipo !== "inicio");
+  const orden = [...t.fichas.filter((f) => f.tipo === "inicio")].sort((a, b) => a.y - b.y || a.x - b.x);
+  for (const ini of orden) {
+    const cola = [ini.id];
+    const vistas = new Set(cola);
+    for (let i = 0; i < cola.length; i++) {
+      const salen = t.cables
+        .filter((c) => c.de === cola[i])
+        .map((c) => t.fichas.find((f) => f.id === c.a))
+        .filter((f): f is FichaEnElEditor => !!f)
+        .sort((a, b) => a.y - b.y || a.x - b.x);
+      for (const f of salen) {
+        if (vistas.has(f.id)) continue;
+        vistas.add(f.id);
+        cola.push(f.id);
+        if (f.tipo !== "inicio" && !f.guardada && numero[f.id] === undefined) numero[f.id] = ++n;
+      }
+    }
+  }
+  for (const f of [...vivas].sort((a, b) => a.x - b.x || a.y - b.y)) if (numero[f.id] === undefined) numero[f.id] = ++n;
+  return numero;
 }
 
 /** El Inicio de un país ("" = otros países). */
@@ -769,13 +930,24 @@ export default function LienzoDelTablero({
         };
       });
 
+  // LOS NÚMEROS DE LAS FICHAS (26/10/2026, tipo Kommo): en el orden del camino, desde cada Inicio
+  // siguiendo sus cables; las sueltas, al final, de izquierda a derecha. Para ubicarlas y nombrarlas.
+  const numeroDe = useMemo(() => numerarFichas(tablero), [tablero]);
+
   const cables = useMemo<Edge[]>(
     () =>
       tablero.cables
         .filter((c) => visibles.some((f) => f.id === c.de) && visibles.some((f) => f.id === c.a))
         .map((c) => {
           const origen = tablero.fichas.find((f) => f.id === c.de);
+          const destino = tablero.fichas.find((f) => f.id === c.a);
           const color = origen ? ASPECTO[origen.tipo].trazo : "#6366f1";
+          // TIPO SENDY (26/10/2026): al Regalo y los regresos (a una ficha que está a la izquierda) se
+          // dibujan como etiqueta; los de Seguimientos, finos. Todo lo demás, como siempre.
+          const alRegalo = destino?.tipo === "regalo";
+          const regreso = !!origen && !!destino && destino.tipo !== "seguimientos" && destino.x < origen.x - 60;
+          const etiqueta = alRegalo ? "🎁 Regalo" : regreso ? `↩ ${numeroDe[c.a] ?? ""} ${destino?.titulo?.trim() || ASPECTO[destino!.tipo].nombre}`.replace("  ", " ") : undefined;
+          const aSeguimientos = destino?.tipo === "seguimientos";
           return {
             id: c.id,
             source: c.de,
@@ -784,8 +956,14 @@ export default function LienzoDelTablero({
             targetHandle: "entra",
             type: "cable",
             deletable: false,
+            ...(etiqueta ? { data: { etiqueta } } : {}),
             // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra.
-            style: { stroke: color, strokeWidth: 3, strokeDasharray: "9 6", opacity: origen?.apagada ? 0.4 : 1 },
+            style: {
+              stroke: aSeguimientos ? "#f97316" : color,
+              strokeWidth: aSeguimientos ? 1.5 : 3,
+              strokeDasharray: aSeguimientos ? "3 5" : "9 6",
+              opacity: origen?.apagada ? 0.4 : 1,
+            },
           };
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -913,6 +1091,7 @@ export default function LienzoDelTablero({
         cambiar,
         curvar,
         numeros,
+        numeroDe,
       }}
     >
       <div className="lienzo-del-tablero relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
@@ -971,6 +1150,12 @@ export default function LienzoDelTablero({
           onConnect={(c) => {
             if (!c.source || !c.target || !c.sourceHandle || c.source === c.target) return;
             const actual = vivo.current;
+            // NO SE CONECTA DONDE NO DEBE (26/10/2026): el cable no se pone y se dice por qué.
+            const motivo = porQueNoSeConecta(actual, c.source, c.sourceHandle, c.target);
+            if (motivo) {
+              setAviso(motivo);
+              return;
+            }
             // UNA SALIDA, UN CABLE: tirar otro desde el mismo puntito reemplaza al anterior.
             const lista = actual.cables.filter((x) => !(x.de === c.source && x.salida === c.sourceHandle));
             lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de: c.source, salida: c.sourceHandle, a: c.target });
