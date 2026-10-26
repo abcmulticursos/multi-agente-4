@@ -126791,7 +126791,6 @@ tableros:
           presenta:
             - ptmascotas_citas
           instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
-          sin_respuesta_min: 3
           espera_min: 2
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
@@ -127034,7 +127033,6 @@ tableros:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
-          sin_respuesta_min: 1
         - id: f-mvo7hddp-ow7zr
           tipo: cobro
           x: 3047
@@ -127551,6 +127549,10 @@ tableros:
         - id: c-mvp24t51-xeh
           de: f-mvp24b6s-zh4sx
           salida: siguiente
+          a: f-mvnpmsvw-u9oq3
+        - id: c-mvp2ozm6-8kw
+          de: f-mvp20a4l-r8g78
+          salida: sin_pago
           a: f-mvnpmsvw-u9oq3
       curvas:
         c3:
