@@ -127449,6 +127449,10 @@ tableros:
           de: f-mvp0wa4s-2dfnw
           salida: siguiente
           a: f-mvnpmsvw-jxg9n
+        - id: c-mvp1com0-he7
+          de: mas_ec_inicio
+          salida: siguiente
+          a: f-mvnpmsvw-ph32e
       curvas:
         c3:
           x: 121
