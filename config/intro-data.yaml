@@ -126746,8 +126746,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-jxg9n
           tipo: mensaje
-          x: 4146
-          y: 3393
+          x: 4153
+          y: 3391
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126987,8 +126987,8 @@ tableros:
               ignora_tardio: true
         - id: f-mvnq6s0x-ooeg
           tipo: mensaje
-          x: 5225
-          y: 3765
+          x: 4848
+          y: 3790
           steps:
             - type: text
               body_variants:
@@ -127483,9 +127483,9 @@ tableros:
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
           x: 20
-          y: 1519
-          ancho: 5720
-          alto: 4474
+          y: 1431
+          ancho: 9045
+          alto: 4562
           titulo: ""
           inicio: mas_ec_inicio
         - id: manta-mas_ar_inicio
