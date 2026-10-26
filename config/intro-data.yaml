@@ -127500,7 +127500,7 @@ tableros:
           tipo: seguimientos
           x: 1948
           y: 6398
-          titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
+          titulo: Seguimientos · si no elige en la Intro
           presenta:
             - ptmascotas_comida
           seguimientos:
@@ -127828,6 +127828,93 @@ tableros:
           x: 7871
           y: 5898
           titulo: Regalo
+        - id: f-rec26-b0rhv
+          tipo: seguimientos
+          x: 2328
+          y: 6778
+          titulo: Seguimientos · si no elige o no paga
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-rec26-b13wl
+              minutos: 2
+              variantes:
+                - id: v-rec26-b26rm
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                - id: v-rec26-b3h8x
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-rec26-b44be
+              minutos: 4
+              variantes:
+                - id: v-rec26-b5082
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
       cables:
         - id: c2
           de: mas_pe_intro
@@ -128317,14 +128404,6 @@ tableros:
           de: f-rec26-ul0n
           salida: sin_pago
           a: f-rec26-xpt8
-        - id: c-rec26-1q2l2
-          de: f-rec26-05ny
-          salida: siguiente
-          a: f-rec26-abwg
-        - id: c-rec26-1rh4x
-          de: f-rec26-4ddo
-          salida: siguiente
-          a: f-rec26-abwg
         - id: c-rec26-1s24u
           de: f-rec26-abwg
           salida: dec:d-rec26-d8td
@@ -128337,14 +128416,6 @@ tableros:
           de: f-rec26-abwg
           salida: dec:d-rec26-f6es
           a: f-rec26-4ddo
-        - id: c-rec26-1vtk8
-          de: f-rec26-8mi7
-          salida: sin_pago
-          a: f-rec26-abwg
-        - id: c-rec26-1w2q3
-          de: f-rec26-9k6z
-          salida: sin_pago
-          a: f-rec26-abwg
         - id: c-rec26-1xfyq
           de: f-rec26-lu28
           salida: sin_respuesta
@@ -128353,6 +128424,22 @@ tableros:
           de: f-rec26-rkpy
           salida: sin_respuesta
           a: f-rec26-xpt8
+        - id: c-rec26-b67l5
+          de: f-rec26-05ny
+          salida: siguiente
+          a: f-rec26-abwg
+        - id: c-rec26-b77zl
+          de: f-rec26-4ddo
+          salida: siguiente
+          a: f-rec26-b0rhv
+        - id: c-rec26-b81gs
+          de: f-rec26-8mi7
+          salida: sin_pago
+          a: f-rec26-b0rhv
+        - id: c-rec26-b90bt
+          de: f-rec26-9k6z
+          salida: sin_pago
+          a: f-rec26-b0rhv
       curvas:
         c3:
           x: 121
