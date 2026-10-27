@@ -44,6 +44,12 @@ Si la sesión se corta, se retoma desde aquí. La lista completa está en `INVEN
   order bump por la palabra «como» de un cuadrito (por palabra suelta ya solo cuentan nombres de producto
   y botones). Bien: «eligió uno y pagó otro» (pregunta y entrega el que pagó), el cerebro suyo («La
   inversión es de $3 — un solo pago… ¿te indico cómo adquirirlo y llevarte los bonos? 🎁»).
+- Rondas 3–6 (25 clientes más, mezclados EC/PE/AR): upgrade pagando la diferencia, upsell tras el
+  silencio y pagado durante el regalo, «ya pagué» sin foto, cambio de método y de producto, «no quiero
+  pagar todavía», desconfianza, contribución, reenvío. Arreglado en el camino: «quiero pagar por
+  mercado pago» con palabras de más no avanzaba en una venta de un producto (AR); la IA nombraba
+  métodos que no existen; con «mandaré 20 soles» sin foto la IA decía «recibí tu comprobante, lo
+  estoy verificando» (ahora pide la foto).
 - Reenganche (`scripts/recorrido-reenganche.mjs`): los que estaban terminan en su tubería con su precio
   (datos ya recibidos, esperando seguimiento, upsell ofrecido); los nuevos entran por la nueva. OK.
 

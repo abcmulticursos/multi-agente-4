@@ -272,6 +272,9 @@ function cerebro(c: ContextoDeLaIA): string {
     c.eligio
       ? `EL CLIENTE YA ELIGIÓ: ${c.eligio}. Todo lo que digas de precio, pago o datos es de ESE producto. Si pregunta por el otro, contéstale, pero no cambies su elección ni le digas otro precio a pagar: solo cambia si él lo dice claramente.`
       : "",
+    c.sinPagoAprobado
+      ? "NINGÚN COMPROBANTE ESTÁ RECIBIDO NI EN REVISIÓN: si dice que ya pagó o que va a pagar, no digas que lo recibiste ni que lo estás verificando; pídele que envíe la FOTO o captura del comprobante por aquí."
+      : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
       : "",
@@ -333,7 +336,7 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
   return [
     "EXCEPCIONES DEL TABLERO (mandan sobre todo lo anterior):",
     "- No apruebas pagos ni revisas comprobantes: eso lo hace el sistema.",
-    `- NUNCA preguntes por el método de pago por tu cuenta (nada de «¿con qué método te sientes más cómodo?»): el sistema lo pregunta cuando el cliente elige. Solo si el cliente PREGUNTA cómo pagar o cuáles son los métodos, nómbralos en lista vertical, solo sus nombres${c.metodos?.length ? ` (${c.metodos.join(", ")})` : ""}, y cierra con «¿Cuál prefieres?».`,
+    `- NUNCA preguntes por el método de pago por tu cuenta (nada de «¿con qué método te sientes más cómodo?»): el sistema lo pregunta cuando el cliente elige. Solo si el cliente PREGUNTA cómo pagar o cuáles son los métodos, nómbralos en lista vertical, solo sus nombres${c.metodos?.length ? ` (${c.metodos.join(", ")}; NINGÚN otro: si pide uno que no está, dile con amabilidad que por ahora se paga con ${c.metodos.length > 1 ? "esos" : "ese"})` : " (no tienes la lista: no nombres ninguno, dile que le pasas los datos)"}, y cierra con «¿Cuál prefieres?».`,
     c.opcionesDeCompra?.length
       ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Si pregunta el precio sin haber elegido, nómbralas TODAS con su precio (no hay un solo precio); si pregunta qué trae una, contesta sin precio. Cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
       : "",
@@ -732,7 +735,9 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // SIN PAGO APROBADO, NADA DE «YA TE LLEGA»: esas frases se quitan, frase por frase.
   if (c.sinPagoAprobado && texto) {
     const promete =
-      /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora))/i;
+      // Y tampoco «recibí tu comprobante / lo estoy verificando» (27/10/2026: el cliente escribió «ok,
+      // mandaré 20 soles» SIN foto y la IA le dijo tres veces que lo estaba verificando).
+      /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|(sigue|est[aá]) en proceso|apenas (est[eé]|se) confirm)/i;
     const antes = texto;
     texto = texto
       .split(/\n\s*\n/)

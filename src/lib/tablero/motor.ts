@@ -2341,7 +2341,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       await seguirLaOpcion(haciaPagar[0]);
       return true;
     }
-  } else if (texto && !estado.cobro_ficha_id && loDemas.length === 0 && QUIERE_PAGAR.test(normal)) {
+  } else if (
+    texto &&
+    !estado.cobro_ficha_id &&
+    QUIERE_PAGAR.test(normal) &&
+    !/\bno (lo )?(quiero|voy a|puedo|deseo)\b/.test(normal) &&
+    // Con UNA sola forma de comprar, lo que diga además no cambia nada: «no gracias, ya me dijiste lo
+    // que incluye, quiero pagar por mercado pago» (27/10/2026, AR) se quedaba en la IA dos turnos.
+    (loDemas.length === 0 || opcionesDeCompra().destinos.size === 1)
+  ) {
     // «QUIERO PAGAR» SIN DECIR CUÁL (27/10/2026), en cualquier momento (tras un seguimiento, horas
     // después…): con dos o más productos por elegir, la IA ya no adivina (podía darle el barato); se le
     // recuerdan las opciones con su precio, como la venta de siempre. Y con UNA sola forma de comprar,
