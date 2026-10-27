@@ -761,8 +761,12 @@ async function irA(
     }
 
     case "reparto": {
-      const o = sortear(f.reparto ?? []);
+      // EL SORTEO SOLO ENTRE LAS RUTAS CONECTADAS (27/10/2026): una ruta sin cable dejaba al cliente sin
+      // nada (le tocó a la mitad de sus clientes de prueba en MASCOTAS). Si ninguna tiene cable, se avisa.
+      const conectadas = (f.reparto ?? []).filter((r) => cableDeLaSalida(t, f.id, `rep:${r.id}`));
+      const o = sortear(conectadas);
       if (o) await seguir(`rep:${o.id}`);
+      else console.warn(`[tablero] convo ${convoId}: el Reparto «${f.titulo || f.id}» no tiene ninguna ruta conectada`);
       return;
     }
 

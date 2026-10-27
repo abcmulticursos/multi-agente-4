@@ -312,7 +312,9 @@ try {
     console.log("\n· 🇪🇨 CONTRIBUCIÓN con palabras: se calla → su seguimiento → «acepto» → material → pichincha → aporta 3 → nivel $ 3");
     const c = await cliente("EC");
     await c.decir("hola", 45);
-    comprobar("se calla: le llega su seguimiento («¿Sigues por ahí?»)", await c.hasta(/Sigues por ah/i, 120), "");
+    // Puede llegar mientras aún se lee el «hola» (en la copia sale al minuto): se mira toda la charla.
+    const llego = (await c.hasta(/Sigues por ah/i, 120)) || /Sigues por ah/i.test(c.bot.join("\n"));
+    comprobar("se calla: le llega su seguimiento («¿Sigues por ahí?»)", llego, c.bot.slice(-2).join(" / "));
     await c.decir("acepto", 60);
     comprobar("acepta: material y niveles en dólares", tiene(c, "pla_ec_con_entrega") && /\$ 3/.test(c.nuevo()), c.nuevo().slice(-100));
     await c.decir("pichincha", 35);
@@ -397,9 +399,9 @@ try {
   // ── EL REPARTO POR SORTEO (las 4 al 25 %) ──
   if (toca("reparto")) {
     forzar("PE", "todas");
-    console.log("\n· 🎲 REPARTO: 8 clientes de Perú se reparten entre las 4 tuberías");
+    console.log("\n· 🎲 REPARTO: 12 clientes de Perú se reparten entre las 4 tuberías");
     const cayeron = {};
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 12; i++) {
       const c = await cliente("PE");
       await c.decir("hola", 30);
       const ruta = ["lin", "ob", "dou", "con"].find((r) => c.fichas().some((f) => f.startsWith(`pla_pe_${r}_`)));
@@ -408,6 +410,29 @@ try {
     }
     comprobar("todos entran a alguna tubería", !cayeron.ninguna, JSON.stringify(cayeron));
     comprobar("y caen en más de una (sorteo)", Object.keys(cayeron).length >= 2, JSON.stringify(cayeron));
+  }
+
+  // ── UN REPARTO CON RUTAS SIN CABLE: nadie se pierde (27/10/2026, lo cazó él en MASCOTAS) ──
+  if (toca("reparto_sin_cable")) {
+    forzar("PE", "todas");
+    let quitados = [];
+    cambiarLaCopia((js) => {
+      const t = js.tableros[TIENDA].whatsapp;
+      quitados = t.cables.filter((x) => x.de === "pla_pe_reparto" && (x.salida === "rep:dou" || x.salida === "rep:contrib"));
+      t.cables = t.cables.filter((x) => !quitados.includes(x));
+    });
+    quitados = quitados.map((x) => ({ ...x }));
+    console.log("\n· 🎲 REPARTO con 2 de sus 4 rutas sin cable: 6 clientes, ninguno se queda sin respuesta");
+    const cayeron = {};
+    for (let i = 0; i < 6; i++) {
+      const c = await cliente("PE");
+      await c.decir("hola", 30);
+      const ruta = ["lin", "ob", "dou", "con"].find((r) => c.fichas().some((f) => f.startsWith(`pla_pe_${r}_`)));
+      cayeron[ruta ?? "ninguna"] = (cayeron[ruta ?? "ninguna"] ?? 0) + 1;
+      await c.borrar();
+    }
+    comprobar("todos caen en una ruta CONECTADA (lineal u order bump)", Object.keys(cayeron).every((k) => k === "lin" || k === "ob"), JSON.stringify(cayeron));
+    cambiarLaCopia((js) => js.tableros[TIENDA].whatsapp.cables.push(...quitados));
   }
 
   // ── UNA TUBERÍA PARA DOS PAÍSES: el Inicio de Argentina a la tubería lineal de Perú ──

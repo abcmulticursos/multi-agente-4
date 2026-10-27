@@ -456,7 +456,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     const cuadrito = s.clave.startsWith("dec:");
     const falta = faltan?.get(s.clave);
     // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
-    const pide = !!falta || ((boton || cuadrito || s.clave === "sin_pago") && !conCable.has(s.clave));
+    const pide =
+      !!falta ||
+      ((boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
     const destino = destinoDe(s.clave);
     return (
       <div

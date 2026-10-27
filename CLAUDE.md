@@ -1076,6 +1076,9 @@ Nada de esto toca el bot (`cable.vista` es solo pantalla, como `curvas`):
   Entrega (upsell) sin cable ni Seguimientos.
 - **La bandera** (abajo a la derecha) pasa al país de la ficha tocada (`paisDeSuManta`).
 
+**El Reparto solo sortea entre sus rutas CONECTADAS** (motor, 27/10/2026): una ruta sin cable dejaba
+al cliente sin nada (le pasó a él en MASCOTAS EC con «Ruta 2» suelta). Su puntito sin cable sale en rojo.
+
 **TIENDA PLANTILLAS** (`tienda_tplantillas`, productos `ptpla_*`): por país un Inicio → Reparto 🎲
 (4 al 25 %) → lineal, order bump, doble oferta y contribución. Perú con BOTONES, Ecuador con PALABRAS,
 Argentina con NÚMEROS. En el order bump, los Seguimientos de después del order bump llevan «básico /
