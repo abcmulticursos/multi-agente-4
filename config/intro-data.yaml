@@ -16193,30 +16193,25 @@ channels:
                     - *BCP*: 👈🏼
                 delay_after_sec: 5
                 enabled: false
-          - name: GRAFISMO FONETICO INTRO 1 (copia) (copia)
-            enabled: false
+          - name: GRAFISMO FONETICO INTRO 1 (copia)
+            enabled: true
             weight: 1
             adName: ""
             adId: ""
             skipAskName: true
-            adKeys:
-              - ad_1785834921199
-              - ad_1785834939615
-              - ad_1785834950447
-              - meta_120249236901580336
-              - meta_120249236901600336
-              - meta_120249236901610336
+            adKeys: []
             adRoutingEnabled: true
-            paises: []
+            paises:
+              - PE
             paisRoutingEnabled: true
-            semimodalidad: ob
+            semimodalidad: dou
             tiendas:
               - tienda_tplantillas
             steps:
               - type: text
                 body_variants:
                   - |-
-                    OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+                    OB PERUCHO *-DOU-* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
 
                     ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
                     _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
@@ -16584,7 +16579,7 @@ channels:
                 delay_after_sec: 5
                 enabled: false
           - name: GRAFISMO FONETICO INTRO 1 (copia) (copia)
-            enabled: false
+            enabled: true
             weight: 1
             adName: ""
             adId: ""
@@ -16597,16 +16592,17 @@ channels:
               - meta_120249236901600336
               - meta_120249236901610336
             adRoutingEnabled: true
-            paises: []
+            paises:
+              - EC
             paisRoutingEnabled: true
-            semimodalidad: ob
+            semimodalidad: dou
             tiendas:
               - tienda_tplantillas
             steps:
               - type: text
                 body_variants:
                   - |-
-                    OB PERUCHO *COMO OB* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+                    OB PERUCHO *-DOU-* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
 
                     ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
                     _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
@@ -22787,13 +22783,14 @@ channels:
                             body_variants:
                               - "✅ *Paso 2*: *Nos envía el comprobante* y tu correo electrónico *para enviarte el pack completo en segundos* por Whatsapp 🚨"
                             delay_after_sec: 6
-              - name: SEGUIMIENTO 1 PRUEBA OB PERU (copia) (copia)
-                enabled: false
+              - name: SEGUIMIENTO PRUEBA DOU PERU (copia)
+                enabled: true
                 ad_keys: []
                 ad_routing_enabled: true
-                paises: []
+                paises:
+                  - PE
                 pais_routing_enabled: true
-                semimodalidad: ob
+                semimodalidad: dou
                 tiendas:
                   - tienda_tplantillas
                 steps:
@@ -22818,9 +22815,8 @@ channels:
                     enabled: false
                   - type: text
                     body_variants:
-                      - "*OB* perucho PASABA POR AQUI Y PREGUNTAR SI HABIAS RECIBIDO LA INFORMACION CORRECTAMENTE"
+                      - "*DOU* perucho PASABA POR AQUI Y PREGUNTAR SI HABIAS RECIBIDO LA INFORMACION CORRECTAMENTE"
                     delay_after_sec: 3
-                    enabled: false
                   - type: image
                     drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
                     caption_variants:
@@ -22855,67 +22851,23 @@ channels:
                         ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                     delay_after_sec: 6
                     enabled: false
-                  - type: image
-                    drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
-                    caption_variants:
-                      - |
-                        *PERU* ORDER BUMP *Hola Soy Andrea!* 👋🏼 Quería Asegurarme que recibiste la información que envié. ¿Te quedó alguna duda o pregunta? Estoy aquí para ayudarte! 😊
-
-                        📩 *Recibimos pagos todos los días* de personas reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
-
-                        🎯 *Aprovecha la promoción activa* y realiza un pago ahora mismo!
-                        *Ellos ya lo hicieron*... y sus peques *ya están aprendiendo* 🤗
-
-                        💰 EL COSTO DE TODO EL MATERIAL POR *S/. {precio} SOLES*
-                    delay_after_sec: 5
-                    decisions:
-                      - id: 751f1ce0-4216-4074-bf71-a58e7aa16b04
-                        title: QUIERE PAGAR
-                        keywords:
-                          - yape
-                          - yapeo
-                          - plin
-                          - llape
-                          - llapeo
-                          - quiero pagar
-                          - como pago
-                          - como puedo pagar
-                          - a donde yapeo
-                          - cual es el numero de yape
-                          - a que numero yapeo
-                          - a donde yapeo
-                          - cual es el numero
-                        color: esmeralda
-                        action: show_order_bump
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Genial!* Te envio los pasos a seguir para adquirir el pack completo: 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                ✅ *Paso 1*: Realiza el pago
-
-                                {{METODO_DE_PAGO_1}}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "✅ *Paso 2*: *Nos envía el comprobante* y tu correo electrónico *para enviarte el pack completo en segundos* por Whatsapp 🚨"
-                            delay_after_sec: 6
                   - type: text
                     body_variants:
-                      - |
-                        🔴 *Si deseas adquirirlo responde el método de pago que prefieras* 👇🏼
-                        __________
+                      - |-
+                        *Tienes 2 opciones*: Seguir buscando ideas cada semana o empezar a usar actividades prácticas y diferentes desde mañana mismo.
 
-                        {{LISTA_METODOS_POR_PAIS}}
+                        {{PRODUCTO_FULL}}
+                        {{PRODUCTO_BASE}}
 
-                        ⚠️ *Si lo adquieres en los próximos 10 minutos* ⏰ recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                        💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+                        ✅ Yape
+                        ✅ Transferencia bancaria
+
+                        Quedo atento! 😊
                     delay_after_sec: 5
                     decisions:
                       - id: 751f1ce0-4216-4074-bf71-a58e7aa16b04
-                        enabled: false
                         title: QUIERE PAGAR
                         keywords:
                           - yape
@@ -22932,7 +22884,7 @@ channels:
                           - a donde yapeo
                           - cual es el numero
                         color: esmeralda
-                        action: choose_basico
+                        action: choose_combo
                         steps:
                           - type: text
                             body_variants:
@@ -22949,13 +22901,14 @@ channels:
                             body_variants:
                               - "✅ *Paso 2*: *Nos envía el comprobante* y tu correo electrónico *para enviarte el pack completo en segundos* por Whatsapp 🚨"
                             delay_after_sec: 6
-              - name: SEGUIMIENTO 1 PRUEBA OB PERU (copia) (copia)
-                enabled: false
+              - name: SEGUIMIENTO PRUEBA DOU PERU (copia) (copia)
+                enabled: true
                 ad_keys: []
                 ad_routing_enabled: true
-                paises: []
+                paises:
+                  - EC
                 pais_routing_enabled: true
-                semimodalidad: ob
+                semimodalidad: dou
                 tiendas:
                   - tienda_tplantillas
                 steps:
@@ -22980,9 +22933,8 @@ channels:
                     enabled: false
                   - type: text
                     body_variants:
-                      - "*OB* perucho PASABA POR AQUI Y PREGUNTAR SI HABIAS RECIBIDO LA INFORMACION CORRECTAMENTE"
+                      - "*DOU* perucho PASABA POR AQUI Y PREGUNTAR SI HABIAS RECIBIDO LA INFORMACION CORRECTAMENTE"
                     delay_after_sec: 3
-                    enabled: false
                   - type: image
                     drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
                     caption_variants:
@@ -23017,67 +22969,23 @@ channels:
                         ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                     delay_after_sec: 6
                     enabled: false
-                  - type: image
-                    drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
-                    caption_variants:
-                      - |
-                        *PERU* ORDER BUMP *Hola Soy Andrea!* 👋🏼 Quería Asegurarme que recibiste la información que envié. ¿Te quedó alguna duda o pregunta? Estoy aquí para ayudarte! 😊
-
-                        📩 *Recibimos pagos todos los días* de personas reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
-
-                        🎯 *Aprovecha la promoción activa* y realiza un pago ahora mismo!
-                        *Ellos ya lo hicieron*... y sus peques *ya están aprendiendo* 🤗
-
-                        💰 EL COSTO DE TODO EL MATERIAL POR *S/. {precio} SOLES*
-                    delay_after_sec: 5
-                    decisions:
-                      - id: 751f1ce0-4216-4074-bf71-a58e7aa16b04
-                        title: QUIERE PAGAR
-                        keywords:
-                          - yape
-                          - yapeo
-                          - plin
-                          - llape
-                          - llapeo
-                          - quiero pagar
-                          - como pago
-                          - como puedo pagar
-                          - a donde yapeo
-                          - cual es el numero de yape
-                          - a que numero yapeo
-                          - a donde yapeo
-                          - cual es el numero
-                        color: esmeralda
-                        action: show_order_bump
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Genial!* Te envio los pasos a seguir para adquirir el pack completo: 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                ✅ *Paso 1*: Realiza el pago
-
-                                {{METODO_DE_PAGO_1}}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "✅ *Paso 2*: *Nos envía el comprobante* y tu correo electrónico *para enviarte el pack completo en segundos* por Whatsapp 🚨"
-                            delay_after_sec: 6
                   - type: text
                     body_variants:
-                      - |
-                        🔴 *Si deseas adquirirlo responde el método de pago que prefieras* 👇🏼
-                        __________
+                      - |-
+                        *Tienes 2 opciones*: Seguir buscando ideas cada semana o empezar a usar actividades prácticas y diferentes desde mañana mismo.
 
-                        {{LISTA_METODOS_POR_PAIS}}
+                        {{PRODUCTO_FULL}}
+                        {{PRODUCTO_BASE}}
 
-                        ⚠️ *Si lo adquieres en los próximos 10 minutos* ⏰ recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                        💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+                        ✅ Yape
+                        ✅ Transferencia bancaria
+
+                        Quedo atento! 😊
                     delay_after_sec: 5
                     decisions:
                       - id: 751f1ce0-4216-4074-bf71-a58e7aa16b04
-                        enabled: false
                         title: QUIERE PAGAR
                         keywords:
                           - yape
@@ -23094,7 +23002,7 @@ channels:
                           - a donde yapeo
                           - cual es el numero
                         color: esmeralda
-                        action: choose_basico
+                        action: choose_combo
                         steps:
                           - type: text
                             body_variants:
@@ -43955,26 +43863,27 @@ channels:
                             delay_after_sec: 6
                             enabled: false
                     enabled: false
-              - name: SEGUIMIENTO 2 - PRUEBA OB PERU (copia) (copia)
-                enabled: false
+              - name: SEGUIMIENTO 2 - PRUEBA DOU PERU (copia)
+                enabled: true
                 ad_keys: []
                 ad_routing_enabled: true
-                paises: []
+                paises:
+                  - PE
                 pais_routing_enabled: true
-                semimodalidad: ob
+                semimodalidad: dou
                 tiendas:
                   - tienda_tplantillas
                 steps:
                   - type: image
-                    drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                    drive_url: https://drive.google.com/file/d/1t3NipOX3Wwv7InfKDjaURPanIoI0Q2nb/view?usp=drive_link
                     caption_variants: []
                     delay_after_sec: 6
                   - type: text
                     body_variants:
                       - |-
-                        *--OB--* PERUANO *-OB-* 🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+                        *--DOU--* PERUANO *DOU*🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
-                        {{Producto_BASE}} a tan solo {{precio_BASE}}
+                        {{Producto_full}} a tan solo {{precio_full}}
 
                         por tiempo limitado
                     delay_after_sec: 6
@@ -43995,138 +43904,14 @@ channels:
                       - |-
                         Deseas aprovechar este super descuento
 
-                        {{PRODUCTO_BASE}}
-                         A TAN SOLO {{PRECIO_BASE}}
+                        {{PRODUCTO_full}}
+                         A TAN SOLO {{PRECIO_full}}
                     delay_after_sec: 5
                     buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiy0
-                        label: YAPE
-                        action: send_payment_method
-                        payment_method: yape
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiy1
-                        label: PLIN
-                        action: send_payment_method
-                        payment_method: plin
-                      - id: acaff956-3272-49b6-9687-6ba5437559d3~cmvqleyiy2
-                        label: BCP
-                        action: send_payment_method
-                        payment_method: bcp
-                    decisions:
-                      - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
-                        title: YAPE/PLIN
-                        keywords:
-                          - yape
-                          - yap
-                          - llape
-                          - yapee
-                          - ype
-                          - yappe
-                          - yape
-                          - con yape
-                          - con llape
-                          - conyape
-                          - conya pe
-                          - plin
-                          - pln plin
-                          - pn
-                          - pli
-                          - oli
-                          - olin
-                          - con plin
-                          - solo tengo plin
-                          - pln
-                          - con yape
-                          - voy a pagar con yape
-                          - yape nomas
-                          - tengo yape
-                          - tengo plin
-                          - con plin
-                          - con plin nomas
-                          - solo tengo plin y con plin
-                          - mejor plin
-                          - mejor yape
-                          - mejor con yape
-                          - mejor con plin
-                        color: esmeralda
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - |-
-                                *Excelente decisión!* ☺️
-                                El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                🟢 Yape: 935286681
-                                🙎‍♂️{{NOMBRE_RECEPTOR}}
-                                💰️ Precio:  {precio}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
-                            delay_after_sec: 6
-                      - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
-                        title: BCP
-                        keywords:
-                          - bpc
-                          - transferencia
-                          - con transferencia
-                          - con bcp
-                          - bcp nomas
-                          - trasfencia
-                          - trnsfrnecia
-                          - trasferencia
-                          - trnsferncia
-                          - traferencia
-                          - banca movil
-                          - con banca movil
-                          - tengo banca movil
-                          - bcp
-                          - con bcp
-                          - bcp
-                          - tengo bcp
-                          - puedo pagar con bpc
-                          - tengo banca movil
-                          - banca movil
-                          - mejor bcp
-                          - bcp mejor
-                          - mejor con bcp
-                        color: ambar
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                📲 *BCP*: -320485034580
-                                🏦 *INTERBANCARIA*: 038502934
-                                🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
-                            delay_after_sec: 6
-                    enabled: false
-                  - type: text
-                    body_variants:
-                      - |-
-                        Deseas aprovechar este super descuento
-
-                        {{PRODUCTO_BASE}}
-                         A TAN SOLO {{PRECIO_BASE}}
-                    delay_after_sec: 5
-                    buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiy3
+                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9uts0
                         label: QUIERO EL DESCUENTO
-                        action: choose_basico
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiy4
+                        action: choose_combo
+                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqm9uts1
                         label: NO GRACIAS
                         action: send_steps
                         steps:
@@ -44236,32 +44021,19 @@ channels:
                             body_variants:
                               - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
                             delay_after_sec: 6
-                    enabled: false
                   - type: text
                     body_variants:
-                      - EIige un metodo de pago 😊👇️
+                      - |-
+                        ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                        🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                     delay_after_sec: 5
-                    buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiy5
-                        label: YAPE
-                        action: send_steps
-                        steps: []
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiy6
-                        label: PLIN
-                        action: send_steps
-                        steps:
-                          - type: text
-                            body_variants:
-                              - NO TE PREOCUPES, que tengas un excelente día 😊
-                            delay_after_sec: 6
-                            enabled: false
-                      - id: d5c21c76-2b25-46d6-b089-a81c3c8d6a07~cmvqleyiy7
-                        label: BCP
-                        action: send_steps
-                        steps: []
                     decisions:
                       - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
                         title: YAPE/PLIN
                         keywords:
                           - yape
@@ -44317,7 +44089,6 @@ channels:
                               - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
                             delay_after_sec: 6
                       - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
                         title: BCP
                         keywords:
                           - bpc
@@ -44375,120 +44146,6 @@ channels:
                     delay_after_sec: 5
                     decisions:
                       - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
-                        title: YAPE/PLIN
-                        keywords:
-                          - yape
-                          - yap
-                          - llape
-                          - yapee
-                          - ype
-                          - yappe
-                          - yape
-                          - con yape
-                          - con llape
-                          - conyape
-                          - conya pe
-                          - plin
-                          - pln plin
-                          - pn
-                          - pli
-                          - oli
-                          - olin
-                          - con plin
-                          - solo tengo plin
-                          - pln
-                          - con yape
-                          - voy a pagar con yape
-                          - yape nomas
-                          - tengo yape
-                          - tengo plin
-                          - con plin
-                          - con plin nomas
-                          - solo tengo plin y con plin
-                          - mejor plin
-                          - mejor yape
-                          - mejor con yape
-                          - mejor con plin
-                        color: esmeralda
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - |-
-                                *Excelente decisión!* ☺️
-                                El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                🟢 Yape: 935286681
-                                🙎‍♂️{{NOMBRE_RECEPTOR}}
-                                💰️ Precio:  {precio}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
-                            delay_after_sec: 6
-                      - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
-                        title: BCP
-                        keywords:
-                          - bpc
-                          - transferencia
-                          - con transferencia
-                          - con bcp
-                          - bcp nomas
-                          - trasfencia
-                          - trnsfrnecia
-                          - trasferencia
-                          - trnsferncia
-                          - traferencia
-                          - banca movil
-                          - con banca movil
-                          - tengo banca movil
-                          - bcp
-                          - con bcp
-                          - bcp
-                          - tengo bcp
-                          - puedo pagar con bpc
-                          - tengo banca movil
-                          - banca movil
-                          - mejor bcp
-                          - bcp mejor
-                          - mejor con bcp
-                        color: ambar
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                📲 *BCP*: -320485034580
-                                🏦 *INTERBANCARIA*: 038502934
-                                🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
-                            delay_after_sec: 6
-                  - type: text
-                    body_variants:
-                      - |-
-                        ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
-
-                        🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
-
-                        {{LISTA_METODOS_POR_PAIS}}
-
-                        *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
-                    delay_after_sec: 5
-                    decisions:
-                      - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
                         title: YAPE/PLIN
                         keywords:
                           - yape
@@ -44551,7 +44208,6 @@ channels:
                             delay_after_sec: 6
                             enabled: false
                       - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
                         title: BCP
                         keywords:
                           - bpc
@@ -44600,26 +44256,27 @@ channels:
                             delay_after_sec: 6
                             enabled: false
                     enabled: false
-              - name: SEGUIMIENTO 2 - PRUEBA OB PERU (copia) (copia)
-                enabled: false
+              - name: SEGUIMIENTO 2 - PRUEBA DOU PERU (copia) (copia)
+                enabled: true
                 ad_keys: []
                 ad_routing_enabled: true
-                paises: []
+                paises:
+                  - EC
                 pais_routing_enabled: true
-                semimodalidad: ob
+                semimodalidad: dou
                 tiendas:
                   - tienda_tplantillas
                 steps:
                   - type: image
-                    drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                    drive_url: https://drive.google.com/file/d/1t3NipOX3Wwv7InfKDjaURPanIoI0Q2nb/view?usp=drive_link
                     caption_variants: []
                     delay_after_sec: 6
                   - type: text
                     body_variants:
                       - |-
-                        *--OB--* PERUANO *-OB-* 🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+                        *--DOU--* PERUANO *DOU*🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
-                        {{Producto_BASE}} a tan solo {{precio_BASE}}
+                        {{Producto_full}} a tan solo {{precio_full}}
 
                         por tiempo limitado
                     delay_after_sec: 6
@@ -44640,138 +44297,14 @@ channels:
                       - |-
                         Deseas aprovechar este super descuento
 
-                        {{PRODUCTO_BASE}}
-                         A TAN SOLO {{PRECIO_BASE}}
+                        {{PRODUCTO_full}}
+                         A TAN SOLO {{PRECIO_full}}
                     delay_after_sec: 5
                     buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiz0
-                        label: YAPE
-                        action: send_payment_method
-                        payment_method: yape
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiz1
-                        label: PLIN
-                        action: send_payment_method
-                        payment_method: plin
-                      - id: acaff956-3272-49b6-9687-6ba5437559d3~cmvqleyiz2
-                        label: BCP
-                        action: send_payment_method
-                        payment_method: bcp
-                    decisions:
-                      - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
-                        title: YAPE/PLIN
-                        keywords:
-                          - yape
-                          - yap
-                          - llape
-                          - yapee
-                          - ype
-                          - yappe
-                          - yape
-                          - con yape
-                          - con llape
-                          - conyape
-                          - conya pe
-                          - plin
-                          - pln plin
-                          - pn
-                          - pli
-                          - oli
-                          - olin
-                          - con plin
-                          - solo tengo plin
-                          - pln
-                          - con yape
-                          - voy a pagar con yape
-                          - yape nomas
-                          - tengo yape
-                          - tengo plin
-                          - con plin
-                          - con plin nomas
-                          - solo tengo plin y con plin
-                          - mejor plin
-                          - mejor yape
-                          - mejor con yape
-                          - mejor con plin
-                        color: esmeralda
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - |-
-                                *Excelente decisión!* ☺️
-                                El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                🟢 Yape: 935286681
-                                🙎‍♂️{{NOMBRE_RECEPTOR}}
-                                💰️ Precio:  {precio}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
-                            delay_after_sec: 6
-                      - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
-                        title: BCP
-                        keywords:
-                          - bpc
-                          - transferencia
-                          - con transferencia
-                          - con bcp
-                          - bcp nomas
-                          - trasfencia
-                          - trnsfrnecia
-                          - trasferencia
-                          - trnsferncia
-                          - traferencia
-                          - banca movil
-                          - con banca movil
-                          - tengo banca movil
-                          - bcp
-                          - con bcp
-                          - bcp
-                          - tengo bcp
-                          - puedo pagar con bpc
-                          - tengo banca movil
-                          - banca movil
-                          - mejor bcp
-                          - bcp mejor
-                          - mejor con bcp
-                        color: ambar
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                📲 *BCP*: -320485034580
-                                🏦 *INTERBANCARIA*: 038502934
-                                🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
-                            delay_after_sec: 6
-                    enabled: false
-                  - type: text
-                    body_variants:
-                      - |-
-                        Deseas aprovechar este super descuento
-
-                        {{PRODUCTO_BASE}}
-                         A TAN SOLO {{PRECIO_BASE}}
-                    delay_after_sec: 5
-                    buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiz3
+                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9utt0
                         label: QUIERO EL DESCUENTO
-                        action: choose_basico
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiz4
+                        action: choose_combo
+                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqm9utt1
                         label: NO GRACIAS
                         action: send_steps
                         steps:
@@ -44881,32 +44414,19 @@ channels:
                             body_variants:
                               - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
                             delay_after_sec: 6
-                    enabled: false
                   - type: text
                     body_variants:
-                      - EIige un metodo de pago 😊👇️
+                      - |-
+                        ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                        🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                     delay_after_sec: 5
-                    buttons:
-                      - id: 2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqleyiz5
-                        label: YAPE
-                        action: send_steps
-                        steps: []
-                      - id: 03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqleyiz6
-                        label: PLIN
-                        action: send_steps
-                        steps:
-                          - type: text
-                            body_variants:
-                              - NO TE PREOCUPES, que tengas un excelente día 😊
-                            delay_after_sec: 6
-                            enabled: false
-                      - id: d5c21c76-2b25-46d6-b089-a81c3c8d6a07~cmvqleyiz7
-                        label: BCP
-                        action: send_steps
-                        steps: []
                     decisions:
                       - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
                         title: YAPE/PLIN
                         keywords:
                           - yape
@@ -44962,7 +44482,6 @@ channels:
                               - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
                             delay_after_sec: 6
                       - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
                         title: BCP
                         keywords:
                           - bpc
@@ -45020,120 +44539,6 @@ channels:
                     delay_after_sec: 5
                     decisions:
                       - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
-                        title: YAPE/PLIN
-                        keywords:
-                          - yape
-                          - yap
-                          - llape
-                          - yapee
-                          - ype
-                          - yappe
-                          - yape
-                          - con yape
-                          - con llape
-                          - conyape
-                          - conya pe
-                          - plin
-                          - pln plin
-                          - pn
-                          - pli
-                          - oli
-                          - olin
-                          - con plin
-                          - solo tengo plin
-                          - pln
-                          - con yape
-                          - voy a pagar con yape
-                          - yape nomas
-                          - tengo yape
-                          - tengo plin
-                          - con plin
-                          - con plin nomas
-                          - solo tengo plin y con plin
-                          - mejor plin
-                          - mejor yape
-                          - mejor con yape
-                          - mejor con plin
-                        color: esmeralda
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - |-
-                                *Excelente decisión!* ☺️
-                                El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                🟢 Yape: 935286681
-                                🙎‍♂️{{NOMBRE_RECEPTOR}}
-                                💰️ Precio:  {precio}
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
-                            delay_after_sec: 6
-                      - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
-                        title: BCP
-                        keywords:
-                          - bpc
-                          - transferencia
-                          - con transferencia
-                          - con bcp
-                          - bcp nomas
-                          - trasfencia
-                          - trnsfrnecia
-                          - trasferencia
-                          - trnsferncia
-                          - traferencia
-                          - banca movil
-                          - con banca movil
-                          - tengo banca movil
-                          - bcp
-                          - con bcp
-                          - bcp
-                          - tengo bcp
-                          - puedo pagar con bpc
-                          - tengo banca movil
-                          - banca movil
-                          - mejor bcp
-                          - bcp mejor
-                          - mejor con bcp
-                        color: ambar
-                        action: choose_basico
-                        steps:
-                          - type: text
-                            body_variants:
-                              - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - |-
-                                📲 *BCP*: -320485034580
-                                🏦 *INTERBANCARIA*: 038502934
-                                🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
-                            delay_after_sec: 6
-                          - type: text
-                            body_variants:
-                              - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
-                            delay_after_sec: 6
-                  - type: text
-                    body_variants:
-                      - |-
-                        ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
-
-                        🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
-
-                        {{LISTA_METODOS_POR_PAIS}}
-
-                        *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
-                    delay_after_sec: 5
-                    decisions:
-                      - id: 8f8534c2-770e-4739-9dea-45f97d4f6579
-                        enabled: false
                         title: YAPE/PLIN
                         keywords:
                           - yape
@@ -45196,7 +44601,6 @@ channels:
                             delay_after_sec: 6
                             enabled: false
                       - id: 73a0eaaa-126f-4ded-a33c-3320a58e6b88
-                        enabled: false
                         title: BCP
                         keywords:
                           - bpc
@@ -47151,7 +46555,8 @@ channels:
                     steps: []
                 enabled: false
           - name: INTRO OB SUPER PACK 2 EN 1 PERU (copia) (copia)
-            enabled: false
+            paises:
+              - EC
             semimodalidad: ob
             tiendas:
               - tienda_tplantillas
@@ -47238,7 +46643,8 @@ channels:
                     steps: []
                 enabled: false
           - name: INTRO OB SUPER PACK 2 EN 1 PERU (copia) (copia)
-            enabled: false
+            paises:
+              - PE
             semimodalidad: ob
             tiendas:
               - tienda_tplantillas
@@ -96002,6 +95408,948 @@ channels:
                     - *BCP*: 👈🏼
                 delay_after_sec: 5
                 enabled: false
+          - name: Saludo inicial
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys: []
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ""
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |-
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼
+
+                    ✅ {Vi que le llamó la atención|Veo que le interesó|Acabo de ver que le llamó la atención} el *{{PRODUCTO}}* 📚 🌸 💫
+
+                    Antes de continuar con la información dígame: 👇
+
+                    🔴 *{¿Cuál es su nombre?|¿Cuál es su nombre?}* ¿con quién tengo el gusto? 😊
+                delay_after_sec: 0
+          - name: INTRO FLORES DE PAPEL 🌸 - LILA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys:
+              - ad_1785834867152
+              - ad_1785834900231
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ""
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    {*¡Hola!* Un gusto saludarte. 😊|*¡Hola!* 😊 Un gusto saludarte.|*¡Hola!* 😊 Qué gusto saludarte.}
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: {{PRECIO_COMPLETO_MAYUSCULAS}}* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *{{PRECIO_COMPLETO_MAYUSCULAS}}*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+          - name: INTRO FLORES DE PAPEL 🌸 SIN SALUDO - LILA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: true
+            adKeys:
+              - ad_1785834921199
+              - ad_1785834939615
+              - ad_1785834950447
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ""
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: video
+                drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+          - name: INTRO FLORES DE PAPEL 🌸 copia - TURQUESA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys:
+              - ad_1786003873963
+              - ad_1786003919811
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ""
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    {*¡Hola!* Un gusto saludarte. 😊|*¡Hola!* 😊 Un gusto saludarte.|*¡Hola!* 😊 Qué gusto saludarte.}
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: {{PRECIO_COMPLETO_MAYUSCULAS}}* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *{{PRECIO_COMPLETO_MAYUSCULAS}}*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+          - name: INTRO FLORES DE PAPEL 🌸 SIN SALUDO - TURQUESA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: true
+            adKeys:
+              - ad_1786003929819
+              - ad_1786003953346
+              - ad_1786003972842
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ""
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: video
+                drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+          - name: Saludo inicial
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys: []
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ob
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |-
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼
+
+                    ✅ {Vi que le llamó la atención|Veo que le interesó|Acabo de ver que le llamó la atención} el *{{PRODUCTO}}* 📚 🌸 💫
+
+                    Antes de continuar con la información dígame: 👇
+
+                    🔴 *{¿Cuál es su nombre?|¿Cuál es su nombre?}* ¿con quién tengo el gusto? 😊
+                delay_after_sec: 0
+          - name: INTRO FLORES DE PAPEL 🌸 - LILA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys:
+              - ad_1785834867152
+              - ad_1785834900231
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ob
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    {*¡Hola!* Un gusto saludarte. 😊|*¡Hola!* 😊 Un gusto saludarte.|*¡Hola!* 😊 Qué gusto saludarte.}
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: {{PRECIO_COMPLETO_MAYUSCULAS}}* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *{{PRECIO_COMPLETO_MAYUSCULAS}}*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+          - name: INTRO FLORES DE PAPEL 🌸 SIN SALUDO - LILA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: true
+            adKeys:
+              - ad_1785834921199
+              - ad_1785834939615
+              - ad_1785834950447
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ob
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: video
+                drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+          - name: INTRO FLORES DE PAPEL 🌸 copia - TURQUESA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: false
+            adKeys:
+              - ad_1786003873963
+              - ad_1786003919811
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ob
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    {*¡Hola!* Un gusto saludarte. 😊|*¡Hola!* 😊 Un gusto saludarte.|*¡Hola!* 😊 Qué gusto saludarte.}
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: {{PRECIO_COMPLETO_MAYUSCULAS}}* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *{{PRECIO_COMPLETO_MAYUSCULAS}}*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+          - name: INTRO FLORES DE PAPEL 🌸 SIN SALUDO - TURQUESA
+            enabled: true
+            weight: 1
+            adName: ""
+            adId: ""
+            skipAskName: true
+            adKeys:
+              - ad_1786003929819
+              - ad_1786003953346
+              - ad_1786003972842
+            adRoutingEnabled: true
+            paises: []
+            paisRoutingEnabled: true
+            semimodalidad: ob
+            tiendas:
+              - tienda_tplantillas
+            steps:
+              - type: text
+                body_variants:
+                  - |
+                    Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+                    ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+                    ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+                    {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
+
+                    - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+                    - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+                    - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+                    - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+                    - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+                    - *Rosas de Papel* 🌹
+                    - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+                    📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+                delay_after_sec: 5
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: image
+                drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+                enabled: false
+              - type: video
+                drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                caption_variants:
+                  - |-
+                    *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+                    - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                    - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                    - 🌹 *Molde para hacer Rosas*
+                    - 🦋 Mariposas de Papel
+
+                    *Bonitos Complementos para tus creaciones* 🤗
+                delay_after_sec: 7
+              - type: text
+                body_variants:
+                  - |-
+                    ❌*({antes|Antes|Precio anterior|Precio regular})* ~S/. 45 Soles~
+                    ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES* ‼️
+
+                    🟣 *¿COMO FUNCIONA?*
+
+                    - *1).-* 💵 Realiza un único pago de *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+
+                    - *2).-* 📲 Envíanos tu comprobante de pago
+
+                    {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    {{LISTA_METODOS_POR_PAIS}}
+                delay_after_sec: 5
+              - type: text
+                body_variants:
+                  - |-
+                    🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+                    🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+                    - *YAPE*: 📱
+                    - *PLIN*: 🤳🏼
+                    - *BCP*: 👈🏼
+                delay_after_sec: 5
+                enabled: false
         followups:
           - name: seguimiento_1
             delay_minutes_from_first_message: 20
@@ -96072,6 +96420,116 @@ channels:
 
                         ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                     delay_after_sec: 6
+              - name: Mensajes principales
+                enabled: true
+                ad_keys: []
+                ad_routing_enabled: true
+                paises: []
+                pais_routing_enabled: true
+                semimodalidad: ""
+                tiendas:
+                  - tienda_tplantillas
+                steps:
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                    caption_variants:
+                      - |
+                        *Hola Soy Andrea!* 👋🏼 Quería Asegurarme que recibiste la información que envié. ¿Te quedó alguna duda o pregunta? Estoy aquí para ayudarte! 😊
+
+                        📩 *Recibimos pagos todos los días* de personas reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                        🎯 *Aprovecha la promoción activa* y realiza un pago ahora mismo!
+                        *Ellos ya lo hicieron*... y sus peques *ya están aprendiendo* 🤗
+
+                        💰 EL COSTO DE TODO EL MATERIAL POR *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+                    delay_after_sec: 6
+                    enabled: false
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                        🌸 *Al adquirir* el SuperKit PDF Flores de papel *llévate automaticamente los bonos de obsequio* 🎁😱
+
+                        ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                    delay_after_sec: 3
+                  - type: video
+                    drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                        🌸 *Al adquirir* el SuperKit PDF Flores de papel *llévate automaticamente los bonos de obsequio* 🎁😱
+
+                        ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                    delay_after_sec: 3
+                    enabled: false
+                  - type: text
+                    body_variants:
+                      - |-
+                        🔴 *{Si deseas adquirirlo responde el método de pago que prefieras|Si deseas obtenerlo responde con el método de pago que prefieras|Para adquirirlo responde con el método de pago que prefieras|Elige el método de pago que prefieras para adquirirlo}* 👇🏼
+                        __________
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                    delay_after_sec: 6
+              - name: Mensajes principales
+                enabled: true
+                ad_keys: []
+                ad_routing_enabled: true
+                paises: []
+                pais_routing_enabled: true
+                semimodalidad: ob
+                tiendas:
+                  - tienda_tplantillas
+                steps:
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                    caption_variants:
+                      - |
+                        *Hola Soy Andrea!* 👋🏼 Quería Asegurarme que recibiste la información que envié. ¿Te quedó alguna duda o pregunta? Estoy aquí para ayudarte! 😊
+
+                        📩 *Recibimos pagos todos los días* de personas reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                        🎯 *Aprovecha la promoción activa* y realiza un pago ahora mismo!
+                        *Ellos ya lo hicieron*... y sus peques *ya están aprendiendo* 🤗
+
+                        💰 EL COSTO DE TODO EL MATERIAL POR *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+                    delay_after_sec: 6
+                    enabled: false
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                        🌸 *Al adquirir* el SuperKit PDF Flores de papel *llévate automaticamente los bonos de obsequio* 🎁😱
+
+                        ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                    delay_after_sec: 3
+                  - type: video
+                    drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                        🌸 *Al adquirir* el SuperKit PDF Flores de papel *llévate automaticamente los bonos de obsequio* 🎁😱
+
+                        ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                    delay_after_sec: 3
+                    enabled: false
+                  - type: text
+                    body_variants:
+                      - |-
+                        🔴 *{Si deseas adquirirlo responde el método de pago que prefieras|Si deseas obtenerlo responde con el método de pago que prefieras|Para adquirirlo responde con el método de pago que prefieras|Elige el método de pago que prefieras para adquirirlo}* 👇🏼
+                        __________
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                    delay_after_sec: 6
           - name: seguimiento_2
             delay_minutes_from_first_message: 360
             enabled: true
@@ -96095,6 +96553,96 @@ channels:
                 pais_routing_enabled: true
                 semimodalidad: ""
                 tiendas: []
+                steps:
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1GO-xlJuGAew9Xz98eP3Nyiw585kuFATM/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        🔥 *!Mamita, última oferta flash!* 📣
+
+                        *Sólo {{PRECIO_COMPLETO_MAYUSCULAS}}* ❗ por tiempo limitado‼️📉 😱
+                        __________
+
+                        🚨 *Descuento exclusivo válido solo por Hoy!*, aprovéchalo antes de que se agote! ⏳
+
+                        *EN RESUMEN RECIBIRAS:*
+
+                        Nuestro *{{PRODUCTO}}* 📚 incluye:
+
+                        - 🌸 *50 modelos de Flores de Papel*,
+                        - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
+                        - 🌹 *Molde para hacer Rosas*
+                        - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                        - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                        - 🦋 Mariposas de Papel
+
+                        *Regalos adicionales al llevarte el Super Kit!!* 🤗
+                    delay_after_sec: 6
+                  - type: text
+                    body_variants:
+                      - |
+                        ✅ *PARA COMPRA*  🫰🏼
+
+                        🔴 *Responde tu método de pago Favorito* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        *⚠️ No dejes que la oportunidad se te escape!* 🏃🏻‍♀️💫
+                    delay_after_sec: 0
+              - name: Mensajes principales
+                enabled: true
+                ad_keys: []
+                ad_routing_enabled: true
+                paises: []
+                pais_routing_enabled: true
+                semimodalidad: ""
+                tiendas:
+                  - tienda_tplantillas
+                steps:
+                  - type: image
+                    drive_url: https://drive.google.com/file/d/1GO-xlJuGAew9Xz98eP3Nyiw585kuFATM/view?usp=sharing
+                    caption_variants:
+                      - |-
+                        🔥 *!Mamita, última oferta flash!* 📣
+
+                        *Sólo {{PRECIO_COMPLETO_MAYUSCULAS}}* ❗ por tiempo limitado‼️📉 😱
+                        __________
+
+                        🚨 *Descuento exclusivo válido solo por Hoy!*, aprovéchalo antes de que se agote! ⏳
+
+                        *EN RESUMEN RECIBIRAS:*
+
+                        Nuestro *{{PRODUCTO}}* 📚 incluye:
+
+                        - 🌸 *50 modelos de Flores de Papel*,
+                        - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
+                        - 🌹 *Molde para hacer Rosas*
+                        - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                        - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                        - 🦋 Mariposas de Papel
+
+                        *Regalos adicionales al llevarte el Super Kit!!* 🤗
+                    delay_after_sec: 6
+                  - type: text
+                    body_variants:
+                      - |
+                        ✅ *PARA COMPRA*  🫰🏼
+
+                        🔴 *Responde tu método de pago Favorito* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                        {{LISTA_METODOS_POR_PAIS}}
+
+                        *⚠️ No dejes que la oportunidad se te escape!* 🏃🏻‍♀️💫
+                    delay_after_sec: 0
+              - name: Mensajes principales
+                enabled: true
+                ad_keys: []
+                ad_routing_enabled: true
+                paises: []
+                pais_routing_enabled: true
+                semimodalidad: ob
+                tiendas:
+                  - tienda_tplantillas
                 steps:
                   - type: image
                     drive_url: https://drive.google.com/file/d/1GO-xlJuGAew9Xz98eP3Nyiw585kuFATM/view?usp=sharing
@@ -120904,7 +121452,7 @@ tiendas:
     nombre: GRAFISMO FONETICO Y SUPER PACK 2 EN 1
     numero: "1345130172015574"
     pagina: "1282178584987581"
-    semimodalidad: segunda_oculta
+    semimodalidad: dos_juntas
     alineacion:
       basico: pmu39gpb1
       unico: pmu39gpb1
@@ -121150,7 +121698,7 @@ tiendas:
     pagina: ""
     frases_de_entrada:
       - tienda plantillas
-    semimodalidad: segunda_oculta
+    semimodalidad: dos_juntas
     alineacion:
       basico: ptpla_basico
       unico: ptpla_basico
@@ -124265,6 +124813,7 @@ pizarra:
           ancho: 1940
           alto: 184
           titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
+      visibles: []
     tienda_tplantillas|whatsapp|ob:
       ramasPorConectar:
         - seg:0:42|6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04
@@ -124280,12 +124829,6 @@ pizarra:
         seg:0:42:
           - x: 520
             y: -86
-        seg:0:43:
-          - x: 275
-            y: 203
-        seg:0:44:
-          - x: 275
-            y: 203
         ob:20:
           - x: 431
             y: 246
@@ -124306,8 +124849,8 @@ pizarra:
           x: -72
           y: -937
         inicio:EC:
-          x: -10
-          y: 264
+          x: -101
+          y: -518
         inicio:AR:
           x: -10
           y: 508
@@ -124317,30 +124860,12 @@ pizarra:
         suelta:intro:49:
           x: 415
           y: -832
-        suelta:intro:50:
-          x: 422
-          y: -124
-        suelta:intro:51:
-          x: 410
-          y: -1846
         suelta:seg:0:42:
           x: 762
           y: -1356
-        suelta:seg:0:43:
-          x: 1085
-          y: -407
-        suelta:seg:0:44:
-          x: 809
-          y: -2399
         suelta:seg:1:41:
           x: 762
           y: -1352
-        suelta:seg:1:42:
-          x: 1085
-          y: -403
-        suelta:seg:1:43:
-          x: 809
-          y: -2395
         suelta:ob:20:
           x: 1771
           y: -825
@@ -124353,12 +124878,33 @@ pizarra:
         segs:suelta:seg:0:42:
           x: 762
           y: -1356
-        segs:suelta:seg:0:43:
-          x: 1085
-          y: -407
-        segs:suelta:seg:0:44:
+        pz:PE:ob:ob:22:
+          x: 1766
+          y: -1908
+        dest:pz:PE:seg:0:seg:0:44:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1084
+          y: -2196
+        dest:pz:PE:ob:ob:22:3:boton:026d48f2-85e0-4638-ad9e-72820cdeb448~cmvqleyj30:
+          x: 2093
+          y: -1690
+        dest:pz:PE:ob:ob:22:3:boton:1109e82a-d9dc-4bcd-b9d4-680c53f2378c~cmvqleyj31:
+          x: 2093
+          y: -1656
+        pv:PE:upsells:
+          x: 3330
+          y: -2634
+        pv:PE:regalo:
+          x: 3630
+          y: -2634
+        pv:PE:cobro:
+          x: 2710
+          y: -2634
+        segs:PE:P:
           x: 809
           y: -2399
+        pz:EC:ob:ob:21:
+          x: 1775
+          y: -213
       cajas:
         - id: caja:carril:PE
           x: 290
@@ -124386,30 +124932,171 @@ pizarra:
           titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
       visibles:
         - intro:49
-        - intro:50
-        - intro:51
         - seg:0:42
-        - seg:0:43
-        - seg:0:44
         - seg:1:41
-        - seg:1:42
-        - seg:1:43
         - ob:20
         - ob:21
         - ob:22
       enlaces:
         - intro:49|ob:20
-        - intro:50|ob:21
-        - intro:51|ob:22
         - intro:49|seg:0:42
-        - intro:50|seg:0:43
-        - intro:51|seg:0:44
         - seg:0:42|seg:1:41
         - seg:1:41|ob:20
-        - seg:0:43|seg:1:42
-        - seg:1:42|ob:21
-        - seg:0:44|seg:1:43
-        - seg:1:43|ob:22
+    tienda_tplantillas|instagram|ob:
+      posiciones: {}
+    tienda_tplantillas|whatsapp|dou:
+      ramasPorConectar:
+        - seg:0:43|6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04
+        - seg:0:44|6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04
+        - seg:1:42|3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9uts0
+        - seg:1:43|3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9utt0
+      recuadros:
+        seg:0:43:
+          - x: 1102
+            y: 256
+        seg:0:44:
+          - x: 500
+            y: -47
+        seg:1:42:
+          - x: 474
+            y: 229
+          - x: 648
+            y: 499
+        seg:1:43:
+          - x: 535
+            y: 51
+          - x: 576
+            y: 204
+      posiciones:
+        inicio:PE:
+          x: -10
+          y: 20
+        inicio:EC:
+          x: -10
+          y: 264
+        inicio:AR:
+          x: -10
+          y: 508
+        inicio:CO:
+          x: -10
+          y: 752
+        suelta:intro:50:
+          x: 923
+          y: -741
+        suelta:intro:51:
+          x: 750
+          y: 91
+        suelta:seg:0:43:
+          x: 1369
+          y: -977
+        suelta:seg:0:44:
+          x: 1196
+          y: -145
+        suelta:seg:1:42:
+          x: 1369
+          y: -973
+        suelta:seg:1:43:
+          x: 1196
+          y: -141
+        segs:suelta:seg:0:43:
+          x: 1369
+          y: -977
+        segs:suelta:seg:0:44:
+          x: 1196
+          y: -145
+        pz:PE:intro:intro:50:
+          x: 923
+          y: -741
+        pz:PE:seg:0:seg:0:43:
+          x: 1369
+          y: -977
+        pz:PE:seg:1:seg:1:42:
+          x: 1369
+          y: -973
+        pz:EC:intro:intro:51:
+          x: 828
+          y: 272
+        pz:EC:seg:0:seg:0:44:
+          x: 1259
+          y: 326
+        pz:EC:seg:1:seg:1:43:
+          x: 1259
+          y: 330
+        dest:pz:PE:seg:0:seg:0:43:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 2471
+          y: -721
+        dest:pz:PE:seg:1:seg:1:42:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9uts0:
+          x: 1843
+          y: -744
+        dest:pz:PE:seg:1:seg:1:42:3:boton:03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqm9uts1:
+          x: 2017
+          y: -474
+        pv:PE:upsells:
+          x: 2860
+          y: -1061
+        pv:PE:regalo:
+          x: 3160
+          y: -1061
+        dest:pz:EC:seg:0:seg:0:44:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
+          x: 1759
+          y: 279
+        dest:pz:EC:seg:1:seg:1:43:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvqm9utt0:
+          x: 1794
+          y: 381
+        dest:pz:EC:seg:1:seg:1:43:3:boton:03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvqm9utt1:
+          x: 1835
+          y: 534
+        pv:EC:upsells:
+          x: 2860
+          y: 288
+        pv:EC:regalo:
+          x: 3160
+          y: 288
+        pv:PE:cobro:
+          x: 2240
+          y: -1061
+        pv:EC:cobro:
+          x: 2240
+          y: 288
+        segs:PE:P:
+          x: 1369
+          y: -977
+        segs:EC:P:
+          x: 1259
+          y: 326
+      cajas:
+        - id: caja:carril:PE
+          x: 290
+          y: -1115
+          ancho: 3031
+          alto: 1289
+          titulo: "🇵🇪 🇵🇪 Peru · vacío: conecta su intro desde el Inicio"
+        - id: caja:carril:EC
+          x: 290
+          y: 234
+          ancho: 1940
+          alto: 184
+          titulo: "🇪🇨 🇪🇨 Ecuador · vacío: conecta su intro desde el Inicio"
+        - id: caja:carril:AR
+          x: 290
+          y: 478
+          ancho: 1940
+          alto: 184
+          titulo: "🇦🇷 🇦🇷 Argentina · vacío: conecta su intro desde el Inicio"
+        - id: caja:carril:CO
+          x: 290
+          y: 722
+          ancho: 1940
+          alto: 184
+          titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
+      visibles:
+        - intro:50
+        - intro:51
+        - seg:0:43
+        - seg:0:44
+        - seg:1:42
+        - seg:1:43
+      enlaces: []
 respaldo_entre_tiendas: true
 tableros:
   tienda_tcocina:
