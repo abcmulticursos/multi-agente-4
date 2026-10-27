@@ -31285,11 +31285,20 @@ function PantallaDelTablero({
             </button>
           }
           despuesDelMas={
-            <div className="relative" ref={refDeHerramientasDelTablero}>
+            <div className="relative flex items-center gap-2" ref={refDeHerramientasDelTablero}>
+              {/* EL SIMULADOR, A LA VISTA (27/10/2026): un botón propio, no escondido en el ☰. */}
+              <button
+                type="button"
+                onClick={() => setVentanaDeHerramienta("prueba")}
+                title="Simulador: chatea con el bot como un cliente, sin enviar nada a Meta"
+                className="order-2 flex h-9 items-center gap-1 rounded-full bg-emerald-600 px-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700"
+              >
+                💬 Simulador
+              </button>
               <button
                 type="button"
                 onClick={() => setMenuHerramientas((v) => !v)}
-                title="Tienda, productos y modo prueba"
+                title="Tienda, productos y simulador"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-lg font-bold text-white shadow-md hover:bg-slate-800"
               >
                 {menuHerramientas ? "×" : "☰"}
@@ -31303,7 +31312,7 @@ function PantallaDelTablero({
                       ["productos", "📦", "Productos y precios", "Precio por país, entrega, contenido y muestras"],
                       ["pagos", "💳", "Datos de pago por país", "Los textos de cada método (Yape, BCP…), las cuentas y el menú de métodos, por país"],
                       ["anuncios", "📣", "Anuncios", "Tus campañas y anuncios, y a qué ficha de este tablero lleva cada uno"],
-                      ["prueba", "🧪", "Modo prueba", "Probar el bot sin enviar nada a Meta"],
+                      ["prueba", "💬", "Simulador", "Chatea con el bot como un cliente, sin enviar nada a Meta"],
                       ["exportar", "⇅", "Exportar / importar tienda", "La tienda entera (con su tablero) en un archivo JSON, y traerla de vuelta"],
                     ] as const
                   ).map(([v, icono, texto, ayuda]) => (
@@ -31398,12 +31407,12 @@ function PantallaDelTablero({
       )}
       {ventanaDeHerramienta === "prueba" && (
         <VentanaFlotante
-          titulo="🧪 Modo prueba"
-          detalle="Prueba el bot sin enviar nada a Meta. Lo que no hayas guardado no entra en la prueba."
+          titulo="💬 Simulador"
+          detalle="Chatea con el bot como un cliente, sin enviar nada a Meta. Lo que no hayas guardado no entra."
           onCerrar={() => setVentanaDeHerramienta(null)}
           ancho="max-w-6xl"
         >
-          <iframe src="/simulador" title="Modo prueba" className="h-[75vh] w-full rounded-md border border-borde bg-white" />
+          <iframe src="/simulador" title="Simulador" className="h-[75vh] w-full rounded-md border border-borde bg-white" />
         </VentanaFlotante>
       )}
       {/* LOS ANUNCIOS, como en la pizarra (25/10/2026): por BM y campaña, a qué ficha de ESTE tablero
@@ -32328,6 +32337,8 @@ function AjustesDeLaFicha({
   onCerrar: () => void;
 }) {
   const [b, setB] = useState<FichaEnElEditor>(ficha);
+  // EL BUSCADOR DE «LO QUE SE ENTREGA» (27/10/2026): con muchos productos, la lista era eterna.
+  const [buscarEntrega, setBuscarEntrega] = useState("");
   const [pais, setPais] = useState(paisInicial);
   const a = ASPECTO[ficha.tipo];
   const cobro = b.cobro ?? { modo: "abierto" as const };
@@ -32455,8 +32466,15 @@ function AjustesDeLaFicha({
                 const limpias = nueva.filter(Boolean);
                 setB({ ...b, entregas: limpias.length ? nueva : undefined, producto_id: limpias[0]?.split("#")[0] || undefined });
               };
-              const propios = entregasPorProducto.filter((g) => g.propio);
-              const otros = entregasPorProducto.filter((g) => !g.propio);
+              const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+              const q = sinTildes(buscarEntrega.trim());
+              // Lo ya elegido siempre se ve (si no, el selector quedaría en blanco al buscar).
+              const filtrar = (g: (typeof entregasPorProducto)[number]) => ({
+                ...g,
+                opciones: g.opciones.filter((o) => !q || lista.includes(o.clave) || sinTildes(`${g.nombre} ${o.nombre}`).includes(q)),
+              });
+              const propios = entregasPorProducto.filter((g) => g.propio).map(filtrar).filter((g) => g.opciones.length);
+              const otros = entregasPorProducto.filter((g) => !g.propio).map(filtrar).filter((g) => g.opciones.length);
               return (
                 <div className={etiqueta}>
                   Lo que se entrega
@@ -32464,6 +32482,13 @@ function AjustesDeLaFicha({
                     Elige qué entrega de qué producto. Arriba, los productos de esta tienda; abajo, los demás. Las entregas extra (muestras, niveles…)
                     se escriben en la ficha del producto, en «📦 Entregas extra».
                   </span>
+                  <input
+                    id="buscar-entrega"
+                    value={buscarEntrega}
+                    onChange={(e) => setBuscarEntrega(e.target.value)}
+                    placeholder="Buscar producto…"
+                    className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal"
+                  />
                   <div className="mt-1 space-y-1">
                     {lista.map((clave, i) => (
                       <div key={i} className="flex items-center gap-1">

@@ -119,6 +119,9 @@ function porQueNoSeConecta(t: TableroEnElEditor, de: string, salida: string, a: 
   }
   if (origen.tipo === "seguimientos" && destino.tipo === "seguimientos")
     return "Unos Seguimientos no llevan a otros: los seguimientos ya enviados no se repiten.";
+  // DOS RUTAS DE UN REPARTO A LA MISMA FICHA (27/10/2026): sería como no sortear.
+  if (origen.tipo === "reparto" && t.cables.some((c) => c.de === de && c.salida !== salida && c.a === a))
+    return "Esa ficha ya tiene su ruta en este Reparto: cada ruta va a una tubería distinta.";
   return null;
 }
 
@@ -475,7 +478,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         }`}
       >
         {(boton || cuadrito) && <span className="shrink-0 text-[9px] opacity-70">{boton ? "BOTÓN" : "SI DICE"}</span>}
-        <span className="truncate">{s.etiqueta.replace(/^(🔘|💬) /, "")}</span>
+        <span className="truncate" title={s.etiqueta.replace(/^(🔘|💬) /, "")}>
+          {s.etiqueta.replace(/^(🔘|💬) /, "")}
+        </span>
         {!conPunto && destino && (
           // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.
           <span
@@ -527,11 +532,15 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       }}
     >
       <Handle type="target" position={Position.Left} id="entra" className={PUNTO_VERDE} style={{ top: 18 }} />
+      {/* «NADIE LLEGA», ARRIBA DE LA FICHA (27/10/2026): el punto rojo junto al conector estorbaba al
+          soltar el cable ahí. */}
       {!leLlega && (
         <span
-          className="pointer-events-auto absolute -left-[32px] top-[9px] h-[18px] w-[18px] rounded-full bg-red-600 ring-2 ring-white"
+          className="pointer-events-auto absolute -top-[22px] left-1 rounded-full bg-red-600 px-1.5 text-[10px] font-bold leading-[16px] text-white shadow"
           title="No le llega ningún cable: nadie entra por aquí."
-        />
+        >
+          ⚠ nadie llega
+        </span>
       )}
       {colitasQueLlegan.length > 0 && (
         <span
@@ -622,7 +631,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
                       ctx.abrir(f.id, b.indice);
                     }
               }
-              title={f.tipo === "intro_ob" ? undefined : "Doble clic: abrir la ficha en esta burbuja"}
+              title={`${b.texto || "(sin texto)"}${f.tipo === "intro_ob" ? "" : "\n\nDoble clic: abrir la ficha en esta burbuja"}`}
             >
               <span className="shrink-0">{b.icono}</span>
               <span className="truncate">{b.texto || "(sin texto)"}</span>
@@ -633,7 +642,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {burbujas.length > BURBUJAS_A_LA_VISTA && (
           <div className="text-[10px] font-semibold text-slate-500">+ {burbujas.length - BURBUJAS_A_LA_VISTA} burbuja(s) más</div>
         )}
-        {(burbujas.length === 0 || (f.tipo !== "mensaje" && f.tipo !== "intro_ob")) && (
+        {/* El Cobro con burbujas se ve como las demás: solo sus burbujas (27/10/2026). */}
+        {(burbujas.length === 0 || (f.tipo !== "mensaje" && f.tipo !== "intro_ob" && f.tipo !== "cobro")) && (
           <div className={`whitespace-pre-line text-[11px] ${burbujas.length === 0 ? "italic" : ""} text-slate-600`}>{ctx.resumenDe(f)}</div>
         )}
         {f.instrucciones?.trim() && (
@@ -1230,14 +1240,9 @@ export default function LienzoDelTablero({
   const colita = (c: CableDelTablero) => esColita(tablero, c, todoCable);
   const soltarElCable = useCallback(() => setTirando(null), []);
   const inicioDelTiro = useRef<Punto | null>(null);
-  // MIENTRAS SE TIRA UN CABLE, solo se ven fuertes las fichas donde puede llegar (las demás, tenues).
-  const nodosAlTirar = !tirando
-    ? nodosVistos
-    : nodosVistos.map((n) =>
-        n.type === "caja" || (n.id !== tirando.de && n.type === "ficha" && !porQueNoSeConecta(tablero, tirando.de, tirando.salida, n.id))
-          ? n
-          : { ...n, style: { ...n.style, opacity: 0.25 } }
-      );
+  // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
+  // sigue sin ponerse donde no encaja, con su aviso.)
+  const nodosAlTirar = nodosVistos;
 
   const cables = useMemo<Edge[]>(
     () =>
@@ -1406,7 +1411,9 @@ export default function LienzoDelTablero({
         faltas: faltasPorFicha,
       }}
     >
-      <div className="lienzo-del-tablero relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
+      {/* SIN SELECCIONAR TEXTO (27/10/2026): Shift + arrastrar elegía también el texto de las fichas y
+          Edge sacaba su lupa de búsqueda, que no dejaba mover nada. Los campos siguen escribiéndose. */}
+      <div className="lienzo-del-tablero relative h-full w-full select-none" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
         <ReactFlow
           nodes={nodosAlTirar}
           edges={
