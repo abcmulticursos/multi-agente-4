@@ -591,6 +591,12 @@ input,
   right: 12px !important;
 }
 
+/* EN EL TABLERO LA MINIATURA NAVEGA (27/10/2026: «sigue cosmética»): clic, arrastre y rueda. Sigue
+   clavada en su esquina (las reglas de arriba), que era lo que la movía al centro el 19/10. */
+.lienzo-del-tablero .react-flow__panel.react-flow__minimap {
+  pointer-events: all !important;
+}
+
 /* EL FONDO DE UN PAÍS ELEGIDO (19/10/2026): con el recuadro de selección, también se nota. */
 .react-flow__node-caja.selected > * {
   outline: 3px dashed rgba(59, 130, 246, 0.7);

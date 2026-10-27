@@ -1629,6 +1629,9 @@ export default function LienzoDelTablero({
           fitView
           fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
           minZoom={0.1}
+          // SOLO SE DIBUJA LO QUE ESTÁ A LA VISTA (27/10/2026: «¿estás mostrando todas las fichas, incluso
+          // las que no se ven?» — sí: todas, de todos los países). Al arrastrar ya no se recalcula todo.
+          onlyRenderVisibleElements
           proOptions={{ hideAttribution: true }}
           style={{ background: "transparent" }}
         >
