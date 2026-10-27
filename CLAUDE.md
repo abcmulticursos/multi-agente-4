@@ -1109,6 +1109,24 @@ Nada de esto toca el bot (`cable.vista` es solo pantalla, como `curvas`):
 - Tokens: la IA del tablero pasó de ~2,8k a ~4,7k de entrada por turno (las reglas del automático);
   salen menos llamadas (sin el reintento por la pregunta).
 
+**Su prueba HOLA1/2/3 en paralelo (27/10/2026, más tarde):**
+- **Pagar lo ofrecido durante el regalo, sin «sí»:** el comprobante se lee contra un cobro (desde las
+  fichas por las que pasó, la más reciente primero) de un producto que AÚN NO COMPRÓ; se abre callado,
+  se cobra y la ruta no sigue (sigue en el regalo). Antes lo contestaba el motor de siempre con «Tu pago
+  ya está confirmado» sin mirarlo. Su propio comprobante reenviado → «ya está registrado».
+- **En el regalo, lo que el motor de siempre no resuelve lo contesta la IA del tablero**
+  (`contestarEnElRegalo`, en handler / Messenger / Instagram, solo texto): la IA de la venta de siempre
+  le volvía a vender lo ya comprado (foto + «¿deseas adquirirlo?» + datos de pago).
+- **La IA nunca escribe datos de cuenta:** burbuja con 7+ dígitos seguidos → se quita con lo que sigue;
+  con cobro abierto, los datos verdaderos los manda el sistema.
+- **Comprobante repetido:** en el simulador solo dentro de la misma ventana; en vivo, en cualquier chat
+  (más estricto que la venta de siempre, que mira solo su chat), con aviso al dueño si es de otro chat.
+- **Burbujas:** sin el tope fijo de 3; manda «Limitar burbujas» de Ajustes, como la venta de siempre.
+  La lista «*Opción N* — …» solo si la IA no nombró todas. Comparando opciones («son 2», «la
+  diferencia») → una frase de por qué conviene la más completa, solo en ese turno.
+- Tiendas de ejemplo: el Cobro en 3 burbujas (precio / método y lista / «Así te paso los datos exactos
+  para tu pago 😊») — `cobro-tres-burbujas.cjs` del scratchpad.
+
 **El Reparto solo sortea entre sus rutas CONECTADAS** (motor, 27/10/2026): una ruta sin cable dejaba
 al cliente sin nada (le pasó a él en MASCOTAS EC con «Ruta 2» suelta). Su puntito sin cable sale en rojo.
 

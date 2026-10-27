@@ -88,7 +88,7 @@ import {
   getSamplesOfferBubble,
   topeDeOrganicos,
 } from "@/lib/workflow/config";
-import { alRecibirMensaje, esDelTablero } from "@/lib/tablero/motor";
+import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
 import { marcaDeAdjunto } from "@/lib/marca-de-adjunto";
@@ -1679,6 +1679,16 @@ async function handleIncomingMessage(
     if (handled) return;
   } catch (err) {
     console.error("[wh] workflow engine falló, fallback a IA:", err);
+  }
+
+  // EL REGALO DE UNA CONVERSACIÓN DEL TABLERO (27/10/2026): lo que el motor de siempre no resolvió lo
+  // contesta la IA del tablero, no la de la venta de siempre (que vendía su producto). Solo texto.
+  if ((msg.type === "text" || msg.type === "interactive" || msg.type === "button") && loadWorkflowConfig()?.silent_mode !== true) {
+    try {
+      if (esDelTablero(fresh.id) && (await contestarEnElRegalo(getConversationById(fresh.id) ?? fresh))) return;
+    } catch (err) {
+      console.error("[tablero] falló la respuesta en el regalo:", err);
+    }
   }
 
   // MODO SILENCIOSO: el bot NO charla con el LLM. Pero una IMAGEN (posible

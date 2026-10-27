@@ -769,7 +769,7 @@ function looksLikeOptionMeaningQuestion(text: string): boolean {
  * Por eso fallar aquí es barato: si no acierta, el turno sale exactamente como
  * sale hoy. No registra elecciones, no manda nada y no se queda ningún turno.
  */
-function preguntaCuantasOpcionesHay(text: string): boolean {
+export function preguntaCuantasOpcionesHay(text: string): boolean {
   if (!text) return false;
   return (
     /\b(son|hay|serian|seran|eran|habia)\s+(2|dos)\b/.test(text) ||

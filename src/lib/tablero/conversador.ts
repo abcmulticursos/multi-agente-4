@@ -11,6 +11,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 import type { ConversationRow } from "@/lib/db";
 import { getClient } from "@/lib/openrouter";
 import { sendChunkedBotText } from "@/lib/workflow/engine";
+import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { ultimosMensajes } from "./lector";
 import { CEREBRO_DE_FABRICA } from "./datos";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
@@ -91,6 +92,16 @@ export interface ContextoDeLaIA {
   opcionesDeCompra?: string[];
   /** Los nombres de los métodos de pago de su país (solo nombres: los datos los manda el sistema). */
   metodos?: string[];
+  /**
+   * LA LISTA CORTA DE LAS OPCIONES («*Opción 1* — nombre · precio»), SOLO SI FALTA (27/10/2026): si la
+   * IA ya nombró todas las opciones, no se agrega (era texto fijo repetido). Va antes de `alFinal`.
+   */
+  opcionesSiFaltan?: { burbuja: string; nombres: string[] };
+  /**
+   * ESTÁ COMPARANDO LAS OPCIONES («son 2», «la diferencia»), como el turno de la venta de siempre: en
+   * ESTA respuesta, una sola frase de por qué conviene la más completa.
+   */
+  recomendarLaCompleta?: boolean;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -177,6 +188,11 @@ function cerebro(c: ContextoDeLaIA): string {
     c.noOfrezcasImagenes
       ? "EN ESTE TURNO: contesta por escrito lo que pregunta sobre el contenido y termina ahí. No menciones imágenes, fotos ni muestras: el sistema añade él mismo la oferta de verlas justo después de tu respuesta."
       : "",
+    // LA MISMA ORDEN DEL TURNO QUE USA LA VENTA DE SIEMPRE cuando preguntan cuántas opciones hay
+    // (openrouter.ts, «CURRENT TURN — THEY ARE ASKING HOW MANY OPTIONS»), solo en este turno.
+    c.recomendarLaCompleta
+      ? "EN ESTE TURNO ESTÁ COMPARANDO LAS OPCIONES: explícale cada una con claridad, cada idea en su burbuja, y antes de tu pregunta de cierre añade UNA sola frase de por qué conviene la más completa —lo que suma, con un detalle concreto de su contenido—, sin menospreciar la otra y sin presión. Una frase, no un párrafo. Esto vale SOLO para esta respuesta: no vuelvas a recomendar en las siguientes."
+      : "",
     cierre(c),
     c.nota ? `LO QUE ACABA DE PASAR (dilo con tus palabras): ${c.nota}` : "",
   ]
@@ -218,7 +234,7 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
       ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Cuando hables de los productos, nómbralas TODAS con su precio (aunque pregunte por una) y cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
       : "",
     "- Si ya compró (postventa) o tiene un problema, no cierres con pregunta de venta.",
-    "- Respuestas CORTAS: lo que pregunta + un valor breve + la pregunta de cierre. Máximo 3 burbujas breves.",
+    "- Lo que ya compró no se le vuelve a ofrecer ni a cobrar.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -540,9 +556,33 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // EL CIERRE LO PONE EL BOT SI FALTA (27/10/2026): vendiendo, la respuesta termina con una pregunta
   // suave, como la venta de siempre. Antes se le pedía otra respuesta a la IA (se pagaba dos veces);
   // ahora se agrega una de sus preguntas de siempre, distinta de las 2 últimas, sin gastar tokens.
+  // EL TOPE DE BURBUJAS ES EL DE TUS AJUSTES (27/10/2026), el mismo de la venta de siempre
+  // («Limitar burbujas» y su máximo; apagado = sin tope). Antes el tablero tenía un 3 fijo y juntaba lo
+  // que sobraba en la última burbuja (se veía apretado). Con tope, lo que sobra se junta en la última
+  // para que no se pierda (`sendChunkedBotText` cortaría).
+  const cfg = loadWorkflowConfig();
+  const tope = cfg?.llm_bubble_limit_enabled === true ? Math.max(1, Math.floor(cfg.llm_max_bubbles ?? 3)) : null;
+  const alTope = (partes: string[], n: number | null) => (n && partes.length > n ? [...partes.slice(0, n - 1), partes.slice(n - 1).join("\n")] : partes);
   {
     const ultimos = ultimosMensajes(convo.id, 8);
     const delCliente = ([...ultimos].reverse().find((m) => m.role === "user")?.content ?? "").toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+    // LA IA NUNCA ESCRIBE DATOS DE CUENTA (27/10/2026, su prueba HOLA2): copió del historial la cuenta y
+    // la cédula con otro monto. Los datos de pago los manda SOLO el sistema. Toda burbuja con una cifra
+    // de 7 o más dígitos (cuenta, cédula, teléfono; sin contar enlaces) se quita junto con las que vienen
+    // detrás («luego que lo realices, me envías…») y la línea «…de la siguiente forma:» que la presentaba.
+    // Si hay un cobro abierto con su método, los datos verdaderos los manda el sistema.
+    {
+      const conCuenta = (b: string) => /\d{7,}/.test(b.replace(/https?:\/\/\S+/g, "").replace(/(?<=\d)[ \t-](?=\d)/g, ""));
+      const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+      const desde = partes.findIndex(conCuenta);
+      if (desde >= 0) {
+        const quedan = partes.slice(0, desde);
+        if (quedan.length && /:\s*$/.test(quedan[quedan.length - 1])) quedan[quedan.length - 1] = quedan[quedan.length - 1].replace(/(^|\n)[^\n]*:\s*$/, "").trim();
+        console.log(`[tablero:ia] convo ${convo.id}: escribió datos de cuenta → se quitan (los manda solo el sistema)${c.reenviarDatos ? "; reenvío los de su cobro" : ""}`);
+        texto = quedan.filter(Boolean).join("\n\n");
+        if (c.reenviarDatos) await c.reenviarDatos();
+      }
+    }
     // UNA FRASE CORTADA AL FINAL («Los métodos que tenemos para ti son:» y nada más) no sale (27/10/2026).
     texto = texto.replace(/(^|\n)[^\n]*:\s*$/, "").trim();
     // NUNCA PREGUNTA EL MÉTODO POR SU CUENTA, vendiendo: «¿con qué método te sientes más cómodo?» sonaba a
@@ -555,11 +595,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         texto = burbujas.slice(0, -1).join("\n\n").trim();
       }
     }
-    // NUNCA MÁS DE 3 BURBUJAS, y la última es la que se mira (antes la 4.ª —la pregunta agregada— se perdía).
-    {
-      const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
-      texto = (partes.length > 3 ? [...partes.slice(0, 2), partes.slice(2).join("\n")] : partes).join("\n\n");
-    }
+    // CON TOPE, la última burbuja es la que se mira (antes la pregunta agregada se perdía).
+    texto = alTope(texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean), tope).join("\n\n");
     const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).pop() ?? "";
     // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
     // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
@@ -571,19 +608,33 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       const pregunta =
         n > 1 ? `¿Cuál de las ${n === 2 ? "dos" : n} prefieres?` : PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
-      // La pregunta va en su propia burbuja; si ya había 3, las dos últimas se juntan para que quepa.
+      // La pregunta va en su propia burbuja; con tope, las de antes se juntan para que quepa.
       const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
-      const cuerpo = partes.length >= 3 ? [partes[0], partes.slice(1).join("\n")] : partes;
-      texto = [...cuerpo, pregunta].join("\n\n");
+      texto = [...alTope(partes, tope ? tope - 1 : null), pregunta].join("\n\n");
     }
   }
   const malos = prohibidos(texto);
   if (malos.length > 0) {
     // Se quitan las frases con montos ajenos: mejor una respuesta más corta que un precio falso.
+    // (Burbuja por burbuja: antes se unía todo con espacios y las burbujas quedaban en una sola.)
     texto = texto
-      .split(/(?<=[.!?¿¡\n])\s+/)
-      .filter((frase) => prohibidos(frase).length === 0)
-      .join(" ")
+      .split(/\n\s*\n/)
+      .map((b) =>
+        b
+          .split("\n")
+          .map((linea) =>
+            linea
+              .split(/(?<=[.!?¿¡])[ \t]+/)
+              .filter((frase) => prohibidos(frase).length === 0)
+              .join(" ")
+              .trim()
+          )
+          .filter(Boolean)
+          .join("\n")
+          .trim()
+      )
+      .filter(Boolean)
+      .join("\n\n")
       .trim();
   }
   if (!texto) return salieronMuestras;
@@ -591,13 +642,26 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   texto = texto.replace(/\*\*([^*\n]+)\*\*/g, "*$1*").replace(/^#{1,6}\s+/gm, "");
   // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.
   texto = texto.replace(/\*\*([^\n]+?)\*\*/g, (_, x: string) => `*${x.replace(/\*/g, "")}*`).replace(/\*\*/g, "*");
-  const burbujas = texto
-    .split(/\n\s*\n/)
-    .map((b) => b.trim())
-    .filter(Boolean)
-    .slice(0, 3);
+  const burbujas = alTope(
+    texto
+      .split(/\n\s*\n/)
+      .map((b) => b.trim())
+      .filter(Boolean),
+    tope
+  );
+  // LA LISTA CORTA DE LAS OPCIONES, SOLO SI LA IA NO LAS NOMBRÓ TODAS (27/10/2026): si ya las explicó, no
+  // se repite un texto fijo debajo.
+  let alFinal = c.alFinal ?? [];
+  if (c.opcionesSiFaltan && burbujas.length > 0) {
+    const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/\*/g, "");
+    const dicho = plano(burbujas.join(" "));
+    if (c.opcionesSiFaltan.nombres.some((n) => !dicho.includes(plano(n)))) {
+      alFinal = [c.opcionesSiFaltan.burbuja, ...alFinal];
+      console.log(`[tablero] convo ${convo.id}: la IA no nombró todas las opciones → burbuja con las ${c.opcionesSiFaltan.nombres.length} opciones`);
+    }
+  }
   // CON LAS PAUSAS DE TUS AJUSTES (25/10/2026, punto 17), como la venta de siempre: la primera enseguida
   // y las demás separadas por «Delay entre mensajes» (Menús → Ajustes → Tiempos generales).
-  if (burbujas.length > 0) await sendChunkedBotText(convo, burbujas.join("\n\n"), c.alFinal);
+  if (burbujas.length > 0) await sendChunkedBotText(convo, burbujas.join("\n\n"), alFinal);
   return burbujas.length > 0;
 }

@@ -37,7 +37,7 @@ import {
 } from "@/lib/workflow/config";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
-import { alRecibirMensaje, esDelTablero } from "@/lib/tablero/motor";
+import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
 import { tiendaDeLaPagina } from "@/lib/workflow/config";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { getWebhookAppSecret, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
@@ -381,6 +381,15 @@ async function handleInstagramMessage(
       return;
     }
     console.error("[instagram] workflow fallo, sigo con IA:", err);
+  }
+
+  // EL REGALO DE UNA CONVERSACIÓN DEL TABLERO (27/10/2026), como en WhatsApp (handler.ts). Solo texto.
+  if (!attachment && loadWorkflowConfig()?.silent_mode !== true) {
+    try {
+      if (esDelTablero(fresh.id) && (await contestarEnElRegalo(getConversationById(fresh.id) ?? fresh))) return;
+    } catch (err) {
+      console.error("[tablero] falló la respuesta en el regalo (instagram):", err);
+    }
   }
 
   if (loadWorkflowConfig()?.silent_mode === true) {

@@ -72,7 +72,7 @@ import {
   isQuietHour,
   nextLocalTime,
 } from "@/lib/workflow/quiet-hours";
-import { looksLikeMediaTurn, looksLikeProductContentTurn } from "@/lib/openrouter";
+import { looksLikeMediaTurn, looksLikeProductContentTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, preguntarElMetodo } from "./pago";
@@ -129,6 +129,8 @@ import {
   ponerPreciosDelCobro,
   preciosDelCobro,
   proponerProducto,
+  quienRegistroLaHuella,
+  fichasVisitadas,
   reiniciarRelojDelCobro,
   salirDelTablero,
   sumarAlCobro,
@@ -1021,6 +1023,14 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     !nota && opcionesAqui.length > 1 && (looksLikeProductContentTurn(ultimo) || PIDE_INFO_DE_LAS_OPCIONES.test(ultimo)) && !preguntaPrecio && !hablaDeUnProblema
       ? opcionesAqui.map((o, i) => `*Opción ${i + 1}* — ${o.nombre}${o.precio ? ` · *${o.precio}*` : ""}`).join("\n")
       : "";
+  // ESTÁ COMPARANDO LAS OPCIONES (27/10/2026): «son 2» (la misma detección de la venta de siempre,
+  // `preguntaCuantasOpcionesHay`) o «la diferencia» / «cuál me conviene». En esa respuesta, una frase de
+  // por qué conviene la más completa.
+  const recomendarLaCompleta =
+    !nota &&
+    opcionesAqui.length > 1 &&
+    !hablaDeUnProblema &&
+    (preguntaCuantasOpcionesHay(ultimo) || /\b(diferencia|diferente|diferentes|cual me conviene|cual es mejor|me recomiendas|recomiendas)\b/.test(ultimo));
   const metodosDelPais = getPaymentMethods(convo.phone).map((m) => m.label).filter(Boolean);
   const salio = await responderConIA(convo, {
     ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
@@ -1091,11 +1101,11 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     // imágenes…?», al FINAL de la fila (después de la última burbuja de la IA). Su «sí» del turno
     // siguiente manda la galería (`mandarLaGaleria`). Una vez por ficha.
     ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true } : {}),
-    ...((ofrecerImagenes && ofertaDeImagenes) || burbujaDeAyuda
-      ? { alFinal: [...(burbujaDeAyuda ? [burbujaDeAyuda] : []), ...(ofrecerImagenes && ofertaDeImagenes ? [ofertaDeImagenes] : [])] }
-      : {}),
+    ...(ofrecerImagenes && ofertaDeImagenes ? { alFinal: [ofertaDeImagenes] } : {}),
+    // La lista corta de las opciones: solo si la IA no las nombró todas (lo decide `responderConIA`).
+    ...(burbujaDeAyuda ? { opcionesSiFaltan: { burbuja: burbujaDeAyuda, nombres: opcionesAqui.map((o) => o.nombre) } } : {}),
+    ...(recomendarLaCompleta ? { recomendarLaCompleta: true } : {}),
   });
-  if (salio && burbujaDeAyuda) console.log(`[tablero] convo ${convo.id}: preguntó por los productos → burbuja con las ${opcionesAqui.length} opciones`);
   if (salio && ofrecerImagenes) {
     if (ofertaDeImagenes) {
       apuntarImagenesOfrecidas(convo.id, true);
@@ -1322,10 +1332,31 @@ async function atenderComprobante(
       return;
     }
   }
-  const huella = huellaDelPago(lectura);
+  // EN EL SIMULADOR, REPETIDO SOLO DENTRO DE LA MISMA VENTANA (27/10/2026, su pedido): él prueba en
+  // paralelo con los mismos comprobantes; en ventanas distintas valen, en la misma no. En vivo, el mismo
+  // pago no vale dos veces en ningún chat (más estricto que la venta de siempre, que mira solo su chat).
+  const huellaDelPagoLeido = huellaDelPago(lectura);
+  const huella = huellaDelPagoLeido && convo.channel === "test" ? `${huellaDelPagoLeido}#c${convo.id}` : huellaDelPagoLeido;
   if (huella && !apuntarHuella(huella, convo.id)) {
-    console.log(`[tablero] convo ${convo.id}: comprobante repetido (${huella})`);
-    await contestarConIA(convo, t, "Ese comprobante ya estaba registrado antes. Díselo con amabilidad: ya lo tenemos y no hace falta enviarlo otra vez.");
+    const deOtroChat = quienRegistroLaHuella(huella) !== convo.id;
+    console.log(`[tablero] convo ${convo.id}: comprobante repetido (${huella})${deOtroChat ? " — lo usó otra conversación" : ""}`);
+    if (deOtroChat) {
+      if (convo.channel !== "test")
+        void notifyAdmin(
+        `🧾 *Tablero:* ${convo.client_name ?? convo.name ?? convo.phone} mandó un comprobante que ya se usó en otra compra (${huellaDelPagoLeido}). Revísalo en el chat.`
+      ).catch(() => {});
+      await contestarConIA(
+        convo,
+        t,
+        "Ese comprobante ya se usó para otra compra, así que no se puede contar aquí. Díselo con amabilidad y pídele el comprobante de SU pago. NO digas que se va a validar ni que le llegará el material."
+      );
+    } else {
+      await contestarConIA(
+        convo,
+        t,
+        "Ese mismo comprobante ya lo había enviado antes en este chat y ya se contó (no se suma otra vez). Díselo con amabilidad. NO digas que se va a validar de nuevo ni prometas nada nuevo."
+      );
+    }
     return;
   }
   const total = sumarAlCobro(convo.id, lectura.monto);
@@ -1429,14 +1460,21 @@ function entregaDelProductoEnSuRuta(t: Tablero, cobroId: string, productoId: str
  * seguimientos), el que cobra (o acepta) un producto con ESE precio. Ese se abre en silencio y su
  * comprobante se lee contra él. Ninguno encaja: null (se te avisa, como antes).
  */
-function cobroQueEncajaConElPago(t: Tablero, desde: string[], monto: number, pais: string): FichaDelTablero | null {
+function cobroQueEncajaConElPago(
+  t: Tablero,
+  desde: string[],
+  monto: number,
+  pais: string,
+  /** Productos que no cuentan (ya comprados). */
+  excluir: Set<string> = new Set()
+): FichaDelTablero | null {
   const config = loadWorkflowConfig();
   const casi = (a: number, b: number) => Math.abs(a - b) < 0.01;
   for (const id of alcanzables(t, desde)) {
     const f = t.fichas.find((x) => x.id === id);
     if (f?.tipo !== "cobro" || f.apagada || f.cobro?.modo !== "producto") continue;
     for (const pid of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
-      if (!pid) continue;
+      if (!pid || excluir.has(pid)) continue;
       const p = producto(config, pid);
       const normal = precioDelProducto(p, pais, false);
       const oferta = precioDelProducto(p, pais, true);
@@ -1666,6 +1704,32 @@ export async function alRecibirMensaje(
 }
 
 /**
+ * EL REGALO, CUANDO EL MOTOR DE SIEMPRE NO LO RESOLVIÓ (27/10/2026, su prueba HOLA2). En el regalo, el
+ * motor de siempre atiende sus botones, sus cuadritos, el «sí»/«no» y la captura; lo que no resuelve
+ * («como es eso») caía en la IA de la venta de siempre, que vendía SU producto: mandó la foto de lo que
+ * el cliente ya había comprado y «¿deseas adquirirlo?». En una conversación del tablero, ese texto lo
+ * contesta la IA del tablero, que sabe lo que compró y no le vuelve a vender. Solo texto: una imagen
+ * sigue su camino de siempre (la captura del comentario). Devuelve false si no es su caso.
+ */
+export async function contestarEnElRegalo(convo: ConversationRow): Promise<boolean> {
+  const estado = estadoEnElTablero(convo.id);
+  if (!estado || !ESTADOS_DEL_REGALO.has(convo.state ?? "")) return false;
+  return conSuTienda(estado.tienda_id, convo, async () => {
+    const t = tableroDe(loadWorkflowConfig(), estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+    if (!t) return false;
+    const nota =
+      convo.state === "awaiting_gift_consent"
+        ? "Está en el paso del REGALO: se le acaba de ofrecer (míralo en tus últimos mensajes). Contesta su duda sobre ese regalo con lo que dice ese ofrecimiento, sin inventar, y al final pregúntale con tus palabras si lo quiere. Ya compró: no le ofrezcas ni le cobres ningún producto."
+        : convo.state === "awaiting_facebook_comment"
+          ? "Está en el paso del REGALO de dejar su comentario (míralo en tus últimos mensajes). Contesta su duda con lo que dice ese mensaje, sin inventar, y recuérdale que cuando deje su comentario y mande la captura le envías su regalo. Ya compró: no le ofrezcas ni le cobres ningún producto."
+          : "Ya compró y está recibiendo su regalo. Contesta su duda con amabilidad, sin inventar. No le ofrezcas ni le cobres ningún producto.";
+    console.log(`[tablero] convo ${convo.id}: en el regalo (${convo.state}) contesta la IA del tablero, no la de la venta de siempre`);
+    await contestarConIA(convo, t, nota);
+    return true;
+  });
+}
+
+/**
  * EL TURNO CON SU TIENDA PUESTA: burbujas, comodines y precios leen la de esta conversación.
  * Si el turno ya la trae (WhatsApp, Messenger), no se envuelve nada. En un workflow se usa la
  * tienda de la conversación (el workflow no tiene tienda).
@@ -1745,6 +1809,62 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         return true;
       }
       return false;
+    }
+    // EL PAGO DE LO QUE SE LE OFRECIÓ Y NO COMPRÓ, sin cobro abierto (27/10/2026, su prueba HOLA1): el
+    // upsell se ofreció, el silencio lo llevó al regalo y él pagó sin decir «sí». Como la venta de
+    // siempre (`esperaPagoDelUpsell`), ese comprobante se cobra contra lo ofrecido: se busca, desde las
+    // fichas por las que pasó (la más reciente primero), un cobro con ese precio de un producto que
+    // AÚN NO COMPRÓ, se abre callado y se lee contra él. Antes lo atendía el motor de siempre con su
+    // «Tu pago ya está confirmado», sin mirarlo. Solo se lee la imagen si queda algo por comprar
+    // (la captura del comentario del regalo, sin nada pendiente, ni se lee).
+    if (t && !estado.cobro_ficha_id && hayComprobantePendiente(convo.id, estado.comprobante_leido)) {
+      const comprados = new Set<string>([
+        ...comprasDelCliente(convo.id).map((c) => c.producto_id ?? ""),
+        ...entregasDelCliente(convo.id).map((k) => k.split("#")[0]),
+      ].filter(Boolean));
+      const visitadas = fichasVisitadas(convo.id).filter((id) => t.fichas.find((x) => x.id === id)?.tipo !== "regalo");
+      const quedaPorComprar = alcanzables(t, visitadas).some((id) => {
+        const f = t.fichas.find((x) => x.id === id);
+        return f?.tipo === "cobro" && !f.apagada && f.cobro?.modo === "producto" && [f.cobro.producto_id, ...(f.cobro.acepta ?? [])].some((p) => !!p && !comprados.has(p));
+      });
+      if (quedaPorComprar) {
+        marcarComprobanteLeido(convo.id, idDelComprobantePendiente(convo.id));
+        const lectura = await leerComprobante(convo.id);
+        if (!lectura) return false; // no es un comprobante (la captura del comentario): del regalo
+        const regaloId = estado.ficha_id;
+        let encaja: FichaDelTablero | null = null;
+        for (const id of visitadas) {
+          encaja = cobroQueEncajaConElPago(t, [id], lectura.monto, pais, comprados);
+          if (encaja) break;
+        }
+        if (encaja) {
+          console.log(`[tablero] convo ${convo.id}: comprobante de ${lectura.monto} durante el regalo → «${encaja.titulo || encaja.id}» (lo ofrecido)`);
+          await irA(convo.id, t, encaja.id, 0, { enSilencio: true });
+          // Sigue en el regalo: su ficha vuelve a ser la del regalo («Al terminar el regalo» sale de ahí).
+          moverA(convo.id, regaloId);
+          const abierto = estadoEnElTablero(convo.id);
+          if (abierto?.cobro_ficha_id === encaja.id) {
+            await atenderComprobante(convo, t, abierto, lectura);
+            return true;
+          }
+        }
+        // Ninguno encaja (o es el mismo comprobante de su compra): lo revisa la regla de los repetidos y,
+        // si no, se te avisa. Nunca el «ya está confirmado» del motor de siempre sin mirarlo.
+        const huellaLeida = huellaDelPago(lectura);
+        const clave = huellaLeida && convo.channel === "test" ? `${huellaLeida}#c${convo.id}` : huellaLeida;
+        if (clave && quienRegistroLaHuella(clave) === convo.id) {
+          console.log(`[tablero] convo ${convo.id}: durante el regalo reenvió el comprobante de su compra`);
+          await contestarConIA(convo, t, "Reenvió el comprobante de la compra que ya pagó y recibió. Dile con amabilidad que ese pago ya está registrado y su material ya le llegó más arriba (si no lo ve, que te avise y se lo reenvías). No pidas nada más.");
+          return true;
+        }
+        console.log(`[tablero] convo ${convo.id}: comprobante de ${lectura.monto} durante el regalo, no encaja con nada ofrecido → aviso al dueño`);
+        if (convo.channel !== "test")
+          void notifyAdmin(
+            `🧾 *Tablero:* ${convo.client_name ?? convo.name ?? convo.phone} mandó un comprobante de ${lectura.monto} durante el regalo que no encaja con nada ofrecido. Revísalo en el chat.`
+          ).catch(() => {});
+        await contestarConIA(convo, t, "Mandó un comprobante de pago. Agradécele y dile que un asesor lo revisa enseguida. No confirmes el pago ni entregues nada.");
+        return true;
+      }
     }
     const delRegalo =
       !t ||

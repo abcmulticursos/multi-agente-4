@@ -120464,12 +120464,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -120534,12 +120540,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -120693,12 +120705,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -120879,12 +120897,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -120949,12 +120973,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121064,12 +121094,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121209,12 +121245,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121317,12 +121359,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121786,12 +121834,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121856,12 +121910,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -121987,12 +122047,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122109,12 +122175,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122323,12 +122395,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122393,12 +122471,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122524,12 +122608,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122646,12 +122736,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122802,12 +122898,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -122926,12 +123028,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -123049,12 +123157,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -123555,12 +123669,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -123670,12 +123790,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -123792,12 +123918,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -123898,12 +124030,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124112,12 +124250,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124182,12 +124326,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124297,12 +124447,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124419,12 +124575,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124525,12 +124687,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124665,12 +124833,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124773,12 +124947,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -124896,12 +125076,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -125003,12 +125189,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -125103,12 +125295,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -125615,12 +125813,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -125636,12 +125840,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -125842,12 +126052,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -126032,12 +126248,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -126120,12 +126342,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -126251,12 +126479,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -126396,12 +126630,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -126520,12 +126760,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127016,12 +127262,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127037,12 +127289,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127106,12 +127364,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127347,12 +127611,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127368,12 +127638,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127449,12 +127725,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127787,12 +128069,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -127808,12 +128096,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -128077,12 +128371,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -128161,12 +128461,18 @@ tableros:
           steps:
             - type: text
               body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           cobro:
             modo: producto
@@ -130384,7 +130690,7 @@ tableros:
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
                       delay_after_sec: 4
-                      buttons: &a25
+                      buttons: &a1
                         - id: pla_pe_lin_segA_quiere
                           label: Quiero comprar
                           action: send_steps
@@ -130402,7 +130708,7 @@ tableros:
 
                           Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
-                      buttons: *a25
+                      buttons: *a1
           x: 720
           y: 430
         - id: pla_pe_lin_cobro
@@ -130414,15 +130720,21 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: &a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
             - type: text
               body_variants:
                 - |-
-                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
-
                   ¿Con qué método prefieres pagar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           x: 1050
           y: 0
@@ -130497,7 +130809,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2040
           y: 0
         - id: pla_pe_lin_ent_u1
@@ -130590,7 +130917,7 @@ tableros:
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
                       delay_after_sec: 4
-                      buttons: &a27
+                      buttons: &a2
                         - id: pla_pe_ob_segA_quiere
                           label: Quiero comprar
                           action: send_steps
@@ -130608,7 +130935,7 @@ tableros:
 
                           Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
-                      buttons: *a27
+                      buttons: *a2
           x: 720
           y: 1680
         - id: pla_pe_ob_ob
@@ -130668,7 +130995,7 @@ tableros:
                           1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
                           2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
                       delay_after_sec: 4
-                      buttons: &a28
+                      buttons: &a3
                         - id: pla_pe_ob_segB_basico
                           label: Solo el básico
                           action: send_steps
@@ -130690,7 +131017,7 @@ tableros:
                           1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
                           2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
                       delay_after_sec: 4
-                      buttons: *a28
+                      buttons: *a3
           x: 1050
           y: 1680
         - id: pla_pe_ob_cobro_b
@@ -130703,7 +131030,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 1250
         - id: pla_pe_ob_cobro_p
@@ -130716,7 +131058,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 1680
         - id: pla_pe_ob_ent_b
@@ -130766,7 +131123,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 1250
         - id: pla_pe_ob_ent_u1
@@ -130870,7 +131242,7 @@ tableros:
                           1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
                           2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
                       delay_after_sec: 4
-                      buttons: &a29
+                      buttons: &a4
                         - id: pla_pe_dou_seg_basico
                           label: Solo el básico
                           action: send_steps
@@ -130892,7 +131264,7 @@ tableros:
                           1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
                           2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
                       delay_after_sec: 4
-                      buttons: *a29
+                      buttons: *a4
           x: 720
           y: 2930
         - id: pla_pe_dou_cobro_b
@@ -130905,7 +131277,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 2500
         - id: pla_pe_dou_cobro_p
@@ -130918,7 +131305,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 2930
         - id: pla_pe_dou_ent_b
@@ -130965,7 +131367,22 @@ tableros:
             precio: etapa
             metodos: true
             diferencia: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1710
           y: 2930
         - id: pla_pe_dou_upsell1
@@ -131003,7 +131420,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 2500
         - id: pla_pe_dou_ent_u1
@@ -131082,7 +131514,7 @@ tableros:
                       body_variants:
                         - ¿Sigues por ahí? 😊 Si quieres el material, solo dime que aceptas y te lo envío ahora mismo 💛
                       delay_after_sec: 4
-                      buttons: &a30
+                      buttons: &a5
                         - id: pla_pe_con_segP_acepto
                           label: Sí, acepto
                           action: send_steps
@@ -131100,7 +131532,7 @@ tableros:
                       body_variants:
                         - "Último aviso 💛 El material sigue reservado para ti: ¿lo quieres?"
                       delay_after_sec: 4
-                      buttons: *a30
+                      buttons: *a5
           x: 720
           y: 4180
         - id: pla_pe_con_no
@@ -131151,10 +131583,17 @@ tableros:
 
                   💰 *S/ 15*
                   Todo lo anterior + Acceso total
-
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
                   ¿Con qué método prefieres aportar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           x: 1380
           y: 3750
@@ -131308,7 +131747,7 @@ tableros:
               decisions:
                 - id: pla_ec_lin_intro_quiere
                   title: Quiero comprar
-                  keywords: &a31
+                  keywords: &a6
                     - quiero comprar
                     - quiero pagar
                     - lo quiero
@@ -131345,10 +131784,10 @@ tableros:
 
                           Escríbeme *«quiero comprar»* 😊
                       delay_after_sec: 4
-                      decisions: &a32
+                      decisions: &a7
                         - id: pla_ec_lin_segA_quiere
                           title: Quiero comprar
-                          keywords: *a31
+                          keywords: *a6
             - id: pla_ec_lin_segA_2
               minutos: 600
               variantes:
@@ -131365,7 +131804,7 @@ tableros:
 
                           Escríbeme *«quiero comprar»* 😊
                       delay_after_sec: 4
-                      decisions: *a32
+                      decisions: *a7
           x: 720
           y: 6030
         - id: pla_ec_lin_cobro
@@ -131377,7 +131816,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 5600
         - id: pla_ec_lin_segB
@@ -131438,7 +131892,7 @@ tableros:
               decisions:
                 - id: pla_ec_lin_u1_si
                   title: Sí, lo quiero
-                  keywords: &a37
+                  keywords: &a12
                     - si
                     - sí
                     - claro
@@ -131448,7 +131902,7 @@ tableros:
                     - va
                 - id: pla_ec_lin_u1_no
                   title: No, gracias
-                  keywords: &a38
+                  keywords: &a13
                     - no
                     - no gracias
                     - ahora no
@@ -131465,7 +131919,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2040
           y: 5600
         - id: pla_ec_lin_ent_u1
@@ -131537,7 +132006,7 @@ tableros:
               decisions:
                 - id: pla_ec_ob_intro_quiere
                   title: Quiero comprar
-                  keywords: *a31
+                  keywords: *a6
           x: 720
           y: 6850
         - id: pla_ec_ob_segA
@@ -131562,10 +132031,10 @@ tableros:
 
                           Escríbeme *«quiero comprar»* 😊
                       delay_after_sec: 4
-                      decisions: &a33
+                      decisions: &a8
                         - id: pla_ec_ob_segA_quiere
                           title: Quiero comprar
-                          keywords: *a31
+                          keywords: *a6
             - id: pla_ec_ob_segA_2
               minutos: 600
               variantes:
@@ -131582,7 +132051,7 @@ tableros:
 
                           Escríbeme *«quiero comprar»* 😊
                       delay_after_sec: 4
-                      decisions: *a33
+                      decisions: *a8
           x: 720
           y: 7280
         - id: pla_ec_ob_ob
@@ -131616,7 +132085,7 @@ tableros:
                   decisions:
                     - id: pla_ec_ob_ob_basico
                       title: Solo el básico
-                      keywords: &a34
+                      keywords: &a9
                         - el basico
                         - basico
                         - solo el basico
@@ -131624,7 +132093,7 @@ tableros:
                         - el mas barato
                     - id: pla_ec_ob_ob_pack
                       title: Quiero el pack
-                      keywords: &a35
+                      keywords: &a10
                         - el pack
                         - pack
                         - completo
@@ -131657,13 +132126,13 @@ tableros:
 
                           Escríbeme *«el basico»* o *«el pack»* 😊
                       delay_after_sec: 4
-                      decisions: &a36
+                      decisions: &a11
                         - id: pla_ec_ob_segB_basico
                           title: Solo el básico
-                          keywords: *a34
+                          keywords: *a9
                         - id: pla_ec_ob_segB_pack
                           title: Quiero el pack
-                          keywords: *a35
+                          keywords: *a10
             - id: pla_ec_ob_segB_2
               minutos: 600
               variantes:
@@ -131681,7 +132150,7 @@ tableros:
 
                           Escríbeme *«el basico»* o *«el pack»* 😊
                       delay_after_sec: 4
-                      decisions: *a36
+                      decisions: *a11
           x: 1050
           y: 7280
         - id: pla_ec_ob_cobro_b
@@ -131694,7 +132163,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 6850
         - id: pla_ec_ob_cobro_p
@@ -131707,7 +132191,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 7280
         - id: pla_ec_ob_ent_b
@@ -131744,10 +132243,10 @@ tableros:
               decisions:
                 - id: pla_ec_ob_u1_si
                   title: Sí, lo quiero
-                  keywords: *a37
+                  keywords: *a12
                 - id: pla_ec_ob_u1_no
                   title: No, gracias
-                  keywords: *a38
+                  keywords: *a13
           x: 2040
           y: 6850
         - id: pla_ec_ob_cobro_u1
@@ -131759,7 +132258,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 6850
         - id: pla_ec_ob_ent_u1
@@ -131837,10 +132351,10 @@ tableros:
               decisions:
                 - id: pla_ec_dou_intro_basico
                   title: Solo el básico
-                  keywords: *a34
+                  keywords: *a9
                 - id: pla_ec_dou_intro_pack
                   title: Quiero el pack
-                  keywords: *a35
+                  keywords: *a10
           x: 720
           y: 8100
         - id: pla_ec_dou_seg
@@ -131867,13 +132381,13 @@ tableros:
 
                           Escríbeme *«el basico»* o *«el pack»* 😊
                       delay_after_sec: 4
-                      decisions: &a39
+                      decisions: &a14
                         - id: pla_ec_dou_seg_basico
                           title: Solo el básico
-                          keywords: *a34
+                          keywords: *a9
                         - id: pla_ec_dou_seg_pack
                           title: Quiero el pack
-                          keywords: *a35
+                          keywords: *a10
             - id: pla_ec_dou_seg_2
               minutos: 600
               variantes:
@@ -131891,7 +132405,7 @@ tableros:
 
                           Escríbeme *«el basico»* o *«el pack»* 😊
                       delay_after_sec: 4
-                      decisions: *a39
+                      decisions: *a14
           x: 720
           y: 8530
         - id: pla_ec_dou_cobro_b
@@ -131904,7 +132418,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 8100
         - id: pla_ec_dou_cobro_p
@@ -131917,7 +132446,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 8530
         - id: pla_ec_dou_ent_b
@@ -131950,10 +132494,10 @@ tableros:
               decisions:
                 - id: pla_ec_dou_up_si
                   title: Sí, completar
-                  keywords: *a37
+                  keywords: *a12
                 - id: pla_ec_dou_up_no
                   title: No, gracias
-                  keywords: *a38
+                  keywords: *a13
           x: 1710
           y: 8100
         - id: pla_ec_dou_cobro_up
@@ -131967,7 +132511,22 @@ tableros:
             precio: etapa
             metodos: true
             diferencia: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1710
           y: 8530
         - id: pla_ec_dou_upsell1
@@ -131992,10 +132551,10 @@ tableros:
               decisions:
                 - id: pla_ec_dou_u1_si
                   title: Sí, lo quiero
-                  keywords: *a37
+                  keywords: *a12
                 - id: pla_ec_dou_u1_no
                   title: No, gracias
-                  keywords: *a38
+                  keywords: *a13
           x: 2040
           y: 8100
         - id: pla_ec_dou_cobro_u1
@@ -132007,7 +132566,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 8100
         - id: pla_ec_dou_ent_u1
@@ -132065,7 +132639,7 @@ tableros:
               decisions:
                 - id: pla_ec_con_promesa_acepto
                   title: Sí, acepto
-                  keywords: &a40
+                  keywords: &a15
                     - acepto
                     - si acepto
                     - si
@@ -132075,7 +132649,7 @@ tableros:
                     - lo quiero
                 - id: pla_ec_con_promesa_no
                   title: No, gracias
-                  keywords: *a38
+                  keywords: *a13
           x: 720
           y: 9350
         - id: pla_ec_con_segP
@@ -132098,13 +132672,13 @@ tableros:
 
                           Escríbeme *«acepto»* o *«no»* 😊
                       delay_after_sec: 4
-                      decisions: &a41
+                      decisions: &a16
                         - id: pla_ec_con_segP_acepto
                           title: Sí, acepto
-                          keywords: *a40
+                          keywords: *a15
                         - id: pla_ec_con_segP_no
                           title: No, gracias
-                          keywords: *a38
+                          keywords: *a13
             - id: pla_ec_con_segP_2
               minutos: 600
               variantes:
@@ -132119,7 +132693,7 @@ tableros:
 
                           Escríbeme *«acepto»* o *«no»* 😊
                       delay_after_sec: 4
-                      decisions: *a41
+                      decisions: *a16
           x: 720
           y: 9780
         - id: pla_ec_con_no
@@ -132170,10 +132744,17 @@ tableros:
 
                   💰 *$ 3*
                   Todo lo anterior + Acceso total
-
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
                   ¿Con qué método prefieres aportar? 👇
 
                   {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
               delay_after_sec: 4
           x: 1380
           y: 9350
@@ -132329,7 +132910,7 @@ tableros:
               decisions:
                 - id: pla_ar_lin_intro_quiere
                   title: 1 · Quiero comprar
-                  keywords: &a42
+                  keywords: &a17
                     - "1"
                     - uno
                     - opcion 1
@@ -132361,10 +132942,10 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: &a43
+                      decisions: &a18
                         - id: pla_ar_lin_segA_quiere
                           title: 1 · Quiero comprar
-                          keywords: *a42
+                          keywords: *a17
             - id: pla_ar_lin_segA_2
               minutos: 600
               variantes:
@@ -132383,7 +132964,7 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: *a43
+                      decisions: *a18
           x: 720
           y: 11630
         - id: pla_ar_lin_cobro
@@ -132395,7 +132976,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 11200
         - id: pla_ar_lin_segB
@@ -132460,10 +133056,10 @@ tableros:
               decisions:
                 - id: pla_ar_lin_u1_si
                   title: 1 · Sí, lo quiero
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_lin_u1_no
                   title: 2 · No, gracias
-                  keywords: &a45
+                  keywords: &a20
                     - "2"
                     - dos
                     - opcion 2
@@ -132480,7 +133076,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2040
           y: 11200
         - id: pla_ar_lin_ent_u1
@@ -132554,7 +133165,7 @@ tableros:
               decisions:
                 - id: pla_ar_ob_intro_quiere
                   title: 1 · Quiero comprar
-                  keywords: *a42
+                  keywords: *a17
           x: 720
           y: 12450
         - id: pla_ar_ob_segA
@@ -132581,10 +133192,10 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: &a44
+                      decisions: &a19
                         - id: pla_ar_ob_segA_quiere
                           title: 1 · Quiero comprar
-                          keywords: *a42
+                          keywords: *a17
             - id: pla_ar_ob_segA_2
               minutos: 600
               variantes:
@@ -132603,7 +133214,7 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: *a44
+                      decisions: *a19
           x: 720
           y: 12880
         - id: pla_ar_ob_ob
@@ -132640,10 +133251,10 @@ tableros:
                   decisions:
                     - id: pla_ar_ob_ob_basico
                       title: 1 · Solo el básico
-                      keywords: *a42
+                      keywords: *a17
                     - id: pla_ar_ob_ob_pack
                       title: 2 · Quiero el pack
-                      keywords: *a45
+                      keywords: *a20
           x: 1050
           y: 12450
         - id: pla_ar_ob_segB
@@ -132673,13 +133284,13 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: &a46
+                      decisions: &a21
                         - id: pla_ar_ob_segB_basico
                           title: 1 · Solo el básico
-                          keywords: *a42
+                          keywords: *a17
                         - id: pla_ar_ob_segB_pack
                           title: 2 · Quiero el pack
-                          keywords: *a45
+                          keywords: *a20
             - id: pla_ar_ob_segB_2
               minutos: 600
               variantes:
@@ -132700,7 +133311,7 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: *a46
+                      decisions: *a21
           x: 1050
           y: 12880
         - id: pla_ar_ob_cobro_b
@@ -132713,7 +133324,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 12450
         - id: pla_ar_ob_cobro_p
@@ -132726,7 +133352,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1380
           y: 12880
         - id: pla_ar_ob_ent_b
@@ -132766,10 +133407,10 @@ tableros:
               decisions:
                 - id: pla_ar_ob_u1_si
                   title: 1 · Sí, lo quiero
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_ob_u1_no
                   title: 2 · No, gracias
-                  keywords: *a45
+                  keywords: *a20
           x: 2040
           y: 12450
         - id: pla_ar_ob_cobro_u1
@@ -132781,7 +133422,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 12450
         - id: pla_ar_ob_ent_u1
@@ -132862,10 +133518,10 @@ tableros:
               decisions:
                 - id: pla_ar_dou_intro_basico
                   title: 1 · Solo el básico
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_dou_intro_pack
                   title: 2 · Quiero el pack
-                  keywords: *a45
+                  keywords: *a20
           x: 720
           y: 13700
         - id: pla_ar_dou_seg
@@ -132895,13 +133551,13 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: &a47
+                      decisions: &a22
                         - id: pla_ar_dou_seg_basico
                           title: 1 · Solo el básico
-                          keywords: *a42
+                          keywords: *a17
                         - id: pla_ar_dou_seg_pack
                           title: 2 · Quiero el pack
-                          keywords: *a45
+                          keywords: *a20
             - id: pla_ar_dou_seg_2
               minutos: 600
               variantes:
@@ -132922,7 +133578,7 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: *a47
+                      decisions: *a22
           x: 720
           y: 14130
         - id: pla_ar_dou_cobro_b
@@ -132935,7 +133591,22 @@ tableros:
               - ptpla_pack
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 13700
         - id: pla_ar_dou_cobro_p
@@ -132948,7 +133619,22 @@ tableros:
               - ptpla_basico
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1050
           y: 14130
         - id: pla_ar_dou_ent_b
@@ -132984,10 +133670,10 @@ tableros:
               decisions:
                 - id: pla_ar_dou_up_si
                   title: 1 · Sí, completar
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_dou_up_no
                   title: 2 · No, gracias
-                  keywords: *a45
+                  keywords: *a20
           x: 1710
           y: 13700
         - id: pla_ar_dou_cobro_up
@@ -133001,7 +133687,22 @@ tableros:
             precio: etapa
             metodos: true
             diferencia: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 1710
           y: 14130
         - id: pla_ar_dou_upsell1
@@ -133029,10 +133730,10 @@ tableros:
               decisions:
                 - id: pla_ar_dou_u1_si
                   title: 1 · Sí, lo quiero
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_dou_u1_no
                   title: 2 · No, gracias
-                  keywords: *a45
+                  keywords: *a20
           x: 2040
           y: 13700
         - id: pla_ar_dou_cobro_u1
@@ -133044,7 +133745,22 @@ tableros:
             acepta: []
             precio: etapa
             metodos: true
-          steps: *a26
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           x: 2370
           y: 13700
         - id: pla_ar_dou_ent_u1
@@ -133105,10 +133821,10 @@ tableros:
               decisions:
                 - id: pla_ar_con_promesa_acepto
                   title: 1 · Sí, acepto
-                  keywords: *a42
+                  keywords: *a17
                 - id: pla_ar_con_promesa_no
                   title: 2 · No, gracias
-                  keywords: *a45
+                  keywords: *a20
           x: 720
           y: 14950
         - id: pla_ar_con_segP
@@ -133134,13 +133850,13 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: &a48
+                      decisions: &a23
                         - id: pla_ar_con_segP_acepto
                           title: 1 · Sí, acepto
-                          keywords: *a42
+                          keywords: *a17
                         - id: pla_ar_con_segP_no
                           title: 2 · No, gracias
-                          keywords: *a45
+                          keywords: *a20
             - id: pla_ar_con_segP_2
               minutos: 600
               variantes:
@@ -133158,7 +133874,7 @@ tableros:
 
                           Escríbeme el número 😊
                       delay_after_sec: 4
-                      decisions: *a48
+                      decisions: *a23
           x: 720
           y: 15380
         - id: pla_ar_con_no

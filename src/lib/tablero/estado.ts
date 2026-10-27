@@ -416,6 +416,23 @@ export function apuntarHuella(huella: string, conversationId: number): boolean {
   );
 }
 
+/** La conversación que registró ese comprobante (null = nadie). */
+export function quienRegistroLaHuella(huella: string): number | null {
+  const fila = db.prepare("SELECT conversation_id FROM tablero_pagos WHERE huella = ?").get(huella) as
+    | { conversation_id: number }
+    | undefined;
+  return fila?.conversation_id ?? null;
+}
+
+/** Las fichas por las que pasó, de la más reciente a la más vieja (una vez cada una). */
+export function fichasVisitadas(conversationId: number): string[] {
+  return (
+    db.prepare("SELECT ficha_id FROM tablero_visitas WHERE conversation_id = ? ORDER BY rowid DESC").all(conversationId) as Array<{
+      ficha_id: string;
+    }>
+  ).map((f) => f.ficha_id);
+}
+
 export function botonYaUsado(conversationId: number, botonId: string): boolean {
   const fila = db.prepare("SELECT botones_usados FROM tablero_estado WHERE conversation_id = ?").get(conversationId) as
     | { botones_usados?: string }
