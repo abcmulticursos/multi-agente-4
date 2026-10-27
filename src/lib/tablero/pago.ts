@@ -31,7 +31,55 @@ export function metodoQueNombra(contenido: string, phone: string | null | undefi
   // El botón de método llega como su id («pmethod:<id>:n» → «<id>», ver `textoDelBotonPulsado`).
   const porId = metodos.find((m) => m.method.trim().toLowerCase() === limpio);
   if (porId) return porId.method;
-  return detectDynamicPaymentMethod(contenido, phone);
+  // UN MÉTODO NEGADO NO SE ELIGE (27/10/2026), la regla de la venta de siempre (`methodMentionIsNegated`):
+  // «no tengo pichincha, tengo guayaquil» es GUAYAQUIL; «no tengo yape» no es ninguno. Una negación cuenta
+  // en las 4 palabras de antes, y la puntuación la corta.
+  const libres = metodosSinNegar(contenido, phone);
+  const detectado = detectDynamicPaymentMethod(contenido, phone);
+  if (libres.size === 1) return [...libres][0];
+  if (detectado && (libres.size === 0 ? !hayMencionNegada(contenido, phone) : libres.has(detectado))) return detectado;
+  return null;
+}
+
+const NEGACIONES = new Set(["no", "ni", "sin", "tampoco", "nunca", "jamas"]);
+function palabrasMarcadas(msg: string): string[] {
+  return msg
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "")
+    .replace(/[,.;:!?\n]+/g, " | ")
+    .replace(/[^a-z0-9|]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
+}
+/** Las menciones de métodos: [método, negado]. Solo palabras exactas (nombre o alias de una palabra). */
+function menciones(msg: string, phone: string | null | undefined): Array<[string, boolean]> {
+  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const words = palabrasMarcadas(msg);
+  const fuera: Array<[string, boolean]> = [];
+  for (const m of getPaymentMethods(phone)) {
+    const claves = [m.label, ...(m.aliases ?? [])].map(norm).filter((k) => k && !k.includes(" "));
+    words.forEach((w, i) => {
+      if (!claves.includes(w)) return;
+      let negado = false;
+      for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
+        if (words[j] === "|") break;
+        if (NEGACIONES.has(words[j])) {
+          negado = true;
+          break;
+        }
+      }
+      fuera.push([m.method, negado]);
+    });
+  }
+  return fuera;
+}
+function metodosSinNegar(msg: string, phone: string | null | undefined): Set<string> {
+  return new Set(menciones(msg, phone).filter(([, n]) => !n).map(([m]) => m));
+}
+function hayMencionNegada(msg: string, phone: string | null | undefined): boolean {
+  return menciones(msg, phone).some(([, n]) => n);
 }
 
 /**

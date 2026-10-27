@@ -102,6 +102,10 @@ export interface ContextoDeLaIA {
    * ESTA respuesta, una sola frase de por qué conviene la más completa.
    */
   recomendarLaCompleta?: boolean;
+  /** EL CANDADO DE LA ELECCIÓN: lo que eligió, con su precio («PACK… (US$ 4)»). */
+  eligio?: string;
+  /** Entró en el precio de oferta (lo activó un seguimiento). */
+  enOferta?: boolean;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -152,6 +156,89 @@ function loQueSabe(c: ContextoDeLaIA): string {
 }
 
 /**
+ * EL CEREBRO DEL TABLERO CON SECCIONES (27/10/2026, su encargo «que se comporte como el automático»):
+ * el cerebro del tablero puede traer la copia de su cerebro del automático, partida en secciones con
+ * «=== NOMBRE ===» (ROL, IDIOMA, PAGO, PRECIO Y CIERRE, POSTVENTA). Como en la venta de siempre
+ * (`promptSectionExclusionsForTurn`), se recorta por etapa: vendiendo no va la POSTVENTA; después de
+ * comprar no van PAGO ni PRECIO Y CIERRE. Sus comodines se llenan con el producto que se ofrece aquí.
+ * Sin secciones, el texto va entero (como antes).
+ */
+function cerebroDeLaTienda(c: ContextoDeLaIA): { texto: string; conSecciones: boolean } {
+  const crudo = (c.cerebroGeneral ?? "").trim() || CEREBRO_DE_FABRICA;
+  const partes = crudo.split(/^===\s*(.+?)\s*===\s*$/m);
+  const conSecciones = partes.length >= 3;
+  let texto = crudo;
+  if (conSecciones) {
+    const fuera = c.etapa === "postventa" ? /^(pago|precio y cierre)$/i : /^postventa$/i;
+    const trozos: string[] = [partes[0].trim()];
+    for (let i = 1; i < partes.length; i += 2) {
+      if (fuera.test(partes[i].trim())) continue;
+      trozos.push(partes[i + 1]?.trim() ?? "");
+    }
+    texto = trozos.filter(Boolean).join("\n\n");
+  }
+  // Sus comodines, con lo que se ofrece AQUÍ (lo elegido, o el primero que no compró).
+  const principal =
+    (c.productos ?? []).find((p) => c.eligio?.startsWith(p.nombre)) ?? (c.productos ?? []).find((p) => !p.comprado) ?? c.productos?.[0];
+  const precio = principal?.precio ?? "su precio";
+  texto = texto
+    .replace(/\{\{\s*PRODUCTO\s*\}\}/g, principal?.nombre ?? "el producto")
+    .replace(/\{\{\s*PRECIO_COMPLETO_MAYUSCULAS\s*\}\}/g, precio.toUpperCase())
+    .replace(/\{\{\s*PRECIO_COMPLETO_MINUSCULAS\s*\}\}/g, precio.toLowerCase())
+    .replace(/\{\{\s*PRECIO_COMPLETO\s*\}\}/g, precio)
+    .replace(/\{\{\s*PRICE\s*\}\}/g, (precio.match(/[\d.,]+/)?.[0] ?? precio))
+    .replace(/\{\{\s*(MONEDA|SIMBOLO)\s*\}\}/g, (precio.match(/^[^\d\s]+/)?.[0] ?? "").trim());
+  return { texto, conSecciones };
+}
+
+/**
+ * LAS REGLAS FIJAS QUE LA VENTA DE SIEMPRE PONE EN TODOS LOS TURNOS (openrouter.ts, `addFijo`), el
+ * mismo texto: sin el nombre del cliente, un emoji, distancia profesional, sin «quisieras», datos solo
+ * del contenido, negrita ligera. No nombran productos: son de la casa.
+ */
+const REGLAS_FIJAS_DEL_AUTOMATICO = [
+  `CUSTOMER NAME — DO NOT USE ANY NAME: never address the customer by name — do not greet them by name and do not sprinkle a name into messages. Using their name feels intrusive and overfamiliar ("confianzudo"). Speak naturally, warmly, without any name.`,
+  `EMOJI TONE — include 1 context-appropriate emoji in every conversational reply (2 maximum across the full reply). Keep it professional and relevant; never use kisses, romantic hearts, winks or overly familiar emojis.`,
+  `PROFESSIONAL DISTANCE — avoid overfamiliar slang or casual reassurance such as "tranqui", "no te preocupes", "amigo/amiga", "bro", "corazon", "lindo/linda", "mi reina", "mi estimado/estimada" or similar. Use respectful, neutral phrases instead: "claro", "con gusto", "te explico", "sí, correcto", "puedes hacerlo así".`,
+  `CTA WORDING - do NOT use "quisieras" in sales CTAs. Do NOT close with "Quisieras saber como adquirirlo" or "Quieres saber como adquirirlo". Prefer "Quieres que te indique como adquirirlo?", "Deseas que te indique como adquirirlo?" or another short CTA with adquirirlo/proceder/metodo de pago.`,
+  `PRODUCT FACTS: state quantities, bonuses, formats and features only when present in the product content you were given. Never infer, alter or invent facts; if uncertain, omit them or ask.`,
+  `FORMATTING: in WhatsApp, *word* makes it bold (ONE asterisk). Highlight ONLY the most important terms in *bold* — at most 1-3 key words/phrases per message. NEVER bold whole sentences or most of the text; keep it light and tasteful.`,
+].join("\n");
+
+/**
+ * LAS DOS OPCIONES A LA VISTA (27/10/2026): el bloque de la venta de siempre para Order Bump / Doble
+ * Oferta (openrouter.ts, «ORDER BUMP ACTIVE»), con las reglas que no dependen de su motor. Va cuando
+ * en la ficha hay dos o más productos por elegir. Su regla editable de Ajustes va detrás.
+ */
+function bloqueDeLasOpciones(c: ContextoDeLaIA): string {
+  const ops = c.opcionesDeCompra ?? [];
+  if (ops.length < 2) return "";
+  const regla = loadWorkflowConfig()?.order_bump_option_presentation_rule?.trim();
+  return [
+    `TWO OR MORE SELLABLE OPTIONS ARE ON THE TABLE: ${ops.join(" · ")}. This OVERRIDES any "you only sell ONE product" wording above: these are all products of this store.`,
+    `PRESENTATION ORDER — present the most complete option FIRST and the other SECOND. Treat each option as a valuable, valid choice in its own right; never belittle one or describe it as an inferior leftover.`,
+    `COMPLEMENT WORDING — an additional product inside a bundle is NOT a gift, freebie or bonus unless its content explicitly says so.`,
+    `Interpret the customer's meaning from the full conversation. Questions, comparisons, unusual wording and topic changes are not choices. Answer first; never treat one matching word as a choice.`,
+    `Be warm, direct and commercial, with at least one fitting emoji. Stay professional, calm and concise (no chit-chat, no pushiness): do NOT volunteer a recommendation unless a turn rule below asks for it — simply ask, once and gently, which one they prefer; only help them decide if THEY ask for it. Avoid flyer-like dumps, repetition and pressure.`,
+    `If they ask what one option is / includes, explain it by its content and its relation to the other, WITHOUT any price unless they asked for the price.`,
+    `When you present the options: one option per paragraph separated by a blank line; names in bold; no numbered/keycap emojis.`,
+    `A payment question or a payment-method name is NEVER a product choice: if no option is chosen yet, ask which one they prefer first.`,
+    `PURCHASE CONFIRMATION — money safety: NEVER tell the customer their purchase is approved, complete or done. Only the system confirms and delivers, after a receipt covering the full amount arrives.`,
+    regla ? `OPTION PRESENTATION RULE (from the owner's settings):\n${regla}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** UN SOLO PRODUCTO (openrouter.ts, «SINGLE-PRODUCT MODE»): vendiendo, sin opciones por elegir. */
+function bloqueDeUnProducto(c: ContextoDeLaIA): string {
+  if (c.etapa !== "venta" || (c.opcionesDeCompra?.length ?? 0) > 1) return "";
+  const enVenta = (c.productos ?? []).filter((p) => !p.comprado);
+  if (enVenta.length !== 1) return "";
+  return `SINGLE-PRODUCT MODE — there is exactly ONE product on offer here. If the customer asks about an unrelated topic, redirect warmly: make clear we only offer this one material and, in ONE short phrase, say what it helps with (drawn ONLY from its content). Do NOT imply there are other products. Do NOT label it as option 1/2 or use numbered option emojis. Answer the customer's concern first, write in clear WhatsApp paragraphs/bubbles instead of one dense block, stay warm and professional, and close with a soft next step.`;
+}
+
+/**
  * EL CEREBRO QUE SE LE DA A LA IA. Lo FIJO va primero (el cerebro general, las reglas del dinero y el
  * dialecto: iguales en todos los turnos de este tablero), para que el proveedor lo cobre más barato
  * como prefijo repetido; lo que cambia en cada turno va detrás.
@@ -160,22 +247,33 @@ function cerebro(c: ContextoDeLaIA): string {
   const montos = c.montosPermitidos.length
     ? `Los ÚNICOS montos que puedes mencionar son: ${c.montosPermitidos.join(", ")}${c.moneda ? ` (${c.moneda})` : ""}. Ningún otro número de dinero, ni sumas, ni descuentos.`
     : "NO menciones ningún precio ni monto de dinero: si preguntan cuánto cuesta, di que en un momento le compartes la información, sin inventar cifras.";
+  const suCerebro = cerebroDeLaTienda(c);
   return [
     // ── FIJO ──
-    (c.cerebroGeneral ?? "").trim() || CEREBRO_DE_FABRICA,
+    suCerebro.texto,
     "REGLAS QUE NO SE ROMPEN: la conversación sigue una ruta armada por el dueño; contesta y devuélvelo a ella. No des datos de pago, números de cuenta, nombres de titular ni enlaces: eso lo envía el sistema. No inventes contenido, beneficios, plazos ni condiciones. Escribe en español neutro.",
-    // LAS REGLAS DE CONVERSACIÓN DE LA VENTA DE SIEMPRE, SU MISMO TEXTO (27/10/2026: «quiero que responda
-    // como el automático»): desconfianza, preguntas de precio, formato y tono, cierre y gramática.
-    reglasDelAutomatico(c),
+    // LAS REGLAS DE CONVERSACIÓN DE LA VENTA DE SIEMPRE (27/10/2026): si el cerebro del tablero ya trae su
+    // cerebro del automático (con secciones), sus reglas ya van ahí; si no, el texto de fábrica del código.
+    suCerebro.conSecciones ? "" : reglasDelAutomatico(c),
+    REGLAS_FIJAS_DEL_AUTOMATICO,
     "IMÁGENES: no ofrezcas ni prometas fotos, imágenes ni videos por tu cuenta: de eso se encarga el sistema.",
+    bloqueDeLasOpciones(c),
+    bloqueDeUnProducto(c),
     excepcionesDelTablero(c),
     c.dialecto ? `DIALECTO (manda sobre todo lo demás): ${c.dialecto}` : "",
     // ── LO DE ESTE TURNO ──
     loQueSabe(c),
+    c.eligio
+      ? `EL CLIENTE YA ELIGIÓ: ${c.eligio}. Todo lo que digas de precio, pago o datos es de ESE producto. Si pregunta por el otro, contéstale, pero no cambies su elección ni le digas otro precio a pagar: solo cambia si él lo dice claramente.`
+      : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
       : "",
     montos,
+    // La venta de siempre (openrouter.ts, `discountActive`): por qué está más barato.
+    c.enOferta
+      ? "Este cliente entró en el precio de oferta. Si pregunta por qué está más barato, dile que es una promoción especial por seguir interesado."
+      : "",
     c.instrucciones?.trim() ? `EN ESTA ETAPA, ADEMÁS: ${c.instrucciones.trim().slice(0, 3000)}` : "",
     c.completar ? `Si dice que quiere completar, pagar la diferencia o pasarse a «${c.completar.para}», usa la herramienta completar_al_otro.` : "",
     c.pedirCorreo ? "Si pide que le envíes lo que ya recibió a su correo (email), usa la herramienta enviar_por_correo." : "",
@@ -231,7 +329,7 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
     "- No apruebas pagos ni revisas comprobantes: eso lo hace el sistema.",
     `- NUNCA preguntes por el método de pago por tu cuenta (nada de «¿con qué método te sientes más cómodo?»): el sistema lo pregunta cuando el cliente elige. Solo si el cliente PREGUNTA cómo pagar o cuáles son los métodos, nómbralos en lista vertical, solo sus nombres${c.metodos?.length ? ` (${c.metodos.join(", ")})` : ""}, y cierra con «¿Cuál prefieres?».`,
     c.opcionesDeCompra?.length
-      ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Cuando hables de los productos, nómbralas TODAS con su precio (aunque pregunte por una) y cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
+      ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Si pregunta el precio sin haber elegido, nómbralas TODAS con su precio (no hay un solo precio); si pregunta qué trae una, contesta sin precio. Cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
       : "",
     "- Si ya compró (postventa) o tiene un problema, no cierres con pregunta de venta.",
     "- Lo que ya compró no se le vuelve a ofrecer ni a cobrar.",
@@ -561,6 +659,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // que sobraba en la última burbuja (se veía apretado). Con tope, lo que sobra se junta en la última
   // para que no se pierda (`sendChunkedBotText` cortaría).
   const cfg = loadWorkflowConfig();
+  /** Los datos verdaderos del cobro ya salieron (la IA había escrito una cuenta): eso ya es respuesta. */
+  let reenvioPorCuenta = false;
   const tope = cfg?.llm_bubble_limit_enabled === true ? Math.max(1, Math.floor(cfg.llm_max_bubbles ?? 3)) : null;
   const alTope = (partes: string[], n: number | null) => (n && partes.length > n ? [...partes.slice(0, n - 1), partes.slice(n - 1).join("\n")] : partes);
   {
@@ -580,7 +680,10 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         if (quedan.length && /:\s*$/.test(quedan[quedan.length - 1])) quedan[quedan.length - 1] = quedan[quedan.length - 1].replace(/(^|\n)[^\n]*:\s*$/, "").trim();
         console.log(`[tablero:ia] convo ${convo.id}: escribió datos de cuenta → se quitan (los manda solo el sistema)${c.reenviarDatos ? "; reenvío los de su cobro" : ""}`);
         texto = quedan.filter(Boolean).join("\n\n");
-        if (c.reenviarDatos) await c.reenviarDatos();
+        if (c.reenviarDatos) {
+          await c.reenviarDatos();
+          reenvioPorCuenta = true;
+        }
       }
     }
     // UNA FRASE CORTADA AL FINAL («Los métodos que tenemos para ti son:» y nada más) no sale (27/10/2026).
@@ -590,9 +693,16 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     if (c.etapa === "venta" && !/(metodo|como (te )?pago|formas? de pago|medios? de pago|como se paga|donde pago)/.test(delCliente)) {
       const burbujas = texto.split(/\n\s*\n/);
       const ult = burbujas[burbujas.length - 1] ?? "";
-      if (/\?/.test(ult) && /(m[eé]todo|c[oó]mo (prefieres|deseas|quieres) pagar|con qu[eé] (pagas|pagar))/i.test(ult)) {
-        console.log(`[tablero:ia] convo ${convo.id}: preguntó el método por su cuenta → se quita «${ult.slice(0, 60)}»`);
-        texto = burbujas.slice(0, -1).join("\n\n").trim();
+      // Solo la pregunta de CUÁL método («¿con qué método te sientes más cómodo?»), no la invitación de la
+      // venta de siempre («¿Deseas que te indique los métodos de pago…?»), que el automático sí hace.
+      const preguntaCualMetodo = /(con qu[eé] m[eé]todo|qu[eé] m[eé]todo|cu[aá]l (es tu )?m[eé]todo|c[oó]mo (prefieres|deseas|quieres) pagar|con qu[eé] (pagas|pagar|te sientes))/i;
+      if (/\?/.test(ult) && preguntaCualMetodo.test(ult)) {
+        // SOLO LA FRASE DE LA PREGUNTA, no la burbuja entera (27/10/2026, su prueba H2: «¡Hola! Qué gusto…
+        // ¿ya decidiste con qué método…?» venía en UNA burbuja y quitarla dejó al cliente sin respuesta).
+        const frases = ult.split(/(?<=[.!?¡¿\n])\s+/);
+        const sinLaPregunta = frases.filter((f) => !(/\?/.test(f) && preguntaCualMetodo.test(f))).join(" ").trim();
+        console.log(`[tablero:ia] convo ${convo.id}: preguntó el método por su cuenta → se quita esa pregunta`);
+        texto = [...burbujas.slice(0, -1), sinLaPregunta].filter((b) => b.trim()).join("\n\n").trim();
       }
     }
     // CON TOPE, la última burbuja es la que se mira (antes la pregunta agregada se perdía).
@@ -637,7 +747,17 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .join("\n\n")
       .trim();
   }
-  if (!texto) return salieronMuestras;
+  // NUNCA MUDO (27/10/2026): si los frenos dejaron la respuesta vacía y no salió nada más (ni muestras ni
+  // los datos del cobro), sale una pregunta corta: un cliente sin respuesta es una venta perdida.
+  if (!texto && !salieronMuestras && !reenvioPorCuenta) {
+    const recientes = ultimosMensajes(convo.id, 8).filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
+    texto =
+      c.etapa === "venta" && !c.nota
+        ? PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0]
+        : "¿En qué más te puedo ayudar? 😊";
+    console.log(`[tablero:ia] convo ${convo.id}: la respuesta quedó vacía → sale «${texto}» (nunca mudo)`);
+  }
+  if (!texto) return salieronMuestras || reenvioPorCuenta;
   // **ASÍ** (markdown) no es negrita en WhatsApp: se ve con asteriscos de más. Se deja *así*.
   texto = texto.replace(/\*\*([^*\n]+)\*\*/g, "*$1*").replace(/^#{1,6}\s+/gm, "");
   // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.

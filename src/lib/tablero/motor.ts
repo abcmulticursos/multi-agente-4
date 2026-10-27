@@ -504,9 +504,11 @@ async function irA(
     yaEspero?: boolean;
     /** Solo un Cobro: se abre callado (sin burbujas ni seguimientos), para atender un comprobante. */
     enSilencio?: boolean;
+    /** Solo un Cobro: se cobra la DIFERENCIA con lo que ya pagó (el upgrade de la venta de siempre). */
+    upgrade?: boolean;
   } = {}
 ): Promise<void> {
-  const { yaEspero = false, enSilencio = false } = opciones;
+  const { yaEspero = false, enSilencio = false, upgrade = false } = opciones;
   const convo = getConversationById(convoId);
   if (!convo || noSeLeEscribe(convo)) return;
   if (pasos > 25) {
@@ -681,7 +683,7 @@ async function irA(
       if (f.cobro?.modo === "producto" && f.cobro.producto_id && especial) precios[f.cobro.producto_id] = especial;
       // EL UPGRADE: si ya compró uno de éstos más barato, los más caros cuestan la diferencia y lo
       // que ya tiene (o uno más barato) ya no se cobra.
-      if (f.cobro?.modo === "producto" && f.cobro.diferencia) {
+      if (f.cobro?.modo === "producto" && (f.cobro.diferencia || upgrade)) {
         const pagado = Math.max(
           0,
           ...comprasDelCliente(convoId)
@@ -714,6 +716,20 @@ async function irA(
       // No se le manda nada: se lee su comprobante contra este cobro (ver `cobroQueEncajaConElPago`).
       if (enSilencio) {
         console.log(`[tablero] convo ${convoId}: cobro «${f.titulo || f.id}» abierto en silencio para su comprobante`);
+        return;
+      }
+      // EL UPGRADE, CON LAS PALABRAS DE LA VENTA DE SIEMPRE (`sendOrderBumpComboUpgradeMessage`): cuánto le
+      // falta para llevarse el completo. Después, los datos de su método (si ya lo tiene) o la pregunta.
+      if (upgrade && principal && precio !== undefined) {
+        await sendConfiguredSteps(convo, [
+          {
+            type: "text",
+            body: `Sí, claro 😊 Puedes completar *${formatCurrencyAmount(precio, pais as never)}* para llevarte *${nombre ?? "el completo"}*. Cuando envíes el comprobante de lo que falta, te lo dejo listo.`,
+          },
+        ] as never);
+        const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
+        if (!(yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre)))) await preguntarElMetodo(convo, [] as never, precio, nombre);
+        console.log(`[tablero] convo ${convoId}: upgrade a «${nombre}» — falta ${precio}`);
         return;
       }
       if (f.cobro?.metodos) {
@@ -988,7 +1004,10 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
           x.cobro.producto_id &&
           !comprados.has(x.cobro.producto_id) &&
           [x.cobro.producto_id, ...(x.cobro.acepta ?? [])].some((id) => comprados.has(id))
-      )
+      ) ??
+      // EL UPGRADE AUTOMÁTICO (27/10/2026): también sin ficha de «diferencia», un cobro de su ruta que
+      // acepta lo que ya compró (`loQuePuedeComprar`), como la venta de siempre.
+      loQuePuedeComprar(convo, t, pais).find((o) => o.upgrade)?.ficha
     : undefined;
   // LA ETAPA (25/10/2026): vendiendo (lo que se le ofrece aún no lo compró), con los datos de pago ya
   // enviados (espera su comprobante), o después de comprar sin nada nuevo delante.
@@ -1032,7 +1051,15 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     !hablaDeUnProblema &&
     (preguntaCuantasOpcionesHay(ultimo) || /\b(diferencia|diferente|diferentes|cual me conviene|cual es mejor|me recomiendas|recomiendas)\b/.test(ultimo));
   const metodosDelPais = getPaymentMethods(convo.phone).map((m) => m.label).filter(Boolean);
+  // EL CANDADO DE LA ELECCIÓN (27/10/2026): con un cobro abierto, la IA sabe qué eligió y a qué precio.
+  const elegidoAhora = cobro?.cobro?.modo === "producto" && estado ? estado.cobro_elegido ?? cobro.cobro.producto_id ?? null : null;
+  const precioElegido = elegidoAhora && estado ? preciosDelCobro(estado)[elegidoAhora] : undefined;
+  const eligio = elegidoAhora
+    ? `${nombreDe(elegidoAhora) ?? elegidoAhora}${precioElegido !== undefined ? ` (${formatCurrencyAmount(precioElegido, pais as never)})` : ""}`
+    : undefined;
   const salio = await responderConIA(convo, {
+    ...(eligio ? { eligio } : {}),
+    ...(estado?.oferta === 1 ? { enOferta: true } : {}),
     ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
     ...(metodosDelPais.length ? { metodos: metodosDelPais } : {}),
     cerebroGeneral: t.cerebro,
@@ -1050,7 +1077,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
                 cancelPendingActionsForConvo(convo.id);
                 setConversationState(convo.id, "tablero");
               }
-              await irA(convo.id, t, upgrade.id);
+              await irA(convo.id, t, upgrade.id, 0, { upgrade: !upgrade.cobro?.diferencia });
             },
           },
         }
@@ -1059,7 +1086,13 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
       ? { pedirCorreo: () => quiereSuCorreo(convo, t, ultimosMensajes(convo.id, 4).filter((m) => m.role === "user").pop()?.content ?? "") }
       : {}),
     preguntaPendiente: ficha && ficha.tipo !== "cobro" && etapa === "venta" ? textoDeLaUltimaBurbuja(pasosVistos(ficha, estado)) : undefined,
-    montosPermitidos: [...new Set([...(estado ? montosDelCobro(t, estado, pais) : []), ...montos])],
+    // LA DIFERENCIA ENTRE DOS PRECIOS TAMBIÉN ES SUYA (27/10/2026, su prueba H3): «el pack por $1 más»,
+    // «completas con $1». El filtro la borraba y pedía otra respuesta (salía apretada y pagada dos veces).
+    montosPermitidos: (() => {
+      const base = [...new Set([...(estado ? montosDelCobro(t, estado, pais) : []), ...montos])];
+      const difs = base.flatMap((a) => base.filter((b) => a > b).map((b) => Math.round((a - b) * 100) / 100));
+      return [...new Set([...base, ...difs])];
+    })(),
     moneda: getCountryInfo(pais).currency,
     nota,
     productos,
@@ -1484,6 +1517,135 @@ function cobroQueEncajaConElPago(
   return null;
 }
 
+/**
+ * LO QUE TODAVÍA PUEDE COMPRAR, después de haber comprado algo (27/10/2026, sus pruebas H2/H3): los
+ * cobros de su ruta (desde las fichas por las que pasó, la más reciente primero) de productos que aún
+ * no tiene. Un cobro que ACEPTA lo que ya compró (o que es de «diferencia») es un UPGRADE: se cobra lo
+ * que falta, como la venta de siempre. Los demás (el upsell) se pagan enteros.
+ */
+type LoQuePuedeComprar = { ficha: FichaDelTablero; productoId: string; nombre: string; precio: number; upgrade: boolean };
+function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): LoQuePuedeComprar[] {
+  const config = loadWorkflowConfig();
+  const compras = comprasDelCliente(convo.id);
+  const comprados = new Set<string>([
+    ...compras.map((c) => c.producto_id ?? ""),
+    ...entregasDelCliente(convo.id).map((k) => k.split("#")[0]),
+  ].filter(Boolean));
+  if (comprados.size === 0) return [];
+  const visitadas = fichasVisitadas(convo.id).filter((id) => t.fichas.find((x) => x.id === id)?.tipo !== "regalo");
+  const fuera: LoQuePuedeComprar[] = [];
+  const vistos = new Set<string>();
+  const estado = estadoEnElTablero(convo.id);
+  for (const desde of visitadas)
+    for (const id of alcanzables(t, [desde])) {
+      const f = t.fichas.find((x) => x.id === id);
+      if (f?.tipo !== "cobro" || f.apagada || f.guardada || f.cobro?.modo !== "producto") continue;
+      const pid = f.cobro.producto_id;
+      if (!pid || comprados.has(pid) || vistos.has(pid)) continue;
+      const p = producto(config, pid);
+      const lleno = precioDelProducto(p, pais, estado?.oferta === 1);
+      if (!p || lleno === null) continue;
+      const deLoComprado = (f.cobro.acepta ?? []).filter((x) => comprados.has(x));
+      const upgrade = deLoComprado.length > 0 || !!f.cobro.diferencia;
+      const pagado = upgrade
+        ? Math.max(0, ...compras.filter((c) => c.producto_id && (deLoComprado.includes(c.producto_id) || f.cobro!.diferencia)).map((c) => c.monto))
+        : 0;
+      const precio = Math.round((lleno - pagado) * 100) / 100;
+      if (precio <= 0) continue;
+      vistos.add(pid);
+      fuera.push({ ficha: f, productoId: pid, nombre: p.name ?? pid, precio, upgrade: upgrade && pagado > 0 });
+    }
+  return fuera;
+}
+
+/** Abre el cobro de lo que puede comprar (saliendo del regalo si estaba en él). */
+async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQuePuedeComprar, enSilencio = false): Promise<void> {
+  const fresca = getConversationById(convo.id) ?? convo;
+  if (!enSilencio && ESTADOS_DEL_REGALO.has(fresca.state ?? "")) {
+    // Como «completar»: el cobro manda ahora; al pagar, su ruta lo lleva a la entrega (y al regalo).
+    cancelPendingActionsForConvo(convo.id);
+    setConversationState(convo.id, "tablero");
+  }
+  console.log(`[tablero] convo ${convo.id}: después de comprar, paga «${x.nombre}» (${x.upgrade ? "upgrade, falta" : "entero"} ${x.precio})`);
+  await irA(convo.id, t, x.ficha.id, 0, { enSilencio, upgrade: x.upgrade });
+}
+
+/** «¿A cuál te refieres?», con los nombres delante (`preguntarPorCualDeLosDos` de la venta de siempre). */
+const PREGUNTA_A_CUAL = "¿A cuál te refieres? 😊";
+async function preguntarACual(convo: ConversationRow, opciones: LoQuePuedeComprar[], pais: string): Promise<void> {
+  const lineas = opciones.map((o) =>
+    o.upgrade
+      ? `• *${o.nombre}* — puedes completar lo que ya pagaste: te faltan *${formatCurrencyAmount(o.precio, pais as never)}*.`
+      : `• *${o.nombre}* — va aparte y se paga completo: *${formatCurrencyAmount(o.precio, pais as never)}*.`
+  );
+  await sendConfiguredSteps(convo, [{ type: "text", body: `${PREGUNTA_A_CUAL}\n\n${lineas.join("\n")}` }] as never);
+  console.log(`[tablero] convo ${convo.id}: después de comprar, quiere pagar sin decir cuál → le pregunto a cuál`);
+}
+
+/**
+ * QUIERE COMPRAR ALGO MÁS DESPUÉS DE COMPRAR (27/10/2026): «quiero pagar eso de mascotas», «puedo
+ * completar», «quiero el otro también». Lo resuelve el bot, no la IA (antes la IA elegía otro producto
+ * y escribía una cuenta). Un producto claro → su cobro; varios → «¿a cuál te refieres?»; y la respuesta
+ * a esa pregunta elige. Devuelve true si atendió el turno.
+ */
+async function comprarDespuesDeComprar(
+  convo: ConversationRow,
+  t: Tablero,
+  contenido: string,
+  pais: string,
+  enElRegalo = false,
+  hayOfertaDelante = false
+): Promise<boolean> {
+  const opciones = loQuePuedeComprar(convo, t, pais);
+  if (opciones.length === 0) return false;
+  const normal = sinTildes(contenido);
+  const ultimaDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+  const respondeAMiPregunta = ultimaDelBot.startsWith(PREGUNTA_A_CUAL);
+  // ¿Cuál nombra? Por una palabra que solo tiene una de las opciones.
+  const palabras = (s: string) => new Set(sinTildes(s).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w)));
+  const conjuntos = opciones.map((o) => palabras(o.nombre));
+  const dichas = palabras(contenido);
+  const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
+  const acertadas = opciones.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
+  // Solo con una intención CLARA de comprar: «lo quiero» a secas puede ser el «sí» al regalo, y una
+  // pregunta («¿qué trae el pack?») la contesta la IA.
+  const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(normal.trim());
+  const completar = /\b(completar|completo|la diferencia|el resto|lo que falta|pasarme al|cambiarme al)\b/.test(normal);
+  // En el regalo, «sí quiero» / «lo quiero» es aceptar el REGALO: ahí solo cuenta pagar o comprar dicho.
+  const quiereComprar =
+    !esPregunta &&
+    ((enElRegalo ? /\b(pagar|pago|comprar|adquirir|depositar|transferir|yapear)\b/.test(normal) : QUIERE_PAGAR.test(normal)) ||
+      completar ||
+      (acertadas.length > 0 && /\b(quiero|quisiera|pagar|pago|comprar|compro|llevar|llevo|adquirir|tambien)\b/.test(normal)));
+  if (!quiereComprar && !respondeAMiPregunta) return false;
+  // Con una oferta delante (el upsell con su «Sí»), «me lo llevo» sin nombrar nada es para ESA oferta: la
+  // atiende su ficha, como el «sí» al extra de la venta de siempre.
+  if (hayOfertaDelante && acertadas.length === 0 && !completar && !respondeAMiPregunta) return false;
+  let elegida: LoQuePuedeComprar | undefined = acertadas.length === 1 ? acertadas[0] : undefined;
+  // Completar sin nombrar, con un solo upgrade posible: ése.
+  if (!elegida && /\b(completar|la diferencia|el resto|lo que falta)\b/.test(normal)) {
+    const upgrades = opciones.filter((o) => o.upgrade);
+    if (upgrades.length === 1 && opciones.length === 1) elegida = upgrades[0];
+  }
+  // Contesta a «¿a cuál te refieres?» con otras palabras («el último que me enseñaste»): decide la IA.
+  if (!elegida && respondeAMiPregunta) {
+    const id = await elegirOpcionConIA(
+      convo.id,
+      contenido,
+      opciones.map((o) => ({ id: o.productoId, etiqueta: `${o.nombre}${o.upgrade ? " (completar lo que ya pagó)" : " (va aparte, el último que se le ofreció si es el upsell)"}` }))
+    );
+    elegida = opciones.find((o) => o.productoId === id);
+  }
+  if (!elegida && opciones.length === 1) elegida = opciones[0];
+  if (elegida) {
+    await abrirLoQuePuedeComprar(convo, t, elegida);
+    return true;
+  }
+  if (respondeAMiPregunta) return false; // ni así: que conteste la IA
+  await preguntarACual(convo, opciones, pais);
+  return true;
+}
+
 async function cerrarLaVenta(
   convo: ConversationRow,
   t: Tablero,
@@ -1832,14 +1994,17 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         const lectura = await leerComprobante(convo.id);
         if (!lectura) return false; // no es un comprobante (la captura del comentario): del regalo
         const regaloId = estado.ficha_id;
-        let encaja: FichaDelTablero | null = null;
-        for (const id of visitadas) {
-          encaja = cobroQueEncajaConElPago(t, [id], lectura.monto, pais, comprados);
-          if (encaja) break;
-        }
+        // Primero lo que puede comprar, con su precio de HOY para él (el upgrade cuesta la diferencia: su $1).
+        const porMonto = loQuePuedeComprar(convo, t, pais).find((o) => Math.abs(o.precio - lectura.monto) < 0.01);
+        let encaja: FichaDelTablero | null = porMonto?.ficha ?? null;
+        if (!encaja)
+          for (const id of visitadas) {
+            encaja = cobroQueEncajaConElPago(t, [id], lectura.monto, pais, comprados);
+            if (encaja) break;
+          }
         if (encaja) {
-          console.log(`[tablero] convo ${convo.id}: comprobante de ${lectura.monto} durante el regalo → «${encaja.titulo || encaja.id}» (lo ofrecido)`);
-          await irA(convo.id, t, encaja.id, 0, { enSilencio: true });
+          console.log(`[tablero] convo ${convo.id}: comprobante de ${lectura.monto} durante el regalo → «${encaja.titulo || encaja.id}» (lo ofrecido${porMonto?.upgrade ? ", upgrade" : ""})`);
+          await irA(convo.id, t, encaja.id, 0, { enSilencio: true, upgrade: !!porMonto?.upgrade });
           // Sigue en el regalo: su ficha vuelve a ser la del regalo («Al terminar el regalo» sale de ahí).
           moverA(convo.id, regaloId);
           const abierto = estadoEnElTablero(convo.id);
@@ -1865,6 +2030,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         await contestarConIA(convo, t, "Mandó un comprobante de pago. Agradécele y dile que un asesor lo revisa enseguida. No confirmes el pago ni entregues nada.");
         return true;
       }
+    }
+    // QUIERE PAGAR ALGO MÁS, ESTANDO EN EL REGALO («quiero pagar eso de mascotas», «puedo completar»).
+    if (t && !estado.cobro_ficha_id && contenido.trim() && !contenido.startsWith("bubble:") && !hayComprobantePendiente(convo.id, estado.comprobante_leido)) {
+      if (await comprarDespuesDeComprar(convo, t, contenido, pais, true)) return true;
     }
     const delRegalo =
       !t ||
@@ -1923,11 +2092,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   if (!estado.cobro_ficha_id && pendiente) {
     const lectura = await leerComprobante(convo.id);
     // EL COBRO QUE ENCAJA CON SU MONTO, desde donde está (lo que hacía la «Caja abierta»).
+    // Lo que puede comprar después de comprar, con su precio de hoy (el upgrade cuesta la diferencia).
+    const porMonto = lectura ? loQuePuedeComprar(convo, t, pais).find((o) => Math.abs(o.precio - lectura.monto) < 0.01) : undefined;
     const encaja = lectura
-      ? cobroQueEncajaConElPago(t, [estado.ficha_id, ...(estado.seg_ficha ? [estado.seg_ficha] : [])], lectura.monto, pais)
+      ? porMonto?.ficha ?? cobroQueEncajaConElPago(t, [estado.ficha_id, ...(estado.seg_ficha ? [estado.seg_ficha] : [])], lectura.monto, pais)
       : null;
     if (lectura && encaja) {
-      await irA(convo.id, t, encaja.id, 0, { enSilencio: true });
+      await irA(convo.id, t, encaja.id, 0, { enSilencio: true, upgrade: !!porMonto?.upgrade });
       const abierto = estadoEnElTablero(convo.id);
       if (abierto?.cobro_ficha_id === encaja.id) {
         await atenderComprobante(convo, t, abierto, lectura);
@@ -2051,6 +2222,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       if (!duena || !(duena.tipo === "mensaje" || duena.tipo === "intro_ob" || duena.tipo === "seguimientos")) continue;
       const d = decisionQueCoincide(texto, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
       if (!d || !cableDeLaSalida(t, duena.id, `dec:${d.id}`)) continue;
+      // EL CANDADO DE LA ELECCIÓN (27/10/2026, su prueba H1): con un cobro abierto, un cuadrito que lleva
+      // a pagar (otro Cobro o el Order bump) no se sigue: el cobro abierto atiende el método y el «quiero
+      // pagar» con el producto que ELIGIÓ. Pasó: eligió el PACK, dijo «vecino», el cuadrito de método de
+      // los seguimientos colgados lo llevó al Cobro del BÁSICO y le pidió el precio del básico. Como la
+      // venta de siempre: con un producto elegido, el método manda los datos de ESE producto.
+      const aDonde = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, `dec:${d.id}`)?.a);
+      if (estado.cobro_ficha_id && (aDonde?.tipo === "cobro" || aDonde?.tipo === "intro_ob")) continue;
       if (metodoDicho) setSelectedPaymentMethod(convo.id, metodoDicho);
       await actuarCuadrito(convo, t, duena, d);
       return true;
@@ -2172,6 +2350,28 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     }
   }
 
+  // «YA PAGUÉ» SIN LA FOTO (27/10/2026), como la venta de siempre: con el cobro abierto y sin imagen, se le
+  // pide el comprobante; no se le vuelve a vender ni se le mandan otra vez los datos.
+  if (
+    texto &&
+    estado.cobro_ficha_id &&
+    !pendiente &&
+    /\b(ya (te )?(pague|yapee|plinee|deposite|transferi|hice (el|la) (pago|transferencia|deposito))|ya esta pagado|ahi (te )?(mande|envie|va) (el|la)? ?(pago|comprobante|captura)|listo ya pague)\b/.test(normal)
+  ) {
+    respondio(convo, t);
+    await contestarConIA(
+      convo,
+      t,
+      "Dice que ya pagó, pero todavía no llegó ninguna imagen de su comprobante. Agradécele y pídele con amabilidad que envíe la foto o captura del comprobante para validarlo y mandarle su material al instante. No le mandes otra vez los datos ni le vendas nada."
+    );
+    return true;
+  }
+
+  // QUIERE PAGAR ALGO MÁS DESPUÉS DE COMPRAR (el upsell, completar al full): lo resuelve el bot.
+  if (texto && !estado.cobro_ficha_id && (comprasDelCliente(convo.id).length > 0 || entregasDelCliente(convo.id).length > 0)) {
+    if (await comprarDespuesDeComprar(convo, t, contenido, pais, false, opcionesDeCompra().haciaPagar.length > 0)) return true;
+  }
+
   // 2-bis. EL MÉTODO Y EL PRODUCTO, con un cobro abierto que pide método — como la venta de siempre:
   // nombrar un método (o tocar su botón) manda SUS datos con el precio de lo elegido, en cualquier
   // momento (también para cambiar de método); «mejor el otro» cambia de producto y le llegan los
@@ -2286,10 +2486,19 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // LAS OPCIONES QUE VALEN AHORA: las de su ficha y las de sus seguimientos colgados (25/10/2026).
   const duenas = [conRespuesta ? ficha : undefined, segAqui].filter((x): x is FichaDelTablero => !!x);
   if (duenas.length > 0) {
+    // EL CANDADO DE LA ELECCIÓN: con un cobro abierto, lo que lleva a pagar otra cosa solo se sigue si
+    // el cliente lo NOMBRA (o toca su botón, arriba). Ni un cuadrito de palabras sueltas ni la IA
+    // adivinando lo mueven de lo que eligió (el cambio de producto dentro del cobro va en 2-bis).
+    const conCobroAbierto = !!estado.cobro_ficha_id;
+    const llevaAPagar = (duena: FichaDelTablero, salida: string) => {
+      const a = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, salida)?.a);
+      return a?.tipo === "cobro" || a?.tipo === "intro_ob";
+    };
     // 5. UN CUADRITO, por sus palabras: sus burbujas, y luego su cable.
     if (!contenido.startsWith("bubble:"))
       for (const duena of duenas) {
         const decision = decisionQueCoincide(contenido, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
+        if (decision && conCobroAbierto && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         if (decision) {
           await actuarCuadrito(convo, t, duena, decision);
           return true;
@@ -2321,8 +2530,11 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       const palabrasDe = (x: (typeof lista)[number]) => {
         const destino = t.fichas.find((f) => f.id === cableDeLaSalida(t, x.duena.id, x.op.id)?.a);
         const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
+        // Con el cobro abierto, una opción que lleva a pagar solo se reconoce por el NOMBRE de su producto
+        // (no por las palabras de su cuadrito: «vecino» es un método, no un producto).
+        const texto = conCobroAbierto && p ? p.name ?? "" : [x.op.etiqueta, p?.name ?? ""].join(" ");
         return new Set(
-          sinTildes([x.op.etiqueta, p?.name ?? ""].join(" "))
+          sinTildes(texto)
             .replace(/[^a-z0-9ñ\s]/g, " ")
             .split(/\s+/)
             .filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w))
@@ -2338,7 +2550,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // UNA PREGUNTA NO ELIGE («¿cuánto cuesta el pack?», «¿qué trae el básico?»): ésa la contesta la IA.
       const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
       const porPalabra = acertados.length === 1 && !esPregunta ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
-      const elegida = porPalabra.length === 1 ? porPalabra[0].op.id : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
+      // Con el cobro abierto, la IA no elige por él: solo vale lo que nombró (el candado).
+      const elegida =
+        porPalabra.length === 1
+          ? porPalabra[0].op.id
+          : conCobroAbierto
+            ? null
+            : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
       if (porPalabra.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${elegida} (por su palabra)`);
       const cual = lista.find((x) => x.op.id === elegida);
       // ELIGIÓ JUSTO DESPUÉS DE PREGUNTAR EL PRECIO (27/10/2026), como la venta de siempre
@@ -2369,7 +2587,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       }
       if (cual) {
         const cable = cableDeLaSalida(t, cual.duena.id, cual.op.id);
-        if (cable) {
+        // Nombró lo que YA tiene elegido, con su cobro abierto: no se reabre (perdería lo pagado); contesta la IA.
+        if (cable && cable.a === estado.cobro_ficha_id) {
+          // (sigue abajo: la IA le contesta desde donde va)
+        } else if (cable) {
           if (cual.op.id.startsWith("btn:")) apuntarBoton(convo.id, cual.op.id.slice(4));
           await irA(convo.id, t, cable.a);
           return true;

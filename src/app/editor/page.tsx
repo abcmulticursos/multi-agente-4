@@ -31206,6 +31206,45 @@ function PantallaDelTablero({
               <button type="button" onClick={() => guardar({ ...tablero, cerebro: undefined })} className="rounded border border-borde px-2 py-1 font-semibold text-tinta hover:bg-relleno">
                 Volver al de fábrica
               </button>
+              {/* COPIAR EL CEREBRO DEL AUTOMÁTICO (27/10/2026): una copia de sus secciones (=== ROL ===, PAGO…), que
+                  el tablero recorta por etapa como la venta de siempre. Es una copia: editarla aquí no cambia el
+                  automático, ni al revés. Lo que ya estaba escrito arriba (quién es esta tienda) se conserva delante. */}
+              <button
+                type="button"
+                onClick={() => {
+                  const s = (cfg as { system_prompt_sections?: Record<string, unknown> }).system_prompt_sections ?? {};
+                  const leer = (k: string) => {
+                    const v = s[k] as string | { text?: string; content?: string } | undefined;
+                    return String(typeof v === "string" ? v : v?.text ?? v?.content ?? "").trim();
+                  };
+                  const secciones = (
+                    [
+                      ["ROL", leer("rol_producto")],
+                      ["IDIOMA", leer("idioma_pais")],
+                      ["PAGO", leer("pago")],
+                      ["PRECIO Y CIERRE", leer("precio_cierre")],
+                      ["POSTVENTA", leer("postventa")],
+                      ["EXTRA", leer("extra")],
+                    ] as const
+                  ).filter(([, t]) => t);
+                  if (secciones.length === 0) {
+                    window.alert("El cerebro del automático no tiene secciones escritas: no hay nada que copiar.");
+                    return;
+                  }
+                  const suyo = (tablero.cerebro ?? "").split(/^===\s/m)[0].replace(/\(Lo que sigue es la copia[^)]*\)\s*$/, "").trim();
+                  if (!window.confirm("¿Copiar aquí el cerebro del automático? Lo que ya tenía este tablero (antes de las secciones) se conserva delante.")) return;
+                  guardar({
+                    ...tablero,
+                    cerebro: `${suyo ? `${suyo}\n\n` : ""}(Lo que sigue es la copia de tu cerebro del automático. Se edita aquí y solo cambia este tablero.)\n\n${secciones
+                      .map(([n, t]) => `=== ${n} ===\n${t}`)
+                      .join("\n\n")}`,
+                  });
+                }}
+                className="rounded border border-borde px-2 py-1 font-semibold text-tinta hover:bg-relleno"
+                title="Copia aquí tu cerebro del automático, para que este tablero hable como él"
+              >
+                ⧉ Copiar el cerebro del automático
+              </button>
               <span>
                 Lo que protege el dinero va siempre y no está aquí: nunca da números de cuenta, solo nombra los montos permitidos y solo habla de los
                 productos ya presentados.

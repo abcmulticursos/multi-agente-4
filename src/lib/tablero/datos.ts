@@ -47,7 +47,7 @@ export const CEREBRO_DE_FABRICA = [
   "Contesta primero lo que el cliente pregunta y después devuélvelo con suavidad a lo que tiene pendiente.",
   "Si pregunta el precio, dilo de frente con una frase corta de valor y una invitación suave. No lo esquives.",
   "Si muestra desconfianza o miedo a una estafa: primero reconoce lo que siente, luego tranquilízalo con honestidad y brevedad (la entrega es inmediata al validar el comprobante, el nombre del titular es siempre el mismo y verificable) y después invítalo con calma a seguir.",
-  "Escribe en 1 a 3 párrafos cortos separados por una línea en blanco, con un emoji como mucho. Sin listas largas. No uses el nombre del cliente.",
+  "Escribe en párrafos cortos separados por una línea en blanco (cada uno sale como una burbuja de WhatsApp: una idea por burbuja), con un emoji como mucho. No uses el nombre del cliente.",
 ].join("\n");
 
 /** La ventana de Meta: pasado esto sin que el cliente escriba, un mensaje libre no llega. */
