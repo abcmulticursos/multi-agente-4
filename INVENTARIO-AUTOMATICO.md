@@ -92,6 +92,26 @@ que el automático añade en `openrouter.ts` NO las tiene:
 | F3 | Saludo a mitad de la venta («hola») → corto, con el producto | ⚠️ **(H2)**: no es una regla escrita del automático (sale de su cerebro); en el tablero mi freno dejó al cliente SIN respuesta |
 | F4 | Bot mudo → nunca: si no hay respuesta, algo sale | ❌ (mi freno de «no preguntar el método» borró una respuesta entera) |
 
+## G. Lo que faltaba inventariar (revisión del 27/10, más tarde)
+
+Zonas que la primera pasada no cubrió. ❓ = sin medir todavía en el tablero.
+
+| # | Regla del automático | Dónde | Tablero |
+|---|---|---|---|
+| G1 | Muestras en orden (básico → complementario → full), una sola vez, solo con galería y checks | handler / openrouter 1614–1709 | ✅ (25/10) — el orden por puesto ❓ |
+| G2 | El producto oculto del order bump: ni precio ni contenido hasta su intro | openrouter 1454 / CLAUDE.md A5 | ✅ (la IA solo conoce lo presentado) |
+| G3 | Precio de oferta: si pregunta por qué está más barato, «promoción por seguir interesado» | openrouter 1181 | ❌ |
+| G4 | Seguimientos: franjas, horas de silencio, lead tardío, antirráfaga, reinicio al escribir | engine 4606 / quiet-hours | ✅ (27/10, con «ignora…») |
+| G5 | Preferencia de entrega (WhatsApp o correo) tras pagar | engine 12535–12775 | ❌ (hay «Ofrecer también por correo» en la Entrega, pero no la pregunta de preferencia) |
+| G6 | Encuesta al cliente después de la compra | engine 849–938 | ⚠️ sale si el regalo la programa (lo hace el motor de siempre) |
+| G7 | A humano tras el comentario del regalo | engine 824 | ✅ (el regalo es del motor de siempre) |
+| G8 | Preguntar el nombre del cliente | engine 2132 | ❌ |
+| G9 | Aviso de país (Venezuela / «¿atienden en Perú?») | engine 2141 | ❌ |
+| G10 | El bot no se queda mudo con un comprobante (acuse) | handler 2521–2613 | ❌ (= F4) |
+| G11 | Pregunta de precio repetida en segundos → no se contesta dos veces | handler `shouldSuppressDuplicatePriceReply` | ❌ (va después de la entrada del tablero) |
+| G12 | Order bump DESPUÉS de pagar (`awaiting_post_payment_order_bump_choice`) | engine 3392 | ➖ se arma con cables (una oferta después de la Entrega) |
+| G13 | Audio del cliente (se transcribe y se contesta) | handler 1370 | ✅ (la transcripción llega al tablero como texto) |
+
 ---
 
 ## Lo que falta, por orden de daño
