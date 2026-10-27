@@ -127328,8 +127328,8 @@ tableros:
               ignora_tardio: true
         - id: f-rec26-05ny
           tipo: mensaje
-          x: 121
-          y: 5459
+          x: 263
+          y: 5078
           titulo: Intro (versión recomendada)
           steps:
             - type: text
@@ -128740,6 +128740,10 @@ tableros:
         - id: c-mvq1ip6m-uiy
           de: f-mvq1i8zr-wg9n
           salida: rep:r2
+          a: f-rec26-05ny
+        - id: c-mvq2639m-tg1
+          de: f-mvq1i8zr-wg9n
+          salida: rep:r1
           a: f-rec26-05ny
       curvas:
         c3:
