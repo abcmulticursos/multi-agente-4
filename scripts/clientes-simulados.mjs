@@ -32,11 +32,16 @@ const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 const env = readFileSync(join(RAIZ, ".env"), "utf8");
 const deEnv = (k) => (env.match(new RegExp(`^${k}=(.*)$`, "m"))?.[1] ?? "").trim().replace(/^["']|["']$/g, "");
 
-// ── LA COPIA: tiempos cortos en la tienda que se prueba ──
-{
+// ── LOS PERFILES (mezclados, como él) ──
+const PERFILES = JSON.parse(readFileSync(args.perfiles ?? join(RAIZ, "..", "perfiles-clientes.json"), "utf8")).filter((p) => !solo || solo.has(p.id));
+
+// ── LA COPIA: tiempos cortos en las tiendas que se prueban ──
+for (const tiendaId of new Set(PERFILES.map((p) => p.tienda ?? TIENDA))) {
   const doc = YAML.parseDocument(readFileSync(ARCHIVO, "utf8"));
   const js = doc.toJS({ maxAliasCount: -1 });
   js.awaiting_email_timeout_seconds = 60;
+  const TIENDA = tiendaId;
+  if (!js.tableros?.[TIENDA]?.whatsapp) continue;
   for (const f of js.tableros[TIENDA].whatsapp.fichas) {
     if (f.tipo === "seguimientos") {
       if (f.seguimientos?.[0]) f.seguimientos[0].minutos = 2;
@@ -120,7 +125,7 @@ async function siguienteMensaje(perfil, historial) {
 // ── UNA CONVERSACIÓN ──
 const base = () => new Database(join(RAIZ, "data", "messages.db"), { readonly: true });
 async function conversar(perfil) {
-  const conv = await (await api("/api/test-simulator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel: "whatsapp", tienda: TIENDA, country: perfil.pais }) })).json();
+  const conv = await (await api("/api/test-simulator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel: "whatsapp", tienda: perfil.tienda ?? TIENDA, country: perfil.pais }) })).json();
   const historial = [];
   const registro = [];
   let vistos = 0;
@@ -149,7 +154,7 @@ async function conversar(perfil) {
   const silencios = [];
   for (let turno = 0; turno < (perfil.turnos ?? 16); turno++) {
     const msg = await siguienteMensaje(perfil, historial);
-    if (/^\[FIN\]/i.test(msg)) break;
+    if (/^\[?FIN\]?[.!]*$/i.test(msg.trim()) || /^\[FIN\]/i.test(msg) || /\[FIN\]/i.test(msg)) break;
     const espera = msg.match(/^\[ESPERAR\s+(\d+)\]/i);
     if (espera) {
       anotar("cliente", `(se queda callado ${espera[1]} s)`);
@@ -157,7 +162,12 @@ async function conversar(perfil) {
       for (const b of llegados) anotar("bot", b);
       continue;
     }
-    const comp = msg.match(/^\[COMPROBANTE\s+([\d.,]+)\]/i);
+    // El cliente-modelo a veces escribe «[image]» o «[foto]» en vez del comando: es su comprobante, el
+    // siguiente que su guion manda pagar.
+    const pagosDelGuion = [...perfil.guion.matchAll(/\[COMPROBANTE\s+([\d.,]+)\]/gi)].map((m) => m[1]);
+    const yaPagados = registro.filter((l) => l.startsWith("CLIENTE: [foto del comprobante")).length;
+    const fotoSuelta = /^\[(image|imagen|foto|captura)[^\]]*\]$/i.test(msg.trim()) && pagosDelGuion[yaPagados];
+    const comp = msg.match(/^\[COMPROBANTE\s+([\d.,]+)\]/i) ?? (fotoSuelta ? [msg, pagosDelGuion[yaPagados]] : null);
     if (comp) {
       const ruta = comprobanteDe(perfil.pais, comp[1]);
       if (!ruta) {
@@ -218,8 +228,6 @@ function revisar(r) {
   return fallos;
 }
 
-// ── LOS PERFILES (mezclados, como él) ──
-const PERFILES = JSON.parse(readFileSync(args.perfiles ?? join(RAIZ, "..", "perfiles-clientes.json"), "utf8")).filter((p) => !solo || solo.has(p.id));
 const resultados = [];
 const enCurso = new Set();
 const cola = [...PERFILES];

@@ -467,7 +467,7 @@ export function anotarVisita(conversationId: number, fichaId: string): void {
  * LOS NÚMEROS DE CADA FICHA de una tienda: cuántos clientes llegaron y cuántos de ellos pagaron
  * algo en el tablero. Sin las conversaciones del simulador (sus pruebas no inflan los números).
  */
-export function numerosDelTablero(tiendaId: string): Record<string, { clientes: number; ventas: number }> {
+export function numerosDelTablero(tiendaId: string): Record<string, { clientes: number; ventas: number; ahora?: number }> {
   const filas = db
     .prepare(
       `SELECT v.ficha_id AS ficha,
@@ -479,7 +479,21 @@ export function numerosDelTablero(tiendaId: string): Record<string, { clientes: 
         GROUP BY v.ficha_id`
     )
     .all(tiendaId) as Array<{ ficha: string; clientes: number; ventas: number }>;
-  return Object.fromEntries(filas.map((f) => [f.ficha, { clientes: f.clientes, ventas: f.ventas }]));
+  // LOS QUE ESTÁN AHORA EN CADA FICHA (27/10/2026): para avisar antes de borrar una tubería con clientes
+  // dentro (se quedarían sin ruta: hay que desconectarla del Inicio, no borrarla).
+  const ahora = db
+    .prepare(
+      `SELECT e.ficha_id AS ficha, COUNT(*) AS n
+         FROM tablero_estado e JOIN conversations c ON c.id = e.conversation_id
+        WHERE e.tienda_id = ? AND c.channel <> 'test'
+        GROUP BY e.ficha_id`
+    )
+    .all(tiendaId) as Array<{ ficha: string; n: number }>;
+  const fuera: Record<string, { clientes: number; ventas: number; ahora?: number }> = Object.fromEntries(
+    filas.map((f) => [f.ficha, { clientes: f.clientes, ventas: f.ventas }])
+  );
+  for (const a of ahora) fuera[a.ficha] = { ...(fuera[a.ficha] ?? { clientes: 0, ventas: 0 }), ahora: a.n };
+  return fuera;
 }
 
 /**

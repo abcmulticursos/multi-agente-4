@@ -254,7 +254,7 @@ const Contexto = createContext<{
   cambiar: (t: TableroEnElEditor) => void;
   curvar: (cableId: string, p: Punto | null) => void;
   /** Por ficha: cuántos clientes llegaron y cuántos pagaron (de verdad, sin las pruebas). */
-  numeros?: Record<string, { clientes: number; ventas: number }>;
+  numeros?: Record<string, { clientes: number; ventas: number; ahora?: number }>;
   /** El número de cada ficha (tipo Kommo), para ubicarlas y para los regresos «↩ 7». */
   numeroDe: Record<string, number>;
   /**
@@ -1137,7 +1137,7 @@ export default function LienzoDelTablero({
   antesDelMas?: ReactNode;
   despuesDelMas?: ReactNode;
   /** LOS NÚMEROS DE CADA FICHA (25/10/2026), como los de las rutas de la pizarra. */
-  numeros?: Record<string, { clientes: number; ventas: number }>;
+  numeros?: Record<string, { clientes: number; ventas: number; ahora?: number }>;
 }) {
   const instancia = useRef<ReactFlowInstance<Node, Edge> | null>(null);
   const vivo = useRef(tablero);
@@ -1450,7 +1450,14 @@ export default function LienzoDelTablero({
         // Las cajas y mantas elegidas con el recuadro también se borran (las fichas de encima, no).
         const cajasElegidas = new Set(nodos.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
         if (ids.size === 0 && cajasElegidas.size === 0) return;
-        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) con sus cables${cajasElegidas.size ? ` y ${cajasElegidas.size} caja(s)` : ""}?`)) return;
+        // CON CLIENTES DENTRO (27/10/2026): borrar una tubería con gente en sus fichas los deja sin ruta. Para
+        // cambiar de tubería (el reenganche), lo correcto es desconectar el cable del Inicio: los que ya
+        // estaban terminan su compra y los nuevos entran por la otra.
+        const dentro = [...ids].reduce((s, id) => s + (numeros?.[id]?.ahora ?? 0), 0);
+        const aviso = dentro
+          ? `\n\n⚠ Hay ${dentro} cliente(s) ahora mismo en esas fichas: si las borras se quedan sin ruta (solo les contestará la IA). Para pasar a otra tubería, mejor desconecta el cable del Inicio y deja estas fichas hasta que terminen.`
+          : "";
+        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) con sus cables${cajasElegidas.size ? ` y ${cajasElegidas.size} caja(s)` : ""}?${aviso}`)) return;
         const sinEllas = sinFichas(actual, ids);
         cambiar({ ...sinEllas, cajas: (sinEllas.cajas ?? []).filter((c) => !cajasElegidas.has(c.id)) });
         e.preventDefault();

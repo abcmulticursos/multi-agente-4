@@ -28696,7 +28696,7 @@ function VistaPizarra({
     };
   }, []);
   const numerosPorRuta = useMemo(() => {
-    const m = new Map<string, { clientes: number; ventas: number }>();
+    const m = new Map<string, { clientes: number; ventas: number; ahora?: number }>();
     for (const c of chatsParaRutas) {
       if ((c.channel ?? "whatsapp") !== "whatsapp") continue;
       if (c.intro_variant_sent == null && !c.camino) continue;
@@ -30918,7 +30918,7 @@ function PantallaDelTablero({
   const [avisoDelTablero, setAvisoDelTablero] = useState<string | null>(null);
   // LOS NÚMEROS DE CADA FICHA (25/10/2026): clientes que llegaron y cuántos pagaron, como en la
   // pizarra. Se piden al abrir y cada minuto; si falla, simplemente no se muestran.
-  const [numeros, setNumeros] = useState<Record<string, { clientes: number; ventas: number }>>({});
+  const [numeros, setNumeros] = useState<Record<string, { clientes: number; ventas: number; ahora?: number }>>({});
   useEffect(() => {
     if (!tiendaId) return;
     let vivo = true;

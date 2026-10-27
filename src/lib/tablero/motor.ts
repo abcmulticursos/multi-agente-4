@@ -912,7 +912,10 @@ const PIDE_INFO_DE_LAS_OPCIONES =
   /\b(como es|que es|q es|que trae|q trae|incluye|contiene|contenido|informacion|info|explicame|detalles|sirve|funciona|material|producto|combo|basico|pack|diferencia|cual|opcion|opciones|eran 2|son 2|los 2|ambos)\b/;
 
 /** Palabras que no distinguen una opción de otra. */
-const PALABRAS_COMUNES = new Set(["solo", "quiero", "el", "la", "los", "las", "de", "del", "con", "para", "por", "mas", "un", "una", "opcion", "si", "y"]);
+const PALABRAS_COMUNES = new Set([
+  "solo", "quiero", "el", "la", "los", "las", "de", "del", "con", "para", "por", "mas", "un", "una", "opcion", "si", "y",
+  "como", "que", "pago", "pagar", "comprar", "compro", "eso", "esto", "ese", "este", "lo", "mi", "tu", "no",
+]);
 
 /**
  * «¿CUÁL ELIGES?» (27/10/2026), como la venta de siempre (`sendTwoOptionsReminder`): quiere pagar —o
@@ -1060,6 +1063,10 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   const salio = await responderConIA(convo, {
     ...(eligio ? { eligio } : {}),
     ...(estado?.oferta === 1 ? { enOferta: true } : {}),
+    // Con un cobro abierto (nada aprobado todavía) o un comprobante que no se contó, no se promete entrega.
+    ...(estado?.cobro_ficha_id || /(no alcanza|le faltan|no pude validar|no se ve como un comprobante|a nombre de|ya se usó|ya lo había enviado|un asesor lo revisa)/i.test(nota ?? "")
+      ? { sinPagoAprobado: true }
+      : {}),
     ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
     ...(metodosDelPais.length ? { metodos: metodosDelPais } : {}),
     cerebroGeneral: t.cerebro,
@@ -1100,7 +1107,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     ...(puedeReenviar
       ? {
           reenviar: async () => {
-            reenviarLoDelTablero(convo);
+            reenviarLoDelTablero(convo, ultimo, true);
           },
         }
       : {}),
@@ -2532,7 +2539,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
         // Con el cobro abierto, una opción que lleva a pagar solo se reconoce por el NOMBRE de su producto
         // (no por las palabras de su cuadrito: «vecino» es un método, no un producto).
-        const texto = conCobroAbierto && p ? p.name ?? "" : [x.op.etiqueta, p?.name ?? ""].join(" ");
+        // Y un CUADRITO no se reconoce por una palabra suelta de su lista («como» de «cómo pago»): sus frases
+        // ya se miran enteras en el paso 5. Aquí cuenta solo el nombre de su producto (27/10/2026: «no sé si
+        // es estafa, como que no confío» soltaba el order bump por la palabra «como»).
+        const texto = (conCobroAbierto || x.d) ? (p ? p.name ?? "" : "") : [x.op.etiqueta, p?.name ?? ""].join(" ");
         return new Set(
           sinTildes(texto)
             .replace(/[^a-z0-9ñ\s]/g, " ")

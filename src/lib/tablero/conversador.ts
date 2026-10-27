@@ -106,6 +106,12 @@ export interface ContextoDeLaIA {
   eligio?: string;
   /** Entró en el precio de oferta (lo activó un seguimiento). */
   enOferta?: boolean;
+  /**
+   * NO HAY PAGO APROBADO EN ESTE TURNO (un pago a medias, un comprobante rechazado): la IA no puede
+   * prometer la entrega. Se quitan las frases que la prometen (27/10/2026: con $1 de $4 dijo «en unos
+   * segundos llegará tu enlace del PACK»).
+   */
+  sinPagoAprobado?: boolean;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -722,6 +728,24 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
       texto = [...alTope(partes, tope ? tope - 1 : null), pregunta].join("\n\n");
     }
+  }
+  // SIN PAGO APROBADO, NADA DE «YA TE LLEGA»: esas frases se quitan, frase por frase.
+  if (c.sinPagoAprobado && texto) {
+    const promete =
+      /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora))/i;
+    const antes = texto;
+    texto = texto
+      .split(/\n\s*\n/)
+      .map((b) =>
+        b
+          .split(/(?<=[.!?¡¿])\s+/)
+          .filter((f) => !promete.test(f))
+          .join(" ")
+          .trim()
+      )
+      .filter(Boolean)
+      .join("\n\n");
+    if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: prometía la entrega sin pago aprobado → se quita esa frase`);
   }
   const malos = prohibidos(texto);
   if (malos.length > 0) {

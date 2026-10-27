@@ -29,10 +29,23 @@ Si la sesión se corta, se retoma desde aquí. La lista completa está en `INVEN
   «⧉ Copiar el cerebro del automático» en el 🧠 Cerebro del tablero.
 - 3. «No tengo X, tengo Y» (negación); «ya pagué» sin foto → pide el comprobante; precio de oferta explicado.
 - Contenido: los 80 Cobros de las tiendas de ejemplo otra vez en 3 burbujas.
+- Subido: e9314ee (fase 1 y 2).
+- Después de e9314ee: el cerebro del tablero se cortaba a 6.000 caracteres (ahora 40.000); sin pago
+  aprobado la IA no puede prometer la entrega (lo cazó la ronda 1: con $1 de $4 dijo «llegará tu
+  enlace»); aviso al borrar fichas con clientes dentro (`numerosDelTablero` cuenta «ahora»).
 
 ## Probado
 
-(nada aún)
+- Ronda 1 (9 clientes simulados a la vez, 11 min, sin congestión): ec_cambia, ec_hola, ec_desconfiado,
+  ec_noentiendo, ec_precio_pack sin fallos. Fallos: la promesa de entrega sin pago (arreglado); PE de
+  MASCOTAS no entra al tablero en la copia (va a la venta automática: es del contenido, no del motor).
+- Ronda 2 (10 a la vez, 21 min): cazó y se arregló: el reenvío mandaba TODAS las entregas (ahora solo la
+  que pide, con «Claro, te lo reenvío ahora mismo»); «no sé si es estafa, como que no confío» soltaba el
+  order bump por la palabra «como» de un cuadrito (por palabra suelta ya solo cuentan nombres de producto
+  y botones). Bien: «eligió uno y pagó otro» (pregunta y entrega el que pagó), el cerebro suyo («La
+  inversión es de $3 — un solo pago… ¿te indico cómo adquirirlo y llevarte los bonos? 🎁»).
+- Reenganche (`scripts/recorrido-reenganche.mjs`): los que estaban terminan en su tubería con su precio
+  (datos ya recibidos, esperando seguimiento, upsell ofrecido); los nuevos entran por la nueva. OK.
 
 ## Notas para retomar
 

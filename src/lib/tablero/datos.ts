@@ -294,7 +294,8 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         curvas[texto(k, 140)] = { x: Math.round(x), y: Math.round(y) };
     }
   const nombre = texto(crudo.nombre, 80).trim();
-  const cerebro = texto(crudo.cerebro, 6000).trim();
+  // 40.000: cabe la copia entera de su cerebro del automático (≈18.000), que antes se cortaba a 6.000.
+  const cerebro = texto(crudo.cerebro, 40000).trim();
   const cajas = Array.isArray(crudo.cajas)
     ? crudo.cajas.slice(0, 200).flatMap((k) => {
         if (!esObjeto(k)) return [];
