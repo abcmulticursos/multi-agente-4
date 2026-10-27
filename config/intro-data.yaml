@@ -126576,8 +126576,8 @@ tableros:
           producto_id: ptmascotas_comida
         - id: f-mvnpmsvw-ph32e
           tipo: mensaje
-          x: 370
-          y: 3623
+          x: 9514
+          y: 3258
           titulo: Intro
           steps:
             - type: text
@@ -126671,8 +126671,8 @@ tableros:
             - ptmascotas_comida
         - id: f-mvnpmsvw-fa2fp
           tipo: intro_ob
-          x: 860
-          y: 3494
+          x: 10004
+          y: 3129
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -126712,8 +126712,8 @@ tableros:
                       steps: []
         - id: f-mvnpmsvw-cg6i5
           tipo: cobro
-          x: 1508
-          y: 3263
+          x: 10652
+          y: 2898
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -126733,8 +126733,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-tq1yb
           tipo: cobro
-          x: 1508
-          y: 3569
+          x: 10652
+          y: 3204
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -126754,8 +126754,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-jxg9n
           tipo: mensaje
-          x: 4153
-          y: 3391
+          x: 13297
+          y: 3026
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126802,8 +126802,8 @@ tableros:
           espera_min: 2
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
-          x: 4539
-          y: 3295
+          x: 13683
+          y: 2930
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -126821,31 +126821,31 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-92jl4
           tipo: entregar
-          x: 4854
-          y: 3350
+          x: 13998
+          y: 2985
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 7871
-          y: 3845
+          x: 15276
+          y: 3192
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 3841
-          y: 4051
+          x: 12985
+          y: 3686
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 3834
-          y: 4385
+          x: 12978
+          y: 4020
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
           tipo: seguimientos
-          x: 1995
-          y: 4196
+          x: 11139
+          y: 3831
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -126993,8 +126993,8 @@ tableros:
               ignora_tardio: true
         - id: f-mvnq6s0x-ooeg
           tipo: mensaje
-          x: 4864
-          y: 4003
+          x: 14008
+          y: 3638
           steps:
             - type: text
               body_variants:
@@ -127002,8 +127002,8 @@ tableros:
               delay_after_sec: 6
         - id: f-mvo7g67a-vlta3
           tipo: intro_ob
-          x: 2558
-          y: 4002
+          x: 11702
+          y: 3637
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -127043,8 +127043,8 @@ tableros:
                       steps: []
         - id: f-mvo7hddp-ow7zr
           tipo: cobro
-          x: 3047
-          y: 3899
+          x: 12191
+          y: 3534
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -127064,8 +127064,8 @@ tableros:
             metodos: true
         - id: f-mvo7hh6u-vasar
           tipo: cobro
-          x: 3048
-          y: 4231
+          x: 12192
+          y: 3866
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -127085,20 +127085,20 @@ tableros:
             metodos: true
         - id: f-mvp0wa4s-tadqn
           tipo: entregar
-          x: 2457
-          y: 3410
+          x: 11601
+          y: 3045
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvp0wa4s-2dfnw
           tipo: entregar
-          x: 2451
-          y: 3723
+          x: 11595
+          y: 3358
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvp1zc5h-z0ta7
           tipo: mensaje
-          x: 5329
-          y: 3279
+          x: 14473
+          y: 2914
           titulo: Upsell 2 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -127145,8 +127145,8 @@ tableros:
           espera_min: 2
         - id: f-mvp20a4l-r8g78
           tipo: cobro
-          x: 5663
-          y: 3287
+          x: 14807
+          y: 2922
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -127164,14 +127164,14 @@ tableros:
             metodos: true
         - id: f-mvp22hzh-yylux
           tipo: entregar
-          x: 5958
-          y: 3289
+          x: 15102
+          y: 2924
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvp24b6s-zh4sx
           tipo: mensaje
-          x: 5723
-          y: 3778
+          x: 14867
+          y: 3413
           steps:
             - type: text
               body_variants:
@@ -127179,8 +127179,8 @@ tableros:
               delay_after_sec: 6
         - id: f-mvp3cgba-l9skj
           tipo: seguimientos
-          x: 3061
-          y: 4616
+          x: 12205
+          y: 4251
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -127724,8 +127724,8 @@ tableros:
           producto_id: ptmascotas_pack
         - id: f-rec26-lu28
           tipo: mensaje
-          x: 4153
-          y: 5444
+          x: 4064
+          y: 5424
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -127857,8 +127857,8 @@ tableros:
           espera_min: 2
         - id: f-rec26-ul0n
           tipo: cobro
-          x: 5663
-          y: 5340
+          x: 5691
+          y: 5280
           titulo: Cobro · TINTAS PEPITO
           steps:
             - type: text
@@ -127886,8 +127886,8 @@ tableros:
               delay_after_sec: 6
         - id: f-rec26-w13f
           tipo: entregar
-          x: 5958
-          y: 5342
+          x: 6054
+          y: 5290
           titulo: Entrega · TINTAS PEPITO
           producto_id: pmtxy45s7
         - id: f-rec26-xpt8
@@ -127984,8 +127984,8 @@ tableros:
               ignora_tardio: true
         - id: f-mvq1ekfa-ho4y0
           tipo: seguimientos
-          x: 2040
-          y: 6056
+          x: 1947
+          y: 6180
           titulo: Seguimientos · si no elige en la Intro
           presenta:
             - ptmascotas_comida
@@ -128169,6 +128169,15 @@ tableros:
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
+        - id: f-mvq1i8zr-wg9n
+          tipo: reparto
+          x: 68
+          y: 3138
+          reparto:
+            - id: r1
+              peso: 1
+            - id: r2
+              peso: 1
       cables:
         - id: c2
           de: mas_pe_intro
@@ -128678,10 +128687,6 @@ tableros:
           de: f-rec26-05ny
           salida: siguiente
           a: f-rec26-abwg
-        - id: c-mvp4hqtb-y1g
-          de: mas_ec_inicio
-          salida: siguiente
-          a: f-rec26-05ny
         - id: c-rec26-c122u
           de: f-rec26-05ny
           salida: dec:d-rec26-c0w8i
@@ -128728,6 +128733,14 @@ tableros:
           de: f-mvq1ekfa-ho4y0
           salida: dec:d-mvq1ekfb-1c2av
           a: f-rec26-8mi7
+        - id: c-mvq1ifom-nhy
+          de: mas_ec_inicio
+          salida: siguiente
+          a: f-mvq1i8zr-wg9n
+        - id: c-mvq1ip6m-uiy
+          de: f-mvq1i8zr-wg9n
+          salida: rep:r2
+          a: f-rec26-05ny
       curvas:
         c3:
           x: 121
