@@ -112,10 +112,58 @@ Zonas que la primera pasada no cubrió. ❓ = sin medir todavía en el tablero.
 | G12 | Order bump DESPUÉS de pagar (`awaiting_post_payment_order_bump_choice`) | engine 3392 | ➖ se arma con cables (una oferta después de la Entrega) |
 | G13 | Audio del cliente (se transcribe y se contesta) | handler 1370 | ✅ (la transcripción llega al tablero como texto) |
 
+## H. Barrido completo de funciones del automático (27/10, más tarde)
+
+Recorridas una por una las funciones de `engine.ts`, `handler.ts` y `payment.ts`. Lo que no estaba
+en las secciones de arriba:
+
+| # | Regla del automático | Dónde | Tablero |
+|---|---|---|---|
+| H0 | **EL CANDADO DE LA ELECCIÓN — la palabra del bot es ley.** Elegido un producto, precio, datos, contenido y lo que diga la IA son de ESE producto hasta que el cliente cambie claramente. Nada lo mueve solo (cuadrito, seguimiento, IA) | engine 3561–3700 (cambio de opción), `lockExpectedPriceForConvo` | ❌ **(H1)** — regla nº 1 |
+| H1 | «No tengo yape, tengo plin»: un método NEGADO no se elige | engine 11726 `methodMentionIsNegated` | ⚠️ el tablero usa `detectDynamicPaymentMethod` sin la negación — medir |
+| H2 | «Ya pagué» / «ahorita te pago» sin foto: se le pide el comprobante, no se le vende otra vez | engine 11703 `messageAnnouncesPayment` | ⚠️ lo contesta la IA — medir |
+| H3 | Pagó sin elegir: se deduce la opción por el monto | payment.ts `inferOrderBumpChoiceFromAmount` | ✅ (`cobroQueEncajaConElPago`) |
+| H4 | Elección ambigua entre las dos → «¿te refieres a X o a Y?» | engine 10694 `sendTwoTierChoiceClarification` | ⚠️ la IA responde; no hay pregunta fija |
+| H5 | Redirección de país (`<<PAIS: …>>`: el cliente es de otro país → mensajes de ese país) | engine 9068 `sendCountryRedirect` | ❌ |
+| H6 | Postventa con RECLAMO insistente («no me llegó», «¿a qué hora?») → al insistir, reenvía | handler / `resendApprovedMaterial` + COMO-TESTEA-ALBERTO | ⚠️ hay herramienta de reenvío; el «tras 3–5 quejas siempre entrega» sin medir |
+| H7 | Aviso de novedad al pasar de 1 a 2 productos (con el REENGANCHE encendido) | engine 10600 `renderAvisoDeActualizacion` | ❌ (ver I) |
+| H8 | Contenido guiado del dueño (modo guiado: respuestas fijas por tema) | engine 1183 `tryGuidedSalesbotContent` | ➖ el tablero arma eso con fichas y cuadritos |
+| H9 | Reglas fijas por palabra del dueño (salesbot) | engine 1852 `runSalesbotRules` | ➖ decidido no trasladar (26/10) |
+
+## I. REENGANCHE — cambiar de tubería con clientes dentro (pruebas propias)
+
+Lo que él hace: vende con una tubería lineal; arma otra (COMO DOU o COMO OB) suelta; cuando está lista,
+desconecta la lineal del Inicio y conecta la nueva. **Solo los clientes nuevos entran por la nueva;
+los antiguos terminan su compra como empezaron, con su precio congelado.**
+
+| # | Del automático | Tablero |
+|---|---|---|
+| I1 | La conversación anota con qué forma nació y se queda con ella («lineal extendida») — handler 1475 | ✅ por diseño: el cliente sigue en su ficha, con los cables de la tubería vieja |
+| I2 | Precio congelado al dar el precio / los datos | ✅ al abrir el cobro |
+| I3 | Interruptor REENGANCHE: los antiguos pasan a la forma nueva, con aviso de novedad | ❌ |
+| I4 | Borrar la tubería vieja con clientes dentro | ⚠️ se quedan sin ruta (solo la IA): hay que DESCONECTAR, no borrar — avisarlo en pantalla |
+
+**Las pruebas del reenganche (distintas de las normales)**, con sus ventanas en tiempos distintos,
+conectadas a la tubería vieja en el momento del cambio:
+1. Con los datos de pago ya recibidos → paga: ¿precio y producto de antes?
+2. Esperando su seguimiento 1 → ¿le sale el de la vieja (su camino)?
+3. En el seguimiento 2, pulsa el botón → ¿precio del botón?
+4. En el seguimiento 2, compra hablando → ¿precio de su tubería?
+5. Con el upsell ofrecido → ¿lo puede comprar?
+6. Un cliente nuevo → ¿entra por la nueva y ve los dos productos?
+
+## J. El contrato de la venta (dictado el 27/10)
+
+Hay información correcta · palabras finales que llevan a la compra · romper objeciones · sugerir
+métodos de pago · entender la elección de pago · **la elección es ley (H0)** · entrega correcta ·
+postventa que se comporta como el automático (H6, D1) · reenvío de enlaces sin fallas.
+**Pendiente aparte:** el correo.
+
 ---
 
 ## Lo que falta, por orden de daño
 
+0. **H0** — el candado de la elección (la palabra del bot es ley). Incluye C1.
 1. **C1** — cobra el producto equivocado. **D3/E6** — el upgrade no existe sin ficha especial.
    **D2/D5** — pagar el segundo producto se confunde y se traba.
 2. **F4** y **A7** — silencio y conversación trabada.
