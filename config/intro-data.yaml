@@ -127442,8 +127442,8 @@ tableros:
             - ptmascotas_comida
         - id: f-rec26-4ddo
           tipo: intro_ob
-          x: 968
-          y: 5543
+          x: 747
+          y: 5616
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -127483,8 +127483,8 @@ tableros:
                       steps: []
         - id: f-rec26-8mi7
           tipo: cobro
-          x: 1508
-          y: 5316
+          x: 1488
+          y: 5312
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -127504,8 +127504,8 @@ tableros:
             metodos: true
         - id: f-rec26-9k6z
           tipo: cobro
-          x: 1598
-          y: 5609
+          x: 1483
+          y: 5672
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -127525,8 +127525,8 @@ tableros:
             metodos: true
         - id: f-rec26-abwg
           tipo: seguimientos
-          x: 529
-          y: 5944
+          x: 744
+          y: 5930
           titulo: Seguimientos · si no elige en la Intro
           presenta:
             - ptmascotas_comida
@@ -127712,14 +127712,14 @@ tableros:
               ignora_tardio: true
         - id: f-rec26-jcxt
           tipo: entregar
-          x: 2666
-          y: 5472
+          x: 2277
+          y: 5462
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-rec26-k3r2
           tipo: entregar
-          x: 2660
-          y: 5785
+          x: 2272
+          y: 5819
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-rec26-lu28
@@ -127897,8 +127897,8 @@ tableros:
           titulo: Regalo
         - id: f-rec26-b0rhv
           tipo: seguimientos
-          x: 2173
-          y: 6188
+          x: 2562
+          y: 6609
           titulo: Seguimientos · si no elige o no paga
           presenta:
             - ptmascotas_comida
@@ -127980,6 +127980,193 @@ tableros:
 
                           🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvq1ekfa-ho4y0
+          tipo: seguimientos
+          x: 2040
+          y: 6056
+          titulo: Seguimientos · si no elige en la Intro
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvq1ekfa-uzn3w
+              minutos: 2
+              variantes:
+                - id: v-mvq1ekfa-ryail
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvq1ekfb-9keuw
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvq1ekfb-7bdei
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvq1ekfb-56z16
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvq1ekfb-1c2av
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
+                - id: v-mvq1ekfb-j48fq
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvq1ekfb-txi4v
+              minutos: 4
+              variantes:
+                - id: v-mvq1ekfb-xx1iy
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvq1ekfb-9keuw
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvq1ekfb-7bdei
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvq1ekfb-56z16
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvq1ekfb-1c2av
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
               ignora_silencio: true
               ignora_tardio: true
       cables:
@@ -128403,34 +128590,31 @@ tableros:
           de: f-rec26-oute
           salida: sin_pago
           a: f-rec26-xpt8
-        - id: c-rec26-18ubx
-          de: f-rec26-05ny
-          salida: dec:d-rec26-1ol0
-          a: f-rec26-4ddo
-        - id: c-rec26-1979m
-          de: f-rec26-05ny
-          salida: dec:d-rec26-2xjm
-          a: f-rec26-4ddo
         - id: c-rec26-1ai22
           de: f-rec26-05ny
           salida: dec:d-rec26-3vu2
           a: f-rec26-4ddo
+          vista: cable
         - id: c-rec26-1b9kr
           de: f-rec26-8mi7
           salida: pagado
           a: f-rec26-jcxt
+          vista: cable
         - id: c-rec26-1czus
           de: f-rec26-8mi7
           salida: prod:ptmascotas_pack
           a: f-rec26-k3r2
+          vista: cable
         - id: c-rec26-1drqc
           de: f-rec26-9k6z
           salida: pagado
           a: f-rec26-k3r2
+          vista: cable
         - id: c-rec26-1emjr
           de: f-rec26-9k6z
           salida: prod:ptmascotas_comida
           a: f-rec26-jcxt
+          vista: cable
         - id: c-rec26-1fdwy
           de: f-rec26-jcxt
           salida: siguiente
@@ -128471,14 +128655,17 @@ tableros:
           de: f-rec26-abwg
           salida: dec:d-rec26-d8td
           a: f-rec26-4ddo
+          vista: colita
         - id: c-rec26-1ty6c
           de: f-rec26-abwg
           salida: dec:d-rec26-ebsn
           a: f-rec26-4ddo
+          vista: colita
         - id: c-rec26-1u8ky
           de: f-rec26-abwg
           salida: dec:d-rec26-f6es
           a: f-rec26-4ddo
+          vista: colita
         - id: c-rec26-1xfyq
           de: f-rec26-lu28
           salida: sin_respuesta
@@ -128491,18 +128678,6 @@ tableros:
           de: f-rec26-05ny
           salida: siguiente
           a: f-rec26-abwg
-        - id: c-rec26-b77zl
-          de: f-rec26-4ddo
-          salida: siguiente
-          a: f-rec26-b0rhv
-        - id: c-rec26-b81gs
-          de: f-rec26-8mi7
-          salida: sin_pago
-          a: f-rec26-b0rhv
-        - id: c-rec26-b90bt
-          de: f-rec26-9k6z
-          salida: sin_pago
-          a: f-rec26-b0rhv
         - id: c-mvp4hqtb-y1g
           de: mas_ec_inicio
           salida: siguiente
@@ -128511,10 +128686,48 @@ tableros:
           de: f-rec26-05ny
           salida: dec:d-rec26-c0w8i
           a: f-rec26-4ddo
+          vista: cable
         - id: c-rec26-c3lpn
           de: f-rec26-abwg
           salida: dec:d-rec26-c2zit
           a: f-rec26-4ddo
+          vista: colita
+        - id: c-mvq136c2-zmh
+          de: f-rec26-05ny
+          salida: dec:d-rec26-1ol0
+          a: f-rec26-4ddo
+        - id: c-mvq1381c-tit
+          de: f-rec26-05ny
+          salida: dec:d-rec26-2xjm
+          a: f-rec26-4ddo
+        - id: c-mvq1cw3z-1bj
+          de: f-rec26-b0rhv
+          salida: fin
+          a: f-rec26-9k6z
+        - id: c-mvq1flk6-a47
+          de: f-rec26-8mi7
+          salida: sin_pago
+          a: f-mvq1ekfa-ho4y0
+        - id: c-mvq1fom6-ym8
+          de: f-rec26-9k6z
+          salida: sin_pago
+          a: f-mvq1ekfa-ho4y0
+        - id: c-mvq1fxvj-t16
+          de: f-mvq1ekfa-ho4y0
+          salida: dec:d-mvq1ekfb-9keuw
+          a: f-rec26-8mi7
+        - id: c-mvq1g22m-vsx
+          de: f-mvq1ekfa-ho4y0
+          salida: dec:d-mvq1ekfb-7bdei
+          a: f-rec26-8mi7
+        - id: c-mvq1g5ly-h5b
+          de: f-mvq1ekfa-ho4y0
+          salida: dec:d-mvq1ekfb-56z16
+          a: f-rec26-8mi7
+        - id: c-mvq1g8y6-n9r
+          de: f-mvq1ekfa-ho4y0
+          salida: dec:d-mvq1ekfb-1c2av
+          a: f-rec26-8mi7
       curvas:
         c3:
           x: 121
