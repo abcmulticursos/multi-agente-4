@@ -220,12 +220,12 @@ try {
   }
 
   if (toca("taller_pe")) {
-    console.log("\n· 🇵🇪 TIENDA TALLER MAESTRO — doble oferta escrita: elige escribiendo");
+    console.log("\n· 🇵🇪 TIENDA TALLER MAESTRO — doble oferta escrita («✍️ Si elige»): elige escribiendo");
     const c = await cliente("tienda_ttaller", "PE");
     await c.decir("hola", 50);
-    comprobar("la intro con los dos y le pide el método del básico (15)", /15/.test(c.nuevo()) && /20/.test(c.nuevo()) && /m[eé]todo/i.test(c.nuevo()), c.nuevo().slice(-160));
-    await c.decir("mejor quiero el pack completo", 35);
-    comprobar("«mejor el pack»: le cambia al pack (20)", /PACK GIMNASIO/.test(c.nuevo()) && /20/.test(c.nuevo()), c.nuevo());
+    comprobar("la intro con los dos precios (15 y 20) y le pregunta cuál", /15/.test(c.nuevo()) && /20/.test(c.nuevo()) && /cu[aá]l prefieres/i.test(c.nuevo()), c.nuevo().slice(-160));
+    await c.decir("quiero el pack completo", 35);
+    comprobar("«el pack completo» (sin botones ni cuadritos): su Cobro, con 20", /PACK GIMNASIO/.test(c.nuevo()) && /20/.test(c.nuevo()), c.nuevo().slice(0, 140));
     await c.borrar();
   }
 

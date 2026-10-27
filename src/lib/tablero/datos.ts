@@ -399,6 +399,20 @@ export function opcionesDe(pasos: SequenceStep[]): { botones: BubbleButton[]; cu
   return { botones, cuadritos };
 }
 
+/**
+ * ELEGIR DE PALABRA, SIN BOTONES NI CUADRITOS (27/10/2026): una Intro o un Order bump que presenta dos
+ * o más productos y no tiene ninguna opción tiene una salida por producto («✍️ Si elige X»). El
+ * cliente lo escribe como quiera y la IA reconoce cuál; así cada camino tiene su cable a la vista.
+ * Salen de su «🏷 Presenta»: si se quita un producto de ahí, su salida se va.
+ */
+export function eligeDeLaFicha(f: FichaDelTablero): string[] {
+  if (f.tipo !== "mensaje" && f.tipo !== "intro_ob") return [];
+  const presenta = [...new Set(f.presenta ?? [])];
+  if (presenta.length < 2) return [];
+  const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
+  return botones.length + cuadritos.length === 0 ? presenta : [];
+}
+
 const FICHAS_CON_RESPUESTA: TipoDeFicha[] = ["mensaje", "intro_ob", "seguimientos"];
 
 /** LO QUE MANDA UNA FICHA «ENTREGAR», en orden: su lista de entregas, o la principal de su producto. */
@@ -460,6 +474,8 @@ export function salidasDeLaFicha(
           clave: `dec:${d.id}`,
           etiqueta: `💬 ${d.title || (d.keywords ?? []).slice(0, 2).join(", ") || "Otra respuesta"}`,
         });
+      // ELIGE DE PALABRA, SIN BOTONES NI CUADRITOS (27/10/2026): una salida por cada producto que presenta.
+      for (const id of eligeDeLaFicha(f)) salidas.push({ clave: `elige:${id}`, etiqueta: `✍️ Si elige ${nombres?.[id] ?? "este producto"}` });
       const pregunta = salidas.length > 0;
       if (f.tipo === "seguimientos") {
         salidas.push({ clave: "fin", etiqueta: "🏁 Terminaron sin respuesta" });

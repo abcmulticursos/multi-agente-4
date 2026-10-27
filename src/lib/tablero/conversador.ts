@@ -13,6 +13,7 @@ import { getClient } from "@/lib/openrouter";
 import { sendChunkedBotText } from "@/lib/workflow/engine";
 import { ultimosMensajes } from "./lector";
 import { CEREBRO_DE_FABRICA } from "./datos";
+import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { NOTIFY_ADVISOR_TOOL, NOTIFY_EMERGENCY_TOOL, executeNotifyAdvisor, executeNotifyEmergency } from "@/lib/workflow/emergency";
 
 /** Lo que la IA sabe de un producto YA PRESENTADO al cliente (sale de su ficha en Productos). */
@@ -86,6 +87,10 @@ export interface ContextoDeLaIA {
    * (la oferta de imágenes). Si salieran aparte, caerían en medio de las burbujas de la IA.
    */
   alFinal?: string[];
+  /** Con dos o más productos por elegir donde está: «Nombre (precio)» de cada uno. */
+  opcionesDeCompra?: string[];
+  /** Los nombres de los métodos de pago de su país (solo nombres: los datos los manda el sistema). */
+  metodos?: string[];
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -148,11 +153,11 @@ function cerebro(c: ContextoDeLaIA): string {
     // ── FIJO ──
     (c.cerebroGeneral ?? "").trim() || CEREBRO_DE_FABRICA,
     "REGLAS QUE NO SE ROMPEN: la conversación sigue una ruta armada por el dueño; contesta y devuélvelo a ella. No des datos de pago, números de cuenta, nombres de titular ni enlaces: eso lo envía el sistema. No inventes contenido, beneficios, plazos ni condiciones. Escribe en español neutro.",
-    // El mismo formato que pide la venta de siempre: en WhatsApp la negrita es UN asterisco.
-    "FORMATO: en WhatsApp *palabra* va en negrita (UN asterisco a cada lado, nunca dos). Resalta solo 1 a 3 palabras clave por mensaje.",
-    // EL ESTILO DE LA VENTA DE SIEMPRE (25/10/2026, punto 6): sus mismas reglas de código, no frases fijas.
-    "ESTILO: contesta primero lo que te preguntan, en párrafos cortos de WhatsApp separados por una línea en blanco (máximo 3), cálido y profesional, nunca un bloque denso. Si desconfía, tranquilízalo con naturalidad, sin sonar a la defensiva ni inventar pruebas.",
+    // LAS REGLAS DE CONVERSACIÓN DE LA VENTA DE SIEMPRE, SU MISMO TEXTO (27/10/2026: «quiero que responda
+    // como el automático»): desconfianza, preguntas de precio, formato y tono, cierre y gramática.
+    reglasDelAutomatico(c),
     "IMÁGENES: no ofrezcas ni prometas fotos, imágenes ni videos por tu cuenta: de eso se encarga el sistema.",
+    excepcionesDelTablero(c),
     c.dialecto ? `DIALECTO (manda sobre todo lo demás): ${c.dialecto}` : "",
     // ── LO DE ESTE TURNO ──
     loQueSabe(c),
@@ -185,6 +190,40 @@ function cerebro(c: ContextoDeLaIA): string {
  * presionar; en la postventa, sin pregunta de venta). Son reglas, no frases: la IA redacta. Y nunca
  * copia el texto de los botones del dueño (un «ELIGE UNA OPCIÓN…» dicho por la IA suena a presión).
  */
+/**
+ * LAS REGLAS DE CONVERSACIÓN DE LA VENTA DE SIEMPRE, tomadas de su propio texto (`SYSTEM_PROMPT`): desde
+ * «DISTRUST OR FEAR» hasta antes de «EMAIL CAPTURE» (desconfianza, preguntas de precio, formato y tono,
+ * cierre con sus variantes, la excepción del comprobante y la gramática). Lo que se cambie allí vale
+ * aquí. Lo demás de ese texto (aprobar pagos, pedir el correo, la postventa) el tablero lo hace a su modo.
+ */
+function reglasDelAutomatico(c: ContextoDeLaIA): string {
+  const desde = SYSTEM_PROMPT.indexOf("DISTRUST OR FEAR");
+  const hasta = SYSTEM_PROMPT.indexOf("EMAIL CAPTURE");
+  if (desde < 0 || hasta <= desde) return "";
+  const principal = (c.productos ?? []).find((p) => !p.comprado) ?? c.productos?.[0];
+  const texto = SYSTEM_PROMPT.slice(desde, hasta)
+    .replace(/\{\{\s*PRODUCTO\s*\}\}/g, principal?.nombre ?? "el producto")
+    .replace(/\{\{\s*PRECIO_COMPLETO\s*\}\}/g, principal?.precio ?? "su precio")
+    .trim();
+  return `REGLAS DE CONVERSACIÓN DE LA VENTA DE SIEMPRE (síguelas; las EXCEPCIONES DEL TABLERO de abajo mandan sobre ellas):\n${texto}`;
+}
+
+/** Lo que en el tablero es distinto de la venta de siempre, y manda sobre sus reglas. */
+function excepcionesDelTablero(c: ContextoDeLaIA): string {
+  return [
+    "EXCEPCIONES DEL TABLERO (mandan sobre todo lo anterior):",
+    "- No apruebas pagos ni revisas comprobantes: eso lo hace el sistema.",
+    `- NUNCA preguntes por el método de pago por tu cuenta (nada de «¿con qué método te sientes más cómodo?»): el sistema lo pregunta cuando el cliente elige. Solo si el cliente PREGUNTA cómo pagar o cuáles son los métodos, nómbralos en lista vertical, solo sus nombres${c.metodos?.length ? ` (${c.metodos.join(", ")})` : ""}, y cierra con «¿Cuál prefieres?».`,
+    c.opcionesDeCompra?.length
+      ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Cuando hables de los productos, nómbralas TODAS con su precio (aunque pregunte por una) y cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
+      : "",
+    "- Si ya compró (postventa) o tiene un problema, no cierres con pregunta de venta.",
+    "- Respuestas CORTAS: lo que pregunta + un valor breve + la pregunta de cierre. Máximo 3 burbujas breves.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 /** Las preguntas de cierre de la venta de siempre (`system-prompt.ts`), para cuando la IA no cerró. */
 const PREGUNTAS_DE_CIERRE = [
   "¿Te gustaría que te indique cómo adquirirlo?",
@@ -203,10 +242,9 @@ function cierre(c: ContextoDeLaIA): string {
   // Si ya realizaste el pago, envíame la foto…» sonaba a desesperado por cobrar.
   if (c.etapa === "datos")
     return "CIERRE: ya tiene los datos de pago y esperamos su comprobante. Contesta breve lo que escribió. NO le preguntes si ya pagó ni le pidas la foto con una pregunta; si cierras, que sea con una línea natural como «Quedo pendiente de tu comprobante para darte acceso 😊». No repitas los datos ni el precio.";
+  // VENDIENDO: el cierre es el de la venta de siempre (sus reglas van arriba, con sus variantes).
   return [
-    "CIERRE (como la venta de siempre): termina SIEMPRE con UNA pregunta suave, sola en su propia línea (deja una línea en blanco antes). Varíala: no repitas la de tus 2 últimas respuestas. Ejemplos de su estilo: «¿Te gustaría que te indique cómo adquirirlo?», «¿Deseas saber los métodos de pago?», «¿Te muestro los pasos para tenerlo?», «¿Te gustaría asegurar tu acceso hoy?». Si hay dos opciones: «¿Cuál de las dos prefieres?».",
-    "Si el cliente tiene un problema o está molesto, tu pregunta final es sobre su problema (o el asesor), nunca de venta.",
-    "No presiones: nada de «solo dime…», «¿lo quieres ya?», «solo falta que…», «elige una opción para…», ni la palabra «compra», ni «quisieras», ni «¿te quedó claro?». Si hay dos opciones y pregunta el precio, nombra las dos con su precio. Preguntar el precio no es decidir comprar.",
+    "CIERRE: el de las reglas de la venta de siempre de arriba (una pregunta suave en su propia línea, rotando). Si el cliente tiene un problema o está molesto, tu pregunta final es sobre su problema (o el asesor), nunca de venta. Nada de «solo dime…» ni «¿lo quieres ya?».",
     c.preguntaPendiente
       ? `Lo que quedó pendiente en la conversación es esto (NO copies este texto ni el de sus botones; invítalo con tus palabras): «${c.preguntaPendiente.slice(0, 300)}».`
       : "",
@@ -503,17 +541,40 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // suave, como la venta de siempre. Antes se le pedía otra respuesta a la IA (se pagaba dos veces);
   // ahora se agrega una de sus preguntas de siempre, distinta de las 2 últimas, sin gastar tokens.
   {
-    const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).slice(0, 3).pop() ?? "";
-    // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
-    // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
     const ultimos = ultimosMensajes(convo.id, 8);
     const delCliente = ([...ultimos].reverse().find((m) => m.role === "user")?.content ?? "").toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
-    const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|estafa|reclamo|molest|cansad|harto)\b/.test(delCliente);
+    // UNA FRASE CORTADA AL FINAL («Los métodos que tenemos para ti son:» y nada más) no sale (27/10/2026).
+    texto = texto.replace(/(^|\n)[^\n]*:\s*$/, "").trim();
+    // NUNCA PREGUNTA EL MÉTODO POR SU CUENTA, vendiendo: «¿con qué método te sientes más cómodo?» sonaba a
+    // desesperado. Esa pregunta se quita (solo vale si el cliente preguntó cómo pagar).
+    if (c.etapa === "venta" && !/(metodo|como (te )?pago|formas? de pago|medios? de pago|como se paga|donde pago)/.test(delCliente)) {
+      const burbujas = texto.split(/\n\s*\n/);
+      const ult = burbujas[burbujas.length - 1] ?? "";
+      if (/\?/.test(ult) && /(m[eé]todo|c[oó]mo (prefieres|deseas|quieres) pagar|con qu[eé] (pagas|pagar))/i.test(ult)) {
+        console.log(`[tablero:ia] convo ${convo.id}: preguntó el método por su cuenta → se quita «${ult.slice(0, 60)}»`);
+        texto = burbujas.slice(0, -1).join("\n\n").trim();
+      }
+    }
+    // NUNCA MÁS DE 3 BURBUJAS, y la última es la que se mira (antes la 4.ª —la pregunta agregada— se perdía).
+    {
+      const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+      texto = (partes.length > 3 ? [...partes.slice(0, 2), partes.slice(2).join("\n")] : partes).join("\n\n");
+    }
+    const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).pop() ?? "";
+    // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
+    // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
+    const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
     if (!c.nota && c.etapa === "venta" && !conProblema && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
       const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
-      const pregunta = PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
+      const n = c.opcionesDeCompra?.length ?? 0;
+      // Con dos o más opciones por elegir, el cierre es elegir (como la venta de siempre).
+      const pregunta =
+        n > 1 ? `¿Cuál de las ${n === 2 ? "dos" : n} prefieres?` : PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
-      texto = `${texto}\n\n${pregunta}`;
+      // La pregunta va en su propia burbuja; si ya había 3, las dos últimas se juntan para que quepa.
+      const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+      const cuerpo = partes.length >= 3 ? [partes[0], partes.slice(1).join("\n")] : partes;
+      texto = [...cuerpo, pregunta].join("\n\n");
     }
   }
   const malos = prohibidos(texto);
@@ -528,6 +589,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   if (!texto) return salieronMuestras;
   // **ASÍ** (markdown) no es negrita en WhatsApp: se ve con asteriscos de más. Se deja *así*.
   texto = texto.replace(/\*\*([^*\n]+)\*\*/g, "*$1*").replace(/^#{1,6}\s+/gm, "");
+  // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.
+  texto = texto.replace(/\*\*([^\n]+?)\*\*/g, (_, x: string) => `*${x.replace(/\*/g, "")}*`).replace(/\*\*/g, "*");
   const burbujas = texto
     .split(/\n\s*\n/)
     .map((b) => b.trim())

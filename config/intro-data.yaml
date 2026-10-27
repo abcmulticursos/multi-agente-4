@@ -123542,7 +123542,7 @@ tableros:
                   2️⃣ *{{PRODUCTO_FULL}}*
                   ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
 
-                  Te paso los datos de la *opción 1*. Si prefieres la *opción 2*, solo escríbemelo y te los cambio 😊
+                  *¿Cuál prefieres?* Escríbeme el que quieras 😊
               delay_after_sec: 4
           presenta:
             - pttaller_gimnasio
@@ -125095,15 +125095,32 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: tal_pe_cobro_p
+          tipo: cobro
+          x: 720
+          y: 430
+          titulo: Cobro · PACK GIMNASIO + METÁLICA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  {¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*.
+
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: pttaller_pack
+            acepta:
+              - pttaller_gimnasio
+            metodos: true
       cables:
         - id: c1
           de: tal_pe_inicio
           salida: siguiente
           a: tal_pe_intro
-        - id: c2
-          de: tal_pe_intro
-          salida: siguiente
-          a: tal_pe_cobro_b
         - id: c3
           de: tal_pe_cobro_b
           salida: sin_pago
@@ -125460,6 +125477,26 @@ tableros:
           de: tal_ec_ob
           salida: siguiente
           a: tal_ec_seg_b
+        - id: c-elige-tal-pe-b
+          de: tal_pe_intro
+          salida: elige:pttaller_gimnasio
+          a: tal_pe_cobro_b
+        - id: c-elige-tal-pe-p
+          de: tal_pe_intro
+          salida: elige:pttaller_pack
+          a: tal_pe_cobro_p
+        - id: c-tal-pe-cp-pag
+          de: tal_pe_cobro_p
+          salida: pagado
+          a: tal_pe_ent_p
+        - id: c-tal-pe-cp-bas
+          de: tal_pe_cobro_p
+          salida: prod:pttaller_gimnasio
+          a: tal_pe_ent_b
+        - id: c-tal-pe-cp-seg
+          de: tal_pe_cobro_p
+          salida: sin_pago
+          a: tal_pe_seg_b
       cajas:
         - id: manta-tal_pe_inicio
           x: 20

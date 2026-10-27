@@ -189,6 +189,7 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
       if (conCable(f.id, s.clave)) continue;
       const nombre = s.etiqueta.replace(/^(🔘|💬) /, "");
       if (s.clave.startsWith("btn:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `El botón «${nombre}» no lleva a ningún lado.` });
+      else if (s.clave.startsWith("elige:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `«${s.etiqueta.replace(/^✍️ /, "")}» no lleva a ningún lado.` });
       else if (s.clave.startsWith("dec:")) {
         const d = opcionesDe(pasosDeLaFicha(f as FichaDelTablero)).cuadritos.find((x) => `dec:${x.id}` === s.clave);
         // Un cuadrito con sus propias burbujas contesta y se queda: no le falta nada.
@@ -461,7 +462,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   /** Una salida con su puntito (o, repetida en otro seguimiento, con el letrero de a dónde va). */
   const pastilla = (s: { clave: string; etiqueta: string }, conPunto: boolean, llave: string) => {
     const boton = s.clave.startsWith("btn:");
-    const cuadrito = s.clave.startsWith("dec:");
+    const cuadrito = s.clave.startsWith("dec:") || s.clave.startsWith("elige:");
     const falta = faltan?.get(s.clave);
     // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
     const pide =
@@ -482,9 +483,16 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
                 : "border-slate-200 bg-slate-50 text-slate-700"
         }`}
       >
-        {(boton || cuadrito) && <span className="shrink-0 text-[9px] opacity-70">{boton ? "BOTÓN" : "SI DICE"}</span>}
-        <span className="truncate" title={s.etiqueta.replace(/^(🔘|💬) /, "")}>
-          {s.etiqueta.replace(/^(🔘|💬) /, "")}
+        {(boton || cuadrito) && (
+          <span className="shrink-0 text-[9px] opacity-70">{boton ? "BOTÓN" : s.clave.startsWith("elige:") ? "SI ELIGE" : "SI DICE"}</span>
+        )}
+        <span
+          className="truncate"
+          title={`${s.etiqueta.replace(/^(🔘|💬|✍️) /, "")}${boton ? "\nTambién si lo escribe con sus palabras (la IA reconoce cuál)." : ""}`}
+        >
+          {s.etiqueta.replace(/^(🔘|💬|✍️) /, "")}
+          {/* Tocarlo o escribirlo lleva por el mismo cable (27/10/2026). */}
+          {boton && <span className="ml-1 text-[9px] font-normal opacity-60">· o escrito</span>}
         </span>
         {!conPunto && destino && (
           // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.

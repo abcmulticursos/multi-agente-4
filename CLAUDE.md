@@ -1091,6 +1091,24 @@ Nada de esto toca el bot (`cable.vista` es solo pantalla, como `curvas`):
   cajas y mantas se borran (🗑 al elegirlas, o Supr con el recuadro); «↺» en las fichas para lo que
   hacen solas (pagar sin elegir, nombrar un método).
 
+**La IA del tablero, como el automático (27/10/2026, sus casos HOLAE1/2/3; probado en la copia):**
+- **«Sí» a la invitación** («¿te indico cómo adquirirlo?», «¿te lo preparo?»): lo resuelve el bot, no la
+  IA. Producto nombrado en la pregunta (o, si no lo nombra, en el último turno del bot) → ése; una sola
+  forma de comprar → ésa (el Order bump o el Cobro); dos o más Cobros → «¿Cuál eliges?».
+- **«✍️ Si elige X»** (`elige:<producto>`): un Mensaje / Order bump que presenta 2+ productos y no tiene
+  botones ni cuadritos saca una salida por producto; escribir su nombre lo lleva por ese cable.
+  Antes de llamar a la IA se busca una palabra única de cada opción; una PREGUNTA («¿cuánto cuesta el
+  pack?») no elige. Elegir justo después de preguntar el precio → «*X* queda en *precio*. ¿Te lo preparo?».
+- La IA lleva las reglas del automático (de «DISTRUST OR FEAR» a «EMAIL CAPTURE» de `SYSTEM_PROMPT`)
+  más las excepciones del tablero (`excepcionesDelTablero`): no pregunta el método si no lo piden, nombra
+  las opciones con precio, sin pregunta de venta en postventa ni con un problema, máx. 3 burbujas.
+  Con una pregunta de contenido y opciones, el bot añade «*Opción N* — nombre · *precio*». Tras 2 quejas
+  sin asesor ofrecido, la IA recibe la nota de ofrecerlo. Negrita doble (`**`) → una sola.
+- **Seguimientos**: «Ignora las horas de silencio / aplazamiento» va a sus minutos, como en Canales
+  (en el simulador no se nota: ahí no hay horas).
+- Tokens: la IA del tablero pasó de ~2,8k a ~4,7k de entrada por turno (las reglas del automático);
+  salen menos llamadas (sin el reintento por la pregunta).
+
 **El Reparto solo sortea entre sus rutas CONECTADAS** (motor, 27/10/2026): una ruta sin cable dejaba
 al cliente sin nada (le pasó a él en MASCOTAS EC con «Ruta 2» suelta). Su puntito sin cable sale en rojo.
 

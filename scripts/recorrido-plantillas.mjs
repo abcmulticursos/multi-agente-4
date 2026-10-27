@@ -76,8 +76,8 @@ async function entrar() {
 }
 const Database = require("better-sqlite3");
 const base = () => new Database(join(RAIZ, "data", "messages.db"));
-async function cliente(pais) {
-  const conv = await (await api("/api/test-simulator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel: "whatsapp", tienda: TIENDA, country: pais }) })).json();
+async function cliente(pais, tienda = TIENDA) {
+  const conv = await (await api("/api/test-simulator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel: "whatsapp", tienda, country: pais }) })).json();
   let vistos = 0;
   const bot = [];
   const leer = async (seg) => {
@@ -503,6 +503,87 @@ try {
       s.seguimientos[0].minutos = 1;
       s.seguimientos[1].minutos = 3;
     });
+  }
+
+  // ── COMO RESPONDE EL AUTOMÁTICO: sus mismas conversaciones de MASCOTAS Ecuador (27/10/2026) ──
+  const MAS = "tienda_tmascotas";
+  const OB_MAS = "f-rec26-4ddo";
+  const terminaConPregunta = (t) => /\?\s*\S{0,3}\s*$/.test(t.trim());
+  const preguntaElMetodo = (t) => /(con (cu[aá]l|qu[eé]) m[eé]todo|m[eé]todo de pago te|c[oó]mo (prefieres|deseas) pagar)/i.test(t);
+  if (toca("holae1")) {
+    console.log("\n· 🇪🇨 MASCOTAS (HOLAE1): «PRECIO» → respuesta corta con pregunta → «si» → el Order bump (no se traba)");
+    const c = await cliente("EC", MAS);
+    await c.decir("HOLA", 45);
+    await c.decir("PRECIO", 35);
+    comprobar("«PRECIO»: el precio ($3) y una pregunta suave al final, sin preguntar el método", /\$ ?3/.test(c.nuevo()) && terminaConPregunta(c.nuevo()) && !preguntaElMetodo(c.nuevo()), c.nuevo().slice(-120));
+    await c.decir("si", 40);
+    comprobar("«si»: le sale el Order bump (lo decide el bot)", c.fichas().includes(OB_MAS) && /Espera/i.test(c.nuevo()), c.nuevo().slice(0, 100));
+    comprobar("y ninguna frase cortada («…son:»)", !/:\s*$/.test(c.bot.join("\n").trim()), "");
+    await c.borrar();
+  }
+  if (toca("holae2")) {
+    console.log("\n· 🇪🇨 MASCOTAS (HOLAE2): «que contiene» → «dale» → Order bump → «que son 2»: nombra los dos y cierra con cuál");
+    const c = await cliente("EC", MAS);
+    await c.decir("HOLA", 45);
+    await c.decir("que contiene", 40);
+    comprobar("«que contiene»: termina con pregunta", terminaConPregunta(c.nuevo()) || /im[aá]genes|fotos/i.test(c.nuevo()), c.nuevo().slice(-100));
+    await c.decir("dale", 40);
+    comprobar("«dale»: el Order bump", c.fichas().includes(OB_MAS), c.fichas().slice(-2).join(", "));
+    await c.decir("que son 2", 40);
+    comprobar("«que son 2»: nombra los dos productos", /COMIDA CASERA/i.test(c.nuevo()) && /PACK/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    comprobar("y lleva a elegir (cuál prefieres u Opción 1/2)", /cu[aá]l (de las dos )?prefieres|Opci[oó]n 1/i.test(c.nuevo()), c.nuevo().slice(-120));
+    await c.borrar();
+  }
+  if (toca("holae3")) {
+    console.log("\n· 🇪🇨 MASCOTAS (HOLAE3): tras su seguimiento, «hola» → no le pregunta el método");
+    const c = await cliente("EC", MAS);
+    await c.decir("HOLA", 45);
+    comprobar("le llega su seguimiento 1", (await c.hasta(/./, 200)) && c.bot.length > 2, "");
+    await c.decir("hola", 40);
+    comprobar("«hola»: contesta sin preguntar el método", !preguntaElMetodo(c.nuevo()) && c.nuevo().trim().length > 0, c.nuevo().slice(-120));
+    await c.borrar();
+  }
+  if (toca("palabras")) {
+    console.log("\n· PALABRAS SUELTAS sobre botones y cuadritos: «sí quiero el básico», «el combo», «el full», «el completo»");
+    for (const [pais, tienda, ruta, quiere, frase, cobro] of [
+      ["EC", MAS, null, "quiero pagar", "si quiero el basico", "f-rec26-8mi7"],
+      ["EC", MAS, null, "quiero pagar", "el combo", "f-rec26-9k6z"],
+      ["PE", TIENDA, "ob", null, "el full", "pla_pe_ob_cobro_p"],
+      ["EC", TIENDA, "ob", "quiero comprar", "el completo", "pla_ec_ob_cobro_p"],
+    ]) {
+      if (ruta) forzar(pais, ruta);
+      const c = await cliente(pais, tienda);
+      await c.decir("hola", 45);
+      if (quiere) await c.decir(quiere, 40);
+      else await c.tocar("pla_pe_ob_intro_quiere", "Quiero comprar", 40);
+      await c.decir(frase, 40);
+      comprobar(`«${frase}» → su Cobro`, c.fichas().includes(cobro), c.fichas().slice(-2).join(", "));
+      await c.borrar();
+    }
+  }
+  if (toca("precio_y_elige")) {
+    console.log("\n· 🇪🇨 MASCOTAS: pregunta el precio del pack y luego «el pack» → le confirma y pregunta; «sí» → su Cobro");
+    const c = await cliente("EC", MAS);
+    await c.decir("HOLA", 45);
+    await c.decir("quiero pagar", 40);
+    await c.decir("cuanto cuesta el pack?", 40);
+    await c.decir("el pack", 35);
+    comprobar("«el pack» tras preguntar el precio: «¿Te lo preparo?» (sin abrir el Cobro)", /te lo preparo/i.test(c.nuevo()) && !c.fichas().includes("f-rec26-9k6z"), c.nuevo().slice(0, 120));
+    await c.decir("si", 35);
+    comprobar("«si»: el Cobro del pack", c.fichas().includes("f-rec26-9k6z"), c.fichas().slice(-2).join(", "));
+    await c.borrar();
+  }
+  if (toca("postventa")) {
+    forzar("PE", "lineal");
+    console.log("\n· 🇵🇪 POSTVENTA: compra y pregunta «es de por vida?» → sin pregunta de venta");
+    const c = await cliente("PE");
+    await c.decir("hola", 45);
+    await c.tocar("pla_pe_lin_intro_quiere", "Quiero comprar", 35);
+    await c.decir("yape", 30);
+    await c.foto(R.pe15, 40);
+    await c.decir("es de por vida?", 35);
+    comprobar("contesta sin pregunta de venta", c.nuevo().trim().length > 0 && !/(adquir|obten|asegura|te indico)/i.test(c.nuevo().split("PLANTILLAS PREMIUM")[0]), c.nuevo().slice(0, 140));
+    await c.borrar();
   }
 
   // ── UN REPARTO CON RUTAS SIN CABLE: nadie se pierde (27/10/2026, lo cazó él en MASCOTAS) ──

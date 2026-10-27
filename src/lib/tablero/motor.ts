@@ -61,6 +61,7 @@ import {
   type SequenceStep,
   type Tienda,
   type WorkflowConfig,
+  getPaymentMethods,
 } from "@/lib/workflow/config";
 import { esUnAcuseSeco, messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
 import {
@@ -90,6 +91,7 @@ import {
   opcionesDe,
   pasosDeLaFicha,
   entregasDeLaFicha,
+  eligeDeLaFicha,
 } from "./datos";
 import { laEntrega } from "./entregas";
 import {
@@ -348,8 +350,10 @@ function cuandoSaleElSeguimiento(
   // del motor de siempre para los 2+ (`computeNextFollowupSlot`): la próxima franja, al menos «horas
   // mínimas entre seguimientos» después del anterior, nunca en horas de silencio. Si no hay franja,
   // sus minutos, como hasta hoy. (En el simulador salen a sus minutos, para poder probarlos.)
-  if (idx >= 1) {
-    const conSilencioEste = sched?.quiet_hours_enabled !== false && seg.ignora_silencio !== true;
+  // CON «IGNORA LAS HORAS DE SILENCIO» MARCADA (27/10/2026), como los seguimientos de Canales: sale a sus
+  // minutos, a cualquier hora, sin esperar las horas fijas («aquí no se lanzan»).
+  if (idx >= 1 && seg.ignora_silencio !== true) {
+    const conSilencioEste = sched?.quiet_hours_enabled !== false;
     const franja = computeNextFollowupSlot({
       nowSec: ahora(),
       lastFollowupAtSec: ahora(),
@@ -558,13 +562,14 @@ async function irA(
       // pregunta con sus palabras cuál prefiere.
       if (volvio) {
         const ya = opcionesDe(pasosDeLaFicha(f));
-        if (ya.botones.length + ya.cuadritos.length > 0) {
+        const eligeYa = eligeDeLaFicha(f).map((id) => producto(config, id)?.name ?? "");
+        if (ya.botones.length + ya.cuadritos.length + eligeYa.length > 0) {
           console.log(`[tablero] convo ${convoId}: vuelve a «${f.titulo || f.id}», que ya vio → no se repite`);
           const colgadosOtraVez = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
           if (colgadosOtraVez) colgarSeguimientos(convo, colgadosOtraVez, t);
           else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
             programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
-          const nombres = [...ya.botones.map((b) => b.label), ...ya.cuadritos.map((d) => d.title)].filter(Boolean).join(", ");
+          const nombres = [...ya.botones.map((b) => b.label), ...ya.cuadritos.map((d) => d.title), ...eligeYa].filter(Boolean).join(", ");
           await contestarConIA(
             convo,
             t,
@@ -588,7 +593,8 @@ async function irA(
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta.
       anotarPresentados(convoId, f.presenta ?? []);
       const { botones, cuadritos } = opcionesDe(pasosAEnviar);
-      if (botones.length + cuadritos.length === 0) {
+      // Sin opciones sigue de largo… salvo que elija de palabra («✍️ Si elige X»): entonces espera.
+      if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0) {
         await seguir("siguiente");
         return;
       }
@@ -871,7 +877,24 @@ function loQueFalta(
 
 /** «Quiero pagar», «voy a pagar», «¿cómo pago?», «me lo llevo»… (ya sin tildes ni mayúsculas). */
 const QUIERE_PAGAR =
-  /\b(quiero (pagar|comprar|comprarlo|adquirir|adquirirlo|llevarlo)|voy a (pagar|comprar|yapear|depositar|transferir)|procedo|paso a pagar|como (pago|te pago|se paga|puedo pagar|compro|lo compro|lo adquiero)|donde (pago|te pago|deposito)|a que (cuenta|numero)|pasame (la cuenta|los datos)|datos (de|para) (pago|pagar)|me lo llevo|lo quiero|si quiero|lo compro)\b/;
+  /\b(quiero (pagar|comprar|comprarlo|adquirir|adquirirlo|llevarlo)|voy a (pagar|comprar|yapear|depositar|transferir)|procedo|paso a pagar|como (pago|te pago|se paga|puedo pagar|compro|lo compro|lo adquiero)|donde (pago|te pago|deposito)|a que (cuenta|numero)|(pasame|dame|mandame|enviame) (la cuenta|los datos|el numero)|datos (de|para) (pago|pagar)|me lo llevo|lo quiero|si quiero|lo compro)\b/;
+
+/** Un «sí» pelado: «sí», «dale», «ok», «claro», «de una», «sí quiero», «perfecto»… (sin tildes ni signos). */
+const AFIRMA =
+  /^(si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio)( (por favor|porfa|claro|dale|gracias|ok))*$/;
+
+/** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
+const INVITA_A_COMPRAR =
+  /(adquir|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de las dos|prefieres|eliges))/;
+
+const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+
+/** Pide info de las opciones («¿qué son 2?», «¿qué trae?», «la diferencia»…), el mismo detector de la venta de siempre. */
+const PIDE_INFO_DE_LAS_OPCIONES =
+  /\b(como es|que es|q es|que trae|q trae|incluye|contiene|contenido|informacion|info|explicame|detalles|sirve|funciona|material|producto|combo|basico|pack|diferencia|cual|opcion|opciones|eran 2|son 2|los 2|ambos)\b/;
+
+/** Palabras que no distinguen una opción de otra. */
+const PALABRAS_COMUNES = new Set(["solo", "quiero", "el", "la", "los", "las", "de", "del", "con", "para", "por", "mas", "un", "una", "opcion", "si", "y"]);
 
 /**
  * «¿CUÁL ELIGES?» (27/10/2026), como la venta de siempre (`sendTwoOptionsReminder`): quiere pagar —o
@@ -910,6 +933,19 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     const pendiente = loQueFalta(estado, t, pais);
     if (pendiente)
       nota = `Ya recibimos un pago de ${pendiente.pagado} de los ${pendiente.esperado}: le faltan ${pendiente.falta}. Contesta lo que escribió y, si habla del pago, recuérdale con amabilidad que faltan ${pendiente.falta} y que nos envíe el comprobante de lo que falta. No inventes otros montos.`;
+  }
+  if (!nota) {
+    // EL ASESOR, A LA SEGUNDA QUEJA (27/10/2026), como la venta de siempre: si ya dijo DOS veces que algo
+    // no le funciona y aún no se le ofreció, en esta respuesta se le ofrece (la IA a veces seguía
+    // intentando sola y el cliente se cansaba).
+    const recientes = ultimosMensajes(convo.id, 10);
+    const quejas = recientes.filter(
+      (m) => m.role === "user" && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale)|error|falla|problema)\b/.test(sinTildes(m.content ?? ""))
+    ).length;
+    const yaOfrecido = recientes.some((m) => m.role !== "user" && /asesor/i.test(m.content ?? ""));
+    if (quejas >= 2 && !yaOfrecido)
+      nota =
+        "El cliente ya te dijo DOS veces que tiene un problema que no se resuelve. Muéstrale empatía en una frase, dale una última sugerencia breve si la tienes, y termina con esta pregunta exacta: «¿Deseas que un asesor especializado se comunique contigo?». Si después dice que sí, usa notify_admin_emergency.";
   }
   // Una ficha que todavía ESPERA su tiempo (el upsell) no se ha presentado: la IA no habla de ella.
   const ficha = estado?.espera_ficha && estado.espera_ficha === estado.ficha_id ? undefined : t.fichas.find((x) => x.id === estado?.ficha_id);
@@ -975,7 +1011,20 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     !yaCompro &&
     !muestrasEnviadas(estado).includes(`oferta:${estado?.ficha_id ?? ""}`);
   const ofertaDeImagenes = ofrecerImagenes ? getSamplesOfferBubble() : "";
+  // LAS OPCIONES DE COMPRA DONDE ESTÁ (27/10/2026), como la venta de siempre: con dos o más, la IA las
+  // nombra todas y cierra con «¿Cuál de las dos prefieres?»; y si preguntó por los productos, al final
+  // va la burbuja corta con las opciones (`getOrderBumpChoiceHelperBubbles`).
+  const segDeAqui = estado?.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado.seg_ficha) : undefined;
+  const opcionesAqui = etapa === "venta" && !estado?.cobro_ficha_id ? opcionesDeCompraEn(t, [ficha, segDeAqui], config, pais, estado?.oferta === 1) : [];
+  const preguntaPrecio = /\b(precio|cuesta|vale|costo|valor|cuanto (es|sale|seria)|a cuanto)\b/.test(ultimo);
+  const burbujaDeAyuda =
+    !nota && opcionesAqui.length > 1 && (looksLikeProductContentTurn(ultimo) || PIDE_INFO_DE_LAS_OPCIONES.test(ultimo)) && !preguntaPrecio && !hablaDeUnProblema
+      ? opcionesAqui.map((o, i) => `*Opción ${i + 1}* — ${o.nombre}${o.precio ? ` · *${o.precio}*` : ""}`).join("\n")
+      : "";
+  const metodosDelPais = getPaymentMethods(convo.phone).map((m) => m.label).filter(Boolean);
   const salio = await responderConIA(convo, {
+    ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
+    ...(metodosDelPais.length ? { metodos: metodosDelPais } : {}),
     cerebroGeneral: t.cerebro,
     instrucciones: ficha?.instrucciones,
     ...(ofreciendoAhora ? { ofreciendoAhora } : {}),
@@ -1041,8 +1090,12 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     // el contenido y quedan muestras por ver → tras su respuesta, tu burbuja «¿Deseas ver unas
     // imágenes…?», al FINAL de la fila (después de la última burbuja de la IA). Su «sí» del turno
     // siguiente manda la galería (`mandarLaGaleria`). Una vez por ficha.
-    ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true, alFinal: [ofertaDeImagenes] } : {}),
+    ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true } : {}),
+    ...((ofrecerImagenes && ofertaDeImagenes) || burbujaDeAyuda
+      ? { alFinal: [...(burbujaDeAyuda ? [burbujaDeAyuda] : []), ...(ofrecerImagenes && ofertaDeImagenes ? [ofertaDeImagenes] : [])] }
+      : {}),
   });
+  if (salio && burbujaDeAyuda) console.log(`[tablero] convo ${convo.id}: preguntó por los productos → burbuja con las ${opcionesAqui.length} opciones`);
   if (salio && ofrecerImagenes) {
     if (ofertaDeImagenes) {
       apuntarImagenesOfrecidas(convo.id, true);
@@ -1050,6 +1103,37 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
       console.log(`[tablero] convo ${convo.id}: pregunta por el contenido → ofrece ver las imágenes`);
     }
   }
+}
+
+/**
+ * LAS OPCIONES DE COMPRA DE UNA ESTACIÓN: los Cobros a los que llevan sus botones, cuadritos y «✍️ Si
+ * elige» (de la ficha donde está y de sus seguimientos), con el nombre y el precio de su producto.
+ */
+function opcionesDeCompraEn(
+  t: Tablero,
+  fichas: Array<FichaDelTablero | undefined>,
+  config: WorkflowConfig | null,
+  pais: string,
+  deOferta: boolean
+): Array<{ nombre: string; precio: string | null; valor: number }> {
+  const vistos = new Set<string>();
+  const fuera: Array<{ nombre: string; precio: string | null; valor: number }> = [];
+  for (const f of fichas) {
+    if (!f) continue;
+    const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
+    const salidas = [...botones.map((b) => `btn:${b.id}`), ...cuadritos.map((d) => `dec:${d.id}`), ...eligeDeLaFicha(f).map((id) => `elige:${id}`)];
+    for (const s of salidas) {
+      const d = t.fichas.find((x) => x.id === cableDeLaSalida(t, f.id, s)?.a);
+      const id = d?.tipo === "cobro" ? d.cobro?.producto_id : undefined;
+      if (!id || vistos.has(id)) continue;
+      vistos.add(id);
+      const p = producto(config, id);
+      if (!p) continue;
+      const v = precioDelProducto(p, pais, deOferta);
+      fuera.push({ nombre: p.name ?? id, precio: v ? formatCurrencyAmount(v, pais as never) : null, valor: v ?? 0 });
+    }
+  }
+  return fuera.sort((a, b) => a.valor - b.valor);
 }
 
 /** Lo último que escribió el cliente (texto), para saber de qué habla en este turno. */
@@ -1866,6 +1950,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       return [
         ...botones.map((b) => ({ duena, salida: `btn:${b.id}`, boton: b.id as string | null, cuadrito: null as BubbleDecision | null })),
         ...cuadritos.map((d) => ({ duena, salida: `dec:${d.id}`, boton: null as string | null, cuadrito: d as BubbleDecision | null })),
+        ...eligeDeLaFicha(duena).map((id) => ({ duena, salida: `elige:${id}`, boton: null as string | null, cuadrito: null as BubbleDecision | null })),
       ].filter((o) => {
         const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, o.salida)?.a);
         return destino?.tipo === "cobro" || destino?.tipo === "intro_ob";
@@ -1875,6 +1960,57 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const cobros = [...destinos].map((id) => t.fichas.find((x) => x.id === id)).filter((x): x is FichaDelTablero => x?.tipo === "cobro");
     return { haciaPagar, destinos, soloCobros: cobros.length === destinos.size ? cobros : [] };
   };
+  // Seguir una de esas opciones: un cuadrito (con sus burbujas), un botón o un «✍️ Si elige».
+  const seguirLaOpcion = async (o: { duena: FichaDelTablero; salida: string; boton: string | null; cuadrito: BubbleDecision | null }) => {
+    if (o.cuadrito) await actuarCuadrito(convo, t, o.duena, o.cuadrito);
+    else {
+      if (o.boton) apuntarBoton(convo.id, o.boton);
+      await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
+    }
+  };
+  // «SÍ» A LO QUE PROPUSO EL BOT (27/10/2026), como la venta de siempre (`laPropuestaDelBotQueElClienteAfirmo`
+  // y la afirmación a la pregunta de pago): si su última burbuja invitó a comprar y el cliente dice «sí»,
+  // «dale», «ok»…, eso ES decidir. Si el bot propuso UN producto, ése; si hay una sola forma de comprar,
+  // ésa (el Order bump o el Cobro); con dos o más, «¿Cuál eliges?». Lo resuelve el bot, no la IA (antes
+  // la IA improvisaba los pasos y se quedaba en «Los métodos que tenemos son:»).
+  if (texto && !estado.cobro_ficha_id && !metodoDicho && AFIRMA.test(normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim())) {
+    // Las últimas burbujas del bot (tras su pregunta puede venir otra sin pregunta, como las opciones).
+    // (Se saltan los mensajes del cliente del final —su propio «sí»— y se toman las burbujas del bot de antes.)
+    const alReves = [...ultimosMensajes(convo.id, 10)].reverse();
+    const desde = alReves.findIndex((m) => m.role !== "user");
+    const resto = desde < 0 ? [] : alReves.slice(desde);
+    const hasta = resto.findIndex((m) => m.role === "user");
+    const ultimaDelBot = (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
+    const pregunta = sinTildes(ultimaDelBot.split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
+    if (pregunta && INVITA_A_COMPRAR.test(pregunta) && !/\b(foto|fotos|imagen|imagenes|muestra|muestras|video)\b/.test(pregunta)) {
+      const { haciaPagar, destinos, soloCobros } = opcionesDeCompra();
+      const nombreDelDestino = (o: (typeof haciaPagar)[number]) => {
+        const d = t.fichas.find((x) => x.id === cableDeLaSalida(t, o.duena.id, o.salida)?.a);
+        return d?.tipo === "cobro" ? producto(config, d.cobro?.producto_id)?.name ?? "" : "";
+      };
+      // El producto se busca en la pregunta; si no lo nombra («¿Te lo preparo?»), en el turno entero del bot.
+      const nombrados = (donde: string) => haciaPagar.filter((o) => {
+        const n = nombreDelDestino(o);
+        return !!n && donde.includes(sinTildes(n));
+      });
+      const enLaPregunta = nombrados(pregunta);
+      const propuestos = enLaPregunta.length ? enLaPregunta : nombrados(sinTildes(ultimaDelBot));
+      const unoPropuesto = new Set(propuestos.map((o) => cableDeLaSalida(t, o.duena.id, o.salida)?.a)).size === 1;
+      console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 20)}» a la invitación «${pregunta.slice(0, 60)}» → decide`);
+      if (unoPropuesto) {
+        await seguirLaOpcion(propuestos[0]);
+        return true;
+      }
+      if (destinos.size === 1) {
+        await seguirLaOpcion(haciaPagar[0]);
+        return true;
+      }
+      if (soloCobros.length > 1) {
+        await recordarLasOpciones(convo, t, soloCobros, null);
+        return true;
+      }
+    }
+  }
   // Lo que dijo además de «quiero pagar / con yape / ¿cómo pago?»: si no queda nada, no dijo CUÁL.
   const loDemas = normal
     .replace(/[^a-z0-9ñ\s]/g, " ")
@@ -1897,21 +2033,21 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       return true;
     }
     if (haciaPagar.length > 0 && destinos.size === 1) {
-      const o = haciaPagar[0];
-      if (o.cuadrito) await actuarCuadrito(convo, t, o.duena, o.cuadrito);
-      else {
-        apuntarBoton(convo.id, o.boton!);
-        await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
-      }
+      await seguirLaOpcion(haciaPagar[0]);
       return true;
     }
   } else if (texto && !estado.cobro_ficha_id && loDemas.length === 0 && QUIERE_PAGAR.test(normal)) {
     // «QUIERO PAGAR» SIN DECIR CUÁL (27/10/2026), en cualquier momento (tras un seguimiento, horas
     // después…): con dos o más productos por elegir, la IA ya no adivina (podía darle el barato); se le
-    // recuerdan las opciones con su precio, como la venta de siempre.
-    const { soloCobros } = opcionesDeCompra();
+    // recuerdan las opciones con su precio, como la venta de siempre. Y con UNA sola forma de comprar,
+    // quererlo ES elegirla («quiero adquirirlo» suelta el Order bump).
+    const { haciaPagar, destinos, soloCobros } = opcionesDeCompra();
     if (soloCobros.length > 1) {
       await recordarLasOpciones(convo, t, soloCobros, null);
+      return true;
+    }
+    if (haciaPagar.length > 0 && destinos.size === 1) {
+      await seguirLaOpcion(haciaPagar[0]);
       return true;
     }
   }
@@ -2050,11 +2186,63 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           op: { id: `dec:${d.id}`, etiqueta: d.title || (d.keywords ?? []).join(", "), palabras: d.keywords } as OpcionParaLaIA,
           d: d as BubbleDecision | null,
         })),
+        // «✍️ Si elige X»: el producto por su nombre y sus alias.
+        ...eligeDeLaFicha(duena).map((id) => ({
+          duena,
+          op: { id: `elige:${id}`, etiqueta: producto(config, id)?.name ?? id, palabras: producto(config, id)?.aliases } as OpcionParaLaIA,
+          d: null as BubbleDecision | null,
+        })),
       ];
     });
     if (!contenido.startsWith("bubble:") && lista.length > 0 && !variasOpcionesDeCompra) {
-      const elegida = await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
+      // POR SU PALABRA, SIN IA (27/10/2026): si escribió una palabra que solo tiene UNA de las opciones
+      // (en su texto o en el nombre de su producto: «pack», «básico»), es ésa. «el pack» a veces se le
+      // escapaba a la IA. Si no, decide la IA («el combo», «el que trae la ropa»…).
+      const palabrasDe = (x: (typeof lista)[number]) => {
+        const destino = t.fichas.find((f) => f.id === cableDeLaSalida(t, x.duena.id, x.op.id)?.a);
+        const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
+        return new Set(
+          sinTildes([x.op.etiqueta, p?.name ?? ""].join(" "))
+            .replace(/[^a-z0-9ñ\s]/g, " ")
+            .split(/\s+/)
+            .filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w))
+        );
+      };
+      // Por DESTINO (la misma opción en la ficha y en sus seguimientos lleva al mismo sitio: cuenta una vez).
+      const destinoDe = (x: (typeof lista)[number]) => cableDeLaSalida(t, x.duena.id, x.op.id)?.a ?? x.op.id;
+      const destinos = [...new Set(lista.map(destinoDe))];
+      const conjuntos = destinos.map((d) => new Set(lista.filter((x) => destinoDe(x) === d).flatMap((x) => [...palabrasDe(x)])));
+      const dichas = new Set(sinTildes(contenido).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/));
+      const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
+      const acertados = destinos.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
+      // UNA PREGUNTA NO ELIGE («¿cuánto cuesta el pack?», «¿qué trae el básico?»): ésa la contesta la IA.
+      const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
+      const porPalabra = acertados.length === 1 && !esPregunta ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
+      const elegida = porPalabra.length === 1 ? porPalabra[0].op.id : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
+      if (porPalabra.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${elegida} (por su palabra)`);
       const cual = lista.find((x) => x.op.id === elegida);
+      // ELIGIÓ JUSTO DESPUÉS DE PREGUNTAR EL PRECIO (27/10/2026), como la venta de siempre
+      // (`askOrderBumpPurchaseConfirm`): primero se le confirma el precio y se le pregunta si lo quiere;
+      // su «sí» lo lleva (lo atiende «sí a lo que propuso el bot»). Solo si lo escribió (no un botón).
+      if (cual) {
+        const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, cual.duena.id, cual.op.id)?.a);
+        const delCliente = ultimosMensajes(convo.id, 6).filter((m) => m.role === "user");
+        const anterior = sinTildes(delCliente[delCliente.length - 2]?.content ?? "");
+        const preguntoPrecio = /\b(precio|cuesta|vale|costo|valor|cuanto (es|sale|seria)|a cuanto)\b/.test(anterior);
+        if (destino?.tipo === "cobro" && preguntoPrecio && !cual.d) {
+          const p = producto(config, destino.cobro?.producto_id);
+          const pais = getEffectiveCountryCode(convo.phone, config);
+          const precio = p ? precioDelProducto(p, pais, estado.oferta === 1) : null;
+          if (p) {
+            await sendConfiguredSteps(convo, [
+              { type: "text", body: `¡Perfecto! 😊 *${p.name}* queda en *${precio ? formatCurrencyAmount(precio, pais as never) : "su precio"}*.\n\n¿Te lo preparo?` },
+            ] as never);
+            respondio(convo, t);
+            console.log(`[tablero] convo ${convo.id}: eligió «${p.name}» tras preguntar el precio → le confirmo y pregunto`);
+            return true;
+          }
+        }
+      }
       if (cual?.d) {
         await actuarCuadrito(convo, t, cual.duena, cual.d);
         return true;
@@ -2062,7 +2250,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       if (cual) {
         const cable = cableDeLaSalida(t, cual.duena.id, cual.op.id);
         if (cable) {
-          apuntarBoton(convo.id, cual.op.id.slice(4));
+          if (cual.op.id.startsWith("btn:")) apuntarBoton(convo.id, cual.op.id.slice(4));
           await irA(convo.id, t, cable.a);
           return true;
         }
