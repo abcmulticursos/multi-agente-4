@@ -1755,6 +1755,14 @@ export default function ConversationPanel({
             mode={convo.mode}
             onChanged={handleModeChanged}
           />
+          <a
+            href={`/api/logs?dia=hoy&convo=${convo.id}`}
+            download
+            title="Descargar el log de esta conversación (hoy y ayer)"
+            className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-100"
+          >
+            📄 Log
+          </a>
           <button
             type="button"
             onClick={toggleBlock}

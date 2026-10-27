@@ -295,6 +295,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
           <div className="truncate text-[11px] text-emerald-100">{snapshot ? formatPhone(snapshot.conversation.phone) : sessionId ? "Cargando..." : "Sin abrir"} · sin envío a Meta</div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          {snapshot && <a href={`/api/logs?dia=hoy&convo=${snapshot.conversation.id}`} download title="Descargar el log de esta conversación" className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20">📄 Log</a>}
           {sessionId && <button onClick={() => void deleteCurrent()} disabled={deleting} title="Eliminar esta prueba" className="rounded border border-red-200/40 bg-red-500/20 px-2 py-1 text-[11px] font-medium text-white hover:bg-red-500/40">🗑</button>}
           {closable && <button onClick={() => { if (confirm("¿Cerrar esta ventana? Se borra su conversación de prueba y sus archivos.")) void closeWindow(); }} title="Cerrar ventana (borra la prueba y sus archivos)" className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20">✕</button>}
         </div>
@@ -458,6 +459,7 @@ export default function SimulatorPage() {
           </div>
           <div className="flex gap-2">
             <button onClick={addWindow} className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">➕ Agregar ventana</button>
+            <a href="/api/logs?dia=hoy" download title="Descargar el log completo de hoy (todas las conversaciones)" className="rounded-md border border-neutral-300 px-3 py-2 text-xs font-medium">📄 Log de hoy</a>
             <Link href="/editor" className="rounded-md border border-neutral-300 px-3 py-2 text-xs font-medium">Volver al editor</Link>
           </div>
         </div>

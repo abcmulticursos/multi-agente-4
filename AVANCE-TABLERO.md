@@ -50,6 +50,11 @@ Si la sesión se corta, se retoma desde aquí. La lista completa está en `INVEN
   mercado pago» con palabras de más no avanzaba en una venta de un producto (AR); la IA nombraba
   métodos que no existen; con «mandaré 20 soles» sin foto la IA decía «recibí tu comprobante, lo
   estoy verificando» (ahora pide la foto).
+- Su prueba HEA1–HEA4 (27/10, noche), arreglada y reproducida en la copia: eligió el caro y pagó el
+  barato → «¿fue una confusión o te quedas con…?» (texto fijo); «sí» a lo que la IA ofrece y «el de 100
+  citas también quiero» → datos de frente; «¿a cuál te refieres?» ya no muestra productos no vistos;
+  upgrade solo con su mensaje; tras el regalo, la entrega no vuelve a soltar upsell ni regalo; el
+  seguimiento se corta si paga a medias; comprobante repetido con texto fijo. Log a disco (📄 Log).
 - Reenganche (`scripts/recorrido-reenganche.mjs`): los que estaban terminan en su tubería con su precio
   (datos ya recibidos, esperando seguimiento, upsell ofrecido); los nuevos entran por la nueva. OK.
 

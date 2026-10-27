@@ -272,7 +272,9 @@ function cerebro(c: ContextoDeLaIA): string {
     c.eligio
       ? `EL CLIENTE YA ELIGIÓ: ${c.eligio}. Todo lo que digas de precio, pago o datos es de ESE producto. Si pregunta por el otro, contéstale, pero no cambies su elección ni le digas otro precio a pagar: solo cambia si él lo dice claramente.`
       : "",
-    c.sinPagoAprobado
+    // Solo sin nota del sistema: con nota («recibimos su pago, pero no alcanza…») el sistema ya dijo qué
+    // pasó con su comprobante, y esta línea la contradecía (HEA1: pidió la foto que acababa de llegar).
+    c.sinPagoAprobado && !c.nota
       ? "NINGÚN COMPROBANTE ESTÁ RECIBIDO NI EN REVISIÓN: si dice que ya pagó o que va a pagar, no digas que lo recibiste ni que lo estás verificando; pídele que envíe la FOTO o captura del comprobante por aquí."
       : "",
     c.ofreciendoAhora
@@ -734,10 +736,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   }
   // SIN PAGO APROBADO, NADA DE «YA TE LLEGA»: esas frases se quitan, frase por frase.
   if (c.sinPagoAprobado && texto) {
-    const promete =
-      // Y tampoco «recibí tu comprobante / lo estoy verificando» (27/10/2026: el cliente escribió «ok,
-      // mandaré 20 soles» SIN foto y la IA le dijo tres veces que lo estaba verificando).
-      /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|(sigue|est[aá]) en proceso|apenas (est[eé]|se) confirm)/i;
+    // Y tampoco «recibí tu comprobante / lo estoy verificando» (27/10/2026: el cliente escribió «ok,
+    // mandaré 20 soles» SIN foto y la IA le dijo tres veces que lo estaba verificando) — salvo con nota
+    // del sistema: ahí sí llegó un comprobante (a medias, o de otro monto) y puede decir que lo recibió.
+    const promete = c.nota
+      ? /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora))/i
+      : /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|(sigue|est[aá]) en proceso|apenas (est[eé]|se) confirm)/i;
     const antes = texto;
     texto = texto
       .split(/\n\s*\n/)
