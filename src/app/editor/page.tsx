@@ -29145,6 +29145,7 @@ function VistaPizarra({
           aplicar={aplicar}
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
+          onPais={onPaisDeLaVista}
         />
       ) : (
       <>
@@ -30848,7 +30849,10 @@ function PantallaDelTablero({
   aplicar,
   onConfigChange,
   onSnapshot,
+  onPais,
 }: {
+  /** Pone la bandera de abajo a la derecha en ese país (al tocar una ficha de su manta). */
+  onPais?: (pais: string) => void;
   cfg: FullConfig;
   /** La tienda (su id) o un workflow (`wf:<id>`). */
   clave: string;
@@ -31259,6 +31263,15 @@ function PantallaDelTablero({
             else setAjustes(fid);
           }}
           onAjustes={setAjustes}
+          // TOCAR UNA FICHA LLEVA LA BANDERA A SU PAÍS (27/10/2026): el de su Inicio, si es de uno solo.
+          onFichaTocada={(fid) => {
+            const f = tablero.fichas.find((x) => x.id === fid);
+            if (!f) return;
+            const pais = f.tipo === "inicio" ? f.pais ?? "" : paisDeSuManta(tablero, f, "");
+            if (!pais) return;
+            setPaisVisto(pais);
+            onPais?.(pais);
+          }}
           buscar={buscar}
           numeros={esWorkflow ? undefined : numeros}
           antesDelMas={
@@ -32402,7 +32415,7 @@ function AjustesDeLaFicha({
               <span className={ayuda}>
                 {ficha.tipo === "correo"
                   ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
-                  : "Con botones o cuadritos, la salida «⏳ Si no responde» siempre se ve. Aquí pones cuánto espera, contado desde su último mensaje; vacío = el silencio del regalo de tus Ajustes. Si su «⏳ Si no elige» va a Seguimientos, mandan ellos."}
+                  : "Con botones o cuadritos, la salida «⏳ Si no responde» siempre se ve. Aquí pones cuánto espera, contado desde su último mensaje; vacío = el silencio del regalo de tus Ajustes. Si tiene «⏳ Seguimientos» conectados, mandan ellos y esta salida no se usa (por eso no se ve)."}
               </span>
             </div>
           )}

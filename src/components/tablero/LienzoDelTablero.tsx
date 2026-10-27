@@ -12,7 +12,7 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -29,7 +29,9 @@ import {
   useNodes,
   useNodesState,
   useStore,
+  useStoreApi,
   ViewportPortal,
+  type ConnectionLineComponentProps,
   type Edge,
   type EdgeProps,
   type Node,
@@ -37,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, opcionesDe, pasosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -96,6 +98,7 @@ type Menu =
   | { tipo: "ficha"; fichaId: string }
   | { tipo: "cable"; cableId: string }
   | { tipo: "crear"; donde: Punto; desde?: { ficha: string; salida: string } }
+  | { tipo: "conectar"; ficha: string; salida: string }
   | { tipo: "caja"; cajaId: string };
 
 /**
@@ -112,10 +115,126 @@ function porQueNoSeConecta(t: TableroEnElEditor, de: string, salida: string, a: 
   if ((origen.tipo === "mensaje" || origen.tipo === "intro_ob") && salida === "siguiente") {
     const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(origen as FichaDelTablero));
     if (botones.length + cuadritos.length > 0 && destino.tipo !== "seguimientos")
-      return "«⏳ Si no elige» solo va a unos Seguimientos. Para llevarlo a otra ficha usa sus botones o cuadritos, o «⏳ Si no responde».";
+      return "«⏳ Seguimientos» solo va a unos Seguimientos. Para llevarlo a otra ficha usa sus botones o cuadritos, o «⏳ Si no responde».";
   }
   if (origen.tipo === "seguimientos" && destino.tipo === "seguimientos")
     return "Unos Seguimientos no llevan a otros: los seguimientos ya enviados no se repiten.";
+  return null;
+}
+
+/**
+ * CABLE O COLITA (27/10/2026, «modo inalámbrico»). Lo elige él en cada conexión (clic derecho); sin
+ * elegir, lo de siempre: al Regalo y los regresos (a una ficha que está a la izquierda) como colita, lo
+ * demás como cable. «Ver todo como cable» los muestra todos con línea sin cambiar lo elegido.
+ */
+function esColita(t: TableroEnElEditor, c: CableDelTablero, todoCable: boolean): boolean {
+  if (todoCable) return false;
+  if (c.vista) return c.vista === "colita";
+  const origen = t.fichas.find((f) => f.id === c.de);
+  const destino = t.fichas.find((f) => f.id === c.a);
+  if (!origen || !destino) return false;
+  return destino.tipo === "regalo" || (destino.tipo !== "seguimientos" && destino.x < origen.x - 60);
+}
+
+/** Lo que dice una colita: hacia dónde, el número y el nombre de su destino. */
+function letreroDeColita(t: TableroEnElEditor, c: CableDelTablero, numeroDe: Record<string, number>): string {
+  const origen = t.fichas.find((f) => f.id === c.de);
+  const destino = t.fichas.find((f) => f.id === c.a);
+  if (!destino) return "→";
+  const atras = !!origen && destino.x < origen.x - 60;
+  const n = numeroDe[destino.id];
+  return `${atras ? "↩" : "→"} ${n !== undefined ? `${n} ` : ""}${ASPECTO[destino.tipo].icono} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}`;
+}
+
+/** Las opciones de cada seguimiento de una caja de Seguimientos: su número, sus minutos y sus salidas. */
+function filasDeSeguimientos(f: FichaEnElEditor): Array<{ n: number; minutos: number; claves: string[] }> {
+  return (f.seguimientos ?? []).map((s, i) => {
+    const pasos = (s.variantes ?? []).flatMap((v) => (v.steps ?? []) as never[]);
+    const { botones, cuadritos } = opcionesDe(pasos as never);
+    return { n: i + 1, minutos: s.minutos, claves: [...botones.map((b) => `btn:${b.id}`), ...cuadritos.map((d) => `dec:${d.id}`)] };
+  });
+}
+
+/**
+ * «🔍 QUÉ FALTA CONECTAR» (27/10/2026): las salidas que, sin cable, dejan al cliente sin camino o te
+ * dejan sin la venta. Solo en lo que está en venta (lo que se alcanza desde un Inicio encendido), sin
+ * las fichas apagadas. Cada una con su porqué en una línea.
+ */
+function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Record<string, string>): Array<{ ficha: string; salida: string; motivo: string }> {
+  const faltas: Array<{ ficha: string; salida: string; motivo: string }> = [];
+  const conCable = (de: string, salida: string) => t.cables.some((c) => c.de === de && c.salida === salida);
+  const enVenta = new Set<string>();
+  for (const ini of t.fichas.filter((f) => f.tipo === "inicio" && !f.guardada)) {
+    if (ini.sin_venta) continue;
+    const sale = t.cables.some((c) => c.de === ini.id);
+    if (!sale)
+      faltas.push({
+        ficha: ini.id,
+        salida: "siguiente",
+        motivo: `El Inicio de ${ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países"} no lleva a ninguna ficha: nadie de ahí entra.`,
+      });
+    for (const id of rutaDe(t, ini.id)) enVenta.add(id);
+  }
+  // Las fichas que vienen después de una Entrega (los upsells): sin respuesta, la venta de siempre
+  // lleva al Regalo.
+  const trasUnaEntrega = new Set<string>();
+  for (const e of t.fichas.filter((f) => f.tipo === "entregar")) for (const id of rutaDe(t, e.id)) if (id !== e.id) trasUnaEntrega.add(id);
+  for (const f of t.fichas) {
+    if (!enVenta.has(f.id) || f.tipo === "inicio" || f.apagada || f.guardada) continue;
+    const salidas = salidasDeLaFicha(f as FichaDelTablero, paisVisto, nombres);
+    for (const s of salidas) {
+      if (conCable(f.id, s.clave)) continue;
+      const nombre = s.etiqueta.replace(/^(🔘|💬) /, "");
+      if (s.clave.startsWith("btn:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `El botón «${nombre}» no lleva a ningún lado.` });
+      else if (s.clave.startsWith("dec:")) {
+        const d = opcionesDe(pasosDeLaFicha(f as FichaDelTablero)).cuadritos.find((x) => `dec:${x.id}` === s.clave);
+        // Un cuadrito con sus propias burbujas contesta y se queda: no le falta nada.
+        if (!d?.steps?.length) faltas.push({ ficha: f.id, salida: s.clave, motivo: `«${nombre}» no lleva a ningún lado.` });
+      } else if (f.tipo === "condicion" || f.tipo === "reparto")
+        faltas.push({ ficha: f.id, salida: s.clave, motivo: `«${s.etiqueta}» no lleva a ningún lado.` });
+      else if (f.tipo === "cobro" && s.clave.startsWith("tramo:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `El tramo «${s.etiqueta}» no entrega nada.` });
+      else if (f.tipo === "cobro" && f.cobro?.modo !== "abierto" && (s.clave === "pagado" || s.clave.startsWith("prod:"))) {
+        // Sin cable, el bot busca la Entrega de ese producto en su ruta (`entregaDelProductoEnSuRuta`):
+        // solo falta si no la hay.
+        const producto = s.clave === "pagado" ? f.cobro?.producto_id : s.clave.slice(5);
+        const entrega = [...enVenta].some((id) => {
+          const x = t.fichas.find((y) => y.id === id);
+          return x?.tipo === "entregar" && !x.apagada && (x.producto_id === producto || (x.entregas ?? []).includes(producto ?? ""));
+        });
+        if (!entrega) faltas.push({ ficha: f.id, salida: s.clave, motivo: `${s.etiqueta}: no hay ninguna Entrega de ese producto en su camino.` });
+      } else if (
+        s.clave === "sin_respuesta" &&
+        (f.tipo === "mensaje" || f.tipo === "intro_ob") &&
+        trasUnaEntrega.has(f.id) &&
+        !conCable(f.id, "siguiente")
+      )
+        faltas.push({ ficha: f.id, salida: s.clave, motivo: "Si no responde a esta oferta, ¿a dónde va? (en la venta de siempre, al Regalo)." });
+    }
+  }
+  return faltas;
+}
+
+/** EL CABLE QUE SE TIRA, del color de la ficha de donde sale (27/10/2026). */
+function CableQueSeTira({ fromX, fromY, toX, toY, fromPosition, toPosition, fromNode }: ConnectionLineComponentProps) {
+  const tipo = (fromNode?.data as { ficha?: FichaEnElEditor } | undefined)?.ficha?.tipo;
+  const color = tipo ? ASPECTO[tipo].trazo : "#f97316";
+  const [camino] = getBezierPath({ sourceX: fromX, sourceY: fromY, sourcePosition: fromPosition, targetX: toX, targetY: toY, targetPosition: toPosition });
+  return <path d={camino} fill="none" stroke={color} strokeWidth={3} strokeDasharray="6 6" />;
+}
+
+/** ESCAPE SUELTA EL CABLE QUE SE ESTÁ TIRANDO (27/10/2026): el que ya estaba queda como estaba. */
+function SoltarConEscape({ tirando, alSoltar }: { tirando: boolean; alSoltar: () => void }) {
+  const tienda = useStoreApi();
+  useEffect(() => {
+    if (!tirando) return;
+    const alPulsar = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      tienda.getState().cancelConnection();
+      alSoltar();
+    };
+    window.addEventListener("keydown", alPulsar, true);
+    return () => window.removeEventListener("keydown", alPulsar, true);
+  }, [tirando, tienda, alSoltar]);
   return null;
 }
 
@@ -134,6 +253,16 @@ const Contexto = createContext<{
   numeros?: Record<string, { clientes: number; ventas: number }>;
   /** El número de cada ficha (tipo Kommo), para ubicarlas y para los regresos «↩ 7». */
   numeroDe: Record<string, number>;
+  /** ¿Este cable se ve como colita? (lo que él eligió, o lo de siempre). */
+  colita: (c: CableDelTablero) => boolean;
+  /** La ficha iluminada al tocar una colita (solo su borde; la vista no se mueve). */
+  destacada: string | null;
+  destacar: (id: string | null) => void;
+  /** La ficha cuyas colitas de llegada se ven como línea (al pasar el ratón por su «← 3»). */
+  verEntrantes: string | null;
+  setVerEntrantes: (id: string | null) => void;
+  /** «🔍 Qué falta conectar»: por ficha, las salidas que faltan con su porqué. */
+  faltas: Map<string, Map<string, string>> | null;
 } | null>(null);
 
 /** «👥 12 · 💰 3»: los números de una ficha, como los de las rutas de la pizarra. Nada si no hay. */
@@ -201,12 +330,32 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
             title="Quien vino de este anuncio va por este cable (su tubería)."
           >
             📣 {ctx?.nombres[`anuncio:${k}`] ?? k}
-            <Handle type="source" position={Position.Right} id={`anuncio:${k}`} className={PUNTO_NARANJA} />
+            <Handle
+              type="source"
+              position={Position.Right}
+              id={`anuncio:${k}`}
+              className={PUNTO_NARANJA}
+              title="Clic: elegir a dónde va de una lista"
+              onClick={(e) => {
+                e.stopPropagation();
+                ctx?.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: `anuncio:${k}` });
+              }}
+            />
           </div>
         ))}
         <div className="relative rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700">
           {suyos.length ? "→ Los demás" : "→ Empieza aquí"}
-          <Handle type="source" position={Position.Right} id="siguiente" className={PUNTO_NARANJA} />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="siguiente"
+            className={`${PUNTO_NARANJA} ${ctx?.faltas?.get(f.id)?.has("siguiente") ? "punto-pide-cable" : ""}`}
+            title="Clic: elegir a dónde va de una lista"
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx?.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: "siguiente" });
+            }}
+          />
         </div>
         {anunciosDisponibles.length > 0 && (
           <button
@@ -279,6 +428,78 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const leLlega = ctx.tablero.cables.some((c) => c.a === f.id);
   const tenue = !!f.apagada;
+  const titulo = f.titulo?.trim() || a.nombre;
+  // MODO INALÁMBRICO (27/10/2026): cuántas colitas le llegan (al pasar el ratón se ven sus líneas), y
+  // una marca sutil en la ficha que tiene alguna conexión inalámbrica.
+  const colitasQueLlegan = ctx.tablero.cables.filter((c) => c.a === f.id && ctx.colita(c));
+  const conColitas = colitasQueLlegan.length > 0 || ctx.tablero.cables.some((c) => c.de === f.id && ctx.colita(c));
+  const destacada = ctx.destacada === f.id;
+  const faltan = ctx.faltas?.get(f.id);
+  const destinoDe = (clave: string) => {
+    const c = ctx.tablero.cables.find((x) => x.de === f.id && x.salida === clave);
+    return c ? ctx.tablero.fichas.find((x) => x.id === c.a) : undefined;
+  };
+  // «⏳ SI NO RESPONDE» NO SE VE CON SEGUIMIENTOS CONECTADOS (27/10/2026): ahí mandan ellos y el bot no
+  // la usa. Si ya tenía cable, se ve (para poder cortarlo).
+  const conSeguimientos = destinoDe("siguiente")?.tipo === "seguimientos";
+  const visibles = salidas
+    // «Otra cosa» solo en la ficha que ya la tiene conectada (26/10/2026): sin cable no hace nada.
+    .filter((s) => s.clave !== "otra" || conCable.has("otra"))
+    .filter((s) => !(s.clave === "sin_respuesta" && conSeguimientos && !conCable.has("sin_respuesta")))
+    .map((s) =>
+      // «Si no paga» hacia unos Seguimientos: se llama como lo que hace.
+      s.clave === "sin_pago" && destinoDe("sin_pago")?.tipo === "seguimientos" ? { ...s, etiqueta: "⏳ Seguimientos (si no paga)" } : s
+    );
+  /** Una salida con su puntito (o, repetida en otro seguimiento, con el letrero de a dónde va). */
+  const pastilla = (s: { clave: string; etiqueta: string }, conPunto: boolean, llave: string) => {
+    const boton = s.clave.startsWith("btn:");
+    const cuadrito = s.clave.startsWith("dec:");
+    const falta = faltan?.get(s.clave);
+    // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
+    const pide = !!falta || ((boton || cuadrito || s.clave === "sin_pago") && !conCable.has(s.clave));
+    const destino = destinoDe(s.clave);
+    return (
+      <div
+        key={llave}
+        title={falta ?? undefined}
+        className={`relative flex items-center gap-1.5 rounded-full border px-2 py-0.5 pr-4 text-[11px] font-semibold ${
+          falta
+            ? "border-red-500 bg-red-50 text-red-800"
+            : boton
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+              : cuadrito
+                ? "border-indigo-300 bg-indigo-50 text-indigo-800"
+                : "border-slate-200 bg-slate-50 text-slate-700"
+        }`}
+      >
+        {(boton || cuadrito) && <span className="shrink-0 text-[9px] opacity-70">{boton ? "BOTÓN" : "SI DICE"}</span>}
+        <span className="truncate">{s.etiqueta.replace(/^(🔘|💬) /, "")}</span>
+        {!conPunto && destino && (
+          // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.
+          <span
+            className="ml-auto shrink-0 rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800"
+            style={{ borderColor: ASPECTO[destino.tipo].trazo }}
+            title={`Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre} (el mismo cable de arriba)`}
+          >
+            → {ctx.numeroDe[destino.id] ?? ""}
+          </span>
+        )}
+        {conPunto && (
+          <Handle
+            type="source"
+            position={Position.Right}
+            id={s.clave}
+            className={`${PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+            title={pide ? (falta ?? "Sin cable: tíralo a donde lleva, o haz clic para elegir de una lista") : "Clic: elegir a dónde va de una lista"}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
+            }}
+          />
+        )}
+      </div>
+    );
+  };
   const burbujas =
     f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo"
       ? resumenDeBurbujas(f.steps)
@@ -296,6 +517,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       className={`relative w-[250px] rounded-lg border-2 bg-white text-slate-800 shadow-md ${a.borde} ${tenue ? "ficha-tenue border-dashed" : ""} ${
         selected ? "ring-4 ring-sky-400" : ""
       }`}
+      style={{
+        // LA FICHA A LA QUE LLEGA LA COLITA TOCADA: solo su borde se ilumina (27/10/2026).
+        ...(destacada ? { boxShadow: "0 0 0 5px #f59e0b, 0 0 22px 6px rgba(245,158,11,0.55)" } : {}),
+        // Marca sutil: esta ficha tiene alguna conexión inalámbrica.
+        ...(conColitas && !destacada ? { outline: "2px dotted rgba(100,116,139,0.55)", outlineOffset: 4 } : {}),
+      }}
     >
       <Handle type="target" position={Position.Left} id="entra" className={PUNTO_VERDE} style={{ top: 18 }} />
       {!leLlega && (
@@ -304,7 +531,17 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           title="No le llega ningún cable: nadie entra por aquí."
         />
       )}
-      <div className={`flex cursor-pointer items-center gap-2 rounded-t-[6px] ${a.color} px-2 py-1.5 text-white`} title="Doble clic para abrirla">
+      {colitasQueLlegan.length > 0 && (
+        <span
+          className="nodrag pointer-events-auto absolute -left-[46px] top-[34px] cursor-help rounded-full border border-slate-300 bg-white px-1.5 text-[10px] font-bold text-slate-700 shadow"
+          title={`Le llegan ${colitasQueLlegan.length} conexión(es) inalámbrica(s). Pasa el ratón para ver de dónde.`}
+          onMouseEnter={() => ctx.setVerEntrantes(f.id)}
+          onMouseLeave={() => ctx.setVerEntrantes(null)}
+        >
+          ← {colitasQueLlegan.length}
+        </span>
+      )}
+      <div className={`flex cursor-pointer items-center gap-2 rounded-t-[6px] ${a.color} px-2 py-1.5 text-white`} title={`${ctx.numeroDe[f.id] ?? ""} ${titulo}\nDoble clic para abrirla`.trim()}>
         {avisos.length > 0 && (
           <span
             title={avisos.join("\n")}
@@ -320,7 +557,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           </span>
         )}
         <span className="shrink-0 text-xs">{a.icono}</span>
-        <span className="truncate text-xs font-bold">{f.titulo?.trim() || a.nombre}</span>
+        <span className="truncate text-xs font-bold" title={titulo}>
+          {titulo}
+        </span>
         {tenue && <span className="ml-auto shrink-0 text-[10px]">APAGADA</span>}
         <span className={`${tenue ? "" : "ml-auto"} flex shrink-0 items-center gap-1`}>
           <button
@@ -407,39 +646,33 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
         )}
       </div>
-      {salidas.length > 0 && (
+      {visibles.length > 0 && f.tipo !== "seguimientos" && (
+        <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">{visibles.map((s) => pastilla(s, true, s.clave))}</div>
+      )}
+      {/* LA CAJA DE SEGUIMIENTOS, FILA POR FILA (27/10/2026): cada seguimiento con su número, sus minutos
+          y sus propias opciones. Una opción que se repite en otro seguimiento es el MISMO cable: su
+          puntito está en la primera; en las demás se ve a dónde va. */}
+      {f.tipo === "seguimientos" && (
         <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
-          {salidas
-            // «Otra cosa» solo en la ficha que ya la tiene conectada (26/10/2026): sin cable no hace nada.
-            .filter((s) => s.clave !== "otra" || conCable.has("otra"))
-            .map((s) => {
-            const boton = s.clave.startsWith("btn:");
-            const cuadrito = s.clave.startsWith("dec:");
-            // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
-            const pide = (boton || cuadrito || s.clave === "sin_pago") && !conCable.has(s.clave);
-            return (
-              <div
-                key={s.clave}
-                className={`relative flex items-center gap-1.5 rounded-full border px-2 py-0.5 pr-4 text-[11px] font-semibold ${
-                  boton
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                    : cuadrito
-                      ? "border-indigo-300 bg-indigo-50 text-indigo-800"
-                      : "border-slate-200 bg-slate-50 text-slate-700"
-                }`}
-              >
-                {(boton || cuadrito) && <span className="text-[9px] opacity-70">{boton ? "BOTÓN" : "SI DICE"}</span>}
-                <span className="truncate">{s.etiqueta.replace(/^(🔘|💬) /, "")}</span>
-                <Handle
-                  type="source"
-                  position={Position.Right}
-                  id={s.clave}
-                  className={`${PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
-                  title={pide ? "Sin cable: tíralo a donde lleva" : undefined}
-                />
+          {(() => {
+            const yaPuestas = new Set<string>();
+            const porClave = new Map(visibles.map((s) => [s.clave, s]));
+            return filasDeSeguimientos(f).map((fila) => (
+              <div key={fila.n} className="flex flex-col gap-1">
+                <div className="flex items-center gap-1.5 rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-900">
+                  ⏳ Seguimiento {fila.n} <span className="font-semibold text-orange-700">· {minutosLegibles(fila.minutos)}</span>
+                </div>
+                {fila.claves.flatMap((clave) => {
+                  const s = porClave.get(clave);
+                  if (!s) return [];
+                  const primera = !yaPuestas.has(clave);
+                  yaPuestas.add(clave);
+                  return [<div key={`${fila.n}-${clave}`} className="pl-3">{pastilla(s, primera, `${fila.n}-${clave}`)}</div>];
+                })}
               </div>
-            );
-          })}
+            ));
+          })()}
+          {visibles.filter((s) => !s.clave.startsWith("btn:") && !s.clave.startsWith("dec:")).map((s) => pastilla(s, true, s.clave))}
         </div>
       )}
       {salidas.length === 0 && (
@@ -568,34 +801,70 @@ function CableDelTablero(props: EdgeProps) {
   // EL CABLE COMO ETIQUETA (26/10/2026, tipo Sendy/Kommo): un regreso («↩ 7») o el que va al Regalo
   // («🎁 Regalo») no cruza la pizarra. Se ve un trazo corto con su etiqueta; al pasar el ratón, la línea
   // completa. El cable es el mismo: solo cambia cómo se dibuja.
-  const etiqueta = (props.data as { etiqueta?: string } | undefined)?.etiqueta;
-  if (etiqueta) return <CableComoEtiqueta {...props} etiqueta={etiqueta} />;
+  const datos = props.data as { etiqueta?: string; colorDestino?: string; tenue?: boolean } | undefined;
+  if (datos?.etiqueta) return <CableComoEtiqueta {...props} etiqueta={datos.etiqueta} colorDestino={datos.colorDestino} tenue={datos.tenue} />;
   return <CableCompleto {...props} />;
 }
 
-function CableComoEtiqueta({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, etiqueta }: EdgeProps & { etiqueta: string }) {
+function CableComoEtiqueta({
+  id,
+  target,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style,
+  etiqueta,
+  colorDestino,
+  tenue,
+}: EdgeProps & { etiqueta: string; colorDestino?: string; tenue?: boolean }) {
   const ctx = useContext(Contexto);
   const [encima, setEncima] = useState(false);
+  const zoom = useStore((s) => s.transform[2]);
   const [completo] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   const corto = `M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`;
+  // LA LÍNEA DE LA COLITA (al pasar el ratón, o por el «← 3» de su destino): del MISMO GROSOR en la
+  // pantalla, cerca o lejos (27/10/2026: «si se adelgaza con la distancia, no veo a dónde conecta»).
+  const verLinea = encima || ctx?.verEntrantes === target;
+  const grosor = 3.5 / Math.max(zoom, 0.05);
   return (
     <>
-      <BaseEdge id={id} path={corto} interactionWidth={0} style={{ ...style, strokeWidth: 3, strokeDasharray: undefined }} />
-      {encima && <BaseEdge id={`${id}-completo`} path={completo} interactionWidth={0} style={{ ...style, strokeWidth: 2, opacity: 0.55 }} />}
+      <BaseEdge id={id} path={corto} interactionWidth={0} style={{ ...style, strokeWidth: 3, strokeDasharray: undefined, opacity: tenue ? 0.4 : 1 }} />
+      {verLinea && (
+        <BaseEdge
+          id={`${id}-completo`}
+          path={completo}
+          interactionWidth={0}
+          style={{ ...style, strokeWidth: grosor, strokeDasharray: `${9 / Math.max(zoom, 0.05)} ${6 / Math.max(zoom, 0.05)}`, opacity: 0.8 }}
+        />
+      )}
       <EdgeLabelRenderer>
         <div
-          className="nodrag nopan absolute flex items-center gap-1 rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
-          style={{ transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`, pointerEvents: "all", borderColor: String(style?.stroke ?? "#94a3b8") }}
+          className="nodrag nopan absolute flex max-w-[230px] cursor-pointer items-center gap-1 rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
+          style={{
+            transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`,
+            pointerEvents: "all",
+            // EL BORDE, DEL COLOR DE LA FICHA A LA QUE LLEGA (27/10/2026): magenta = va al Regalo.
+            borderColor: colorDestino ?? String(style?.stroke ?? "#94a3b8"),
+            opacity: tenue ? 0.5 : 1,
+          }}
           onMouseEnter={() => setEncima(true)}
           onMouseLeave={() => setEncima(false)}
+          // TOCARLA ILUMINA EL BORDE DE SU DESTINO; la vista no se mueve. Otro toque lo apaga.
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx?.destacar(ctx.destacada === target ? null : target);
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();
             ctx?.menu(e.clientX, e.clientY, { tipo: "cable", cableId: id });
           }}
-          title="Pasa el ratón para ver a dónde llega · clic derecho: cortar"
+          title={`${etiqueta}${tenue ? " (apagada)" : ""}\nClic: ilumina su destino · pasa el ratón: ves la línea · clic derecho: volver cable o cortar`}
         >
-          {etiqueta}
+          <span className="truncate">{etiqueta}</span>
           {encima && (
             <button
               type="button"
@@ -775,7 +1044,10 @@ export default function LienzoDelTablero({
   antesDelMas,
   despuesDelMas,
   numeros,
+  onFichaTocada,
 }: {
+  /** Al tocar una ficha: para poner la bandera en el país de su manta (27/10/2026). */
+  onFichaTocada?: (id: string) => void;
   tablero: TableroEnElEditor;
   resumenDe: (f: FichaEnElEditor) => string;
   paisVisto: string;
@@ -934,20 +1206,49 @@ export default function LienzoDelTablero({
   // siguiendo sus cables; las sueltas, al final, de izquierda a derecha. Para ubicarlas y nombrarlas.
   const numeroDe = useMemo(() => numerarFichas(tablero), [tablero]);
 
+  // EL MODO INALÁMBRICO (27/10/2026): cada conexión, cable o colita, como él la eligió.
+  const [todoCable, setTodoCable] = useState(false);
+  const [destacada, setDestacada] = useState<string | null>(null);
+  const [verEntrantes, setVerEntrantes] = useState<string | null>(null);
+  // AL TIRAR DE NUEVO DESDE UNA SALIDA CON CABLE, el viejo no se ve mientras se tira; si el nuevo no
+  // llega a ninguna ficha, vuelve a verse tal cual (no se desconecta nada).
+  const [tirando, setTirando] = useState<{ de: string; salida: string } | null>(null);
+  // «🔍 QUÉ FALTA CONECTAR»
+  const [revisando, setRevisando] = useState(false);
+  const faltas = useMemo(() => (revisando ? faltasDelTablero(tablero, paisVisto, nombres) : null), [revisando, tablero, paisVisto, nombres]);
+  const faltasPorFicha = useMemo(() => {
+    if (!faltas) return null;
+    const m = new Map<string, Map<string, string>>();
+    for (const x of faltas) {
+      if (!m.has(x.ficha)) m.set(x.ficha, new Map());
+      m.get(x.ficha)!.set(x.salida, x.motivo);
+    }
+    return m;
+  }, [faltas]);
+  const colita = (c: CableDelTablero) => esColita(tablero, c, todoCable);
+  const soltarElCable = useCallback(() => setTirando(null), []);
+  const inicioDelTiro = useRef<Punto | null>(null);
+  // MIENTRAS SE TIRA UN CABLE, solo se ven fuertes las fichas donde puede llegar (las demás, tenues).
+  const nodosAlTirar = !tirando
+    ? nodosVistos
+    : nodosVistos.map((n) =>
+        n.type === "caja" || (n.id !== tirando.de && n.type === "ficha" && !porQueNoSeConecta(tablero, tirando.de, tirando.salida, n.id))
+          ? n
+          : { ...n, style: { ...n.style, opacity: 0.25 } }
+      );
+
   const cables = useMemo<Edge[]>(
     () =>
       tablero.cables
         .filter((c) => visibles.some((f) => f.id === c.de) && visibles.some((f) => f.id === c.a))
+        .filter((c) => !(tirando && c.de === tirando.de && c.salida === tirando.salida))
         .map((c) => {
           const origen = tablero.fichas.find((f) => f.id === c.de);
           const destino = tablero.fichas.find((f) => f.id === c.a);
+          // EL CABLE, SIEMPRE DEL COLOR DE LA SOLAPA DE LA FICHA DE DONDE SALE (27/10/2026).
           const color = origen ? ASPECTO[origen.tipo].trazo : "#6366f1";
-          // TIPO SENDY (26/10/2026): al Regalo y los regresos (a una ficha que está a la izquierda) se
-          // dibujan como etiqueta; los de Seguimientos, finos. Todo lo demás, como siempre.
-          const alRegalo = destino?.tipo === "regalo";
-          const regreso = !!origen && !!destino && destino.tipo !== "seguimientos" && destino.x < origen.x - 60;
-          const etiqueta = alRegalo ? "🎁 Regalo" : regreso ? `↩ ${numeroDe[c.a] ?? ""} ${destino?.titulo?.trim() || ASPECTO[destino!.tipo].nombre}`.replace("  ", " ") : undefined;
           const aSeguimientos = destino?.tipo === "seguimientos";
+          const comoColita = esColita(tablero, c, todoCable);
           return {
             id: c.id,
             source: c.de,
@@ -956,10 +1257,12 @@ export default function LienzoDelTablero({
             targetHandle: "entra",
             type: "cable",
             deletable: false,
-            ...(etiqueta ? { data: { etiqueta } } : {}),
-            // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra.
+            ...(comoColita && destino
+              ? { data: { etiqueta: letreroDeColita(tablero, c, numeroDe), colorDestino: ASPECTO[destino.tipo].trazo, tenue: !!destino.apagada } }
+              : {}),
+            // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra; los de Seguimientos, finos.
             style: {
-              stroke: aSeguimientos ? "#f97316" : color,
+              stroke: color,
               strokeWidth: aSeguimientos ? 1.5 : 3,
               strokeDasharray: aSeguimientos ? "3 5" : "9 6",
               opacity: origen?.apagada ? 0.4 : 1,
@@ -967,7 +1270,7 @@ export default function LienzoDelTablero({
           };
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero]
+    [tablero, todoCable, tirando, numeroDe]
   );
 
   const crearFicha = (tipo: TipoDeFicha, donde: Punto, desde?: { ficha: string; salida: string }) => {
@@ -1017,6 +1320,7 @@ export default function LienzoDelTablero({
         setMenuMas(false);
         setPanel(false);
         setCajaElegida(null);
+        setDestacada(null);
         setNodos((ns) => (ns.some((n) => n.selected) ? ns.map((n) => (n.selected ? { ...n, selected: false } : n)) : ns));
         return;
       }
@@ -1092,11 +1396,17 @@ export default function LienzoDelTablero({
         curvar,
         numeros,
         numeroDe,
+        colita,
+        destacada,
+        destacar: setDestacada,
+        verEntrantes,
+        setVerEntrantes,
+        faltas: faltasPorFicha,
       }}
     >
       <div className="lienzo-del-tablero relative h-full w-full" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
         <ReactFlow
-          nodes={nodosVistos}
+          nodes={nodosAlTirar}
           edges={
             enLaRuta || coincidentes
               ? cables.map((c) =>
@@ -1161,10 +1471,20 @@ export default function LienzoDelTablero({
             lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de: c.source, salida: c.sourceHandle, a: c.target });
             cambiar({ ...actual, cables: lista });
           }}
-          // SOLTAR EL CABLE EN EL VACÍO: se ofrece crear ahí una ficha ya conectada.
+          onConnectStart={(e, p) => {
+            const q = "touches" in e ? e.touches[0] : (e as MouseEvent);
+            inicioDelTiro.current = q ? { x: q.clientX, y: q.clientY } : null;
+            if (p.nodeId && p.handleId && p.handleType === "source") setTirando({ de: p.nodeId, salida: p.handleId });
+          }}
+          // SOLTAR EL CABLE EN EL VACÍO: se ofrece crear ahí una ficha ya conectada. (El cable viejo
+          // vuelve a verse: solo se reemplaza si el nuevo llega a una ficha o se crea una.)
           onConnectEnd={(evento, estado) => {
+            setTirando(null);
             if (estado.isValid || !estado.fromNode || !estado.fromHandle?.id) return;
             const punto = "changedTouches" in evento ? evento.changedTouches[0] : (evento as MouseEvent);
+            // Un clic en el puntito (sin arrastrar) no es «soltar en el vacío»: abre la lista «Conectar a…».
+            const desde = inicioDelTiro.current;
+            if (desde && Math.hypot(punto.clientX - desde.x, punto.clientY - desde.y) < 6) return;
             const p = instancia.current?.screenToFlowPosition({ x: punto.clientX, y: punto.clientY });
             if (!p) return;
             setMenu({ x: punto.clientX, y: punto.clientY, m: { tipo: "crear", donde: { x: p.x, y: p.y - 20 }, desde: { ficha: estado.fromNode.id, salida: estado.fromHandle.id } } });
@@ -1177,8 +1497,15 @@ export default function LienzoDelTablero({
           onPaneClick={() => {
             setCajaElegida(null);
             setMenu(null);
+            setDestacada(null);
           }}
-          connectionLineStyle={{ stroke: "#f97316", strokeWidth: 2.5, strokeDasharray: "6 6" }}
+          // TOCAR UNA FICHA DE UN PAÍS CAMBIA LA BANDERA a ese país (27/10/2026).
+          onNodeClick={(_, n) => {
+            if (n.type === "ficha" || n.type === "inicio") onFichaTocada?.(n.id);
+          }}
+          connectionLineComponent={CableQueSeTira}
+          // El clic en un puntito abre la lista «Conectar a…» (no el modo de conectar con dos clics).
+          connectOnClick={false}
           deleteKeyCode={null}
           // Como la pizarra: con fondo oscuro, los recuadros de selección y los controles en oscuro.
           colorMode={tema === "oscuro" ? "dark" : "light"}
@@ -1200,6 +1527,7 @@ export default function LienzoDelTablero({
           <Controls showInteractive={false} />
           <MiniMap pannable={false} zoomable={false} nodeStrokeWidth={3} style={{ pointerEvents: "none" }} />
           <ZonaDeLaSeleccion />
+          <SoltarConEscape tirando={!!tirando} alSoltar={soltarElCable} />
         </ReactFlow>
 
         {/* ← + ☰, DENTRO DEL LIENZO, arriba a la izquierda, como en la pizarra (24/10/2026): «el selector
@@ -1272,6 +1600,46 @@ export default function LienzoDelTablero({
             )}
           </div>
           {despuesDelMas}
+          {/* «🔍 QUÉ FALTA CONECTAR» y «VER TODO COMO CABLE» (27/10/2026) */}
+          <button
+            type="button"
+            onClick={() => setRevisando((v) => !v)}
+            title="Marca en rojo las salidas que, sin cable, dejan al cliente sin camino o te dejan sin la venta"
+            className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-md ${
+              revisando ? "border-red-400 bg-red-50 text-red-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+            }`}
+          >
+            🔍 {revisando ? "Dejar de revisar" : "Qué falta conectar"}
+          </button>
+          {faltas && (
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow ${faltas.length ? "bg-red-100 text-red-900" : "bg-emerald-100 text-emerald-900"}`}>
+              {faltas.length === 0 ? (
+                "✅ No falta ninguna conexión"
+              ) : (
+                <>
+                  Faltan {faltas.length} ·{" "}
+                  <button
+                    type="button"
+                    className="underline"
+                    title={faltas.map((x) => `${numeroDe[x.ficha] ?? "▶"} · ${x.motivo}`).join("\n")}
+                    onClick={() => instancia.current?.fitView({ nodes: [...new Set(faltas.map((x) => x.ficha))].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 })}
+                  >
+                    verlas
+                  </button>
+                </>
+              )}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setTodoCable((v) => !v)}
+            title="Solo para mirar: muestra todas las conexiones como línea, sin cambiar lo que elegiste en cada una"
+            className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-md ${
+              todoCable ? "border-sky-400 bg-sky-50 text-sky-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+            }`}
+          >
+            {todoCable ? "📡 Volver a mis colitas" : "〰 Ver todo como cable"}
+          </button>
           {coincidentes && (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow">
               {coincidentes.size === 0 ? (
@@ -1430,36 +1798,6 @@ export default function LienzoDelTablero({
                         </div>
                       );
                     })()}
-                    {/* «DUPLICAR PARA…», como en la pizarra: la copia queda en la manta de ese país,
-                        sin conectar («nada se conecta solo»); él le tira el cable. */}
-                    {(() => {
-                      const otros = [...paisesConInicio].filter((p) => mantaDelPais(tablero, p) && !rutaDe(tablero, inicioDe(tablero, p) ?? "").has(fichaDelMenu.id));
-                      if (otros.length === 0) return null;
-                      return (
-                        <div className="border-t border-slate-200 pt-1">
-                          <div className="px-3 py-1 text-[11px] font-semibold text-slate-500">⧉ Duplicar para… (sin conectar)</div>
-                          {otros.map((p) => (
-                            <button
-                              key={p || "otros"}
-                              type="button"
-                              className={`${opcionDeMenu} pl-6`}
-                              onClick={() => {
-                                const m = mantaDelPais(vivo.current, p)!;
-                                const original = vivo.current.fichas.find((x) => x.id === fichaDelMenu.id)!;
-                                const c = copiarFichas([original], [], { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y });
-                                cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
-                                setMenu(null);
-                                setAviso(`Copia puesta en la manta de ${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}, abajo a la izquierda. Conéctala con su cable.`);
-                                const nueva = c.fichas[0]?.id;
-                                if (nueva) window.setTimeout(() => instancia.current?.fitView({ nodes: [{ id: nueva }], padding: 1.2, maxZoom: 1, duration: 500 }), 80);
-                              }}
-                            >
-                              {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
-                            </button>
-                          ))}
-                        </div>
-                      );
-                    })()}
                     <button
                       type="button"
                       className={opcionDeMenu}
@@ -1497,8 +1835,66 @@ export default function LienzoDelTablero({
                 </button>
               </>
             )}
+            {menu.m.tipo === "conectar" &&
+              (() => {
+                const m = menu.m as Extract<Menu, { tipo: "conectar" }>;
+                const origen = tablero.fichas.find((f) => f.id === m.ficha);
+                const salida = origen ? salidasDeLaFicha(origen as FichaDelTablero, paisVisto, nombres).find((s) => s.clave === m.salida) : undefined;
+                const actual = tablero.cables.find((c) => c.de === m.ficha && c.salida === m.salida);
+                // LA LISTA «CONECTAR A…» (27/10/2026): solo las fichas donde esa salida puede llegar.
+                const posibles = tablero.fichas
+                  .filter((f) => !f.guardada && f.tipo !== "inicio" && f.id !== m.ficha && !porQueNoSeConecta(tablero, m.ficha, m.salida, f.id))
+                  .sort((a, b) => (numeroDe[a.id] ?? 9999) - (numeroDe[b.id] ?? 9999));
+                return (
+                  <>
+                    <div className="border-b border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
+                      Conectar «{salida?.etiqueta.replace(/^(🔘|💬) /, "") ?? m.salida}» a…
+                    </div>
+                    {posibles.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        className={`${opcionDeMenu} flex items-center gap-2 ${actual?.a === f.id ? "bg-amber-50 font-bold" : ""}`}
+                        onClick={() => {
+                          const lista = vivo.current.cables.filter((x) => !(x.de === m.ficha && x.salida === m.salida));
+                          lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de: m.ficha, salida: m.salida, a: f.id });
+                          cambiar({ ...vivo.current, cables: lista });
+                          setMenu(null);
+                        }}
+                      >
+                        <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: ASPECTO[f.tipo].trazo }} />
+                        <span className="w-6 shrink-0 text-right text-xs font-black text-slate-500">{numeroDe[f.id] ?? ""}</span>
+                        <span className="truncate" title={f.titulo?.trim() || ASPECTO[f.tipo].nombre}>
+                          {ASPECTO[f.tipo].icono} {f.titulo?.trim() || ASPECTO[f.tipo].nombre}
+                        </span>
+                        {actual?.a === f.id && <span className="ml-auto shrink-0 text-[10px]">✓ ahora</span>}
+                      </button>
+                    ))}
+                    {posibles.length === 0 && <div className="px-3 py-2 text-xs text-slate-500">No hay fichas donde esta salida pueda llegar.</div>}
+                  </>
+                );
+              })()}
             {menu.m.tipo === "cable" && (
               <>
+                {/* CABLE O COLITA, A ELECCIÓN SUYA (27/10/2026): lo que se agrega, se quita. */}
+                {(() => {
+                  const id = (menu.m as { cableId: string }).cableId;
+                  const c = tablero.cables.find((x) => x.id === id);
+                  if (!c) return null;
+                  const ahora = esColita(tablero, c, false);
+                  return (
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      onClick={() => {
+                        cambiar({ ...vivo.current, cables: vivo.current.cables.map((x) => (x.id === id ? { ...x, vista: ahora ? "cable" : "colita" } : x)) });
+                        setMenu(null);
+                      }}
+                    >
+                      {ahora ? "🔌 Volver a cable (línea)" : "📡 Inalámbrico (colita con su destino)"}
+                    </button>
+                  );
+                })()}
                 <button type="button" className={opcionDeMenu} onClick={() => (curvar((menu.m as { cableId: string }).cableId, null), setMenu(null))}>
                   ↔ Enderezar
                 </button>

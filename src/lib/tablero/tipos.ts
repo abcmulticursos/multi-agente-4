@@ -222,6 +222,12 @@ export interface CableDelTablero {
   salida: string;
   /** Ficha a la que llega. */
   a: string;
+  /**
+   * CÓMO SE DIBUJA (27/10/2026, solo pantalla; el bot no lo mira): «colita» = inalámbrico, una
+   * etiqueta con el número y el nombre de su destino; «cable» = la línea. Sin esto, lo de siempre: al
+   * Regalo y los regresos van como colita, lo demás como cable.
+   */
+  vista?: "colita" | "cable";
 }
 
 export interface Tablero {

@@ -50,7 +50,14 @@ export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: Cable
   // otra salida fija queda igual.
   const copiasDeCables = cables
     .filter((c) => idDe.has(c.de) && idDe.has(c.a))
-    .map((c) => ({ id: nuevo("c"), de: idDe.get(c.de)!, a: idDe.get(c.a)!, salida: salidaDe.get(`${c.de}|${c.salida}`) ?? c.salida }));
+    .map((c) => ({
+      id: nuevo("c"),
+      de: idDe.get(c.de)!,
+      a: idDe.get(c.a)!,
+      salida: salidaDe.get(`${c.de}|${c.salida}`) ?? c.salida,
+      // Cable o colita, como estaba el original (27/10/2026).
+      ...(c.vista ? { vista: c.vista } : {}),
+    }));
   return { fichas: copias, cables: copiasDeCables };
 }
 

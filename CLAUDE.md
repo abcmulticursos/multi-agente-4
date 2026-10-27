@@ -1048,6 +1048,40 @@ la ficha del producto, debajo de «Lo que recibe al pagar». La venta de siempre
 Prueba: `recorrido-tiendas-ejemplo.mjs --solo=figurarte,figurarte2,figurarte3` (figurarte2 pide
 `prueba-wf-copia.cjs` del scratchpad en la copia) y la de pantalla `prueba-ui-entregas.mjs` (scratchpad).
 
+### El tablero, 27/10/2026: modo inalámbrico, colores y «Qué falta conectar» (solo pizarra)
+
+Nada de esto toca el bot (`cable.vista` es solo pantalla, como `curvas`):
+- **Cable o colita, a elección suya** (clic derecho en el cable: «📡 Inalámbrico» / «🔌 Volver a
+  cable»; `CableDelTablero.vista`). Sin elegir, lo de antes: al Regalo y los regresos como colita.
+  La colita dice «→ N 🎁 Título» (número y nombre de su destino) con el BORDE DEL COLOR DEL DESTINO;
+  tocarla ilumina solo el borde de su destino (la vista NO se mueve: él lo pidió así); al pasar el
+  ratón, la línea con GROSOR FIJO EN PANTALLA (no se adelgaza al alejarse). «← 3» en la ficha que
+  recibe colitas (al pasar el ratón, sus líneas). Marca sutil (contorno punteado) en la ficha con
+  conexiones inalámbricas. «〰 Ver todo como cable» solo para mirar. Copiar fichas conserva la vista.
+- **Colores**: el cable, siempre del color de la solapa de su ficha de origen (también el que se
+  tira). Cobro en TURQUESA (Esperar pasó a piedra).
+- **Etiquetas**: «⏳ Si no elige · seguimientos» → «⏳ Seguimientos»; «Si no responde» no se ve si la
+  ficha tiene Seguimientos conectados (el bot no la usa ahí), salvo que ya tenga cable; «Si no paga»
+  hacia Seguimientos → «⏳ Seguimientos (si no paga)».
+- **La caja de Seguimientos, fila por fila**: «⏳ Seguimiento N · tiempo» y debajo SUS opciones. Una
+  opción repetida en otro seguimiento es el MISMO cable (mismo id): su puntito está en la primera; en
+  las demás, «→ N» con el color del destino.
+- **Conectar sin equivocarse**: al tirar, el cable viejo de esa salida se esconde (si el nuevo no
+  llega, vuelve); Esc suelta el que se tira (`SoltarConEscape`); las fichas donde no puede llegar se
+  ven tenues; clic en un puntito → lista «Conectar a…» con las fichas válidas, por número.
+- **«🔍 Qué falta conectar»** (`faltasDelTablero`): solo lo que está en venta (desde un Inicio
+  encendido), sin apagadas. Falta: Inicio sin cable; botón sin cable; cuadrito sin cable y sin
+  burbujas propias; Condición/Reparto sin cable; tramo sin cable; «Pagó» sin cable SOLO si no hay
+  Entrega de ese producto en la venta (el bot la busca sola); «Si no responde» de una oferta tras una
+  Entrega (upsell) sin cable ni Seguimientos.
+- **La bandera** (abajo a la derecha) pasa al país de la ficha tocada (`paisDeSuManta`).
+
+**TIENDA PLANTILLAS** (`tienda_tplantillas`, productos `ptpla_*`): por país un Inicio → Reparto 🎲
+(4 al 25 %) → lineal, order bump, doble oferta y contribución. Perú con BOTONES, Ecuador con PALABRAS,
+Argentina con NÚMEROS. En el order bump, los Seguimientos de después del order bump llevan «básico /
+pack» a su Cobro (no vuelven al order bump). Comparte el número de las tiendas de ejemplo con la frase
+«tienda plantillas». Pruebas: `scripts/recorrido-plantillas.mjs` (fuerza el Reparto en la copia).
+
 ### El tablero, 26/10/2026: lo que le faltaba frente al automático + pizarra tipo Sendy
 
 Comparado función por función con el automático (COMO HOY, COMO DOU, COMO OB). Lo que faltaba:

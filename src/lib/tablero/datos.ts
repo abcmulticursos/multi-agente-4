@@ -282,7 +282,8 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       const llave = `${de}|${salida}`;
       if (vistos.has(llave)) return [];
       vistos.add(llave);
-      return [{ id: texto(c.id, 120).trim() || `c-${llave}`, de, salida, a }];
+      const vista = c.vista === "colita" || c.vista === "cable" ? c.vista : undefined;
+      return [{ id: texto(c.id, 120).trim() || `c-${llave}`, de, salida, a, ...(vista ? { vista } : {}) }];
     });
   const curvas: Record<string, { x: number; y: number }> = {};
   if (esObjeto(crudo.curvas))
@@ -465,13 +466,14 @@ export function salidasDeLaFicha(
         return salidas;
       }
       // SIN OPCIONES, «→» es continuar. CON OPCIONES (26/10/2026) ese mismo puntito dice lo que hace:
-      // «⏳ Si no elige» va a sus Seguimientos (salen mientras no elige; sus opciones siguen valiendo), y
+      // «⏳ Seguimientos» va a sus Seguimientos (salen mientras no elige; sus opciones siguen valiendo), y
       // «⏳ Si no responde» siempre se ve (a sus minutos, o al silencio del regalo si no tiene).
       if (!pregunta) {
         salidas.push({ clave: "siguiente", etiqueta: "→" });
         return salidas;
       }
-      salidas.push({ clave: "siguiente", etiqueta: "⏳ Si no elige · seguimientos" });
+      // 27/10/2026: «"si no elige seguimientos" confunde»: se llama como lo que es, sus Seguimientos.
+      salidas.push({ clave: "siguiente", etiqueta: "⏳ Seguimientos" });
       salidas.push({
         clave: "sin_respuesta",
         etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde",
