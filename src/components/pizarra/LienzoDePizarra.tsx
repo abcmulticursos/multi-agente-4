@@ -1496,18 +1496,23 @@ function enCajones(
   const escondidas = new Map<string, string>(); // tarjeta → su cajón
   const nuevos: Node[] = [];
   const porId = new Map(nodos.map((n) => [n.id, n]));
-  // ── 💳 COBRO Y ENTREGA, por país ──
-  const deCobro = nodos.filter((n) => /^pv:[^:]+:(pago|entrega):(basico|full|unico)$/.test(n.id));
+  // ── 💳 COBRO, por país ──
+  // LA ENTREGA SE VE (27/10/2026): «no veo la entrega en la pizarra… es como si fuese una entrega
+  // secreta». Antes el pago Y la entrega iban escondidos en el cajón «Cobro y entrega». Ahora el cajón
+  // junta solo los pagos, y cada entrega queda a la vista como su propia tarjeta, con su resumen y su
+  // clic para abrirla (como la ficha Entregar del tablero). Cada pago sale del cajón por su punto
+  // («Pagó X») hacia su entrega. Solo pantalla: el bot entrega igual que siempre.
+  const deCobro = nodos.filter((n) => /^pv:[^:]+:pago:(basico|full|unico)$/.test(n.id));
   const paisesDeCobro = [...new Set(deCobro.map((n) => n.id.split(":")[1]))];
   for (const p of paisesDeCobro) {
-    const suyos = deCobro.filter((n) => n.id.split(":")[1] === p);
-    const pagos = suyos.filter((n) => n.id.includes(":pago:"));
+    const pagos = deCobro.filter((n) => n.id.split(":")[1] === p);
     if (pagos.length === 0) continue;
     const id = `pv:${p}:cobro`;
-    for (const n of suyos) escondidas.set(n.id, id);
-    const x = Math.min(...suyos.map((n) => sitio(n).x));
-    const y = Math.min(...suyos.map((n) => sitio(n).y));
+    for (const n of pagos) escondidas.set(n.id, id);
+    const x = Math.min(...pagos.map((n) => sitio(n).x));
+    const y = Math.min(...pagos.map((n) => sitio(n).y));
     const datosDe = (n: Node) => n.data as DatosDeFijo;
+    const nombreDe = (n: Node) => datosDe(n).titulo.replace(/^Pago · /, "");
     nuevos.push({
       id,
       type: "cajon",
@@ -1515,15 +1520,16 @@ function enCajones(
       data: {
         tipo: "cobro",
         icono: "💳",
-        titulo: "Cobro y entrega",
+        titulo: "Cobro",
         pais: p === "otros" ? "" : p,
-        lineas: pagos.map((n) => `${datosDe(n).titulo.replace(/^Pago · /, "")} → pago → entrega`),
+        lineas: pagos.map((n) => `${nombreDe(n)} → pago`),
         entradas: pagos.map((n) => ({
           id: `entra:${n.id.split(":").pop()}`,
-          texto: pagos.length > 1 ? `Si elige ${datosDe(n).titulo.replace(/^Pago · /, "")}` : "Quiere pagar",
+          texto: pagos.length > 1 ? `Si elige ${nombreDe(n)}` : "Quiere pagar",
         })),
-        salidas: [{ id: "sale", texto: "Pagó y recibió su entrega" }],
-        dentro: suyos.map((n) => n.id),
+        // Un punto por pago: «tarjeta~punto», que al conectar se traduce al pago de dentro.
+        salidas: pagos.map((n) => ({ id: `${n.id}~sale`, texto: `Pagó ${nombreDe(n)} → su entrega` })),
+        dentro: pagos.map((n) => n.id),
       } satisfies DatosDeCajon,
       deletable: false,
     });
@@ -1665,14 +1671,12 @@ function enCajones(
     if (cajonA) {
       target = cajonA;
       targetHandle = cajonA.endsWith(":cobro") ? `entra:${c.target.split(":").pop()}` : "entra";
-      // A la entrega solo llega el pago, que está dentro: nada más.
-      if (cajonA.endsWith(":cobro") && c.target.includes(":entrega:")) continue;
     }
     if (cajonDe) {
       if (cajonDe.endsWith(":cobro")) {
-        // Del cobro solo sale lo que sale de una entrega.
-        if (!c.source.includes(":entrega:")) continue;
-        sourceHandle = "sale";
+        // Del cobro solo sale el cable de cada pago a SU entrega (que ahora está a la vista).
+        if (!c.target.includes(":entrega:")) continue;
+        sourceHandle = `${c.source}~${sourceHandle ?? "sale"}`;
       } else {
         sourceHandle = (sourceHandle ?? "sale") === "sale" ? "sale" : `${c.source}~${sourceHandle}`;
       }
@@ -2330,7 +2334,9 @@ function disponer(
       fijo(idEntrega, x + 300, yy, {
         tipo: "entrega",
         titulo: t.e ? `Entrega · ${t.e.nombre}` : "Entrega",
-        subtitulo: t.e ? "Lo que recibe al aprobarse su pago. Vive en la ficha del producto." : "Esta tienda no tiene producto con entrega.",
+        subtitulo: t.e
+          ? "Lo que recibe al aprobarse su pago. Es la del producto: si la editas, cambia en todas las tiendas que lo venden. Doble clic para abrirla."
+          : "Esta tienda no tiene producto con entrega.",
         abre: t.e?.id ?? "",
         resumen: t.e?.resumen ?? [],
         aviso: !t.e
@@ -3962,9 +3968,24 @@ export default function LienzoDePizarra({
       })(),
       deletable: false,
     }));
-    const conSuSitio = conLaFormaDelPrimero(base.nodos, base.cajasDeFabrica, disposicion.posiciones).map((n) =>
+    const conSuSitioGuardado = conLaFormaDelPrimero(base.nodos, base.cajasDeFabrica, disposicion.posiciones).map((n) =>
       disposicion.posiciones[n.id] ? { ...n, position: disposicion.posiciones[n.id] } : n
     );
+    // LAS ENTREGAS, A LA DERECHA DE SU CAJÓN «Cobro» si quedaron debajo de él (27/10/2026). Cuando iban
+    // dentro del cajón se movían con él y guardaron su mismo sitio; ahora que se ven, lo tapaban. Solo
+    // las tapadas: una que él puso en otro lado se queda donde está.
+    const destapadas = new Map<string, { x: number; y: number }>();
+    for (const caj of conSuSitioGuardado) {
+      if (caj.type !== "cajon" || !caj.id.endsWith(":cobro")) continue;
+      (caj.data as DatosDeCajon).dentro.forEach((pagoId, i) => {
+        const e = conSuSitioGuardado.find((m) => m.id === pagoId.replace(":pago:", ":entrega:"));
+        if (!e) return;
+        const { x, y } = caj.position;
+        const tapada = e.position.x >= x - 20 && e.position.x < x + 280 && e.position.y >= y - 20 && e.position.y < y + 300;
+        if (tapada) destapadas.set(e.id, { x: x + 320, y: y + i * 190 });
+      });
+    }
+    const conSuSitio = conSuSitioGuardado.map((n) => (destapadas.has(n.id) ? { ...n, position: destapadas.get(n.id)! } : n));
     // LO NUEVO NACE EN UN SITIO LIBRE (17/10/2026): «al crear un nuevo cuadro aparece encima de
     // los demás y se combinan… no sé cuáles son los nuevos». Una suelta sin sitio guardado se
     // pone en el primer hueco libre DEBAJO de todo, sin pisar nada.
