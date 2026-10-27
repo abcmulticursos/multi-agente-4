@@ -1758,7 +1758,7 @@ export default function ConversationPanel({
           <a
             href={`/api/logs?dia=hoy&convo=${convo.id}`}
             download
-            title="Descargar el log de esta conversación (hoy y ayer)"
+            title="Descargar la conversación completa (cliente y bot) con su log técnico, en un solo archivo"
             className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-100"
           >
             📄 Log

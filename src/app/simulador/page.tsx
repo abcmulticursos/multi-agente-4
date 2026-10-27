@@ -295,7 +295,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
           <div className="truncate text-[11px] text-emerald-100">{snapshot ? formatPhone(snapshot.conversation.phone) : sessionId ? "Cargando..." : "Sin abrir"} · sin envío a Meta</div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {snapshot && <a href={`/api/logs?dia=hoy&convo=${snapshot.conversation.id}`} download title="Descargar el log de esta conversación" className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20">📄 Log</a>}
+          {snapshot && <a href={`/api/logs?dia=hoy&convo=${snapshot.conversation.id}`} download title="Descargar la conversación completa (cliente y bot) con su log técnico, en un solo archivo" className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20">📄 Log</a>}
           {sessionId && <button onClick={() => void deleteCurrent()} disabled={deleting} title="Eliminar esta prueba" className="rounded border border-red-200/40 bg-red-500/20 px-2 py-1 text-[11px] font-medium text-white hover:bg-red-500/40">🗑</button>}
           {closable && <button onClick={() => { if (confirm("¿Cerrar esta ventana? Se borra su conversación de prueba y sus archivos.")) void closeWindow(); }} title="Cerrar ventana (borra la prueba y sus archivos)" className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-medium text-white hover:bg-white/20">✕</button>}
         </div>
