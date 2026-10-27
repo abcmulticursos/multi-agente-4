@@ -128737,10 +128737,6 @@ tableros:
           de: mas_ec_inicio
           salida: siguiente
           a: f-mvq1i8zr-wg9n
-        - id: c-mvq1ip6m-uiy
-          de: f-mvq1i8zr-wg9n
-          salida: rep:r2
-          a: f-rec26-05ny
         - id: c-mvq2639m-tg1
           de: f-mvq1i8zr-wg9n
           salida: rep:r1
@@ -128770,6 +128766,9 @@ tableros:
         c-mvnq7sq8-kw2:
           x: 335
           y: 4
+        c-mvq2639m-tg1:
+          x: 39
+          y: 5
       cajas:
         - id: manta-mas_pe_inicio
           x: -61
