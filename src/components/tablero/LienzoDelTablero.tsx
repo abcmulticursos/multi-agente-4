@@ -256,8 +256,13 @@ const Contexto = createContext<{
   numeros?: Record<string, { clientes: number; ventas: number }>;
   /** El número de cada ficha (tipo Kommo), para ubicarlas y para los regresos «↩ 7». */
   numeroDe: Record<string, number>;
-  /** ¿Este cable se ve como colita? (lo que él eligió, o lo de siempre). */
-  colita: (c: CableDelTablero) => boolean;
+  /**
+   * LO INALÁMBRICO, CALCULADO UNA VEZ (27/10/2026: «mover las fichas se hizo lento como una tortuga»):
+   * los cables que se ven como colita, cuántas colitas le llegan a cada ficha y qué fichas tienen alguna.
+   */
+  colitas: Set<string>;
+  colitasQueLlegan: Map<string, number>;
+  fichasConColitas: Set<string>;
   /** La ficha iluminada al tocar una colita (solo su borde; la vista no se mueve). */
   destacada: string | null;
   destacar: (id: string | null) => void;
@@ -434,8 +439,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const titulo = f.titulo?.trim() || a.nombre;
   // MODO INALÁMBRICO (27/10/2026): cuántas colitas le llegan (al pasar el ratón se ven sus líneas), y
   // una marca sutil en la ficha que tiene alguna conexión inalámbrica.
-  const colitasQueLlegan = ctx.tablero.cables.filter((c) => c.a === f.id && ctx.colita(c));
-  const conColitas = colitasQueLlegan.length > 0 || ctx.tablero.cables.some((c) => c.de === f.id && ctx.colita(c));
+  const colitasQueLlegan = { length: ctx.colitasQueLlegan.get(f.id) ?? 0 };
+  const conColitas = ctx.fichasConColitas.has(f.id);
   const destacada = ctx.destacada === f.id;
   const faltan = ctx.faltas?.get(f.id);
   const destinoDe = (clave: string) => {
@@ -659,7 +664,35 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         )}
       </div>
       {visibles.length > 0 && f.tipo !== "seguimientos" && (
-        <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">{visibles.map((s) => pastilla(s, true, s.clave))}</div>
+        <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
+          {visibles.map((s) => pastilla(s, true, s.clave))}
+          {/* LO QUE HACE SOLA ESTA FICHA, A LA VISTA (27/10/2026: «si hace algo y no se ve, es el muro»). Sin
+              punto: el cliente se queda aquí. */}
+          {(() => {
+            const cobrosDestino = new Set(
+              visibles
+                .filter((s) => s.clave.startsWith("btn:") || s.clave.startsWith("dec:"))
+                .map((s) => destinoDe(s.clave))
+                .filter((x) => x?.tipo === "cobro")
+                .map((x) => x!.id)
+            );
+            const quedarse = [
+              ...(cobrosDestino.size > 1 ? [["💳 Quiere pagar sin elegir", "le pregunto cuál quiere, con sus precios"]] : []),
+              ...(f.tipo === "cobro" && f.cobro?.metodos ? [["💳 Nombra un método", "le mando sus datos con este precio"]] : []),
+            ];
+            return quedarse.map(([que, hace]) => (
+              <div
+                key={que}
+                className="flex items-center gap-1.5 rounded-full border border-dashed border-slate-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600"
+                title={`${que}: ${hace}. El cliente se queda en esta ficha (no lleva a otra).`}
+              >
+                <span className="truncate">
+                  {que} <span className="font-normal">↺ {hace}</span>
+                </span>
+              </div>
+            ));
+          })()}
+        </div>
       )}
       {/* LA CAJA DE SEGUIMIENTOS, FILA POR FILA (27/10/2026): cada seguimiento con su número, sus minutos
           y sus propias opciones. Una opción que se repite en otro seguimiento es el MISMO cable: su
@@ -737,6 +770,8 @@ type DatosDeCaja = {
   elegida: boolean;
   alElegir: () => void;
   alCambiar: (c: NonNullable<Tablero["cajas"]>[number]) => void;
+  /** Borrar la caja (las fichas de encima se quedan). */
+  alBorrar: () => void;
   /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
   manta?: { titulo: string; mirando: boolean; alVer: () => void };
 };
@@ -777,6 +812,22 @@ function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
         >
           {manta ? manta.titulo : data.caja.titulo || "Caja"}
         </div>
+        {/* BORRAR LA CAJA O LA MANTA (27/10/2026): «no se pueden borrar». Al elegirla, su botón; las fichas
+            de encima se quedan donde están. */}
+        {data.elegida && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              data.alBorrar();
+            }}
+            className="nodrag nopan ml-2 mt-3 inline-block rounded-md border border-red-300 bg-white px-2 py-0.5 align-top text-[11px] font-bold text-red-700 shadow-sm hover:bg-red-50"
+            style={{ pointerEvents: "all" }}
+            title="Borrar esta caja (las fichas se quedan)"
+          >
+            🗑 Borrar
+          </button>
+        )}
         {/* «▶ VER RECORRIDO», como en la pizarra: su ruta se ilumina y lo demás queda tenue. */}
         {manta && (
           <button
@@ -1103,13 +1154,19 @@ export default function LienzoDelTablero({
   }, [menuMas]);
   const t = TEMA[tema];
 
-  const cambiar = (n: TableroEnElEditor) => onCambiar(n);
-  const curvar = (cableId: string, p: Punto | null) => {
-    const actual = { ...(vivo.current.curvas ?? {}) };
-    if (p) actual[cableId] = { x: Math.round(p.x), y: Math.round(p.y) };
-    else delete actual[cableId];
-    cambiar({ ...vivo.current, curvas: actual });
-  };
+  // Estables (no cambian en cada redibujo): así el contexto de las fichas tampoco.
+  const alCambiar = useRef(onCambiar);
+  alCambiar.current = onCambiar;
+  const cambiar = useCallback((n: TableroEnElEditor) => alCambiar.current(n), []);
+  const curvar = useCallback(
+    (cableId: string, p: Punto | null) => {
+      const actual = { ...(vivo.current.curvas ?? {}) };
+      if (p) actual[cableId] = { x: Math.round(p.x), y: Math.round(p.y) };
+      else delete actual[cableId];
+      cambiar({ ...vivo.current, curvas: actual });
+    },
+    [cambiar]
+  );
 
   const visibles = tablero.fichas.filter((f) => !f.guardada);
   const nodosDesdeProps = useMemo<Node[]>(() => {
@@ -1135,6 +1192,10 @@ export default function LienzoDelTablero({
           elegida: cajaElegida === c.id,
           alElegir: () => setCajaElegida(c.id),
           alCambiar: (n: typeof c) => cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).map((x) => (x.id === c.id ? n : x)) }),
+          alBorrar: () => {
+            cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).filter((x) => x.id !== c.id) });
+            setCajaElegida(null);
+          },
           ...(ini
             ? {
                 manta: {
@@ -1237,7 +1298,20 @@ export default function LienzoDelTablero({
     }
     return m;
   }, [faltas]);
-  const colita = (c: CableDelTablero) => esColita(tablero, c, todoCable);
+  const { colitas, colitasQueLlegan, fichasConColitas } = useMemo(() => {
+    const colitas = new Set<string>();
+    const llegan = new Map<string, number>();
+    const conColitas = new Set<string>();
+    for (const c of tablero.cables)
+      if (esColita(tablero, c, todoCable)) {
+        colitas.add(c.id);
+        llegan.set(c.a, (llegan.get(c.a) ?? 0) + 1);
+        conColitas.add(c.a);
+        conColitas.add(c.de);
+      }
+    return { colitas, colitasQueLlegan: llegan, fichasConColitas: conColitas };
+  }, [tablero, todoCable]);
+  const abrirMenu = useCallback((x: number, y: number, m: Menu) => setMenu({ x, y, m }), []);
   const soltarElCable = useCallback(() => setTirando(null), []);
   const inicioDelTiro = useRef<Punto | null>(null);
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
@@ -1365,9 +1439,12 @@ export default function LienzoDelTablero({
           return;
         }
         const ids = new Set(elegidas());
-        if (ids.size === 0) return;
-        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) y sus cables?`)) return;
-        cambiar(sinFichas(actual, ids));
+        // Las cajas y mantas elegidas con el recuadro también se borran (las fichas de encima, no).
+        const cajasElegidas = new Set(nodos.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
+        if (ids.size === 0 && cajasElegidas.size === 0) return;
+        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) con sus cables${cajasElegidas.size ? ` y ${cajasElegidas.size} caja(s)` : ""}?`)) return;
+        const sinEllas = sinFichas(actual, ids);
+        cambiar({ ...sinEllas, cajas: (sinEllas.cajas ?? []).filter((c) => !cajasElegidas.has(c.id)) });
         e.preventDefault();
       }
     };
@@ -1382,6 +1459,35 @@ export default function LienzoDelTablero({
     return () => window.clearTimeout(r);
   }, [aviso]);
 
+  // EL CONTEXTO, ESTABLE (27/10/2026): antes era un objeto nuevo en cada redibujo y, al arrastrar una
+  // ficha, se redibujaban TODAS las fichas en cada movimiento. Ahora solo cambia cuando cambia algo suyo.
+  const contexto = useMemo(
+    () => ({
+      tablero,
+      tema,
+      paisVisto,
+      nombres,
+      resumenDe,
+      abrir: onAbrir,
+      ajustes: onAjustes,
+      menu: abrirMenu,
+      cambiar,
+      curvar,
+      numeros,
+      numeroDe,
+      colitas,
+      colitasQueLlegan,
+      fichasConColitas,
+      destacada,
+      destacar: setDestacada,
+      verEntrantes,
+      setVerEntrantes,
+      faltas: faltasPorFicha,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha]
+  );
+
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));
   const guardadas = tablero.fichas.filter((f) => f.guardada);
   const fichaDelMenu = menu?.m.tipo === "ficha" ? tablero.fichas.find((f) => f.id === (menu.m as { fichaId: string }).fichaId) : undefined;
@@ -1390,30 +1496,24 @@ export default function LienzoDelTablero({
 
   return (
     <Contexto.Provider
-      value={{
-        tablero,
-        tema,
-        paisVisto,
-        nombres,
-        resumenDe,
-        abrir: onAbrir,
-        ajustes: onAjustes,
-        menu: (x, y, m) => setMenu({ x, y, m }),
-        cambiar,
-        curvar,
-        numeros,
-        numeroDe,
-        colita,
-        destacada,
-        destacar: setDestacada,
-        verEntrantes,
-        setVerEntrantes,
-        faltas: faltasPorFicha,
-      }}
+      value={contexto}
     >
       {/* SIN SELECCIONAR TEXTO (27/10/2026): Shift + arrastrar elegía también el texto de las fichas y
           Edge sacaba su lupa de búsqueda, que no dejaba mover nada. Los campos siguen escribiéndose. */}
-      <div className="lienzo-del-tablero relative h-full w-full select-none" style={{ background: t.fondo }} onClick={() => setMenu(null)}>
+      <div
+        className="lienzo-del-tablero relative h-full w-full select-none overflow-hidden"
+        style={{ background: t.fondo }}
+        onClick={() => setMenu(null)}
+        // EL NAVEGADOR NO LO DESPLAZA (27/10/2026): «la pantalla se centró sola y desapareció la
+        // miniatura; tuve que refrescar». Si algo lo corre, vuelve a su sitio.
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          if (el.scrollTop || el.scrollLeft) {
+            el.scrollTop = 0;
+            el.scrollLeft = 0;
+          }
+        }}
+      >
         <ReactFlow
           nodes={nodosAlTirar}
           edges={
@@ -1534,7 +1634,15 @@ export default function LienzoDelTablero({
         >
           <Background variant={BackgroundVariant.Dots} gap={22} size={1.6} color={t.puntos} />
           <Controls showInteractive={false} />
-          <MiniMap pannable={false} zoomable={false} nodeStrokeWidth={3} style={{ pointerEvents: "none" }} />
+          {/* LA MINIATURA NAVEGA (27/10/2026: «parece cosmética»): clic para ir ahí, arrastrar para mover la
+              vista, rueda para acercar o alejar. */}
+          <MiniMap
+            pannable
+            zoomable
+            nodeStrokeWidth={3}
+            onClick={(_, p) => instancia.current?.setCenter(p.x, p.y, { zoom: instancia.current.getZoom(), duration: 300 })}
+            style={{ cursor: "pointer" }}
+          />
           <ZonaDeLaSeleccion />
           <SoltarConEscape tirando={!!tirando} alSoltar={soltarElCable} />
         </ReactFlow>
@@ -1647,7 +1755,7 @@ export default function LienzoDelTablero({
               todoCable ? "border-sky-400 bg-sky-50 text-sky-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
             }`}
           >
-            {todoCable ? "📡 Volver a mis colitas" : "〰 Ver todo como cable"}
+            {todoCable ? "📡 Modo inalámbrico" : "〰 Ver todo como cable"}
           </button>
           {coincidentes && (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow">

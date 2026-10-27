@@ -1076,6 +1076,21 @@ Nada de esto toca el bot (`cable.vista` es solo pantalla, como `curvas`):
   Entrega (upsell) sin cable ni Seguimientos.
 - **La bandera** (abajo a la derecha) pasa al país de la ficha tocada (`paisDeSuManta`).
 
+**Lo que dice el bot (27/10/2026, como la venta de siempre; probado en la copia):**
+- «Quiere pagar» o nombra un método SIN haber elegido entre 2+ productos → texto fijo «¡Perfecto(, con
+  X)! ¿Cuál eliges? 1️⃣ … · precio / 2️⃣ …» (`recordarLasOpciones`, sin IA); la IA ya no adivina. El
+  método queda anotado: al elegir, sus datos de frente.
+- País con UN solo método (AR): el Cobro manda los datos de frente (`elUnicoMetodo`), sin «¿con qué
+  método?»; la contribución manda antes su lista de montos.
+- Pago a medias: la IA sabe cuánto pagó y cuánto falta (`loQueFalta`), también en los turnos siguientes,
+  y esos montos están permitidos en el filtro de montos ajenos.
+- Cierre: pregunta suave al estilo del automático; si falta, el bot agrega una de sus preguntas (antes
+  se pedía otra respuesta a la IA y se pagaba doble); con un problema del cliente no hay pregunta de
+  venta; esperando el comprobante, sin pregunta («Quedo pendiente de tu comprobante…»).
+- Pizarra: contexto estable y colitas calculadas una vez (mover fichas era lento); la miniatura navega;
+  cajas y mantas se borran (🗑 al elegirlas, o Supr con el recuadro); «↺» en las fichas para lo que
+  hacen solas (pagar sin elegir, nombrar un método).
+
 **El Reparto solo sortea entre sus rutas CONECTADAS** (motor, 27/10/2026): una ruta sin cable dejaba
 al cliente sin nada (le pasó a él en MASCOTAS EC con «Ruta 2» suelta). Su puntito sin cable sale en rojo.
 

@@ -412,6 +412,99 @@ try {
     comprobar("y caen en más de una (sorteo)", Object.keys(cayeron).length >= 2, JSON.stringify(cayeron));
   }
 
+  // ── «¿CUÁL ELIGES?», UN SOLO MÉTODO, PAGO DE MENOS Y EL CIERRE (27/10/2026, sus observaciones) ──
+  const CUAL = /Cu[aá]l eliges/i;
+  if (toca("cual_pe")) {
+    forzar("PE", "ob");
+    console.log("\n· 🇵🇪 ORDER BUMP destapado: «quiero pagar» → «¿Cuál eliges?»; «yape» → «con Yape… ¿Cuál eliges?»; elige → datos de frente");
+    const c = await cliente("PE");
+    await c.decir("hola", 45);
+    await c.tocar("pla_pe_ob_intro_quiere", "Quiero comprar", 35);
+    await c.decir("quiero pagar", 30);
+    comprobar("«quiero pagar» sin elegir: «¿Cuál eliges?» con los dos y sus precios", CUAL.test(c.nuevo()) && /15/.test(c.nuevo()) && /20/.test(c.nuevo()), c.nuevo().slice(0, 120));
+    comprobar("y no abre ningún Cobro", !tiene(c, "pla_pe_ob_cobro_b") && !tiene(c, "pla_pe_ob_cobro_p"), "");
+    await c.decir("yape", 30);
+    comprobar("«yape» sin elegir: «¡Perfecto, con Yape!» y otra vez cuál", /con \*?yape/i.test(c.nuevo()) && CUAL.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.tocar("pla_pe_ob_ob_pack", "Quiero el pack", 35);
+    comprobar("elige el pack: datos de Yape con 20, sin preguntar el método", /20/.test(c.nuevo()) && !/m[eé]todo prefieres/i.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.borrar();
+  }
+  if (toca("cual_ec")) {
+    forzar("EC", "dou");
+    console.log("\n· 🇪🇨 DOBLE OFERTA: «pichincha» sin elegir → «con PICHINCHA… ¿Cuál eliges?» → «el pack» → datos de PICHINCHA con 4");
+    const c = await cliente("EC");
+    await c.decir("hola", 45);
+    await c.decir("pichincha", 30);
+    comprobar("«pichincha»: «¡Perfecto, con PICHINCHA!» y «¿Cuál eliges?»", /pichincha/i.test(c.nuevo()) && CUAL.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.decir("el pack", 35);
+    comprobar("«el pack»: sus datos con 4, sin repreguntar el método", tiene(c, "pla_ec_dou_cobro_p") && /\b4\b/.test(c.nuevo()) && !/m[eé]todo prefieres/i.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.borrar();
+  }
+  if (toca("cual_ar")) {
+    forzar("AR", "ob");
+    console.log("\n· 🇦🇷 ORDER BUMP: se calla → seguimiento → «quiero pagar» → «¿Cuál eliges?» → «2» → datos con 12.000 (un solo método: sin preguntarlo)");
+    const c = await cliente("AR");
+    await c.decir("hola", 45);
+    await c.decir("1", 35);
+    comprobar("le llega su seguimiento de después del order bump", (await c.hasta(/Ya elegiste/i, 150)) || /Ya elegiste/i.test(c.bot.join("\n")), "");
+    await c.decir("quiero pagar", 30);
+    comprobar("«quiero pagar» tras el seguimiento: «¿Cuál eliges?»", CUAL.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.decir("2", 35);
+    comprobar("«2»: los datos de transferencia con 12.000, sin preguntar el método", /12\.?000/.test(c.nuevo()) && !/m[eé]todo prefieres/i.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.borrar();
+  }
+  if (toca("un_metodo_ar")) {
+    forzar("AR", "lineal");
+    console.log("\n· 🇦🇷 UN SOLO MÉTODO: «1» → los datos de frente, sin «¿con qué método?»; y la contribución con su lista de montos");
+    const c = await cliente("AR");
+    await c.decir("hola", 45);
+    await c.decir("1", 35);
+    comprobar("datos con 8.000 de frente", /8\.?000/.test(c.nuevo()) && !/m[eé]todo prefieres/i.test(c.nuevo()), c.nuevo().slice(0, 120));
+    await c.borrar();
+    forzar("AR", "contrib");
+    const d = await cliente("AR");
+    await d.decir("hola", 45);
+    await d.decir("1", 60);
+    comprobar("contribución: la lista de montos y los datos de una vez", /8\.000 ARS/.test(d.nuevo()) && /2\.000/.test(d.nuevo()) && !/m[eé]todo prefieres/i.test(d.nuevo()), d.nuevo().slice(-140));
+    await d.borrar();
+  }
+  if (toca("pago_menos")) {
+    forzar("EC", "lineal");
+    console.log("\n· 🇪🇨 PAGA DE MENOS: 1.50 de 3 → le dice cuánto falta; a su «ya te mandé», también");
+    const c = await cliente("EC");
+    await c.decir("hola", 45);
+    await c.decir("quiero comprar", 35);
+    if (!/\b3\b/.test(c.nuevo())) await c.decir("pichincha", 35);
+    await c.foto(comprobante(/PICHINCHA 1\.50/i), 80);
+    comprobar("le dice cuánto falta (1,50)", /1[.,]50/.test(c.nuevo()) && /falt/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.decir("ya te mande", 35);
+    comprobar("a «ya te mandé»: le recuerda lo que falta, sin «¿ya pagaste?»", /1[.,]50/.test(c.nuevo()) && !/si ya realizaste/i.test(c.nuevo()), c.nuevo().slice(0, 140));
+    await c.borrar();
+  }
+  if (toca("cierre")) {
+    forzar("PE", "dou");
+    // Sus seguimientos, lejos: aquí se mira solo cómo cierra la IA (en la copia salen al minuto y se cruzan).
+    cambiarLaCopia((js) => {
+      const s = js.tableros[TIENDA].whatsapp.fichas.find((f) => f.id === "pla_pe_dou_seg");
+      s.seguimientos[0].minutos = 600;
+      s.seguimientos[1].minutos = 900;
+    });
+    console.log("\n· 🇵🇪 EL CIERRE DE LA IA: pregunta suave al final, sin «solo dime»");
+    const c = await cliente("PE");
+    await c.decir("hola", 45);
+    for (const q of ["que contiene", "es fisico o digital", "tiene garantia"]) {
+      await c.decir(q, 35);
+      const ultima = c.nuevo().trim().split(/\n\s*\n/).pop() ?? "";
+      comprobar(`«${q}»: termina con una pregunta suave`, /\?\s*\S*$/.test(ultima) && !/solo dime|lo quieres ya|adquirirlo ya/i.test(c.nuevo()), ultima.slice(0, 90));
+    }
+    await c.borrar();
+    cambiarLaCopia((js) => {
+      const s = js.tableros[TIENDA].whatsapp.fichas.find((f) => f.id === "pla_pe_dou_seg");
+      s.seguimientos[0].minutos = 1;
+      s.seguimientos[1].minutos = 3;
+    });
+  }
+
   // ── UN REPARTO CON RUTAS SIN CABLE: nadie se pierde (27/10/2026, lo cazó él en MASCOTAS) ──
   if (toca("reparto_sin_cable")) {
     forzar("PE", "todas");

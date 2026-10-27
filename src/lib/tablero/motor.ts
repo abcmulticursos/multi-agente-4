@@ -74,7 +74,7 @@ import {
 import { looksLikeMediaTurn, looksLikeProductContentTurn } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
-import { conElNombreDelProducto, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, preguntarElMetodo } from "./pago";
+import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, preguntarElMetodo } from "./pago";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import {
   VENTANA_DE_META_MIN,
@@ -709,8 +709,11 @@ async function irA(
         return;
       }
       if (f.cobro?.metodos) {
-        // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése.
-        const yaElegido = metodoVigente(getConversationById(convoId) ?? convo);
+        // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése. Y CON UN SOLO
+        // MÉTODO EN SU PAÍS (27/10/2026) tampoco: sus datos de frente. La contribución manda antes sus
+        // burbujas (la lista de montos): sin ella no sabe cuánto aportar.
+        const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
+        if (yaElegido && f.cobro.modo === "abierto") await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
         if (yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre))) {
           // (los datos ya salieron)
         } else if (f.cobro.sin_preguntar) {
@@ -838,18 +841,87 @@ function montosDelCobro(t: Tablero, estado: EstadoEnElTablero, pais: string): nu
   return [...new Set(montos)];
 }
 
+/**
+ * LO QUE YA PAGÓ Y LO QUE LE FALTA, con el cobro abierto y un pago a medias (27/10/2026): pagó 1.50 de
+ * 4 y, a su «ya te mandé», la IA contestaba «si ya pagaste, envíame la foto» — no sabía que faltaban
+ * 2.50. Como la venta de siempre (pago PARCIAL), se le dice exacto cuánto falta.
+ */
+function loQueFalta(
+  estado: EstadoEnElTablero | null,
+  t: Tablero,
+  pais: string
+): { pagado: string; esperado: string; falta: string; numeros: { pagado: number; esperado: number; falta: number } } | null {
+  if (!estado?.cobro_ficha_id || !(estado.cobro_pagado > 0)) return null;
+  const f = t.fichas.find((x) => x.id === estado.cobro_ficha_id);
+  if (!f?.cobro) return null;
+  const esperado =
+    f.cobro.modo === "abierto"
+      ? f.cobro.minimo_por_pais?.[pais] ?? 0
+      : preciosDelCobro(estado)[estado.cobro_elegido ?? f.cobro.producto_id ?? ""] ?? 0;
+  const falta = Math.round((esperado - estado.cobro_pagado) * 100) / 100;
+  if (!(esperado > 0) || falta <= 0.009) return null;
+  const dinero = (v: number) => formatCurrencyAmount(v, pais as never);
+  return {
+    pagado: dinero(estado.cobro_pagado),
+    esperado: dinero(esperado),
+    falta: dinero(falta),
+    numeros: { pagado: estado.cobro_pagado, esperado, falta },
+  };
+}
+
+/** «Quiero pagar», «voy a pagar», «¿cómo pago?», «me lo llevo»… (ya sin tildes ni mayúsculas). */
+const QUIERE_PAGAR =
+  /\b(quiero (pagar|comprar|comprarlo|adquirir|adquirirlo|llevarlo)|voy a (pagar|comprar|yapear|depositar|transferir)|procedo|paso a pagar|como (pago|te pago|se paga|puedo pagar|compro|lo compro|lo adquiero)|donde (pago|te pago|deposito)|a que (cuenta|numero)|pasame (la cuenta|los datos)|datos (de|para) (pago|pagar)|me lo llevo|lo quiero|si quiero|lo compro)\b/;
+
+/**
+ * «¿CUÁL ELIGES?» (27/10/2026), como la venta de siempre (`sendTwoOptionsReminder`): quiere pagar —o
+ * nombra un método— sin haber elegido entre dos o más productos. Texto fijo, sin IA: las opciones de
+ * esos Cobros con su precio del país del cliente. Si nombró un método, ya quedó anotado: al elegir le
+ * llegan sus datos de frente.
+ */
+async function recordarLasOpciones(convo: ConversationRow, t: Tablero, cobros: FichaDelTablero[], metodo: string | null): Promise<void> {
+  const config = loadWorkflowConfig();
+  const pais = getEffectiveCountryCode(convo.phone, config);
+  const estado = estadoEnElTablero(convo.id);
+  const ids = [...new Set(cobros.map((c) => c.cobro?.producto_id).filter((x): x is string => !!x))];
+  const opciones = ids
+    .map((id) => {
+      const p = producto(config, id);
+      const precio = p ? precioDelProducto(p, pais, estado?.oferta === 1) : null;
+      return p ? { nombre: p.name, precio } : null;
+    })
+    .filter((x): x is { nombre: string; precio: number | null } => !!x)
+    .sort((a, b) => (a.precio ?? 0) - (b.precio ?? 0));
+  const numeros = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+  const texto =
+    `${metodo ? `¡Perfecto, con *${nombreDelMetodo(convo.phone, metodo)}*! 😊` : "¡Perfecto! 😊"} ¿Cuál eliges?\n\n` +
+    opciones.map((o, i) => `${numeros[i] ?? `${i + 1}.`} *${o.nombre}*${o.precio ? ` · *${formatCurrencyAmount(o.precio, pais as never)}*` : ""}`).join("\n");
+  await sendConfiguredSteps(convo, [{ type: "text", body: texto }] as never);
+  respondio(convo, t);
+  console.log(`[tablero] convo ${convo.id}: quiere pagar sin elegir${metodo ? ` (con «${metodo}»)` : ""} → le recuerdo las ${opciones.length} opciones`);
+}
+
 /** El cliente de esta ficha recibe la IA, con lo que tiene pendiente y los montos permitidos. */
 async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string): Promise<void> {
   const estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
   const pais = getEffectiveCountryCode(convo.phone, config);
+  if (!nota) {
+    const pendiente = loQueFalta(estado, t, pais);
+    if (pendiente)
+      nota = `Ya recibimos un pago de ${pendiente.pagado} de los ${pendiente.esperado}: le faltan ${pendiente.falta}. Contesta lo que escribió y, si habla del pago, recuérdale con amabilidad que faltan ${pendiente.falta} y que nos envíe el comprobante de lo que falta. No inventes otros montos.`;
+  }
   // Una ficha que todavía ESPERA su tiempo (el upsell) no se ha presentado: la IA no habla de ella.
   const ficha = estado?.espera_ficha && estado.espera_ficha === estado.ficha_id ? undefined : t.fichas.find((x) => x.id === estado?.ficha_id);
   // EL REENVÍO SOLO SI HAY ALGO QUE REENVIAR Y NO HAY UNA INSTRUCCIÓN: con una nota («pregúntale si
   // fue un error…») la IA tiene un encargo concreto, y ofrecerle el reenvío lo desviaba (lo midió el
   // recorrido del 23/10: el cliente se quedó sin la pregunta).
   const puedeReenviar = !nota && entregasDelCliente(convo.id).length > 0;
-  const { productos, montos } = loQueSabeLaIA(convo, estado, pais);
+  const { productos, montos: montosDeVenta } = loQueSabeLaIA(convo, estado, pais);
+  // Con un pago a medias, lo pagado y lo que falta también son montos suyos (si no, el filtro de montos
+  // ajenos los borraba de la respuesta: «nombró montos que no son suyos (1.5)»).
+  const aMedias = loQueFalta(estado, t, pais);
+  const montos = aMedias ? [...new Set([...montosDeVenta, aMedias.numeros.pagado, aMedias.numeros.falta, aMedias.numeros.esperado])] : montosDeVenta;
   const muestras = muestrasDisponibles(estado);
   // LOS DATOS OTRA VEZ («pásame la cuenta», «sí, ya pago»): con el cobro abierto que pide método y
   // el método ya elegido. Los manda el sistema con el precio congelado, nunca la IA.
@@ -1217,8 +1289,16 @@ async function atenderComprobante(
   console.log(`[tablero] convo ${convo.id}: pagó ${lectura.monto} (acumulado ${total} ${moneda}) → salida ${salida}`);
   if (salida === "menos") {
     // EL COBRO SIGUE ABIERTO: puede completar con otro comprobante, y se suma.
-    if (!(await seguirPor(convo.id, t, f.id, "menos", 0)))
-      await contestarConIA(convo, t, `Recibimos su pago de ${lectura.monto} ${moneda}, pero no alcanza el monto esperado. Díselo con amabilidad, sin inventar el monto que falta.`);
+    if (!(await seguirPor(convo.id, t, f.id, "menos", 0))) {
+      const pendiente = loQueFalta(estadoEnElTablero(convo.id), t, pais);
+      await contestarConIA(
+        convo,
+        t,
+        pendiente
+          ? `Recibimos su pago de ${formatCurrencyAmount(lectura.monto, pais as never)}. En total lleva ${pendiente.pagado} de ${pendiente.esperado}: le faltan ${pendiente.falta}. Díselo con amabilidad, con esos montos exactos, y que nos envíe el comprobante de lo que falta.`
+          : `Recibimos su pago de ${lectura.monto} ${moneda}, pero no alcanza el monto esperado. Díselo con amabilidad, sin inventar el monto que falta.`
+      );
+    }
     return;
   }
   await cerrarLaVenta(convo, t, f, salida, productoPagado, total, moneda);
@@ -1778,9 +1858,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // (Con DOS o más opciones de compra —doble oferta— decir el método NO elige producto: se anota y la
   // IA le pregunta cuál quiere. Lo cazó la ronda del 25/10: «yape» elegía el básico solo.)
   let variasOpcionesDeCompra = false;
-  if (metodoDicho && !estado.cobro_ficha_id) {
-    setSelectedPaymentMethod(convo.id, metodoDicho);
-    console.log(`[tablero] convo ${convo.id}: nombra el método «${metodoDicho}» → queda anotado`);
+  // Las opciones de la ficha donde está (y de sus seguimientos) que llevan a pagar: un Cobro o el Order bump.
+  const opcionesDeCompra = () => {
     const duenas = [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x);
     const haciaPagar = duenas.flatMap((duena) => {
       const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
@@ -1793,12 +1872,30 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       });
     });
     const destinos = new Set(haciaPagar.map((o) => cableDeLaSalida(t, o.duena.id, o.salida)?.a));
+    const cobros = [...destinos].map((id) => t.fichas.find((x) => x.id === id)).filter((x): x is FichaDelTablero => x?.tipo === "cobro");
+    return { haciaPagar, destinos, soloCobros: cobros.length === destinos.size ? cobros : [] };
+  };
+  // Lo que dijo además de «quiero pagar / con yape / ¿cómo pago?»: si no queda nada, no dijo CUÁL.
+  const loDemas = normal
+    .replace(/[^a-z0-9ñ\s]/g, " ")
+    .split(/\s+/)
+    .filter(
+      (w) =>
+        w &&
+        !/^(quiero|quisiera|deseo|puedo|voy|a|pagar|pago|pagare|pagaria|con|por|en|mi|el|la|lo|si|ok|dale|bueno|hola|metodo|mediante|via|ya|comprar|compro|comprarlo|adquirir|adquirirlo|llevar|llevarlo|me|como|donde|te|se|cuenta|numero|datos|de|para|pasame|mandame|enviame|procedo|paso|listo|ahora|hoy)$/.test(w)
+    );
+  if (metodoDicho && !estado.cobro_ficha_id) {
+    setSelectedPaymentMethod(convo.id, metodoDicho);
+    console.log(`[tablero] convo ${convo.id}: nombra el método «${metodoDicho}» → queda anotado`);
+    const { haciaPagar, destinos, soloCobros } = opcionesDeCompra();
     // Solo si dijo NADA MÁS que el método («yape», «quiero pagar con yape»); «el pack con yape» sí elige.
-    const loDemas = normal
-      .replace(/[^a-z0-9ñ\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w && !/^(quiero|quisiera|deseo|puedo|voy|a|pagar|pago|pagare|pagaria|con|por|en|mi|el|la|lo|si|ok|dale|bueno|hola|metodo|mediante|via)$/.test(w));
     variasOpcionesDeCompra = destinos.size > 1 && loDemas.length <= 1;
+    // «¿CUÁL ELIGES?», COMO LA VENTA DE SIEMPRE (27/10/2026): con dos o más productos por elegir, el
+    // método no elige producto; se anota y se le recuerdan las opciones con su precio (texto fijo, sin IA).
+    if (variasOpcionesDeCompra && soloCobros.length > 1) {
+      await recordarLasOpciones(convo, t, soloCobros, metodoDicho);
+      return true;
+    }
     if (haciaPagar.length > 0 && destinos.size === 1) {
       const o = haciaPagar[0];
       if (o.cuadrito) await actuarCuadrito(convo, t, o.duena, o.cuadrito);
@@ -1806,6 +1903,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         apuntarBoton(convo.id, o.boton!);
         await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
       }
+      return true;
+    }
+  } else if (texto && !estado.cobro_ficha_id && loDemas.length === 0 && QUIERE_PAGAR.test(normal)) {
+    // «QUIERO PAGAR» SIN DECIR CUÁL (27/10/2026), en cualquier momento (tras un seguimiento, horas
+    // después…): con dos o más productos por elegir, la IA ya no adivina (podía darle el barato); se le
+    // recuerdan las opciones con su precio, como la venta de siempre.
+    const { soloCobros } = opcionesDeCompra();
+    if (soloCobros.length > 1) {
+      await recordarLasOpciones(convo, t, soloCobros, null);
       return true;
     }
   }

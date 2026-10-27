@@ -31244,7 +31244,7 @@ function PantallaDelTablero({
           </select>
         </label>
       </div>
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-hidden">
         <LienzoDelTablero
           key={`${clave}|${canal}`}
           tablero={tablero}

@@ -34,6 +34,20 @@ export function metodoQueNombra(contenido: string, phone: string | null | undefi
   return detectDynamicPaymentMethod(contenido, phone);
 }
 
+/**
+ * EL ÚNICO MÉTODO DE SU PAÍS (27/10/2026): con uno solo (Argentina: transferencia), preguntar «¿con qué
+ * método pagas?» no tiene sentido; se le mandan sus datos de frente. Con dos o más, null.
+ */
+export function elUnicoMetodo(phone: string | null | undefined): string | null {
+  const metodos = getPaymentMethods(phone);
+  return metodos.length === 1 ? metodos[0].method : null;
+}
+
+/** El nombre con que el cliente ve un método («PICHINCHA»), para decirle «¡Perfecto, con PICHINCHA!». */
+export function nombreDelMetodo(phone: string | null | undefined, metodo: string): string {
+  return getPaymentMethods(phone).find((m) => m.method === metodo)?.label ?? metodo;
+}
+
 /** El método que ya eligió, si sigue siendo uno de los de su país (y de quien cobra). */
 export function metodoVigente(convo: ConversationRow): string | null {
   const elegido = (convo.selected_payment_method ?? "").trim().toLowerCase();

@@ -185,15 +185,28 @@ function cerebro(c: ContextoDeLaIA): string {
  * presionar; en la postventa, sin pregunta de venta). Son reglas, no frases: la IA redacta. Y nunca
  * copia el texto de los botones del dueño (un «ELIGE UNA OPCIÓN…» dicho por la IA suena a presión).
  */
+/** Las preguntas de cierre de la venta de siempre (`system-prompt.ts`), para cuando la IA no cerró. */
+const PREGUNTAS_DE_CIERRE = [
+  "¿Te gustaría que te indique cómo adquirirlo?",
+  "¿Deseas saber los métodos de pago?",
+  "¿Te muestro los pasos para tenerlo?",
+  "¿Te gustaría que te indique cómo proceder?",
+  "¿Quieres que te explique cómo obtenerlo?",
+  "¿Te gustaría asegurar tu acceso hoy?",
+];
+
 function cierre(c: ContextoDeLaIA): string {
   if (c.nota) return "";
   if (c.etapa === "postventa")
     return "CIERRE: ya compró. Contesta breve y positivo. No le vuelvas a vender lo que ya compró ni termines con una pregunta de venta.";
+  // ESPERANDO EL COMPROBANTE, COMO LA VENTA DE SIEMPRE (27/10/2026): sin pregunta de venta. «¿Todo bien?
+  // Si ya realizaste el pago, envíame la foto…» sonaba a desesperado por cobrar.
   if (c.etapa === "datos")
-    return "CIERRE: ya tiene los datos de pago. Contesta lo que preguntó y termina con UNA invitación breve y amable a enviar su comprobante cuando pague. No repitas los datos ni el precio, y no presiones.";
+    return "CIERRE: ya tiene los datos de pago y esperamos su comprobante. Contesta breve lo que escribió. NO le preguntes si ya pagó ni le pidas la foto con una pregunta; si cierras, que sea con una línea natural como «Quedo pendiente de tu comprobante para darte acceso 😊». No repitas los datos ni el precio.";
   return [
-    "CIERRE: termina SIEMPRE con UNA sola pregunta breve, cálida y con tus propias palabras que lo lleve al siguiente paso (llevarlo, elegir una de las opciones, o que le indiques cómo adquirirlo). Nunca cierres con «¿te quedó claro?» ni con una pregunta vacía, y no uses «quisieras».",
-    "No presiones: nada de «solo falta que…», «elige una opción para…» ni de recordarle lo que ya te dijo. Si hay dos opciones y pregunta el precio, nombra las dos con su precio y pregúntale cuál prefiere. Preguntar el precio no es decidir comprar.",
+    "CIERRE (como la venta de siempre): termina SIEMPRE con UNA pregunta suave, sola en su propia línea (deja una línea en blanco antes). Varíala: no repitas la de tus 2 últimas respuestas. Ejemplos de su estilo: «¿Te gustaría que te indique cómo adquirirlo?», «¿Deseas saber los métodos de pago?», «¿Te muestro los pasos para tenerlo?», «¿Te gustaría asegurar tu acceso hoy?». Si hay dos opciones: «¿Cuál de las dos prefieres?».",
+    "Si el cliente tiene un problema o está molesto, tu pregunta final es sobre su problema (o el asesor), nunca de venta.",
+    "No presiones: nada de «solo dime…», «¿lo quieres ya?», «solo falta que…», «elige una opción para…», ni la palabra «compra», ni «quisieras», ni «¿te quedó claro?». Si hay dos opciones y pregunta el precio, nombra las dos con su precio. Preguntar el precio no es decidir comprar.",
     c.preguntaPendiente
       ? `Lo que quedó pendiente en la conversación es esto (NO copies este texto ni el de sus botones; invítalo con tus palabras): «${c.preguntaPendiente.slice(0, 300)}».`
       : "",
@@ -482,20 +495,25 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       return false;
     }
     const malos = prohibidos(texto);
-    // EL CIERRE LO REVISA EL BOT (25/10/2026, punto 6): vendiendo o esperando el pago, la respuesta
-    // tiene que terminar invitando con una pregunta, como la venta de siempre. Si no, se le pide otra
-    // vez UNA sola (si insiste, sale como está: mejor sin pregunta que sin respuesta).
-    const debeCerrarConPregunta = !c.nota && (c.etapa === "venta" || c.etapa === "datos");
+    if (malos.length === 0) break;
+    console.log(`[tablero:ia] convo ${convo.id}: nombró montos que no son suyos (${malos.join(", ")}), se le pide otra vez`);
+    aviso += `\n\nIMPORTANTE: tu respuesta anterior nombró montos no permitidos (${malos.join(", ")}). No los repitas.`;
+  }
+  // EL CIERRE LO PONE EL BOT SI FALTA (27/10/2026): vendiendo, la respuesta termina con una pregunta
+  // suave, como la venta de siempre. Antes se le pedía otra respuesta a la IA (se pagaba dos veces);
+  // ahora se agrega una de sus preguntas de siempre, distinta de las 2 últimas, sin gastar tokens.
+  {
     const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).slice(0, 3).pop() ?? "";
-    const sinPregunta = debeCerrarConPregunta && !!texto && !/[?¿]/.test(ultimaBurbuja);
-    if (malos.length === 0 && !(sinPregunta && intento === 0)) break;
-    if (malos.length > 0) {
-      console.log(`[tablero:ia] convo ${convo.id}: nombró montos que no son suyos (${malos.join(", ")}), se le pide otra vez`);
-      aviso += `\n\nIMPORTANTE: tu respuesta anterior nombró montos no permitidos (${malos.join(", ")}). No los repitas.`;
-    }
-    if (sinPregunta) {
-      console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta, se le pide otra vez`);
-      aviso += "\n\nIMPORTANTE: tu respuesta anterior no terminó con una pregunta. Escríbela de nuevo terminando con UNA pregunta breve y amable que lo lleve al siguiente paso.";
+    // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
+    // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
+    const ultimos = ultimosMensajes(convo.id, 8);
+    const delCliente = ([...ultimos].reverse().find((m) => m.role === "user")?.content ?? "").toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+    const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|estafa|reclamo|molest|cansad|harto)\b/.test(delCliente);
+    if (!c.nota && c.etapa === "venta" && !conProblema && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+      const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
+      const pregunta = PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
+      console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
+      texto = `${texto}\n\n${pregunta}`;
     }
   }
   const malos = prohibidos(texto);
