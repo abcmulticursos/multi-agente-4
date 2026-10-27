@@ -152,6 +152,25 @@ conectadas a la tubería vieja en el momento del cambio:
 5. Con el upsell ofrecido → ¿lo puede comprar?
 6. Un cliente nuevo → ¿entra por la nueva y ve los dos productos?
 
+## K. La conversación: lo que recibe la IA del automático y la del tablero no (revisado el 27/10)
+
+Leídos `buildSystemPrompt` (openrouter.ts 838–2100), su cerebro editado del panel y tres conversaciones
+reales del automático guardadas (convos 1473–1475, HP1PE/EC/AR, COMO OB).
+
+| # | Lo que recibe la IA del automático | Tablero |
+|---|---|---|
+| K1 | **SU CEREBRO EDITADO** (`system_prompt_sections`: rol_producto, idioma_pais, pago, precio_cierre, postventa), recortado por etapa (en venta sin «postventa»; en postventa sin «pago» ni «precio_cierre»). **94 líneas** que el tablero no recibe: sus variantes de cierre («¿Quieres que te indique cómo adquirirlo y llevarte los bonos…? 🎁»), el valor («pago único, acceso de por vida»), métodos en lista vertical, la postventa, los rechazos del comprobante. | ❌ el tablero usa el texto de FÁBRICA del código (de ahí «¿Deseas las instrucciones…?» y «adquirir {{PRODUCTO}}», que su cerebro ya no tiene) |
+| K2 | **El bloque de cada forma de vender** (ORDER BUMP ACTIVE / DOBLE OFERTA / UN SOLO PRODUCTO): el combo se presenta primero; una opción por párrafo, nombre en negrita, sin emojis numerados; el complemento no es «regalo»; un emoji siempre; no recomendar salvo «son 2»; «¿precio?» sin elegir → pregunta cuál; «¿qué trae X?» sin precio; una pregunta de pago no es elegir; nunca «tu compra está aprobada» | ❌ solo una línea de «nombra las opciones con su precio» |
+| K3 | La regla editable de cómo presentar las opciones (Ajustes, `order_bump_option_presentation_rule`) | ❌ |
+| K4 | El precio que viaja: con dos sin elegir, LOS DOS («no hay un precio»); con una elegida, SOLO el suyo | ⚠️ recibe los precios de todo lo presentado (es la mitad de H0) |
+| K5 | La postventa de su cerebro: no repetir enlaces, cerrar sin invitar más preguntas, sus despedidas, problema técnico real → asesor | ⚠️ una regla genérica |
+| K6 | Comprobante rechazado: intento 1, 2 y 3 con textos distintos; al 3, asesor | ⚠️ aviso al 3.º, sin los textos por intento |
+| K7 | Cómo suena de verdad (conversaciones reales): «precio» → precio + valor + «¿Deseas que te indique los métodos…?» en 3 burbujas; «qué trae» → 4–5 burbujas con lista y «¿Te animas a llevarlo hoy? 😊»; «sí» → los datos de frente | ⚠️ el tablero cerraba en 1–3 burbujas (tope quitado hoy) |
+
+**Lo que esto explica:** la mayoría de «no habla como el automático» no es el modelo: es que la IA del
+tablero recibe OTRO cerebro. El arreglo de raíz es que el tablero lea las mismas secciones editadas y
+los mismos bloques por forma de vender, con sus excepciones encima (nunca datos de cuenta, el candado H0).
+
 ## J. El contrato de la venta (dictado el 27/10)
 
 Hay información correcta · palabras finales que llevan a la compra · romper objeciones · sugerir
