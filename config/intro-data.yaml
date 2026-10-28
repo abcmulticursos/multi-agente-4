@@ -133780,7 +133780,7 @@ tableros:
               ignora_silencio: true
               ignora_tardio: true
             - id: s-rec26-hkm0
-              minutos: 5
+              minutos: 4
               variantes:
                 - id: v-rec26-iaud
                   nombre: Versión A
@@ -134256,7 +134256,7 @@ tableros:
               ignora_silencio: true
               ignora_tardio: true
             - id: s-mvq1ekfb-txi4v
-              minutos: 5
+              minutos: 4
               variantes:
                 - id: v-mvq1ekfb-xx1iy
                   nombre: Versión A
