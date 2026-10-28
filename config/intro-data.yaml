@@ -132118,14 +132118,14 @@ tableros:
           titulo: Regalo
         - id: mas_ar_inicio
           tipo: inicio
-          x: 210
-          y: 7376
+          x: -97
+          y: 11508
           titulo: Tubería lineal
           pais: AR
         - id: mas_ar_intro
           tipo: mensaje
-          x: 540
-          y: 7376
+          x: 233
+          y: 11508
           titulo: Intro
           steps:
             - type: text
@@ -132184,8 +132184,8 @@ tableros:
             - ptmascotas_comida
         - id: mas_ar_cobro
           tipo: cobro
-          x: 870
-          y: 7376
+          x: 563
+          y: 11508
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -132209,8 +132209,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_b
           tipo: seguimientos
-          x: 870
-          y: 7706
+          x: 563
+          y: 11838
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -132258,15 +132258,15 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_b
           tipo: entregar
-          x: 1200
-          y: 7376
+          x: 893
+          y: 11508
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           por_correo: true
           producto_id: ptmascotas_comida
         - id: mas_ar_upsell1
           tipo: mensaje
-          x: 1530
-          y: 7376
+          x: 1223
+          y: 11508
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -132314,8 +132314,8 @@ tableros:
           espera_min: 2
         - id: mas_ar_cobro_u1
           tipo: cobro
-          x: 1530
-          y: 7706
+          x: 1223
+          y: 11838
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -132339,8 +132339,8 @@ tableros:
             metodos: true
         - id: mas_ar_seg_u1
           tipo: seguimientos
-          x: 1530
-          y: 8036
+          x: 1223
+          y: 12168
           titulo: Seguimientos · 100 CITAS CON TU MASCOTA
           presenta:
             - ptmascotas_citas
@@ -132388,25 +132388,25 @@ tableros:
                       delay_after_sec: 4
         - id: mas_ar_ent_u1
           tipo: entregar
-          x: 1860
-          y: 7706
+          x: 1553
+          y: 11838
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           por_correo: true
           producto_id: ptmascotas_citas
         - id: mas_ar_regalo
           tipo: regalo
-          x: 2190
-          y: 7376
+          x: 1883
+          y: 11508
           titulo: Regalo
         - id: mas_otros
           tipo: inicio
-          x: 254
-          y: 8334
+          x: -53
+          y: 12466
           titulo: Otros países
         - id: mas_otros_msg
           tipo: mensaje
-          x: 584
-          y: 8334
+          x: 277
+          y: 12466
           titulo: No vendemos aquí
           steps:
             - type: text
@@ -132415,8 +132415,8 @@ tableros:
               delay_after_sec: 4
         - id: mas_otros_humano
           tipo: humano
-          x: 914
-          y: 8334
+          x: 607
+          y: 12466
           titulo: Pasa a un asesor
         - id: f-mvnp4een-2cqak
           tipo: seguimientos
@@ -134956,22 +134956,22 @@ tableros:
           titulo: ""
           inicio: mas_pe_inicio
         - id: manta-mas_ec_inicio
-          x: 23
+          x: -128
           y: 1431
-          ancho: 9042
-          alto: 5271
+          ancho: 9193
+          alto: 9477
           titulo: ""
           inicio: mas_ec_inicio
         - id: manta-mas_ar_inicio
-          x: 178
-          y: 7255
+          x: -129
+          y: 11387
           ancho: 2308
           alto: 958
           titulo: ""
           inicio: mas_ar_inicio
         - id: manta-mas_otros
-          x: 214
-          y: 8264
+          x: -93
+          y: 12396
           ancho: 1280
           alto: 620
           titulo: ""
