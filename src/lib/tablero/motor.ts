@@ -2111,6 +2111,9 @@ function pideLoQueCompro(texto: string): boolean {
     /\b(cuanto|cuando|a\s+que\s+hora)\b[\s\S]*\b(demora|tarda|llega|envian|mandan|recibo)\b/.test(t) ||
     // Las de su prueba H4/H2:
     /\bno\s+me\s+(ha|han)\s+(llegado|enviado|mandado)\b/.test(t) ||
+    // «no me llegó lo de mi aporte»: después de una entrega (esta función solo se usa con entregas), «no me
+    // llegó / llegaron» ya es un reclamo de lo entregado (E1 en la copia, 27/10/2026).
+    /\bno\s+me\s+(llego|llegaron)\b/.test(t) ||
     /\bcuando\s+me\s+(van\s+a|vas\s+a)\s+(enviar|mandar|llegar)\b/.test(t) ||
     /^\s*(no\s+(hay|esta|llego|llega|aparece|veo\s+nada)|no\s+me\s+llego\s+nada)\s*[.!]*\s*$/.test(t)
   );
@@ -2349,6 +2352,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // 1-bis. UN COMPROBANTE SIN NINGÚN COBRO ABIERTO: no se cuenta solo; se te avisa.
   if (!estado.cobro_ficha_id && pendiente) {
     const lectura = await leerComprobante(convo.id);
+    // UN COMPROBANTE YA USADO, sin cobro abierto (E1 en la copia, 27/10/2026): volvió a mandar el de su
+    // compra y la IA dijo «ya lo recibí, un asesor lo revisa». Con el texto fijo de siempre, como con el
+    // cobro abierto (misma regla de la huella: en el simulador, por ventana).
+    const huellaLeida = lectura ? huellaDelPago(lectura) : null;
+    const claveHuella = huellaLeida && convo.channel === "test" ? `${huellaLeida}#c${convo.id}` : huellaLeida;
+    if (claveHuella && quienRegistroLaHuella(claveHuella)) {
+      console.log(`[tablero] convo ${convo.id}: sin cobro abierto mandó un comprobante ya usado (${claveHuella})`);
+      await sendConfiguredSteps(convo, [
+        { type: "text", body: "Este comprobante ya fue usado y está registrado ✅ Si hiciste un pago nuevo, envíame la foto de *ese* comprobante, por favor 😊" },
+      ] as never);
+      return true;
+    }
     // EL COBRO QUE ENCAJA CON SU MONTO, desde donde está (lo que hacía la «Caja abierta»).
     // Lo que puede comprar después de comprar, con su precio de hoy (el upgrade cuesta la diferencia).
     const porMonto = lectura ? loQuePuedeComprar(convo, t, pais).find((o) => Math.abs(o.precio - lectura.monto) < 0.01) : undefined;

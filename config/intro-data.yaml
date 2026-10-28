@@ -120617,6 +120617,112 @@ biblioteca_de_productos:
         price_soles: 12
         discount_price_soles: 12
         market_price: 0
+    entregas_extra:
+      - id: nivel12
+        nombre: Nivel S/ 12
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Material completo de Pequeña Estilista (vestidos y looks principales)* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-12
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel19
+        nombre: Nivel S/ 19
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Material completo + Colección Verano y Playa* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-19
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel25
+        nombre: Nivel S/ 25
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Todo lo anterior + Colección Ropa de Frío* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-25
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel32
+        nombre: Nivel S/ 32
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Todo lo anterior + Colección Deportes* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-32
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel39
+        nombre: Nivel S/ 39
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Todo lo anterior + Closet Masculino Esencial* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-39
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel49
+        nombre: Nivel S/ 49
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Todo lo anterior + Colección de Fiesta* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-49
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
+      - id: nivel69
+        nombre: Nivel S/ 69
+        steps:
+          - type: text
+            body_variants:
+              - |-
+                🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+                Tu aporte desbloquea: *Todo lo anterior + Acceso total al guardarropa definitivo* ✨
+
+                📁 Aquí tienes tu acceso:
+                https://example.com/entrega/pequena-estilista/nivel-69
+
+                ¡Que lo disfruten muchísimo! 👗✂️
+            delay_after_sec: 4
   - id: ptfig_figurarte
     name: FIGURARTE
     aliases:
@@ -135408,131 +135514,54 @@ tableros:
                           ¡Gracias por valorar nuestro trabajo y que disfruten mucho creando juntas! ✂️👗
                       delay_after_sec: 4
         - id: est_nivel12
-          tipo: mensaje
+          tipo: entregar
           x: 1380
           y: -330
           titulo: Nivel S/ 12
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Material completo de Pequeña Estilista (vestidos y looks principales)* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-12
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel12
         - id: est_nivel19
-          tipo: mensaje
+          tipo: entregar
           x: 1710
           y: -330
           titulo: Nivel S/ 19
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Material completo + Colección Verano y Playa* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-19
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel19
         - id: est_nivel25
-          tipo: mensaje
+          tipo: entregar
           x: 1380
           y: 0
           titulo: Nivel S/ 25
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Todo lo anterior + Colección Ropa de Frío* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-25
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel25
         - id: est_nivel32
-          tipo: mensaje
+          tipo: entregar
           x: 1710
           y: 0
           titulo: Nivel S/ 32
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Todo lo anterior + Colección Deportes* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-32
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel32
         - id: est_nivel39
-          tipo: mensaje
+          tipo: entregar
           x: 1380
           y: 330
           titulo: Nivel S/ 39
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Todo lo anterior + Closet Masculino Esencial* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-39
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel39
         - id: est_nivel49
-          tipo: mensaje
+          tipo: entregar
           x: 1710
           y: 330
           titulo: Nivel S/ 49
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Todo lo anterior + Colección de Fiesta* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-49
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel49
         - id: est_nivel69
-          tipo: mensaje
+          tipo: entregar
           x: 1380
           y: 660
           titulo: Nivel S/ 69
-          steps:
-            - type: text
-              body_variants:
-                - |-
-                  🙏 *¡Gracias de corazón por tu contribución!* 💛
-
-                  Tu aporte desbloquea: *Todo lo anterior + Acceso total al guardarropa definitivo* ✨
-
-                  📁 Aquí tienes tu acceso:
-                  https://example.com/entrega/pequena-estilista/nivel-69
-
-                  ¡Que lo disfruten muchísimo! 👗✂️
-              delay_after_sec: 4
+          entregas:
+            - ptestilista_moldes#nivel69
         - id: est_otros
           tipo: inicio
           x: 60
