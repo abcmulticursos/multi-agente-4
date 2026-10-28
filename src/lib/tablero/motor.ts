@@ -142,6 +142,7 @@ import {
   salirDelTablero,
   precioDeSuEntrada,
   marcarAvisoDeNovedad,
+  olvidarPresentados,
   sumarAlCobro,
   tocarVuelta,
   varianteVista,
@@ -2485,7 +2486,10 @@ function seQuedoEnLaTuberiaVieja(
     return f?.tipo === "intro_ob" && !f.apagada;
   });
   const nuevos = (presentacion.presenta ?? []).filter((id) => !vistos.includes(id));
-  return { modo: !hayOrderBump && nuevos.length > 0 ? "avisar" : "silencio", inicio, presentacion };
+  // Nada nuevo, o COMO OB: en silencio. El aviso dice «ahora tenemos 2 opciones»: solo si la nueva presenta
+  // dos o más (la condición 5 del automático). Otro producto distinto → la presentación nueva, sin aviso.
+  if (hayOrderBump || nuevos.length === 0) return { modo: "silencio", inicio, presentacion };
+  return { modo: (presentacion.presenta ?? []).length >= 2 ? "avisar" : "desde_inicio", inicio, presentacion };
 }
 
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
@@ -2528,9 +2532,21 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // nueva, como el automático al cambiar de modalidad (ver `seQuedoEnLaTuberiaVieja`).
   if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
     const vieja = seQuedoEnLaTuberiaVieja(convo, t, estado, pais, contenido);
+    if (vieja) {
+      // LO DE LA VIEJA SE SUELTA (28/10/2026, ronda 27: de 2 productos a 1, el bot seguía ofreciendo el
+      // pack que la nueva ya no vende): sus seguimientos colgados y lo que presentó. Lo que ya recibió
+      // (las burbujas) se recuerda aparte, para no repetirlas.
+      ponerSeguimiento(convo.id, null, 0);
+      olvidarPresentados(convo.id);
+    }
     if (vieja?.modo === "desde_inicio") {
       marcarAvisoDeNovedad(convo.id);
-      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja sin nada presentado → entra a la nueva desde el Inicio`);
+      // Lo que ya recibió en la vieja (el saludo) no se repite.
+      burbujasDeLaTuberiaVieja.set(
+        convo.id,
+        new Set(fichasVisitadas(convo.id).flatMap((id) => pasosActivos(t.fichas.find((x) => x.id === id)?.steps).map(huellaDeLaBurbuja)))
+      );
+      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja → entra a la nueva desde el Inicio, sin aviso`);
       await irA(convo.id, t, vieja.inicio.id);
       return true;
     }
@@ -2559,7 +2575,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       marcarAvisoDeNovedad(convo.id);
       moverA(convo.id, vieja.presentacion.id);
       anotarPresentados(convo.id, vieja.presentacion.presenta ?? []);
-      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja → pasa a la nueva (order bump, sin aviso)`);
+      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja → pasa a la nueva en silencio (order bump, o nada nuevo que contar)`);
       estado = estadoEnElTablero(convo.id)!;
     }
   }

@@ -221,6 +221,11 @@ export function presentadosDe(e: EstadoEnElTablero | null): string[] {
   }
 }
 
+/** Olvida lo presentado (al pasar a otra tubería: lo de la vieja ya no se vende ahí). */
+export function olvidarPresentados(conversationId: number): void {
+  db.prepare("UPDATE tablero_estado SET presentados = '[]' WHERE conversation_id = ?").run(conversationId);
+}
+
 /** Ya se le contó que ahora hay más productos: no vuelve a salir. */
 export function marcarAvisoDeNovedad(conversationId: number): void {
   db.prepare("UPDATE tablero_estado SET aviso_novedad = 1 WHERE conversation_id = ?").run(conversationId);

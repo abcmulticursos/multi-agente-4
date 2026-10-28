@@ -7,14 +7,21 @@ import MessageBubble, { type MessageDTO } from "@/components/MessageBubble";
 type CountryCode = "PE" | "EC" | "MX" | "CO" | "AR" | "BO" | "GT" | "CR" | "CL" | "SV" | "VE";
 type TestChannel = "whatsapp" | "messenger";
 
-const COUNTRIES: Array<{ code: CountryCode; label: string }> = [
+const COUNTRIES: Array<{ code: CountryCode; label: string }> = ([
   { code: "PE", label: "Perú (+51)" }, { code: "EC", label: "Ecuador (+593)" },
   { code: "MX", label: "México (+52)" }, { code: "CO", label: "Colombia (+57)" },
   { code: "AR", label: "Argentina (+54)" }, { code: "BO", label: "Bolivia (+591)" },
   { code: "GT", label: "Guatemala (+502)" }, { code: "CR", label: "Costa Rica (+506)" },
   { code: "CL", label: "Chile (+56)" }, { code: "SV", label: "El Salvador (+503)" },
   { code: "VE", label: "Venezuela (+58)" },
-];
+] as Array<{ code: CountryCode; label: string }>).map((c) => ({
+  ...c,
+  // LA BANDERA delante del nombre (28/10/2026, lo pidió él): la de su código de país.
+  label: `${String.fromCodePoint(...[...c.code].map((l) => 0x1f1e6 + l.charCodeAt(0) - 65))} ${c.label}`,
+}));
+
+/** Sin tildes ni mayúsculas, para el buscador de tiendas. */
+const paraBuscar = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
 type Session = { id: number; phone: string; name: string | null; state: string | null };
 type Snapshot = { conversation: Session; messages: MessageDTO[]; buttons: Record<string, { id: string; title: string }[]> };
@@ -63,6 +70,12 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
    *  igual que en vivo. */
   const [tienda, setTienda] = useState<string>("");
   const [tiendas, setTiendas] = useState<TiendaDePrueba[]>([]);
+  // EL BUSCADOR DE TIENDAS (28/10/2026): con muchas tiendas, escribir parte del nombre filtra la lista.
+  // La elegida se queda siempre en la lista, aunque no coincida.
+  const [buscaTienda, setBuscaTienda] = useState("");
+  const tiendasVistas = tiendas.filter(
+    (t) => !buscaTienda.trim() || t.id === tienda || paraBuscar(t.nombre ?? "").includes(paraBuscar(buscaTienda.trim()))
+  );
   const [name, setName] = useState("Cliente de prueba");
   const [sessions, setSessions] = useState<SessionMap>({});
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -323,9 +336,15 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
               ellas, un desplegable vacío sobra en la pantalla. */}
           {tiendas.length > 0 && (
             <label className="mt-3 block text-xs font-medium text-neutral-700">Tienda
+              <input
+                value={buscaTienda}
+                onChange={(event) => setBuscaTienda(event.target.value)}
+                placeholder="🔎 Buscar tienda…"
+                className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-1.5 text-sm"
+              />
               <select value={tienda} onChange={(event) => setTienda(event.target.value)} className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm">
                 <option value="">Sin tienda · el bot de siempre</option>
-                {tiendas.map((item) => (
+                {tiendasVistas.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.nombre}
                     {item.apagada ? " (apagada)" : ""}
@@ -375,6 +394,15 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
                   Cambiarla abre una conversación nueva: la tienda se escribe al
                   crearla, igual que le llega a un cliente por su número. */}
               {tiendas.length > 0 && (
+                <input
+                  value={buscaTienda}
+                  onChange={(event) => setBuscaTienda(event.target.value)}
+                  placeholder="🔎 Tienda…"
+                  title="Escribe parte del nombre para encontrar la tienda en la lista de al lado."
+                  className="w-28 rounded-md border border-sky-300 px-2 py-1 text-xs"
+                />
+              )}
+              {tiendas.length > 0 && (
                 <select
                   value={tienda}
                   onChange={(event) => void cambiarTienda(event.target.value)}
@@ -382,7 +410,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
                   className="rounded-md border border-sky-300 bg-sky-50 px-2 py-1 text-xs text-sky-900"
                 >
                   <option value="">🏪 Sin tienda</option>
-                  {tiendas.map((item) => (
+                  {tiendasVistas.map((item) => (
                     <option key={item.id} value={item.id}>
                       🏪 {item.nombre}
                     </option>

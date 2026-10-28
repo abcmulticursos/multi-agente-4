@@ -576,11 +576,23 @@ input,
    seleccionados es demasiado tenue; en el modo pizarra es más clara y notoria». El recuadro que se
    arrastra con Shift y la zona de lo ya elegido, con borde celeste y relleno que se ven en claro y
    en oscuro. */
+/* (28/10/2026: «esa malla está demasiado baja… me gusta la del automático»): más relleno y borde
+   continuo, para que la zona elegida se vea clara. */
 .lienzo-del-tablero .react-flow__selection,
 .lienzo-del-tablero .react-flow__nodesselection-rect {
-  background: rgba(14, 165, 233, 0.14) !important;
-  border: 2px dashed #0ea5e9 !important;
+  background: rgba(14, 165, 233, 0.26) !important;
+  border: 2px solid #0ea5e9 !important;
   border-radius: 8px;
+}
+
+/* LA FICHA ELEGIDA EN EL TABLERO, EN CIAN Y QUE SE NOTE (28/10/2026: «el borde azul es demasiado bajo,
+   aunque sea cian pero que se note»). */
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja),
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus,
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus-visible {
+  outline: 4px solid #06b6d4 !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 8px rgba(6, 182, 212, 0.25);
 }
 
 /* EL MINIMAPA, SIEMPRE EN SU ESQUINA Y SIN ATRAPAR EL RATÓN (19/10/2026). */

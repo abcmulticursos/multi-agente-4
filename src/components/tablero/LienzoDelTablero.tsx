@@ -535,7 +535,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id });
       }}
       className={`relative w-[250px] rounded-lg border-2 bg-white text-slate-800 shadow-md ${a.borde} ${tenue ? "ficha-tenue border-dashed" : ""} ${
-        selected ? "ring-4 ring-sky-400" : ""
+        selected ? "ring-4 ring-cyan-400" : ""
       }`}
       style={{
         // LA FICHA A LA QUE LLEGA LA COLITA TOCADA: solo su borde se ilumina (27/10/2026).
@@ -1438,6 +1438,10 @@ export default function LienzoDelTablero({
         // La vista va hasta ellas.
         const ids = copia.fichas.map((f) => ({ id: f.id }));
         window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
+        // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
+        // sale el grupo pegado entero, listo para moverlo junto.
+        const pegadas = new Set(copia.fichas.map((f) => f.id));
+        window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: pegadas.has(n.id) }))), 120);
         e.preventDefault();
       } else if (tecla === "delete" || tecla === "backspace") {
         if (cajaElegida) {
@@ -1644,6 +1648,12 @@ export default function LienzoDelTablero({
           fitView
           fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
           minZoom={0.1}
+          // MÁS ACERCAMIENTO CON LA RUEDITA (28/10/2026: «mira el tamaño que ofrece Sendy»): hasta 4×.
+          maxZoom={4}
+          // EL IMÁN AL ARRASTRAR (28/10/2026: «clap, clap, clap, se alinea a los puntos… pasos cortitos»):
+          // las fichas avanzan de a medio punto de la rejilla de fondo (22 px) y quedan alineadas.
+          snapToGrid
+          snapGrid={[11, 11]}
           // SOLO SE DIBUJA LO QUE ESTÁ A LA VISTA (27/10/2026: «¿estás mostrando todas las fichas, incluso
           // las que no se ven?» — sí: todas, de todos los países). Al arrastrar ya no se recalcula todo.
           onlyRenderVisibleElements
