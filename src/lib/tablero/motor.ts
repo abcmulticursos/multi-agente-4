@@ -753,7 +753,10 @@ async function irA(
         // repetir «¡Excelente! puedes adquirirlo…» con los datos sonaba a otra compra). Si los pide, el
         // cobro abierto se los manda; sin método todavía, se le pregunta.
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
-        if (!yaElegido) await preguntarElMetodo(convo, [] as never, precio, nombre);
+        // Un Cobro SIN «preguntar el método» (28/10/2026) lleva los datos en sus burbujas: salen ésas, con lo
+        // que falta; no se le pregunta un método que esa ruta no pide.
+        if (!f.cobro?.metodos) await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
+        else if (!yaElegido) await preguntarElMetodo(convo, [] as never, precio, nombre);
         console.log(`[tablero] convo ${convoId}: upgrade a «${nombre}» — falta ${precio}`);
         return;
       }
@@ -1216,7 +1219,9 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
                 pais
               );
               console.log(`[tablero] convo ${convo.id}: reenvío las burbujas de su cobro «${cobro.titulo || cobro.id}»`);
-              await sendConfiguredSteps(convo, pasos as never);
+              // CON SU PRECIO (28/10/2026): un Cobro de producto sin «preguntar el método» lleva los datos en sus
+              // burbujas ({{METODO_DE_PAGO_1}} con su «Monto»), y sin el precio ese monto salía con otro.
+              await sendConfiguredSteps(convo, pasos as never, precioElegido);
             },
           }
         : {}),
