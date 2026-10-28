@@ -10594,7 +10594,7 @@ function renderTwoOptionsReminder(
  * Es el respaldo: si él escribe el campo del editor, manda el suyo. Los nombres
  * salen de sus productos con los comodines de siempre, nunca escritos aquí.
  */
-const AVISO_DE_ACTUALIZACION_POR_DEFECTO =
+export const AVISO_DE_ACTUALIZACION_POR_DEFECTO =
   "¡Hola! ‼️😊 \n\n*Te cuento que hemos actualizado nuestro contenido* y ahora tenemos *2 opciones* disponibles para tí: 🎉\n\n{{PRODUCTO_BASE}} y \n\n{{PRODUCTO_FULL}} tiene contenido adicional y novedades. 🤗";
 
 function renderAvisoDeActualizacion(

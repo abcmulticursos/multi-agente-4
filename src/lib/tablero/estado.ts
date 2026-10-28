@@ -110,6 +110,8 @@ for (const [col, tipo] of [
   // texto): uno que ya recibió no se repite aunque vuelva a caer en esos Seguimientos o en un
   // duplicado; unos Seguimientos con otros textos salen completos. Se vacía cuando compra.
   ["segs_enviados", "TEXT NOT NULL DEFAULT '[]'"],
+  // 1 = ya se le contó que ahora hay más productos (el aviso de actualización del automático): una vez.
+  ["aviso_novedad", "INTEGER NOT NULL DEFAULT 0"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -139,6 +141,7 @@ export interface EstadoEnElTablero {
   variantes: string;
   comprobante_leido: number | null;
   presentados: string;
+  aviso_novedad: number;
   cobro_elegido: string | null;
   seg_desde: number | null;
   muestras: string;
@@ -216,6 +219,11 @@ export function presentadosDe(e: EstadoEnElTablero | null): string[] {
   } catch {
     return [];
   }
+}
+
+/** Ya se le contó que ahora hay más productos: no vuelve a salir. */
+export function marcarAvisoDeNovedad(conversationId: number): void {
+  db.prepare("UPDATE tablero_estado SET aviso_novedad = 1 WHERE conversation_id = ?").run(conversationId);
 }
 
 /** Anota productos como presentados (sin repetir). */

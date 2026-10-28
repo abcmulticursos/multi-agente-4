@@ -64,7 +64,13 @@ import {
   getPaymentMethods,
   getPaymentMethodsOfCountry,
 } from "@/lib/workflow/config";
-import { esUnAcuseSeco, messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
+import {
+  AVISO_DE_ACTUALIZACION_POR_DEFECTO,
+  esUnAcuseSeco,
+  messageHasPaymentConcern,
+  scheduleGiftConsentWithDelay,
+  sendConfiguredSteps,
+} from "@/lib/workflow/engine";
 import {
   adjustForQuietHours,
   computeNextFollowupSlot,
@@ -135,6 +141,7 @@ import {
   reiniciarRelojDelCobro,
   salirDelTablero,
   precioDeSuEntrada,
+  marcarAvisoDeNovedad,
   sumarAlCobro,
   tocarVuelta,
   varianteVista,
@@ -613,6 +620,13 @@ async function irA(
         const v = versionQueLeToca(f.variantes ?? [], clavesDelAnuncioDelCliente(convo, config), "intro");
         if (v) apuntarVariante(convoId, f.id, v.id);
         pasosAEnviar = pasosActivos(v?.steps);
+      }
+      // AL PASAR DE LA TUBERÍA VIEJA A LA NUEVA (con el aviso), la burbuja que ya recibió en la vieja —el
+      // saludo, casi siempre— no se le repite: el aviso ya lo saludó (28/10/2026).
+      const yaRecibidas = burbujasDeLaTuberiaVieja.get(convoId);
+      if (yaRecibidas) {
+        burbujasDeLaTuberiaVieja.delete(convoId);
+        pasosAEnviar = pasosAEnviar.filter((p) => !yaRecibidas.has(huellaDeLaBurbuja(p)));
       }
       pasosAEnviar = conLosComodinesDeLaFicha(
         pasosAEnviar,
@@ -2415,6 +2429,65 @@ function conSuTienda<T>(clave: string, convo: ConversationRow, fn: () => T): T {
   return conLaTiendaDelTurno(t, fn);
 }
 
+/** Una burbuja de texto por lo que tiene escrito (antes de los comodines); las demás no se comparan. */
+function huellaDeLaBurbuja(p: SequenceStep): string {
+  const x = p as { type?: string; body?: string; body_variants?: string[] };
+  if (x.type && x.type !== "text") return `otra:${Math.random()}`;
+  return JSON.stringify(x.body_variants?.length ? x.body_variants : [x.body ?? ""]);
+}
+
+/** Las burbujas que recibió en la tubería vieja, para no repetirlas en la nueva (las lee y borra `irA`). */
+const burbujasDeLaTuberiaVieja = new Map<number, Set<string>>();
+
+/** La primera ficha que presenta productos desde el Inicio (siguiendo sus cables). */
+function primeraPresentacion(t: Tablero, inicioId: string): FichaDelTablero | null {
+  for (const id of alcanzables(t, [inicioId])) {
+    const f = t.fichas.find((x) => x.id === id);
+    if (f && !f.apagada && (f.tipo === "mensaje" || f.tipo === "intro_ob") && (f.presenta ?? []).length > 0) return f;
+  }
+  return null;
+}
+
+/**
+ * ¿SE QUEDÓ EN LA TUBERÍA VIEJA? (28/10/2026, su pedido: «el aviso al reconectar no debe salir para
+ * todos, debe ser cuando la gente interactúa… y cuidado con los nuevos»). Él reconectó el Inicio de su país
+ * a otra tubería y la ficha donde está este cliente ya no se alcanza desde él. Las condiciones son las de
+ * `hayQueAvisarDeLaActualizacion` del automático, con sus arreglos ya hechos:
+ *   - solo cuando ESCRIBE (este turno), nunca en un seguimiento; una sola vez (`aviso_novedad`);
+ *   - nunca después de comprar ni con algo entregado, ni a mitad del pago (cobro abierto o comprobante):
+ *     ése termina en la tubería que estaba, con su precio;
+ *   - el aviso solo si la nueva presenta productos que NO se le presentaron (antes uno, ahora dos);
+ *   - nunca en COMO OB (el segundo es oculto: avisarlo lo revelaría) → pasa en silencio;
+ *   - sin nada presentado todavía, no hay novedad que contar: entra a la nueva desde el Inicio.
+ * Lo dice el bot, nunca la IA (en el automático, pedírselo a la IA falló tres veces de seis).
+ */
+function seQuedoEnLaTuberiaVieja(
+  convo: ConversationRow,
+  t: Tablero,
+  estado: EstadoEnElTablero,
+  pais: string,
+  contenido: string
+): { modo: "avisar" | "silencio" | "desde_inicio"; inicio: FichaDelTablero; presentacion: FichaDelTablero } | null {
+  if (estado.aviso_novedad === 1 || estado.cobro_ficha_id) return null;
+  if (comprasDelCliente(convo.id).length > 0 || entregasDelCliente(convo.id).length > 0) return null;
+  if (hayComprobantePendiente(convo.id, estado.comprobante_leido) || contenido.startsWith("bubble:")) return null;
+  if (!elTableroAtiende(t, pais)) return null;
+  const inicio = inicioDelPais(t, pais);
+  if (!inicio) return null;
+  const alcanza = new Set(alcanzables(t, [inicio.id]));
+  if (alcanza.has(estado.ficha_id)) return null;
+  const presentacion = primeraPresentacion(t, inicio.id);
+  if (!presentacion) return null;
+  const vistos = presentadosDe(estado);
+  if (vistos.length === 0) return { modo: "desde_inicio", inicio, presentacion };
+  const hayOrderBump = [...alcanza].some((id) => {
+    const f = t.fichas.find((x) => x.id === id);
+    return f?.tipo === "intro_ob" && !f.apagada;
+  });
+  const nuevos = (presentacion.presenta ?? []).filter((id) => !vistos.includes(id));
+  return { modo: !hayOrderBump && nuevos.length > 0 ? "avisar" : "silencio", inicio, presentacion };
+}
+
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
   let estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
@@ -2443,6 +2516,46 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   }
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+
+  // RECONECTÓ EL INICIO A OTRA TUBERÍA y este cliente se quedó en la vieja: al volver a escribir pasa a la
+  // nueva, como el automático al cambiar de modalidad (ver `seQuedoEnLaTuberiaVieja`).
+  if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
+    const vieja = seQuedoEnLaTuberiaVieja(convo, t, estado, pais, contenido);
+    if (vieja?.modo === "desde_inicio") {
+      marcarAvisoDeNovedad(convo.id);
+      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja sin nada presentado → entra a la nueva desde el Inicio`);
+      await irA(convo.id, t, vieja.inicio.id);
+      return true;
+    }
+    if (vieja) {
+      if (vieja.modo === "avisar") {
+        const texto = (config?.order_bump?.aviso_actualizacion ?? "").trim() || AVISO_DE_ACTUALIZACION_POR_DEFECTO;
+        const pasos = conLosComodinesDeLaFicha(
+          [{ type: "text", body: texto }] as never,
+          productosDeLaFicha(config, vieja.presentacion.presenta ?? [], pais, estado.oferta === 1),
+          pais
+        );
+        await sendConfiguredSteps(convo, pasos as never);
+        marcarAvisoDeNovedad(convo.id);
+        burbujasDeLaTuberiaVieja.set(
+          convo.id,
+          new Set(
+            fichasVisitadas(convo.id).flatMap((id) => pasosActivos(t.fichas.find((x) => x.id === id)?.steps).map(huellaDeLaBurbuja))
+          )
+        );
+        console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja → le cuento que ahora hay más y pasa a la nueva`);
+        await irA(convo.id, t, vieja.inicio.id);
+        return true;
+      }
+      // COMO OB, en silencio (como el automático: «no al pasar a COMO OB», el segundo es oculto): pasa a la
+      // presentación nueva sin mandarla —ya vio ese producto— y su mensaje lo atiende la ruta nueva.
+      marcarAvisoDeNovedad(convo.id);
+      moverA(convo.id, vieja.presentacion.id);
+      anotarPresentados(convo.id, vieja.presentacion.presenta ?? []);
+      console.log(`[tablero] convo ${convo.id}: estaba en la tubería vieja → pasa a la nueva (order bump, sin aviso)`);
+      estado = estadoEnElTablero(convo.id)!;
+    }
+  }
 
   // EL REGALO lo atiende el motor de siempre, como en cualquier venta: su pregunta, sus botones, el
   // enlace, la captura. PERO si durante el regalo el cliente habla de OTRA cosa —el upsell que se le
