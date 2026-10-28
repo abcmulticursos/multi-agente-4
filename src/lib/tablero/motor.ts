@@ -1239,6 +1239,15 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
       : {}),
     // EL REGALO QUE SIGUE PENDIENTE (salió de él para pagar otra cosa): la IA sabe qué es y no lo niega.
     ...(regaloPorVolverAOfrecer(convo.id) ? { regaloPendiente: textoDelRegalo(config) } : {}),
+    // LO QUE YA COMPRÓ, con un cobro nuevo abierto: su «lo que pagué» habla de eso (UULA2, 28/10/2026).
+    ...(estado?.cobro_ficha_id && comprasDelCliente(convo.id).some((c) => c.producto_id)
+      ? {
+          comprasPrevias: comprasDelCliente(convo.id)
+            .filter((c) => c.producto_id)
+            .map((c) => `${nombreDe(c.producto_id) ?? c.producto_id} (${formatCurrencyAmount(c.monto, pais as never)})`)
+            .join(", "),
+        }
+      : {}),
   });
 }
 
@@ -1824,7 +1833,12 @@ function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string):
     const variantes = [n, n.replace(".", ","), Number.isInteger(o.precio) ? `${n}.00` : ""].filter(Boolean);
     return variantes.some((v) => new RegExp(`(^|[^\\d.,])${v.replace(".", "\\.")}([^\\d]|$)`).test(texto));
   };
-  const nombrados = opciones.filter((o, i) => turno.some((b) => unicas[i].some((w) => palabras(b).has(w)) && conSuPrecio(o, b)));
+  let nombrados = opciones.filter((o, i) => turno.some((b) => unicas[i].some((w) => palabras(b).has(w)) && conSuPrecio(o, b)));
+  // (Nombre y precio en burbujas distintas, si el turno no habla del regalo: la misma regla de `comprarDespuesDeComprar`.)
+  if (nombrados.length === 0 && !/\b(regalo|regalito|gratis|obsequio)\b/.test(sinTildes(turno.join("\n")))) {
+    const todo = turno.join("\n");
+    nombrados = opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w)) && conSuPrecio(o, todo));
+  }
   return nombrados.length === 1 ? nombrados[0] : null;
 }
 
@@ -1934,7 +1948,14 @@ async function comprarDespuesDeComprar(
       const variantes = [n, n.replace(".", ","), Number.isInteger(o.precio) ? `${n}.00` : ""].filter(Boolean);
       return variantes.some((v) => new RegExp(`(^|[^\\d.,])${v.replace(".", "\\.")}([^\\d]|$)`).test(texto));
     };
-    const nombrados = opciones.filter((o, i) => turno.some((b) => unicas[i].some((w) => palabras(b).has(w)) && conSuPrecio(o, b)));
+    let nombrados = opciones.filter((o, i) => turno.some((b) => unicas[i].some((w) => palabras(b).has(w)) && conSuPrecio(o, b)));
+    // EL NOMBRE EN UNA BURBUJA Y EL PRECIO EN OTRA (28/10/2026, su UULA1: «100 CITAS… es un material…» /
+    // «…tiene un costo de $2…» / «¿Te gustaría agregarlo?» → su «sí» se fue al regalo). Si el turno NO habla
+    // del regalo, vale el turno entero; si lo nombra, sigue la regla de la misma burbuja (el H2/T1).
+    if (nombrados.length === 0 && !/\b(regalo|regalito|gratis|obsequio)\b/.test(sinTildes(turnoDelBot))) {
+      const todo = turno.join("\n");
+      nombrados = opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w)) && conSuPrecio(o, todo));
+    }
     if (nombrados.length === 1) {
       // ¿Y EL REGALO TAMBIÉN ESTÁ PENDIENTE y el bot habló de los dos? No se sabe a cuál dice «sí»:
       // se le pregunta, con sus palabras (dos burbujas).
@@ -2459,8 +2480,25 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (reenviarSiLoPide(convo, contenido)) return true;
     // COMO LA VENTA DE SIEMPRE: contesta lo que preguntó y lo devuelve con amabilidad al regalo, que
     // sigue pendiente (25/10/2026, punto 10).
-    const vuelta =
-      convo.state === "awaiting_gift_consent"
+    // PREGUNTA POR UN PRODUCTO QUE PUEDE COMPRAR (28/10/2026, su UULA3: «cómo es eso de las 100 citas» → se lo
+    // explicó y lo mandó a dejar el comentario del regalo, sin preguntarle si lo quería). Ahí se contesta y se
+    // le pregunta si lo quiere; el regalo sigue pendiente y se le recuerda en otro momento.
+    // (Sin la «s» final: «mascota» y «mascotas» cuentan como la misma palabra.)
+    const palabrasDe = (s: string) =>
+      sinTildes(s)
+        .replace(/[^a-z0-9ñ\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w))
+        .map((w) => (w.length > 4 ? w.replace(/s$/, "") : w));
+    const dichas = new Set(palabrasDe(contenido));
+    // Solo palabras que el regalo NO tiene («mascotas» está en JUEGOS PARA MASCOTAS y en 100 CITAS…).
+    const palabrasDelRegalo = new Set(palabrasDe(textoDelRegalo(loadWorkflowConfig())));
+    const deUnProducto = t
+      ? loQuePuedeComprar(convo, t, pais).find((o) => palabrasDe(o.nombre).some((w) => !palabrasDelRegalo.has(w) && dichas.has(w)))
+      : undefined;
+    const vuelta = deUnProducto
+      ? `Pregunta por *${deUnProducto.nombre}*, que puede comprar aparte. Contesta lo que pregunta de ese producto y termina preguntándole, con tus palabras, si desea adquirirlo. En esta respuesta no hables del regalo.`
+      : convo.state === "awaiting_gift_consent"
         ? "Contesta lo que preguntó y, al final, invítalo con amabilidad y con tus palabras a aceptar el regalo que se le acaba de ofrecer."
         : convo.state === "awaiting_facebook_comment"
           ? "Contesta lo que preguntó y, al final, recuérdale con amabilidad que cuando deje su comentario le envías su regalo."
@@ -2804,10 +2842,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     /\b(ya (te )?(pague|yapee|plinee|deposite|transferi|hice (el|la) (pago|transferencia|deposito))|ya esta pagado|ahi (te )?(mande|envie|va) (el|la)? ?(pago|comprobante|captura)|listo ya pague)\b/.test(normal)
   ) {
     respondio(convo, t);
+    // SI YA COMPRÓ ANTES (28/10/2026, su UULA2: «ya pagué 3, ¿con eso me das las 100 citas?» → «mándame la
+    // foto», tres veces), su «ya pagué» puede ser ESE pago: se le aclara qué compró y que esto va aparte.
+    const antes = comprasDelCliente(convo.id).filter((c) => c.producto_id);
+    const loQueCompro = antes
+      .map((c) => `${producto(config, c.producto_id)?.name ?? c.producto_id} (${formatCurrencyAmount(c.monto, pais as never)})`)
+      .join(", ");
     await contestarConIA(
       convo,
       t,
-      "Dice que ya pagó, pero todavía no llegó ninguna imagen de su comprobante. Agradécele y pídele con amabilidad que envíe la foto o captura del comprobante para validarlo y mandarle su material al instante. No le mandes otra vez los datos ni le vendas nada."
+      antes.length
+        ? `Dice que ya pagó. OJO: ya compró antes ${loQueCompro}, pagado y entregado más arriba. Si se refiere a ESE pago (para llevarse lo que se le ofrece ahora con él), aclárale con amabilidad que ese pago fue por lo que ya tiene y que lo de ahora es otro material que se paga aparte. Solo si dice que hizo un pago NUEVO, pídele la foto del comprobante. No le mandes otra vez los datos.`
+        : "Dice que ya pagó, pero todavía no llegó ninguna imagen de su comprobante. Agradécele y pídele con amabilidad que envíe la foto o captura del comprobante para validarlo y mandarle su material al instante. No le mandes otra vez los datos ni le vendas nada."
     );
     return true;
   }

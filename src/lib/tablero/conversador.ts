@@ -111,6 +111,8 @@ export interface ContextoDeLaIA {
   confirmarOpciones?: string[];
   /** Un regalo que se le ofreció y sigue sin responder: lo que es (para que la IA no lo niegue). */
   regaloPendiente?: string;
+  /** Lo que ya compró y se le entregó («COMIDA CASERA ($3)»): su «lo que pagué» habla de eso. */
+  comprasPrevias?: string;
   /** EL CANDADO DE LA ELECCIÓN: lo que eligió, con su precio («PACK… (US$ 4)»). */
   eligio?: string;
   /** Entró en el precio de oferta (lo activó un seguimiento). */
@@ -287,6 +289,11 @@ function cerebro(c: ContextoDeLaIA): string {
     // pasó con su comprobante, y esta línea la contradecía (HEA1: pidió la foto que acababa de llegar).
     c.sinPagoAprobado && !c.nota
       ? "NINGÚN COMPROBANTE ESTÁ RECIBIDO NI EN REVISIÓN: si dice que ya pagó o que va a pagar, no digas que lo recibiste ni que lo estás verificando; pídele que envíe la FOTO o captura del comprobante por aquí."
+      : "",
+    // (28/10/2026, su UULA2: «¿a qué hora me envían lo que pagué?» con el cobro del upsell abierto → le pidió la
+    // foto otra vez; hablaba de lo que ya compró.)
+    c.comprasPrevias
+      ? `YA COMPRÓ Y RECIBIÓ (más arriba en el chat): ${c.comprasPrevias}. Si habla de «lo que pagué», «mi pago» o «lo que compré», se refiere a ESO: dile que ya le llegó más arriba y que, si no lo ve, se lo reenvías. Lo que se le ofrece ahora es aparte y se paga aparte.`
       : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
@@ -943,6 +950,13 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     .replace(/(para )?revisar c[oó]mo proceder/gi, "para adquirirlo")
     .replace(/c[oó]mo proceder/gi, "cómo adquirirlo")
     .replace(/\bproceder\b/gi, "avanzar");
+  // SOLO EL PRECIO DE HOY (28/10/2026, él lo pidió: «no me gusta que diga "cuesta 3, antes 10"»). Se quita el
+  // precio anterior que escriba la IA: «(antes $10)», «antes ~$10~», «antes $ 9 Dólares». Sus textos del editor
+  // no pasan por aquí.
+  texto = texto
+    .replace(/\s*\(\s*antes[^)\n]*\)/gi, "")
+    .replace(/,?\s*\bantes\s*~[^~\n]*~/gi, "")
+    .replace(/,?\s*\b(antes|en lugar de)\s+(US\$|S\/\.?|\$)\s*[\d.,]+(\s*(d[oó]lares?|soles?|pesos?))?/gi, "");
   // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.
   texto = texto.replace(/\*\*([^\n]+?)\*\*/g, (_, x: string) => `*${x.replace(/\*/g, "")}*`).replace(/\*\*/g, "*");
   const burbujas = alTope(
@@ -1007,6 +1021,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     ) {
       burbujas.splice(burbujas.length - 1, 1, antes, pregunta);
     }
+  }
+  // UNA BURBUJA SIN LETRAS NI NÚMEROS (solo «😊») no sale sola (28/10/2026, su UULA3): se pega a la anterior.
+  for (let i = burbujas.length - 1; i >= 0; i--) {
+    if (/[\p{L}\p{N}]/u.test(burbujas[i])) continue;
+    if (i > 0) burbujas[i - 1] = `${burbujas[i - 1]} ${burbujas[i]}`.trim();
+    burbujas.splice(i, 1);
   }
   // LA LISTA CORTA DE LAS OPCIONES, SOLO SI LA IA NO LAS NOMBRÓ TODAS (27/10/2026): si ya las explicó, no
   // se repite un texto fijo debajo.
