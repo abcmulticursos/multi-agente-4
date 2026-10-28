@@ -103,6 +103,10 @@ export interface ContextoDeLaIA {
    * ESTA respuesta, una sola frase de por qué conviene la más completa.
    */
   recomendarLaCompleta?: boolean;
+  /** Cuántas opciones tiene delante (para «son N»). */
+  cuantasOpciones?: number;
+  /** Pregunta vaga con las opciones delante («y esto qué es», «no entiendo»): explicar las N. */
+  preguntaVaga?: boolean;
   /** EL CANDADO DE LA ELECCIÓN: lo que eligió, con su precio («PACK… (US$ 4)»). */
   eligio?: string;
   /** Entró en el precio de oferta (lo activó un seguimiento). */
@@ -302,8 +306,14 @@ function cerebro(c: ContextoDeLaIA): string {
       : "",
     // LA MISMA ORDEN DEL TURNO QUE USA LA VENTA DE SIEMPRE cuando preguntan cuántas opciones hay
     // (openrouter.ts, «CURRENT TURN — THEY ARE ASKING HOW MANY OPTIONS»), solo en este turno.
+    // (28/10/2026, su HHH2: a «que son 2» contestó «El PACK incluye todo esto», sin decir que eran dos ni
+    // nombrar la otra. La orden del automático empieza por CONFIRMAR que son N y NOMBRARLAS TODAS.)
     c.recomendarLaCompleta
-      ? "EN ESTE TURNO ESTÁ COMPARANDO LAS OPCIONES: explícale cada una con claridad, cada idea en su burbuja, y antes de tu pregunta de cierre añade UNA sola frase de por qué conviene la más completa —lo que suma, con un detalle concreto de su contenido—, sin menospreciar la otra y sin presión. Una frase, no un párrafo. Esto vale SOLO para esta respuesta: no vuelvas a recomendar en las siguientes."
+      ? `EN ESTE TURNO ESTÁ PREGUNTANDO CUÁNTAS SON O COMPARANDO LAS OPCIONES: empieza confirmando con calidez que son ${c.cuantasOpciones && c.cuantasOpciones > 2 ? c.cuantasOpciones : "dos"} opciones y NÓMBRALAS TODAS por su nombre, en negrita, una por párrafo, con lo que trae cada una (la más completa primero; si una incluye a la otra, dilo: «trae todo lo de X y además…»). Luego UNA sola frase de por qué conviene la más completa —lo que suma, con un detalle concreto de su contenido—, sin menospreciar la otra y sin presión. Sin precios salvo que los haya pedido. NO elijas por él. Esto vale SOLO para esta respuesta: no vuelvas a recomendar en las siguientes.`
+      : "",
+    // (28/10/2026, su HHH1: a «y esto qué es» tras la oferta de dos opciones habló solo del pack.)
+    c.preguntaVaga
+      ? "EN ESTE TURNO NO SABE QUÉ ES LO QUE VE (pregunta algo vago como «y esto qué es» o «no entiendo»): explícale con sencillez que tiene opciones para elegir y NÓMBRALAS TODAS por su nombre, en negrita, una por párrafo, con lo que trae cada una (la más completa primero; si una incluye a la otra, dilo: «trae todo lo de X y además…»). No hables de una sola. Sin precios salvo que los pida. NO elijas por él y no recomiendes."
       : "",
     cierre(c),
     c.nota ? `LO QUE ACABA DE PASAR (dilo con tus palabras): ${c.nota}` : "",
@@ -730,7 +740,10 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const ultimaBurbuja = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).pop() ?? "";
     // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
     // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
-    const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
+    // («No entiendo» con las opciones delante —`preguntaVaga`— no es un problema: no entiende qué elegir, y
+    // su cierre es la pregunta de elegir, sola. Sin esto quedaba metida al final del párrafo, su HHH3.)
+    const conProblema =
+      !c.preguntaVaga && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
     const n = c.opcionesDeCompra?.length ?? 0;
     const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     // LA PREGUNTA DE ELEGIR, SOLA Y SIN REPETIRSE (28/10/2026, su prueba HU1/HU2): la IA la escribía

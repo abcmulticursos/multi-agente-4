@@ -49,9 +49,7 @@ import {
   decisionQueCoincide,
   elCobroDelPais,
   getEffectiveCountryCode,
-  getSamplesAfterSequence,
   burbujasDeLaFicha,
-  getSamplesOfferBubble,
   laTiendaDeLaConversacion,
   laTiendaDelTurno,
   loadWorkflowConfig,
@@ -73,7 +71,7 @@ import {
   isQuietHour,
   nextLocalTime,
 } from "@/lib/workflow/quiet-hours";
-import { looksLikeMediaTurn, looksLikeProductContentTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
+import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, preguntarElMetodo } from "./pago";
@@ -431,7 +429,11 @@ function huellaDelSeguimiento(s: { variantes?: Array<{ steps?: unknown[] }> }): 
 /** El primer seguimiento de esta ficha, desde `desde`, que todavía no le salió (o -1). */
 function siguienteSinEnviar(convoId: number, segs: NonNullable<FichaDelTablero["seguimientos"]>, desde: number): number {
   const ya = new Set(seguimientosEnviados(estadoEnElTablero(convoId)));
-  for (let i = desde; i < segs.length; i++) if (!ya.has(huellaDelSeguimiento(segs[i]))) return i;
+  // POR NÚMERO, COMO EL AUTOMÁTICO (28/10/2026, su HHH3): «seguimiento 1 es seguimiento 1, diga lo que
+  // diga el contenido». Dos cajas con textos algo distintos se tomaban por otros seguimientos y el 1 salía
+  // otra vez después del 2. Ahora, si ya recibió N en esta etapa, cualquier caja sigue desde el N+1 (y el
+  // texto también cuenta, como antes). Al comprar se vacía: el upsell empieza desde el 1.
+  for (let i = Math.max(desde, ya.size); i < segs.length; i++) if (!ya.has(huellaDelSeguimiento(segs[i]))) return i;
   return -1;
 }
 
@@ -931,9 +933,6 @@ const INVITA_A_COMPRAR =
 
 const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
-/** Pide info de las opciones («¿qué son 2?», «¿qué trae?», «la diferencia»…), el mismo detector de la venta de siempre. */
-const PIDE_INFO_DE_LAS_OPCIONES =
-  /\b(como es|que es|q es|que trae|q trae|incluye|contiene|contenido|informacion|info|explicame|detalles|sirve|funciona|material|producto|combo|basico|pack|diferencia|cual|opcion|opciones|eran 2|son 2|los 2|ambos)\b/;
 
 /** Palabras que no distinguen una opción de otra. */
 const PALABRAS_COMUNES = new Set([
@@ -1062,30 +1061,43 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   // venta. Las imágenes no son prioridad: se ofrecen a la primera duda sobre el contenido y no más.
   const comparaOPrecio =
     /\b(diferencia|diferente|son 2|son dos|cual (me )?conviene|cual es mejor|compar|precio|cuesta|vale|costo|cuanto)\b/.test(ultimo);
-  const ofrecerImagenes =
+  // LA GALERÍA, DIRECTO Y UNA SOLA VEZ (28/10/2026, él lo pidió): a la primera vez que quiere conocer el
+  // contenido POR DENTRO («qué contiene», «qué trae», «qué incluye», «cómo es por dentro»), las fotos salen
+  // de frente —sin texto antes ni «¿deseas ver unas imágenes?»: era información doble— y al final SOLO la
+  // pregunta de cierre. «Y esto qué es» o «qué es» no: ahí se explica con texto. Nunca más de una vez
+  // en la conversación (después, solo texto); solo de lo ya presentado (el oculto del order bump, no).
+  const quiereVerPorDentro =
+    /\b(que|q|ke)\s+(contiene|contienen|trae|traen|incluye|incluyen|viene|vienen|lleva|llevan)\b|\bcontenido\b|\bpor dentro\b|\bque hay (adentro|dentro)\b/.test(ultimo);
+  const mostrarLaGaleria =
     !nota &&
     muestras.length > 0 &&
-    looksLikeProductContentTurn(ultimo) &&
+    quiereVerPorDentro &&
     !comparaOPrecio &&
     !hablaDeUnProblema &&
-    // Ya compró: tiene el material, no se le ofrecen fotos (salía en «¿hasta cuándo tengo acceso?»).
+    // Ya compró: tiene el material, no se le mandan fotos (salía en «¿hasta cuándo tengo acceso?»).
     !yaCompro &&
-    !muestrasEnviadas(estado).some((m) => m.startsWith("oferta:"));
-  const ofertaDeImagenes = ofrecerImagenes ? getSamplesOfferBubble() : "";
+    !muestrasEnviadas(estado).some((m) => m === GALERIA_HECHA || m.startsWith("oferta:"));
+  if (mostrarLaGaleria && (await mandarLaGaleria(convo, t, pais))) return;
   // LAS OPCIONES DE COMPRA DONDE ESTÁ (27/10/2026), como la venta de siempre: con dos o más, la IA las
   // nombra todas y cierra con «¿Cuál de las dos prefieres?»; y si preguntó por los productos, al final
   // va la burbuja corta con las opciones (`getOrderBumpChoiceHelperBubbles`).
   const segDeAqui = estado?.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado.seg_ficha) : undefined;
   const opcionesAqui = etapa === "venta" && !estado?.cobro_ficha_id ? opcionesDeCompraEn(t, [ficha, segDeAqui], config, pais, estado?.oferta === 1) : [];
-  const preguntaPrecio = /\b(precio|cuesta|vale|costo|valor|cuanto (es|sale|seria)|a cuanto)\b/.test(ultimo);
-  // (28/10/2026, su HU1: a «y esto» la IA habló solo del pack y preguntó «¿cuál de las dos?»; para elegir
-  // tenía que subir a buscarlas). Ahora la lista sale también cuando el bot cierra preguntando cuál elige
-  // y la IA no nombró las dos; con una pregunta de contenido, como antes, aunque cierre con otra pregunta.
-  const burbujaDeAyuda =
-    !nota && opcionesAqui.length > 1 && !hablaDeUnProblema
-      ? opcionesAqui.map((o, i) => `${["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"][i] ?? `${i + 1}.`} *${o.nombre}*${o.precio ? ` · *${o.precio}*` : ""}`).join("\n")
-      : "";
-  const ayudaSiempre = (looksLikeProductContentTurn(ultimo) || PIDE_INFO_DE_LAS_OPCIONES.test(ultimo)) && !preguntaPrecio;
+  // PREGUNTA VAGA CON LAS OPCIONES DELANTE (28/10/2026, su HHH1: «y esto qué es» tras la oferta del order
+  // bump → la IA habló solo del pack). No nombra ninguna opción y pregunta qué es / no entiende: se le
+  // explica que hay N opciones, las dos con su nombre y qué trae cada una, como el automático.
+  const palabrasDeLasOpciones = new Set(
+    opcionesAqui.flatMap((o) => sinTildes(o.nombre).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 4 && !PALABRAS_COMUNES.has(w)))
+  );
+  const nombraUnaOpcion = ultimo.split(/[^a-z0-9ñ]+/).some((w) => palabrasDeLasOpciones.has(w));
+  const preguntaVaga =
+    !nota &&
+    opcionesAqui.length > 1 &&
+    !hablaDeUnProblema &&
+    !nombraUnaOpcion &&
+    !preguntaCuantasOpcionesHay(ultimo) &&
+    ultimo.split(/\s+/).filter(Boolean).length <= 7 &&
+    /\b(esto|eso|no entiendo|no entendi|no le entiendo|como asi|que es|q es|ke es|que significa|explicame|no comprendo)\b/.test(ultimo);
   // ESTÁ COMPARANDO LAS OPCIONES (27/10/2026): «son 2» (la misma detección de la venta de siempre,
   // `preguntaCuantasOpcionesHay`) o «la diferencia» / «cuál me conviene». En esa respuesta, una frase de
   // por qué conviene la más completa.
@@ -1101,7 +1113,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   const eligio = elegidoAhora
     ? `${nombreDe(elegidoAhora) ?? elegidoAhora}${precioElegido !== undefined ? ` (${formatCurrencyAmount(precioElegido, pais as never)})` : ""}`
     : undefined;
-  const salio = await responderConIA(convo, {
+  await responderConIA(convo, {
     ...(eligio ? { eligio } : {}),
     ...(estado?.oferta === 1 ? { enOferta: true } : {}),
     // Con un cobro abierto (nada aprobado todavía) o un comprobante que no se contó, no se promete entrega.
@@ -1188,23 +1200,12 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     // LA ETAPA, para que cierre como la venta de siempre (punto 6) y la postventa (punto 11).
     etapa,
     ...(etapa === "postventa" && postventa ? { postventa } : {}),
-    // LA OFERTA DE IMÁGENES LA PONE EL BOT, no la IA (punto 7, como la venta de siempre): pregunta por
-    // el contenido y quedan muestras por ver → tras su respuesta, tu burbuja «¿Deseas ver unas
-    // imágenes…?», al FINAL de la fila (después de la última burbuja de la IA). Su «sí» del turno
-    // siguiente manda la galería (`mandarLaGaleria`). Una vez por ficha.
-    ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true } : {}),
-    ...(ofrecerImagenes && ofertaDeImagenes ? { alFinal: [ofertaDeImagenes] } : {}),
-    // La lista corta de las opciones: solo si la IA no las nombró todas (lo decide `responderConIA`).
-    ...(burbujaDeAyuda ? { opcionesSiFaltan: { burbuja: burbujaDeAyuda, nombres: opcionesAqui.map((o) => o.nombre), siempre: ayudaSiempre } } : {}),
-    ...(recomendarLaCompleta ? { recomendarLaCompleta: true } : {}),
+    // (La galería ya no se ofrece con una pregunta: sale directo, arriba, `mostrarLaGaleria`. Y sin la
+    // lista fija «1️⃣… 2️⃣…» debajo: el automático no la manda —su ayuda está apagada en tu configuración—
+    // y la regla de las opciones ya le pide a la IA nombrarlas.)
+    ...(recomendarLaCompleta ? { recomendarLaCompleta: true, cuantasOpciones: opcionesAqui.length } : {}),
+    ...(preguntaVaga ? { preguntaVaga: true } : {}),
   });
-  if (salio && ofrecerImagenes) {
-    if (ofertaDeImagenes) {
-      apuntarImagenesOfrecidas(convo.id, true);
-      anotarMuestras(convo.id, [`oferta:${estado?.ficha_id ?? ""}`]);
-      console.log(`[tablero] convo ${convo.id}: pregunta por el contenido → ofrece ver las imágenes`);
-    }
-  }
 }
 
 /**
@@ -1266,7 +1267,7 @@ function textoDePostventa(config: WorkflowConfig | null, canal: string): string 
  * 27/10/2026: la galería salía sin cierre). El tablero usa el primero que tengas escrito, como hace
  * con tus textos de postventa.
  */
-function cierreDeLaGaleria(): SequenceStep[] {
+function cierreDeLaGaleria(cuantas: number, deOrderBump: boolean): SequenceStep[] {
   // Que se pueda ENVIAR (la regla de `sendSamplesAfterContent`): tu cierre está guardado como «texts» y
   // el envío lee «body_variants»; `burbujasDeLaFicha` lo traduce, como en tus fichas de producto.
   const enviable = (s: unknown): SequenceStep[] => {
@@ -1277,15 +1278,48 @@ function cierreDeLaGaleria(): SequenceStep[] {
       ? pasos
       : [];
   };
-  const delAutomatico = enviable(getSamplesAfterSequence());
-  if (delAutomatico.length) return delAutomatico;
   const config = loadWorkflowConfig();
   const porModalidad = (config?.modality_templates ?? {}) as Record<string, { samples_after_sequence?: unknown[] } | undefined>;
-  for (const modo of ["order_bump", "doble_oferta_upsell", "doble_oferta_dos", "lineal", "bioferta", "upsell"]) {
+  // SEGÚN CUÁNTOS PRODUCTOS HAY DELANTE (28/10/2026, él lo pidió): con dos o más, la pregunta es elegir
+  // («¿cuál eliges?»): tu cierre de order bump en esa tubería, el de doble oferta en la otra. Con uno,
+  // llevarlo («¿te animas?»): tu cierre de lineal. Un cierre de un producto NO sirve para dos (y al revés),
+  // así que no se cruzan: si el tuyo está vacío, sale el de respaldo del caso.
+  const modos =
+    cuantas >= 2
+      ? deOrderBump
+        ? ["order_bump", "doble_oferta_upsell", "doble_oferta_dos", "bioferta"]
+        : ["doble_oferta_upsell", "doble_oferta_dos", "order_bump", "bioferta"]
+      : ["lineal"];
+  for (const modo of modos) {
     const s = enviable(porModalidad[modo]?.samples_after_sequence);
     if (s.length) return s;
   }
-  return enviable((config as { samples_after_sequence?: unknown[] } | null)?.samples_after_sequence);
+  if (cuantas < 2) {
+    const general = enviable((config as { samples_after_sequence?: unknown[] } | null)?.samples_after_sequence);
+    if (general.length) return general;
+  }
+  return [
+    {
+      type: "text",
+      body_variants:
+        cuantas >= 2
+          ? ["¿Cuál eliges? 😊", "¿Por cuál te animas? 😊", "¿Cuál de las dos te gusta más? 😊"]
+          : ["¿Te animas a llevarlo? 😊", "¿Te gustaría llevártelo hoy? 😊", "¿Lo quieres para empezar hoy mismo? 😊"],
+    } as SequenceStep,
+  ];
+}
+
+/**
+ * CUÁNTOS PRODUCTOS TIENE DELANTE Y SI ES LA TUBERÍA DE ORDER BUMP, para el cierre de la galería: con un
+ * cobro abierto ya eligió (uno); si no, los que puede elegir donde está (la ficha y sus seguimientos).
+ */
+function delanteParaElCierre(convo: ConversationRow, t: Tablero, pais: string): { cuantas: number; deOrderBump: boolean } {
+  const estado = estadoEnElTablero(convo.id);
+  const ficha = estado ? t.fichas.find((x) => x.id === estado.ficha_id) : undefined;
+  const seg = estado?.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado.seg_ficha) : undefined;
+  const cuantas = !estado || estado.cobro_ficha_id ? 1 : opcionesDeCompraEn(t, [ficha, seg], loadWorkflowConfig(), pais, estado.oferta === 1).length;
+  const deOrderBump = ficha?.tipo === "intro_ob" || t.fichas.some((f) => f.tipo === "intro_ob" && yaVisito(convo.id, f.id));
+  return { cuantas, deOrderBump };
 }
 
 /**
@@ -1294,9 +1328,11 @@ function cierreDeLaGaleria(): SequenceStep[] {
  * (la misma de la venta de siempre, `getSamplesAfterSequence`). Un solo camino: ya no manda una suelta.
  * Sin muestras por ver (o con «📷 Ofrecer imágenes» apagado), false y no manda nada.
  */
-async function mandarLaGaleria(convo: ConversationRow): Promise<boolean> {
+async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string): Promise<boolean> {
   const muestras = muestrasDisponibles(estadoEnElTablero(convo.id));
   if (muestras.length === 0) return false;
+  // Antes de mandar: cuántos productos tiene delante AHORA (para el cierre).
+  const delante = delanteParaElCierre(convo, t, pais);
   const salieron: string[] = [];
   for (const m of muestras) {
     // Una foto que no se puede bajar no deja al cliente sin respuesta: se salta y queda escrito.
@@ -1309,15 +1345,11 @@ async function mandarLaGaleria(convo: ConversationRow): Promise<boolean> {
     }
   }
   if (salieron.length === 0) return false;
-  anotarMuestras(convo.id, salieron);
-  const cierre = cierreDeLaGaleria();
-  if (cierre.length) await sendConfiguredSteps(convo, cierre as never);
-  else {
-    // Sin cierre escrito: el de respaldo de la venta de siempre, con su misma función.
-    const { sendSamplesAfterContent } = await import("@/lib/workflow/engine");
-    await sendSamplesAfterContent(convo);
-  }
-  console.log(`[tablero] convo ${convo.id}: galería enviada (${salieron.join(", ")})`);
+  // GALERIA_HECHA: la galería sale UNA vez en toda la conversación (28/10/2026, él lo pidió).
+  anotarMuestras(convo.id, [...salieron, GALERIA_HECHA]);
+  // Y después de las fotos, SOLO la pregunta de cierre: nada más en esa fila.
+  await sendConfiguredSteps(convo, cierreDeLaGaleria(delante.cuantas, delante.deOrderBump) as never);
+  console.log(`[tablero] convo ${convo.id}: galería enviada (${salieron.join(", ")}) · cierre de ${delante.cuantas >= 2 ? "elegir" : "un producto"}`);
   return true;
 }
 
@@ -1685,6 +1717,8 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
  */
 const REGALO_PENDIENTE = "regalo:pendiente";
 const REGALO_HECHO = "regalo:hecho";
+/** La galería ya salió en esta conversación: no vuelve a salir sola (28/10/2026). */
+const GALERIA_HECHA = "galeria:hecha";
 function anotarRegaloSinResponder(conversationId: number, state: string | null | undefined): void {
   if (state === "awaiting_gift_consent") anotarMuestras(conversationId, [REGALO_PENDIENTE]);
 }
@@ -1746,10 +1780,14 @@ async function comprarDespuesDeComprar(
   contenido: string,
   pais: string,
   enElRegalo = false,
-  hayOfertaDelante = false
+  hayOfertaDelante = false,
+  /** El cobro que está abierto ahora (el del upsell, p. ej.): «completar» con él delante es ambiguo. */
+  cobroAbierto?: string
 ): Promise<boolean> {
   const opciones = loQuePuedeComprar(convo, t, pais);
   if (opciones.length === 0) return false;
+  // Si el cobro abierto ya ES el del upgrade, «completar» habla de ése: lo atiende su cobro.
+  if (cobroAbierto && opciones.some((o) => o.ficha.id === cobroAbierto && o.upgrade)) return false;
   const normal = sinTildes(contenido);
   const ultimaDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
   const respondeAMiPregunta = ultimaDelBot.startsWith(PREGUNTA_A_CUAL);
@@ -1840,6 +1878,15 @@ async function comprarDespuesDeComprar(
   // no entran en la duda (HEA1: «ya pagué 3, ¿puedo completar para el otro?» preguntaba entre tres).
   if (!elegida && /\b(completar|la diferencia|el resto|lo que falta)\b/.test(normal)) {
     const upgrades = opciones.filter((o) => o.upgrade);
+    // PERO CON OTRO PRODUCTO DELANTE (el upsell ofrecido, o su cobro abierto), «completar para el otro» es
+    // ambiguo (28/10/2026, su HHH1: con 100 CITAS abierto, la IA le cobró 100 CITAS entero). Como el
+    // automático («si no lo sabe, le pregunta a cuál se refiere»): «¿a cuál te refieres?» con los dos —
+    // el que se completa (lo que falta) y el que va aparte (entero)—, sin adivinar.
+    const delante = opciones.filter((o) => !o.upgrade && (o.ficha.id === cobroAbierto || hayOfertaDelante));
+    if (upgrades.length >= 1 && delante.length > 0 && !respondeAMiPregunta) {
+      await preguntarACual(convo, [...upgrades, ...delante], pais);
+      return true;
+    }
     if (upgrades.length === 1) elegida = upgrades[0];
   }
   // Contesta a «¿a cuál te refieres?» con otras palabras («el último que me enseñaste»): decide la IA.
@@ -2486,7 +2533,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         : await elegirOpcionConIA(convo.id, texto, [
             { id: "ver", etiqueta: "Acepta ver las imágenes que se le acaban de ofrecer (sí, dale, a ver, ok, muéstramelas, un emoji de aprobación…)" },
           ]);
-      if (acepta === "ver" && (await mandarLaGaleria(convo))) {
+      if (acepta === "ver" && (await mandarLaGaleria(convo, t, pais))) {
         respondio(convo, t);
         return true;
       }
@@ -2498,7 +2545,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     /\b(ver|veo|vea|verlas?|manda\w*|envia\w*|mostrar|muestrame|ensena\w*|tienes|tiene|hay|pasa\w*)\b[^.?!]{0,25}\b(fotos?|imagen(es)?|muestras?)\b/.test(normal) &&
     !/\b(no|comprobante|pago|pague|yape\w*|plin|deposit\w*|transfer\w*|captura|voucher)\b/.test(normal);
   if (texto && pideVerImagenes) {
-    if (await mandarLaGaleria(convo)) {
+    if (await mandarLaGaleria(convo, t, pais)) {
       respondio(convo, t);
       return true;
     }
@@ -2688,6 +2735,25 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // QUIERE PAGAR ALGO MÁS DESPUÉS DE COMPRAR (el upsell, completar al full): lo resuelve el bot.
   if (texto && !estado.cobro_ficha_id && (comprasDelCliente(convo.id).length > 0 || entregasDelCliente(convo.id).length > 0)) {
     if (await comprarDespuesDeComprar(convo, t, contenido, pais, false, opcionesDeCompra().haciaPagar.length > 0)) return true;
+  }
+  // «COMPLETAR PARA EL OTRO» CON OTRO COBRO ABIERTO (28/10/2026, su HHH1): ya compró, tiene abierto el cobro
+  // del upsell y pide completar → «¿a cuál te refieres?» (el que se completa / el que va aparte), y su
+  // respuesta a esa pregunta. Antes lo contestaba la IA y le cobraba el upsell entero. No con un pago a
+  // medias en este cobro: ahí «completo lo que falta» es de ESTE cobro.
+  if (
+    texto &&
+    estado.cobro_ficha_id &&
+    !pendiente &&
+    estado.cobro_pagado <= 0 &&
+    (comprasDelCliente(convo.id).length > 0 || entregasDelCliente(convo.id).length > 0)
+  ) {
+    const ultimaDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+    if (/\b(completar|la diferencia|el resto|lo que falta)\b/.test(normal) || ultimaDelBot.startsWith(PREGUNTA_A_CUAL)) {
+      if (await comprarDespuesDeComprar(convo, t, contenido, pais, false, false, estado.cobro_ficha_id)) {
+        respondio(convo, t);
+        return true;
+      }
+    }
   }
 
   // 2-bis. EL MÉTODO Y EL PRODUCTO, con un cobro abierto que pide método — como la venta de siempre:
