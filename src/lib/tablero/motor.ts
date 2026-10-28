@@ -2512,6 +2512,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     }).catch(() => {});
     void syncLeadStatus(convo.id).catch(() => {});
     await irA(convo.id, t, inicio.id);
+    // SU PRIMER MENSAJE ES UN COMPROBANTE (28/10/2026, su caso real: dos números con el mismo embudo; la
+    // clienta recibió los datos en uno y pagó por el otro, donde nunca había escrito, y no se le entregó).
+    // Se lee por el mismo camino que un pago durante la intro: si el monto es de un producto, se entrega.
+    if (hayComprobantePendiente(convo.id, estadoEnElTablero(convo.id)?.comprobante_leido ?? null)) {
+      console.log(`[tablero] convo ${convo.id}: su primer mensaje trae un comprobante → se revisa`);
+      return turnoDelTablero(convo, contenido, tiendaDelCanal);
+    }
     return true;
   }
 
