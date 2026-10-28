@@ -219,9 +219,48 @@ export function getClient(): OpenAI {
       "HTTP-Referer": "http://localhost:3000",
       "X-Title": "Agente WhatsApp",
     },
+    fetch: conProveedorFijo,
   });
   return cached;
 }
+
+/**
+ * UN PROVEEDOR PREFERIDO, PARA QUE EL CACHEO FUNCIONE (28/10/2026, medido con su modelo).
+ *
+ * OpenRouter mandaba cada llamada a una empresa distinta (DeepInfra, Parasail, SiliconFlow…): ninguna
+ * reutilizaba el principio del mensaje —el cerebro y las reglas, iguales en cada turno— y el precio
+ * cambiaba en cada una. Con un proveedor fijo (StreamLake, de los más baratos), desde la segunda llamada
+ * reutilizó 5.120 de 5.169 tokens y costó 79% menos.
+ *
+ * SOLO CAMBIA A QUIÉN SE LE PIDE, NO LO QUE SE PIDE: mismo modelo, mismo texto, misma respuesta. Con
+ * `allow_fallbacks`, si ese proveedor está saturado o no tiene el modelo, OpenRouter usa otro como hasta
+ * hoy (esa llamada no se cachea, nada más). `OPENROUTER_PROVIDER_ORDER` lo cambia («A,B»); «off» lo apaga.
+ * Una llamada que ya trae su propio `provider` no se toca.
+ */
+const PROVEEDOR_PREFERIDO = (process.env.OPENROUTER_PROVIDER_ORDER ?? "StreamLake").trim();
+const conProveedorFijo: typeof fetch = async (url, init) => {
+  try {
+    if (
+      PROVEEDOR_PREFERIDO &&
+      PROVEEDOR_PREFERIDO.toLowerCase() !== "off" &&
+      init?.method === "POST" &&
+      typeof init.body === "string" &&
+      String(url).includes("/chat/completions")
+    ) {
+      const cuerpo = JSON.parse(init.body) as Record<string, unknown>;
+      if (!cuerpo.provider) {
+        cuerpo.provider = {
+          order: PROVEEDOR_PREFERIDO.split(",").map((p) => p.trim()).filter(Boolean),
+          allow_fallbacks: true,
+        };
+        return fetch(url, { ...init, body: JSON.stringify(cuerpo) });
+      }
+    }
+  } catch {
+    // Un cuerpo que no se entiende se manda tal cual: nunca se pierde una llamada por esto.
+  }
+  return fetch(url, init);
+};
 
 function imageToDataUrl(relPath: string, mime: string): string | null {
   try {

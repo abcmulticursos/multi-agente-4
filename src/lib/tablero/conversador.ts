@@ -376,7 +376,7 @@ const PREGUNTAS_DE_CIERRE = [
   "¿Te gustaría que te indique cómo adquirirlo?",
   "¿Deseas saber los métodos de pago?",
   "¿Te muestro los pasos para tenerlo?",
-  "¿Te gustaría que te indique cómo proceder?",
+  "¿Te gustaría que te indique cómo obtenerlo ya?",
   "¿Quieres que te explique cómo obtenerlo?",
   "¿Te gustaría asegurar tu acceso hoy?",
 ];
@@ -606,7 +606,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         ...(herramientas.length ? { tools: herramientas } : {}),
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
-      if (r.usage) console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} · salida ${r.usage.completion_tokens}`);
+      if (r.usage) {
+      // Cuántos se cachearon (28/10/2026): para ver en el log si el proveedor fijo está ahorrando.
+      const cacheados = (r.usage as { prompt_tokens_details?: { cached_tokens?: number } }).prompt_tokens_details?.cached_tokens ?? 0;
+      console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens}`);
+    }
       const pidio = (nombre: string) =>
         r.choices[0]?.message?.tool_calls?.some((t) => t.type === "function" && t.function.name === nombre) ?? false;
       // EL AVISO AL DUEÑO (emergencia o pedido de asesor), como la venta de siempre: se te avisa por
@@ -933,6 +937,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   if (!texto) return salieronMuestras || reenvioPorCuenta;
   // **ASÍ** (markdown) no es negrita en WhatsApp: se ve con asteriscos de más. Se deja *así*.
   texto = texto.replace(/\*\*([^*\n]+)\*\*/g, "*$1*").replace(/^#{1,6}\s+/gm, "");
+  // «PROCEDER» NO (28/10/2026, él lo pidió: «adquirirlo» suena mejor). La IA lo copia de las preguntas de
+  // cierre del automático; aquí se cambia por «adquirirlo».
+  texto = texto
+    .replace(/(para )?revisar c[oó]mo proceder/gi, "para adquirirlo")
+    .replace(/c[oó]mo proceder/gi, "cómo adquirirlo")
+    .replace(/\bproceder\b/gi, "avanzar");
   // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.
   texto = texto.replace(/\*\*([^\n]+?)\*\*/g, (_, x: string) => `*${x.replace(/\*/g, "")}*`).replace(/\*\*/g, "*");
   const burbujas = alTope(
@@ -953,7 +963,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const dichas = new Set(palabras(burbujas.join(" ")));
     const suyas = c.confirmarOpciones.map((x) => palabras(x));
     const unicas = suyas.map((ws, i) => ws.filter((w) => suyas.every((o, j) => j === i || !o.includes(w))));
-    if (unicas.some((ws) => ws.length > 0 && !ws.some((w) => dichas.has(w)))) {
+    // Y que DIGA que son varias opciones para elegir (28/10/2026, su MM3: nombró las dos —«el PACK trae todo
+    // lo de COMIDA CASERA»— pero no dijo que eran dos opciones, y el cliente no lo entendió).
+    const diceCuantas = /\b(dos|2|tres|3|cuatro|4)\s+(opciones|productos|alternativas|materiales)\b|\b(ambas|las dos|los dos) (opciones|productos)\b/.test(
+      plano(burbujas.join(" "))
+    );
+    if (!diceCuantas || unicas.some((ws) => ws.length > 0 && !ws.some((w) => dichas.has(w)))) {
       const n = c.confirmarOpciones.length;
       const nombres = c.confirmarOpciones.map((x) => `*${x}*`);
       const linea = `Son ${n === 2 ? "dos" : n} opciones 😊: ${nombres.slice(0, -1).join(", ")} y ${nombres[n - 1]}.`;

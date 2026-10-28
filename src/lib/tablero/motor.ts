@@ -1788,6 +1788,32 @@ async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQ
   await irA(convo.id, t, x.ficha.id, 0, { enSilencio, upgrade: x.upgrade });
 }
 
+/**
+ * LO QUE EL BOT ACABA DE PROPONER (28/10/2026): de lo que puede comprar, el ÚNICO que su último turno nombra
+ * con su precio en la misma burbuja, terminando en pregunta (la misma regla que «sí a lo ofrecido» de
+ * `comprarDespuesDeComprar`: lo estable del texto del bot es el precio). Si no hay uno claro, null.
+ */
+function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string): LoQuePuedeComprar | null {
+  const opciones = loQuePuedeComprar(convo, t, pais);
+  if (opciones.length === 0) return null;
+  const recientes = ultimosMensajes(convo.id, 10);
+  const ultimoDelCliente = recientes.map((m) => m.role).lastIndexOf("user");
+  const antes = recientes.slice(0, ultimoDelCliente < 0 ? recientes.length : ultimoDelCliente);
+  const turno: string[] = [];
+  for (let i = antes.length - 1; i >= 0 && antes[i].role !== "user"; i--) turno.unshift(antes[i].content ?? "");
+  if (!turno.some((b) => b.includes("?"))) return null;
+  const palabras = (s: string) => new Set(sinTildes(s).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w)));
+  const conjuntos = opciones.map((o) => palabras(o.nombre));
+  const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
+  const conSuPrecio = (o: LoQuePuedeComprar, texto: string) => {
+    const n = String(Math.round(o.precio * 100) / 100);
+    const variantes = [n, n.replace(".", ","), Number.isInteger(o.precio) ? `${n}.00` : ""].filter(Boolean);
+    return variantes.some((v) => new RegExp(`(^|[^\\d.,])${v.replace(".", "\\.")}([^\\d]|$)`).test(texto));
+  };
+  const nombrados = opciones.filter((o, i) => turno.some((b) => unicas[i].some((w) => palabras(b).has(w)) && conSuPrecio(o, b)));
+  return nombrados.length === 1 ? nombrados[0] : null;
+}
+
 /** ¿Lo PREGUNTA («¿puedo completar?», «se puede pagar…»), o lo pide? Sin signos también: «puedo completar». */
 function preguntaSiPuede(contenido: string): boolean {
   return /[?¿]/.test(contenido) || /\b(puedo|puede|se puede|podria|podre|es posible)\b/.test(sinTildes(contenido));
@@ -2618,6 +2644,14 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // venta de siempre: con un producto elegido, el método manda los datos de ESE producto.
       const aDonde = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, `dec:${d.id}`)?.a);
       if (estado.cobro_ficha_id && (aDonde?.tipo === "cobro" || aDonde?.tipo === "intro_ob")) continue;
+      // EL «SÍ» ES PARA LO ÚLTIMO QUE PROPUSO EL BOT (28/10/2026, su MM2): con el upsell en pantalla, la IA le
+      // preguntó «¿te falta completar $1 para el PACK?», dijo «sí» y el cuadrito «Sí» del upsell lo llevó a
+      // pagar 100 CITAS. Como el automático: si el último turno del bot propuso OTRO producto (nombre y
+      // precio en la misma burbuja, con pregunta), un «sí» a secas no sigue este cuadrito.
+      if (aDonde?.tipo === "cobro" && AFIRMA.test(normal.trim())) {
+        const propuesto = loQueAcabaDeProponer(convo, t, pais);
+        if (propuesto && propuesto.productoId !== aDonde.cobro?.producto_id) continue;
+      }
       if (metodoDicho) setSelectedPaymentMethod(convo.id, metodoDicho);
       await actuarCuadrito(convo, t, duena, d);
       return true;
@@ -2897,7 +2931,14 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const dicho = limpio(contenido);
     const porNumero = convo.channel === "instagram" && /^[1-3]$/.test(dicho) ? botones[Number(dicho) - 1] : undefined;
     const porTexto = botones.find((b) => limpio(b.label) === dicho);
-    const escrito = porNumero ?? porTexto;
+    let escrito = porNumero ?? porTexto;
+    // (El mismo candado que el del cuadrito, 28/10/2026, su MM2: «sí» escrito a OTRA cosa que el bot acaba de
+    // proponer no es tocar el «Sí» de antes.)
+    if (escrito && !porNumero && ficha) {
+      const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, ficha.id, `btn:${escrito!.id}`)?.a);
+      const propuesto = destino?.tipo === "cobro" ? loQueAcabaDeProponer(convo, t, getEffectiveCountryCode(convo.phone, loadWorkflowConfig())) : null;
+      if (propuesto && propuesto.productoId !== destino?.cobro?.producto_id) escrito = undefined;
+    }
     if (escrito) contenido = `bubble:${escrito.id}`;
   }
 
@@ -2983,7 +3024,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       const destinoDe = (x: (typeof lista)[number]) => cableDeLaSalida(t, x.duena.id, x.op.id)?.a ?? x.op.id;
       const destinos = [...new Set(lista.map(destinoDe))];
       const conjuntos = destinos.map((d) => new Set(lista.filter((x) => destinoDe(x) === d).flatMap((x) => [...palabrasDe(x)])));
-      const dichas = new Set(sinTildes(contenido).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/));
+      // («elpack», «elbasico» escrito junto también cuenta, 28/10/2026, su MM2: solo si lo que queda tiene 4+ letras.)
+      const dichas = new Set(
+        sinTildes(contenido)
+          .replace(/[^a-z0-9ñ\s]/g, " ")
+          .split(/\s+/)
+          .flatMap((w) => [w, w.replace(/^(el|la|los|las)(?=[a-zñ]{4,}$)/, "")])
+      );
       const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
       const acertados = destinos.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
       // UNA PREGUNTA NO ELIGE («¿cuánto cuesta el pack?», «¿qué trae el básico?»): ésa la contesta la IA.
