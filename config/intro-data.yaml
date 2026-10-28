@@ -133766,7 +133766,7 @@ tableros:
                           steps: []
                 - id: v-rec26-gj1a
                   nombre: Versión B
-                  peso: 1
+                  peso: 0
                   steps:
                     - type: text
                       body_variants:
@@ -134238,7 +134238,7 @@ tableros:
                           steps: []
                 - id: v-mvq1ekfb-j48fq
                   nombre: Versión B
-                  peso: 1
+                  peso: 0
                   steps:
                     - type: text
                       body_variants:
