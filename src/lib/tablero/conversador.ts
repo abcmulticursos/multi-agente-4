@@ -111,6 +111,8 @@ export interface ContextoDeLaIA {
   confirmarOpciones?: string[];
   /** Un regalo que se le ofreció y sigue sin responder: lo que es (para que la IA no lo niegue). */
   regaloPendiente?: string;
+  /** El regalo que YA aceptó y se le entrega tras su comentario: lo que es. */
+  regaloAceptado?: string;
   /** Lo que ya compró y se le entregó («COMIDA CASERA ($3)»): su «lo que pagué» habla de eso. */
   comprasPrevias?: string;
   /** EL CANDADO DE LA ELECCIÓN: lo que eligió, con su precio («PACK… (US$ 4)»). */
@@ -293,7 +295,7 @@ function cerebro(c: ContextoDeLaIA): string {
     // (28/10/2026, su UULA2: «¿a qué hora me envían lo que pagué?» con el cobro del upsell abierto → le pidió la
     // foto otra vez; hablaba de lo que ya compró.)
     c.comprasPrevias
-      ? `YA COMPRÓ Y RECIBIÓ (más arriba en el chat): ${c.comprasPrevias}. Si habla de «lo que pagué», «mi pago» o «lo que compré», se refiere a ESO: dile que ya le llegó más arriba y que, si no lo ve, se lo reenvías. Lo que se le ofrece ahora es aparte y se paga aparte.`
+      ? `YA COMPRÓ Y RECIBIÓ (más arriba en el chat): ${c.comprasPrevias}. Ese pago YA está aprobado y entregado: NUNCA digas que no se procesó, que te adelantaste ni que falta validarlo. Si habla de «lo que pagué», «mi pago» o «lo que compré», se refiere a ESO: dile que ya le llegó más arriba y que, si no lo ve, se lo reenvías. Lo que se le ofrece ahora es aparte y se paga aparte.`
       : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
@@ -327,6 +329,9 @@ function cerebro(c: ContextoDeLaIA): string {
     // dijo «no hay un regalo extra»: no sabía que seguía pendiente.)
     c.regaloPendiente
       ? `TIENE UN REGALO PENDIENTE, GRATIS, que se le ofreció y aún no respondió: «${c.regaloPendiente}». Es aparte de lo que compra y NO depende de pagar nada. Si pregunta por el regalo, explícaselo con eso y dile que, si lo quiere, te escriba «quiero el regalo». NUNCA digas que no hay regalo.`
+      : "",
+    c.regaloAceptado
+      ? `SU REGALO, GRATIS, YA LO ACEPTÓ: «${c.regaloAceptado}». Se le entrega cuando deje su comentario en el enlace que se le envió y te avise. Si pregunta por él, explícaselo así. NUNCA digas que no hay regalo ni que no está disponible.`
       : "",
     c.preguntaVaga
       ? "EN ESTE TURNO NO SABE QUÉ ES LO QUE VE (pregunta algo vago como «y esto qué es» o «no entiendo»): explícale con sencillez que tiene opciones para elegir y NÓMBRALAS TODAS por su nombre, en negrita, una por párrafo, con lo que trae cada una (la más completa primero; si una incluye a la otra, dilo: «trae todo lo de X y además…»). No hables de una sola. Sin precios salvo que los pida. NO elijas por él y no recomiendes."
@@ -368,6 +373,11 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
     "EXCEPCIONES DEL TABLERO (mandan sobre todo lo anterior):",
     "- No apruebas pagos ni revisas comprobantes: eso lo hace el sistema.",
     `- NUNCA preguntes por el método de pago por tu cuenta (nada de «¿con qué método te sientes más cómodo?»): el sistema lo pregunta cuando el cliente elige. Solo si el cliente PREGUNTA cómo pagar o cuáles son los métodos, nómbralos en lista vertical, solo sus nombres${c.metodos?.length ? ` (${c.metodos.join(", ")}; NINGÚN otro: si pide uno que no está, dile con amabilidad que por ahora se paga con ${c.metodos.length > 1 ? "esos" : "ese"})` : " (no tienes la lista: no nombres ninguno, dile que le pasas los datos)"}, y cierra con «¿Cuál prefieres?».`,
+    // (28/10/2026, ronda 4 en la copia: «tengo mercadopago» → «¡Perfecto! Con MercadoPago podés abonar», y en
+    // Argentina solo hay transferencia. Vale en todos los turnos, no solo cuando pregunta cómo pagar.)
+    c.metodos?.length
+      ? `- LOS ÚNICOS MÉTODOS DE PAGO SON: ${c.metodos.join(", ")}. Si el cliente nombra un método que no está en esta lista, dile con amabilidad que por ahora se paga solo con ${c.metodos.length > 1 ? "esos" : "ese"}. NUNCA digas que se puede pagar con otro.`
+      : "",
     c.opcionesDeCompra?.length
       ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Si pregunta el precio sin haber elegido, nómbralas TODAS con su precio (no hay un solo precio); si pregunta qué trae una, contesta sin precio. Cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
       : "",
@@ -749,7 +759,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       if (/\?/.test(ult) && preguntaCualMetodo.test(ult)) {
         // SOLO LA FRASE DE LA PREGUNTA, no la burbuja entera (27/10/2026, su prueba H2: «¡Hola! Qué gusto…
         // ¿ya decidiste con qué método…?» venía en UNA burbuja y quitarla dejó al cliente sin respuesta).
-        const frases = ult.split(/(?<=[.!?¡¿\n])\s+/);
+        const frases = ult.split(/(?<=[.!?¡¿\n])(?<![Ss]\/\.)\s+/);
         const sinLaPregunta = frases.filter((f) => !(/\?/.test(f) && preguntaCualMetodo.test(f))).join(" ").trim();
         console.log(`[tablero:ia] convo ${convo.id}: preguntó el método por su cuenta → se quita esa pregunta`);
         texto = [...burbujas.slice(0, -1), sinLaPregunta].filter((b) => b.trim()).join("\n\n").trim();
@@ -764,13 +774,16 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     // su cierre es la pregunta de elegir, sola. Sin esto quedaba metida al final del párrafo, su HHH3.)
     const conProblema =
       !c.preguntaVaga && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
+    // LO POSPUSO (28/10/2026, ronda 5: «después» → «quedo pendiente… ¿te indico cómo adquirirlo?»). Ahí no se le
+    // agrega la pregunta de venta: sonaba insistente. (La que escriba la IA se queda, como siempre.)
+    const loPospuso = /^(despues|luego|mas tarde|otro dia|otra vez sera|ahorita no|ahora no|por ahora no|mejor no|mejor despues|no gracias|no por ahora|lo pienso|lo voy a pensar|dejame pensarlo)\b/.test(delCliente.trim());
     const n = c.opcionesDeCompra?.length ?? 0;
     const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     // LA PREGUNTA DE ELEGIR, SOLA Y SIN REPETIRSE (28/10/2026, su prueba HU1/HU2): la IA la escribía
     // siempre igual («¿Cuál de las dos prefieres?») y a veces al final de un párrafo largo, donde no se
     // ve. Como el automático, va en su PROPIA burbuja, después de la lista de opciones; su frase se quita
     // de donde la haya puesto la IA y el bot pone una que rota.
-    if (!c.nota && c.etapa === "venta" && n > 1 && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto) {
+    if (!c.nota && c.etapa === "venta" && n > 1 && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto) {
       const deElegir =
         /(cu[aá]l (de (las|los|estas|estos|ellas|ellos) |opci[oó]n |prefieres|eliges|escoges|te (gusta|llama|animas|quedas|convence|interesa|late))|por cu[aá]l|qu[eé] opci[oó]n)/i;
       const antes = texto;
@@ -778,7 +791,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         .split(/\n\s*\n/)
         .map((b) =>
           b
-            .split(/(?<=[.!?])[ \t]+/)
+            .split(/(?<=[.!?])(?<![Ss]\/\.)[ \t]+/)
             .filter((f) => !(/[?¿]/.test(f) && deElegir.test(f)))
             .join(" ")
             .trim()
@@ -795,7 +808,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     }
     // Ni cuando el bot cierra con la oferta de las imágenes (ésa ES la pregunta), ni con el cobro ya
     // abierto: ahí ya decidió y «¿te indico cómo adquirirlo?» no tiene sentido (H3, 27/10/2026).
-    if (!preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+    if (!preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
       const pregunta = PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
       // La pregunta va en su propia burbuja; con tope, las de antes se juntan para que quepa.
@@ -810,7 +823,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
     const ult = partes.pop() ?? "";
     const sinPregunta = ult
-      .split(/(?<=[.!?])\s+/)
+      .split(/(?<=[.!?])(?<![Ss]\/\.)\s+/)
       .filter((f) => !/[?¿]/.test(f))
       .join(" ")
       .trim();
@@ -823,7 +836,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .split(/\n\s*\n/)
       .map((b) =>
         b
-          .split(/(?<=[.!?)])\s+/)
+          .split(/(?<=[.!?)])(?<![Ss]\/\.)\s+/)
           .filter((f) => !/\bel sistema\b/i.test(f))
           .join(" ")
           .trim()
@@ -859,7 +872,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .split(/\n\s*\n/)
       .map((b) =>
         b
-          .split(/(?<=[.!?¡¿])\s+/)
+          .split(/(?<=[.!?¡¿])(?<![Ss]\/\.)\s+/)
           .filter((f) => (revisa.test(f) ? (quitadas.push(f), false) : true))
           .join(" ")
           .trim()
@@ -882,7 +895,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .split(/\n\s*\n/)
       .map((b) =>
         b
-          .split(/(?<=[.!?¡¿])\s+/)
+          .split(/(?<=[.!?¡¿])(?<![Ss]\/\.)\s+/)
           .filter((f) => !promete.test(f))
           .join(" ")
           .trim()
@@ -902,6 +915,24 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       texto = sinEnlaces;
     }
   }
+  // YA COMPRÓ: NADA DE «TU PAGO AÚN NO SE PROCESÓ» (28/10/2026, ronda 10 en la copia: tras su entrega, «me adelanté,
+  // el pago aún no se ha procesado»). Con compras hechas, esas frases se quitan.
+  if (c.comprasPrevias && texto) {
+    const niega = /(me adelant|(el|tu) pago (aun|a[uú]n|todav[ií]a)? ?no (se )?(ha )?(sido |fue |est[aá] )?(procesad|confirmad|validad|aprobad|registrad)|(aun|a[uú]n|todav[ií]a) no (se )?(ha )?(procesado|confirmado|validado) (tu|el) pago)/i;
+    const antes = texto;
+    texto = texto
+      .split(/\n\s*\n/)
+      .map((b) =>
+        b
+          .split(/(?<=[.!?¡¿])(?<![Ss]\/\.)\s+/)
+          .filter((f) => !niega.test(f))
+          .join(" ")
+          .trim()
+      )
+      .filter(Boolean)
+      .join("\n\n");
+    if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: negaba un pago ya aprobado → se quita esa frase`);
+  }
   const malos = prohibidos(texto);
   if (malos.length > 0) {
     // Se quitan las frases con montos ajenos: mejor una respuesta más corta que un precio falso.
@@ -913,7 +944,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
           .split("\n")
           .map((linea) =>
             linea
-              .split(/(?<=[.!?¿¡])[ \t]+/)
+              .split(/(?<=[.!?¿¡])(?<![Ss]\/\.)[ \t]+/)
               .filter((frase) => prohibidos(frase).length === 0)
               .join(" ")
               .trim()
@@ -948,6 +979,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // cierre del automático; aquí se cambia por «adquirirlo».
   texto = texto
     .replace(/(para )?revisar c[oó]mo proceder/gi, "para adquirirlo")
+    // («cómo proceder para adquirirlo» → «cómo adquirirlo», no «cómo adquirirlo para adquirirlo»: ronda 3.)
+    .replace(/c[oó]mo proceder (para|y) (adquirirlo|obtenerlo|tenerlo|comprarlo)/gi, "cómo $2")
     .replace(/c[oó]mo proceder/gi, "cómo adquirirlo")
     .replace(/\bproceder\b/gi, "avanzar");
   // SOLO EL PRECIO DE HOY (28/10/2026, él lo pidió: «no me gusta que diga "cuesta 3, antes 10"»). Se quita el
