@@ -132680,8 +132680,8 @@ tableros:
           producto_id: ptmascotas_comida
         - id: f-mvnpmsvw-ph32e
           tipo: mensaje
-          x: 9514
-          y: 3258
+          x: 9474
+          y: 7828
           titulo: Intro
           steps:
             - type: text
@@ -132775,8 +132775,8 @@ tableros:
             - ptmascotas_comida
         - id: f-mvnpmsvw-fa2fp
           tipo: intro_ob
-          x: 10004
-          y: 3129
+          x: 9964
+          y: 7699
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -132816,8 +132816,8 @@ tableros:
                       steps: []
         - id: f-mvnpmsvw-cg6i5
           tipo: cobro
-          x: 10652
-          y: 2898
+          x: 10612
+          y: 7468
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -132843,8 +132843,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-tq1yb
           tipo: cobro
-          x: 10652
-          y: 3204
+          x: 10612
+          y: 7774
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -132870,8 +132870,8 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-jxg9n
           tipo: mensaje
-          x: 13297
-          y: 3026
+          x: 13257
+          y: 7596
           titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -132918,8 +132918,8 @@ tableros:
           espera_min: 2
         - id: f-mvnpmsvw-p7yu2
           tipo: cobro
-          x: 13683
-          y: 2930
+          x: 13643
+          y: 7500
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -132943,31 +132943,31 @@ tableros:
             metodos: true
         - id: f-mvnpmsvw-92jl4
           tipo: entregar
-          x: 13998
-          y: 2985
+          x: 13958
+          y: 7555
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvnpmsvw-u9oq3
           tipo: regalo
-          x: 15276
-          y: 3192
+          x: 15236
+          y: 7762
           titulo: Regalo
         - id: f-mvnpsqoc-avwwz
           tipo: entregar
-          x: 12985
-          y: 3686
+          x: 12945
+          y: 8256
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvnpsqoc-9kqjp
           tipo: entregar
-          x: 12978
-          y: 4020
+          x: 12938
+          y: 8590
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvnpwgvn-c9ae9
           tipo: seguimientos
-          x: 11139
-          y: 3831
+          x: 11099
+          y: 8401
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -133115,8 +133115,8 @@ tableros:
               ignora_tardio: true
         - id: f-mvnq6s0x-ooeg
           tipo: mensaje
-          x: 14008
-          y: 3638
+          x: 13968
+          y: 8208
           steps:
             - type: text
               body_variants:
@@ -133124,8 +133124,8 @@ tableros:
               delay_after_sec: 6
         - id: f-mvo7g67a-vlta3
           tipo: intro_ob
-          x: 11702
-          y: 3637
+          x: 11662
+          y: 8207
           titulo: Order bump
           presenta:
             - ptmascotas_comida
@@ -133165,8 +133165,8 @@ tableros:
                       steps: []
         - id: f-mvo7hddp-ow7zr
           tipo: cobro
-          x: 12191
-          y: 3534
+          x: 12151
+          y: 8104
           titulo: Cobro · COMIDA CASERA PARA MASCOTAS
           steps:
             - type: text
@@ -133192,8 +133192,8 @@ tableros:
             metodos: true
         - id: f-mvo7hh6u-vasar
           tipo: cobro
-          x: 12192
-          y: 3866
+          x: 12152
+          y: 8436
           titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
           steps:
             - type: text
@@ -133219,20 +133219,20 @@ tableros:
             metodos: true
         - id: f-mvp0wa4s-tadqn
           tipo: entregar
-          x: 11601
-          y: 3045
+          x: 11561
+          y: 7615
           titulo: Entrega · COMIDA CASERA PARA MASCOTAS
           producto_id: ptmascotas_comida
         - id: f-mvp0wa4s-2dfnw
           tipo: entregar
-          x: 11595
-          y: 3358
+          x: 11555
+          y: 7928
           titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
           producto_id: ptmascotas_pack
         - id: f-mvp1zc5h-z0ta7
           tipo: mensaje
-          x: 14473
-          y: 2914
+          x: 14433
+          y: 7484
           titulo: Upsell 2 · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -133279,8 +133279,8 @@ tableros:
           espera_min: 2
         - id: f-mvp20a4l-r8g78
           tipo: cobro
-          x: 14807
-          y: 2922
+          x: 14767
+          y: 7492
           titulo: Cobro · 100 CITAS CON TU MASCOTA
           steps:
             - type: text
@@ -133304,14 +133304,14 @@ tableros:
             metodos: true
         - id: f-mvp22hzh-yylux
           tipo: entregar
-          x: 15102
-          y: 2924
+          x: 15062
+          y: 7494
           titulo: Entrega · 100 CITAS CON TU MASCOTA
           producto_id: ptmascotas_citas
         - id: f-mvp24b6s-zh4sx
           tipo: mensaje
-          x: 14867
-          y: 3413
+          x: 14827
+          y: 7983
           steps:
             - type: text
               body_variants:
@@ -133319,8 +133319,8 @@ tableros:
               delay_after_sec: 6
         - id: f-mvp3cgba-l9skj
           tipo: seguimientos
-          x: 12205
-          y: 4251
+          x: 12165
+          y: 8821
           titulo: Seguimientos · COMIDA CASERA PARA MASCOTAS
           presenta:
             - ptmascotas_comida
@@ -134352,6 +134352,883 @@ tableros:
               peso: 1
             - id: r2
               peso: 1
+        - id: f-mvrwrsbq-g19rd
+          tipo: intro_ob
+          x: 895
+          y: 7827
+          titulo: Order bump
+          presenta:
+            - ptmascotas_comida
+            - ptmascotas_pack
+          variantes:
+            - id: v-mvrwrsbq-y6qry
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                      Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                      ✅ TODAS las 70 RECETAS CASERAS PARA MASCOTAS.
+                      ✅ MÁS los 40 MOLDES DE ROPA PARA MASCOTAS.
+                      ✅ Bonus: calendario de vacunas y desparasitación.
+                  delay_after_sec: 4
+                - type: text
+                  body_variants:
+                    - |-
+                      *¿Cuál prefieres?*
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mvrwrsbq-16w7t
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mvrwrsbq-k7eor
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: f-mvrwrsbq-8onac
+          tipo: cobro
+          x: 1636
+          y: 7523
+          titulo: Cobro · COMIDA CASERA PARA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_comida
+            acepta:
+              - ptmascotas_pack
+            metodos: true
+        - id: f-mvrwrsbq-8n9h3
+          tipo: cobro
+          x: 1631
+          y: 7883
+          titulo: Cobro · PACK COMIDA + ROPA MASCOTAS
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_pack
+            acepta:
+              - ptmascotas_comida
+            metodos: true
+        - id: f-mvrwrsbq-pyeps
+          tipo: seguimientos
+          x: 892
+          y: 8141
+          titulo: Seguimientos · si no elige en la Intro
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvrwrsbq-bf3to
+              minutos: 2
+              variantes:
+                - id: v-mvrwrsbq-gxgws
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          *SEGUIMIENTO 1*
+
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvrwrsbq-e7e8s
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvrwrsbq-5g1ne
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvrwrsbq-7jkbn
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvrwrsbq-wuk5z
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
+                - id: v-mvrwrsbq-tknu9
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvrwrsbq-1n0bh
+              minutos: 4
+              variantes:
+                - id: v-mvrwrsbq-4cc92
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          *SEGUIMIENTO 2*
+
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvrwrsbq-e7e8s
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvrwrsbq-5g1ne
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvrwrsbq-7jkbn
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvrwrsbq-wuk5z
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvrwrsbq-jmeyb
+          tipo: entregar
+          x: 2425
+          y: 7673
+          titulo: Entrega · COMIDA CASERA PARA MASCOTAS
+          producto_id: ptmascotas_comida
+        - id: f-mvrwrsbq-j04lt
+          tipo: entregar
+          x: 2420
+          y: 8030
+          titulo: Entrega · PACK COMIDA + ROPA MASCOTAS
+          producto_id: ptmascotas_pack
+        - id: f-mvrwrsbq-jiwzz
+          tipo: mensaje
+          x: 4258
+          y: 7575
+          titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvrwrsbq-fvobq
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-mvrwrsbq-7iqzb
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - ptmascotas_citas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+          espera_min: 2
+        - id: f-mvrwrsbq-cazmc
+          tipo: cobro
+          x: 4687
+          y: 7559
+          titulo: Cobro · 100 CITAS CON TU MASCOTA
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptmascotas_citas
+            metodos: true
+        - id: f-mvrwrsbq-ytwck
+          tipo: mensaje
+          x: 5012
+          y: 8267
+          titulo: Si dice que no
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
+        - id: f-mvrwrsbq-ucl4y
+          tipo: entregar
+          x: 5002
+          y: 7614
+          titulo: Entrega · 100 CITAS CON TU MASCOTA
+          producto_id: ptmascotas_citas
+        - id: f-mvrwrsbq-a8ol7
+          tipo: mensaje
+          x: 5429
+          y: 7480
+          titulo: Upsell 2 · TINTAS PEPITO
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+                  ✅ Paseos, juegos, retos y sesiones de fotos.
+                  ✅ Tarjetas para sacar al azar.
+
+                  *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvrwrsbq-znyb2
+                  title: Sí
+                  keywords:
+                    - si
+                    - sí
+                    - claro
+                    - dale
+                    - lo quiero
+                    - ok
+                    - bueno
+                    - va
+                  color: ""
+                  steps: []
+                - id: d-mvrwrsbq-l0sl1
+                  title: No
+                  keywords:
+                    - no
+                    - no gracias
+                    - ahora no
+                    - despues
+                    - luego
+                    - paso
+                  color: ""
+                  steps: []
+          presenta:
+            - pmtxy45s7
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+          espera_min: 2
+        - id: f-mvrwrsbq-6h3fd
+          tipo: cobro
+          x: 5839
+          y: 7491
+          titulo: Cobro · TINTAS PEPITO
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: pmtxy45s7
+            metodos: true
+        - id: f-mvrwrsbq-ri36q
+          tipo: mensaje
+          x: 5871
+          y: 8042
+          titulo: Si dice que no
+          steps:
+            - type: text
+              body_variants:
+                - No te preocupes, que disfrutes el material con mucha felicidad al lado de tu mascota 🐕️🐶 🤗
+              delay_after_sec: 6
+        - id: f-mvrwrsbq-f1ydh
+          tipo: entregar
+          x: 6202
+          y: 7501
+          titulo: Entrega · TINTAS PEPITO
+          producto_id: pmtxy45s7
+        - id: f-mvrwrsbq-481bd
+          tipo: regalo
+          x: 6511
+          y: 7849
+          titulo: Regalo
+        - id: f-mvrwrsbq-qi4z1
+          tipo: seguimientos
+          x: 2710
+          y: 8820
+          titulo: Seguimientos · si no elige o no paga
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvrwrsbq-n3tlw
+              minutos: 2
+              variantes:
+                - id: v-mvrwrsbq-95lzo
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                - id: v-mvrwrsbq-q5kil
+                  nombre: Versión B
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvrwrsbq-nnusf
+              minutos: 4
+              variantes:
+                - id: v-mvrwrsbq-2l636
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvrwrsbq-ywofr
+          tipo: seguimientos
+          x: 2095
+          y: 8391
+          titulo: Seguimientos · si no elige en la Intro
+          presenta:
+            - ptmascotas_comida
+          seguimientos:
+            - id: s-mvrwrsbq-hxuud
+              minutos: 2
+              variantes:
+                - id: v-mvrwrsbq-1wtp4
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          *SEGUIMIENTO 1*
+
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvrwrsbq-guyzf
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvrwrsbq-hwlhf
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvrwrsbq-j6nr9
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvrwrsbq-bj1st
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
+                - id: v-mvrwrsbq-diy1h
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvrwrsbq-s87o7
+              minutos: 4
+              variantes:
+                - id: v-mvrwrsbr-q9vl1
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          *SEGUIMIENTO 2*
+
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+                    - type: text
+                      body_variants:
+                        - |-
+                          *ELIGE UNA OPCION* PARA PODER BRINDARTE LOS DATOS DE PAGO 👇
+
+                          {{LISTA_METODOS_POR_PAIS}}
+                      delay_after_sec: 4
+                      enabled: false
+                    - type: text
+                      body_variants:
+                        - |-
+                          ELIGE UN METODO DE PAGO:
+
+                          {{LISTA_METODOS_POR_PAIS}}
+
+                          🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+                      delay_after_sec: 4
+                      decisions:
+                        - id: d-mvrwrsbq-guyzf
+                          title: VECINO
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: esmeralda
+                          steps: []
+                        - id: d-mvrwrsbq-hwlhf
+                          title: PICHINCHA
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: azul
+                          steps: []
+                        - id: d-mvrwrsbq-j6nr9
+                          title: GUAYAQUIL
+                          keywords:
+                            - vecino
+                            - mi vecino
+                            - pichincha
+                            - transferencia
+                            - guayaquil
+                          color: ambar
+                          steps: []
+                        - id: d-mvrwrsbq-bj1st
+                          title: Quiere comprar o pregunta cómo pagar
+                          keywords:
+                            - quiero comprar
+                            - lo quiero
+                            - lo compro
+                            - lo llevo
+                            - quiero llevarlo
+                            - quiero pagar
+                            - como pago
+                            - como compro
+                            - como lo compro
+                            - como hago el pago
+                            - donde pago
+                            - donde deposito
+                            - quiero adquirir
+                            - me animo
+                          color: esmeralda
+                          steps: []
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvrwsrom-g4hp2
+          tipo: mensaje
+          x: 438
+          y: 7718
+          titulo: Intro (versión recomendada)
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+                  🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+              caption_variants:
+                - |-
+                  Este es nuestro producto
+
+                  *{{PRODUCTO_BASE}}* 📚
+
+                  ✅ 70 recetas caseras para perros y gatos.
+                  ✅ Porciones según peso y edad.
+                  ✅ Alimentos prohibidos (lista para la refri).
+                  ✅ Snacks y premios saludables.
+
+                  (Imagen referencial)
+              delay_after_sec: 5
+            - type: image
+              drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+              caption_variants:
+                - |-
+                  *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+                  - 🎁 Guía de inicio rápido
+                  - 🎁 Plantillas para imprimir
+                  - 🎁 Acceso de por vida
+
+                  *Bonitos complementos para empezar hoy* 🤗
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+                  ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+                  🟣 *¿CÓMO ADQUIRIRLO?*
+
+                  - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+                  - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+                  *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  ELIGE UN METODO DE PAGO:
+
+                  {{LISTA_METODOS_POR_PAIS}}
+
+                  🕛️ si lo adquieres dentro de los próximos los 10 minutos te daré un regalo sorpresa 🎁
+              delay_after_sec: 4
+              decisions:
+                - id: d-mvrwsrom-ctwm3
+                  title: VECINO
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: esmeralda
+                  steps: []
+                - id: d-mvrwsrom-uqqpq
+                  title: PICHINCHA
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: azul
+                  steps: []
+                - id: d-mvrwsrom-yebfk
+                  title: GUAYAQUIL
+                  keywords:
+                    - vecino
+                    - mi vecino
+                    - pichincha
+                    - transferencia
+                    - guayaquil
+                  color: ambar
+                  steps: []
+                - id: d-mvrwsrom-9twzm
+                  title: Quiere comprar o pregunta cómo pagar
+                  keywords:
+                    - quiero comprar
+                    - lo quiero
+                    - lo compro
+                    - lo llevo
+                    - quiero llevarlo
+                    - quiero pagar
+                    - como pago
+                    - como compro
+                    - como lo compro
+                    - como hago el pago
+                    - donde pago
+                    - donde deposito
+                    - quiero adquirir
+                    - me animo
+                  color: esmeralda
+                  steps: []
+          presenta:
+            - ptmascotas_comida
       cables:
         - id: c2
           de: mas_pe_intro
@@ -134919,6 +135796,174 @@ tableros:
           de: f-rec26-q3sw
           salida: siguiente
           a: f-rec26-xpt8
+        - id: c-mvrwrsbr-as6yv
+          de: f-mvrwrsbq-g19rd
+          salida: btn:b-mvrwrsbq-16w7t
+          a: f-mvrwrsbq-8onac
+        - id: c-mvrwrsbr-ai7rz
+          de: f-mvrwrsbq-g19rd
+          salida: btn:b-mvrwrsbq-k7eor
+          a: f-mvrwrsbq-8n9h3
+        - id: c-mvrwrsbr-c06kz
+          de: f-mvrwrsbq-jiwzz
+          salida: dec:d-mvrwrsbq-fvobq
+          a: f-mvrwrsbq-cazmc
+        - id: c-mvrwrsbr-x39up
+          de: f-mvrwrsbq-cazmc
+          salida: pagado
+          a: f-mvrwrsbq-ucl4y
+        - id: c-mvrwrsbr-5haep
+          de: f-mvrwrsbq-jiwzz
+          salida: dec:d-mvrwrsbq-7iqzb
+          a: f-mvrwrsbq-ytwck
+        - id: c-mvrwrsbr-tcwuq
+          de: f-mvrwrsbq-ytwck
+          salida: siguiente
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-rw78w
+          de: f-mvrwrsbq-cazmc
+          salida: sin_pago
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-ygw28
+          de: f-mvrwrsbq-8onac
+          salida: pagado
+          a: f-mvrwrsbq-jmeyb
+          vista: cable
+        - id: c-mvrwrsbr-inxp4
+          de: f-mvrwrsbq-8onac
+          salida: prod:ptmascotas_pack
+          a: f-mvrwrsbq-j04lt
+          vista: cable
+        - id: c-mvrwrsbr-m2mjb
+          de: f-mvrwrsbq-8n9h3
+          salida: pagado
+          a: f-mvrwrsbq-j04lt
+          vista: cable
+        - id: c-mvrwrsbr-pv2ti
+          de: f-mvrwrsbq-8n9h3
+          salida: prod:ptmascotas_comida
+          a: f-mvrwrsbq-jmeyb
+          vista: cable
+        - id: c-mvrwrsbr-ldpw9
+          de: f-mvrwrsbq-jmeyb
+          salida: siguiente
+          a: f-mvrwrsbq-jiwzz
+        - id: c-mvrwrsbr-jv2d5
+          de: f-mvrwrsbq-j04lt
+          salida: siguiente
+          a: f-mvrwrsbq-jiwzz
+        - id: c-mvrwrsbr-ixlq8
+          de: f-mvrwrsbq-a8ol7
+          salida: dec:d-mvrwrsbq-znyb2
+          a: f-mvrwrsbq-6h3fd
+        - id: c-mvrwrsbr-tl5x5
+          de: f-mvrwrsbq-6h3fd
+          salida: pagado
+          a: f-mvrwrsbq-f1ydh
+        - id: c-mvrwrsbr-n262v
+          de: f-mvrwrsbq-f1ydh
+          salida: siguiente
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-lqv2b
+          de: f-mvrwrsbq-a8ol7
+          salida: dec:d-mvrwrsbq-l0sl1
+          a: f-mvrwrsbq-ri36q
+        - id: c-mvrwrsbr-oakji
+          de: f-mvrwrsbq-ri36q
+          salida: siguiente
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-f4oy2
+          de: f-mvrwrsbq-6h3fd
+          salida: sin_pago
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-7b1d2
+          de: f-mvrwrsbq-pyeps
+          salida: dec:d-mvrwrsbq-e7e8s
+          a: f-mvrwrsbq-g19rd
+          vista: colita
+        - id: c-mvrwrsbr-3er4v
+          de: f-mvrwrsbq-pyeps
+          salida: dec:d-mvrwrsbq-5g1ne
+          a: f-mvrwrsbq-g19rd
+          vista: colita
+        - id: c-mvrwrsbr-a6iw1
+          de: f-mvrwrsbq-pyeps
+          salida: dec:d-mvrwrsbq-7jkbn
+          a: f-mvrwrsbq-g19rd
+          vista: colita
+        - id: c-mvrwrsbr-qg1rm
+          de: f-mvrwrsbq-jiwzz
+          salida: sin_respuesta
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-y8eug
+          de: f-mvrwrsbq-a8ol7
+          salida: sin_respuesta
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwrsbr-mz0t2
+          de: f-mvrwrsbq-pyeps
+          salida: dec:d-mvrwrsbq-wuk5z
+          a: f-mvrwrsbq-g19rd
+          vista: colita
+        - id: c-mvrwrsbr-enzq0
+          de: f-mvrwrsbq-qi4z1
+          salida: fin
+          a: f-mvrwrsbq-8n9h3
+        - id: c-mvrwrsbr-kvuvh
+          de: f-mvrwrsbq-8onac
+          salida: sin_pago
+          a: f-mvrwrsbq-ywofr
+        - id: c-mvrwrsbr-61onr
+          de: f-mvrwrsbq-8n9h3
+          salida: sin_pago
+          a: f-mvrwrsbq-ywofr
+        - id: c-mvrwrsbr-hzdhu
+          de: f-mvrwrsbq-ywofr
+          salida: dec:d-mvrwrsbq-guyzf
+          a: f-mvrwrsbq-8onac
+        - id: c-mvrwrsbr-m3pto
+          de: f-mvrwrsbq-ywofr
+          salida: dec:d-mvrwrsbq-hwlhf
+          a: f-mvrwrsbq-8onac
+        - id: c-mvrwrsbr-a72yw
+          de: f-mvrwrsbq-ywofr
+          salida: dec:d-mvrwrsbq-j6nr9
+          a: f-mvrwrsbq-8onac
+        - id: c-mvrwrsbr-3zqjg
+          de: f-mvrwrsbq-ywofr
+          salida: dec:d-mvrwrsbq-bj1st
+          a: f-mvrwrsbq-8onac
+        - id: c-mvrwrsbr-frh0i
+          de: f-mvrwrsbq-g19rd
+          salida: siguiente
+          a: f-mvrwrsbq-ywofr
+        - id: c-mvrwrsbr-pv0rg
+          de: f-mvrwrsbq-ucl4y
+          salida: siguiente
+          a: f-mvrwrsbq-481bd
+        - id: c-mvrwt56d-oga
+          de: f-mvrwsrom-g4hp2
+          salida: dec:d-mvrwsrom-ctwm3
+          a: f-mvrwrsbq-g19rd
+        - id: c-mvrwt6z0-jlc
+          de: f-mvrwsrom-g4hp2
+          salida: dec:d-mvrwsrom-uqqpq
+          a: f-mvrwrsbq-g19rd
+        - id: c-mvrwt8i4-g10
+          de: f-mvrwsrom-g4hp2
+          salida: dec:d-mvrwsrom-yebfk
+          a: f-mvrwrsbq-g19rd
+        - id: c-mvrwtdlo-o6v
+          de: f-mvrwsrom-g4hp2
+          salida: siguiente
+          a: f-mvrwrsbq-pyeps
+        - id: c-mvrwtnct-74f
+          de: f-mvrwsrom-g4hp2
+          salida: dec:d-mvrwsrom-9twzm
+          a: f-mvrwrsbq-g19rd
+        - id: c-mvrwu0fg-voy
+          de: f-mvq1i8zr-wg9n
+          salida: rep:r2
+          a: f-mvrwsrom-g4hp2
       curvas:
         c3:
           x: 121
