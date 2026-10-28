@@ -134405,21 +134405,21 @@ tableros:
               delay_after_sec: 3
             - type: text
               body_variants:
-                - Puedes pagar por *Mi Vecino*, *Pichincha* o *Guayaquil* a esta cuenta 👇
-              delay_after_sec: 2
-            - type: text
-              body_variants:
-                - "{{METODO_DE_PAGO_1}}"
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 3
             - type: text
               body_variants:
-                - 😊 *{Una vez realizado nos envías tu comprobante 🤳 y al instante te llegará tu enlace de descarga|Luego que lo realices nos envías la imagen de tu pago 🤳 y al instante te llegará tu enlace de descarga|Una vez realizado nos envías la imagen de tu comprobante 🤳 y automáticamente te llegará tu enlace de descarga}*. ¡Aquí estaré para ayudarte!
-              delay_after_sec: 2
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           cobro:
             modo: producto
             producto_id: ptmascotas_comida
             acepta:
               - ptmascotas_pack
+            metodos: true
         - id: f-mvrwrsbq-8n9h3
           tipo: cobro
           x: 1631
@@ -134432,21 +134432,21 @@ tableros:
               delay_after_sec: 3
             - type: text
               body_variants:
-                - Puedes pagar por *Mi Vecino*, *Pichincha* o *Guayaquil* a esta cuenta 👇
-              delay_after_sec: 2
-            - type: text
-              body_variants:
-                - "{{METODO_DE_PAGO_1}}"
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
               delay_after_sec: 3
             - type: text
               body_variants:
-                - 😊 *{Una vez realizado nos envías tu comprobante 🤳 y al instante te llegará tu enlace de descarga|Luego que lo realices nos envías la imagen de tu pago 🤳 y al instante te llegará tu enlace de descarga|Una vez realizado nos envías la imagen de tu comprobante 🤳 y automáticamente te llegará tu enlace de descarga}*. ¡Aquí estaré para ayudarte!
-              delay_after_sec: 2
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
           cobro:
             modo: producto
             producto_id: ptmascotas_pack
             acepta:
               - ptmascotas_comida
+            metodos: true
         - id: f-mvrwrsbq-pyeps
           tipo: seguimientos
           x: 892
@@ -135960,10 +135960,6 @@ tableros:
           de: f-mvrwsrom-g4hp2
           salida: dec:d-mvrwsrom-9twzm
           a: f-mvrwrsbq-g19rd
-        - id: c-mvrwu0fg-voy
-          de: f-mvq1i8zr-wg9n
-          salida: rep:r2
-          a: f-mvrwsrom-g4hp2
       curvas:
         c3:
           x: 121
