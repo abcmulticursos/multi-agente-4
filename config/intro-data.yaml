@@ -118124,7 +118124,7 @@ biblioteca_de_productos:
         market_price: 32
       EC:
         price_soles: 3
-        discount_price_soles: 3
+        discount_price_soles: 2
         market_price: 10
       AR:
         price_soles: 7000
@@ -120318,7 +120318,7 @@ biblioteca_de_productos:
         market_price: 45
       EC:
         price_soles: 3
-        discount_price_soles: 3
+        discount_price_soles: 2
         market_price: 10
       AR:
         price_soles: 8000
@@ -120398,7 +120398,7 @@ biblioteca_de_productos:
         market_price: 36
       EC:
         price_soles: 3
-        discount_price_soles: 3
+        discount_price_soles: 2
         market_price: 9
       AR:
         price_soles: 7000
@@ -120558,7 +120558,7 @@ biblioteca_de_productos:
         market_price: 60
       EC:
         price_soles: 4
-        discount_price_soles: 4
+        discount_price_soles: 3
         market_price: 12
       AR:
         price_soles: 12000
