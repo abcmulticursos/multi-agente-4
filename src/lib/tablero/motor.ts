@@ -927,7 +927,7 @@ const AFIRMA =
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 const INVITA_A_COMPRAR =
   // («cuál de LOS dos» también: la IA lo escribe así y el «sí» se iba a ella, que inventaba la elección.)
-  /(adquir|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres))/;
+  /(adquir|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres|te quedas|te gusta))/;
 
 const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
@@ -1078,10 +1078,14 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   const segDeAqui = estado?.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado.seg_ficha) : undefined;
   const opcionesAqui = etapa === "venta" && !estado?.cobro_ficha_id ? opcionesDeCompraEn(t, [ficha, segDeAqui], config, pais, estado?.oferta === 1) : [];
   const preguntaPrecio = /\b(precio|cuesta|vale|costo|valor|cuanto (es|sale|seria)|a cuanto)\b/.test(ultimo);
+  // (28/10/2026, su HU1: a «y esto» la IA habló solo del pack y preguntó «¿cuál de las dos?»; para elegir
+  // tenía que subir a buscarlas). Ahora la lista sale también cuando el bot cierra preguntando cuál elige
+  // y la IA no nombró las dos; con una pregunta de contenido, como antes, aunque cierre con otra pregunta.
   const burbujaDeAyuda =
-    !nota && opcionesAqui.length > 1 && (looksLikeProductContentTurn(ultimo) || PIDE_INFO_DE_LAS_OPCIONES.test(ultimo)) && !preguntaPrecio && !hablaDeUnProblema
-      ? opcionesAqui.map((o, i) => `*Opción ${i + 1}* — ${o.nombre}${o.precio ? ` · *${o.precio}*` : ""}`).join("\n")
+    !nota && opcionesAqui.length > 1 && !hablaDeUnProblema
+      ? opcionesAqui.map((o, i) => `${["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"][i] ?? `${i + 1}.`} *${o.nombre}*${o.precio ? ` · *${o.precio}*` : ""}`).join("\n")
       : "";
+  const ayudaSiempre = (looksLikeProductContentTurn(ultimo) || PIDE_INFO_DE_LAS_OPCIONES.test(ultimo)) && !preguntaPrecio;
   // ESTÁ COMPARANDO LAS OPCIONES (27/10/2026): «son 2» (la misma detección de la venta de siempre,
   // `preguntaCuantasOpcionesHay`) o «la diferencia» / «cuál me conviene». En esa respuesta, una frase de
   // por qué conviene la más completa.
@@ -1191,7 +1195,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     ...(ofrecerImagenes && ofertaDeImagenes ? { noOfrezcasImagenes: true } : {}),
     ...(ofrecerImagenes && ofertaDeImagenes ? { alFinal: [ofertaDeImagenes] } : {}),
     // La lista corta de las opciones: solo si la IA no las nombró todas (lo decide `responderConIA`).
-    ...(burbujaDeAyuda ? { opcionesSiFaltan: { burbuja: burbujaDeAyuda, nombres: opcionesAqui.map((o) => o.nombre) } } : {}),
+    ...(burbujaDeAyuda ? { opcionesSiFaltan: { burbuja: burbujaDeAyuda, nombres: opcionesAqui.map((o) => o.nombre), siempre: ayudaSiempre } } : {}),
     ...(recomendarLaCompleta ? { recomendarLaCompleta: true } : {}),
   });
   if (salio && ofrecerImagenes) {

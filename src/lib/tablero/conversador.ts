@@ -96,7 +96,8 @@ export interface ContextoDeLaIA {
    * LA LISTA CORTA DE LAS OPCIONES («*Opción 1* — nombre · precio»), SOLO SI FALTA (27/10/2026): si la
    * IA ya nombró todas las opciones, no se agrega (era texto fijo repetido). Va antes de `alFinal`.
    */
-  opcionesSiFaltan?: { burbuja: string; nombres: string[] };
+  /** `siempre`: pregunta de contenido (sale aunque la IA cierre con otra pregunta); si no, solo con la pregunta de elegir. */
+  opcionesSiFaltan?: { burbuja: string; nombres: string[]; siempre?: boolean };
   /**
    * ESTÁ COMPARANDO LAS OPCIONES («son 2», «la diferencia»), como el turno de la venta de siempre: en
    * ESTA respuesta, una sola frase de por qué conviene la más completa.
@@ -360,6 +361,10 @@ const PREGUNTAS_DE_CIERRE = [
   "¿Quieres que te explique cómo obtenerlo?",
   "¿Te gustaría asegurar tu acceso hoy?",
 ];
+
+/** Para elegir entre las opciones: rotan, sin repetir la que acaba de salir (28/10/2026). */
+const CIERRES_DE_DOS = ["¿Por cuál te animas? 😊", "¿Por cuál de las dos te animas?", "¿Cuál de las dos opciones te gusta más?"];
+const CIERRES_DE_VARIAS = ["¿Por cuál te animas? 😊", "¿Cuál de estas opciones te gusta más?", "¿Con cuál te quedas?"];
 
 function cierre(c: ContextoDeLaIA): string {
   if (c.nota) return "";
@@ -674,6 +679,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   const cfg = loadWorkflowConfig();
   /** Los datos verdaderos del cobro ya salieron (la IA había escrito una cuenta): eso ya es respuesta. */
   let reenvioPorCuenta = false;
+  /** La pregunta de elegir entre las opciones: va sola, al final, después de la lista de opciones. */
+  let preguntaDeElegir = "";
   const tope = cfg?.llm_bubble_limit_enabled === true ? Math.max(1, Math.floor(cfg.llm_max_bubbles ?? 3)) : null;
   const alTope = (partes: string[], n: number | null) => (n && partes.length > n ? [...partes.slice(0, n - 1), partes.slice(n - 1).join("\n")] : partes);
   {
@@ -724,14 +731,39 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
     // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
     const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
+    const n = c.opcionesDeCompra?.length ?? 0;
+    const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
+    // LA PREGUNTA DE ELEGIR, SOLA Y SIN REPETIRSE (28/10/2026, su prueba HU1/HU2): la IA la escribía
+    // siempre igual («¿Cuál de las dos prefieres?») y a veces al final de un párrafo largo, donde no se
+    // ve. Como el automático, va en su PROPIA burbuja, después de la lista de opciones; su frase se quita
+    // de donde la haya puesto la IA y el bot pone una que rota.
+    if (!c.nota && c.etapa === "venta" && n > 1 && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto) {
+      const deElegir =
+        /(cu[aá]l (de (las|los|estas|estos|ellas|ellos) |opci[oó]n |prefieres|eliges|escoges|te (gusta|llama|animas|quedas|convence|interesa|late))|por cu[aá]l|qu[eé] opci[oó]n)/i;
+      const antes = texto;
+      texto = texto
+        .split(/\n\s*\n/)
+        .map((b) =>
+          b
+            .split(/(?<=[.!?])[ \t]+/)
+            .filter((f) => !(/[?¿]/.test(f) && deElegir.test(f)))
+            .join(" ")
+            .trim()
+        )
+        .filter(Boolean)
+        .join("\n\n");
+      if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: su pregunta de elegir se quita del texto → va sola al final`);
+      const ultima = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).pop() ?? "";
+      // Si la IA cerró con OTRA pregunta (la de una duda), no se le suma otra encima.
+      if (!/[?¿]/.test(ultima) || texto !== antes) {
+        const opciones = n === 2 ? CIERRES_DE_DOS : CIERRES_DE_VARIAS;
+        preguntaDeElegir = opciones.find((p) => !recientes.includes(p)) ?? opciones[0];
+      }
+    }
     // Ni cuando el bot cierra con la oferta de las imágenes (ésa ES la pregunta), ni con el cobro ya
     // abierto: ahí ya decidió y «¿te indico cómo adquirirlo?» no tiene sentido (H3, 27/10/2026).
-    if (!c.nota && c.etapa === "venta" && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
-      const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
-      const n = c.opcionesDeCompra?.length ?? 0;
-      // Con dos o más opciones por elegir, el cierre es elegir (como la venta de siempre).
-      const pregunta =
-        n > 1 ? `¿Cuál de las ${n === 2 ? "dos" : n} prefieres?` : PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
+    if (!preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+      const pregunta = PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
       // La pregunta va en su propia burbuja; con tope, las de antes se juntan para que quepa.
       const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
@@ -859,6 +891,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   }
   // NUNCA MUDO (27/10/2026): si los frenos dejaron la respuesta vacía y no salió nada más (ni muestras ni
   // los datos del cobro), sale una pregunta corta: un cliente sin respuesta es una venta perdida.
+  if (!texto && preguntaDeElegir) {
+    // La IA solo había escrito la pregunta de elegir: sale la del bot.
+    texto = preguntaDeElegir;
+    preguntaDeElegir = "";
+  }
   if (!texto && !salieronMuestras && !reenvioPorCuenta) {
     const recientes = ultimosMensajes(convo.id, 8).filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     texto =
@@ -882,13 +919,19 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // LA LISTA CORTA DE LAS OPCIONES, SOLO SI LA IA NO LAS NOMBRÓ TODAS (27/10/2026): si ya las explicó, no
   // se repite un texto fijo debajo.
   let alFinal = c.alFinal ?? [];
-  if (c.opcionesSiFaltan && burbujas.length > 0) {
+  if (c.opcionesSiFaltan && burbujas.length > 0 && (c.opcionesSiFaltan.siempre || preguntaDeElegir)) {
     const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/\*/g, "");
     const dicho = plano(burbujas.join(" "));
     if (c.opcionesSiFaltan.nombres.some((n) => !dicho.includes(plano(n)))) {
       alFinal = [c.opcionesSiFaltan.burbuja, ...alFinal];
       console.log(`[tablero] convo ${convo.id}: la IA no nombró todas las opciones → burbuja con las ${c.opcionesSiFaltan.nombres.length} opciones`);
     }
+  }
+  // La pregunta de elegir, sola y después de la lista (si salió la lista, va justo debajo).
+  if (preguntaDeElegir && burbujas.length > 0) {
+    const conLista = c.opcionesSiFaltan && alFinal[0] === c.opcionesSiFaltan.burbuja;
+    alFinal = conLista ? [alFinal[0], preguntaDeElegir, ...alFinal.slice(1)] : [preguntaDeElegir, ...alFinal];
+    console.log(`[tablero:ia] convo ${convo.id}: cierra con «${preguntaDeElegir}» en su propia burbuja`);
   }
   // CON LAS PAUSAS DE TUS AJUSTES (25/10/2026, punto 17), como la venta de siempre: la primera enseguida
   // y las demás separadas por «Delay entre mensajes» (Menús → Ajustes → Tiempos generales).
