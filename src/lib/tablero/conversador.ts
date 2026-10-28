@@ -92,6 +92,9 @@ export interface ContextoDeLaIA {
   opcionesDeCompra?: string[];
   /** Los nombres de los métodos de pago de su país (solo nombres: los datos los manda el sistema). */
   metodos?: string[];
+  /** El país del cliente y los OTROS países donde vende esta tienda, con sus métodos («Argentina (Transferencia)»). */
+  paisDelCliente?: string;
+  otrosPaises?: string[];
   /**
    * LA LISTA CORTA DE LAS OPCIONES («*Opción 1* — nombre · precio»), SOLO SI FALTA (27/10/2026): si la
    * IA ya nombró todas las opciones, no se agrega (era texto fijo repetido). Va antes de `alFinal`.
@@ -377,6 +380,10 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
     // Argentina solo hay transferencia. Vale en todos los turnos, no solo cuando pregunta cómo pagar.)
     c.metodos?.length
       ? `- LOS ÚNICOS MÉTODOS DE PAGO SON: ${c.metodos.join(", ")}. Si el cliente nombra un método que no está en esta lista, dile con amabilidad que por ahora se paga solo con ${c.metodos.length > 1 ? "esos" : "ese"}. NUNCA digas que se puede pagar con otro.`
+      : "",
+    // (28/10/2026, ronda 15: «estoy en chile se puede» → «¡sí, claro!»; «estoy en argentina» → los métodos de Perú.)
+    c.metodos?.length && c.paisDelCliente
+      ? `- ESOS MÉTODOS SON DE ${c.paisDelCliente.toUpperCase()}. ${c.otrosPaises?.length ? `También se vende en: ${c.otrosPaises.join(" · ")}. Si el cliente dice que está en uno de esos países, dile que sí puede comprar desde ahí, con los métodos de ESE país, y ofrécele que un asesor le pase los datos (solo con su «sí» avisas al asesor).` : ""} Si dice que está en un país que no es ${c.paisDelCliente}${c.otrosPaises?.length ? " ni de esa lista" : ""}, dile con amabilidad que por ahora no está disponible en su país. NUNCA le digas que puede pagar desde un país que no está aquí.`
       : "",
     c.opcionesDeCompra?.length
       ? `- AQUÍ EL CLIENTE TIENE QUE ELEGIR ENTRE ${c.opcionesDeCompra.length} OPCIONES: ${c.opcionesDeCompra.join(" · ")}. Si pregunta el precio sin haber elegido, nómbralas TODAS con su precio (no hay un solo precio); si pregunta qué trae una, contesta sin precio. Cierra con «¿Cuál de las ${c.opcionesDeCompra.length === 2 ? "dos" : c.opcionesDeCompra.length} prefieres?».`
@@ -776,7 +783,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       !c.preguntaVaga && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
     // LO POSPUSO (28/10/2026, ronda 5: «después» → «quedo pendiente… ¿te indico cómo adquirirlo?»). Ahí no se le
     // agrega la pregunta de venta: sonaba insistente. (La que escriba la IA se queda, como siempre.)
-    const loPospuso = /^(despues|luego|mas tarde|otro dia|otra vez sera|ahorita no|ahora no|por ahora no|mejor no|mejor despues|no gracias|no por ahora|lo pienso|lo voy a pensar|dejame pensarlo)\b/.test(delCliente.trim());
+    const loPospusoElCliente = /^(despues|luego|mas tarde|otro dia|otra vez sera|ahorita no|ahora no|por ahora no|mejor no|mejor despues|no gracias|no por ahora|lo pienso|lo voy a pensar|dejame pensarlo)\b/.test(delCliente.trim());
+    // Si la IA se despidió o dijo que no está disponible, no se le pega una pregunta de venta encima (28/10/2026,
+    // ronda 17: «¡Que tengas un lindo día! 🌟» + «¿Por cuál te animas?» a un cliente de un país sin venta). Solo
+    // evita AÑADIR: si falla, no pasa nada.
+    const seDespidio = /\b(que tengas (un|una)? ?(lindo|buen|bonito|excelente|feliz)|hasta (pronto|luego|la proxima)|no (esta|está) disponible|no est[aá] (incluid|habilitad))/i.test(texto ?? "");
+    const loPospuso = loPospusoElCliente || seDespidio;
     const n = c.opcionesDeCompra?.length ?? 0;
     const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     // LA PREGUNTA DE ELEGIR, SOLA Y SIN REPETIRSE (28/10/2026, su prueba HU1/HU2): la IA la escribía

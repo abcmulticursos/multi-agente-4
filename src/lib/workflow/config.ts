@@ -10069,7 +10069,14 @@ export function getPaymentMethods(phone?: string | null): {
   principal: boolean;
 }[] {
   const config = loadWorkflowConfig();
-  const country = getEffectiveCountryCode(phone, config);
+  return getPaymentMethodsOfCountry(getEffectiveCountryCode(phone, config), config);
+}
+
+/** Los métodos de un país (los mismos de `getPaymentMethods`, pero por país y no por teléfono). */
+export function getPaymentMethodsOfCountry(
+  country: CountryCode,
+  config = loadWorkflowConfig()
+): ReturnType<typeof getPaymentMethods> {
   const cfg =
     resolveCountryPaymentProfile(country, config)?.payment_buttons ??
     config?.payment_buttons;

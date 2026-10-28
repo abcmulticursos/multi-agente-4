@@ -61,6 +61,7 @@ import {
   type Tienda,
   type WorkflowConfig,
   getPaymentMethods,
+  getPaymentMethodsOfCountry,
 } from "@/lib/workflow/config";
 import { esUnAcuseSeco, messageHasPaymentConcern, scheduleGiftConsentWithDelay, sendConfiguredSteps } from "@/lib/workflow/engine";
 import {
@@ -937,11 +938,16 @@ function loQueFalta(
 
 /** «Quiero pagar», «voy a pagar», «¿cómo pago?», «me lo llevo»… (ya sin tildes ni mayúsculas). */
 const QUIERE_PAGAR =
-  /\b(quiero (pagar|comprar|comprarlo|adquirir|adquirirlo|llevarlo)|voy a (pagar|comprar|yapear|depositar|transferir)|procedo|paso a pagar|como (pago|te pago|se paga|puedo pagar|compro|lo compro|lo adquiero)|donde (pago|te pago|deposito)|a que (cuenta|numero)|(pasame|dame|mandame|enviame) (la cuenta|los datos|el numero)|datos (de|para) (pago|pagar)|me lo llevo|lo quiero|si quiero|lo compro)\b/;
+  /\b(quiero (pagar|comprar|comprarlo|adquirir|adquirirlo|llevarlo)|voy a (pagar|comprar|yapear|depositar|transferir)|procedo|paso a pagar|como (pago|te pago|se paga|puedo pagar|compro|lo compro|lo adquiero)|donde (pago|te pago|deposito)|a que (cuenta|numero)|(pasame|dame|mandame|enviame) (la cuenta|los datos|el numero)|datos (de|para) (pago|pagar)|me lo llevo|(lo|si) quiero(?! (?!pagar|comprar|llevar|adquirir)[a-z]+(ar|er|ir)\b)|lo compro)\b/;
+// («lo quiero VER / saber / pensar» no es comprar: después de «quiero» un verbo que no es de comprar —28/10/2026,
+// ronda 14: «lo quiero ver» en el Order bump eligió el básico—.)
 
 /** Un «sí» pelado: «sí», «dale», «ok», «claro», «de una», «sí quiero», «perfecto»… (sin tildes ni signos). */
-const AFIRMA =
-  /^(si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio)( (por favor|porfa|claro|dale|gracias|ok))*$/;
+// Un mensaje hecho SOLO de afirmaciones también lo es: «bueno ya», «ok dale», «ya bueno» (28/10/2026, ronda 14:
+// «bueno ya» a «¿te muestro cómo adquirirlo?» se fue a la IA y no salieron los datos).
+const SI_SUELTO =
+  "si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio";
+const AFIRMA = new RegExp(`^(${SI_SUELTO})( (por favor|porfa|gracias|${SI_SUELTO}))*$`);
 
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 const INVITA_A_COMPRAR =
@@ -1129,6 +1135,17 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     !hablaDeUnProblema &&
     (preguntaCuantasOpcionesHay(ultimo) || /\b(diferencia|diferente|diferentes|cual me conviene|cual es mejor|me recomiendas|recomiendas)\b/.test(ultimo));
   const metodosDelPais = getPaymentMethods(convo.phone).map((m) => m.label).filter(Boolean);
+  // LOS OTROS PAÍSES DONDE VENDE ESTA TIENDA (28/10/2026, su regla: «si alguien está en ese país sí puede pagarlo,
+  // pero si no está activo decirle que no está disponible»). Los de un Inicio que vende, con sus métodos.
+  const otrosPaises = [
+    ...new Set(t.fichas.filter((f) => f.tipo === "inicio" && f.pais && f.pais !== pais).map((f) => f.pais as string)),
+  ]
+    .filter((p) => elTableroAtiende(t, p))
+    .map((p) => {
+      const ms = getPaymentMethodsOfCountry(p as never).map((m) => m.label).filter(Boolean);
+      return ms.length ? `${getCountryInfo(p as never)?.label ?? p} (${ms.join(", ")})` : "";
+    })
+    .filter(Boolean);
   // EL CANDADO DE LA ELECCIÓN (27/10/2026): con un cobro abierto, la IA sabe qué eligió y a qué precio.
   const elegidoAhora = cobro?.cobro?.modo === "producto" && estado ? estado.cobro_elegido ?? cobro.cobro.producto_id ?? null : null;
   const precioElegido = elegidoAhora && estado ? preciosDelCobro(estado)[elegidoAhora] : undefined;
@@ -1143,7 +1160,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
       ? { sinPagoAprobado: true }
       : {}),
     ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
-    ...(metodosDelPais.length ? { metodos: metodosDelPais } : {}),
+    ...(metodosDelPais.length ? { metodos: metodosDelPais, paisDelCliente: getCountryInfo(pais as never)?.label ?? pais, otrosPaises } : {}),
     cerebroGeneral: t.cerebro,
     instrucciones: ficha?.instrucciones,
     ...(ofreciendoAhora ? { ofreciendoAhora } : {}),
