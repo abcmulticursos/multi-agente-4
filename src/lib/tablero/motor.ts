@@ -2477,9 +2477,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   if (estado.imagenes_ofrecidas === 1) {
     apuntarImagenesOfrecidas(convo.id, false);
     if (texto) {
-      const acepta = await elegirOpcionConIA(convo.id, texto, [
-        { id: "ver", etiqueta: "Acepta ver las imágenes que se le acaban de ofrecer (sí, dale, a ver, ok, muéstramelas, un emoji de aprobación…)" },
-      ]);
+      // Un «sí» / «ok» corto lo decide el código, como el automático (28/10/2026, su prueba hou1: la IA leyó
+      // «ok» como «ninguna», no salió la galería y la respuesta prometió «enseguida comparto las imágenes»).
+      const corto = normal.replace(/[^\p{L}\p{N} ]/gu, " ").replace(/\s+/g, " ").trim();
+      const aceptaClaro = AFIRMA.test(corto) || /^(a ver|muestra(me|las|melas)?|manda(me|las|melas)?|envia(me|las|melas)?|quiero verlas?|si quiero verlas?)$/.test(corto);
+      const acepta = aceptaClaro
+        ? "ver"
+        : await elegirOpcionConIA(convo.id, texto, [
+            { id: "ver", etiqueta: "Acepta ver las imágenes que se le acaban de ofrecer (sí, dale, a ver, ok, muéstramelas, un emoji de aprobación…)" },
+          ]);
       if (acepta === "ver" && (await mandarLaGaleria(convo))) {
         respondio(convo, t);
         return true;
@@ -2973,6 +2979,8 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero):
   if (!e || e.seg_ficha !== ficha.id || e.seg_idx >= segs.length) return;
   // SOLO EL 1 VUELVE A CONTAR (25/10/2026, punto 4): es el que cae en medio de la conversación. Los
   // 2+ ya están en su horario fijo y se quedan ahí (en el simulador, a sus minutos: tampoco se mueven).
+  // (28/10/2026: él lo confirmó así. Reiniciar el 2, que va a horas, lo empujaría fuera de su horario,
+  // hasta el día siguiente. Lo que sí se evita es que caiga encima de un mensaje: ver ACCION_SEGUIMIENTO.)
   if (e.seg_idx >= 1) return;
   const token = ponerSeguimiento(convo.id, ficha.id, e.seg_idx);
   // EL RELOJ VUELVE A CERO, como `renovarEsperaDeLosSeguimientos` del motor de siempre: los que
@@ -3097,6 +3105,14 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
     const segs = f?.seguimientos ?? [];
     const idx = Number(payload.idx ?? 0);
     if (!f) return;
+    // ACABA DE ESCRIBIR Y SU TURNO AÚN NO SE ATIENDE (28/10/2026, su prueba hou2: dijo «si» un segundo antes
+    // y el seguimiento 2 salió encima de la respuesta). El bot espera unos segundos para juntar sus mensajes;
+    // al atenderlo, el seguimiento vuelve a contar. Por si ese turno no lo mueve, se mira otra vez en 1 min.
+    if (idx < segs.length && (getLastUserMessageTime(convo.id) ?? 0) >= ahora() - 45) {
+      console.log(`[tablero] convo ${convo.id}: acaba de escribir → el seguimiento ${idx + 1} espera`);
+      programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx, token: payload.token }, ahora() + 60, true);
+      return;
+    }
     if (idx >= segs.length) {
       // «TERMINARON SIN RESPUESTA»
       ponerSeguimiento(convo.id, null, 0);
