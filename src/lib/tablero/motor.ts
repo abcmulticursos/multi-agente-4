@@ -2981,7 +2981,9 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero):
   // 2+ ya están en su horario fijo y se quedan ahí (en el simulador, a sus minutos: tampoco se mueven).
   // (28/10/2026: él lo confirmó así. Reiniciar el 2, que va a horas, lo empujaría fuera de su horario,
   // hasta el día siguiente. Lo que sí se evita es que caiga encima de un mensaje: ver ACCION_SEGUIMIENTO.)
-  if (e.seg_idx >= 1) return;
+  // EN EL SIMULADOR, TODOS (28/10/2026, él lo pidió): ahí no hay horas fijas, todos van a sus minutos, y para
+  // testear necesita que el 2 también espere si el cliente escribe. En vivo sigue la regla de arriba.
+  if (e.seg_idx >= 1 && convo.channel !== "test") return;
   const token = ponerSeguimiento(convo.id, ficha.id, e.seg_idx);
   // EL RELOJ VUELVE A CERO, como `renovarEsperaDeLosSeguimientos` del motor de siempre: los que
   // faltan cuentan sus minutos desde ahora.
