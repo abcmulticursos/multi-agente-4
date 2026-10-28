@@ -133708,6 +133708,8 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
+                          *SEGUIMIENTO 1*
+
                           ELIGE UN METODO DE PAGO:
 
                           {{LISTA_METODOS_POR_PAIS}}
@@ -133787,6 +133789,8 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
+                          *SEGUIMIENTO 2*
+
                           Paso rapidito por aquí ✨
 
                           Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
@@ -134165,6 +134169,8 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
+                          *SEGUIMIENTO 1*
+
                           Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
@@ -134259,6 +134265,8 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
+                          *SEGUIMIENTO 2*
+
                           Paso rapidito por aquí ✨
 
                           Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
