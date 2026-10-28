@@ -120324,7 +120324,6 @@ biblioteca_de_productos:
         price_soles: 8000
         discount_price_soles: 8000
         market_price: 24000
-    ofrecer_imagenes: false
   - id: ptmascotas_ropa
     name: ROPA PARA MASCOTAS
     aliases:
