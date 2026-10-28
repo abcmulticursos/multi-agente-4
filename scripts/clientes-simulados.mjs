@@ -75,18 +75,25 @@ await api("/api/login", { method: "POST", headers: { "Content-Type": "applicatio
 
 const carpeta = args.comprobantes ?? "";
 const archivos = carpeta && existsSync(carpeta) ? readdirSync(carpeta) : [];
-/** Un comprobante del país con ese monto (si hay varios, uno distinto cada vez). */
+/**
+ * Un comprobante del país con ese monto. Si hay varios, uno distinto cada vez DENTRO DE LA MISMA
+ * conversación (en el simulador el repetido se mira por ventana). `quien` elige el titular («melissa»,
+ * para probar el titular equivocado); sin él, en Perú solo los de ALBERTO (el titular que cobra).
+ */
 const usados = new Map();
-function comprobanteDe(pais, monto) {
+function comprobanteDe(pais, monto, conv, quien = "") {
   const m = String(monto).replace(",", ".");
   const re =
-    pais === "EC" ? new RegExp(`^PICHINCHA ${m.replace(".", "\\.")} DOLAR`, "i")
-    : pais === "PE" ? new RegExp(`(yape|yapeo).* ${m} (soles|b|\\.jpg)|yapeo ALBERTO ${m}\\b`, "i")
-    : new RegExp(`recibo de pago ${m} pesos`, "i");
-  const todos = archivos.filter((a) => re.test(a));
+    pais === "EC"
+      ? new RegExp(`^PICHINCHA ${m.replace(".", "\\.")} DOLAR${m === "2" ? "|^ticket unitario pichincha" : ""}`, "i")
+      : pais === "PE"
+        ? new RegExp(`(yape|yapeo).* ${m} (soles|b|c|\\.jpg)|yapeo ALBERTO ${m}\\b`, "i")
+        : new RegExp(`recibo de pago ${m} pesos`, "i");
+  const todos = archivos.filter((a) => re.test(a) && (pais !== "PE" || (quien ? a.toLowerCase().includes(quien.toLowerCase()) : !/melissa/i.test(a))));
   if (!todos.length) return null;
-  const n = usados.get(`${pais}${m}`) ?? 0;
-  usados.set(`${pais}${m}`, n + 1);
+  const clave = `${conv}|${pais}|${m}|${quien}`;
+  const n = usados.get(clave) ?? 0;
+  usados.set(clave, n + 1);
   return join(carpeta, todos[n % todos.length]);
 }
 
@@ -100,9 +107,15 @@ async function siguienteMensaje(perfil, historial) {
     "Reacciona a lo que te dice el bot. No seas un robot: si te explican algo, a veces preguntas otra cosa, dudas, o cambias de idea, según tu perfil.",
     "COMANDOS (escríbelos SOLOS en tu mensaje, sin nada más):",
     "  [COMPROBANTE <monto>] = mandas la foto de tu comprobante de pago por ese monto (solo cuando ya tienes los datos de pago y decidiste pagar).",
+    "  [COMPROBANTE <monto>] <texto> = la foto con un texto pegado en la misma burbuja (ej: [COMPROBANTE 3] ya pague).",
+    "  [COMPROBANTE <monto> melissa] = un comprobante a nombre de otra persona (solo si tu perfil lo pide).",
+    "  [BOTON <texto del botón>] = tocas ese botón de los que te mandó el bot (los ves como [botones: A | B]).",
     "  [ESPERAR <segundos>] = te quedas callado ese tiempo (para dejar que el bot te mande sus recordatorios).",
     "  [FIN] = terminas la conversación (cuando cumpliste tu perfil o el bot ya no tiene nada que darte).",
     "Nunca escribas como bot ni expliques lo que haces. Solo el mensaje del cliente.",
+    "Los comandos van AL PRINCIPIO del mensaje, tal cual (nunca «voy a completar [COMPROBANTE 1]»: escribe «[COMPROBANTE 1] voy a completar»). Nunca escribas «[foto ...]»: para mandar una foto usa [COMPROBANTE].",
+    "Si tu perfil dice [ESPERAR n] en un paso, en ese paso escribe EXACTAMENTE ese comando y nada más.",
+    "Cuando el bot te entregue tu material (un mensaje de PAGO APROBADO / COMPRA CONFIRMADA / PAGO RECIBIDO con enlaces), tu siguiente mensaje es [ESPERAR 90] (abres tu enlace), salvo que tu perfil diga claramente otra cosa para ese momento.",
   ].join("\n");
   const msgs = [{ role: "system", content: sistema }, ...historial.map((h) => ({ role: h.de === "cliente" ? "assistant" : "user", content: h.texto }))];
   if (historial.length === 0) msgs.push({ role: "user", content: "(empieza tú la conversación, con un saludo corto)" });
@@ -128,6 +141,7 @@ async function conversar(perfil) {
   const conv = await (await api("/api/test-simulator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel: "whatsapp", tienda: perfil.tienda ?? TIENDA, country: perfil.pais }) })).json();
   const historial = [];
   const registro = [];
+  const botonesVistos = new Map();
   let vistos = 0;
   const leerHastaSilencio = async (maxSeg = 90, calma = 12) => {
     const fin = Date.now() + maxSeg * 1000;
@@ -138,7 +152,14 @@ async function conversar(perfil) {
       const llegados = d.messages.slice(vistos).filter((m) => m.role !== "user");
       vistos = d.messages.length;
       if (llegados.length) {
-        nuevos.push(...llegados.map((m) => `${m.media_type ? `[${m.media_type}] ` : ""}${m.content ?? ""}`));
+        // Los botones de cada burbuja, a la vista del cliente: «[botones: Sí | No]».
+        for (const m of llegados) for (const b of d.buttons?.[String(m.id)] ?? []) botonesVistos.set(b.title.toLowerCase(), b);
+        nuevos.push(
+          ...llegados.map((m) => {
+            const bs = d.buttons?.[String(m.id)] ?? [];
+            return `${m.media_type ? `[${m.media_type}] ` : ""}${m.content ?? ""}${bs.length ? ` [botones: ${bs.map((b) => b.title).join(" | ")}]` : ""}`;
+          })
+        );
         ultimoCambio = Date.now();
       }
       if (nuevos.length && Date.now() - ultimoCambio > calma * 1000) break;
@@ -167,16 +188,37 @@ async function conversar(perfil) {
     const pagosDelGuion = [...perfil.guion.matchAll(/\[COMPROBANTE\s+([\d.,]+)\]/gi)].map((m) => m[1]);
     const yaPagados = registro.filter((l) => l.startsWith("CLIENTE: [foto del comprobante")).length;
     const fotoSuelta = /^\[(image|imagen|foto|captura)[^\]]*\]$/i.test(msg.trim()) && pagosDelGuion[yaPagados];
-    const comp = msg.match(/^\[COMPROBANTE\s+([\d.,]+)\]/i) ?? (fotoSuelta ? [msg, pagosDelGuion[yaPagados]] : null);
+    // Imita el registro («[foto del comprobante de 1] ya pague»): es su comprobante de ese monto, con su texto.
+    const comoElRegistro = msg.match(/^\[foto del comprobante de ([\d.,]+)(?: a nombre de ([a-zñ]+))?\]\s*(.*)$/is);
+    const comp =
+      msg.match(/^\[COMPROBANTE\s+([\d.,]+)(?:\s+([a-zñ]+))?\]\s*(.*)$/is) ??
+      comoElRegistro ??
+      (fotoSuelta ? [msg, pagosDelGuion[yaPagados], "", ""] : null);
+    const boton = msg.match(/^\[BOTON\s+(.+?)\]\s*$/i);
     if (comp) {
-      const ruta = comprobanteDe(perfil.pais, comp[1]);
+      const ruta = comprobanteDe(perfil.pais, comp[1], conv.id, comp[2] ?? "");
       if (!ruta) {
         anotar("cliente", `(quería mandar un comprobante de ${comp[1]} pero no hay foto de ese monto)`);
         continue;
       }
-      anotar("cliente", `[foto del comprobante de ${comp[1]}]`);
+      const pegado = (comp[3] ?? "").trim();
+      anotar("cliente", `[foto del comprobante de ${comp[1]}${comp[2] ? ` a nombre de ${comp[2]}` : ""}]${pegado ? ` ${pegado}` : ""}`);
       const f = new FormData();
       f.set("file", new Blob([readFileSync(ruta)], { type: "image/jpeg" }), "comprobante.jpg");
+      if (pegado) f.set("content", pegado);
+      await api(`/api/test-simulator/${conv.id}/message`, { method: "POST", body: f });
+    } else if (boton) {
+      // El botón tocado de verdad (su id), como en el simulador. Si no existe, lo escribe.
+      const b = botonesVistos.get(boton[1].trim().toLowerCase()) ?? [...botonesVistos.values()].find((x) => x.title.toLowerCase().includes(boton[1].trim().toLowerCase()));
+      const f = new FormData();
+      if (b) {
+        anotar("cliente", `(toca el botón «${b.title}»)`);
+        f.set("button_id", b.id);
+        f.set("button_title", b.title);
+      } else {
+        anotar("cliente", boton[1]);
+        f.set("content", boton[1]);
+      }
       await api(`/api/test-simulator/${conv.id}/message`, { method: "POST", body: f });
     } else {
       anotar("cliente", msg);

@@ -237,6 +237,42 @@ mitad de una conversación viva. Eso sigue siendo trabajo suyo, o hay que constr
 
 ---
 
+## SU LISTA DE TRABAS (dictada el 27/10/2026, para el tablero)
+
+«El bot debe salir de estos caminos y no trabarse ni dar nada equivocado.» En las cuatro
+tuberías: **lineal, order bump, doble oferta y contribución**. Elige a veces con **botón**, a veces
+con **cuadrito** y a veces **escribiendo**.
+
+**Antes de elegir — el que llega al embudo sin saber nada:**
+«no es estafa», «es estafa», «que es esto», «no entiendo», «como es eso», «precio», «como me llega»,
+«que contiene», «que trae», «que me envian», «me envian a mi casa», «como se estudia», «hola»,
+«gracias», «quiero el mas barato», «no mejor el otro no tengo plata», «quiero el 1 por que no tengo
+mucho», «el full», «el basico».
+
+**Cuando sale la intro de order bump:** «como que son 2», «no entiendo», «y esto que no era 1».
+
+**En la compra:**
+- «ya pague» **amarrado a la foto** (texto suelto en la misma burbuja del comprobante: «5980345ajaf»).
+- El comprobante también en **PDF**, como lo lee el automático.
+- Elige el full y paga el básico, **o al revés**; si le dicen que falta, completa.
+- «ya pague» **sin foto**, para ver qué dice.
+- «¿me lo pueden mandar a mi casa?».
+- El método mal escrito: «vecin», «guaya», «pichi», «pchncha», «guallaquil», «transfencia».
+
+**Después de comprar:**
+- «no me ha llegado», «no hay», «no esta», «cuando me van a enviar ya pague».
+- «ya pague tanto, puedo completar» (el upgrade).
+- Con el upsell: «¿que es esto?», «¿este es otro?»; a veces acepta **con el botón**, a veces
+  **escribiendo**, a veces rechaza.
+- Espera a que salga el regalo y **retoma el upsell** (¿afecta la compra?).
+- Sin comprar el upsell, **elige el regalo**; pregunta «¿que tengo que hacer?»; en vez de
+  «COMENTADO» escribe «ya lo hice», «ya esta», «ya comenté».
+
+**Compra en tres momentos:** antes del seguimiento 1, en el seguimiento 1, y en el seguimiento 2
+(con el precio de descuento activado en ese seguimiento).
+
+---
+
 ## LO QUE HACE SIEMPRE, EN TODAS
 
 **No se la pone fácil al bot.** Sus palabras:

@@ -112,13 +112,27 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
     } as unknown as ChatCompletionMessageParam,
   ];
   try {
-    const r = await getClient().chat.completions.create({
-      model: modelo,
-      messages: mensajes,
-      tools: [HERRAMIENTA],
-      tool_choice: { type: "function", function: { name: "leer_comprobante" } },
-      temperature: 0,
-    });
+    // CON REINTENTOS ANTE UN CORTE DE RED (27/10/2026): un «ECONNRESET» con OpenRouter se tomaba como
+    // comprobante ilegible —y contaba como intento fallido del cliente—. Un corte no es culpa suya: se
+    // intenta hasta 3 veces antes de rendirse.
+    const pedir = () =>
+      getClient().chat.completions.create({
+        model: modelo,
+        messages: mensajes,
+        tools: [HERRAMIENTA],
+        tool_choice: { type: "function", function: { name: "leer_comprobante" } },
+        temperature: 0,
+      });
+    let r: Awaited<ReturnType<typeof pedir>> | null = null;
+    for (let intento = 1; !r; intento++) {
+      try {
+        r = await pedir();
+      } catch (err) {
+        if (intento >= 3) throw err;
+        console.warn(`[tablero:lector] convo ${conversationId}: la lectura falló (intento ${intento}), reintento`);
+        await new Promise((res) => setTimeout(res, 1500 * intento));
+      }
+    }
     const llamada = r.choices[0]?.message?.tool_calls?.find(
       (t) => t.type === "function" && t.function.name === "leer_comprobante"
     );

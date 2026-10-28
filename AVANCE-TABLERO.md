@@ -55,6 +55,18 @@ Si la sesión se corta, se retoma desde aquí. La lista completa está en `INVEN
   citas también quiero» → datos de frente; «¿a cuál te refieres?» ya no muestra productos no vistos;
   upgrade solo con su mensaje; tras el regalo, la entrega no vuelve a soltar upsell ni regalo; el
   seguimiento se corta si paga a medias; comprobante repetido con texto fijo. Log a disco (📄 Log).
+- Sus pruebas H1–H4 (27/10, noche) y la prueba a escala (22 clientes simulados con su lista de trabas,
+  COMO-TESTEA-ALBERTO.md): order bump EC con descuento en el seguimiento 2, lineal AR, doble oferta EC y PE,
+  contribución PE. Arreglado: imágenes una sola vez y solo a «qué trae» (su oferta reemplaza la pregunta
+  de la IA); el cierre de la galería con su texto; «guaya» → la lista de métodos (como <<METODOS_PAGO>>);
+  la IA no dice «el sistema», ni «pago recibido / lo estoy revisando» sin comprobante, ni escribe enlaces
+  sin pago; «no me llegó» → reenvío directo con el detector de la venta de siempre, también en el regalo;
+  el regalo sin responder se vuelve a ofrecer una vez; «sí» con regalo y producto pendientes → sus dos
+  burbujas; «sí» a un producto solo con su precio en la misma burbuja; «¿fue una confusión?» y el pago a
+  medias con texto fijo y renglones; «completar» sin nada que completar → «va aparte»; «¿cuál de LOS
+  dos?» + «sí» → las opciones otra vez (no en bucle); el seguimiento se corta si el cliente escribe; la
+  lectura del comprobante reintenta ante un corte de red; lo incluido en lo comprado no se vuelve a ofrecer;
+  con el regalo aceptado, abrir un cobro ya no lo saca del regalo. «📄 Log»: conversación + log técnico.
 - Reenganche (`scripts/recorrido-reenganche.mjs`): los que estaban terminan en su tubería con su precio
   (datos ya recibidos, esperando seguimiento, upsell ofrecido); los nuevos entran por la nueva. OK.
 

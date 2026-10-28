@@ -112,6 +112,8 @@ export interface ContextoDeLaIA {
    * segundos llegará tu enlace del PACK»).
    */
   sinPagoAprobado?: boolean;
+  /** Cobro abierto esperando el método: si la IA promete los datos, el bot muestra la lista de métodos. */
+  sinMetodo?: () => Promise<void>;
 }
 
 /** Los importes con señal de dinero que trae un texto. «3.000 diseños» no es dinero. */
@@ -722,7 +724,9 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     // Con un PROBLEMA o una queja no va pregunta de venta («el yape me sale error» → «¿te indico cómo
     // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
     const conProblema = /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
-    if (!c.nota && c.etapa === "venta" && !conProblema && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+    // Ni cuando el bot cierra con la oferta de las imágenes (ésa ES la pregunta), ni con el cobro ya
+    // abierto: ahí ya decidió y «¿te indico cómo adquirirlo?» no tiene sentido (H3, 27/10/2026).
+    if (!c.nota && c.etapa === "venta" && !conProblema && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
       const recientes = ultimos.filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
       const n = c.opcionesDeCompra?.length ?? 0;
       // Con dos o más opciones por elegir, el cierre es elegir (como la venta de siempre).
@@ -734,14 +738,76 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       texto = [...alTope(partes, tope ? tope - 1 : null), pregunta].join("\n\n");
     }
   }
+  // LA OFERTA DE LAS IMÁGENES ES LA ÚNICA PREGUNTA DEL CIERRE (H1/H2, 27/10/2026): la IA cerraba con
+  // «¿te ayudo con los métodos de pago?» y debajo salía «¿te muestro unas imágenes?». Como la venta de
+  // siempre, la oferta reemplaza su pregunta: se quita la frase con «?» de su última burbuja.
+  if (c.noOfrezcasImagenes && texto) {
+    const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+    const ult = partes.pop() ?? "";
+    const sinPregunta = ult
+      .split(/(?<=[.!?])\s+/)
+      .filter((f) => !/[?¿]/.test(f))
+      .join(" ")
+      .trim();
+    texto = [...partes, sinPregunta].filter(Boolean).join("\n\n");
+  }
+  // «(EL SISTEMA ENVÍA LOS DATOS)» (H3, 27/10/2026): la IA escribió eso sin que saliera nada. Lo que
+  // haga el sistema lo hace el sistema; una frase que habla de él no es para el cliente.
+  if (texto && /\bel sistema\b/i.test(texto)) {
+    texto = texto
+      .split(/\n\s*\n/)
+      .map((b) =>
+        b
+          .split(/(?<=[.!?)])\s+/)
+          .filter((f) => !/\bel sistema\b/i.test(f))
+          .join(" ")
+          .trim()
+      )
+      .filter(Boolean)
+      .join("\n\n");
+    console.log(`[tablero:ia] convo ${convo.id}: habló de «el sistema» → se quita esa frase`);
+  }
+  // «POR GUAYAQUIL, EN UN MOMENTO TE LLEGAN LOS DATOS» SIN MÉTODO ELEGIDO (H3, 27/10/2026): la IA no manda
+  // datos, así que esa promesa es falsa. Como la venta de siempre (<<METODOS_PAGO>>), sale la lista de
+  // métodos para que elija, en vez de su respuesta.
+  if (
+    c.sinMetodo &&
+    texto &&
+    /(te llega(n|r[aá]n)? los datos|te (paso|env[ií]o|mando|comparto) los datos|aqu[ií] (van|tienes|te dejo) los datos|ya (te )?(envi[eé]|mand[eé]|pas[eé]) los datos|los datos (ya )?(quedaron|fueron) enviados|datos de pago por aqu[ií])/i.test(texto)
+  ) {
+    console.log(`[tablero:ia] convo ${convo.id}: prometió los datos sin método elegido → sale la lista de métodos`);
+    await c.sinMetodo();
+    return true;
+  }
+  // «ESTOY REVISANDO TU COMPROBANTE» SIN NINGÚN COMPROBANTE (C1 en la copia, 27/10/2026): sin cobro abierto
+  // también. Si en este turno no se leyó ninguno (no hay nota del sistema), la IA no puede decir que lo
+  // recibió ni que lo está revisando; esas frases se quitan.
+  if (!c.nota && !c.sinPagoAprobado && texto) {
+    // (Y «enseguida te envío los datos» sin cobro abierto: no sale ninguno — T3 en la copia.)
+    const revisa =
+      /(recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|en cuanto (quede|est[eé]|se) confirm|apenas (est[eé]|se) confirm|revisando tu comprobante|(enseguida|ahora|ya) te (env[ií]o|paso|mando) los datos|te llegan los datos|aqu[ií] (van|tienes) los datos)/i;
+    const antes = texto;
+    texto = texto
+      .split(/\n\s*\n/)
+      .map((b) =>
+        b
+          .split(/(?<=[.!?¡¿])\s+/)
+          .filter((f) => !revisa.test(f))
+          .join(" ")
+          .trim()
+      )
+      .filter(Boolean)
+      .join("\n\n");
+    if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: decía que revisaba un comprobante que no llegó → se quita esa frase`);
+  }
   // SIN PAGO APROBADO, NADA DE «YA TE LLEGA»: esas frases se quitan, frase por frase.
   if (c.sinPagoAprobado && texto) {
     // Y tampoco «recibí tu comprobante / lo estoy verificando» (27/10/2026: el cliente escribió «ok,
     // mandaré 20 soles» SIN foto y la IA le dijo tres veces que lo estaba verificando) — salvo con nota
     // del sistema: ahí sí llegó un comprobante (a medias, o de otro monto) y puede decir que lo recibió.
     const promete = c.nota
-      ? /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora))/i
-      : /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|(sigue|est[aá]) en proceso|apenas (est[eé]|se) confirm)/i;
+      ? /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado)|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|te comparto tu (material|acceso|enlace)|aqu[ií] (est[aá]|tienes|va) tu (material|enlace|acceso)|disfruta tu material)/i
+      : /(llegar[aá] tu|te llegar[aá]|te llega (el|tu)|recibir[aá]s tu|ya tienes (acceso|tu)|pago (confirmado|aprobado|validado|recibido)|recibido correctamente|en unos segundos|tu enlace (de descarga )?(llegar|est[aá])|ya (est[aá]|qued[oó]) (listo|aprobado|confirmado)|te (lo )?env[ií]o (ya|enseguida|ahora)|recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|(sigue|est[aá]) en proceso|apenas (est[eé]|se) confirm|te comparto tu (material|acceso|enlace)|aqu[ií] (est[aá]|tienes|va) tu (material|enlace|acceso)|disfruta tu material)/i;
     const antes = texto;
     texto = texto
       .split(/\n\s*\n/)
@@ -755,6 +821,17 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .filter(Boolean)
       .join("\n\n");
     if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: prometía la entrega sin pago aprobado → se quita esa frase`);
+    // NI UN ENLACE (27/10/2026, D1 en la copia): con «ya pagué» escrito y sin foto, la IA mandó «Pago recibido
+    // correctamente» con un enlace INVENTADO del pack. Los enlaces del material los manda solo la entrega.
+    const sinEnlaces = texto
+      .split(/\n\s*\n/)
+      .map((b) => b.split("\n").filter((l) => !/https?:\/\/|www\./i.test(l)).join("\n").trim())
+      .filter(Boolean)
+      .join("\n\n");
+    if (sinEnlaces !== texto) {
+      console.log(`[tablero:ia] convo ${convo.id}: escribió un enlace sin pago aprobado → se quita`);
+      texto = sinEnlaces;
+    }
   }
   const malos = prohibidos(texto);
   if (malos.length > 0) {

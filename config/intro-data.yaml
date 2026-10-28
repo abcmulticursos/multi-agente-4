@@ -120478,7 +120478,7 @@ biblioteca_de_productos:
         market_price: 15
       EC:
         price_soles: 3
-        discount_price_soles: 3
+        discount_price_soles: 2
         market_price: 9
       AR:
         price_soles: 8000
@@ -133862,6 +133862,7 @@ tableros:
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
+              activa_oferta: true
         - id: f-rec26-jcxt
           tipo: entregar
           x: 2277
@@ -134333,6 +134334,7 @@ tableros:
                           steps: []
               ignora_silencio: true
               ignora_tardio: true
+              activa_oferta: true
         - id: f-mvq1i8zr-wg9n
           tipo: reparto
           x: 68
@@ -138013,14 +138015,13 @@ tableros:
             - type: text
               body_variants:
                 - |-
-                  ¿Con qué método prefieres aportar? 👇
+                  💳 Aporta por Yape
 
-                  {{LISTA_METODOS_POR_PAIS}}
+                  💜 Yape: {{CUENTA_YAPE}}
+                  Titular: {{NOMBRE_COMPLETO}}
+
+                  📷 Envía tu comprobante de pago por aquí.
               delay_after_sec: 3
-            - type: text
-              body_variants:
-                - Así te paso los datos exactos para tu pago 😊
-              delay_after_sec: 4
           cobro:
             modo: abierto
             minimo_por_pais:
@@ -139426,14 +139427,13 @@ tableros:
             - type: text
               body_variants:
                 - |-
-                  ¿Con qué método prefieres aportar? 👇
+                  💳 Aporta por depósito o transferencia
 
-                  {{LISTA_METODOS_POR_PAIS}}
+                  🔴 Cta. Pichincha: {{CUENTA_TRANSFERENCIA}}
+                  A nombre de: {{NOMBRE_COMPLETO}}
+
+                  📷 Envía tu comprobante de pago por aquí.
               delay_after_sec: 3
-            - type: text
-              body_variants:
-                - Así te paso los datos exactos para tu pago 😊
-              delay_after_sec: 4
           cobro:
             modo: abierto
             minimo_por_pais:
