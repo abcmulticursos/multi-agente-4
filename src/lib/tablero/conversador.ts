@@ -977,6 +977,19 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       console.log(`[tablero:ia] convo ${convo.id}: no nombró todas las opciones → empieza con «${linea}»`);
     }
   }
+  // LA MISMA PREGUNTA DOS VECES (28/10/2026, su hay2: «Ahora sí, ¿con cuál método prefieres pagar?» + la lista
+  // + «¿Cuál te queda más cómodo?»). Si la última burbuja es SOLO una pregunta y una burbuja anterior de esta
+  // misma respuesta ya terminó preguntando, y las dos son del método o de elegir, la última sobra.
+  if (burbujas.length >= 2) {
+    const sobreElegir = /(m[eé]todo|pagar|pago|prefieres|c[oó]mod|eliges|cu[aá]l)/i;
+    const ult = burbujas[burbujas.length - 1];
+    const soloPregunta = /^¿[^¿]*\?[^\p{L}\p{N}¿?]*$/u.test(ult.trim());
+    const antes = burbujas.slice(0, -1).find((b) => /\?[^\p{L}\p{N}¿?]*$/u.test(b.trim()) && sobreElegir.test(b.slice(b.lastIndexOf("¿"))));
+    if (soloPregunta && antes && sobreElegir.test(ult)) {
+      burbujas.pop();
+      console.log(`[tablero:ia] convo ${convo.id}: repetía la pregunta («${ult.slice(0, 40)}») → sale una sola`);
+    }
+  }
   // LA PREGUNTA FINAL, EN SU PROPIA BURBUJA (28/10/2026, su hay2: el saludo y «¿ya te decidiste…?» iban en un
   // solo bloque y la pregunta no se veía). Como el automático: si la última burbuja termina en una pregunta
   // con texto antes, la pregunta sale aparte. Solo la última frase, solo si va al final, y sin pasar su tope.

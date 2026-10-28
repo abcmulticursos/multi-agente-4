@@ -1580,6 +1580,15 @@ async function atenderComprobante(
       const mejor = alcanza && alcanza[1] > principal ? alcanza[0] : elegidoId!;
       productoPagado = mejor;
       salida = salidaDe(mejor);
+      // PAGÓ EL PRECIO DEL MÁS CARO (28/10/2026, su MM4: eligió COMIDA a $2, pagó $3 y le llegó el PACK sin
+      // saber por qué): una línea antes de la entrega para que lo entienda. La regla no cambia.
+      if (mejor !== elegidoId) {
+        const nombreMejor = producto(config, mejor)?.name ?? "la opción completa";
+        await sendConfiguredSteps(convo, [
+          { type: "text", body: `Como tu pago fue de *${formatCurrencyAmount(total, pais as never)}*, te dejo *${nombreMejor}* 😊` },
+        ] as never);
+        console.log(`[tablero] convo ${convo.id}: pagó el precio de «${nombreMejor}» (eligió otro) → se lo digo antes de entregar`);
+      }
     } else if (alcanza && alcanza[0] !== elegidoId) {
       proponerProducto(convo.id, alcanza[0]);
       const nombre = producto(config, alcanza[0])?.name ?? "el otro producto";
