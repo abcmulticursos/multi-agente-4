@@ -38,7 +38,25 @@ export function metodoQueNombra(contenido: string, phone: string | null | undefi
   const detectado = detectDynamicPaymentMethod(contenido, phone);
   if (libres.size === 1) return [...libres][0];
   if (detectado && (libres.size === 0 ? !hayMencionNegada(contenido, phone) : libres.has(detectado))) return detectado;
-  return null;
+  return porSusPrimerasLetras(contenido, metodos);
+}
+
+/**
+ * LAS PRIMERAS 4 LETRAS O MÁS (28/10/2026, él lo pidió: «pich» no se reconocía). Solo en una respuesta
+ * corta (hasta 3 palabras, la de quien contesta «¿con qué método?»), sin un «no», y solo si esas letras
+ * empiezan el nombre (o un alias) de UN solo método. Dentro de una frase larga no: ahí una palabra suelta
+ * puede ser cualquier cosa. Lo que ya se reconocía (nombre, alias, una letra de error) va antes y no cambia.
+ */
+function porSusPrimerasLetras(contenido: string, metodos: ReturnType<typeof getPaymentMethods>): string | null {
+  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const palabras = norm(contenido).split(" ").filter(Boolean);
+  if (palabras.length === 0 || palabras.length > 3 || palabras.some((w) => NEGACIONES.has(w))) return null;
+  const encontrados = new Set<string>();
+  for (const m of metodos) {
+    const suyas = [m.label, ...(m.aliases ?? [])].flatMap((k) => norm(k).split(" ")).filter((w) => w.length >= 4);
+    if (palabras.some((w) => w.length >= 4 && suyas.some((s) => s !== w && s.startsWith(w)))) encontrados.add(m.method);
+  }
+  return encontrados.size === 1 ? [...encontrados][0] : null;
 }
 
 const NEGACIONES = new Set(["no", "ni", "sin", "tampoco", "nunca", "jamas"]);

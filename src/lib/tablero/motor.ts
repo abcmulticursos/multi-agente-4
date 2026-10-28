@@ -1130,6 +1130,29 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
           completar: {
             para: nombreDe(upgrade.cobro?.producto_id) ?? "el otro",
             ir: async () => {
+              // «¿PUEDO COMPLETAR?» CON OTRO PRODUCTO DELANTE (28/10/2026, su hay1): si lo PREGUNTA y tiene
+              // delante el upsell (ofrecido o su cobro abierto), «¿a cuál te refieres?» con los dos —el que se
+              // completa y el que va aparte—, como el automático. «Quiero completar» va directo, como antes.
+              // Su BLOQUE entero (lo que escribió seguido desde la última respuesta del bot): en su hay1 mandó
+              // «quiero completar el otro» y «ya pagué 3» juntos, y el último solo no dice «completar».
+              const recientes = ultimosMensajes(convo.id, 8);
+              const desdeElBot = recientes.map((m) => m.role !== "user").lastIndexOf(true);
+              const delMensaje = recientes
+                .slice(desdeElBot + 1)
+                .filter((m) => m.role === "user")
+                .map((m) => m.content ?? "")
+                .join("\n");
+              if (preguntaSiPuede(delMensaje)) {
+                const opciones = loQuePuedeComprar(convo, t, pais);
+                const ups = opciones.filter((o) => o.upgrade);
+                const aparte = opciones.filter(
+                  (o) => !o.upgrade && (o.ficha.id === estado?.cobro_ficha_id || (!!ofreciendoAhora && ofreciendoAhora.includes(o.nombre)))
+                );
+                if (ups.length > 0 && aparte.length > 0) {
+                  await preguntarACual(convo, [...ups, ...aparte], pais);
+                  return;
+                }
+              }
               // Si estaba en el regalo, sale de él (se cancela lo que el regalo tenía programado): su
               // cobro manda ahora. Al pagar, su ruta lo vuelve a llevar a la entrega y al regalo.
               const fresca = getConversationById(convo.id) ?? convo;
@@ -1205,7 +1228,29 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     // y la regla de las opciones ya le pide a la IA nombrarlas.)
     ...(recomendarLaCompleta ? { recomendarLaCompleta: true, cuantasOpciones: opcionesAqui.length } : {}),
     ...(preguntaVaga ? { preguntaVaga: true } : {}),
+    // El seguro de «son 2» y de la pregunta vaga: los nombres de todas, la más completa (la más cara) primero.
+    ...(!nota && opcionesAqui.length > 1 && (preguntaVaga || preguntaCuantasOpcionesHay(ultimo))
+      ? { confirmarOpciones: [...opcionesAqui].sort((a, b) => b.valor - a.valor).map((o) => o.nombre) }
+      : {}),
+    // EL REGALO QUE SIGUE PENDIENTE (salió de él para pagar otra cosa): la IA sabe qué es y no lo niega.
+    ...(regaloPorVolverAOfrecer(convo.id) ? { regaloPendiente: textoDelRegalo(config) } : {}),
   });
+}
+
+/** Lo que dice la oferta del regalo (su primera versión, sin spintax), para que la IA sepa qué es. */
+function textoDelRegalo(config: WorkflowConfig | null): string {
+  const pasos = (config?.gift_mechanic?.consent_sequence ?? []).filter((p) => p.enabled !== false);
+  const textos = pasos.map((p) => {
+    const x = p as { body?: string; body_variants?: string[]; caption?: string; caption_variants?: string[] };
+    return (x.caption_variants?.find((v) => v?.trim()) ?? x.caption ?? x.body_variants?.find((v) => v?.trim()) ?? x.body ?? "").trim();
+  });
+  const todo = textos
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\{([^{}|]*)\|[^{}]*\}/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  return todo.slice(0, 400) || "un regalito adicional gratis";
 }
 
 /**
@@ -1743,6 +1788,11 @@ async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQ
   await irA(convo.id, t, x.ficha.id, 0, { enSilencio, upgrade: x.upgrade });
 }
 
+/** ¿Lo PREGUNTA («¿puedo completar?», «se puede pagar…»), o lo pide? Sin signos también: «puedo completar». */
+function preguntaSiPuede(contenido: string): boolean {
+  return /[?¿]/.test(contenido) || /\b(puedo|puede|se puede|podria|podre|es posible)\b/.test(sinTildes(contenido));
+}
+
 /** «¿A cuál te refieres?», con los nombres delante (`preguntarPorCualDeLosDos` de la venta de siempre). */
 const PREGUNTA_A_CUAL = "¿A cuál te refieres? 😊";
 async function preguntarACual(convo: ConversationRow, opciones: LoQuePuedeComprar[], pais: string): Promise<void> {
@@ -1883,7 +1933,9 @@ async function comprarDespuesDeComprar(
     // automático («si no lo sabe, le pregunta a cuál se refiere»): «¿a cuál te refieres?» con los dos —
     // el que se completa (lo que falta) y el que va aparte (entero)—, sin adivinar.
     const delante = opciones.filter((o) => !o.upgrade && (o.ficha.id === cobroAbierto || hayOfertaDelante));
-    if (upgrades.length >= 1 && delante.length > 0 && !respondeAMiPregunta) {
+    // Solo si lo PREGUNTA («¿puedo completar?», «puedo completar para el otro»): «quiero completar el otro»
+    // es una orden clara y va directo al que se completa (28/10/2026, su hay1: así le gustó).
+    if (upgrades.length >= 1 && delante.length > 0 && !respondeAMiPregunta && preguntaSiPuede(contenido)) {
       await preguntarACual(convo, [...upgrades, ...delante], pais);
       return true;
     }

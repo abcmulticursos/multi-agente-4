@@ -107,6 +107,10 @@ export interface ContextoDeLaIA {
   cuantasOpciones?: number;
   /** Pregunta vaga con las opciones delante («y esto qué es», «no entiendo»): explicar las N. */
   preguntaVaga?: boolean;
+  /** «Son 2» o pregunta vaga: los nombres de TODAS las opciones (la más completa primero), para el seguro. */
+  confirmarOpciones?: string[];
+  /** Un regalo que se le ofreció y sigue sin responder: lo que es (para que la IA no lo niegue). */
+  regaloPendiente?: string;
   /** EL CANDADO DE LA ELECCIÓN: lo que eligió, con su precio («PACK… (US$ 4)»). */
   eligio?: string;
   /** Entró en el precio de oferta (lo activó un seguimiento). */
@@ -312,6 +316,11 @@ function cerebro(c: ContextoDeLaIA): string {
       ? `EN ESTE TURNO ESTÁ PREGUNTANDO CUÁNTAS SON O COMPARANDO LAS OPCIONES: empieza confirmando con calidez que son ${c.cuantasOpciones && c.cuantasOpciones > 2 ? c.cuantasOpciones : "dos"} opciones y NÓMBRALAS TODAS por su nombre, en negrita, una por párrafo, con lo que trae cada una (la más completa primero; si una incluye a la otra, dilo: «trae todo lo de X y además…»). Luego UNA sola frase de por qué conviene la más completa —lo que suma, con un detalle concreto de su contenido—, sin menospreciar la otra y sin presión. Sin precios salvo que los haya pedido. NO elijas por él. Esto vale SOLO para esta respuesta: no vuelvas a recomendar en las siguientes.`
       : "",
     // (28/10/2026, su HHH1: a «y esto qué es» tras la oferta de dos opciones habló solo del pack.)
+    // (28/10/2026, su hay3: salió del regalo para pagar 100 CITAS, preguntó «qué es ese regalo» y la IA le
+    // dijo «no hay un regalo extra»: no sabía que seguía pendiente.)
+    c.regaloPendiente
+      ? `TIENE UN REGALO PENDIENTE, GRATIS, que se le ofreció y aún no respondió: «${c.regaloPendiente}». Es aparte de lo que compra y NO depende de pagar nada. Si pregunta por el regalo, explícaselo con eso y dile que, si lo quiere, te escriba «quiero el regalo». NUNCA digas que no hay regalo.`
+      : "",
     c.preguntaVaga
       ? "EN ESTE TURNO NO SABE QUÉ ES LO QUE VE (pregunta algo vago como «y esto qué es» o «no entiendo»): explícale con sencillez que tiene opciones para elegir y NÓMBRALAS TODAS por su nombre, en negrita, una por párrafo, con lo que trae cada una (la más completa primero; si una incluye a la otra, dilo: «trae todo lo de X y además…»). No hables de una sola. Sin precios salvo que los pida. NO elijas por él y no recomiendes."
       : "",
@@ -829,21 +838,25 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // recibió ni que lo está revisando; esas frases se quitan.
   if (!c.nota && !c.sinPagoAprobado && texto) {
     // (Y «enseguida te envío los datos» sin cobro abierto: no sale ninguno — T3 en la copia.)
+    // (28/10/2026, su hay4: este filtro también borraba «apenas se confirme tu pago, te llega…», que solo
+    // explica cómo se compra —y era la frase de «son dos opciones»—. Ahora solo caza el que dice que YA
+    // recibió o está revisando un comprobante; y deja escrito qué quitó.)
     const revisa =
-      /(recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|en cuanto (quede|est[eé]|se) confirm|apenas (est[eé]|se) confirm|revisando tu comprobante|(enseguida|ahora|ya) te (env[ií]o|paso|mando) los datos|te llegan los datos|aqu[ií] (van|tienes) los datos)/i;
-    const antes = texto;
+      /(recib[ií] tu (comprobante|pago|captura)|(estoy|est[aá]) (verificando|revisando|procesando|validando)|en un momento (lo )?(verifico|reviso|valido)|revisando tu comprobante|(enseguida|ahora|ya) te (env[ií]o|paso|mando) los datos|te llegan los datos|aqu[ií] (van|tienes) los datos)/i;
+    const quitadas: string[] = [];
     texto = texto
       .split(/\n\s*\n/)
       .map((b) =>
         b
           .split(/(?<=[.!?¡¿])\s+/)
-          .filter((f) => !revisa.test(f))
+          .filter((f) => (revisa.test(f) ? (quitadas.push(f), false) : true))
           .join(" ")
           .trim()
       )
       .filter(Boolean)
       .join("\n\n");
-    if (texto !== antes) console.log(`[tablero:ia] convo ${convo.id}: decía que revisaba un comprobante que no llegó → se quita esa frase`);
+    if (quitadas.length)
+      console.log(`[tablero:ia] convo ${convo.id}: decía que revisaba un comprobante que no llegó → se quita «${quitadas.join(" ").slice(0, 120)}»`);
   }
   // SIN PAGO APROBADO, NADA DE «YA TE LLEGA»: esas frases se quitan, frase por frase.
   if (c.sinPagoAprobado && texto) {
@@ -929,11 +942,48 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .filter(Boolean),
     tope
   );
+  const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/\*/g, "");
+  // EL SEGURO DE «SON 2» Y DE LA PREGUNTA VAGA (28/10/2026, su hay4: a «que son 2» habló de una sola). Si su
+  // respuesta no nombra TODAS las opciones, empieza diciendo cuáles son. Con su tope de burbujas, va en la
+  // primera, para no pasarlo.
+  if (c.confirmarOpciones && c.confirmarOpciones.length > 1 && burbujas.length > 0) {
+    // Nombrada = alguna palabra que SOLO tiene ella aparece («el pack», «la de ropa», aunque no use el
+    // nombre completo); así no se repite lo que la IA ya dijo con sus palabras.
+    const palabras = (s: string) => plano(s).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 4);
+    const dichas = new Set(palabras(burbujas.join(" ")));
+    const suyas = c.confirmarOpciones.map((x) => palabras(x));
+    const unicas = suyas.map((ws, i) => ws.filter((w) => suyas.every((o, j) => j === i || !o.includes(w))));
+    if (unicas.some((ws) => ws.length > 0 && !ws.some((w) => dichas.has(w)))) {
+      const n = c.confirmarOpciones.length;
+      const nombres = c.confirmarOpciones.map((x) => `*${x}*`);
+      const linea = `Son ${n === 2 ? "dos" : n} opciones 😊: ${nombres.slice(0, -1).join(", ")} y ${nombres[n - 1]}.`;
+      if (tope && burbujas.length >= tope) burbujas[0] = `${linea}\n${burbujas[0]}`;
+      else burbujas.unshift(linea);
+      console.log(`[tablero:ia] convo ${convo.id}: no nombró todas las opciones → empieza con «${linea}»`);
+    }
+  }
+  // LA PREGUNTA FINAL, EN SU PROPIA BURBUJA (28/10/2026, su hay2: el saludo y «¿ya te decidiste…?» iban en un
+  // solo bloque y la pregunta no se veía). Como el automático: si la última burbuja termina en una pregunta
+  // con texto antes, la pregunta sale aparte. Solo la última frase, solo si va al final, y sin pasar su tope.
+  if (!(tope && burbujas.length >= tope) && burbujas.length > 0) {
+    const ult = burbujas[burbujas.length - 1];
+    const i = ult.lastIndexOf("¿");
+    const pregunta = i > 0 ? ult.slice(i).trim() : "";
+    const antes = i > 0 ? ult.slice(0, i).trim() : "";
+    if (
+      pregunta &&
+      !pregunta.includes("\n") &&
+      /\?[^\p{L}\p{N}¿?]*$/u.test(pregunta) &&
+      antes.length >= 25 &&
+      !/[:¿]$/.test(antes)
+    ) {
+      burbujas.splice(burbujas.length - 1, 1, antes, pregunta);
+    }
+  }
   // LA LISTA CORTA DE LAS OPCIONES, SOLO SI LA IA NO LAS NOMBRÓ TODAS (27/10/2026): si ya las explicó, no
   // se repite un texto fijo debajo.
   let alFinal = c.alFinal ?? [];
   if (c.opcionesSiFaltan && burbujas.length > 0 && (c.opcionesSiFaltan.siempre || preguntaDeElegir)) {
-    const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/\*/g, "");
     const dicho = plano(burbujas.join(" "));
     if (c.opcionesSiFaltan.nombres.some((n) => !dicho.includes(plano(n)))) {
       alFinal = [c.opcionesSiFaltan.burbuja, ...alFinal];
