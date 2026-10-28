@@ -134806,10 +134806,6 @@ tableros:
           de: f-rec26-k3r2
           salida: siguiente
           a: f-rec26-lu28
-        - id: c-rec26-1hxcf
-          de: f-rec26-q3sw
-          salida: siguiente
-          a: f-rec26-rkpy
         - id: c-rec26-1il9g
           de: f-rec26-rkpy
           salida: dec:d-rec26-srz2
@@ -134919,6 +134915,10 @@ tableros:
           de: f-rec26-4ddo
           salida: siguiente
           a: f-mvq1ekfa-ho4y0
+        - id: c-mvrv86tr-ygd
+          de: f-rec26-q3sw
+          salida: siguiente
+          a: f-rec26-xpt8
       curvas:
         c3:
           x: 121
