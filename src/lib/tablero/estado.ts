@@ -57,6 +57,15 @@ db.exec(`
     PRIMARY KEY (conversation_id, ficha_id)
   );
   CREATE INDEX IF NOT EXISTS idx_tablero_visitas_tienda ON tablero_visitas(tienda_id);
+  -- EL PRECIO CON EL QUE SE LE PRESENTÓ CADA PRODUCTO (28/10/2026): ver «precioDeSuEntrada».
+  CREATE TABLE IF NOT EXISTS tablero_precios (
+    conversation_id INTEGER NOT NULL,
+    producto_id TEXT NOT NULL,
+    pais TEXT NOT NULL,
+    normal REAL,
+    oferta REAL,
+    PRIMARY KEY (conversation_id, producto_id, pais)
+  );
 `);
 
 // Columnas que llegaron después: se añaden si faltan.
@@ -506,4 +515,26 @@ export function salirDelTablero(conversationId: number): void {
   db.prepare("DELETE FROM tablero_compras WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_pagos WHERE conversation_id = ?").run(conversationId);
   db.prepare("DELETE FROM tablero_entregas WHERE conversation_id = ?").run(conversationId);
+  db.prepare("DELETE FROM tablero_precios WHERE conversation_id = ?").run(conversationId);
+}
+
+/**
+ * EL PRECIO DE SU ENTRADA (28/10/2026, como `freezePricesForConvo` del automático). La primera vez que el
+ * tablero calcula el precio de un producto para un cliente, se guarda (normal y oferta). Desde ahí manda el
+ * guardado si él SUBE el precio, y el de hoy si lo BAJA: al cliente nunca se le cobra más de lo que se le dijo.
+ */
+export function precioDeSuEntrada(
+  conversationId: number,
+  productoId: string,
+  pais: string,
+  normal: number | null,
+  oferta: number | null
+): { normal: number | null; oferta: number | null } {
+  db.prepare(
+    "INSERT OR IGNORE INTO tablero_precios (conversation_id, producto_id, pais, normal, oferta) VALUES (?, ?, ?, ?, ?)"
+  ).run(conversationId, productoId, pais, normal, oferta);
+  const r = db
+    .prepare("SELECT normal, oferta FROM tablero_precios WHERE conversation_id = ? AND producto_id = ? AND pais = ?")
+    .get(conversationId, productoId, pais) as { normal: number | null; oferta: number | null } | undefined;
+  return r ?? { normal, oferta };
 }

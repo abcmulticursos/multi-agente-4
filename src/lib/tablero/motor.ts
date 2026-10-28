@@ -11,6 +11,7 @@
  *     producto, regalo, avisos, registro en Meta, horas de silencio y la ventana de 24 h.
  *  4. Lo programado lleva su dueño: los `tablero_*` van aquí desde el obrero, nunca al de siempre.
  */
+import { AsyncLocalStorage } from "node:async_hooks";
 import { trackFailedPaymentAttempt } from "@/lib/workflow/payment";
 import {
   addToPaidTotal,
@@ -133,6 +134,7 @@ import {
   fichasVisitadas,
   reiniciarRelojDelCobro,
   salirDelTablero,
+  precioDeSuEntrada,
   sumarAlCobro,
   tocarVuelta,
   varianteVista,
@@ -168,14 +170,34 @@ function producto(config: WorkflowConfig | null, id: string | undefined | null):
   return config?.biblioteca_de_productos?.find((p) => p.id === id) ?? null;
 }
 
+/**
+ * EL CLIENTE DEL TURNO, para el precio de su entrada (28/10/2026). Cada puerta del motor (mensaje, regalo,
+ * reloj) corre dentro de `conSuPrecio`; así `precioDelProducto` sabe de quién es sin pasarlo por las ~15
+ * llamadas. Fuera de una puerta no hay cliente y el precio es el de hoy (lo de antes).
+ */
+const clienteDelTurno = new AsyncLocalStorage<number>();
+function conSuPrecio<T>(conversationId: number, hacer: () => Promise<T>): Promise<T> {
+  return clienteDelTurno.run(conversationId, hacer);
+}
+
 /** El precio de un producto en el país del cliente: el normal o el de oferta (si lo tiene). */
 function precioDelProducto(p: ProductoDeLaBiblioteca | null, pais: string, deOferta: boolean): number | null {
   if (!p) return null;
   const suyo = p.precios_por_pais?.[pais];
-  const normal = suyo?.price_soles ?? p.price_soles;
-  const oferta = suyo?.discount_price_soles ?? p.discount_price_soles;
-  const v = deOferta && typeof oferta === "number" && oferta > 0 ? oferta : normal;
-  return typeof v === "number" && v > 0 ? v : null;
+  const positivo = (x: unknown) => (typeof x === "number" && x > 0 ? x : null);
+  let normal = positivo(suyo?.price_soles ?? p.price_soles);
+  let oferta = positivo(suyo?.discount_price_soles ?? p.discount_price_soles);
+  // CONGELADO AL PRESENTARLO, como el automático: si él lo SUBE después, el cliente sigue con el que vio;
+  // si lo BAJA, se queda con el más bajo.
+  const convoId = clienteDelTurno.getStore();
+  if (convoId && p.id) {
+    const visto = precioDeSuEntrada(convoId, p.id, pais, normal, oferta);
+    const menor = (hoy: number | null, antes: number | null) => (hoy !== null && antes !== null ? Math.min(hoy, antes) : hoy ?? antes);
+    normal = menor(normal, visto.normal);
+    oferta = menor(oferta, visto.oferta);
+  }
+  const v = deOferta && oferta !== null ? oferta : normal;
+  return v;
 }
 
 /**
@@ -2296,6 +2318,10 @@ export async function alRecibirMensaje(
    */
   tiendaDelCanal?: Tienda | null
 ): Promise<boolean> {
+  return conSuPrecio(convo.id, () => alRecibirMensajeDentro(convo, contenido, tiendaDelCanal));
+}
+
+async function alRecibirMensajeDentro(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
   // /reiniciar (para probar): sale del tablero y el motor de siempre borra la charla como
   // siempre. El siguiente «hola» vuelve a entrar al tablero desde el Inicio.
   if (/^\/(restart|reset|reiniciar)$/i.test(contenido.trim())) {
@@ -2352,6 +2378,10 @@ function reenviarSiLoPide(convo: ConversationRow, texto: string): boolean {
 }
 
 export async function contestarEnElRegalo(convo: ConversationRow): Promise<boolean> {
+  return conSuPrecio(convo.id, () => contestarEnElRegaloDentro(convo));
+}
+
+async function contestarEnElRegaloDentro(convo: ConversationRow): Promise<boolean> {
   const estado = estadoEnElTablero(convo.id);
   if (!estado || !ESTADOS_DEL_REGALO.has(convo.state ?? "")) return false;
   return conSuTienda(estado.tienda_id, convo, async () => {
@@ -3407,6 +3437,10 @@ export async function prepararEntradaAlWorkflow(convo: ConversationRow, workflow
 
 /** Los relojes de sus fichas. Lo manda aquí el obrero. */
 export async function ejecutarAccionDelTablero(accion: ScheduledActionRow): Promise<void> {
+  return conSuPrecio(accion.conversation_id, () => ejecutarAccionDelTableroDentro(accion));
+}
+
+async function ejecutarAccionDelTableroDentro(accion: ScheduledActionRow): Promise<void> {
   const convo = getConversationById(accion.conversation_id);
   if (!convo) return;
   let payload: Record<string, unknown> = {};
