@@ -638,10 +638,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         temperature: 0.6,
         ...(herramientas.length ? { tools: herramientas } : {}),
         // LA MISMA EMPRESA, PARA QUE EL CACHÉ ACIERTE (28/10/2026). OpenRouter reparte las llamadas entre
-        // varias y el caché es de cada una: medido, GMICloud cacheó 7 de 8, Relace 1 de 5, Cloudflare 0 de 2.
-        // Va primero; si falla o no está, OpenRouter sigue con las demás (no se queda mudo). Es un campo
-        // del pedido, no un cambio de la conexión.
-        ...({ provider: { order: ["gmicloud"], allow_fallbacks: true } } as object),
+        // varias y el caché es de cada una. Medido con llamadas reales, cada empresa sola (10 por empresa):
+        // las tres cachean; Cloudflare 1,7–2,7 s y sin errores, Relace 2,0 s con 1 error, GMICloud una de
+        // 90 s. Cloudflare primero; si falla, las demás en ese orden (no se queda mudo). Es un campo del
+        // pedido, no un cambio de la conexión.
+        ...({ provider: { order: ["cloudflare", "relace", "gmicloud"], allow_fallbacks: true } } as object),
         ...SIN_PENSAR_DE_MAS,
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
