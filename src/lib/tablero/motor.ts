@@ -3289,7 +3289,20 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           return null;
         })();
         if (porNumero) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 25)}» → ${porNumero} (por el número de la lista)`);
-        const decide = porNumero ?? await elegirOpcionConIA(
+        // «EL OTRO» CON DOS EN EL COBRO (29/10/2026, su conversación 113: «no mejor el otro» + «no me alcanza»
+        // con el PACK elegido; la IA leyó el «no» del principio como rechazo y contestó «ninguna»). Con dos
+        // opciones y una elegida, «el otro» es la que no tiene: lo resuelve el bot. No cuenta si lo pregunta,
+        // si lo rechaza («no quiero el otro») ni si quiere los dos («el otro también»).
+        const porOtro = (() => {
+          if (porNumero || opciones.length !== 2 || !elegidoId || !opciones.includes(elegidoId)) return null;
+          const n = sinTildes(contenido);
+          if (!/\b(el|la|lo|al|del|ese|esa) otr[oa]\b/.test(n)) return null;
+          if (/[?¿]/.test(contenido) || /\b(cuanto|cuesta|costo|vale|valia|precio|que trae|que tiene|como es|cual es|tambien)\b/.test(n)) return null;
+          if (/\bno (lo |la )?(quiero|deseo|necesito|me interesa|me gusta)\b/.test(n)) return null;
+          return opciones.find((id) => id !== elegidoId) ?? null;
+        })();
+        if (porOtro) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 25)}» → ${porOtro} (el otro de los dos)`);
+        const decide = porNumero ?? porOtro ?? await elegirOpcionConIA(
           convo.id,
           contenido,
           opciones.map((id) => ({
