@@ -2625,8 +2625,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // Una palabra que SOLO tiene ese producto (no las que comparte con los otros).
     const unicas = opciones.map((o, i) => palabrasDe(o.nombre).filter((w) => !opciones.some((x, j) => j !== i && palabrasDe(x.nombre).includes(w))));
     const nombrados = opciones.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
-    if (nombrados.length === 1 && !nombrados[0].upgrade) {
-      const x = nombrados[0];
+    // «¿PUEDO TENERLO CON LO QUE PAGUÉ?» SIN NOMBRARLO (29/10/2026, su holala2): con el upsell en pantalla
+    // escribió «no puedo tenerlo con los 3 dolares que pague» y el cuadrito «No» del upsell lo despidió por
+    // la primera palabra. Si PREGUNTA si puede y no nombra ninguno, habla de lo que tiene delante: el producto
+    // que presenta la ficha donde está (uno solo, que no sea el que se completa). Completar sigue su camino.
+    let elegido = nombrados.length === 1 ? nombrados[0] : null;
+    if (nombrados.length === 0 && preguntaSiPuede(contenido) && !/\b(complet\w*|diferencia|falta\w*|otro|otra)\b/.test(sinTildes(contenido))) {
+      const aqui = t.fichas.find((f) => f.id === estado?.ficha_id);
+      const enPantalla = opciones.filter((o) => !o.upgrade && (aqui?.presenta ?? []).includes(o.productoId));
+      if (enPantalla.length === 1) elegido = enPantalla[0];
+    }
+    if (elegido && !elegido.upgrade) {
+      const x = elegido;
       const up = opciones.find((o) => o.upgrade);
       const texto = up
         ? `*${x.nombre}* es un material aparte: se paga completo, *${formatCurrencyAmount(x.precio, pais as never)}* 😊\n\nLo que ya pagaste sirve solo para completar *${up.nombre}* (te falta *${formatCurrencyAmount(up.precio, pais as never)}*).\n\n¿Cuál te gustaría?`
