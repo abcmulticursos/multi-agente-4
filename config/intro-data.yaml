@@ -125603,7 +125603,7 @@ tableros:
             - ptcocina_dietas
           seguimientos:
             - id: coc_pe_seg_b_1
-              minutos: 120
+              minutos: 2
               variantes:
                 - id: coc_pe_seg_b_1a
                   nombre: Versión A
@@ -125612,13 +125612,13 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
-                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+                          *SEGUIMIENTO 1* Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
                       delay_after_sec: 4
                 - id: coc_pe_seg_b_1b
                   nombre: Versión B
-                  peso: 1
+                  peso: 0
                   steps:
                     - type: text
                       body_variants:
@@ -125627,8 +125627,10 @@ tableros:
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: coc_pe_seg_b_2
-              minutos: 600
+              minutos: 5
               variantes:
                 - id: coc_pe_seg_b_2a
                   nombre: Versión A
@@ -125637,12 +125639,15 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
-                          Paso rapidito por aquí ✨
+                          *SEGUIMIENTO 2* Paso rapidito por aquí ✨
 
                           Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
         - id: coc_pe_cobro_p
           tipo: cobro
           x: 720
@@ -125679,7 +125684,7 @@ tableros:
             - ptcocina_pack
           seguimientos:
             - id: coc_pe_seg_p_1
-              minutos: 120
+              minutos: 2
               variantes:
                 - id: coc_pe_seg_p_1a
                   nombre: Versión A
@@ -125688,23 +125693,25 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
-                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+                          *SEGUIMIENTO 1* Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
 
                           Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
                       delay_after_sec: 4
                 - id: coc_pe_seg_p_1b
                   nombre: Versión B
-                  peso: 1
+                  peso: 0
                   steps:
                     - type: text
                       body_variants:
                         - |-
-                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+                          *SEGUIMIENTO 1* ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: coc_pe_seg_p_2
-              minutos: 600
+              minutos: 5
               variantes:
                 - id: coc_pe_seg_p_2a
                   nombre: Versión A
@@ -125713,12 +125720,15 @@ tableros:
                     - type: text
                       body_variants:
                         - |-
-                          Paso rapidito por aquí ✨
+                          *SEGUIMIENTO 2* Paso rapidito por aquí ✨
 
                           Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
         - id: coc_pe_ent_b
           tipo: entregar
           x: 1050
@@ -125842,7 +125852,7 @@ tableros:
             - ptcocina_peruanas
           seguimientos:
             - id: coc_pe_seg_u1_1
-              minutos: 120
+              minutos: 2
               variantes:
                 - id: coc_pe_seg_u1_1a
                   nombre: Versión A
@@ -125866,8 +125876,10 @@ tableros:
 
                           ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
                       delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
             - id: coc_pe_seg_u1_2
-              minutos: 600
+              minutos: 5
               variantes:
                 - id: coc_pe_seg_u1_2a
                   nombre: Versión A
@@ -125882,6 +125894,22 @@ tableros:
 
                           Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
                       delay_after_sec: 4
+                - id: v-mvtxg2i1-3h7
+                  nombre: Versión A
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
         - id: coc_pe_ent_u1
           tipo: entregar
           x: 2040
