@@ -628,12 +628,19 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         ],
         temperature: 0.6,
         ...(herramientas.length ? { tools: herramientas } : {}),
+        // LA MISMA EMPRESA, PARA QUE EL CACHÉ ACIERTE (28/10/2026). OpenRouter reparte las llamadas entre
+        // varias y el caché es de cada una: medido, GMICloud cacheó 7 de 8, Relace 1 de 5, Cloudflare 0 de 2.
+        // Va primero; si falla o no está, OpenRouter sigue con las demás (no se queda mudo). Es un campo
+        // del pedido, no un cambio de la conexión.
+        ...({ provider: { order: ["gmicloud"], allow_fallbacks: true } } as object),
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
       if (r.usage) {
       // Cuántos se cachearon (28/10/2026): para ver en el log si el proveedor fijo está ahorrando.
       const cacheados = (r.usage as { prompt_tokens_details?: { cached_tokens?: number } }).prompt_tokens_details?.cached_tokens ?? 0;
-      console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens}`);
+      // Y qué empresa la atendió (OpenRouter reparte): el caché es de cada una (28/10/2026).
+      const quien = (r as { provider?: string }).provider ?? "?";
+      console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens} · ${quien}`);
     }
       const pidio = (nombre: string) =>
         r.choices[0]?.message?.tool_calls?.some((t) => t.type === "function" && t.function.name === nombre) ?? false;
