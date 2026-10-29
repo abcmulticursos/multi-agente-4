@@ -125743,8 +125743,8 @@ tableros:
           producto_id: ptcocina_pack
         - id: coc_pe_upgrade
           tipo: mensaje
-          x: 1353
-          y: -396
+          x: 2805
+          y: -847
           titulo: Upgrade al pack
           steps:
             - type: text
@@ -125766,8 +125766,8 @@ tableros:
           instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS el otro producto, y solo paga la diferencia.
         - id: coc_pe_cobro_up
           tipo: cobro
-          x: 1672
-          y: -429
+          x: 3124
+          y: -880
           titulo: Cobro · upgrade (diferencia)
           steps:
             - type: text
@@ -126606,11 +126606,277 @@ tableros:
           x: 720
           y: 4400
           titulo: Pasa a un asesor
+        - id: f-mvu306rc-l3ug5
+          tipo: mensaje
+          x: 286
+          y: -1529
+          titulo: Intro
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+                  🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+              caption_variants:
+                - |-
+                  Este es nuestro producto
+
+                  *{{PRODUCTO_BASE}}* 📚
+
+                  ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+                  ✅ Menú semanal listo para 4 semanas.
+                  ✅ Lista de compras por semana.
+                  ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+                  (Imagen referencial)
+              delay_after_sec: 5
+            - type: image
+              drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+              caption_variants:
+                - |-
+                  *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+                  - 🎁 Guía de inicio rápido
+                  - 🎁 Plantillas para imprimir
+                  - 🎁 Acceso de por vida
+
+                  *Bonitos complementos para empezar hoy* 🤗
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+                  ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+                  🟣 *¿CÓMO ADQUIRIRLO?*
+
+                  - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+                  - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+                  *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+              delay_after_sec: 4
+              buttons:
+                - id: b-mvu306rd-lkh9e
+                  label: Quiero pagar
+                  action: send_steps
+                  steps: []
+          presenta:
+            - ptcocina_dietas
+        - id: f-mvu306rd-p9mvs
+          tipo: cobro
+          x: 616
+          y: -1529
+          titulo: Cobro · RECETARIO DIETAS FIT
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+            metodos: true
+        - id: f-mvu306rd-mri0e
+          tipo: seguimientos
+          x: 616
+          y: -1199
+          titulo: Seguimientos · RECETARIO DIETAS FIT
+          presenta:
+            - ptcocina_dietas
+          seguimientos:
+            - id: s-mvu306rd-k5mis
+              minutos: 2
+              variantes:
+                - id: v-mvu306rd-p48l9
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                - id: v-mvu306rd-66brs
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvu306rd-f1xr5
+              minutos: 5
+              variantes:
+                - id: v-mvu306rd-p1xjy
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvu306rd-ivoed
+          tipo: entregar
+          x: 946
+          y: -1529
+          titulo: Entrega · RECETARIO DIETAS FIT
+          por_correo: true
+          producto_id: ptcocina_dietas
+        - id: f-mvu306rd-g0c53
+          tipo: mensaje
+          x: 1276
+          y: -1529
+          titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+                  ✅ Paso a paso con fotos.
+                  ✅ Secretos de las abuelas para el punto exacto.
+
+                  *¿Lo agregas?*
+              delay_after_sec: 4
+              buttons:
+                - id: b-mvu306rd-xnc32
+                  label: Sí, lo quiero
+                  action: send_steps
+                  steps: []
+                - id: b-mvu306rd-zu7w8
+                  label: No, gracias
+                  action: send_steps
+                  steps: []
+          presenta:
+            - ptcocina_peruanas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+          espera_min: 2
+        - id: f-mvu306rd-kicgk
+          tipo: cobro
+          x: 1276
+          y: -1199
+          titulo: Cobro · COMIDAS PERUANAS CASERAS
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ¿Con qué método prefieres pagar? 👇
+
+                  {{LISTA_METODOS_POR_PAIS}}
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - Así te paso los datos exactos para tu pago 😊
+              delay_after_sec: 4
+          cobro:
+            modo: producto
+            producto_id: ptcocina_peruanas
+            metodos: true
+        - id: f-mvu306rd-7dmlq
+          tipo: seguimientos
+          x: 1276
+          y: -869
+          titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+          presenta:
+            - ptcocina_peruanas
+          seguimientos:
+            - id: s-mvu306rd-g0zxz
+              minutos: 2
+              variantes:
+                - id: v-mvu306rd-escfd
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                - id: v-mvu306rd-nbued
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvu306rd-3m8e4
+              minutos: 5
+              variantes:
+                - id: v-mvu306rd-35h67
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvu306rd-uf09r
+          tipo: entregar
+          x: 1606
+          y: -1199
+          titulo: Entrega · COMIDAS PERUANAS CASERAS
+          por_correo: true
+          producto_id: ptcocina_peruanas
+        - id: f-mvu306rd-uojjy
+          tipo: regalo
+          x: 1936
+          y: -1529
+          titulo: Regalo
       cables:
-        - id: c1
-          de: coc_pe_inicio
-          salida: siguiente
-          a: coc_pe_intro
         - id: c2
           de: coc_pe_intro
           salida: btn:coc_pe_b_basico
@@ -126827,6 +127093,58 @@ tableros:
           de: coc_pe_ent_b
           salida: siguiente
           a: coc_pe_upsell1
+        - id: c-mvu306rd-2x07b
+          de: f-mvu306rc-l3ug5
+          salida: btn:b-mvu306rd-lkh9e
+          a: f-mvu306rd-p9mvs
+        - id: c-mvu306rd-alvsw
+          de: f-mvu306rd-p9mvs
+          salida: sin_pago
+          a: f-mvu306rd-mri0e
+        - id: c-mvu306rd-a9td6
+          de: f-mvu306rd-p9mvs
+          salida: pagado
+          a: f-mvu306rd-ivoed
+        - id: c-mvu306rd-12xwi
+          de: f-mvu306rd-ivoed
+          salida: siguiente
+          a: f-mvu306rd-g0c53
+        - id: c-mvu306rd-xlj7q
+          de: f-mvu306rd-g0c53
+          salida: btn:b-mvu306rd-xnc32
+          a: f-mvu306rd-kicgk
+        - id: c-mvu306rd-y8998
+          de: f-mvu306rd-kicgk
+          salida: sin_pago
+          a: f-mvu306rd-7dmlq
+        - id: c-mvu306rd-ihi6i
+          de: f-mvu306rd-kicgk
+          salida: pagado
+          a: f-mvu306rd-uf09r
+        - id: c-mvu306rd-oibfh
+          de: f-mvu306rd-g0c53
+          salida: btn:b-mvu306rd-zu7w8
+          a: f-mvu306rd-uojjy
+        - id: c-mvu306rd-qjhfr
+          de: f-mvu306rd-uf09r
+          salida: siguiente
+          a: f-mvu306rd-uojjy
+        - id: c-mvu306rd-2gtg1
+          de: f-mvu306rd-g0c53
+          salida: sin_respuesta
+          a: f-mvu306rd-uojjy
+        - id: c-mvu306rd-78hmo
+          de: f-mvu306rd-7dmlq
+          salida: fin
+          a: f-mvu306rd-uojjy
+        - id: c-mvu306rd-7ozkp
+          de: f-mvu306rc-l3ug5
+          salida: siguiente
+          a: f-mvu306rd-mri0e
+        - id: c-mvu30p4o-y2l
+          de: coc_pe_inicio
+          salida: siguiente
+          a: f-mvu306rc-l3ug5
       cajas:
         - id: manta-coc_pe_inicio
           x: 20
