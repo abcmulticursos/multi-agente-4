@@ -83,6 +83,7 @@ import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, preguntarElMetodo } from "./pago";
+import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import {
   VENTANA_DE_META_MIN,
@@ -2335,6 +2336,23 @@ const BOTON_CORREO_SI = "tablero_correo_si";
 const BOTON_CORREO_NO = "tablero_correo_no";
 const PATRON_DE_CORREO = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 
+/** El último mensaje que mandó el bot (para leer su «¿Quisiste decir *x*?»). */
+function ultimoMensajeDelBot(conversationId: number): string {
+  return [...ultimosMensajes(conversationId, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+}
+
+/**
+ * ¿HABLA DE SU CORREO? Un correo (bien o mal escrito), o el «sí» al corregido que se le propuso. `esperando`:
+ * se le acaba de pedir, así que también vale sin «@» («juan gmail com»).
+ */
+function hablaDeSuCorreo(conversationId: number, contenido: string, esperando: boolean): boolean {
+  if (!contenido || contenido.startsWith("bubble:")) return false;
+  const propuesto = correoQueSeLePropuso(ultimoMensajeDelBot(conversationId));
+  if (revisarCorreo(contenido, esperando || !!propuesto)) return true;
+  const corto = sinTildes(contenido).replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+  return !!propuesto && AFIRMA.test(corto);
+}
+
 /**
  * QUIERE SUS ENLACES POR CORREO (por el botón de la entrega o pidiéndolo de palabra). Si en el mismo
  * mensaje viene su correo, o ya lo dio antes, se envía ahí; si no, se le pide y se espera. Devuelve
@@ -2342,14 +2360,42 @@ const PATRON_DE_CORREO = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
  */
 async function quiereSuCorreo(convo: ConversationRow, t: Tablero, mensaje: string): Promise<string | null> {
   const fresca = getConversationById(convo.id) ?? convo;
-  const correo = mensaje.match(PATRON_DE_CORREO)?.[0] ?? (fresca.client_email ?? "").trim();
+  // EL CORREO MAL ESCRITO (29/10/2026, él lo pidió: «jotmail, yimail, gimail… @ gmail,com»): se revisa sin IA
+  // (`correo.ts`). Si no cuadra se le dice y se le propone el corregido; su «sí» lo acepta, y si vuelve a
+  // escribir el mismo se respeta. Ninguno dudoso se envía sin esa respuesta.
+  const delBot = ultimoMensajeDelBot(convo.id);
+  const propuesto = correoQueSeLePropuso(delBot);
+  const corto = sinTildes(mensaje).replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+  let correo: string | null = propuesto && corto && AFIRMA.test(corto) ? propuesto : null;
+  if (!correo && mensaje) {
+    const r = revisarCorreo(mensaje, fresca.state === "tablero" ? estadoEnElTablero(convo.id)?.correo_espera === 1 || !!propuesto : !!propuesto);
+    if (r?.tipo === "bien") correo = r.correo;
+    else if (r?.tipo === "dudoso") {
+      const marcado = correoQueSeMarco(delBot);
+      const junto = (s: string) => sinTildes(s).replace(/\s+/g, "");
+      if (marcado && junto(marcado) === junto(r.escrito)) {
+        // Insiste con el mismo: se respeta (si al menos tiene forma de correo; si no, el corregido).
+        const limpio = r.escrito.replace(/\s+/g, "").replace(/,/g, ".").toLowerCase();
+        correo = PATRON_DE_CORREO.test(limpio) ? limpio : r.sugerido;
+      } else {
+        esperarCorreo(convo.id, 1);
+        await sendBotText(convo, textoDelCorreoDudoso(r));
+        console.log(`[tablero:correo] convo ${convo.id}: «${r.escrito}» parece mal escrito → le propongo «${r.sugerido}»`);
+        return null;
+      }
+    }
+  }
+  if (!correo) correo = (fresca.client_email ?? "").trim() || null;
   if (correo) {
     esperarCorreo(convo.id, 0);
     const ok = await enviarElCorreo(fresca, correo);
-    return ok
-      ? `Ya le enviamos los enlaces de lo que compró a ${correo}. Díselo, que revise también spam, y que si prefiere otro correo solo lo escriba.`
-      : // Sin promesas: el recorrido cazó a la IA diciendo «ahora mismo te envío» con el envío fallado.
-        "El correo NO se pudo enviar. NO digas que se envió ni que se enviará ahora. Dile con amabilidad que el material ya lo tiene aquí en el chat y que un asesor le escribirá por el correo.";
+    // Enviado: la confirmación de siempre, fija como el automático (sin IA y sin volver a ofrecer otro correo).
+    if (ok) {
+      await sendBotText(convo, textoDelCorreoEnviado(correo));
+      return null;
+    }
+    // Sin promesas: el recorrido cazó a la IA diciendo «ahora mismo te envío» con el envío fallado.
+    return "El correo NO se pudo enviar. NO digas que se envió ni que se enviará ahora. Dile con amabilidad que el material ya lo tiene aquí en el chat y que un asesor le escribirá por el correo.";
   }
   esperarCorreo(convo.id, 1);
   const entrega = t.fichas.find((f) => f.tipo === "entregar" && f.por_correo);
@@ -2769,7 +2815,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // UN CORREO ELECTRÓNICO EN EL MENSAJE LO ATIENDE SIEMPRE EL TABLERO (24/10/2026, lo cazó el
     // recorrido por países): el motor de siempre lo tomaba como su «pedido de correo» y mandaba SU
     // plantilla, que es de su venta, no de lo que compró este cliente en el tablero.
-    if (t && PATRON_DE_CORREO.test(contenido) && entregasDelCliente(convo.id).length > 0) {
+    if (t && hablaDeSuCorreo(convo.id, contenido, false) && entregasDelCliente(convo.id).length > 0) {
       const nota = await quiereSuCorreo(convo, t, contenido);
       if (nota) await contestarConIA(convo, t, nota);
       return true;
@@ -3081,7 +3127,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (nota) await contestarConIA(convo, t, nota);
     return true;
   }
-  if (estado.correo_espera === 1 && PATRON_DE_CORREO.test(contenido)) {
+  if (estado.correo_espera === 1 && hablaDeSuCorreo(convo.id, contenido, true)) {
     const nota = await quiereSuCorreo(convo, t, contenido);
     if (nota) await contestarConIA(convo, t, nota);
     return true;
@@ -3573,15 +3619,32 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
 
   // 2-ter. LA FICHA «PEDIR CORREO»: cuando escribe su correo, se le manda el material.
   if (ficha?.tipo === "correo" && !contenido.startsWith("bubble:")) {
-    const correo = contenido.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
     respondio(convo, t);
+    // Revisado sin IA, como en «📧 por correo» (`quiereSuCorreo`): mal escrito → se le propone el corregido.
+    const delBot = ultimoMensajeDelBot(convo.id);
+    const propuesto = correoQueSeLePropuso(delBot);
+    const corto = sinTildes(contenido).replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+    let correo: string | null = propuesto && AFIRMA.test(corto) ? propuesto : null;
+    if (!correo) {
+      const r = revisarCorreo(contenido, true);
+      const marcado = correoQueSeMarco(delBot);
+      const junto = (s: string) => sinTildes(s).replace(/\s+/g, "");
+      if (r?.tipo === "bien") correo = r.correo;
+      else if (r && marcado && junto(marcado) === junto(r.escrito)) {
+        const limpio = r.escrito.replace(/\s+/g, "").replace(/,/g, ".").toLowerCase();
+        correo = PATRON_DE_CORREO.test(limpio) ? limpio : r.sugerido;
+      } else if (r) {
+        await sendBotText(convo, textoDelCorreoDudoso(r));
+        console.log(`[tablero:correo] convo ${convo.id}: «${r.escrito}» parece mal escrito → le propongo «${r.sugerido}»`);
+        return true;
+      }
+    }
     if (!correo) {
       await contestarConIA(convo, t, "Estás esperando su correo electrónico para enviarle el material. Contesta con naturalidad lo que escribió y vuelve a pedirle su correo.");
       return true;
     }
     if (await enviarElCorreo(convo, correo, ficha)) {
-      if (!(await seguirPor(convo.id, t, ficha.id, "enviado", 0)))
-        await contestarConIA(convo, t, `Ya le enviamos el material a ${correo}. Díselo y que revise también la carpeta de spam.`);
+      if (!(await seguirPor(convo.id, t, ficha.id, "enviado", 0))) await sendBotText(convo, textoDelCorreoEnviado(correo));
     } else
       await contestarConIA(convo, t, "No se pudo enviar el correo ahora. Dile con amabilidad que el material lo tiene aquí en el chat y que un asesor le escribirá.");
     return true;
