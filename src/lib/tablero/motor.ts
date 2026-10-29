@@ -2093,7 +2093,8 @@ async function comprarDespuesDeComprar(
     // ambiguo (28/10/2026, su HHH1: con 100 CITAS abierto, la IA le cobró 100 CITAS entero). Como el
     // automático («si no lo sabe, le pregunta a cuál se refiere»): «¿a cuál te refieres?» con los dos —
     // el que se completa (lo que falta) y el que va aparte (entero)—, sin adivinar.
-    const delante = opciones.filter((o) => !o.upgrade && (o.ficha.id === cobroAbierto || hayOfertaDelante));
+    // (Y en el regalo: el upsell se le ofreció justo antes y no lo compró — su conversación 101, 28/10/2026.)
+    const delante = opciones.filter((o) => !o.upgrade && (o.ficha.id === cobroAbierto || hayOfertaDelante || enElRegalo));
     // Solo si lo PREGUNTA («¿puedo completar?», «puedo completar para el otro»): «quiero completar el otro»
     // es una orden clara y va directo al que se completa (28/10/2026, su hay1: así le gustó).
     if (upgrades.length >= 1 && delante.length > 0 && !respondeAMiPregunta && preguntaSiPuede(contenido)) {
@@ -2533,6 +2534,40 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   }
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+
+  // «CON LO QUE PAGUÉ, ¿ME LLEVO X?» (28/10/2026, su conversación 101: la IA contestó «¡claro que sí! con lo
+  // que ya pagaste puedes llevarte 100 CITAS sin pagar nada extra» — falso: el upsell va aparte y se paga
+  // entero). Lo contesta el bot con los datos, como el automático: si X es el que se completa, lo que falta;
+  // si va aparte, su precio entero y para qué sirve lo pagado. Solo con algo comprado y X nombrado.
+  if (t && !contenido.startsWith("bubble:") && /\b(pague|pagado|pagaste|ya pague|con eso|ese pago|mi pago)\b/.test(sinTildes(contenido))) {
+    const opciones = loQuePuedeComprar(convo, t, pais);
+    const palabrasDe = (s: string) =>
+      sinTildes(s)
+        .replace(/[^a-z0-9ñ\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w))
+        .map((w) => (w.length > 4 ? w.replace(/s$/, "") : w));
+    const dichas = new Set(palabrasDe(contenido));
+    // Una palabra que SOLO tiene ese producto (no las que comparte con los otros).
+    const unicas = opciones.map((o, i) => palabrasDe(o.nombre).filter((w) => !opciones.some((x, j) => j !== i && palabrasDe(x.nombre).includes(w))));
+    const nombrados = opciones.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
+    if (nombrados.length === 1 && !nombrados[0].upgrade) {
+      const x = nombrados[0];
+      const up = opciones.find((o) => o.upgrade);
+      const texto = up
+        ? `*${x.nombre}* es un material aparte: se paga completo, *${formatCurrencyAmount(x.precio, pais as never)}* 😊\n\nLo que ya pagaste sirve solo para completar *${up.nombre}* (te falta *${formatCurrencyAmount(up.precio, pais as never)}*).\n\n¿Cuál te gustaría?`
+        : `*${x.nombre}* es un material aparte: se paga completo, *${formatCurrencyAmount(x.precio, pais as never)}* 😊 Lo que ya pagaste fue por lo que ya recibiste.\n\n¿Deseas adquirirlo?`;
+      if (convo.state === "awaiting_gift_consent") {
+        anotarRegaloSinResponder(convo.id, convo.state);
+        cancelPendingActionsForConvo(convo.id);
+        setConversationState(convo.id, "tablero");
+      }
+      console.log(`[tablero] convo ${convo.id}: «con lo que pagué, ¿${x.nombre}?» → va aparte (${x.precio})`);
+      await sendConfiguredSteps(convo, [{ type: "text", body: texto }] as never);
+      tocarVuelta(convo.id);
+      return true;
+    }
+  }
 
   // RECONECTÓ EL INICIO A OTRA TUBERÍA y este cliente se quedó en la vieja: al volver a escribir pasa a la
   // nueva, como el automático al cambiar de modalidad (ver `seQuedoEnLaTuberiaVieja`).

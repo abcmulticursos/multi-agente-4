@@ -298,7 +298,7 @@ function cerebro(c: ContextoDeLaIA): string {
     // (28/10/2026, su UULA2: «¿a qué hora me envían lo que pagué?» con el cobro del upsell abierto → le pidió la
     // foto otra vez; hablaba de lo que ya compró.)
     c.comprasPrevias
-      ? `YA COMPRÓ Y RECIBIÓ (más arriba en el chat): ${c.comprasPrevias}. Ese pago YA está aprobado y entregado: NUNCA digas que no se procesó, que te adelantaste ni que falta validarlo. Si habla de «lo que pagué», «mi pago» o «lo que compré», se refiere a ESO: dile que ya le llegó más arriba y que, si no lo ve, se lo reenvías. Lo que se le ofrece ahora es aparte y se paga aparte.`
+      ? `YA COMPRÓ Y RECIBIÓ (más arriba en el chat): ${c.comprasPrevias}. Ese pago YA está aprobado y entregado: NUNCA digas que no se procesó, que te adelantaste ni que falta validarlo. Si habla de «lo que pagué», «mi pago» o «lo que compré», se refiere a ESO: dile que ya le llegó más arriba y que, si no lo ve, se lo reenvías. Lo que se le ofrece ahora es aparte y se paga aparte: lo que ya pagó NUNCA alcanza para otro producto ni lo da gratis (solo completar al que se completa, pagando la diferencia).`
       : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
