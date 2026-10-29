@@ -125743,8 +125743,8 @@ tableros:
           producto_id: ptcocina_pack
         - id: coc_pe_upgrade
           tipo: mensaje
-          x: 1380
-          y: 0
+          x: 1353
+          y: -396
           titulo: Upgrade al pack
           steps:
             - type: text
@@ -125766,8 +125766,8 @@ tableros:
           instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS el otro producto, y solo paga la diferencia.
         - id: coc_pe_cobro_up
           tipo: cobro
-          x: 1380
-          y: 330
+          x: 1672
+          y: -429
           titulo: Cobro · upgrade (diferencia)
           steps:
             - type: text
@@ -125820,8 +125820,8 @@ tableros:
           espera_min: 2
         - id: coc_pe_cobro_u1
           tipo: cobro
-          x: 1710
-          y: 330
+          x: 1705
+          y: 418
           titulo: Cobro · COMIDAS PERUANAS CASERAS
           steps:
             - type: text
@@ -125845,8 +125845,8 @@ tableros:
             metodos: true
         - id: coc_pe_seg_u1
           tipo: seguimientos
-          x: 1710
-          y: 660
+          x: 1936
+          y: 792
           titulo: Seguimientos · COMIDAS PERUANAS CASERAS
           presenta:
             - ptcocina_peruanas
@@ -125912,8 +125912,8 @@ tableros:
               ignora_tardio: true
         - id: coc_pe_ent_u1
           tipo: entregar
-          x: 2040
-          y: 330
+          x: 2079
+          y: 319
           titulo: Entrega · COMIDAS PERUANAS CASERAS
           producto_id: ptcocina_peruanas
         - id: coc_pe_regalo
@@ -126643,22 +126643,10 @@ tableros:
           de: coc_pe_cobro_p
           salida: prod:ptcocina_dietas
           a: coc_pe_ent_b
-        - id: c10
-          de: coc_pe_ent_b
-          salida: siguiente
-          a: coc_pe_upgrade
-        - id: c11
-          de: coc_pe_upgrade
-          salida: btn:coc_pe_up_si
-          a: coc_pe_cobro_up
         - id: c12
           de: coc_pe_cobro_up
           salida: pagado
           a: coc_pe_ent_p
-        - id: c13
-          de: coc_pe_upgrade
-          salida: btn:coc_pe_up_no
-          a: coc_pe_upsell1
         - id: c14
           de: coc_pe_ent_p
           salida: siguiente
@@ -126667,10 +126655,6 @@ tableros:
           de: coc_pe_upsell1
           salida: btn:coc_pe_u1_si
           a: coc_pe_cobro_u1
-        - id: c16
-          de: coc_pe_cobro_u1
-          salida: sin_pago
-          a: coc_pe_seg_u1
         - id: c17
           de: coc_pe_cobro_u1
           salida: pagado
@@ -126839,13 +126823,9 @@ tableros:
           de: coc_ar_intro
           salida: siguiente
           a: coc_ar_seg_b
-        - id: c-tub26-coc_pe_upgrade-sin_respuesta
-          de: coc_pe_upgrade
-          salida: sin_respuesta
-          a: coc_pe_upsell1
-        - id: c-tub26-coc_pe_cobro_up-sin_pago
-          de: coc_pe_cobro_up
-          salida: sin_pago
+        - id: c-mvu1ko5b-xvn
+          de: coc_pe_ent_b
+          salida: siguiente
           a: coc_pe_upsell1
       cajas:
         - id: manta-coc_pe_inicio
