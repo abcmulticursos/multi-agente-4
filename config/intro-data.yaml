@@ -126693,8 +126693,8 @@ tableros:
             metodos: true
         - id: f-mvu306rd-mri0e
           tipo: seguimientos
-          x: 616
-          y: -1199
+          x: 913
+          y: -1100
           titulo: Seguimientos · RECETARIO DIETAS FIT
           presenta:
             - ptcocina_dietas
