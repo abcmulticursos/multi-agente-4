@@ -1084,6 +1084,28 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       console.log(`[tablero:ia] convo ${convo.id}: repetía la pregunta («${ult.slice(0, 40)}») → sale una sola`);
     }
   }
+  // ESPERANDO SU COMPROBANTE, NO SE LE PIDE (29/10/2026, su conversación 140): ya tenía los datos de Yape,
+  // preguntó «cuántas veces voy a pagar» y la IA cerró con «¿Me compartes la foto de tu comprobante…?» sin que
+  // él dijera que pagó. Su cierre de la etapa «datos» ya lo prohíbe y no lo obedeció: lo hace el bot. Si la
+  // pregunta final pide el comprobante o pregunta si ya pagó, se cambia por la línea suave del automático.
+  // Salvo que él diga que ya pagó: ahí pedirle la foto es lo correcto.
+  if (c.etapa === "datos" && burbujas.length > 0) {
+    const delCliente = plano([...ultimosMensajes(convo.id, 4)].reverse().find((m) => m.role === "user")?.content ?? "");
+    const dijoQuePago = /\b(pague|pagado|deposite|transferi|yapee|plinee|ya esta|listo|hice el pago|realice el pago)\b/.test(delCliente);
+    const ult = burbujas[burbujas.length - 1];
+    const i = ult.lastIndexOf("¿");
+    const pregunta = i >= 0 ? plano(ult.slice(i)) : "";
+    const pideElPago =
+      /\b(comprobante|foto|fotito|captura|voucher|constancia)\b/.test(pregunta) ||
+      /\b(pagaste|realizaste|hiciste|transferiste|yapeaste|depositaste|pudiste pagar|pudiste hacer)\b/.test(pregunta);
+    if (!dijoQuePago && pregunta && ult.trim().endsWith("?") && pideElPago) {
+      const antes = ult.slice(0, i).trim();
+      if (antes) burbujas[burbujas.length - 1] = antes;
+      else burbujas.pop();
+      burbujas.push("Quedo pendiente de tu comprobante para darte acceso 😊");
+      console.log(`[tablero:ia] convo ${convo.id}: le pedía el comprobante sin que dijera que pagó → «Quedo pendiente…»`);
+    }
+  }
   // LA PREGUNTA FINAL, EN SU PROPIA BURBUJA (28/10/2026, su hay2: el saludo y «¿ya te decidiste…?» iban en un
   // solo bloque y la pregunta no se veía). Como el automático: si la última burbuja termina en una pregunta
   // con texto antes, la pregunta sale aparte. Solo la última frase, solo si va al final, y sin pasar su tope.
