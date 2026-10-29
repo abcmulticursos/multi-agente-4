@@ -519,8 +519,11 @@ async function handleMessengerMessage(
   // país —aquí el país se pregunta primero— y antes del motor de siempre, igual que en WhatsApp
   // (handler.ts). Solo atiende conversaciones nuevas de una tienda con tablero encendido; las
   // demás siguen exactamente igual. Los botones llegan como respuestas rápidas con el mismo id.
+  // El bloque entero de lo que escribió seguido, como en WhatsApp (handler.ts, 29/10/2026). Una
+  // respuesta rápida llega como su id y no termina el bloque: va tal cual.
+  const paraElTablero = !attachment && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
   try {
-    if (await alRecibirMensaje(countryReady, content)) return;
+    if (await alRecibirMensaje(countryReady, paraElTablero)) return;
   } catch (err) {
     console.error("[tablero] falló el turno del tablero (messenger):", err);
     if (esDelTablero(countryReady.id)) return;

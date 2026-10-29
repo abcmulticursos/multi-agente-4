@@ -349,7 +349,9 @@ async function handleInstagramMessage(
   // numerada y el tablero entiende «1», «2» o el texto del botón.
   try {
     const tiendaDeInstagram = tiendaDeLaPagina(getActiveInstagramMetaConnection()?.page_id ?? null);
-    if (await alRecibirMensaje(countryReady, content, tiendaDeInstagram)) return;
+    // El bloque entero de lo que escribió seguido, como en WhatsApp (handler.ts, 29/10/2026).
+    const paraElTablero = !attachment && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
+    if (await alRecibirMensaje(countryReady, paraElTablero, tiendaDeInstagram)) return;
   } catch (err) {
     console.error("[tablero] falló el turno del tablero (instagram):", err);
     if (esDelTablero(countryReady.id)) return;

@@ -1650,8 +1650,14 @@ async function handleIncomingMessage(
   // EL TABLERO (22/10/2026, solo ALBERTO 4). Atiende SOLO las conversaciones que nacieron en una
   // tienda con tablero encendido; para las demás devuelve false sin escribir nada y todo sigue
   // como siempre. Ver src/lib/tablero/motor.ts y PLAN-TABLERO.md.
+  // EL BLOQUE ENTERO, como el motor de siempre (29/10/2026, sus conversaciones 109 y 110): «con
+  // transferencia» + «sepuede» en 2 segundos; el debounce solo contesta el último y el tablero recibía
+  // «sepuede» sin el método. Solo con texto escrito (un botón llega como su id y una imagen como su
+  // leyenda: esos van tal cual).
+  const paraElTablero =
+    msg.type === "text" && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
   try {
-    if (await alRecibirMensaje(getConversationById(fresh.id) ?? fresh, content)) return;
+    if (await alRecibirMensaje(getConversationById(fresh.id) ?? fresh, paraElTablero)) return;
   } catch (err) {
     console.error("[tablero] falló el turno del tablero:", err);
     if (esDelTablero(fresh.id)) return;
