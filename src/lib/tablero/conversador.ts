@@ -475,6 +475,7 @@ export async function elegirOpcionConIA(
     const r = await getClient().chat.completions.create({
       model: modelo,
       temperature: 0,
+      ...SIN_PENSAR_DE_MAS,
       messages: [
         {
           role: "system",
@@ -520,6 +521,7 @@ export async function deQueHablaConIA(conversationId: number, mensaje: string, o
     const r = await getClient().chat.completions.create({
       model: modelo,
       temperature: 0,
+      ...SIN_PENSAR_DE_MAS,
       messages: [
         { role: "system", content: "Decides de qué trata el último mensaje del cliente, entre las opciones. Responde SOLO con el id de la opción, o NINGUNA si no queda claro." },
         {
@@ -572,6 +574,13 @@ const HERRAMIENTA_DE_CORREO = {
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
 };
+
+/**
+ * SIN «PENSAR» ANTES DE CONTESTAR (28/10/2026, su conversación 98: 50 s para una respuesta de 3 burbujas,
+ * con 2.904 piezas de salida —el razonamiento oculto del modelo—). Son respuestas cortas de chat y
+ * decisiones de una palabra: el razonamiento solo suma espera y costo. Es un campo del pedido a OpenRouter.
+ */
+const SIN_PENSAR_DE_MAS = { reasoning: { enabled: false } } as object;
 
 const HERRAMIENTA_DE_COMPLETAR = {
   type: "function" as const,
@@ -633,6 +642,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         // Va primero; si falla o no está, OpenRouter sigue con las demás (no se queda mudo). Es un campo
         // del pedido, no un cambio de la conexión.
         ...({ provider: { order: ["gmicloud"], allow_fallbacks: true } } as object),
+        ...SIN_PENSAR_DE_MAS,
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
       if (r.usage) {
@@ -640,7 +650,10 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       const cacheados = (r.usage as { prompt_tokens_details?: { cached_tokens?: number } }).prompt_tokens_details?.cached_tokens ?? 0;
       // Y qué empresa la atendió (OpenRouter reparte): el caché es de cada una (28/10/2026).
       const quien = (r as { provider?: string }).provider ?? "?";
-      console.log(`[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens} · ${quien}`);
+      const pensadas = (r.usage as { completion_tokens_details?: { reasoning_tokens?: number } }).completion_tokens_details?.reasoning_tokens ?? 0;
+      console.log(
+        `[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens} (pensadas ${pensadas}) · ${quien}`
+      );
     }
       const pidio = (nombre: string) =>
         r.choices[0]?.message?.tool_calls?.some((t) => t.type === "function" && t.function.name === nombre) ?? false;
@@ -1011,6 +1024,12 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     .replace(/,?\s*\b(antes|en lugar de)\s+(US\$|S\/\.?|\$)\s*[\d.,]+(\s*(d[oó]lares?|soles?|pesos?))?/gi, "");
   // Negrita doble con otra negrita dentro («**Opción 1 – *COMIDA* · $3**»): una sola, sin las de dentro.
   texto = texto.replace(/\*\*([^\n]+?)\*\*/g, (_, x: string) => `*${x.replace(/\*/g, "")}*`).replace(/\*\*/g, "*");
+  // EL ASTERISCO SUELTO (28/10/2026, su conversación 98: «¿Te gustaría adquirirlo?* 😊»): una línea con un
+  // número impar de asteriscos tiene uno que no cierra nada; se quita el último.
+  texto = texto
+    .split("\n")
+    .map((l) => ((l.match(/\*/g) ?? []).length % 2 === 1 ? l.replace(/\*(?=[^*]*$)/, "") : l))
+    .join("\n");
   const burbujas = alTope(
     texto
       .split(/\n\s*\n/)

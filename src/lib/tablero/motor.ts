@@ -981,10 +981,12 @@ const QUIERE_PAGAR =
 
 /** Un «sí» pelado: «sí», «dale», «ok», «claro», «de una», «sí quiero», «perfecto»… (sin tildes ni signos). */
 // Un mensaje hecho SOLO de afirmaciones también lo es: «bueno ya», «ok dale», «ya bueno» (28/10/2026, ronda 14:
-// «bueno ya» a «¿te muestro cómo adquirirlo?» se fue a la IA y no salieron los datos).
+// «bueno ya» a «¿te muestro cómo adquirirlo?» se fue a la IA y no salieron los datos). Y con el relleno que se
+// pega sin pensar detrás del sí: «si tambien», «ya pues», «dale nomas» (28/10/2026, su conversación 98).
 const SI_SUELTO =
   "si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio";
-const AFIRMA = new RegExp(`^(${SI_SUELTO})( (por favor|porfa|gracias|${SI_SUELTO}))*$`);
+const RELLENO = "por favor|porfa|gracias|tambien|pues|ps|nomas|no mas|entonces|amiga|amigo|hermano|seño";
+const AFIRMA = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`);
 
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 const INVITA_A_COMPRAR =
@@ -1091,7 +1093,11 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   // «QUIERO COMPLETAR PARA EL OTRO», en cualquier momento: si ya compró uno y en la ruta hay un cobro
   // con upgrade que lo incluye y cobra otro que aún no tiene. Sin un cobro abierto (no se cruzan).
   const comprados = new Set(comprasDelCliente(convo.id).map((c) => c.producto_id).filter(Boolean));
-  const upgrade = !estado?.cobro_ficha_id && !nota
+  // (28/10/2026, su conversación 98: «puedo completar para el otro» con el cobro de las 100 CITAS abierto
+  // —le habían llegado sus datos— no ofrecía el upgrade y la IA dijo «el pack se paga aparte, $4». Con un
+  // cobro abierto SIN NADA PAGADO también se puede completar; `completar.ir` pregunta «¿a cuál te
+  // refieres?» si tiene otro delante, como el automático.)
+  const upgrade = (!estado?.cobro_ficha_id || (estado.cobro_pagado ?? 0) <= 0) && !nota
     ? t.fichas.find(
         (x) =>
           x.tipo === "cobro" &&
@@ -2749,6 +2755,27 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // «NO ME LLEGÓ» EN EL REGALO (H4, 27/10/2026): como la venta de siempre en ese paso (primero el regalo,
     // después su detector), reenvío directo; antes contestaba la IA, sin poder reenviar.
     if (reenviarSiLoPide(convo, contenido)) return true;
+    // «QUIERO COMPLETAR» EN EL REGALO (28/10/2026, su conversación 98: «puedo completar para el otro» / «ya
+    // pagué 3 pero hay uno que cuesta 4, quiero completar» → la IA, con la instrucción del regalo, no podía
+    // ofrecer el upgrade y dijo «se paga aparte, $4»). Lo atiende el bot, como el automático: con otro
+    // producto delante (el upsell, ofrecido o con su cobro abierto) pregunta «¿a cuál te refieres?»; si no,
+    // abre el cobro de la diferencia. Sale del regalo (queda anotado: se le vuelve a ofrecer después).
+    if (t && /\b(complet\w*|diferencia|lo que falta|el resto|pagar el resto)\b/.test(sinTildes(contenido))) {
+      const opciones = loQuePuedeComprar(convo, t, pais);
+      const ups = opciones.filter((o) => o.upgrade);
+      if (ups.length > 0) {
+        const aparte = opciones.filter((o) => !o.upgrade);
+        if (convo.state === "awaiting_gift_consent") {
+          anotarRegaloSinResponder(convo.id, convo.state);
+          cancelPendingActionsForConvo(convo.id);
+          setConversationState(convo.id, "tablero");
+        }
+        console.log(`[tablero] convo ${convo.id}: en el regalo pide completar → ${aparte.length ? "¿a cuál te refieres?" : `upgrade a «${ups[0].nombre}»`}`);
+        if (aparte.length > 0) await preguntarACual(convo, [...ups, ...aparte], pais);
+        else await abrirLoQuePuedeComprar(convo, t, ups[0], false);
+        return true;
+      }
+    }
     // COMO LA VENTA DE SIEMPRE: contesta lo que preguntó y lo devuelve con amabilidad al regalo, que
     // sigue pendiente (25/10/2026, punto 10).
     // PREGUNTA POR UN PRODUCTO QUE PUEDE COMPRAR (28/10/2026, su UULA3: «cómo es eso de las 100 citas» → se lo
