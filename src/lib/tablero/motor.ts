@@ -989,6 +989,45 @@ const RELLENO = "por favor|porfa|gracias|tambien|pues|ps|nomas|no mas|entonces|a
 const AFIRMA = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`);
 
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
+/**
+ * UNA PREGUNTA NO ELIGE, TAMPOCO POR LA IA (29/10/2026, su conversación 129). Con «¿Cuál eliges? 1️⃣… 2️⃣…» en
+ * pantalla preguntó «que son 2» y la IA que elige leyó el «2» como la opción 2: le abrió el cobro del PACK. La
+ * elección por palabra ya tenía este freno; la IA no. Es pregunta si trae signos o EMPIEZA con una palabra de
+ * pregunta (sin signos, como escribe la gente) — salvo que en la misma frase diga que quiere uno («quiero»,
+ * «dame», «me quedo»…) o pregunte cómo/dónde pagar (eso sí es decidir comprar, la regla del automático).
+ * Solo se usa entre dos o más productos: con una sola forma de comprar no cambia nada.
+ */
+function esPreguntaQueNoElige(contenido: string): boolean {
+  const n = sinTildes(contenido).replace(/\s+/g, " ").trim();
+  // Tampoco elige UN PEDAZO SUELTO (ronda 50 en la copia: «puedo pagar con transfernci» y, ya contestado, «a»:
+  // la IA lo leyó como «opción A» y abrió el cobro del básico). 1–2 letras no nombran ningún producto.
+  if (esUnPedazo(n)) return true;
+  if (/\b(quiero|quisiera|dame|deme|me llevo|elijo|escojo|prefiero|me quedo|mandame|pasame|sea)\b/.test(n)) return false;
+  if (/\b(como|donde)\b.{0,20}\b(pag\w*|deposit\w*|yape\w*|transfier\w*|compr\w*|adquier\w*|adquir\w*)\b/.test(n)) return false;
+  return /[?¿]/.test(contenido) || /^(y )?(que|cual|cuales|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye|son)\b/.test(n);
+}
+
+/** Cuántas letras hay que cambiar para ir de una palabra a otra (Levenshtein). */
+function distancia(a: string, b: string): number {
+  const fila = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let antes = fila[0];
+    fila[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const guardado = fila[j];
+      fila[j] = Math.min(fila[j] + 1, fila[j - 1] + 1, antes + (a[i - 1] === b[j - 1] ? 0 : 1));
+      antes = guardado;
+    }
+  }
+  return fila[b.length];
+}
+
+/** 1–2 letras sueltas que no son una respuesta («a», «ia»): el resto de una palabra que se cortó. */
+function esUnPedazo(normal: string): boolean {
+  const n = normal.trim();
+  return /^[a-zñ]{1,2}$/.test(n) && !/^(si|no|ok|ya|ni)$/.test(n);
+}
+
 const INVITA_A_COMPRAR =
   // («cuál de LOS dos» también: la IA lo escribe así y el «sí» se iba a ella, que inventaba la elección.)
   /(adquir|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres|te quedas|te gusta))/;
@@ -1178,6 +1217,23 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     !hablaDeUnProblema &&
     (preguntaCuantasOpcionesHay(ultimo) || /\b(diferencia|diferente|diferentes|cual me conviene|cual es mejor|me recomiendas|recomiendas)\b/.test(ultimo));
   const metodosDelPais = getPaymentMethods(convo.phone).map((m) => m.label).filter(Boolean);
+  // Sus otras palabras (los alias de «Métodos de pago»), sin las que solo son el nombre mal escrito («yapee»):
+  // las de 6+ letras que no contienen el nombre ni se le parecen. Así la IA sabe que «transferencia» es BCP.
+  const metodosOtrasPalabras = getPaymentMethods(convo.phone)
+    .map((m) => {
+      const nombre = sinTildes(m.label ?? "").replace(/[^a-z0-9ñ]/g, "");
+      const otras: string[] = [];
+      for (const a of [...new Set((m.aliases ?? []).map((x) => sinTildes(x).trim()))]) {
+        const junto = a.replace(/[^a-z0-9ñ]/g, "");
+        if (a.length < 6 || !nombre || nombre.includes(junto) || junto.includes(nombre) || junto.startsWith(nombre.slice(0, 3))) continue;
+        // Ni el nombre mal escrito ni otra palabra ya puesta mal escrita («transfrencia»).
+        if ([nombre, ...otras.map((o) => o.replace(/[^a-z0-9ñ]/g, ""))].some((o) => distancia(junto, o) <= 2)) continue;
+        otras.push(a);
+        if (otras.length >= 8) break;
+      }
+      return otras.length && m.label ? `${m.label.replace(/[^\p{L}\p{N} ]/gu, "").trim()} = ${otras.join(", ")}` : "";
+    })
+    .filter(Boolean);
   // LOS OTROS PAÍSES DONDE VENDE ESTA TIENDA (28/10/2026, su regla: «si alguien está en ese país sí puede pagarlo,
   // pero si no está activo decirle que no está disponible»). Los de un Inicio que vende, con sus métodos.
   const otrosPaises = [
@@ -1203,7 +1259,7 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
       ? { sinPagoAprobado: true }
       : {}),
     ...(opcionesAqui.length > 1 ? { opcionesDeCompra: opcionesAqui.map((o) => `${o.nombre}${o.precio ? ` (${o.precio})` : ""}`) } : {}),
-    ...(metodosDelPais.length ? { metodos: metodosDelPais, paisDelCliente: getCountryInfo(pais as never)?.label ?? pais, otrosPaises } : {}),
+    ...(metodosDelPais.length ? { metodos: metodosDelPais, ...(metodosOtrasPalabras.length ? { metodosOtrasPalabras } : {}), paisDelCliente: getCountryInfo(pais as never)?.label ?? pais, otrosPaises } : {}),
     cerebroGeneral: t.cerebro,
     instrucciones: ficha?.instrucciones,
     ...(ofreciendoAhora ? { ofreciendoAhora } : {}),
@@ -3036,7 +3092,14 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   const segAqui = estado.seg_ficha && estado.seg_ficha !== estado.ficha_id ? t.fichas.find((x) => x.id === estado!.seg_ficha) : undefined;
   const texto = contenido.startsWith("bubble:") ? "" : contenido;
   const normal = texto.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
-  const metodoDicho = texto && !messageHasPaymentConcern(texto) ? metodoQueNombra(texto, convo.phone) : null;
+  // EL PEDAZO QUE LLEGA EN OTRO TURNO (ronda 50 en la copia): «puedo pagar con transfernci», el bot contesta, y
+  // luego «a». Pegado a lo que dijo antes queda «transferncia» y se reconoce el método como si lo hubiera
+  // escrito entero. Solo para un pedazo de 1–2 letras (`esUnPedazo`).
+  const metodoDicho =
+    texto && !messageHasPaymentConcern(texto)
+      ? metodoQueNombra(texto, convo.phone) ??
+        (esUnPedazo(normal) ? metodoQueNombra(`${loQueDijoAntes(convo.id)}\n${texto}`, convo.phone) : null)
+      : null;
 
   // 1-ter. EL RECLAMO DE LO QUE YA COMPRÓ VA PRIMERO (29/10/2026, sus conversaciones 118, 119 y 120): con el
   // upsell en pantalla («¿lo agregas? sí o no») o su cobro abierto, «no me ha llegado lo que pagué» se leía
@@ -3426,7 +3489,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       const elegidoId = estado.cobro_elegido ?? cobro.cobro.producto_id ?? null;
       // Nombrar el método para quejarse («me estafaron con el yape») no es elegirlo: la misma guarda
       // de la venta de siempre (`messageHasPaymentConcern`), y contesta la IA con empatía.
-      const metodo = messageHasPaymentConcern(contenido) ? null : metodoQueNombra(contenido, convo.phone);
+      // (El mismo `metodoDicho` de arriba: también reconoce el pedazo que llega en otro turno, ronda 51.)
+      const metodo = metodoDicho;
       if (metodo) {
         respondio(convo, t);
         if (await mandarDatosDelMetodo(convo, metodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
@@ -3472,7 +3536,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           return opciones.find((id) => id !== elegidoId) ?? null;
         })();
         if (porOtro) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 25)}» → ${porOtro} (el otro de los dos)`);
-        const decide = porNumero ?? porOtro ?? await elegirOpcionConIA(
+        const decide = porNumero ?? porOtro ?? (esPreguntaQueNoElige(contenido) ? null : await elegirOpcionConIA(
           convo.id,
           contenido,
           opciones.map((id) => ({
@@ -3482,7 +3546,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
             }${id === elegidoId ? " (el que tiene elegido ahora)" : ""}`,
             palabras: producto(config, id)?.aliases,
           }))
-        );
+        ));
         if (decide && decide !== elegidoId) {
           elegirEnElCobro(convo.id, decide);
           respondio(convo, t);
@@ -3688,12 +3752,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       })();
       if (porPrecio.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${porPrecio[0].op.id} (por su precio)`);
       // Con el cobro abierto, la IA no elige por él: solo vale lo que nombró (el candado).
+      // Y entre dos o más productos, una pregunta tampoco elige por la IA (`esPreguntaQueNoElige`).
       const elegida =
         porPalabra.length === 1
           ? porPalabra[0].op.id
           : porPrecio.length === 1
             ? porPrecio[0].op.id
-          : conCobroAbierto
+          : conCobroAbierto || (destinos.length > 1 && esPreguntaQueNoElige(contenido))
             ? null
             : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
       if (porPalabra.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${elegida} (por su palabra)`);

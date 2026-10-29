@@ -92,6 +92,8 @@ export interface ContextoDeLaIA {
   opcionesDeCompra?: string[];
   /** Los nombres de los métodos de pago de su país (solo nombres: los datos los manda el sistema). */
   metodos?: string[];
+  /** Las otras palabras con que el cliente nombra cada método (sus alias de «Métodos de pago»): «BCP = transferencia, depósito…». */
+  metodosOtrasPalabras?: string[];
   /** El país del cliente y los OTROS países donde vende esta tienda, con sus métodos («Argentina (Transferencia)»). */
   paisDelCliente?: string;
   otrosPaises?: string[];
@@ -379,7 +381,13 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
     // (28/10/2026, ronda 4 en la copia: «tengo mercadopago» → «¡Perfecto! Con MercadoPago podés abonar», y en
     // Argentina solo hay transferencia. Vale en todos los turnos, no solo cuando pregunta cómo pagar.)
     c.metodos?.length
-      ? `- LOS ÚNICOS MÉTODOS DE PAGO SON: ${c.metodos.join(", ")}. Si el cliente nombra un método que no está en esta lista, dile con amabilidad que por ahora se paga solo con ${c.metodos.length > 1 ? "esos" : "ese"}. NUNCA digas que se puede pagar con otro.`
+      ? `- LOS ÚNICOS MÉTODOS DE PAGO SON: ${c.metodos.join(", ")}. Si el cliente nombra un método que no está en esta lista, dile con amabilidad que por ahora se paga solo con ${c.metodos.length > 1 ? "esos" : "ese"}. NUNCA digas que se puede pagar con otro.${
+          // (29/10/2026, su conversación 129: «¿puedo pagar con transferencia?» → «solo YAPE, PLIN o BCP»; en su
+          // configuración «transferencia» ES BCP.) Las otras palabras de cada método, escrito con error o no, son ESE método.
+          c.metodosOtrasPalabras?.length
+            ? ` OJO: el cliente también los nombra con otras palabras (aunque las escriba con errores), y eso ES ese método: ${c.metodosOtrasPalabras.join(" · ")}. Si nombra una de ellas, dile que sí, por ese método.`
+            : ""
+        }`
       : "",
     // (28/10/2026, ronda 15: «estoy en chile se puede» → «¡sí, claro!»; «estoy en argentina» → los métodos de Perú.)
     c.metodos?.length && c.paisDelCliente

@@ -25,6 +25,19 @@ import { sendBotButtons } from "@/lib/workflow/sender";
 
 /** El método que nombra el cliente: el id que trae un botón de método, o su nombre/alias escrito. */
 export function metodoQueNombra(contenido: string, phone: string | null | undefined): string | null {
+  const dicho = metodoQueNombraTalCual(contenido, phone);
+  if (dicho) return dicho;
+  // UNA PALABRA PARTIDA EN DOS MENSAJES (29/10/2026, su conversación 129: «puedo pagar con transfernci» y
+  // enseguida «a»). El bloque llega con el pedazo en su propia línea; pegado a la palabra de antes queda
+  // «transferncia», a una letra de su alias, y se reconoce como siempre. Solo pedazos de 1–2 letras que no
+  // son una palabra suelta («si», «no», «ya»…), y solo si tal cual no nombraba ninguno.
+  const pegado = contenido.replace(/([a-zñáéíóú])[ \t]*\n[ \t]*([a-zñáéíóú]{1,2})[ \t]*(?=\n|$)/gi, (todo, antes: string, pedazo: string) =>
+    /^(si|no|ni|ya|ok|ah|eh|oh|y|o|e|u)$/i.test(pedazo) ? todo : antes + pedazo
+  );
+  return pegado !== contenido ? metodoQueNombraTalCual(pegado, phone) : null;
+}
+
+function metodoQueNombraTalCual(contenido: string, phone: string | null | undefined): string | null {
   const limpio = contenido.trim().toLowerCase();
   if (!limpio) return null;
   const metodos = getPaymentMethods(phone);
@@ -76,13 +89,18 @@ function menciones(msg: string, phone: string | null | undefined): Array<[string
   const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^a-z0-9]+/g, " ").trim();
   const words = palabrasMarcadas(msg);
   const fuera: Array<[string, boolean]> = [];
+  // SIN COMAS, COMO ESCRIBE LA GENTE (29/10/2026, ronda 52 en la copia): «no tengo pichincha tengo guayaquil» negaba
+  // también GUAYAQUIL (el «no» estaba a 4 palabras) y «no mejor plin» negaba PLIN. El «no» se queda con el método
+  // que niega: no salta por encima de otro método, ni por encima de una corrección («mejor», «sino», «pero»…).
+  const todasLasClaves = new Set(getPaymentMethods(phone).flatMap((m) => [m.label, ...(m.aliases ?? [])].map(norm).filter((k) => k && !k.includes(" "))));
+  const CORRIGE = new Set(["mejor", "sino", "pero", "prefiero", "mas"]);
   for (const m of getPaymentMethods(phone)) {
     const claves = [m.label, ...(m.aliases ?? [])].map(norm).filter((k) => k && !k.includes(" "));
     words.forEach((w, i) => {
       if (!claves.includes(w)) return;
       let negado = false;
       for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
-        if (words[j] === "|") break;
+        if (words[j] === "|" || todasLasClaves.has(words[j]) || CORRIGE.has(words[j])) break;
         if (NEGACIONES.has(words[j])) {
           negado = true;
           break;
