@@ -30971,7 +30971,7 @@ function PantallaDelTablero({
       nombre: p.name?.trim() || p.id,
       propio: enEsteTablero.has(p.id),
       opciones: [
-        { clave: p.id, nombre: "Entrega principal" },
+        { clave: p.id, nombre: "entrega principal" },
         ...(p.entregas_extra ?? []).map((e) => ({ clave: `${p.id}#${e.id}`, nombre: e.nombre?.trim() || "Entrega sin nombre" })),
       ],
     }));
@@ -32501,9 +32501,23 @@ function AjustesDeLaFicha({
               // LAS ENTREGAS DE LA FICHA (25/10/2026): una o varias, en orden, de uno o varios productos.
               // Se guarda la lista y, para lo de antes, el producto de la primera.
               const lista = b.entregas?.length ? b.entregas : b.producto_id ? [b.producto_id] : [""];
+              // EL TÍTULO DICE LO QUE SE ENTREGA (29/10/2026, él: «el nombre de la ficha puede cambiarse pero no
+              // garantiza qué producto se entrega»). Si la ficha se llama como la nombró el sistema («Entregar»,
+              // «Entrega · <producto>»), al cambiar el producto se renombra sola: «Entrega · <el nuevo>». Un
+              // nombre propio suyo no se toca.
+              const productoDe = (clave?: string) => entregasPorProducto.find((g) => g.id === (clave ?? "").split("#")[0])?.nombre;
+              const nombresDelSistema = new Set(["", "entregar", "entrega", ...entregasPorProducto.map((g) => `entrega · ${g.nombre}`.toLowerCase())]);
               const poner = (nueva: string[]) => {
                 const limpias = nueva.filter(Boolean);
-                setB({ ...b, entregas: limpias.length ? nueva : undefined, producto_id: limpias[0]?.split("#")[0] || undefined });
+                const nuevo = productoDe(limpias[0]);
+                const tituloAhora = (b.titulo ?? "").trim();
+                const renombrar = nuevo && nombresDelSistema.has(tituloAhora.toLowerCase());
+                setB({
+                  ...b,
+                  entregas: limpias.length ? nueva : undefined,
+                  producto_id: limpias[0]?.split("#")[0] || undefined,
+                  ...(renombrar ? { titulo: `Entrega · ${nuevo}` } : {}),
+                });
               };
               const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
               const q = sinTildes(buscarEntrega.trim());
@@ -32541,7 +32555,8 @@ function AjustesDeLaFicha({
                             <optgroup key={g.id} label={`── ${g.nombre} ──`}>
                               {g.opciones.map((o) => (
                                 <option key={o.clave} value={o.clave}>
-                                  {o.nombre}
+                                  {/* El producto delante, también con el selector cerrado (29/10/2026). */}
+                                  {`${g.nombre} · ${o.nombre}`}
                                 </option>
                               ))}
                             </optgroup>
@@ -32550,7 +32565,7 @@ function AjustesDeLaFicha({
                             <optgroup key={g.id} label={`Otros productos · ${g.nombre}`}>
                               {g.opciones.map((o) => (
                                 <option key={o.clave} value={o.clave}>
-                                  {o.nombre}
+                                  {`${g.nombre} · ${o.nombre}`}
                                 </option>
                               ))}
                             </optgroup>

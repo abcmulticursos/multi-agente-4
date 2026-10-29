@@ -122,7 +122,10 @@ export function correoQueSeMarco(textoDelBot: string): string | null {
   return textoDelBot.match(/tu correo está mal escrito: \*([^*]+)\*/)?.[1] ?? null;
 }
 
-/** La confirmación del envío, como el automático (texto fijo, sin IA y sin volver a ofrecer). */
+/**
+ * La confirmación del envío: EL MISMO TEXTO del automático (`tryCaptureEmail` en engine.ts), palabra por
+ * palabra. Él lo pidió así el 29/10/2026: «nada de reofrecer otros correos… se vende, se entrega y punto».
+ */
 export function textoDelCorreoEnviado(correo: string): string {
-  return `✅ ¡Listo! Te envié tu material a *${correo}* 📧\n\nSi no lo ves en tu bandeja de entrada, revisa la carpeta de *SPAM* / *Correo no deseado* 🔎`;
+  return `✅ ¡Recibí tu correo: *${correo}*!\n\n📧 Te lo envié también allí para que no lo pierdas. Si no te aparece en tu bandeja de entrada, revisa la carpeta de *SPAM* / *Correo no deseado* 🔎`;
 }

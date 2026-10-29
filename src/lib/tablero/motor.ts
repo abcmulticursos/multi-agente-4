@@ -1008,6 +1008,17 @@ function esPreguntaQueNoElige(contenido: string): boolean {
   return /[?¿]/.test(contenido) || /^(y )?(que|cual|cuales|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye|son)\b/.test(n);
 }
 
+/** ¿La ficha lleva a DOS o más compras distintas (por sus botones y cuadritos)? Con una sola, nada cambia. */
+function variasComprasEn(t: Tablero, duena: FichaDelTablero): boolean {
+  const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
+  const destinos = new Set<string>();
+  for (const salida of [...botones.map((b) => `btn:${b.id}`), ...cuadritos.map((d) => `dec:${d.id}`)]) {
+    const a = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, salida)?.a);
+    if (a && (a.tipo === "cobro" || a.tipo === "intro_ob")) destinos.add(a.id);
+  }
+  return destinos.size > 1;
+}
+
 /** Cuántas letras hay que cambiar para ir de una palabra a otra (Levenshtein). */
 function distancia(a: string, b: string): number {
   const fila = Array.from({ length: b.length + 1 }, (_, j) => j);
@@ -3305,6 +3316,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // venta de siempre: con un producto elegido, el método manda los datos de ESE producto.
       const aDonde = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, `dec:${d.id}`)?.a);
       if (estado.cobro_ficha_id && (aDonde?.tipo === "cobro" || aDonde?.tipo === "intro_ob")) continue;
+      // UNA PREGUNTA NO ELIGE, TAMPOCO POR CUADRITO (29/10/2026, ronda 57 en la copia: PEQUEÑOS FELICES elige con
+      // cuadritos «1 / uno…» y «2 / dos…»; «que son 2» cayó en el del «2» y le abrió el cobro del PACK). Entre dos
+      // o más productos, la misma regla que ya frena a la IA. «cómo pago» sigue eligiendo (decide comprar).
+      if ((aDonde?.tipo === "cobro" || aDonde?.tipo === "intro_ob") && esPreguntaQueNoElige(texto) && variasComprasEn(t, duena)) continue;
       // EL «SÍ» ES PARA LO ÚLTIMO QUE PROPUSO EL BOT (28/10/2026, su MM2): con el upsell en pantalla, la IA le
       // preguntó «¿te falta completar $1 para el PACK?», dijo «sí» y el cuadrito «Sí» del upsell lo llevó a
       // pagar 100 CITAS. Como el automático: si el último turno del bot propuso OTRO producto (nombre y
@@ -3731,6 +3746,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       for (const duena of duenas) {
         const decision = decisionQueCoincide(contenido, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
         if (decision && conCobroAbierto && llevaAPagar(duena, `dec:${decision.id}`)) continue;
+        // Una pregunta no elige entre dos o más productos, tampoco por cuadrito (`esPreguntaQueNoElige`).
+        if (decision && llevaAPagar(duena, `dec:${decision.id}`) && esPreguntaQueNoElige(contenido) && variasComprasEn(t, duena)) continue;
         if (decision && pideElRegalo && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         if (decision) {
           await actuarCuadrito(convo, t, duena, decision);
