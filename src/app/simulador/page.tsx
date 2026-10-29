@@ -172,10 +172,17 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
   const previousUnstartedChannelRef = useRef<TestChannel>("whatsapp");
   const lsKey = `${STORAGE_KEY}:${storageKey}`;
 
+  // LENTO CON VARIAS VENTANAS (29/10/2026): cada ventana pide su chat cada segundo y se redibujaba entera
+  // aunque no hubiera nada nuevo. Ahora solo se redibuja si la respuesta cambió.
+  const ultimaRespuestaRef = useRef<string>("");
   const load = useCallback(async (id = sessionId) => {
     if (!id) return;
     const res = await fetch(`/api/test-simulator/${id}`, { cache: "no-store" });
-    if (res.ok) setSnapshot(await res.json() as Snapshot);
+    if (!res.ok) return;
+    const texto = await res.text();
+    if (texto === ultimaRespuestaRef.current) return;
+    ultimaRespuestaRef.current = texto;
+    setSnapshot(JSON.parse(texto) as Snapshot);
   }, [sessionId]);
 
   useEffect(() => {
