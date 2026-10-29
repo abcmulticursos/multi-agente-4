@@ -482,7 +482,7 @@ export async function elegirOpcionConIA(
           content:
             "Decides cuál de las opciones ELIGIÓ el cliente con su último mensaje. Responde SOLO con el id de la opción, o con NINGUNA. " +
             "Es NINGUNA si pregunta, duda, compara, pide más información, dice que no quiere algo, o no queda claro. " +
-            "«No quiero X» nunca es elegir X. Pero «no, mejor X» / «no mejor X» SÍ es elegir X: ese «no» corrige lo de antes. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer. " +
+            "«No quiero X» nunca es elegir X. «El otro», «el primero», «el de 10» se resuelven con lo que el BOT le acaba de ofrecer. " +
             // COMO LA VENTA DE SIEMPRE (25/10/2026, punto 8): elegir método o decir que quiere pagar ES
             // decidir comprar (en COMO OB eso suelta el order bump); preguntar el precio no lo es.
             "Si una opción es la de PAGAR o COMPRAR (por ejemplo «Quiero pagar», «Lo quiero», «Sí»), el cliente la ELIGE cuando dice claramente que quiere pagar o comprarlo, nombra un método de pago, o pregunta a dónde o cómo pagar. Preguntar el precio, qué trae o cómo funciona NO es elegirla. " +

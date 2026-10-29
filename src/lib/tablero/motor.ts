@@ -1881,6 +1881,24 @@ function regaloPorVolverAOfrecer(conversationId: number): boolean {
   return m.includes(REGALO_PENDIENTE) && !m.includes(REGALO_HECHO);
 }
 
+/**
+ * EL RECORDATORIO DEL REGALO, UNA SOLA VEZ (29/10/2026, su conversación 117): se le ofreció el regalo, se
+ * quejó de que no le llegó lo que pagó, se le reenvió y el regalo quedó enterrado arriba. Con la pregunta del
+ * regalo sin contestar, se le vuelve a hacer tras el silencio de siempre. Solo una vez («para no embotarlo»).
+ */
+const REGALO_RECORDADO = "regalo:recordado";
+function recordarElRegaloUnaVez(convoId: number): void {
+  const fresca = getConversationById(convoId);
+  if (fresca?.state !== "awaiting_gift_consent") return;
+  if (muestrasEnviadas(estadoEnElTablero(convoId)).includes(REGALO_RECORDADO)) return;
+  anotarMuestras(convoId, [REGALO_RECORDADO]);
+  setConversationState(convoId, "payment_approved");
+  const segundos = Math.max(1, Math.floor(loadWorkflowConfig()?.awaiting_email_timeout_seconds ?? 300));
+  const falta = Math.max(1, (getLastUserMessageTime(convoId) ?? ahora()) + segundos - ahora());
+  console.log(`[tablero] convo ${convoId}: el regalo quedó sin responder tras el reenvío → se le recuerda en ${falta} s (una vez)`);
+  scheduleGiftConsentWithDelay(convoId, falta);
+}
+
 /** Abre el cobro de lo que puede comprar (saliendo del regalo si estaba en él). */
 async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQuePuedeComprar, enSilencio = false): Promise<void> {
   const fresca = getConversationById(convo.id) ?? convo;
@@ -2385,10 +2403,63 @@ function pideLoQueCompro(texto: string): boolean {
     /\bno\s+me\s+(ha|han)\s+(llegado|enviado|mandado)\b/.test(t) ||
     // «no me llegó lo de mi aporte»: después de una entrega (esta función solo se usa con entregas), «no me
     // llegó / llegaron» ya es un reclamo de lo entregado (E1 en la copia, 27/10/2026).
-    /\bno\s+me\s+(llego|llegaron)\b/.test(t) ||
+    /\bno\s+me\s+(llego|llegaron|llega)\b/.test(t) ||
     /\bcuando\s+me\s+(van\s+a|vas\s+a)\s+(enviar|mandar|llegar)\b/.test(t) ||
     /^\s*(no\s+(hay|esta|llego|llega|aparece|veo\s+nada)|no\s+me\s+llego\s+nada)\s*[.!]*\s*$/.test(t)
   );
+}
+
+/** «Ya pagué» escrito (sin tildes, en minúsculas). */
+const YA_PAGO_SIN_FOTO =
+  /\b(ya (te )?(pague|yapee|plinee|deposite|transferi|hice (el|la) (pago|transferencia|deposito))|ya esta pagado|ahi (te )?(mande|envie|va) (el|la)? ?(pago|comprobante|captura)|listo ya pague)\b/;
+
+/** Lo que escribió el cliente en su turno ANTERIOR (antes de la última respuesta del bot). */
+function loQueDijoAntes(conversationId: number): string {
+  const alReves = [...ultimosMensajes(conversationId, 14)].reverse();
+  const bot = alReves.findIndex((m) => m.role !== "user");
+  if (bot < 0) return "";
+  const resto = alReves.slice(bot);
+  const desde = resto.findIndex((m) => m.role === "user");
+  if (desde < 0) return "";
+  const suyos: string[] = [];
+  for (const m of resto.slice(desde)) {
+    if (m.role !== "user") break;
+    suyos.unshift(m.content ?? "");
+  }
+  return suyos.join("\n");
+}
+
+/** Las burbujas del bot desde el último mensaje del cliente hacia atrás (su último turno), juntas. */
+function ultimoTurnoDelBot(conversationId: number): string {
+  const alReves = [...ultimosMensajes(conversationId, 12)].reverse();
+  const desde = alReves.findIndex((m) => m.role !== "user");
+  const resto = desde < 0 ? [] : alReves.slice(desde);
+  const hasta = resto.findIndex((m) => m.role === "user");
+  return (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
+}
+/** La última pregunta de ese turno (sin tildes). */
+function ultimaPreguntaDelBot(conversationId: number): string {
+  return sinTildes(ultimoTurnoDelBot(conversationId).split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
+}
+/**
+ * ¿El último turno del bot fueron las burbujas de estas fichas (y no una respuesta de la IA)? Se busca en él
+ * alguna línea de sus textos (sin comodines, solo letras): sale tal cual, y la IA no la copia.
+ */
+function laFichaHabloUltimo(conversationId: number, fichas: FichaDelTablero[]): boolean {
+  const plano = (s: string) => sinTildes(s).replace(/[^a-zñ]+/g, "");
+  const turno = plano(ultimoTurnoDelBot(conversationId));
+  if (!turno) return false;
+  for (const f of fichas) {
+    for (const p of pasosDeLaFicha(f) as Array<{ body?: string; body_variants?: string[]; caption?: string; caption_variants?: string[] }>) {
+      const textos = [p.body ?? "", ...(p.body_variants ?? []), p.caption ?? "", ...(p.caption_variants ?? [])];
+      for (const linea of textos.flatMap((x) => x.split("\n"))) {
+        if (linea.includes("{{")) continue;
+        const l = plano(linea);
+        if (l.length >= 12 && turno.includes(l)) return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** Lo reenvía, como la venta de siempre («Claro, te lo reenvío ahora mismo» + lo comprado). */
@@ -2412,7 +2483,10 @@ async function contestarEnElRegaloDentro(convo: ConversationRow): Promise<boolea
     // «NO ME LLEGÓ» DENTRO DEL REGALO (H4, 27/10/2026): antes iba a la IA, que no podía reenviar y
     // ofrecía un asesor. Ahora, como la venta de siempre en ese mismo paso: reenvío directo.
     const ultimoTexto = ultimosMensajes(convo.id, 2).filter((m) => m.role === "user").pop()?.content ?? "";
-    if (reenviarSiLoPide(convo, ultimoTexto)) return true;
+    if (reenviarSiLoPide(convo, ultimoTexto)) {
+      recordarElRegaloUnaVez(convo.id);
+      return true;
+    }
     const nota =
       convo.state === "awaiting_gift_consent"
         ? "Está en el paso del REGALO: se le acaba de ofrecer (míralo en tus últimos mensajes). Contesta su duda sobre ese regalo con lo que dice ese ofrecimiento, sin inventar, y al final pregúntale con tus palabras si lo quiere. Ya compró: no le ofrezcas ni le cobres ningún producto."
@@ -2789,7 +2863,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (delRegalo) return false;
     // «NO ME LLEGÓ» EN EL REGALO (H4, 27/10/2026): como la venta de siempre en ese paso (primero el regalo,
     // después su detector), reenvío directo; antes contestaba la IA, sin poder reenviar.
-    if (reenviarSiLoPide(convo, contenido)) return true;
+    if (reenviarSiLoPide(convo, contenido)) {
+      recordarElRegaloUnaVez(convo.id);
+      return true;
+    }
     // «QUIERO COMPLETAR» EN EL REGALO (28/10/2026, su conversación 98: «puedo completar para el otro» / «ya
     // pagué 3 pero hay uno que cuesta 4, quiero completar» → la IA, con la instrucción del regalo, no podía
     // ofrecer el upgrade y dijo «se paga aparte, $4»). Lo atiende el bot, como el automático: con otro
@@ -2951,6 +3028,51 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   const normal = texto.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
   const metodoDicho = texto && !messageHasPaymentConcern(texto) ? metodoQueNombra(texto, convo.phone) : null;
 
+  // 1-ter. EL RECLAMO DE LO QUE YA COMPRÓ VA PRIMERO (29/10/2026, sus conversaciones 118, 119 y 120): con el
+  // upsell en pantalla («¿lo agregas? sí o no») o su cobro abierto, «no me ha llegado lo que pagué» se leía
+  // como el «no» del upsell, o la IA pedía el comprobante del upsell; y el «si» a «¿quieres que te lo
+  // reenvíe?» aceptaba el upsell y le mandaba los datos de pago. Ahora, si ya compró algo y reclama lo que
+  // pagó, se le reenvía; el upsell sigue en pie (un «sí» o un «no» a él funcionan igual que antes).
+  // (Pedir los DATOS de pago no es reclamar el material: «pásame el yape otra vez» le reenviaba las muestras
+  // gratis de FIGURARTE en vez de la cuenta — ronda 47 en la copia. Eso lo atiende el cobro, como antes.)
+  const pideLosDatos = !!metodoDicho || /\b(cuenta|numero|datos|cbu|alias|donde (te )?(pago|deposito|yapeo))\b/.test(normal);
+  if (texto && !pendiente && !pideLosDatos && entregasDelCliente(convo.id).length > 0) {
+    if (reenviarSiLoPide(convo, texto)) {
+      respondio(convo, t);
+      return true;
+    }
+    // «YA PAGUÉ» SIN FOTO Y SIN NADA POR PAGAR (29/10/2026, ronda 45 en la copia: «cuándo me vas a enviar / ya
+    // pagué» → la IA cerró con «¿te indico cómo adquirirlo?» y su «sí» le abrió el cobro del upsell): ya compró y
+    // no le queda ningún cobro abierto, así que habla de lo que pagó. Se le reenvía.
+    // Solo «ya pagué» suelto (en su propia línea, corto). «Yo ya pagué, ¿puedo completar para el otro?» (su 101) o
+    // «con lo que pagué, ¿me llevo…?» son otra cosa y siguen su camino.
+    const lineas = normal.split("\n").map((l) => l.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim());
+    const suelto = lineas.some((l) => YA_PAGO_SIN_FOTO.test(l) && l.split(" ").length <= 4);
+    const otraCosa = /\b(complet\w*|diferencia|con (eso|ese|lo que)|tambien|llevar|llevo|el otro|lo otro)\b/.test(normal);
+    if (!estado.cobro_ficha_id && suelto && !otraCosa) {
+      console.log(`[tablero] convo ${convo.id}: «ya pagué» sin cobro abierto → reenvío de lo que compró`);
+      reenviarLoDelTablero(convo, texto, true);
+      respondio(convo, t);
+      return true;
+    }
+    const corto = normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+    if (AFIRMA.test(corto)) {
+      // ¿Su «sí» contesta a «¿te lo reenvío?»? Se mira la última pregunta del bot (la de la IA).
+      const alReves = [...ultimosMensajes(convo.id, 10)].reverse();
+      const desde = alReves.findIndex((m) => m.role !== "user");
+      const resto = desde < 0 ? [] : alReves.slice(desde);
+      const hasta = resto.findIndex((m) => m.role === "user");
+      const delBot = (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
+      const pregunta = sinTildes(delBot.split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
+      if (/\breenv\w*|\b(envie|mande|pase)\s+(de nuevo|otra vez)\b/.test(pregunta)) {
+        console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 20)}» a «¿te lo reenvío?» → reenvío`);
+        reenviarLoDelTablero(convo, texto, true);
+        respondio(convo, t);
+        return true;
+      }
+    }
+  }
+
   // 1-quater. EL UPSELL QUE TODAVÍA ESPERA SU TIEMPO (punto 9): no se ha presentado. Lo que escriba lo
   // contesta la IA sin hablar de él, y la espera vuelve a contar desde ahora.
   if (fichaAqui && estado.espera_ficha === fichaAqui.id && !contenido.startsWith("bubble:")) {
@@ -3015,10 +3137,44 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     }
   }
 
+  // DESPUÉS DE COMPRAR, UN «SÍ» O UN «NO» CONTESTA LA ÚLTIMA PREGUNTA (29/10/2026, sus conversaciones 120 y la
+  // ronda 42 en la copia): con el upsell en pantalla, la IA preguntó «¿ya pudiste verlo?» / «¿pudiste abrir el
+  // enlace?», el cliente dijo «si» / «no» y los cuadritos Sí / No del upsell le cobraron 100 CITAS o lo
+  // despidieron sin reenviarle nada. Si el último turno fue de la IA y no ofreció algo para comprar —o lo que
+  // él dijo antes fue un reclamo de lo que pagó—, su sí/no es para la IA: no elige ninguna opción (ni por su
+  // cuadrito, ni por la IA que elige). Y «quiero el regalo» no es aceptar el upsell (le mandaba sus datos de pago).
+  // Solo con algo ya comprado: la venta de antes de comprar no cambia.
+  const yaCompro = !!texto && entregasDelCliente(convo.id).length > 0;
+  const suSiNoEsDeLaIA = (() => {
+    if (!yaCompro) return false;
+    const corto = normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+    const afirma = AFIRMA.test(corto);
+    if (!afirma && !/^(no|nop|nel|no gracias|ahora no|por ahora no|no por ahora|no quiero|no todavia)$/.test(corto)) return false;
+    const antes = sinTildes(loQueDijoAntes(convo.id));
+    if (afirma && antes && (pideLoQueCompro(antes) || YA_PAGO_SIN_FOTO.test(antes))) return true;
+    if (laFichaHabloUltimo(convo.id, [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x))) return false;
+    const pregunta = ultimaPreguntaDelBot(convo.id);
+    return !INVITA_A_COMPRAR.test(pregunta) && !/\bagreg|\blo agregas\b/.test(pregunta);
+  })();
+  const pideElRegalo = yaCompro && /\b(regal(o|ito)|obsequio)\b/.test(normal);
+  if (suSiNoEsDeLaIA) console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 20)}» contesta a la IA, no a las opciones de la ficha`);
+  // «QUIERO EL REGALO» ANTES DE QUE SE LE OFREZCA (ronda 45 en la copia): con el upsell en pantalla —que lleva un 🎁—
+  // la IA creyó que el regalo era 100 CITAS y le dio su precio. Solo en ese turno se le dice qué es cada cosa.
+  const regaloYaOfrecido = fichasVisitadas(convo.id).some((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
+  if (pideElRegalo && !ESTADOS_DEL_REGALO.has(convo.state ?? "") && !regaloYaOfrecido) {
+    respondio(convo, t);
+    await contestarConIA(
+      convo,
+      t,
+      "Pide el REGALO. El regalo es GRATIS y aparte: se le ofrece enseguida, después de esto, y no tiene que pagar nada por él. Lo que tiene en pantalla ahora (con su precio) NO es el regalo: es otro material opcional que se paga aparte. Díselo claro y corto, y pregúntale si le interesa ese material o prefiere pasar al regalo."
+    );
+    return true;
+  }
+
   // 1-septies. MANDA LA FICHA DONDE ESTÁ (punto 15): si un cuadrito suyo —o de sus seguimientos
   // colgados— reconoce el mensaje, se sigue SU cable, antes que el cobro abierto de atrás. Y si el
   // mensaje nombra un método, queda anotado (punto 8): al elegir producto le llegan sus datos de frente.
-  if (texto) {
+  if (texto && !suSiNoEsDeLaIA) {
     for (const duena of [fichaAqui, segAqui]) {
       if (!duena || !(duena.tipo === "mensaje" || duena.tipo === "intro_ob" || duena.tipo === "seguimientos")) continue;
       const d = decisionQueCoincide(texto, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
@@ -3037,7 +3193,11 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       if (aDonde?.tipo === "cobro" && AFIRMA.test(normal.trim())) {
         const propuesto = loQueAcabaDeProponer(convo, t, pais);
         if (propuesto && propuesto.productoId !== aDonde.cobro?.producto_id) continue;
+        // …NI CUANDO LO DE ANTES FUE UN RECLAMO (29/10/2026, su conversación 120): con el upsell en pantalla
+        // dijo «cuándo me vas a enviar / ya pagué», la IA le preguntó «¿ya pudiste verlo?», dijo «si» y el
+        // cuadrito «Sí» del upsell le mandó los datos para pagar 100 CITAS. Su «sí» contesta a su reclamo.
       }
+      if (pideElRegalo && aDonde?.tipo === "cobro") continue;
       if (metodoDicho) setSelectedPaymentMethod(convo.id, metodoDicho);
       await actuarCuadrito(convo, t, duena, d);
       return true;
@@ -3182,7 +3342,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     texto &&
     estado.cobro_ficha_id &&
     !pendiente &&
-    /\b(ya (te )?(pague|yapee|plinee|deposite|transferi|hice (el|la) (pago|transferencia|deposito))|ya esta pagado|ahi (te )?(mande|envie|va) (el|la)? ?(pago|comprobante|captura)|listo ya pague)\b/.test(normal)
+    YA_PAGO_SIN_FOTO.test(normal)
   ) {
     respondio(convo, t);
     // SI YA COMPRÓ ANTES (28/10/2026, su UULA2: «ya pagué 3, ¿con eso me das las 100 citas?» → «mándame la
@@ -3430,10 +3590,11 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       return a?.tipo === "cobro" || a?.tipo === "intro_ob";
     };
     // 5. UN CUADRITO, por sus palabras: sus burbujas, y luego su cable.
-    if (!contenido.startsWith("bubble:"))
+    if (!contenido.startsWith("bubble:") && !suSiNoEsDeLaIA)
       for (const duena of duenas) {
         const decision = decisionQueCoincide(contenido, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
         if (decision && conCobroAbierto && llevaAPagar(duena, `dec:${decision.id}`)) continue;
+        if (decision && pideElRegalo && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         if (decision) {
           await actuarCuadrito(convo, t, duena, decision);
           return true;
@@ -3458,7 +3619,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         })),
       ];
     });
-    if (!contenido.startsWith("bubble:") && lista.length > 0 && !variasOpcionesDeCompra) {
+    if (!contenido.startsWith("bubble:") && lista.length > 0 && !variasOpcionesDeCompra && !suSiNoEsDeLaIA && !pideElRegalo) {
       // POR SU PALABRA, SIN IA (27/10/2026): si escribió una palabra que solo tiene UNA de las opciones
       // (en su texto o en el nombre de su producto: «pack», «básico»), es ésa. «el pack» a veces se le
       // escapaba a la IA. Si no, decide la IA («el combo», «el que trae la ropa»…).
@@ -3494,10 +3655,34 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // UNA PREGUNTA NO ELIGE («¿cuánto cuesta el pack?», «¿qué trae el básico?»): ésa la contesta la IA.
       const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
       const porPalabra = acertados.length === 1 && !esPregunta ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
+      // POR SU PRECIO, SIN IA (29/10/2026, ronda 41 en la copia): «el de 2» con «Solo el básico · $2» y «Quiero el
+      // pack · $3» → la IA solo veía el texto de los botones y leyó «2» como la opción 2 (le cobró el pack). Si nombra
+      // un monto («el de 2», «el que cuesta 2», «el de 2 dolares») y es el precio de UNA sola opción, es ésa. «El 2» a
+      // secas no es un monto: sigue como siempre.
+      const porPrecio = (() => {
+        if (porPalabra.length === 1 || conCobroAbierto) return [];
+        const n = sinTildes(contenido);
+        if (/\?|¿/.test(contenido) || /\b(cuanto|que trae|que tiene|que incluye)\b/.test(n)) return [];
+        const m =
+          n.match(/\b(?:de|cuesta|vale|a|por)\s+\$?\s*(\d+(?:[.,]\d+)?)(?![\d.,])/) ??
+          n.match(/\b(\d+(?:[.,]\d+)?)\s*(?:dolar|dolares|soles|sol|pesos|usd)\b/);
+        if (!m) return [];
+        const monto = Number(m[1].replace(",", "."));
+        const conEse = destinos.filter((d) => {
+          const x = lista.find((y) => destinoDe(y) === d);
+          const destino = t.fichas.find((f) => f.id === d);
+          const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x?.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
+          return !!p && precioDelProducto(p, pais, estado?.oferta === 1) === monto;
+        });
+        return conEse.length === 1 ? lista.filter((x) => destinoDe(x) === conEse[0]).slice(0, 1) : [];
+      })();
+      if (porPrecio.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${porPrecio[0].op.id} (por su precio)`);
       // Con el cobro abierto, la IA no elige por él: solo vale lo que nombró (el candado).
       const elegida =
         porPalabra.length === 1
           ? porPalabra[0].op.id
+          : porPrecio.length === 1
+            ? porPrecio[0].op.id
           : conCobroAbierto
             ? null
             : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
