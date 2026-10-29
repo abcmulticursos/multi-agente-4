@@ -23,6 +23,91 @@ const COUNTRIES: Array<{ code: CountryCode; label: string }> = ([
 /** Sin tildes ni mayúsculas, para el buscador de tiendas. */
 const paraBuscar = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
+/**
+ * EL BUSCADOR DE TIENDAS (28/10/2026, él: «cuando escribo no aparece para seleccionar, hay un cuadro y el
+ * selector colapsado»). Una sola caja: muestra la tienda elegida; al tocarla o escribir se despliega la lista
+ * de las que coinciden y un clic la elige. Esc o clic fuera la cierra sin cambiar nada.
+ */
+function BuscadorDeTiendas({
+  tiendas,
+  valor,
+  alElegir,
+  compacto,
+}: {
+  tiendas: Array<{ id: string; nombre: string; apagada?: boolean }>;
+  valor: string;
+  alElegir: (id: string) => void;
+  compacto?: boolean;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const elegida = tiendas.find((t) => t.id === valor);
+  const lista = [{ id: "", nombre: "Sin tienda · el bot de siempre" }, ...tiendas].filter(
+    (t) => !texto.trim() || paraBuscar(t.nombre ?? "").includes(paraBuscar(texto.trim()))
+  );
+  const elegir = (id: string) => {
+    setAbierto(false);
+    setTexto("");
+    if (id !== valor) alElegir(id);
+  };
+  return (
+    <div className={`relative ${compacto ? "w-48" : "mt-1 w-full"}`}>
+      <input
+        value={abierto ? texto : `🏪 ${elegida?.nombre ?? "Sin tienda"}`}
+        onFocus={() => {
+          setAbierto(true);
+          setTexto("");
+        }}
+        onChange={(e) => {
+          setTexto(e.target.value);
+          setAbierto(true);
+        }}
+        onBlur={() => window.setTimeout(() => setAbierto(false), 150)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") (e.target as HTMLInputElement).blur();
+          if (e.key === "Enter" && lista[0]) {
+            e.preventDefault();
+            elegir(lista[0].id);
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        placeholder="🔎 Escribe para buscar la tienda…"
+        title="Escribe parte del nombre y elige la tienda de la lista."
+        className={
+          compacto
+            ? "w-full rounded-md border border-sky-300 bg-sky-50 px-2 py-1 text-xs text-sky-900"
+            : "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        }
+      />
+      {abierto && (
+        <ul
+          className={`absolute z-50 mt-1 max-h-64 w-full min-w-[14rem] overflow-y-auto rounded-md border border-neutral-300 bg-white shadow-lg ${
+            compacto ? "bottom-full mb-1 text-xs" : "text-sm"
+          }`}
+        >
+          {lista.length === 0 && <li className="px-3 py-2 text-neutral-500">Ninguna tienda con ese nombre</li>}
+          {lista.map((t) => (
+            <li key={t.id || "-"}>
+              <button
+                type="button"
+                // onMouseDown (no onClick): elige antes de que el cuadro pierda el foco y cierre la lista.
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  elegir(t.id);
+                }}
+                className={`block w-full px-3 py-2 text-left text-neutral-800 hover:bg-sky-50 ${t.id === valor ? "bg-sky-100 font-semibold" : ""}`}
+              >
+                {t.id ? `🏪 ${t.nombre}` : t.nombre}
+                {"apagada" in t && t.apagada ? " (apagada)" : ""}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 type Session = { id: number; phone: string; name: string | null; state: string | null };
 type Snapshot = { conversation: Session; messages: MessageDTO[]; buttons: Record<string, { id: string; title: string }[]> };
 type SessionMap = Partial<Record<string, number>>;
@@ -70,12 +155,6 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
    *  igual que en vivo. */
   const [tienda, setTienda] = useState<string>("");
   const [tiendas, setTiendas] = useState<TiendaDePrueba[]>([]);
-  // EL BUSCADOR DE TIENDAS (28/10/2026): con muchas tiendas, escribir parte del nombre filtra la lista.
-  // La elegida se queda siempre en la lista, aunque no coincida.
-  const [buscaTienda, setBuscaTienda] = useState("");
-  const tiendasVistas = tiendas.filter(
-    (t) => !buscaTienda.trim() || t.id === tienda || paraBuscar(t.nombre ?? "").includes(paraBuscar(buscaTienda.trim()))
-  );
   const [name, setName] = useState("Cliente de prueba");
   const [sessions, setSessions] = useState<SessionMap>({});
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -336,21 +415,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
               ellas, un desplegable vacío sobra en la pantalla. */}
           {tiendas.length > 0 && (
             <label className="mt-3 block text-xs font-medium text-neutral-700">Tienda
-              <input
-                value={buscaTienda}
-                onChange={(event) => setBuscaTienda(event.target.value)}
-                placeholder="🔎 Buscar tienda…"
-                className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-1.5 text-sm"
-              />
-              <select value={tienda} onChange={(event) => setTienda(event.target.value)} className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm">
-                <option value="">Sin tienda · el bot de siempre</option>
-                {tiendasVistas.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.nombre}
-                    {item.apagada ? " (apagada)" : ""}
-                  </option>
-                ))}
-              </select>
+              <BuscadorDeTiendas tiendas={tiendas} valor={tienda} alElegir={setTienda} />
               {/* SI ESA TIENDA NO ATIENDE ESTE CANAL, SE DICE ANTES DE PROBAR.
                   Sin esto la prueba sale sin tienda y parece que el bot la ignora. */}
               {(() => {
@@ -394,28 +459,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
                   Cambiarla abre una conversación nueva: la tienda se escribe al
                   crearla, igual que le llega a un cliente por su número. */}
               {tiendas.length > 0 && (
-                <input
-                  value={buscaTienda}
-                  onChange={(event) => setBuscaTienda(event.target.value)}
-                  placeholder="🔎 Tienda…"
-                  title="Escribe parte del nombre para encontrar la tienda en la lista de al lado."
-                  className="w-28 rounded-md border border-sky-300 px-2 py-1 text-xs"
-                />
-              )}
-              {tiendas.length > 0 && (
-                <select
-                  value={tienda}
-                  onChange={(event) => void cambiarTienda(event.target.value)}
-                  title="Prueba con la tienda de ese número. Cambiarla abre un chat nuevo."
-                  className="rounded-md border border-sky-300 bg-sky-50 px-2 py-1 text-xs text-sky-900"
-                >
-                  <option value="">🏪 Sin tienda</option>
-                  {tiendasVistas.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      🏪 {item.nombre}
-                    </option>
-                  ))}
-                </select>
+                <BuscadorDeTiendas compacto tiendas={tiendas} valor={tienda} alElegir={(id) => void cambiarTienda(id)} />
               )}
               {/* MODO TESTEADOR: la modalidad de ESTA prueba. No toca la que
                   venden tus clientas — esa vive en la configuración. */}
