@@ -985,8 +985,10 @@ const QUIERE_PAGAR =
 // Un mensaje hecho SOLO de afirmaciones también lo es: «bueno ya», «ok dale», «ya bueno» (28/10/2026, ronda 14:
 // «bueno ya» a «¿te muestro cómo adquirirlo?» se fue a la IA y no salieron los datos). Y con el relleno que se
 // pega sin pensar detrás del sí: «si tambien», «ya pues», «dale nomas» (28/10/2026, su conversación 98).
+// («como no» = «¡cómo no!», un sí de siempre: su conversación 157, «ah ok si como no», 31/10/2026. Va AQUÍ, en
+// la lista del tablero, y solo vale entero: «como no lo voy a querer» no es el mensaje entero.)
 const SI_SUELTO =
-  "si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio";
+  "si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio|como no";
 const RELLENO = "por favor|porfa|gracias|tambien|pues|ps|nomas|no mas|entonces|amiga|amigo|hermano|seño";
 const AFIRMA_SUELTO = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`);
 // «OK ESTA BIEN» TAMBIÉN ES SÍ (30/10/2026, sus conversaciones 146, 147 y 148): a «¿te indico cómo adquirirlo?»
@@ -2173,6 +2175,15 @@ async function comprarDespuesDeComprar(
       if (nombrados.length === 0 && INVITA_A_COMPRAR.test(pregunta)) {
         const soloNombrados = opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w)));
         if (soloNombrados.length === 1) nombrados = soloNombrados;
+      }
+      // SIN NOMBRE, CON SU PRECIO (31/10/2026, su conversación 157): en el regalo la IA cerró «te paso la información
+      // para que lo adquieras a solo *S/. 5 Soles*. ¿Deseas que te indique cómo adquirirlo?», sin nombrar COMIDAS, y su
+      // «si» se lo llevó la pregunta del regalo (le llegó el enlace del regalo). Un «sí» responde a la ÚLTIMA pregunta:
+      // si el turno del bot no habla del regalo y su precio es el de UNO solo de lo que puede comprar, es ése (lo
+      // estable del texto del bot es el precio, CLAUDE.md).
+      if (nombrados.length === 0) {
+        const porPrecio = opciones.filter((o) => conSuPrecio(o, todo));
+        if (porPrecio.length === 1) nombrados = porPrecio;
       }
     }
     if (nombrados.length === 1) {
