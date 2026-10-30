@@ -1095,9 +1095,13 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const ult = burbujas[burbujas.length - 1];
     const i = ult.lastIndexOf("¿");
     const pregunta = i >= 0 ? plano(ult.slice(i)) : "";
+    // …ni lo vuelve a invitar a comprar (29/10/2026, su 140 repetida en lineal: «¿Te gustaría que te ayude a
+    // obtenerlo ahora?» con los datos ya en la mano). Una pregunta de asesor o de su correo sí se queda.
     const pideElPago =
-      /\b(comprobante|foto|fotito|captura|voucher|constancia)\b/.test(pregunta) ||
-      /\b(pagaste|realizaste|hiciste|transferiste|yapeaste|depositaste|pudiste pagar|pudiste hacer)\b/.test(pregunta);
+      !/\b(asesor|persona|humano|correo)\b/.test(pregunta) &&
+      (/\b(comprobante|foto|fotito|captura|voucher|constancia)\b/.test(pregunta) ||
+        /\b(pagaste|realizaste|hiciste|transferiste|yapeaste|depositaste|pudiste pagar|pudiste hacer)\b/.test(pregunta) ||
+        /\b(te (ayude|ayudo|indique|indico|guie|guio|explique|cuente|oriente)|adquir\w*|obtener\w*|obtenerlo|comprar\w*|pagar|pago|animas|decides)\b/.test(pregunta));
     if (!dijoQuePago && pregunta && ult.trim().endsWith("?") && pideElPago) {
       const antes = ult.slice(0, i).trim();
       if (antes) burbujas[burbujas.length - 1] = antes;
