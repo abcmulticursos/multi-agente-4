@@ -1057,8 +1057,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 1749
-      y: 2673
+      x: 1771
+      y: 2750
       steps:
         - type: text
           body_variants:
@@ -1095,6 +1095,33 @@ whatsapp:
               🟢 *PACK 2 EN 1* - (Los 2 Kits juntos 📚+📚) 👉🏼 *$ 4.5 Dólares*
 
               🟠 *SOLO GRAFISMO FONETICO* 👉🏼 *$ 3 Dólares*
+          delay_after_sec: 6
+    - id: f-mvvg4f2j-8t6dd
+      tipo: mensaje
+      x: 2090
+      y: 3058
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Para Transferencia* puedes adquirir el curso *pagando tan solo $ 4.5 Dólares* de la siguiente manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🏦 *Transferencia*
+              🙎🏻‍♂️ A nombre de: *Carlos Quimi*
+
+              💰 *Monto: $ 4.5 Dólares*
+
+              💳 *Cta* Ahorros: 😊 👇🏼
+              *Pichincha: 2203305628*
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Recuerda que puedes hacerlo por *Banca Móvil Pichincha* 📲 o en efectivo en el *Banco del Barrio* o en *Mi Vecino* más cercano. 😊
+
+              *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼
           delay_after_sec: 6
   cables:
     - id: c-mvveb856-3
