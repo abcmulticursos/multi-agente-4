@@ -1412,8 +1412,8 @@ whatsapp:
         producto_id: ptcocina_dietas
     - id: f-mvu306rd-mri0e
       tipo: seguimientos
-      x: 957
-      y: -1078
+      x: 979
+      y: -1144
       titulo: Seguimientos · RECETARIO DIETAS FIT
       presenta:
         - ptcocina_dietas
