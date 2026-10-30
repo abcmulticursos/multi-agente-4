@@ -2444,6 +2444,9 @@ export async function GET() {
       // TU NOMBRE COMPLETO, el de leer. Va en esta lista o no se guarda: lo que
       // no está nombrado aquí se cae al guardar, en silencio y sin error.
       nombre_completo: str(p?.nombre_completo),
+      // EL AVATAR DEL TITULAR DEL PAÍS (29/10/2026), solo para la pantalla: el Inicio de cada país muestra quién
+      // cobra ahí. Nunca viaja al cliente. Solo si tiene algo.
+      ...(str(p?.foto).trim() ? { foto: str(p?.foto).trim() } : {}),
     };
   };
   const payment_profiles_by_country = Object.fromEntries(
@@ -4383,6 +4386,8 @@ export async function POST(req: NextRequest) {
       // Recortado por lo mismo: un espacio de sobra no se ve en la casilla y sí
       // en el mensaje. Por dentro va entero, con sus espacios entre apellidos.
       nombre_completo: str(p?.nombre_completo).trim(),
+      // El avatar del titular del país (solo pantalla). Si no se nombra aquí, se pierde al guardar.
+      ...(str(p?.foto).trim() ? { foto: str(p?.foto).trim() } : {}),
     };
   };
   if (

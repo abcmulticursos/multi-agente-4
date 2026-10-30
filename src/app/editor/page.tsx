@@ -1649,6 +1649,9 @@ interface CountryPaymentProfileEditor {
   /** Tu nombre completo → {{NOMBRE_COMPLETO}}. Solo para leer: no valida nada.
    *  Separado del nombre del receptor, que sí valida el comprobante. */
   nombre_completo?: string;
+  /** El avatar del titular de este país (29/10/2026), solo para la pantalla: lo muestra el Inicio del tablero
+   *  cuando cobra «por defecto». Nunca viaja al cliente. */
+  foto?: string;
 }
 
 /** Tus productos y el papel que juega cada uno. Ver `BibliotecaDeProductos` en
@@ -30976,6 +30979,22 @@ function PantallaDelTablero({
       ],
     }));
   const workflows = Object.entries(cfg.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }));
+  // QUIÉN COBRA EN CADA PAÍS, PARA SU INICIO (29/10/2026). Él: «que automáticamente aparezca el avatar del
+  // cobrador que está activo… o si se olvidó de seleccionarlo, el que es por defecto… yo solo miro la pizarra y
+  // digo, ah ok, está bien el que va a cobrar». La misma regla del bot (`quienCobraEn`): el cobrador de la tienda
+  // si tiene cuenta en ese país; si no, el titular de los Datos para pago del país («por defecto»).
+  const quienCobraPorPais: Record<string, { foto?: string; nombre: string; porDefecto: boolean }> = {};
+  if (!esWorkflow)
+    for (const f of tablero.fichas) {
+      if (f.tipo !== "inicio" || !f.pais || quienCobraPorPais[f.pais]) continue;
+      const q = quienCobraEn(cfg, tienda, f.pais);
+      const perfil = (cfg.modality_payment_profiles?.[activeModality(cfg)]?.[f.pais as CountryCode] ??
+        cfg.payment_profiles_by_country?.[f.pais as CountryCode]) as { foto?: string } | undefined;
+      quienCobraPorPais[f.pais] =
+        q.deQuien && q.cobrador
+          ? { foto: q.cobrador.foto, nombre: q.cobrador.nombre?.trim() || q.nombre, porDefecto: false }
+          : { foto: perfil?.foto, nombre: q.nombre || q.titular || "Cuenta del país", porDefecto: true };
+    }
 
   const guardar = (t: TableroEnElEditor) =>
     aplicar(
@@ -31292,6 +31311,7 @@ function PantallaDelTablero({
           tema={fondoOscuro ? "oscuro" : "claro"}
           nombres={nombres}
           paisesDisponibles={paises}
+          quienCobra={quienCobraPorPais}
           onCambiar={guardar}
           onAbrir={(fid, burbuja) => {
             const f = tablero.fichas.find((x) => x.id === fid);
@@ -49384,6 +49404,19 @@ function PestanaDeUsuario({
       {/* EL CUADRO. Se abre en su ventana, como los productos de Precios y
           pagos: el mismo gesto que ya se conoce en este panel. */}
       <div className="flex flex-wrap items-center gap-3">
+        {/* EL AVATAR DEL TITULAR DE ESTE PAÍS (29/10/2026): lo muestra el Inicio del tablero cuando en este
+            país cobra «por defecto» (la tienda sin cobrador, o su cobrador sin cuenta aquí). Solo pantalla. */}
+        <span className="flex flex-col items-center gap-1" title="El avatar de quien recibe los pagos de este país por defecto. Solo se ve en el tablero.">
+          <RetratoDelCobrador
+            foto={(perfil as { foto?: string }).foto}
+            nombre={nombre}
+            onCambiar={(foto) => {
+              onSnapshot();
+              onDatos({ foto } as never);
+            }}
+          />
+          <span className="text-[10px] font-semibold text-tinta-suave">Avatar</span>
+        </span>
         <button
           type="button"
           onClick={() => abrir("datos")}
@@ -53499,8 +53532,11 @@ function RetratoDelCobrador({
   useEffect(() => {
     setRoto(false);
   }, [url]);
-  const comun =
-    "h-12 w-12 shrink-0 rounded-full border border-borde object-cover bg-tarjeta";
+  // UN SOLO BORDE, BLANCO (29/10/2026): sus avatares vienen sin anillo; el anillo lo pone la pantalla,
+  // igual para los avatares y para una foto propia («no quiero que salgan 2 bordes»).
+  // (Los de la galería ya traen su anillo dentro de la imagen: a ésos no se les pone otro.)
+  const comun = `h-12 w-12 shrink-0 rounded-full object-cover shadow ${url.startsWith("/avatares/") ? "" : "bg-tarjeta ring-[3px] ring-white"}`;
+  const [galeria, setGaleria] = useState(false);
   /**
    * CARGAR Y QUITAR LA FOTO, CON EL BOTÓN DERECHO SOBRE ELLA.
    *
@@ -53550,11 +53586,15 @@ function RetratoDelCobrador({
         tabIndex={0}
         title={
           url && !roto
-            ? "Clic derecho para cambiarla o quitarla"
+            ? "Clic: elegir un avatar · Clic derecho: pegar el enlace de una foto o quitarla"
             : roto
-              ? "La foto no se pudo cargar. Clic derecho para corregir el enlace"
-              : "Sin foto. Clic derecho para cargar una"
+              ? "La foto no se pudo cargar. Clic: elegir un avatar · Clic derecho: corregir el enlace"
+              : "Sin foto. Clic: elegir un avatar · Clic derecho: pegar el enlace de una foto"
         }
+        onClick={(e) => {
+          e.stopPropagation();
+          setGaleria(true);
+        }}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -53609,6 +53649,92 @@ function RetratoDelCobrador({
           </span>
         </>
       )}
+      {galeria && (
+        <ElegirAvatar
+          actual={url}
+          onCerrar={() => setGaleria(false)}
+          onListo={(a) => {
+            setGaleria(false);
+            onCambiar(a);
+          }}
+        />
+      )}
+    </span>
+  );
+}
+
+/** Los avatares de la galería (en `public/avatares`, los que él eligió el 29/10/2026). */
+const AVATARES = Array.from({ length: 49 }, (_, i) => `/avatares/avatar-${String(i + 1).padStart(2, "0")}.png`);
+
+/**
+ * ELEGIR UN AVATAR, AL ESTILO MAC (29/10/2026). Él: «nada de poner una lista gigante… que se muestre al
+ * desplegar unos cuantos pero scrolleable, al estilo mac». Cuadrícula de 4, unas 3 filas a la vista y el resto
+ * con la rueda; el elegido con su anillo de color; doble clic o «Listo» lo pone; Esc o «Cancelar» no cambia nada.
+ */
+function ElegirAvatar({ actual, onListo, onCerrar }: { actual?: string; onListo: (a: string) => void; onCerrar: () => void }) {
+  const [elegido, setElegido] = useState(actual ?? "");
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCerrar();
+    };
+    window.addEventListener("keydown", tecla);
+    return () => window.removeEventListener("keydown", tecla);
+  }, [onCerrar]);
+  return (
+    <span
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCerrar();
+      }}
+    >
+      <span
+        role="dialog"
+        aria-label="Elegir un avatar"
+        className="flex w-[min(92vw,400px)] flex-col rounded-xl border border-borde bg-tarjeta p-4 text-tinta shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className="mb-3 block text-sm font-bold">Elige un avatar</span>
+        <span className="grid max-h-[300px] grid-cols-4 gap-3 overflow-y-auto p-2">
+          {AVATARES.map((a) => (
+            <button
+              key={a}
+              type="button"
+              onClick={() => setElegido(a)}
+              onDoubleClick={() => onListo(a)}
+              className={`rounded-full p-0.5 transition ${elegido === a ? "ring-4 ring-sky-500" : "hover:ring-2 hover:ring-neutral-300"}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={a} alt="" loading="lazy" className="aspect-square w-full rounded-full" />
+            </button>
+          ))}
+        </span>
+        <span className="mt-3 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => onListo("")}
+            className="rounded-md px-2 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-neutral-100 oscuro:hover:bg-white/10"
+          >
+            Sin avatar (silueta)
+          </button>
+          <span className="flex gap-2">
+            <button
+              type="button"
+              onClick={onCerrar}
+              className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100 oscuro:hover:bg-white/10"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => onListo(elegido)}
+              className="rounded-md bg-sky-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-sky-700"
+            >
+              Listo
+            </button>
+          </span>
+        </span>
+      </span>
     </span>
   );
 }

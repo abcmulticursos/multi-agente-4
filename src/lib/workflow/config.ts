@@ -1076,6 +1076,8 @@ export interface CountryPaymentProfile {
    *  VACÍO USA EL DEL RECEPTOR, así que quien no lo llene ve exactamente lo de
    *  siempre y nada cambia sin que nadie lo pida. */
   nombre_completo?: string;
+  /** El avatar del titular del país (29/10/2026). SOLO PANTALLA: el bot no lo lee ni lo envía nunca. */
+  foto?: string;
 }
 
 /**

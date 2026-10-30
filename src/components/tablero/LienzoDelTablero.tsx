@@ -272,7 +272,58 @@ const Contexto = createContext<{
   setVerEntrantes: (id: string | null) => void;
   /** «🔍 Qué falta conectar»: por ficha, las salidas que faltan con su porqué. */
   faltas: Map<string, Map<string, string>> | null;
+  /** Por país: quién cobra ahí (su avatar y su nombre), para el Inicio. Solo pantalla. */
+  quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
 } | null>(null);
+
+/** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…). */
+const COLORES_DE_NOMBRE = ["bg-blue-600", "bg-pink-600", "bg-teal-600", "bg-amber-500", "bg-violet-600", "bg-emerald-600", "bg-sky-600", "bg-rose-600"];
+function colorDelNombre(nombre: string): string {
+  let h = 0;
+  for (const c of nombre) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return COLORES_DE_NOMBRE[h % COLORES_DE_NOMBRE.length];
+}
+
+/**
+ * QUIÉN COBRA EN ESTE PAÍS, EN SU INICIO (29/10/2026). Él: «yo solo miro la pizarra y digo, ah ok, sí, está bien
+ * el que va a cobrar, no me preocupa». Su avatar arriba a la derecha y su nombre debajo, como su dibujo. Si cobra
+ * «por defecto» (la tienda sin cobrador o el cobrador sin cuenta en este país), lo dice. Sin foto: la silueta.
+ */
+function QuienCobraEnElInicio({ pais }: { pais?: string }) {
+  const ctx = useContext(Contexto);
+  const q = pais ? ctx?.quienCobra?.[pais] : undefined;
+  const [roto, setRoto] = useState(false);
+  if (!q) return null;
+  const foto = String(q.foto ?? "").trim();
+  const nombreCorto = q.nombre.trim().split(/\s+/)[0] || q.nombre;
+  const deLaGaleria = foto.startsWith("/avatares/");
+  return (
+    <div
+      className="pointer-events-auto absolute -right-6 -top-5 flex flex-col items-center"
+      title={`Cobra aquí: ${q.nombre}${q.porDefecto ? " (por defecto: los Datos para pago del país)" : ""}.\nSe cambia en Mis tiendas → Quién cobra.`}
+    >
+      {foto && !roto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={foto}
+          alt=""
+          onError={() => setRoto(true)}
+          className={`h-16 w-16 rounded-full object-cover shadow-md ${deLaGaleria ? "" : "bg-white ring-[3px] ring-white"}`}
+        />
+      ) : (
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-slate-500 shadow-md ring-[3px] ring-white">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8">
+            <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+          </svg>
+        </span>
+      )}
+      <span className={`-mt-2 max-w-[110px] truncate rounded-full px-2 py-0.5 text-[11px] font-black text-white shadow ${colorDelNombre(q.nombre)}`}>
+        {nombreCorto}
+      </span>
+      {q.porDefecto && <span className="mt-0.5 rounded bg-white/90 px-1 text-[9px] font-semibold text-slate-600">por defecto</span>}
+    </div>
+  );
+}
 
 /** «👥 12 · 💰 3»: los números de una ficha, como los de las rutas de la pizarra. Nada si no hay. */
 function NumerosDeLaFicha({ id }: { id: string }) {
@@ -316,7 +367,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
   const etiqueta = f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países";
   return (
     <div
-      className={`w-[200px] rounded-xl border-2 bg-white text-slate-800 shadow-lg ${color.borde}`}
+      className={`relative w-[200px] rounded-xl border-2 bg-white text-slate-800 shadow-lg ${color.borde}`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -324,6 +375,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
       }}
       title={conectado ? undefined : "Desconectado: arrastra el punto naranja hasta la primera ficha de esta ruta."}
     >
+      <QuienCobraEnElInicio pais={f.pais} />
       <div className={`rounded-t-[10px] px-3 py-2 text-white ${color.banda}`}>
         <div className="text-sm font-bold">▶ Inicio</div>
         <div className="text-[11px] opacity-90">
@@ -1116,7 +1168,10 @@ export default function LienzoDelTablero({
   despuesDelMas,
   numeros,
   onFichaTocada,
+  quienCobra,
 }: {
+  /** Por país: quién cobra ahí, para mostrar su avatar en el Inicio (29/10/2026). Solo pantalla. */
+  quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
   /** Al tocar una ficha: para poner la bandera en el país de su manta (27/10/2026). */
   onFichaTocada?: (id: string) => void;
   tablero: TableroEnElEditor;
@@ -1502,9 +1557,11 @@ export default function LienzoDelTablero({
       verEntrantes,
       setVerEntrantes,
       faltas: faltasPorFicha,
+      quienCobra,
     }),
+    // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha]
+    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {})]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));
