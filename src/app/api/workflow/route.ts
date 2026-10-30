@@ -834,6 +834,8 @@ function leeCobradores(v: unknown): Array<Record<string, unknown>> {
         // tiene algo, como el resto del archivo — y si no se nombrara aquí, se
         // perdería en silencio al guardar.
         ...(str(c?.foto).trim() ? { foto: str(c.foto).trim() } : {}),
+        // SU COLOR (30/10/2026), solo pantalla: la etiqueta de su nombre en el Inicio del tablero.
+        ...(/^#[0-9a-f]{6}$/i.test(str(c?.color).trim()) ? { color: str(c.color).trim().toLowerCase() } : {}),
         ...(Object.keys(por_pais).length > 0 ? { por_pais } : {}),
       };
     });
@@ -2457,6 +2459,8 @@ export async function GET() {
       // EL AVATAR DEL TITULAR DEL PAÍS (29/10/2026), solo para la pantalla: el Inicio de cada país muestra quién
       // cobra ahí. Nunca viaja al cliente. Solo si tiene algo.
       ...(str(p?.foto).trim() ? { foto: str(p?.foto).trim() } : {}),
+      // Y su color (30/10/2026), solo pantalla: la etiqueta de su nombre en ese Inicio.
+      ...(/^#[0-9a-f]{6}$/i.test(str(p?.color_etiqueta).trim()) ? { color_etiqueta: str(p?.color_etiqueta).trim().toLowerCase() } : {}),
     };
   };
   const payment_profiles_by_country = Object.fromEntries(
@@ -4398,6 +4402,7 @@ export async function POST(req: NextRequest) {
       nombre_completo: str(p?.nombre_completo).trim(),
       // El avatar del titular del país (solo pantalla). Si no se nombra aquí, se pierde al guardar.
       ...(str(p?.foto).trim() ? { foto: str(p?.foto).trim() } : {}),
+      ...(/^#[0-9a-f]{6}$/i.test(str(p?.color_etiqueta).trim()) ? { color_etiqueta: str(p?.color_etiqueta).trim().toLowerCase() } : {}),
     };
   };
   if (

@@ -273,13 +273,20 @@ const Contexto = createContext<{
   /** «🔍 Qué falta conectar»: por ficha, las salidas que faltan con su porqué. */
   faltas: Map<string, Map<string, string>> | null;
   /** Por país: quién cobra ahí (su avatar y su nombre), para el Inicio. Solo pantalla. */
-  quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
+  quienCobra?: Record<string, { foto?: string; color?: string; nombre: string; porDefecto: boolean }>;
   /** Clic en la cara del Inicio: abre los datos de la tienda (quién cobra por país). */
   alTocarQuienCobra?: () => void;
 } | null>(null);
 
-/** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…). */
-const COLORES_DE_NOMBRE = ["bg-blue-600", "bg-pink-600", "bg-teal-600", "bg-amber-500", "bg-violet-600", "bg-emerald-600", "bg-sky-600", "bg-rose-600"];
+/** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…).
+ *  Sin verdes ni turquesas (29/10/2026): se confundían con la franja verde del Inicio y con el Cobro. */
+const COLORES_DE_NOMBRE = ["bg-blue-600", "bg-pink-600", "bg-slate-800", "bg-orange-600", "bg-violet-600", "bg-fuchsia-600", "bg-purple-700", "bg-rose-600"];
+/** Letra blanca sobre un color oscuro y casi negra sobre uno claro, para que el nombre se lea siempre. */
+function letraSobreElColor(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const luz = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+  return luz > 0.62 ? "#1f2937" : "#ffffff";
+}
 function colorDelNombre(nombre: string): string {
   let h = 0;
   for (const c of nombre) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -299,6 +306,8 @@ function QuienCobraEnElInicio({ pais }: { pais?: string }) {
   const foto = String(q.foto ?? "").trim();
   const nombreCorto = q.nombre.trim().split(/\s+/)[0] || q.nombre;
   const deLaGaleria = foto.startsWith("/avatares/");
+  // El color que él eligió en menú usuarios (30/10/2026); sin elegir, el automático de su nombre.
+  const colorElegido = /^#[0-9a-f]{6}$/i.test(String(q.color ?? "").trim()) ? String(q.color).trim() : "";
   return (
     <div
       role="button"
@@ -325,7 +334,10 @@ function QuienCobraEnElInicio({ pais }: { pais?: string }) {
           </svg>
         </span>
       )}
-      <span className={`-mt-2 max-w-[110px] truncate rounded-full px-2 py-0.5 text-[11px] font-black text-white shadow ${colorDelNombre(q.nombre)}`}>
+      <span
+        className={`-mt-2 max-w-[110px] truncate rounded-full px-2 py-0.5 text-[11px] font-black shadow ${colorElegido ? "" : `text-white ${colorDelNombre(q.nombre)}`}`}
+        style={colorElegido ? { backgroundColor: colorElegido, color: letraSobreElColor(colorElegido) } : undefined}
+      >
         {nombreCorto}
       </span>
       {q.porDefecto && <span className="mt-0.5 rounded bg-white/90 px-1 text-[9px] font-semibold text-slate-600">por defecto</span>}
@@ -1180,7 +1192,7 @@ export default function LienzoDelTablero({
   alTocarQuienCobra,
 }: {
   /** Por país: quién cobra ahí, para mostrar su avatar en el Inicio (29/10/2026). Solo pantalla. */
-  quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
+  quienCobra?: Record<string, { foto?: string; color?: string; nombre: string; porDefecto: boolean }>;
   /** Clic en esa cara: abrir los datos de la tienda (quién cobra por país), sin salir del tablero. */
   alTocarQuienCobra?: () => void;
   /** Al tocar una ficha: para poner la bandera en el país de su manta (27/10/2026). */

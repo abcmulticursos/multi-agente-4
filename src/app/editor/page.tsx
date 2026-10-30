@@ -2414,6 +2414,8 @@ interface CobradorEditor {
   /** SU FOTO, solo para la pantalla; nunca viaja al cliente. Vacío = la silueta.
    *  Ver `Cobrador.foto` en el motor para el porqué. */
   foto?: string;
+  /** EL COLOR DE SU ETIQUETA en el Inicio del tablero (30/10/2026), «#rrggbb». Solo pantalla. Vacío = automático. */
+  color?: string;
   /** Sus cuentas, por país. Un país ausente = aquí no cobra él. */
   por_pais?: Partial<Record<CountryCode, CobroDeUnPais>>;
 }
@@ -11200,6 +11202,7 @@ export default function EditorPage() {
               tiendas={cfg.tiendas ?? []}
               onCobradores={(cobradores) => setCfg({ ...cfg, cobradores })}
               onSnapshot={() => editSnapshot("usuario_cobradores")}
+              onPaleta={(ad_color_palette) => setCfg({ ...cfg, ad_color_palette })}
             />
           </Collapsible>
         )}
@@ -30986,17 +30989,18 @@ function PantallaDelTablero({
   // cobrador que está activo… o si se olvidó de seleccionarlo, el que es por defecto… yo solo miro la pizarra y
   // digo, ah ok, está bien el que va a cobrar». La misma regla del bot (`quienCobraEn`): el cobrador de la tienda
   // si tiene cuenta en ese país; si no, el titular de los Datos para pago del país («por defecto»).
-  const quienCobraPorPais: Record<string, { foto?: string; nombre: string; porDefecto: boolean }> = {};
+  const quienCobraPorPais: Record<string, { foto?: string; color?: string; nombre: string; porDefecto: boolean }> = {};
   if (!esWorkflow)
     for (const f of tablero.fichas) {
       if (f.tipo !== "inicio" || !f.pais || quienCobraPorPais[f.pais]) continue;
       const q = quienCobraEn(cfg, tienda, f.pais);
       const perfil = (cfg.modality_payment_profiles?.[activeModality(cfg)]?.[f.pais as CountryCode] ??
-        cfg.payment_profiles_by_country?.[f.pais as CountryCode]) as { foto?: string } | undefined;
+        cfg.payment_profiles_by_country?.[f.pais as CountryCode]) as { foto?: string; color_etiqueta?: string } | undefined;
+      // El color de su etiqueta (30/10/2026): el que él eligió en menú usuarios; sin elegir, el automático.
       quienCobraPorPais[f.pais] =
         q.deQuien && q.cobrador
-          ? { foto: q.cobrador.foto, nombre: q.cobrador.nombre?.trim() || q.nombre, porDefecto: false }
-          : { foto: perfil?.foto, nombre: q.nombre || q.titular || "Cuenta del país", porDefecto: true };
+          ? { foto: q.cobrador.foto, color: q.cobrador.color, nombre: q.cobrador.nombre?.trim() || q.nombre, porDefecto: false }
+          : { foto: perfil?.foto, color: perfil?.color_etiqueta, nombre: q.nombre || q.titular || "Cuenta del país", porDefecto: true };
     }
 
   const guardar = (t: TableroEnElEditor) =>
@@ -49523,6 +49527,18 @@ function PestanaDeUsuario({
             }}
           />
           <span className="text-[10px] font-semibold text-tinta-suave">Avatar</span>
+          {/* Y EL COLOR DE SU ETIQUETA en ese Inicio (30/10/2026). Solo pantalla. */}
+          <span title="El color de la etiqueta de su nombre en el Inicio del tablero. El cliente no lo ve.">
+            <SelectorDeColorDePersona
+              cfg={cfg}
+              valor={(perfil as { color_etiqueta?: string }).color_etiqueta}
+              onColor={(color) => {
+                onSnapshot();
+                onDatos({ color_etiqueta: color || undefined } as never);
+              }}
+              onPaleta={(ad_color_palette) => onCfg({ ...cfg, ad_color_palette })}
+            />
+          </span>
         </span>
         <button
           type="button"
@@ -52977,14 +52993,18 @@ function AdColorSelect({
   palette = [],
   onSavePalette,
   onDeletePalette,
+  sinElegir,
 }: {
   value: string;
   onChange: (color: string) => void;
   palette?: AdColorPaletteEntry[];
   onSavePalette?: (entry: AdColorPaletteEntry) => void;
   onDeletePalette?: (color: string) => void;
+  /** Si viene, el color se puede dejar SIN ELEGIR (vacío) y este es su nombre («Automático»). Sin él, lo de siempre. */
+  sinElegir?: string;
 }) {
-  const current = /^#[0-9a-fA-F]{6}$/.test(value) ? value.toLowerCase() : AD_COLORS[0].value;
+  const elegido = /^#[0-9a-fA-F]{6}$/.test(value);
+  const current = elegido ? value.toLowerCase() : AD_COLORS[0].value;
   const [customName, setCustomName] = useState("");
   const [open, setOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -52999,7 +53019,7 @@ function AdColorSelect({
   const colors = [...AD_COLORS, ...palette]
     .filter((color, index, all) => all.findIndex((candidate) => candidate.value.toLowerCase() === color.value.toLowerCase()) === index);
   const saved = colors.some((color) => color.value.toLowerCase() === current);
-  const selectedLabel = colors.find((color) => color.value.toLowerCase() === current)?.label ?? "Personalizado";
+  const selectedLabel = sinElegir && !elegido ? sinElegir : colors.find((color) => color.value.toLowerCase() === current)?.label ?? "Personalizado";
   const saveCustom = () => {
     if (!onSavePalette || saved) return;
     onSavePalette({ label: customName.trim() || current.toUpperCase(), value: current });
@@ -53007,15 +53027,21 @@ function AdColorSelect({
   };
   return (
     <div ref={pickerRef} className="relative flex w-[205px] items-center gap-2">
-      <button type="button" title="Elegir color" onClick={() => setOpen(!open)} style={{ backgroundColor: current }} className="h-5 w-5 shrink-0 rounded-sm" />
+      <button type="button" title="Elegir color" onClick={() => setOpen(!open)} style={sinElegir && !elegido ? undefined : { backgroundColor: current }} className={`h-5 w-5 shrink-0 rounded-sm ${sinElegir && !elegido ? "border border-dashed border-neutral-400 bg-tarjeta" : ""}`} />
       <button type="button" onClick={() => setOpen(!open)} className="flex h-9 w-32 shrink-0 items-center justify-between rounded border border-neutral-300 bg-tarjeta px-2 text-left text-sm text-neutral-800">
         <span className="truncate">{selectedLabel}</span><span className="text-xs text-neutral-500">v</span>
       </button>
       {open && <div className="absolute left-0 top-full z-40 mt-2 w-72 rounded-md border border-neutral-300 bg-tarjeta p-3 shadow-xl">
         <div className="mb-2 flex items-center justify-between"><span className="text-xs font-semibold text-neutral-700">Elegir color</span><button type="button" onClick={() => setOpen(false)} className="text-xs text-neutral-500">Cerrar</button></div>
         <div className="flex flex-wrap gap-1.5">
+        {sinElegir && (
+          <button type="button" title={sinElegir} aria-label={`Usar ${sinElegir}`} onClick={() => { onChange(""); setOpen(false); }}
+            className={`h-7 rounded-sm border border-dashed px-1.5 text-[10px] font-semibold text-neutral-600 ${!elegido ? "border-neutral-950 ring-2 ring-neutral-950 ring-offset-2" : "border-neutral-400 hover:bg-neutral-50"}`}>
+            {sinElegir}
+          </button>
+        )}
         {colors.map((color) => {
-          const selected = color.value.toLowerCase() === current;
+          const selected = (elegido || !sinElegir) && color.value.toLowerCase() === current;
           return <button
             key={`${color.label}-${color.value}`}
             type="button"
@@ -54365,12 +54391,46 @@ function PastillaDeTiendas({
  * porque es dinero que no le llega a quien debía. La alternativa —no mandar número
  * de cuenta— rompe la venta, que es peor.
  */
+/**
+ * EL COLOR DE UNA PERSONA QUE COBRA (30/10/2026). Él: «ese color que sea el que se vea en esa etiqueta… agrega
+ * unos colorcitos más… que yo agregue otro y otro, pero que también se puedan borrar». Es el selector de los
+ * anuncios (fijos + mezclador + «mi paleta», que se borra con la ✕), con «Automático» para no elegir ninguno.
+ */
+function SelectorDeColorDePersona({
+  cfg,
+  valor,
+  onColor,
+  onPaleta,
+}: {
+  cfg: FullConfig;
+  valor?: string;
+  onColor: (color: string) => void;
+  onPaleta?: (paleta: AdColorPaletteEntry[]) => void;
+}) {
+  const paleta = cfg.ad_color_palette ?? [];
+  return (
+    <AdColorSelect
+      value={valor ?? ""}
+      onChange={onColor}
+      sinElegir="Automático"
+      palette={paleta}
+      onSavePalette={
+        onPaleta
+          ? (c) => onPaleta(paleta.some((p) => p.value.toLowerCase() === c.value.toLowerCase()) ? paleta : [...paleta, c])
+          : undefined
+      }
+      onDeletePalette={onPaleta ? (c) => onPaleta(paleta.filter((p) => p.value.toLowerCase() !== c.toLowerCase())) : undefined}
+    />
+  );
+}
+
 function CobradoresDelProyecto({
   cfg,
   cobradores,
   tiendas,
   onCobradores,
   onSnapshot,
+  onPaleta,
 }: {
   /** Para leer los MÉTODOS DE PAGO de cada país — los suyos, de sus botones.
    *  Nunca una lista escrita aquí: cada negocio tiene los que tiene. */
@@ -54380,6 +54440,8 @@ function CobradoresDelProyecto({
   tiendas: TiendaEditor[];
   onCobradores: (siguientes: CobradorEditor[]) => void;
   onSnapshot: () => void;
+  /** Para guardar y borrar colores de «mi paleta» (la misma de los anuncios). Sin él, solo se elige. */
+  onPaleta?: (paleta: AdColorPaletteEntry[]) => void;
 }) {
   /** Los métodos de pago de ese país, tal como él los tiene escritos. */
   const metodosDe = (
@@ -54495,6 +54557,18 @@ function CobradoresDelProyecto({
                 placeholder="Nombre de la persona"
                 className="min-w-44 flex-1 rounded-md border border-borde bg-tarjeta px-2 py-1.5 text-sm font-bold"
               />
+              {/* SU COLOR (30/10/2026): el de la etiqueta de su nombre en el Inicio del tablero. Solo pantalla. */}
+              <span title="El color de la etiqueta de su nombre en el Inicio del tablero. El cliente no lo ve.">
+                <SelectorDeColorDePersona
+                  cfg={cfg}
+                  valor={cobrador.color}
+                  onColor={(color) => {
+                    onSnapshot();
+                    parchar(i, { color: color || undefined });
+                  }}
+                  onPaleta={onPaleta}
+                />
+              </span>
               <button
                 type="button"
                 onClick={() => setAbierto(estaAbierto ? null : cobrador.id)}
