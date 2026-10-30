@@ -229,6 +229,15 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         ficha.steps = leerPasos(f.steps.slice(0, 60)) as FichaDelTablero["steps"];
       const presenta = ids(f.presenta, 20);
       if ((tipo === "mensaje" || tipo === "intro_ob" || tipo === "seguimientos") && presenta.length) ficha.presenta = presenta;
+      // Cómo se ve su camino «🛒 si compra» (31/10/2026): cable o colita. Solo pantalla; el bot no lo lee.
+      if (tipo === "seguimientos" && esObjeto(f.vista_compra)) {
+        const vista = Object.fromEntries(
+          Object.entries(f.vista_compra)
+            .filter(([k, v]) => k.length <= 80 && (v === "cable" || v === "colita"))
+            .slice(0, 40)
+        ) as Record<string, "cable" | "colita">;
+        if (Object.keys(vista).length) ficha.vista_compra = vista;
+      }
       if (tipo === "correo") {
         const asunto = texto(f.correo_asunto, 200).trim();
         const cuerpo = texto(f.correo_texto, 4000);

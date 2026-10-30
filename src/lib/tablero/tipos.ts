@@ -194,6 +194,8 @@ export interface FichaDelTablero {
    * intro. El cobro presenta los suyos y «Entregar» el que entrega.
    */
   presenta?: string[];
+  /** SEGUIMIENTOS: cómo se ve cada camino «🛒 si compra» (por ficha de destino), cable o colita (31/10/2026). Solo pantalla. */
+  vista_compra?: Record<string, "cable" | "colita">;
   /** Ficha «Pedir correo y enviar»: el asunto y el texto del correo. {{MATERIAL}} = lo que recibió. */
   correo_asunto?: string;
   correo_texto?: string;

@@ -149,6 +149,51 @@ function letreroDeColita(t: TableroEnElEditor, c: CableDelTablero, numeroDe: Rec
   return `${atras ? "↩" : "→"} ${n !== undefined ? `${n} ` : ""}${ASPECTO[destino.tipo].icono} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}`;
 }
 
+/**
+ * EL CAMINO DE COMPRA DESDE UNOS SEGUIMIENTOS (31/10/2026). Él vio la caja de Seguimientos sin ningún cable
+ * saliendo y pensó que era un callejón: «no dejar que el usuario se rompa la cabeza pensando qué va a pasar».
+ * El bot ya lo hace (mientras salen los seguimientos el cliente sigue en la ficha de la que cuelgan, y su
+ * compra va por los cables de esa ficha); aquí solo se DIBUJA, sola, como copia de esos cables: no se jala,
+ * no se corta, y si los cables de la ficha cambian, cambia con ellos. Colgados de un Cobro: «🛒 si paga»,
+ * de vuelta a ese Cobro. Colgados de una Intro / Order bump: «🛒 si compra» hasta su Cobro (con dos o más
+ * productos, uno por producto: «🛒 si elige X»).
+ */
+function caminosDeCompra(
+  t: TableroEnElEditor,
+  seg: FichaEnElEditor,
+  nombres: Record<string, string>
+): Array<{ clave: string; destino: FichaEnElEditor; etiqueta: string }> {
+  if (seg.tipo !== "seguimientos") return [];
+  const out = new Map<string, { clave: string; destino: FichaEnElEditor; etiqueta: string }>();
+  const padres = t.cables
+    .filter((c) => c.a === seg.id && (c.salida === "siguiente" || c.salida === "sin_respuesta" || c.salida === "sin_pago"))
+    .map((c) => t.fichas.find((f) => f.id === c.de))
+    .filter((f): f is FichaEnElEditor => !!f && !f.guardada);
+  const destinos = new Map<string, FichaEnElEditor>();
+  for (const p of padres) {
+    if (p.tipo === "cobro") {
+      out.set(p.id, { clave: `compra:${p.id}`, destino: p, etiqueta: "🛒 si paga" });
+      continue;
+    }
+    for (const c of t.cables) {
+      if (c.de !== p.id || !/^(btn|dec|elige):/.test(c.salida)) continue;
+      const d = t.fichas.find((f) => f.id === c.a);
+      if (d && (d.tipo === "cobro" || d.tipo === "intro_ob")) destinos.set(d.id, d);
+    }
+  }
+  // Con un solo destino, «si compra»; con varios (de todas las fichas de las que cuelga), uno por producto.
+  for (const d of destinos.values()) {
+    if (out.has(d.id)) continue;
+    const nombre = d.tipo === "cobro" ? nombres[d.cobro?.producto_id ?? ""] : undefined;
+    out.set(d.id, {
+      clave: `compra:${d.id}`,
+      destino: d,
+      etiqueta: destinos.size > 1 ? `🛒 si elige ${nombre ?? d.titulo?.trim() ?? ASPECTO[d.tipo].nombre}` : "🛒 si compra",
+    });
+  }
+  return [...out.values()];
+}
+
 /** Las opciones de cada seguimiento de una caja de Seguimientos: su número, sus minutos y sus salidas. */
 function filasDeSeguimientos(f: FichaEnElEditor): Array<{ n: number; minutos: number; claves: string[] }> {
   return (f.seguimientos ?? []).map((s, i) => {
@@ -798,6 +843,18 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             ));
           })()}
           {visibles.filter((s) => !s.clave.startsWith("btn:") && !s.clave.startsWith("dec:")).map((s) => pastilla(s, true, s.clave))}
+          {/* EL CAMINO DE COMPRA, SOLO (31/10/2026): un dibujo de lo que el bot ya hace; su punto no se jala. */}
+          {caminosDeCompra(ctx.tablero, f, ctx.nombres).map((cam) => (
+            <div
+              key={cam.clave}
+              className="relative flex items-center gap-1.5 rounded-full border border-dashed border-emerald-400 bg-emerald-50 px-2 py-0.5 pr-4 text-[11px] font-semibold text-emerald-800"
+              title={`${cam.etiqueta}: va a ${ctx.numeroDe[cam.destino.id] ?? ""} ${cam.destino.titulo?.trim() || ASPECTO[cam.destino.tipo].nombre}.\nLo hace el bot solo: mientras salen los seguimientos, el cliente sigue en la ficha de la que cuelgan y puede comprar.\nEs automático (copia los cables de esa ficha): no se jala ni se corta. Clic derecho en la línea: cable o colita.`}
+            >
+              <span className="truncate">{cam.etiqueta}</span>
+              <span className="ml-auto shrink-0 text-[9px] font-normal opacity-70">automático</span>
+              <Handle type="source" position={Position.Right} id={cam.clave} isConnectable={false} className={`${PUNTO_NARANJA} !bg-emerald-500`} />
+            </div>
+          ))}
         </div>
       )}
       {salidas.length === 0 && (
@@ -1119,8 +1176,66 @@ function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition,
   );
 }
 
+/**
+ * EL CAMINO «🛒 SI COMPRA» DE UNOS SEGUIMIENTOS (31/10/2026). Se dibuja solo (ver `caminosDeCompra`): no se
+ * jala ni se corta. Como los demás, cable o colita a elección suya: clic derecho lo cambia (se guarda en la
+ * caja de Seguimientos, `vista_compra`). Solo pantalla: el bot no lo lee.
+ */
+function CaminoDeCompra({ id, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
+  const ctx = useContext(Contexto);
+  const [encima, setEncima] = useState(false);
+  const zoom = useStore((s) => s.transform[2]);
+  const d = data as { seg: string; colita: boolean; etiqueta: string; colorDestino?: string };
+  const [camino] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  const alternar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!ctx) return;
+    ctx.cambiar({
+      ...ctx.tablero,
+      fichas: ctx.tablero.fichas.map((f) => (f.id === d.seg ? { ...f, vista_compra: { ...(f.vista_compra ?? {}), [target]: d.colita ? "cable" : "colita" } } : f)),
+    });
+  };
+  const ayuda = `${d.etiqueta}\nLo hace el bot solo (no se jala ni se corta).\nClic: ilumina a dónde va · clic derecho: ${d.colita ? "verlo como cable" : "verlo como colita"}`;
+  const estilo = { stroke: "#10b981", strokeDasharray: `${3 / Math.max(zoom, 0.05)} ${6 / Math.max(zoom, 0.05)}` };
+  if (d.colita)
+    return (
+      <>
+        <BaseEdge id={id} path={`M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`} interactionWidth={0} style={{ stroke: "#10b981", strokeWidth: 2.5 }} />
+        {encima && <BaseEdge id={`${id}-completo`} path={camino} interactionWidth={0} style={{ ...estilo, strokeWidth: 3 / Math.max(zoom, 0.05), opacity: 0.8 }} />}
+        <EdgeLabelRenderer>
+          <div
+            className="nodrag nopan absolute flex max-w-[230px] cursor-pointer items-center gap-1 rounded-full border-2 border-dashed bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-900 shadow"
+            style={{ transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`, pointerEvents: "all", borderColor: d.colorDestino ?? "#10b981" }}
+            onMouseEnter={() => setEncima(true)}
+            onMouseLeave={() => setEncima(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx?.destacar(ctx.destacada === target ? null : target);
+            }}
+            onContextMenu={alternar}
+            title={ayuda}
+          >
+            <span className="truncate">{d.etiqueta}</span>
+          </div>
+        </EdgeLabelRenderer>
+      </>
+    );
+  return (
+    <>
+      <g onMouseEnter={() => setEncima(true)} onMouseLeave={() => setEncima(false)}>
+        <BaseEdge id={id} path={camino} interactionWidth={0} style={{ ...estilo, strokeWidth: encima ? 3.5 : 2 }} />
+        <path d={camino} fill="none" stroke="transparent" strokeWidth={18} className="nopan nodrag" style={{ pointerEvents: "stroke" }} onContextMenu={alternar}>
+          <title>{ayuda}</title>
+        </path>
+      </g>
+      {/* Sin letrero sobre la línea: ya lo dice la caja de Seguimientos (pizarra limpia). */}
+    </>
+  );
+}
+
 const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja };
-const TIPOS_DE_CABLE = { cable: CableDelTablero };
+const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
 
 /** Quitar fichas con sus cables. Si se va un Inicio, se va también su manta (las fichas se quedan). */
 function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
@@ -1406,6 +1521,41 @@ export default function LienzoDelTablero({
   // sigue sin ponerse donde no encaja, con su aviso.)
   const nodosAlTirar = nodosVistos;
 
+  // EL CAMINO «🛒 SI COMPRA» DE CADA CAJA DE SEGUIMIENTOS (31/10/2026): se dibuja solo; no está en
+  // `tablero.cables` (no es un cable suyo ni lo lee el bot). Ver `caminosDeCompra`.
+  const caminosDeLaCompra = useMemo<Edge[]>(
+    () =>
+      visibles
+        .filter((f) => f.tipo === "seguimientos")
+        .flatMap((seg) =>
+          caminosDeCompra(tablero, seg, nombres)
+            .filter((cam) => visibles.some((f) => f.id === cam.destino.id))
+            .map((cam) => {
+              const elegida = seg.vista_compra?.[cam.destino.id];
+              const colita = todoCable ? false : elegida ? elegida === "colita" : cam.destino.x < seg.x - 60;
+              const n = numeroDe[cam.destino.id];
+              return {
+                id: `compra-${seg.id}-${cam.destino.id}`,
+                source: seg.id,
+                sourceHandle: cam.clave,
+                target: cam.destino.id,
+                targetHandle: "entra",
+                type: "compra",
+                deletable: false,
+                selectable: false,
+                data: {
+                  seg: seg.id,
+                  colita,
+                  etiqueta: colita ? `${cam.etiqueta} → ${n !== undefined ? `${n} ` : ""}${ASPECTO[cam.destino.tipo].icono} ${cam.destino.titulo?.trim() || ASPECTO[cam.destino.tipo].nombre}` : cam.etiqueta,
+                  colorDestino: ASPECTO[cam.destino.tipo].trazo,
+                },
+              } as Edge;
+            })
+        ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tablero, todoCable, numeroDe, nombres]
+  );
+
   const cables = useMemo<Edge[]>(
     () =>
       tablero.cables
@@ -1441,8 +1591,9 @@ export default function LienzoDelTablero({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tablero, todoCable, tirando, numeroDe]
   );
+  const todosLosCables = useMemo(() => [...cables, ...caminosDeLaCompra], [cables, caminosDeLaCompra]);
 
-  const crearFicha = (tipo: TipoDeFicha, donde: Punto, desde?: { ficha: string; salida: string }) => {
+  const crearFicha =(tipo: TipoDeFicha, donde: Punto, desde?: { ficha: string; salida: string }) => {
     const id = `f-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
     const nueva: FichaEnElEditor = {
       id,
@@ -1620,12 +1771,12 @@ export default function LienzoDelTablero({
           nodes={nodosAlTirar}
           edges={
             enLaRuta || coincidentes
-              ? cables.map((c) =>
+              ? todosLosCables.map((c) =>
                   (!enLaRuta || (enLaRuta.has(c.source) && enLaRuta.has(c.target))) && (!coincidentes || coincidentes.has(c.source) || coincidentes.has(c.target))
                     ? c
                     : { ...c, style: { ...c.style, opacity: 0.12 } }
                 )
-              : cables
+              : todosLosCables
           }
           nodeTypes={TIPOS_DE_NODO}
           edgeTypes={TIPOS_DE_CABLE}
