@@ -1,0 +1,1040 @@
+whatsapp:
+  encendido: false
+  fichas:
+    - id: inicio-mvveb83v-1
+      tipo: inicio
+      pais: PE
+      x: 60
+      y: 0
+    - id: intro-mvveb83v-2
+      tipo: mensaje
+      titulo: GRAFISMO FONETICO INTRO 1
+      presenta: &a1
+        - pmu39gpb1
+        - pmugne9ti
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              OB PERUCHO *-DOU-* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+
+              ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
+              _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
+
+              La etapa Pre escolar es *CLAVE* para desarrollar su *_atención, lenguaje, motricidad y aprendizaje_* 🧠✨
+
+              📚 *Y con las actividades correctas*, puedes estimularlo desde casa de forma divertida y sin estrés.
+
+              *{Por eso hoy quiero mostrarte|Por eso hoy quiero presentarte|Por eso quiero compartir contigo} nuestro pack educativo:* 🤗⬇️
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              *{Con el Kit Esencial de {{PRODUCTO_BASE}}|Al adquirir el Kit Esencial de GRAFISMO FONÉTICO|Con nuestro Kit Esencial de GRAFISMO FONÉTICO}* recibirás:
+
+              📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
+
+              * 👨‍👩‍👦 Imágenes de personas, 
+              * 🐕 animales, 
+              * 🍎 frutas y
+              * 🚗 objetos, que facilitarán su aprendizaje.
+              🖨️ Formato *PDF para descargar e Imprimir*
+
+              📲 *{Se envía directamente a tu Whatsapp o correo|Recíbelo directamente en tu Whatsapp o correo|Lo recibirás cómodamente en tu Whatsapp o correo}* 💌
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 7
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 7
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 7
+          enabled: false
+        - type: video
+          drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 7
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
+          caption_variants:
+            - |
+              🎁 *Además recibirás GRATIS estos complementos* 🎁 ‼️👇🏼
+
+              * 🔢 Cuaderno de los Números
+              * 🎴 Tarjetitas gráficas
+              * 📕 Cuaderno de Sílabas simples
+              * 🔤 Alfabeto con caritas
+              * 🎁 Alfabeto con Imagen
+              * 🎁 Alfabeto con rompecabezas y más...
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |
+              ❌*(antes)* ~{{PRECIO_MERCADO}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              🟣 *¿COMO FUNCIONA?*
+
+              * 1.- 💵 Realiza un único pago de {{PRECIO_BASE}}*
+              * 2.- 📲 Envíanos tu comprobante de pago
+
+              *! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡
+          delay_after_sec: 5
+          decisions:
+            - id: d-mvveb83v-1ar2
+              enabled: false
+              title: YAPE/PLIN
+              keywords:
+                - yape
+                - yap
+                - llape
+                - yapee
+                - ype
+                - yappe
+                - yape
+                - con yape
+                - con llape
+                - conyape
+                - conya pe
+                - plin
+                - pln plin
+                - pn
+                - pli
+                - oli
+                - olin
+                - con plin
+                - solo tengo plin
+                - pln
+                - con yape
+                - voy a pagar con yape
+                - yape nomas
+                - tengo yape
+                - tengo plin
+                - con plin
+                - con plin nomas
+                - solo tengo plin y con plin
+                - mejor plin
+                - mejor yape
+                - mejor con yape
+                - mejor con plin
+                - yapeo
+                - a cual yapeo
+                - a este numero yapeo
+              color: esmeralda
+              action: send_payment_method
+              payment_method: yape
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *Excelente decisión!* ☺️
+                      El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🟢 Yape: 935286681
+                      🙎‍♂️{{NOMBRE_RECEPTOR}}
+                      💰️ Precio:  {precio}
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mvveb83v-24tg
+              enabled: false
+              title: BCP
+              keywords:
+                - bpc
+                - transferencia
+                - con transferencia
+                - con bcp
+                - bcp nomas
+                - trasfencia
+                - trnsfrnecia
+                - trasferencia
+                - trnsferncia
+                - traferencia
+                - banca movil
+                - con banca movil
+                - tengo banca movil
+                - bcp
+                - con bcp
+                - bcp
+                - tengo bcp
+                - puedo pagar con bpc
+                - tengo banca movil
+                - banca movil
+                - mejor bcp
+                - bcp mejor
+                - mejor con bcp
+              color: ambar
+              action: send_payment_method
+              payment_method: bcp
+              steps:
+                - type: text
+                  body_variants:
+                    - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      📲 *BCP*: -320485034580
+                      🏦 *INTERBANCARIA*: 038502934
+                      🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mvveb83v-32s1
+              enabled: false
+              title: ""
+              keywords: []
+              color: gris
+              steps: []
+        - type: text
+          body_variants:
+            - |
+              🔥 Completa tu pago hoy y *llévate GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRAR? *RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 5
+          decisions:
+            - id: d-mvveb83v-4wpm
+              enabled: false
+              title: YAPE/PLIN
+              keywords:
+                - yape
+                - yap
+                - llape
+                - yapee
+                - ype
+                - yappe
+                - yape
+                - con yape
+                - con llape
+                - conyape
+                - conya pe
+                - plin
+                - pln plin
+                - pn
+                - pli
+                - oli
+                - olin
+                - con plin
+                - solo tengo plin
+                - pln
+                - con yape
+                - voy a pagar con yape
+                - yape nomas
+                - tengo yape
+                - tengo plin
+                - con plin
+                - con plin nomas
+                - solo tengo plin y con plin
+                - mejor plin
+                - mejor yape
+                - mejor con yape
+                - mejor con plin
+                - yapeo
+                - a cual yapeo
+                - a este numero yapeo
+              color: esmeralda
+              action: send_payment_method
+              payment_method: yape
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *Excelente decisión!* ☺️
+                      El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🟢 Yape: 935286681
+                      🙎‍♂️{{NOMBRE_RECEPTOR}}
+                      💰️ Precio:  {precio}
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mvveb83v-5seg
+              enabled: false
+              title: BCP
+              keywords:
+                - bpc
+                - transferencia
+                - con transferencia
+                - con bcp
+                - bcp nomas
+                - trasfencia
+                - trnsfrnecia
+                - trasferencia
+                - trnsferncia
+                - traferencia
+                - banca movil
+                - con banca movil
+                - tengo banca movil
+                - bcp
+                - con bcp
+                - bcp
+                - tengo bcp
+                - puedo pagar con bpc
+                - tengo banca movil
+                - banca movil
+                - mejor bcp
+                - bcp mejor
+                - mejor con bcp
+              color: ambar
+              action: send_payment_method
+              payment_method: bcp
+              steps:
+                - type: text
+                  body_variants:
+                    - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      📲 *BCP*: -320485034580
+                      🏦 *INTERBANCARIA*: 038502934
+                      🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mvveb83v-6c2u
+              enabled: false
+              title: ""
+              keywords: []
+              color: gris
+              steps: []
+        - type: text
+          body_variants:
+            - |-
+              🔥 {Completa tu pago hoy|Realiza tu pago hoy|Paga hoy mismo|Haz tu pago hoy} y *{llévate GRATIS aparte un regalito adicional|recibe GRATIS además un regalito adicional|obtén GRATIS un regalito adicional|llévate de REGALO un regalito adicional}* 🎁
+
+              🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+
+              - *YAPE*: 📱
+              - *PLIN*: 🤳🏼
+              - *BCP*: 👈🏼
+          delay_after_sec: 5
+          enabled: false
+      x: 390
+      y: 0
+    - id: cobro-mvveb856-4
+      tipo: cobro
+      titulo: Cobro · GRAFISMO FONETICO
+      cobro:
+        modo: producto
+        producto_id: pmu39gpb1
+        acepta:
+          - pmugne9ti
+        precio: etapa
+        metodos: true
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *{¡Perfecto!|¡Excelente!|¡Genial!}* puedes {adquirir el curso de la siguiente manera|adquirir el curso de la siguiente forma|adquirir el curso de esta manera} 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Puedes elegir tu método de pago entre las siguientes opciones:
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              ¿Cuál prefieres?
+          delay_after_sec: 0
+        - type: text
+          body_variants:
+            - |-
+              🔴 *Yape/Plin : 935286681*
+              🙎🏻‍♂️A nombre de: *Alberto Salinas.*
+              💰 *Monto: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} soles*
+          delay_after_sec: 6
+          enabled: false
+      x: 1050
+      y: 330
+    - id: seg-mvveb857-a
+      tipo: seguimientos
+      titulo: Seguimientos
+      presenta: *a1
+      seguimientos:
+        - id: s-mvveb856-6
+          minutos: 2
+          variantes:
+            - id: v-mvveb856-7
+              nombre: SEGUIMIENTO PRUEBA DOU PERU
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                  caption_variants:
+                    - |
+                      *Hola Soy Andrea!* 👋🏼 Quería Asegurarme que recibiste la información que envié. ¿Te quedó alguna duda o pregunta? Estoy aquí para ayudarte! 😊
+
+                      📩 *Recibimos pagos todos los días* de personas reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                      🎯 *Aprovecha la promoción activa* y realiza un pago ahora mismo!
+                      *Ellos ya lo hicieron*... y sus peques *ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *S/. {{PRECIO_COMPLETO_MAYUSCULAS}} SOLES*
+                  delay_after_sec: 6
+                  enabled: false
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Ko5oSUrNHK2wdPSgqr8clb4XFpYTkNFa/view?usp=sharing
+                  caption_variants: []
+                  delay_after_sec: 3
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "*DOU* perucho PASABA POR AQUI Y PREGUNTAR SI HABIAS RECIBIDO LA INFORMACION CORRECTAMENTE"
+                  delay_after_sec: 3
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+
+                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                  delay_after_sec: 3
+                  enabled: false
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                      🌸 *Al adquirir* el SuperKit PDF Flores de papel *llévate automaticamente los bonos de obsequio* 🎁😱
+
+                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                  delay_after_sec: 3
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+                      (transferencia)
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      *Tienes 2 opciones*: Seguir buscando ideas cada semana o empezar a usar actividades prácticas y diferentes desde mañana mismo.
+
+                      {{PRODUCTO_FULL}}
+                      {{PRODUCTO_BASE}}
+
+                      💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+                      ✅ Yape
+                      ✅ Transferencia bancaria
+
+                      Quedo atento! 😊
+                  delay_after_sec: 5
+                  decisions:
+                    - id: d-mvveb856-7qb3
+                      title: QUIERE PAGAR
+                      keywords:
+                        - yape
+                        - yapeo
+                        - plin
+                        - llape
+                        - llapeo
+                        - quiero pagar
+                        - como pago
+                        - como puedo pagar
+                        - a donde yapeo
+                        - cual es el numero de yape
+                        - a que numero yapeo
+                        - a donde yapeo
+                        - cual es el numero
+                      color: esmeralda
+                      action: choose_combo
+        - id: s-mvveb856-8
+          minutos: 5
+          variantes:
+            - id: v-mvveb856-9
+              nombre: SEGUIMIENTO 2 - PRUEBA DOU PERU
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1t3NipOX3Wwv7InfKDjaURPanIoI0Q2nb/view?usp=drive_link
+                  caption_variants: []
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      *--DOU--* PERUANO *DOU*🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+
+                      {{Producto_full}} a tan solo {{precio_full}}
+
+                      por tiempo limitado
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 0
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      Deseas aprovechar este super descuento
+
+                      {{PRODUCTO_full}}
+                       A TAN SOLO {{PRECIO_full}}
+                  delay_after_sec: 5
+                  buttons:
+                    - id: b-mvveb857-8pia
+                      label: QUIERO EL DESCUENTO
+                      action: choose_combo
+                    - id: b-mvveb857-933e
+                      label: NO GRACIAS
+                      action: send_steps
+                  decisions:
+                    - id: d-mvveb857-a0nu
+                      enabled: false
+                      title: YAPE/PLIN
+                      keywords:
+                        - yape
+                        - yap
+                        - llape
+                        - yapee
+                        - ype
+                        - yappe
+                        - yape
+                        - con yape
+                        - con llape
+                        - conyape
+                        - conya pe
+                        - plin
+                        - pln plin
+                        - pn
+                        - pli
+                        - oli
+                        - olin
+                        - con plin
+                        - solo tengo plin
+                        - pln
+                        - con yape
+                        - voy a pagar con yape
+                        - yape nomas
+                        - tengo yape
+                        - tengo plin
+                        - con plin
+                        - con plin nomas
+                        - solo tengo plin y con plin
+                        - mejor plin
+                        - mejor yape
+                        - mejor con yape
+                        - mejor con plin
+                      color: esmeralda
+                      action: choose_basico
+                      steps:
+                        - type: text
+                          body_variants:
+                            - |-
+                              *Excelente decisión!* ☺️
+                              El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - |-
+                              🟢 Yape: 935286681
+                              🙎‍♂️{{NOMBRE_RECEPTOR}}
+                              💰️ Precio:  {precio}
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
+                          delay_after_sec: 6
+                    - id: d-mvveb857-b6v6
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bpc
+                        - transferencia
+                        - con transferencia
+                        - con bcp
+                        - bcp nomas
+                        - trasfencia
+                        - trnsfrnecia
+                        - trasferencia
+                        - trnsferncia
+                        - traferencia
+                        - banca movil
+                        - con banca movil
+                        - tengo banca movil
+                        - bcp
+                        - con bcp
+                        - bcp
+                        - tengo bcp
+                        - puedo pagar con bpc
+                        - tengo banca movil
+                        - banca movil
+                        - mejor bcp
+                        - bcp mejor
+                        - mejor con bcp
+                      color: ambar
+                      action: choose_basico
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - |-
+                              📲 *BCP*: -320485034580
+                              🏦 *INTERBANCARIA*: 038502934
+                              🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
+                          delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 5
+                  decisions:
+                    - id: d-mvveb857-cze5
+                      title: YAPE/PLIN
+                      keywords:
+                        - yape
+                        - yap
+                        - llape
+                        - yapee
+                        - ype
+                        - yappe
+                        - yape
+                        - con yape
+                        - con llape
+                        - conyape
+                        - conya pe
+                        - plin
+                        - pln plin
+                        - pn
+                        - pli
+                        - oli
+                        - olin
+                        - con plin
+                        - solo tengo plin
+                        - pln
+                        - con yape
+                        - voy a pagar con yape
+                        - yape nomas
+                        - tengo yape
+                        - tengo plin
+                        - con plin
+                        - con plin nomas
+                        - solo tengo plin y con plin
+                        - mejor plin
+                        - mejor yape
+                        - mejor con yape
+                        - mejor con plin
+                      color: esmeralda
+                      action: choose_basico
+                      steps:
+                        - type: text
+                          body_variants:
+                            - |-
+                              *Excelente decisión!* ☺️
+                              El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - |-
+                              🟢 Yape: 935286681
+                              🙎‍♂️{{NOMBRE_RECEPTOR}}
+                              💰️ Precio:  {precio}
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
+                          delay_after_sec: 6
+                    - id: d-mvveb857-dpuy
+                      title: BCP
+                      keywords:
+                        - bpc
+                        - transferencia
+                        - con transferencia
+                        - con bcp
+                        - bcp nomas
+                        - trasfencia
+                        - trnsfrnecia
+                        - trasferencia
+                        - trnsferncia
+                        - traferencia
+                        - banca movil
+                        - con banca movil
+                        - tengo banca movil
+                        - bcp
+                        - con bcp
+                        - bcp
+                        - tengo bcp
+                        - puedo pagar con bpc
+                        - tengo banca movil
+                        - banca movil
+                        - mejor bcp
+                        - bcp mejor
+                        - mejor con bcp
+                      color: ambar
+                      action: choose_basico
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - |-
+                              📲 *BCP*: -320485034580
+                              🏦 *INTERBANCARIA*: 038502934
+                              🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
+                          delay_after_sec: 6
+                        - type: text
+                          body_variants:
+                            - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
+                          delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_COMPLETO_MAYUSCULAS}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 5
+                  decisions:
+                    - id: d-mvveb857-e5rz
+                      title: YAPE/PLIN
+                      keywords:
+                        - yape
+                        - yap
+                        - llape
+                        - yapee
+                        - ype
+                        - yappe
+                        - yape
+                        - con yape
+                        - con llape
+                        - conyape
+                        - conya pe
+                        - plin
+                        - pln plin
+                        - pn
+                        - pli
+                        - oli
+                        - olin
+                        - con plin
+                        - solo tengo plin
+                        - pln
+                        - con yape
+                        - voy a pagar con yape
+                        - yape nomas
+                        - tengo yape
+                        - tengo plin
+                        - con plin
+                        - con plin nomas
+                        - solo tengo plin y con plin
+                        - mejor plin
+                        - mejor yape
+                        - mejor con yape
+                        - mejor con plin
+                        - yapeo
+                        - a cual yapeo
+                        - a este numero yapeo
+                      color: esmeralda
+                      action: send_payment_method
+                      payment_method: yape
+                      steps:
+                        - type: text
+                          body_variants:
+                            - |-
+                              *Excelente decisión!* ☺️
+                              El *{{PRODUCTO}}* es una muy buena alternativa 👍️ y puedes adquirirlo de la siguiente manera ⬇️
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - |-
+                              🟢 Yape: 935286681
+                              🙎‍♂️{{NOMBRE_RECEPTOR}}
+                              💰️ Precio:  {precio}
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "*Luego nos envías tu comprobante y automaticamente recibirás tu enlace de acceso* 🤳🤗"
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mvveb857-f5w4
+                      title: BCP
+                      keywords:
+                        - bpc
+                        - transferencia
+                        - con transferencia
+                        - con bcp
+                        - bcp nomas
+                        - trasfencia
+                        - trnsfrnecia
+                        - trasferencia
+                        - trnsferncia
+                        - traferencia
+                        - banca movil
+                        - con banca movil
+                        - tengo banca movil
+                        - bcp
+                        - con bcp
+                        - bcp
+                        - tengo bcp
+                        - puedo pagar con bpc
+                        - tengo banca movil
+                        - banca movil
+                        - mejor bcp
+                        - bcp mejor
+                        - mejor con bcp
+                      color: ambar
+                      action: send_payment_method
+                      payment_method: bcp
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "*Excelente! puedes pagar por BCP de la siguiente manera y a este número* 😊👇️"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - |-
+                              📲 *BCP*: -320485034580
+                              🏦 *INTERBANCARIA*: 038502934
+                              🤵‍♂️ A nombre de: *{{NOMBRE_RECEPTOR}}*
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "*Una vez realizado tu pago* nos envías tu comprobante y listo, te enviamos inmediatamente 🤳"
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+      x: 720
+      y: 990
+    - id: cobro-mvveb857-b
+      tipo: cobro
+      titulo: Cobro · SUPER PACK 2 EN 1
+      cobro:
+        modo: producto
+        producto_id: pmugne9ti
+        acepta:
+          - pmu39gpb1
+        precio: etapa
+        metodos: true
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *{¡Perfecto!|¡Excelente!|¡Genial!}* puedes {adquirir el curso de la siguiente manera|adquirir el curso de la siguiente forma|adquirir el curso de esta manera} 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Puedes elegir tu método de pago entre las siguientes opciones:
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              ¿Cuál prefieres?
+          delay_after_sec: 0
+        - type: text
+          body_variants:
+            - |-
+              🔴 *Yape/Plin : 935286681*
+              🙎🏻‍♂️A nombre de: *Alberto Salinas.*
+              💰 *Monto: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} soles*
+          delay_after_sec: 6
+          enabled: false
+      x: 1050
+      y: 660
+    - id: msg-mvveb857-e
+      tipo: mensaje
+      titulo: NO GRACIAS
+      steps:
+        - type: text
+          body_variants:
+            - NO TE PREOCUPES, que tengas un excelente día 😊
+          delay_after_sec: 6
+      x: 1380
+      y: 1650
+    - id: entrega-mvveb857-i
+      tipo: entregar
+      titulo: Entrega · GRAFISMO FONETICO
+      producto_id: pmu39gpb1
+      x: 1380
+      y: 0
+    - id: entrega-mvveb857-k
+      tipo: entregar
+      titulo: Entrega · SUPER PACK 2 EN 1
+      producto_id: pmugne9ti
+      x: 1380
+      y: 660
+    - id: regalo-mvveb857-o
+      tipo: regalo
+      titulo: Regalo
+      x: 1710
+      y: 0
+  cables:
+    - id: c-mvveb856-3
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: intro-mvveb83v-2
+    - id: c-mvveb857-c
+      de: seg-mvveb857-a
+      salida: dec:d-mvveb856-7qb3
+      a: cobro-mvveb857-b
+    - id: c-mvveb857-d
+      de: seg-mvveb857-a
+      salida: btn:b-mvveb857-8pia
+      a: cobro-mvveb857-b
+    - id: c-mvveb857-f
+      de: seg-mvveb857-a
+      salida: btn:b-mvveb857-933e
+      a: msg-mvveb857-e
+    - id: c-mvveb857-g
+      de: cobro-mvveb856-4
+      salida: sin_pago
+      a: seg-mvveb857-a
+    - id: c-mvveb857-h
+      de: cobro-mvveb857-b
+      salida: sin_pago
+      a: seg-mvveb857-a
+    - id: c-mvveb857-j
+      de: cobro-mvveb856-4
+      salida: pagado
+      a: entrega-mvveb857-i
+    - id: c-mvveb857-l
+      de: cobro-mvveb856-4
+      salida: prod:pmugne9ti
+      a: entrega-mvveb857-k
+    - id: c-mvveb857-m
+      de: cobro-mvveb857-b
+      salida: pagado
+      a: entrega-mvveb857-k
+    - id: c-mvveb857-n
+      de: cobro-mvveb857-b
+      salida: prod:pmu39gpb1
+      a: entrega-mvveb857-i
+    - id: c-mvveb857-p
+      de: entrega-mvveb857-i
+      salida: siguiente
+      a: regalo-mvveb857-o
+    - id: c-mvveb857-q
+      de: entrega-mvveb857-k
+      salida: siguiente
+      a: regalo-mvveb857-o
+    - id: c-grafismo-mvveb857-1
+      de: intro-mvveb83v-2
+      salida: elige:pmu39gpb1
+      a: cobro-mvveb856-4
+    - id: c-grafismo-mvveb857-2
+      de: intro-mvveb83v-2
+      salida: elige:pmugne9ti
+      a: cobro-mvveb857-b
+    - id: c-grafismo-mvveb857-3
+      de: intro-mvveb83v-2
+      salida: siguiente
+      a: seg-mvveb857-a
+  cajas:
+    - id: manta-inicio-mvveb83v-1
+      x: 20
+      y: -70
+      ancho: 1980
+      alto: 2010
+      titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
+      inicio: inicio-mvveb83v-1

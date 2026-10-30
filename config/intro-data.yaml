@@ -12524,6 +12524,7 @@ tableros:
   tienda_tplantillas: "@pieza:tableros/tienda_tplantillas.yaml"
   tienda_test1: "@pieza:tableros/tienda_test1.yaml"
   tienda_test2: "@pieza:tableros/tienda_test2.yaml"
+  tienda_mupk9ybz: "@pieza:tableros/tienda_mupk9ybz.yaml"
 workflows:
   figurarte2:
     encendido: true
