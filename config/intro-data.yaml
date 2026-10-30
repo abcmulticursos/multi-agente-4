@@ -126705,7 +126705,6 @@ tableros:
           cobro:
             modo: producto
             producto_id: ptcocina_dietas
-            metodos: true
         - id: f-mvu306rd-mri0e
           tipo: seguimientos
           x: 913
