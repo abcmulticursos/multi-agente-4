@@ -459,6 +459,19 @@ function huellaDelSeguimiento(s: { variantes?: Array<{ steps?: unknown[] }> }): 
   return `${textos.length}:${(h >>> 0).toString(36)}`;
 }
 
+/**
+ * LAS BURBUJAS QUE YA PUDO VER, para leer sus cuadritos por palabras (31/10/2026). En una caja de Seguimientos,
+ * solo las de los seguimientos que YA LE SALIERON: el cuadrito de un seguimiento vale después de ese seguimiento,
+ * como en el automático. Pasó en GRAFISMO (prueba en la copia): dijo «yape» justo tras la intro, el seguimiento 1
+ * aún no había salido, y su cuadrito «QUIERE PAGAR» (yape… → el pack) ya saltaba: mandó sus burbujas con un precio
+ * y abrió el cobro del pack con otro. Las demás fichas, como siempre.
+ */
+function pasosQueValen(convoId: number, f: FichaDelTablero): ReturnType<typeof pasosDeLaFicha> {
+  if (f.tipo !== "seguimientos") return pasosDeLaFicha(f);
+  const ya = new Set(seguimientosEnviados(estadoEnElTablero(convoId)));
+  return pasosDeLaFicha({ ...f, seguimientos: (f.seguimientos ?? []).filter((s) => ya.has(huellaDelSeguimiento(s))) });
+}
+
 /** El primer seguimiento de esta ficha, desde `desde`, que todavía no le salió (o -1). */
 function siguienteSinEnviar(convoId: number, segs: NonNullable<FichaDelTablero["seguimientos"]>, desde: number): number {
   const ya = new Set(seguimientosEnviados(estadoEnElTablero(convoId)));
@@ -3351,7 +3364,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   if (texto && !suSiNoEsDeLaIA) {
     for (const duena of [fichaAqui, segAqui]) {
       if (!duena || !(duena.tipo === "mensaje" || duena.tipo === "intro_ob" || duena.tipo === "seguimientos")) continue;
-      const d = decisionQueCoincide(texto, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
+      const d = decisionQueCoincide(texto, opcionesDe(pasosQueValen(convo.id, duena)).cuadritos);
       if (!d || !cableDeLaSalida(t, duena.id, `dec:${d.id}`)) continue;
       // EL CANDADO DE LA ELECCIÓN (27/10/2026, su prueba H1): con un cobro abierto, un cuadrito que lleva
       // a pagar (otro Cobro o el Order bump) no se sigue: el cobro abierto atiende el método y el «quiero
@@ -3391,7 +3404,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   const opcionesDeCompra = () => {
     const duenas = [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x);
     const haciaPagar = duenas.flatMap((duena) => {
-      const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
+      const { botones, cuadritos } = opcionesDe(pasosQueValen(convo.id, duena));
       return [
         ...botones.map((b) => ({ duena, salida: `btn:${b.id}`, boton: b.id as string | null, cuadrito: null as BubbleDecision | null })),
         ...cuadritos.map((d) => ({ duena, salida: `dec:${d.id}`, boton: null as string | null, cuadrito: d as BubbleDecision | null })),
@@ -3788,7 +3801,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // 5. UN CUADRITO, por sus palabras: sus burbujas, y luego su cable.
     if (!contenido.startsWith("bubble:") && !suSiNoEsDeLaIA)
       for (const duena of duenas) {
-        const decision = decisionQueCoincide(contenido, opcionesDe(pasosDeLaFicha(duena)).cuadritos);
+        const decision = decisionQueCoincide(contenido, opcionesDe(pasosQueValen(convo.id, duena)).cuadritos);
         if (decision && conCobroAbierto && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         // Una pregunta no elige entre dos o más productos, tampoco por cuadrito (`esPreguntaQueNoElige`).
         if (decision && llevaAPagar(duena, `dec:${decision.id}`) && esPreguntaQueNoElige(contenido) && variasComprasEn(t, duena)) continue;
@@ -3801,7 +3814,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // 6. NINGUNO ACERTÓ: la IA decide cuál eligió («el de 10», «el otro», «quiero pagar con yape»…), sin
     // escribir nada. Desde ahí sale lo mismo que si hubiera tocado o escrito esa opción.
     const lista = duenas.flatMap((duena) => {
-      const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
+      const { botones, cuadritos } = opcionesDe(pasosQueValen(convo.id, duena));
       return [
         ...botones.map((b) => ({ duena, op: { id: `btn:${b.id}`, etiqueta: b.label } as OpcionParaLaIA, d: null as BubbleDecision | null })),
         ...cuadritos.map((d) => ({
