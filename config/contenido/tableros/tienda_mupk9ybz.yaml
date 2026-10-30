@@ -3,15 +3,14 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      pais: PE
       x: 60
       y: 0
+      pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
+      x: 385
+      y: 0
       titulo: GRAFISMO FONETICO INTRO 1
-      presenta: &a1
-        - pmu39gpb1
-        - pmugne9ti
       steps:
         - type: text
           body_variants:
@@ -383,18 +382,14 @@ whatsapp:
               - *BCP*: 👈🏼
           delay_after_sec: 5
           enabled: false
-      x: 390
-      y: 0
+      presenta:
+        - pmu39gpb1
+        - pmugne9ti
     - id: cobro-mvveb856-4
       tipo: cobro
+      x: 1050
+      y: 330
       titulo: Cobro · GRAFISMO FONETICO
-      cobro:
-        modo: producto
-        producto_id: pmu39gpb1
-        acepta:
-          - pmugne9ti
-        precio: etapa
-        metodos: true
       steps:
         - type: text
           body_variants:
@@ -417,12 +412,20 @@ whatsapp:
               💰 *Monto: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} soles*
           delay_after_sec: 6
           enabled: false
-      x: 1050
-      y: 330
+      cobro:
+        modo: producto
+        producto_id: pmu39gpb1
+        acepta:
+          - pmugne9ti
+        metodos: true
     - id: seg-mvveb857-a
       tipo: seguimientos
+      x: 720
+      y: 990
       titulo: Seguimientos
-      presenta: *a1
+      presenta:
+        - pmu39gpb1
+        - pmugne9ti
       seguimientos:
         - id: s-mvveb856-6
           minutos: 2
@@ -522,6 +525,7 @@ whatsapp:
                         - cual es el numero
                       color: esmeralda
                       action: choose_combo
+                      steps: []
         - id: s-mvveb856-8
           minutos: 5
           variantes:
@@ -569,6 +573,7 @@ whatsapp:
                     - id: b-mvveb857-933e
                       label: NO GRACIAS
                       action: send_steps
+                      steps: []
                   decisions:
                     - id: d-mvveb857-a0nu
                       enabled: false
@@ -906,18 +911,11 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-      x: 720
-      y: 990
     - id: cobro-mvveb857-b
       tipo: cobro
+      x: 1050
+      y: 660
       titulo: Cobro · SUPER PACK 2 EN 1
-      cobro:
-        modo: producto
-        producto_id: pmugne9ti
-        acepta:
-          - pmu39gpb1
-        precio: etapa
-        metodos: true
       steps:
         - type: text
           body_variants:
@@ -940,35 +938,123 @@ whatsapp:
               💰 *Monto: S/. {{PRECIO_COMPLETO_MAYUSCULAS}} soles*
           delay_after_sec: 6
           enabled: false
-      x: 1050
-      y: 660
+      cobro:
+        modo: producto
+        producto_id: pmugne9ti
+        acepta:
+          - pmu39gpb1
+        metodos: true
     - id: msg-mvveb857-e
       tipo: mensaje
+      x: 1380
+      y: 1650
       titulo: NO GRACIAS
       steps:
         - type: text
           body_variants:
             - NO TE PREOCUPES, que tengas un excelente día 😊
           delay_after_sec: 6
-      x: 1380
-      y: 1650
     - id: entrega-mvveb857-i
       tipo: entregar
+      x: 1380
+      y: 0
       titulo: Entrega · GRAFISMO FONETICO
       producto_id: pmu39gpb1
-      x: 1380
-      y: 0
     - id: entrega-mvveb857-k
       tipo: entregar
-      titulo: Entrega · SUPER PACK 2 EN 1
-      producto_id: pmugne9ti
       x: 1380
       y: 660
+      titulo: Entrega · SUPER PACK 2 EN 1
+      producto_id: pmugne9ti
     - id: regalo-mvveb857-o
       tipo: regalo
-      titulo: Regalo
       x: 1710
       y: 0
+      titulo: Regalo
+    - id: f-mvvfyvy5-34lw
+      tipo: mensaje
+      x: 1045
+      y: 2189
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *¡Hola Le saluda Miss Andrea!, Cómo estás* ‼️ ¡un gusto saludarte! 👋🏼
+
+              * ✅ *Veo que te llamó la atención el Pack PDF de Grafismo Fonético* 📚 diseñado para apoyar a tu niño en el proceso de lectura. 👶🏻💫
+
+              *Antes de enviarte la información*, cuéntame por favor: 👇
+
+              🔴 *¿Cómo te llamas?* ¿con quién tengo el gusto? 😊
+          delay_after_sec: 6
+    - id: f-mvvfznys-u8svs
+      tipo: mensaje
+      x: 1353
+      y: 2475
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
+              El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
+
+              *Con GRAFISMO FONÉTICO* transformarás el aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
+
+              ✅ Ideal para mantener su atención *sin obligarlo*
+
+              ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              *Con el Kit Escencial de GRAFISMO FONETICO* recibirás:
+
+              📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
+              * 👨‍👩‍👦 Imágenes de personas, 
+              * 🐕 animales, 
+              * 🍎 frutas y
+              * 🚗 objetos, que facilitarán su aprendizaje.
+              🖨️ Formato *PDF para descargar e Imprimir*
+
+              📲 *Se envía directamente a tu Whatsapp o correo* 💌
+          delay_after_sec: 6
+        - type: image
+          drive_url: ""
+          caption_variants:
+            - |-
+              *Además recibirás GRATIS estos complementos* ‼️👇🏼
+
+              * 🔢 Cuaderno de los Números
+              * 🎴 Tarjetitas gráficas
+              * 📕 Cuaderno de Sílabas simples
+              * 🔤 Alfabeto con caritas
+              * 🎁 Alfabeto con Imagen
+              * 🎁 Alfabeto con rompecabezas y más...
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~precio original $ 15 Dólares~
+              ✅ 📚 *HOY: $ 3 Dólares* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *$ 3 Dólares*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              ▫️ *TRANSFERENCIA:* (Pichincha) 
+              ▫️ *BANCO DEL BARRIO:* 📲
+              ▫️ *Mi vecino:* 🧾
+          delay_after_sec: 6
   cables:
     - id: c-mvveb856-3
       de: inicio-mvveb83v-1
@@ -1030,6 +1116,10 @@ whatsapp:
       de: intro-mvveb83v-2
       salida: siguiente
       a: seg-mvveb857-a
+    - id: c-mvvg1xak-zzj
+      de: f-mvvfyvy5-34lw
+      salida: siguiente
+      a: f-mvvfznys-u8svs
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
