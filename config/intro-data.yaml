@@ -115495,6 +115495,7 @@ payment_profiles_by_country:
     numero_de_cuenta: "2203305628"
     cuentas_por_metodo: {}
     nombre_completo: Carlos Quimi
+    foto: /avatares/avatar-11.png
   MX:
     enabled: false
     course_price_soles: 0
@@ -115733,6 +115734,7 @@ payment_profiles_by_country:
       plin: 935 286 681
       bcp: "19120023958019"
     nombre_completo: Alberto Salinas
+    foto: /avatares/avatar-20.png
   GT:
     enabled: false
     course_price_soles: 0
@@ -115874,6 +115876,7 @@ payment_profiles_by_country:
     numero_de_cuenta: "1430001713024677890018"
     cuentas_por_metodo: {}
     nombre_completo: Franko Robles
+    foto: /avatares/avatar-46.png
   CO:
     enabled: false
     course_price_soles: 0
@@ -116443,6 +116446,7 @@ modality_payment_profiles:
         plin: 935 286 681
         bcp: "19120023958019"
       nombre_completo: Alberto Salinas
+      foto: /avatares/avatar-20.png
     EC:
       enabled: true
       course_price_soles: 0
@@ -116585,6 +116589,7 @@ modality_payment_profiles:
       numero_de_cuenta: "2203305628"
       cuentas_por_metodo: {}
       nombre_completo: Carlos Quimi
+      foto: /avatares/avatar-11.png
     AR:
       enabled: true
       course_price_soles: 0
@@ -116664,6 +116669,7 @@ modality_payment_profiles:
       numero_de_cuenta: "1430001713024677890018"
       cuentas_por_metodo: {}
       nombre_completo: Franko Robles
+      foto: /avatares/avatar-46.png
   order_bump:
     PE:
       enabled: true
@@ -116847,6 +116853,7 @@ modality_payment_profiles:
         plin: 935 286 681
         bcp: "19120023958019"
       nombre_completo: Alberto Salinas
+      foto: /avatares/avatar-20.png
     EC:
       enabled: true
       course_price_soles: 10
@@ -116989,6 +116996,7 @@ modality_payment_profiles:
       numero_de_cuenta: "2203305628"
       cuentas_por_metodo: {}
       nombre_completo: Carlos Quimi
+      foto: /avatares/avatar-11.png
   doble_oferta_upsell:
     AR:
       enabled: false
@@ -117076,6 +117084,7 @@ modality_payment_profiles:
       numero_de_cuenta: "1430001713024677890018"
       cuentas_por_metodo: {}
       nombre_completo: Franko Robles
+      foto: /avatares/avatar-46.png
     PE:
       enabled: true
       course_price_soles: 10
@@ -117257,6 +117266,7 @@ modality_payment_profiles:
         plin: 935 286 681
         bcp: "19120023958019"
       nombre_completo: Alberto Salinas
+      foto: /avatares/avatar-20.png
     EC:
       enabled: false
       course_price_soles: 2
@@ -117398,6 +117408,7 @@ modality_payment_profiles:
       numero_de_cuenta: "2203305628"
       cuentas_por_metodo: {}
       nombre_completo: Carlos Quimi
+      foto: /avatares/avatar-11.png
 intro_ad_routing_enabled: []
 ad_color_palette:
   - label: "#70FFEE"
