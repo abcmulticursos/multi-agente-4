@@ -125758,8 +125758,8 @@ tableros:
           producto_id: ptcocina_pack
         - id: coc_pe_upgrade
           tipo: mensaje
-          x: 2805
-          y: -847
+          x: 3905
+          y: -913
           titulo: Upgrade al pack
           steps:
             - type: text
@@ -125781,8 +125781,8 @@ tableros:
           instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS el otro producto, y solo paga la diferencia.
         - id: coc_pe_cobro_up
           tipo: cobro
-          x: 3124
-          y: -880
+          x: 4224
+          y: -946
           titulo: Cobro · upgrade (diferencia)
           steps:
             - type: text
@@ -126892,8 +126892,8 @@ tableros:
           titulo: Regalo
         - id: f-mvuo5fvc-y8ape
           tipo: mensaje
-          x: 2900
-          y: -1529
+          x: 3993
+          y: -1595
           titulo: Intro
           steps:
             - type: text
@@ -126952,8 +126952,8 @@ tableros:
             - ptcocina_dietas
         - id: f-mvuo5fvc-uppvm
           tipo: cobro
-          x: 3230
-          y: -1529
+          x: 4323
+          y: -1595
           titulo: Cobro · RECETARIO DIETAS FIT
           steps:
             - type: text
@@ -126977,8 +126977,8 @@ tableros:
             producto_id: ptcocina_dietas
         - id: f-mvuo5fvc-vhhf8
           tipo: seguimientos
-          x: 3527
-          y: -1100
+          x: 4620
+          y: -1166
           titulo: Seguimientos · RECETARIO DIETAS FIT
           presenta:
             - ptcocina_dietas
@@ -127031,15 +127031,15 @@ tableros:
               ignora_tardio: true
         - id: f-mvuo5fvd-g5qsa
           tipo: entregar
-          x: 3560
-          y: -1529
+          x: 4653
+          y: -1595
           titulo: Entrega · RECETARIO DIETAS FIT
           por_correo: true
           producto_id: ptcocina_dietas
         - id: f-mvuo5fvd-jrjam
           tipo: mensaje
-          x: 3890
-          y: -1529
+          x: 4983
+          y: -1595
           titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
           steps:
             - type: text
@@ -127071,8 +127071,8 @@ tableros:
           espera_min: 2
         - id: f-mvuo5fvd-o7kn6
           tipo: cobro
-          x: 4297
-          y: -1441
+          x: 5390
+          y: -1507
           titulo: Cobro · COMIDAS PERUANAS CASERAS
           steps:
             - type: text
@@ -127097,8 +127097,8 @@ tableros:
             metodos: true
         - id: f-mvuo5fvd-sdvm4
           tipo: seguimientos
-          x: 4682
-          y: -1056
+          x: 5775
+          y: -1122
           titulo: Seguimientos · COMIDAS PERUANAS CASERAS
           presenta:
             - ptcocina_peruanas
@@ -127151,15 +127151,15 @@ tableros:
               ignora_tardio: true
         - id: f-mvuo5fvd-4bbz1
           tipo: entregar
-          x: 4759
-          y: -1276
+          x: 5852
+          y: -1342
           titulo: Entrega · COMIDAS PERUANAS CASERAS
           por_correo: true
           producto_id: ptcocina_peruanas
         - id: f-mvuo5fvd-clvu8
           tipo: regalo
-          x: 5188
-          y: -1419
+          x: 6281
+          y: -1485
           titulo: Regalo
       cables:
         - id: c2
@@ -127426,58 +127426,58 @@ tableros:
           de: f-mvu306rc-l3ug5
           salida: siguiente
           a: f-mvu306rd-mri0e
-        - id: c-mvu30p4o-y2l
-          de: coc_pe_inicio
-          salida: siguiente
-          a: f-mvu306rc-l3ug5
         - id: c-mvuo5fvd-dzt7n
           de: f-mvuo5fvc-y8ape
-          a: f-mvuo5fvc-uppvm
           salida: btn:b-mvuo5fvc-zksc9
+          a: f-mvuo5fvc-uppvm
         - id: c-mvuo5fvd-a3zky
           de: f-mvuo5fvc-uppvm
-          a: f-mvuo5fvc-vhhf8
           salida: sin_pago
+          a: f-mvuo5fvc-vhhf8
         - id: c-mvuo5fvd-zdxmi
           de: f-mvuo5fvc-uppvm
-          a: f-mvuo5fvd-g5qsa
           salida: pagado
+          a: f-mvuo5fvd-g5qsa
         - id: c-mvuo5fvd-f3e82
           de: f-mvuo5fvd-g5qsa
-          a: f-mvuo5fvd-jrjam
           salida: siguiente
+          a: f-mvuo5fvd-jrjam
         - id: c-mvuo5fvd-kmwbi
           de: f-mvuo5fvd-jrjam
-          a: f-mvuo5fvd-o7kn6
           salida: btn:b-mvuo5fvd-3alhc
+          a: f-mvuo5fvd-o7kn6
         - id: c-mvuo5fvd-s4n7u
           de: f-mvuo5fvd-o7kn6
-          a: f-mvuo5fvd-sdvm4
           salida: sin_pago
+          a: f-mvuo5fvd-sdvm4
         - id: c-mvuo5fvd-3y47z
           de: f-mvuo5fvd-o7kn6
-          a: f-mvuo5fvd-4bbz1
           salida: pagado
+          a: f-mvuo5fvd-4bbz1
         - id: c-mvuo5fvd-npxyb
           de: f-mvuo5fvd-jrjam
-          a: f-mvuo5fvd-clvu8
           salida: btn:b-mvuo5fvd-fb63u
+          a: f-mvuo5fvd-clvu8
         - id: c-mvuo5fvd-pxz6f
           de: f-mvuo5fvd-4bbz1
-          a: f-mvuo5fvd-clvu8
           salida: siguiente
+          a: f-mvuo5fvd-clvu8
         - id: c-mvuo5fvd-x3osi
           de: f-mvuo5fvd-jrjam
-          a: f-mvuo5fvd-clvu8
           salida: sin_respuesta
+          a: f-mvuo5fvd-clvu8
         - id: c-mvuo5fvd-s2djt
           de: f-mvuo5fvd-sdvm4
-          a: f-mvuo5fvd-clvu8
           salida: fin
+          a: f-mvuo5fvd-clvu8
         - id: c-mvuo5fvd-atl0c
           de: f-mvuo5fvc-y8ape
-          a: f-mvuo5fvc-vhhf8
           salida: siguiente
+          a: f-mvuo5fvc-vhhf8
+        - id: c-mvup328t-vbl
+          de: coc_pe_inicio
+          salida: siguiente
+          a: f-mvuo5fvc-y8ape
       cajas:
         - id: manta-coc_pe_inicio
           x: 20
@@ -127508,11 +127508,11 @@ tableros:
           titulo: ""
           inicio: coc_otros
         - id: caja-pe-datos-de-frente-mvuo5fvd
-          x: 2860
-          y: -1599
+          x: 3960
+          y: -1661
           ancho: 2618
           alto: 833
-          titulo: "🇵🇪 PERÚ · lineal con los datos de frente (SIN CONECTAR: conéctala tú al Inicio de Perú)"
+          titulo: "🇵🇪 PERÚ · lineal con los datos de frente (SIN CONECTAR: conéctala tú al Inicio"
   tienda_tninos:
     whatsapp:
       encendido: true
