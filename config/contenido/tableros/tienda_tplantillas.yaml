@@ -1,0 +1,5143 @@
+whatsapp:
+  encendido: true
+  cerebro: |-
+    Eres Sofía, asesora de TIENDA PLANTILLAS. Vendes material digital de plantillas. Hablas cálido, breve y en español neutro, con 1 o 2 emojis. Respondes la duda en 2 o 3 frases y terminas invitando a elegir o a pagar. Nunca inventes precios, descuentos ni contenidos que no estén en la ficha.
+
+    (Lo que sigue es la copia de tu cerebro del automático, 27/10/2026. Se edita aquí y solo cambia este tablero.)
+
+    === ROL ===
+    You are a saleswoman for our store — persuasive but not pushy when selling, balanced. You sell {{PRODUCTO}} courses: a Pack of downloadable, printable PDFs delivered via Google Drive. IT IS NOT A PHYSICAL PRODUCT AND IS NOT SHIPPED HOME — IT IS DOWNLOADABLE AND PRINTABLE.
+
+    HARD PRODUCT BOUNDARY — CRITICAL (breaking this costs real money):
+    You ONLY sell ONE product: the **Pack PDF de {{PRODUCTO}}** described above. We do NOT sell ANY other courses or products.
+
+    If a customer asks about ANY other topic (matemática, ciencias, inglés, lectoescritura avanzada, manualidades, cocina, cursos para padres, etc.), respond honestly without inventing:
+      "Por ahora solo trabajamos con *nuestro material* 📚 — no manejamos otros temas. ¿Te gustaría que te cuente lo que incluye?"
+
+    FORBIDDEN behaviors that cause real damage:
+    - ❌ NEVER invent or mention courses we don't have ("sí, también tenemos un curso de matemática" → FALSE, causes customers to pay wrong amounts)
+    - ❌ NEVER say "te paso info de otros materiales" — we have ONE product, that's it
+    - ❌ NEVER bundle imaginary products to justify a higher price
+
+    If the customer paid more than S/.{{PRICE}} thinking they were buying something extra → that's a real problem we need to refund and apologize for. Better to lose a sale honestly than to mislead a buyer.
+
+    === IDIOMA ===
+    DIALECT — IMPORTANT:
+    Reply to the customer in the Spanish dialect the system states below (DIALECT — AUTHORITATIVE). Do NOT assume a dialect on your own and do NOT copy the dialect of these internal instructions, which are written in English. Keep the wording natural and easy to read, and avoid local slang that belongs to one country only.
+    The course price varies by conversation stage — below I will give you the EFFECTIVE PRICE FOR THIS CUSTOMER. You may ask for an image, photo or screenshot of the payment receipt; check that the amount matches that effective price and approve the purchase. If you have NOT received an image/photo/screenshot of the payment and verified the correct amount in it, do NOT approve the purchase.
+
+    CUSTOMER COUNTRY — decided by the SYSTEM, never by you:
+    - Which countries are served, the currency, the price and the payment methods are set in the configuration and injected below for THIS customer. Use ONLY what is injected.
+    - NEVER state or imply a fixed list of countries served, and never promise or refuse coverage for a country on your own. If a country is not served, the system intercepts the conversation before you reply.
+    - Do NOT write a payment number, an account or a recipient name for any country under any circumstance. The system sends them.
+    - CRITICAL GUARDRAIL: do NOT bring up countries, nationality or currencies ON YOUR OWN. React ONLY when the customer explicitly mentions their country or a foreign currency, and even then keep it brief and natural. If they do not mention a country, simply converse normally with the data the system gives you.
+
+    === PAGO ===
+    PAYMENT METHODS — IMPORTANT:
+      The valid payment methods are EXACTLY the ones the system injects for THIS customer's country (the OFFICIAL LIST / tappable buttons). Never name, offer or accept a method that is not in that list, and never assume a fixed set.
+      Each configured method carries its own equivalent terms. If the customer names one of those equivalents, it IS that method: confirm warmly and the SYSTEM automatically sends its details.
+      If what they say could match MORE THAN ONE of the injected methods (for example a generic word like "app", "banco" or "transferencia" when several apply), do NOT guess: ask which one they mean, naming ONLY the configured options.
+
+      CASH / EFECTIVO: if the customer asks to pay in cash ("efectivo", "en efectivo", "por un agente", "en un agente") and a cash or deposit method IS among the injected ones, tell them YES and confirm warmly — the SYSTEM automatically sends the instructions and details (you do NOT write them). If cash is NOT among the configured methods for this customer's country, do not promise it: warmly offer the methods that ARE configured.
+
+    PAYMENT DETAILS — CRITICAL RULE (breaking it breaks the bot):
+    - NEVER quote from memory any account, card, wallet or routing number, phone number or recipient name. That data lives in the system and ONLY the system sends it when the customer picks a method.
+    - ESPECIALLY FORBIDDEN: mixing up two different methods, or claiming that a bank account and a phone-based wallet share the same number. A bank transfer uses an account number, never a phone number. Mixing them gives the customer FALSE information.
+    - If the customer asks "¿cuáles son los métodos?", "¿cómo pago?", "¿qué opciones tengo?" or similar, present ONLY the injected methods, ALWAYS in this format (one per line, one emoji per line, NEVER in a horizontal line):
+
+        Puedes elegir tu método de pago entre las siguientes opciones:
+
+        • *MÉTODO 1* 🤳🏼
+        • *MÉTODO 2* 📲
+
+        ¿Cuál prefieres?
+
+      FORBIDDEN: a linear format like "Tenemos X, Y y Z" — always the bulleted version. And NEVER add numbers, accounts or names there (the system sends those).
+    - When the customer says a method keyword or one of its equivalents → the SYSTEM AUTOMATICALLY sends the correct details. You do NOT repeat them and do NOT anticipate them.
+    - If the customer insists you give the details without having chosen a method ("dame los datos", "envíame todo"), ask them warmly to first tell you which of the available options they prefer, naming ONLY the injected ones. 😊
+
+    DISTRUST OR FEAR OF BEING SCAMMED — LISTEN AND REASSURE (never ignore it):
+    If the customer shows fear or distrust, or says they were scammed before ("no confío en pagar primero", "¿no será estafa?", "tengo miedo"), do NOT just send payment details as if they hadn't spoken. FIRST acknowledge their feeling with empathy, THEN reassure honestly and briefly:
+      - It's a one-time payment with INSTANT delivery: the moment the receipt is verified, the material arrives automatically right here in the chat.
+      - The recipient name on the receipt is verifiable and always the same registered name — a sign of a real, traceable account, not an anonymous scam.
+      - We are a real store with many satisfied customers.
+    Then gently invite them to continue whenever they feel comfortable. Be warm and patient — winning their trust is more important than rushing the sale.
+
+    === PRECIO Y CIERRE ===
+    PRICE QUESTIONS — RESPOND DIRECTLY, DO NOT DEFLECT:
+    When the customer asks the price directly ("¿cuánto cuesta?", "¿precio?", "¿valor?", "¿cuánto?", etc.), respond with the effective price + brief value reinforcement (pago único, acceso de por vida) + a persuasive CTA that mentions the bonus PDFs. Do NOT deflect with "tell me your payment method first" — that frustrates the customer.
+
+    Rotate between these CTA variants so it doesn't feel repetitive (pick a different one each time):
+
+      Variant A:
+        "¡Claro! 😊 La inversión es de *{{PRECIO_COMPLETO}}* — un único pago con acceso de por vida, sin mensualidades.
+        ¿Quieres que te indique cómo adquirirlo y llevarte los bonos de obsequio en PDF? 🎁"
+
+      Variant B:
+        "¡Sí! 😊 Es *{{PRECIO_COMPLETO}}*, un solo pago sin mensualidades — acceso permanente al material.
+        ¿Quieres que te oriente cómo proceder con tu pago para que te lleves estos regalos? 🎁"
+
+      Variant C:
+        "¡Por supuesto! 😊 Son *{{PRECIO_COMPLETO}}*, pago único con acceso de por vida.
+        ¿Quieres que te ayude con los métodos de pago para que puedas adquirirlo y recibir también los bonos de obsequio? 📚🎁"
+
+    Keep the response SHORT — do not dump the full intro content (modules, pages, etc.). Just price + brief value + CTA. The intro_data already has the full description.
+
+    WRITING FORMAT AND TONE:
+    - Always write the price with the {{PRECIO_COMPLETO}} wildcard, exactly as the system renders it for this customer (amount and currency). Never convert it, never rewrite it in another currency and never put it in all caps. (All-caps in image captions is intentional for visual emphasis, but your conversational text must be normal mixed case.)
+    - BOLD (*with asterisks*): use it ONLY to highlight what matters — the price, the course name, the payment method, specific keywords. Do NOT bold everything; if everything stands out, nothing does. 2-4 bolds per message is a good ceiling.
+    - EMOJIS — GLOBAL RULE PER RESPONSE, NOT PER LINE:
+      - Think of your full response as ONE single set, even if you split it with a double line break (
+
+    ) so it looks like several WhatsApp bubbles.
+      - Across the whole set: use ONE single friendly face (😊, 🙂, 😄...) — somewhere, not in every bubble. If you put it at the end of the body, do NOT repeat it in the CTA. If you saved it for the CTA, do NOT also put it in the body.
+      - Optionally add 1-2 thematic emojis related to the content (📚 for the material, 💳 for the payment method, 🎁 for a bonus, etc.). But TOTAL 2-3 emojis across the whole set, not per bubble.
+      - FORBIDDEN: repeating the same emoji in different bubbles of the same message (e.g. 😊 at the end of the body AND 😊 at the end of the CTA — it looks saturated and robotic).
+      - ALSO FORBIDDEN: saturated messages like "🎉📚✨💫🔥".
+
+    CLOSING / CALL-TO-ACTION (CTA) — MANDATORY IN EVERY RESPONSE:
+    - ALWAYS, without exception, end your messages with a soft closing question, separated by a line break. THIS INCLUDES short/one-line responses (e.g. the customer asks "¿cuánto cuesta?" and you answer "{{PRECIO_COMPLETO}}" — the CTA still goes below it). A response without a question leaves the conversation COLD and kills it.
+    - ROTATION — CRITICAL, DO NOT SKIP IT: before choosing the CTA, REVIEW your last 2 responses in the history. Pick a variant DIFFERENT from those — never the same one twice in a row, ideally never the same one within 3 turns. The customer should feel variety, not mechanical insistence (e.g. if you already used "método de pago" → use "adquirirlo ahora" or "proceder").
+    - Do NOT hook the CTA to the most recent topic: if the customer asked about price, do NOT always close with "método de pago"; alternate.
+    - AVOID the word "compra" in the CTA — prefer "adquirirlo", "obtenerlo", "proceder", "método de pago". It sounds more natural. FORBIDDEN the exact text "¿Te gustaría proceder con la compra?" — it sounds formal and invasive.
+    - Do NOT attach a face emoji to the CTA if you already used one in the body — the global emoji rule wins.
+
+      VARIANTS FOR THE FIRST 1-2 TURNS (before payment methods have been discussed):
+        - "¿Te gustaría que te indique cómo adquirirlo?"
+        - "¿Deseas las instrucciones para adquirirlo?"
+        - "¿Deseas saber los métodos de pago?"
+        - "¿Te gustaría que te ayude con el método de pago?"
+        - "¿Te gustaría que te indique cómo proceder?"
+        - "¿Quieres que te explique cómo obtenerlo?"
+        - "¿Te muestro los pasos para tenerlo?"
+        - "¿Deseas avanzar con tu acceso y adquirirlo?"
+        - "¿Te interesa que te guíe para conseguirlo?"
+        - "¿Te gustaría asegurar tu acceso hoy?"
+
+      VARIANTS FOR LATER TURNS (once the process has been discussed at least once):
+        - "¿Te animaste a adquirirlo?"
+        - "¿Te gustaría adquirirlo ahora?"
+        - "¿Ya decidiste adquirirlo y poder ayudarte?"
+        - "¿Te gustaría que te ayude a obtenerlo ahora?"
+        - "¿Te gustaría que te ayude con el método de pago?"
+        - "¿Te gustaría que te indique cómo proceder?"
+        - "¿Deseas asegurar y adquirirlo hoy mismo?"
+        - "¿Deseas avanzar al siguiente paso?"
+        - "¿Te ayudo a tenerlo ahora?"
+        - "¿Quieres que avancemos juntos con tu acceso?"
+        - "¿Te animas a obtenerlo hoy?"
+
+    ONLY EXCEPTION where the CTA does NOT go — WAITING FOR THE RECEIPT: once the customer has chosen a payment method and the system sent them the payment details (in THIS turn OR any PREVIOUS turn), we are waiting for their receipt. From that point on, do NOT add sales CTAs. If the customer writes something while we wait, answer briefly and, at most, close with a natural line like "Quedo pendiente de tu comprobante para darte acceso 😊" — NEVER re-ask them to send the receipt as a question (it was already requested in the payment details).
+
+    GRAMMAR — FORBIDDEN CONSTRUCTION: never phrase a request as "¿Te gustaría que me envíes…?" / "¿Te gustaría que me [verbo]…?" — it is grammatically wrong and confusing (the CUSTOMER is the one who sends/does the action, not you). If you ever need to ask them to send something, say it directly and correctly, e.g. "¿Me compartes la foto de tu comprobante?".
+
+    === POSTVENTA ===
+    EMAIL CAPTURE — RIGHT AFTER PAGO APROBADO:
+
+    The system asks for the customer's email to send the link permanently. The email is OPTIONAL. If the customer responds without sending it (gracias, ok, listo, etc.), you may remind them GENTLY *once* that the email helps to receive the link permanently.
+
+    If the customer refuses, says they don't have email, asks for the link by WhatsApp, or shows any resistance:
+    - Accept gracefully, do NOT insist
+    - Tell them the link is ALREADY available in the PAGO APROBADO message above — they just need to tap on it
+    - Suggest they save or print the material for safety
+    - Close with a warm farewell
+
+    NEVER ask for the email more than once. ONE polite reminder is the maximum.
+
+    Example response (tuteo peruano) when the customer prefers WhatsApp or refuses email:
+      "¡No te preocupes! 😊 Tu enlace ya está en el mensaje de *PAGO APROBADO* de arriba — solo tócalo desde ahí para descargar el material. Guárdalo o envíatelo a tu correo cuando puedas, para tenerlo siempre seguro 📥"
+
+    POST-SALE BEHAVIOR (once the customer has received the "PAGO APROBADO" links):
+
+      If the customer asks things like:
+      - "¿Cómo lo descargo?"
+      - "¿Cómo lo abro / imprimo?"
+      - "¿Es de por vida?"
+      - "¿Eso es todo?"
+      - "¿Me llegó al correo?"
+      - ...or other questions about using the material
+
+      Your response must ALWAYS redirect them to the *carpetas de Drive que ya recibiste* in the PAGO APROBADO message (the material you already received). Speak as if you know the content, WITHOUT inventing specific steps. Phrases like:
+
+        "Todo está en las carpetas de Drive que te envié: abres el enlace, descargas tu material, y las imprimes las veces que quieras 😊🖨️📔"
+
+        "Sí, el acceso es de por vida — el material queda siempre en tu Drive 💾"
+
+      RULES:
+      - Do NOT invent specific steps (e.g. do NOT say "haz clic en X, luego en Y").
+      - Do NOT repeat the download links (they already have them in the chat and by email).
+      - Your sales role is OVER. Be warm but do NOT invite more questions — the bot is for selling, not for extended post-sale support.
+      - NEVER say phrases that open the door to more questions, such as:
+        - "Si tienes alguna otra pregunta, aquí estoy"
+        - "Cualquier duda, no dudes en escribirme"
+        - "Estoy para ayudarte en lo que necesites"
+        - "Cualquier cosa avísame"
+      - Instead, close with a warm farewell that does NOT invite continuation:
+        - "¡Recuerda que el acceso a tu material está mas arribita luego de tu pago, Les deseo lo mejor practicando con su peque o la persona que más quiera!."
+        - "!Recuerda que tu enlace de descargar está justo después de la foto de tu comprobante. Que tenga un buen progreso practicando con la persona que tanto quiere! 🤗"
+        - "Recuerde que su enlace de descarga está luego de su foto de pago, ¡Éxitos en esta nueva etapa en el aprendizaje con este bonito material! 🤗✨"
+      - If the customer reports a REAL technical problem (can't download, link won't open, didn't receive the material) → that IS a real emergency, invoke notify_admin_emergency. For everything else, briefly redirect to the Drive folders and close.
+
+    PAYMENT IMAGE NOT VISIBLE / RECEIPT REJECTED — handle empathetically:
+
+    When the system rejects a payment image (you receive REJECTED from the tool, OR the tool says "no se recibió ninguna imagen del comprobante"), the customer is often confused and frustrated. They DID send something — the bot just couldn't process it. Common causes:
+      - WhatsApp compressed the image so much it's unreadable
+      - Image + text arrived in the wrong order and the system misses the image
+      - The vision model couldn't extract the amount or recipient clearly
+      - The image got lost in transit
+
+    DO NOT robotically repeat "no puedo ver la imagen" every time. That feels like mockery (a real customer literally said "se está burlando de mí" because of this).
+
+    HOW TO HANDLE (vary your response — never the same robotic message twice):
+
+    ATTEMPT 1 (first time the receipt fails):
+      Warmly acknowledge the customer's effort. Ask specifically:
+        "Mil disculpas, parece que la imagen no me llegó del todo bien 🙏. ¿Podrías enviármela DE NUEVO como una foto fresca (mejor sacarla otra vez con la cámara, no reenviarla), y sin texto en el mismo mensaje? Así me aseguro de captarla correctamente 😊"
+
+    ATTEMPT 2 (second failure):
+      Apologize sincerely. Suggest a different angle/method:
+        "De verdad lo lamento mucho 🙏. A veces WhatsApp comprime las imágenes y se vuelven difíciles de leer. ¿Podrías intentar tomarle una foto a la pantalla de tu Yape con el celular (no captura de pantalla), o también podrías escribirme el monto y el nombre del receptor mientras lo intentamos de nuevo?"
+
+    ATTEMPT 3 OR MORE — ESCALATE TO HUMAN ADVISOR:
+      When the tool response includes `failed_attempts_count >= 3` (or you notice you've rejected this customer 3+ times), STOP retrying mechanically. Acknowledge the frustration and offer the human advisor IMMEDIATELY:
+
+        "De verdad lamento mucho la complicación 🙏. Voy a pasarte directamente con un asesor humano para que te ayude a registrar tu pago sin más vueltas. Por favor, comunicate al *📲 +51935286681* — te van a atender en breve para resolver esto."
+
+      THEN invoke notify_admin_emergency with reason "Cliente tuvo 3+ rechazos de comprobante, necesita atención humana inmediata". After that, DO NOT keep rejecting more images — let the human handle it.
+
+    FORBIDDEN at any attempt count:
+      - ❌ Repeating the SAME literal rejection text twice (varies it, vary it, vary it)
+      - ❌ Implying the customer is lying ("¿seguro que enviaste la imagen?") — they did, the system failed
+      - ❌ Asking for "comprobante" when they ALREADY sent one — acknowledge they tried
+      - ❌ Being cold or robotic when the customer is clearly frustrated
+  fichas:
+    - id: pla_pe_inicio
+      tipo: inicio
+      x: 60
+      y: 1875
+      titulo: Inicio · PE
+      pais: PE
+    - id: pla_pe_reparto
+      tipo: reparto
+      x: 390
+      y: 1875
+      titulo: Reparto · 4 tuberías por sorteo
+      reparto:
+        - id: lineal
+          nombre: Lineal
+          peso: 1
+        - id: ob
+          nombre: Order bump
+          peso: 1
+        - id: dou
+          nombre: Doble oferta
+          peso: 1
+        - id: contrib
+          nombre: Contribución
+          peso: 1
+    - id: pla_pe_lin_intro
+      tipo: mensaje
+      x: 720
+      y: 0
+      titulo: Intro · lineal
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_lin_intro_quiere
+              label: Quiero comprar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_pe_lin_segA
+      tipo: seguimientos
+      x: 720
+      y: 430
+      titulo: Seguimientos · si no responde a la Intro
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_pe_lin_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_lin_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_lin_segA_quiere
+                      label: Quiero comprar
+                      action: send_steps
+                      steps: []
+        - id: pla_pe_lin_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_lin_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_lin_segA_quiere
+                      label: Quiero comprar
+                      action: send_steps
+                      steps: []
+    - id: pla_pe_lin_cobro
+      tipo: cobro
+      x: 1050
+      y: 0
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        metodos: true
+    - id: pla_pe_lin_segB
+      tipo: seguimientos
+      x: 1050
+      y: 430
+      titulo: Seguimientos · si no paga
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_pe_lin_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_lin_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Te dejo tus datos a la mano 😊 Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_pe_lin_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_lin_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¿Pudiste hacer el pago? Si tuviste algún problema, escríbeme y te ayudo 🙌
+                  delay_after_sec: 4
+    - id: pla_pe_lin_ent_b
+      tipo: entregar
+      x: 1380
+      y: 0
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_pe_lin_upsell1
+      tipo: mensaje
+      x: 1710
+      y: 0
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_lin_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: pla_pe_lin_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_pe_lin_cobro_u1
+      tipo: cobro
+      x: 2040
+      y: 0
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_pe_lin_ent_u1
+      tipo: entregar
+      x: 2370
+      y: 0
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_pe_lin_no_u1
+      tipo: mensaje
+      x: 2040
+      y: 430
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_pe_lin_regalo
+      tipo: regalo
+      x: 2700
+      y: 0
+      titulo: Regalo
+    - id: pla_pe_ob_intro
+      tipo: mensaje
+      x: 720
+      y: 1250
+      titulo: Intro · order bump
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_ob_intro_quiere
+              label: Quiero comprar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_pe_ob_segA
+      tipo: seguimientos
+      x: 720
+      y: 1680
+      titulo: Seguimientos · antes del order bump
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_pe_ob_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_ob_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_ob_segA_quiere
+                      label: Quiero comprar
+                      action: send_steps
+                      steps: []
+        - id: pla_pe_ob_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_ob_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_ob_segA_quiere
+                      label: Quiero comprar
+                      action: send_steps
+                      steps: []
+    - id: pla_pe_ob_ob
+      tipo: intro_ob
+      x: 1050
+      y: 1250
+      titulo: Intro de order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      variantes:
+        - id: pla_pe_ob_ob_v1
+          nombre: Versión A
+          peso: 1
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                  Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  *¿Cuál prefieres?*
+
+                  1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                  2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+              delay_after_sec: 4
+              buttons:
+                - id: pla_pe_ob_ob_basico
+                  label: Solo el básico
+                  action: send_steps
+                  steps: []
+                - id: pla_pe_ob_ob_pack
+                  label: Quiero el pack
+                  action: send_steps
+                  steps: []
+    - id: pla_pe_ob_segB
+      tipo: seguimientos
+      x: 1050
+      y: 1680
+      titulo: Seguimientos · después del order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_pe_ob_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_ob_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_ob_segB_basico
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_ob_segB_pack
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: pla_pe_ob_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_ob_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_ob_segB_basico
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_ob_segB_pack
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+    - id: pla_pe_ob_cobro_b
+      tipo: cobro
+      x: 1380
+      y: 1250
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_pe_ob_cobro_p
+      tipo: cobro
+      x: 1380
+      y: 1680
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_pe_ob_ent_b
+      tipo: entregar
+      x: 1710
+      y: 1250
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_pe_ob_ent_p
+      tipo: entregar
+      x: 1710
+      y: 1680
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_pe_ob_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 1250
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_ob_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: pla_pe_ob_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_pe_ob_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 1250
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_pe_ob_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 1250
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_pe_ob_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 1680
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_pe_ob_regalo
+      tipo: regalo
+      x: 3030
+      y: 1250
+      titulo: Regalo
+    - id: pla_pe_dou_intro
+      tipo: mensaje
+      x: 720
+      y: 2500
+      titulo: Intro · doble oferta
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Tenemos *dos opciones* para ti 👇
+
+              1️⃣ *{{PRODUCTO_BASE}}*
+              ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+              2️⃣ *{{PRODUCTO_FULL}}*
+              ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+              *¿Cuál prefieres?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_dou_intro_basico
+              label: Solo el básico
+              action: send_steps
+              steps: []
+            - id: pla_pe_dou_intro_pack
+              label: Quiero el pack
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+    - id: pla_pe_dou_seg
+      tipo: seguimientos
+      x: 720
+      y: 2930
+      titulo: Seguimientos · si no elige o no paga
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_pe_dou_seg_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_dou_seg_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_dou_seg_basico
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_dou_seg_pack
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: pla_pe_dou_seg_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_dou_seg_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_dou_seg_basico
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_dou_seg_pack
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+    - id: pla_pe_dou_cobro_b
+      tipo: cobro
+      x: 1050
+      y: 2500
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_pe_dou_cobro_p
+      tipo: cobro
+      x: 1050
+      y: 2930
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_pe_dou_ent_b
+      tipo: entregar
+      x: 1380
+      y: 2500
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_pe_dou_ent_p
+      tipo: entregar
+      x: 1380
+      y: 2930
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_pe_dou_upgrade
+      tipo: mensaje
+      x: 1710
+      y: 2500
+      titulo: Upgrade al pack
+      steps:
+        - type: text
+          body_variants:
+            - "🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?"
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_dou_up_si
+              label: Sí, completar
+              action: send_steps
+              steps: []
+            - id: pla_pe_dou_up_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
+    - id: pla_pe_dou_cobro_up
+      tipo: cobro
+      x: 1710
+      y: 2930
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+        diferencia: true
+    - id: pla_pe_dou_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 2500
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_dou_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: pla_pe_dou_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_pe_dou_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 2500
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_pe_dou_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 2500
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_pe_dou_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 2930
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_pe_dou_regalo
+      tipo: regalo
+      x: 3030
+      y: 2500
+      titulo: Regalo
+    - id: pla_pe_con_promesa
+      tipo: mensaje
+      x: 720
+      y: 3750
+      titulo: Intro · contribución
+      steps:
+        - type: text
+          body_variants:
+            - "*¡Hola! 😊 Soy Sofía* de *TIENDA PLANTILLAS* 💛"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Es un material digital de plantillas para imprimir y usar 📚
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Funciona así 💛
+
+              1️⃣ Te envío el material *primero*, con total confianza.
+              2️⃣ Lo revisas.
+              3️⃣ Luego haces una *contribución voluntaria*, del valor que tú elijas.
+
+              *¿Aceptas?*
+          delay_after_sec: 4
+          buttons:
+            - id: pla_pe_con_promesa_acepto
+              label: Sí, acepto
+              action: send_steps
+              steps: []
+            - id: pla_pe_con_promesa_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptpla_aporte
+    - id: pla_pe_con_segP
+      tipo: seguimientos
+      x: 720
+      y: 4180
+      titulo: Seguimientos · si no contesta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_pe_con_segP_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_con_segP_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¿Sigues por ahí? 😊 Si quieres el material, solo dime que aceptas y te lo envío ahora mismo 💛
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_con_segP_acepto
+                      label: Sí, acepto
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_con_segP_no
+                      label: No, gracias
+                      action: send_steps
+                      steps: []
+        - id: pla_pe_con_segP_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_con_segP_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - "Último aviso 💛 El material sigue reservado para ti: ¿lo quieres?"
+                  delay_after_sec: 4
+                  buttons:
+                    - id: pla_pe_con_segP_acepto
+                      label: Sí, acepto
+                      action: send_steps
+                      steps: []
+                    - id: pla_pe_con_segP_no
+                      label: No, gracias
+                      action: send_steps
+                      steps: []
+    - id: pla_pe_con_no
+      tipo: mensaje
+      x: 1050
+      y: 4180
+      titulo: Dijo que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡No te preocupes! 💛 Si más adelante lo quieres, aquí estaré ✨
+          delay_after_sec: 4
+    - id: pla_pe_con_entrega
+      tipo: entregar
+      x: 1050
+      y: 3750
+      titulo: Entrega · MATERIAL POR CONTRIBUCIÓN
+      producto_id: ptpla_aporte
+    - id: pla_pe_con_cobro
+      tipo: cobro
+      x: 1380
+      y: 3750
+      titulo: Contribución
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Ahora puedes hacer tu contribución para apoyar este proyecto 💛
+
+              💰 *S/ 5*
+              Material completo
+
+              💰 *S/ 10*
+              Material completo + Colección extra
+
+              💰 *S/ 15*
+              Todo lo anterior + Acceso total
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              💳 Aporta por Yape
+
+              💜 Yape: {{CUENTA_YAPE}}
+              Titular: {{NOMBRE_COMPLETO}}
+
+              📷 Envía tu comprobante de pago por aquí.
+          delay_after_sec: 3
+      cobro:
+        modo: abierto
+        minimo_por_pais:
+          PE: 5
+        tramos_por_pais:
+          PE:
+            - id: n5
+              desde: 5
+            - id: n10
+              desde: 10
+            - id: n15
+              desde: 15
+    - id: pla_pe_con_rec
+      tipo: seguimientos
+      x: 1380
+      y: 4180
+      titulo: Recordatorios · si no aporta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_pe_con_rec_1
+          minutos: 120
+          variantes:
+            - id: pla_pe_con_rec_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¡Hola de nuevo! ✨ Espero que estés disfrutando el material. Cuando hagas tu contribución, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_pe_con_rec_2
+          minutos: 600
+          variantes:
+            - id: pla_pe_con_rec_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Paso por última vez 💛 Si deseas hacer tu contribución hoy, aún estás a tiempo. ¡Gracias por valorar este trabajo!
+                  delay_after_sec: 4
+    - id: pla_pe_con_nivel5
+      tipo: mensaje
+      x: 1710
+      y: 3750
+      titulo: Nivel S/ 5
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-pe-5
+          delay_after_sec: 4
+    - id: pla_pe_con_nivel10
+      tipo: mensaje
+      x: 1710
+      y: 4180
+      titulo: Nivel S/ 10
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo + Colección extra* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-pe-10
+          delay_after_sec: 4
+    - id: pla_pe_con_nivel15
+      tipo: mensaje
+      x: 1710
+      y: 4610
+      titulo: Nivel S/ 15
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Todo lo anterior + Acceso total* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-pe-15
+          delay_after_sec: 4
+    - id: pla_ec_inicio
+      tipo: inicio
+      x: 60
+      y: 7475
+      titulo: Inicio · EC
+      pais: EC
+    - id: pla_ec_reparto
+      tipo: reparto
+      x: 390
+      y: 7475
+      titulo: Reparto · 4 tuberías por sorteo
+      reparto:
+        - id: lineal
+          nombre: Lineal
+          peso: 1
+        - id: ob
+          nombre: Order bump
+          peso: 1
+        - id: dou
+          nombre: Doble oferta
+          peso: 1
+        - id: contrib
+          nombre: Contribución
+          peso: 1
+    - id: pla_ec_lin_intro
+      tipo: mensaje
+      x: 720
+      y: 5600
+      titulo: Intro · lineal
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+
+              Escríbeme *«quiero comprar»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_lin_intro_quiere
+              title: Quiero comprar
+              keywords:
+                - quiero comprar
+                - quiero pagar
+                - lo quiero
+                - como pago
+                - comprar
+                - dale
+                - si quiero
+                - yape
+                - plin
+                - pichincha
+                - transferencia
+                - deposito
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_ec_lin_segA
+      tipo: seguimientos
+      x: 720
+      y: 6030
+      titulo: Seguimientos · si no responde a la Intro
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ec_lin_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_lin_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+
+                      Escríbeme *«quiero comprar»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_lin_segA_quiere
+                      title: Quiero comprar
+                      keywords:
+                        - quiero comprar
+                        - quiero pagar
+                        - lo quiero
+                        - como pago
+                        - comprar
+                        - dale
+                        - si quiero
+                        - yape
+                        - plin
+                        - pichincha
+                        - transferencia
+                        - deposito
+                      color: ""
+                      steps: []
+        - id: pla_ec_lin_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_lin_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+
+                      Escríbeme *«quiero comprar»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_lin_segA_quiere
+                      title: Quiero comprar
+                      keywords:
+                        - quiero comprar
+                        - quiero pagar
+                        - lo quiero
+                        - como pago
+                        - comprar
+                        - dale
+                        - si quiero
+                        - yape
+                        - plin
+                        - pichincha
+                        - transferencia
+                        - deposito
+                      color: ""
+                      steps: []
+    - id: pla_ec_lin_cobro
+      tipo: cobro
+      x: 1050
+      y: 5600
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        metodos: true
+    - id: pla_ec_lin_segB
+      tipo: seguimientos
+      x: 1050
+      y: 6030
+      titulo: Seguimientos · si no paga
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ec_lin_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_lin_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Te dejo tus datos a la mano 😊 Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_ec_lin_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_lin_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¿Pudiste hacer el pago? Si tuviste algún problema, escríbeme y te ayudo 🙌
+                  delay_after_sec: 4
+    - id: pla_ec_lin_ent_b
+      tipo: entregar
+      x: 1380
+      y: 5600
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_ec_lin_upsell1
+      tipo: mensaje
+      x: 1710
+      y: 5600
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              Escríbeme *«si»* o *«no»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_lin_u1_si
+              title: Sí, lo quiero
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - ok
+                - va
+              color: ""
+              steps: []
+            - id: pla_ec_lin_u1_no
+              title: No, gracias
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - paso
+                - luego
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ec_lin_cobro_u1
+      tipo: cobro
+      x: 2040
+      y: 5600
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ec_lin_ent_u1
+      tipo: entregar
+      x: 2370
+      y: 5600
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ec_lin_no_u1
+      tipo: mensaje
+      x: 2040
+      y: 6030
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ec_lin_regalo
+      tipo: regalo
+      x: 2700
+      y: 5600
+      titulo: Regalo
+    - id: pla_ec_ob_intro
+      tipo: mensaje
+      x: 720
+      y: 6850
+      titulo: Intro · order bump
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+
+              Escríbeme *«quiero comprar»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_ob_intro_quiere
+              title: Quiero comprar
+              keywords:
+                - quiero comprar
+                - quiero pagar
+                - lo quiero
+                - como pago
+                - comprar
+                - dale
+                - si quiero
+                - yape
+                - plin
+                - pichincha
+                - transferencia
+                - deposito
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_ec_ob_segA
+      tipo: seguimientos
+      x: 720
+      y: 7280
+      titulo: Seguimientos · antes del order bump
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ec_ob_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_ob_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+
+                      Escríbeme *«quiero comprar»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_ob_segA_quiere
+                      title: Quiero comprar
+                      keywords:
+                        - quiero comprar
+                        - quiero pagar
+                        - lo quiero
+                        - como pago
+                        - comprar
+                        - dale
+                        - si quiero
+                        - yape
+                        - plin
+                        - pichincha
+                        - transferencia
+                        - deposito
+                      color: ""
+                      steps: []
+        - id: pla_ec_ob_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_ob_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+
+                      Escríbeme *«quiero comprar»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_ob_segA_quiere
+                      title: Quiero comprar
+                      keywords:
+                        - quiero comprar
+                        - quiero pagar
+                        - lo quiero
+                        - como pago
+                        - comprar
+                        - dale
+                        - si quiero
+                        - yape
+                        - plin
+                        - pichincha
+                        - transferencia
+                        - deposito
+                      color: ""
+                      steps: []
+    - id: pla_ec_ob_ob
+      tipo: intro_ob
+      x: 1050
+      y: 6850
+      titulo: Intro de order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      variantes:
+        - id: pla_ec_ob_ob_v1
+          nombre: Versión A
+          peso: 1
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                  Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  *¿Cuál prefieres?*
+
+                  1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                  2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                  Escríbeme *«el basico»* o *«el pack»* 😊
+              delay_after_sec: 4
+              decisions:
+                - id: pla_ec_ob_ob_basico
+                  title: Solo el básico
+                  keywords:
+                    - el basico
+                    - basico
+                    - solo el basico
+                    - el primero
+                    - el mas barato
+                  color: ""
+                  steps: []
+                - id: pla_ec_ob_ob_pack
+                  title: Quiero el pack
+                  keywords:
+                    - el pack
+                    - pack
+                    - completo
+                    - el completo
+                    - los dos
+                    - el segundo
+                  color: ""
+                  steps: []
+    - id: pla_ec_ob_segB
+      tipo: seguimientos
+      x: 1050
+      y: 7280
+      titulo: Seguimientos · después del order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_ec_ob_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_ob_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      Escríbeme *«el basico»* o *«el pack»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_ob_segB_basico
+                      title: Solo el básico
+                      keywords:
+                        - el basico
+                        - basico
+                        - solo el basico
+                        - el primero
+                        - el mas barato
+                      color: ""
+                      steps: []
+                    - id: pla_ec_ob_segB_pack
+                      title: Quiero el pack
+                      keywords:
+                        - el pack
+                        - pack
+                        - completo
+                        - el completo
+                        - los dos
+                        - el segundo
+                      color: ""
+                      steps: []
+        - id: pla_ec_ob_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_ob_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      Escríbeme *«el basico»* o *«el pack»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_ob_segB_basico
+                      title: Solo el básico
+                      keywords:
+                        - el basico
+                        - basico
+                        - solo el basico
+                        - el primero
+                        - el mas barato
+                      color: ""
+                      steps: []
+                    - id: pla_ec_ob_segB_pack
+                      title: Quiero el pack
+                      keywords:
+                        - el pack
+                        - pack
+                        - completo
+                        - el completo
+                        - los dos
+                        - el segundo
+                      color: ""
+                      steps: []
+    - id: pla_ec_ob_cobro_b
+      tipo: cobro
+      x: 1380
+      y: 6850
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_ec_ob_cobro_p
+      tipo: cobro
+      x: 1380
+      y: 7280
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_ec_ob_ent_b
+      tipo: entregar
+      x: 1710
+      y: 6850
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_ec_ob_ent_p
+      tipo: entregar
+      x: 1710
+      y: 7280
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_ec_ob_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 6850
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              Escríbeme *«si»* o *«no»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_ob_u1_si
+              title: Sí, lo quiero
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - ok
+                - va
+              color: ""
+              steps: []
+            - id: pla_ec_ob_u1_no
+              title: No, gracias
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - paso
+                - luego
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ec_ob_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 6850
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ec_ob_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 6850
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ec_ob_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 7280
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ec_ob_regalo
+      tipo: regalo
+      x: 3030
+      y: 6850
+      titulo: Regalo
+    - id: pla_ec_dou_intro
+      tipo: mensaje
+      x: 720
+      y: 8100
+      titulo: Intro · doble oferta
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Tenemos *dos opciones* para ti 👇
+
+              1️⃣ *{{PRODUCTO_BASE}}*
+              ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+              2️⃣ *{{PRODUCTO_FULL}}*
+              ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+              *¿Cuál prefieres?*
+
+              Escríbeme *«el basico»* o *«el pack»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_dou_intro_basico
+              title: Solo el básico
+              keywords:
+                - el basico
+                - basico
+                - solo el basico
+                - el primero
+                - el mas barato
+              color: ""
+              steps: []
+            - id: pla_ec_dou_intro_pack
+              title: Quiero el pack
+              keywords:
+                - el pack
+                - pack
+                - completo
+                - el completo
+                - los dos
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+    - id: pla_ec_dou_seg
+      tipo: seguimientos
+      x: 720
+      y: 8530
+      titulo: Seguimientos · si no elige o no paga
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_ec_dou_seg_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_dou_seg_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      Escríbeme *«el basico»* o *«el pack»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_dou_seg_basico
+                      title: Solo el básico
+                      keywords:
+                        - el basico
+                        - basico
+                        - solo el basico
+                        - el primero
+                        - el mas barato
+                      color: ""
+                      steps: []
+                    - id: pla_ec_dou_seg_pack
+                      title: Quiero el pack
+                      keywords:
+                        - el pack
+                        - pack
+                        - completo
+                        - el completo
+                        - los dos
+                        - el segundo
+                      color: ""
+                      steps: []
+        - id: pla_ec_dou_seg_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_dou_seg_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      Escríbeme *«el basico»* o *«el pack»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_dou_seg_basico
+                      title: Solo el básico
+                      keywords:
+                        - el basico
+                        - basico
+                        - solo el basico
+                        - el primero
+                        - el mas barato
+                      color: ""
+                      steps: []
+                    - id: pla_ec_dou_seg_pack
+                      title: Quiero el pack
+                      keywords:
+                        - el pack
+                        - pack
+                        - completo
+                        - el completo
+                        - los dos
+                        - el segundo
+                      color: ""
+                      steps: []
+    - id: pla_ec_dou_cobro_b
+      tipo: cobro
+      x: 1050
+      y: 8100
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_ec_dou_cobro_p
+      tipo: cobro
+      x: 1050
+      y: 8530
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_ec_dou_ent_b
+      tipo: entregar
+      x: 1380
+      y: 8100
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_ec_dou_ent_p
+      tipo: entregar
+      x: 1380
+      y: 8530
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_ec_dou_upgrade
+      tipo: mensaje
+      x: 1710
+      y: 8100
+      titulo: Upgrade al pack
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?
+
+              Escríbeme *«si»* o *«no»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_dou_up_si
+              title: Sí, completar
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - ok
+                - va
+              color: ""
+              steps: []
+            - id: pla_ec_dou_up_no
+              title: No, gracias
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - paso
+                - luego
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
+    - id: pla_ec_dou_cobro_up
+      tipo: cobro
+      x: 1710
+      y: 8530
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+        diferencia: true
+    - id: pla_ec_dou_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 8100
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              Escríbeme *«si»* o *«no»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_dou_u1_si
+              title: Sí, lo quiero
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - ok
+                - va
+              color: ""
+              steps: []
+            - id: pla_ec_dou_u1_no
+              title: No, gracias
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - paso
+                - luego
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ec_dou_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 8100
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ec_dou_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 8100
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ec_dou_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 8530
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ec_dou_regalo
+      tipo: regalo
+      x: 3030
+      y: 8100
+      titulo: Regalo
+    - id: pla_ec_con_promesa
+      tipo: mensaje
+      x: 720
+      y: 9350
+      titulo: Intro · contribución
+      steps:
+        - type: text
+          body_variants:
+            - "*¡Hola! 😊 Soy Sofía* de *TIENDA PLANTILLAS* 💛"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Es un material digital de plantillas para imprimir y usar 📚
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Funciona así 💛
+
+              1️⃣ Te envío el material *primero*, con total confianza.
+              2️⃣ Lo revisas.
+              3️⃣ Luego haces una *contribución voluntaria*, del valor que tú elijas.
+
+              *¿Aceptas?*
+
+              Escríbeme *«acepto»* o *«no»* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ec_con_promesa_acepto
+              title: Sí, acepto
+              keywords:
+                - acepto
+                - si acepto
+                - si
+                - sí
+                - dale
+                - claro
+                - lo quiero
+              color: ""
+              steps: []
+            - id: pla_ec_con_promesa_no
+              title: No, gracias
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - paso
+                - luego
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_aporte
+    - id: pla_ec_con_segP
+      tipo: seguimientos
+      x: 720
+      y: 9780
+      titulo: Seguimientos · si no contesta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_ec_con_segP_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_con_segP_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Sigues por ahí? 😊 Si quieres el material, solo dime que aceptas y te lo envío ahora mismo 💛
+
+                      Escríbeme *«acepto»* o *«no»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_con_segP_acepto
+                      title: Sí, acepto
+                      keywords:
+                        - acepto
+                        - si acepto
+                        - si
+                        - sí
+                        - dale
+                        - claro
+                        - lo quiero
+                      color: ""
+                      steps: []
+                    - id: pla_ec_con_segP_no
+                      title: No, gracias
+                      keywords:
+                        - no
+                        - no gracias
+                        - ahora no
+                        - paso
+                        - luego
+                      color: ""
+                      steps: []
+        - id: pla_ec_con_segP_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_con_segP_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Último aviso 💛 El material sigue reservado para ti: ¿lo quieres?
+
+                      Escríbeme *«acepto»* o *«no»* 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ec_con_segP_acepto
+                      title: Sí, acepto
+                      keywords:
+                        - acepto
+                        - si acepto
+                        - si
+                        - sí
+                        - dale
+                        - claro
+                        - lo quiero
+                      color: ""
+                      steps: []
+                    - id: pla_ec_con_segP_no
+                      title: No, gracias
+                      keywords:
+                        - no
+                        - no gracias
+                        - ahora no
+                        - paso
+                        - luego
+                      color: ""
+                      steps: []
+    - id: pla_ec_con_no
+      tipo: mensaje
+      x: 1050
+      y: 9780
+      titulo: Dijo que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡No te preocupes! 💛 Si más adelante lo quieres, aquí estaré ✨
+          delay_after_sec: 4
+    - id: pla_ec_con_entrega
+      tipo: entregar
+      x: 1050
+      y: 9350
+      titulo: Entrega · MATERIAL POR CONTRIBUCIÓN
+      producto_id: ptpla_aporte
+    - id: pla_ec_con_cobro
+      tipo: cobro
+      x: 1380
+      y: 9350
+      titulo: Contribución
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Ahora puedes hacer tu contribución para apoyar este proyecto 💛
+
+              💰 *$ 1*
+              Material completo
+
+              💰 *$ 2*
+              Material completo + Colección extra
+
+              💰 *$ 3*
+              Todo lo anterior + Acceso total
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              💳 Aporta por depósito o transferencia
+
+              🔴 Cta. Pichincha: {{CUENTA_TRANSFERENCIA}}
+              A nombre de: {{NOMBRE_COMPLETO}}
+
+              📷 Envía tu comprobante de pago por aquí.
+          delay_after_sec: 3
+      cobro:
+        modo: abierto
+        minimo_por_pais:
+          EC: 1
+        tramos_por_pais:
+          EC:
+            - id: n1
+              desde: 1
+            - id: n2
+              desde: 2
+            - id: n3
+              desde: 3
+    - id: pla_ec_con_rec
+      tipo: seguimientos
+      x: 1380
+      y: 9780
+      titulo: Recordatorios · si no aporta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_ec_con_rec_1
+          minutos: 120
+          variantes:
+            - id: pla_ec_con_rec_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¡Hola de nuevo! ✨ Espero que estés disfrutando el material. Cuando hagas tu contribución, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_ec_con_rec_2
+          minutos: 600
+          variantes:
+            - id: pla_ec_con_rec_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Paso por última vez 💛 Si deseas hacer tu contribución hoy, aún estás a tiempo. ¡Gracias por valorar este trabajo!
+                  delay_after_sec: 4
+    - id: pla_ec_con_nivel1
+      tipo: mensaje
+      x: 1710
+      y: 9350
+      titulo: Nivel $ 1
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ec-1
+          delay_after_sec: 4
+    - id: pla_ec_con_nivel2
+      tipo: mensaje
+      x: 1710
+      y: 9780
+      titulo: Nivel $ 2
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo + Colección extra* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ec-2
+          delay_after_sec: 4
+    - id: pla_ec_con_nivel3
+      tipo: mensaje
+      x: 1710
+      y: 10210
+      titulo: Nivel $ 3
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Todo lo anterior + Acceso total* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ec-3
+          delay_after_sec: 4
+    - id: pla_ar_inicio
+      tipo: inicio
+      x: 60
+      y: 13075
+      titulo: Inicio · AR
+      pais: AR
+    - id: pla_ar_reparto
+      tipo: reparto
+      x: 390
+      y: 13075
+      titulo: Reparto · 4 tuberías por sorteo
+      reparto:
+        - id: lineal
+          nombre: Lineal
+          peso: 1
+        - id: ob
+          nombre: Order bump
+          peso: 1
+        - id: dou
+          nombre: Doble oferta
+          peso: 1
+        - id: contrib
+          nombre: Contribución
+          peso: 1
+    - id: pla_ar_lin_intro
+      tipo: mensaje
+      x: 720
+      y: 11200
+      titulo: Intro · lineal
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+
+              *1* → Quiero comprar
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_lin_intro_quiere
+              title: 1 · Quiero comprar
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_ar_lin_segA
+      tipo: seguimientos
+      x: 720
+      y: 11630
+      titulo: Seguimientos · si no responde a la Intro
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ar_lin_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_lin_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+
+                      *1* → Quiero comprar
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_lin_segA_quiere
+                      title: 1 · Quiero comprar
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+        - id: pla_ar_lin_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_lin_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+
+                      *1* → Quiero comprar
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_lin_segA_quiere
+                      title: 1 · Quiero comprar
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+    - id: pla_ar_lin_cobro
+      tipo: cobro
+      x: 1050
+      y: 11200
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        metodos: true
+    - id: pla_ar_lin_segB
+      tipo: seguimientos
+      x: 1050
+      y: 11630
+      titulo: Seguimientos · si no paga
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ar_lin_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_lin_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Te dejo tus datos a la mano 😊 Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_ar_lin_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_lin_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¿Pudiste hacer el pago? Si tuviste algún problema, escríbeme y te ayudo 🙌
+                  delay_after_sec: 4
+    - id: pla_ar_lin_ent_b
+      tipo: entregar
+      x: 1380
+      y: 11200
+      titulo: Entrega · GUÍA PLANTILLA
+      por_correo: true
+      producto_id: ptpla_basico
+    - id: pla_ar_lin_upsell1
+      tipo: mensaje
+      x: 1710
+      y: 11200
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              *1* → Sí, lo quiero
+              *2* → No, gracias
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_lin_u1_si
+              title: 1 · Sí, lo quiero
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_lin_u1_no
+              title: 2 · No, gracias
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ar_lin_cobro_u1
+      tipo: cobro
+      x: 2040
+      y: 11200
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ar_lin_ent_u1
+      tipo: entregar
+      x: 2370
+      y: 11200
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ar_lin_no_u1
+      tipo: mensaje
+      x: 2040
+      y: 11630
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ar_lin_regalo
+      tipo: regalo
+      x: 2700
+      y: 11200
+      titulo: Regalo
+    - id: pla_ar_ob_intro
+      tipo: mensaje
+      x: 720
+      y: 12450
+      titulo: Intro · order bump
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              *¿Lo quieres?*
+
+              *1* → Quiero comprar
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_ob_intro_quiere
+              title: 1 · Quiero comprar
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+    - id: pla_ar_ob_segA
+      tipo: seguimientos
+      x: 720
+      y: 12880
+      titulo: Seguimientos · antes del order bump
+      presenta:
+        - ptpla_basico
+      seguimientos:
+        - id: pla_ar_ob_segA_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_ob_segA_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).
+
+                      *1* → Quiero comprar
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_ob_segA_quiere
+                      title: 1 · Quiero comprar
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+        - id: pla_ar_ob_segA_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_ob_segA_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌
+
+                      Es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+
+                      *1* → Quiero comprar
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_ob_segA_quiere
+                      title: 1 · Quiero comprar
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+    - id: pla_ar_ob_ob
+      tipo: intro_ob
+      x: 1050
+      y: 12450
+      titulo: Intro de order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      variantes:
+        - id: pla_ar_ob_ob_v1
+          nombre: Versión A
+          peso: 1
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                  Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  *¿Cuál prefieres?*
+
+                  1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                  2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                  *1* → Solo el básico
+                  *2* → Quiero el pack
+
+                  Escríbeme el número 😊
+              delay_after_sec: 4
+              decisions:
+                - id: pla_ar_ob_ob_basico
+                  title: 1 · Solo el básico
+                  keywords:
+                    - "1"
+                    - uno
+                    - opcion 1
+                    - la primera
+                    - el primero
+                  color: ""
+                  steps: []
+                - id: pla_ar_ob_ob_pack
+                  title: 2 · Quiero el pack
+                  keywords:
+                    - "2"
+                    - dos
+                    - opcion 2
+                    - la segunda
+                    - el segundo
+                  color: ""
+                  steps: []
+    - id: pla_ar_ob_segB
+      tipo: seguimientos
+      x: 1050
+      y: 12880
+      titulo: Seguimientos · después del order bump
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_ar_ob_segB_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_ob_segB_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      *1* → Solo el básico
+                      *2* → Quiero el pack
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_ob_segB_basico
+                      title: 1 · Solo el básico
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_ob_segB_pack
+                      title: 2 · Quiero el pack
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+        - id: pla_ar_ob_segB_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_ob_segB_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      *1* → Solo el básico
+                      *2* → Quiero el pack
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_ob_segB_basico
+                      title: 1 · Solo el básico
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_ob_segB_pack
+                      title: 2 · Quiero el pack
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+    - id: pla_ar_ob_cobro_b
+      tipo: cobro
+      x: 1380
+      y: 12450
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_ar_ob_cobro_p
+      tipo: cobro
+      x: 1380
+      y: 12880
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_ar_ob_ent_b
+      tipo: entregar
+      x: 1710
+      y: 12450
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_ar_ob_ent_p
+      tipo: entregar
+      x: 1710
+      y: 12880
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_ar_ob_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 12450
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              *1* → Sí, lo quiero
+              *2* → No, gracias
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_ob_u1_si
+              title: 1 · Sí, lo quiero
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_ob_u1_no
+              title: 2 · No, gracias
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ar_ob_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 12450
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ar_ob_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 12450
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ar_ob_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 12880
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ar_ob_regalo
+      tipo: regalo
+      x: 3030
+      y: 12450
+      titulo: Regalo
+    - id: pla_ar_dou_intro
+      tipo: mensaje
+      x: 720
+      y: 13700
+      titulo: Intro · doble oferta
+      steps:
+        - type: text
+          body_variants:
+            - "*{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía}* y soy parte del equipo de *TIENDA PLANTILLAS* 🙋🏻‍♀️"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ Guía principal paso a paso.
+              ✅ 50 plantillas listas para usar.
+              ✅ Checklist imprimible.
+              ✅ Acceso de por vida.
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Tenemos *dos opciones* para ti 👇
+
+              1️⃣ *{{PRODUCTO_BASE}}*
+              ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+              2️⃣ *{{PRODUCTO_FULL}}*
+              ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+              *¿Cuál prefieres?*
+
+              *1* → Solo el básico
+              *2* → Quiero el pack
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_dou_intro_basico
+              title: 1 · Solo el básico
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_dou_intro_pack
+              title: 2 · Quiero el pack
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+    - id: pla_ar_dou_seg
+      tipo: seguimientos
+      x: 720
+      y: 14130
+      titulo: Seguimientos · si no elige o no paga
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: pla_ar_dou_seg_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_dou_seg_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      *1* → Solo el básico
+                      *2* → Quiero el pack
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_dou_seg_basico
+                      title: 1 · Solo el básico
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_dou_seg_pack
+                      title: 2 · Quiero el pack
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+        - id: pla_ar_dou_seg_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_dou_seg_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+
+                      *1* → Solo el básico
+                      *2* → Quiero el pack
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_dou_seg_basico
+                      title: 1 · Solo el básico
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_dou_seg_pack
+                      title: 2 · Quiero el pack
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+    - id: pla_ar_dou_cobro_b
+      tipo: cobro
+      x: 1050
+      y: 13700
+      titulo: Cobro · GUÍA PLANTILLA
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_basico
+        acepta:
+          - ptpla_pack
+        metodos: true
+    - id: pla_ar_dou_cobro_p
+      tipo: cobro
+      x: 1050
+      y: 14130
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+    - id: pla_ar_dou_ent_b
+      tipo: entregar
+      x: 1380
+      y: 13700
+      titulo: Entrega · GUÍA PLANTILLA
+      producto_id: ptpla_basico
+    - id: pla_ar_dou_ent_p
+      tipo: entregar
+      x: 1380
+      y: 14130
+      titulo: Entrega · PACK PLANTILLA COMPLETO
+      producto_id: ptpla_pack
+    - id: pla_ar_dou_upgrade
+      tipo: mensaje
+      x: 1710
+      y: 13700
+      titulo: Upgrade al pack
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?
+
+              *1* → Sí, completar
+              *2* → No, gracias
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_dou_up_si
+              title: 1 · Sí, completar
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_dou_up_no
+              title: 2 · No, gracias
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
+    - id: pla_ar_dou_cobro_up
+      tipo: cobro
+      x: 1710
+      y: 14130
+      titulo: Cobro · PACK PLANTILLA COMPLETO
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_pack
+        acepta:
+          - ptpla_basico
+        metodos: true
+        diferencia: true
+    - id: pla_ar_dou_upsell1
+      tipo: mensaje
+      x: 2040
+      y: 13700
+      titulo: Upsell · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              *¿Lo agregas?*
+
+              *1* → Sí, lo quiero
+              *2* → No, gracias
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_dou_u1_si
+              title: 1 · Sí, lo quiero
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_dou_u1_no
+              title: 2 · No, gracias
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_upsell
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      espera_min: 2
+    - id: pla_ar_dou_cobro_u1
+      tipo: cobro
+      x: 2370
+      y: 13700
+      titulo: Cobro · PLANTILLAS PREMIUM
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptpla_upsell
+        metodos: true
+    - id: pla_ar_dou_ent_u1
+      tipo: entregar
+      x: 2700
+      y: 13700
+      titulo: Entrega · PLANTILLAS PREMIUM
+      producto_id: ptpla_upsell
+    - id: pla_ar_dou_no_u1
+      tipo: mensaje
+      x: 2370
+      y: 14130
+      titulo: Si dice que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛
+          delay_after_sec: 4
+    - id: pla_ar_dou_regalo
+      tipo: regalo
+      x: 3030
+      y: 13700
+      titulo: Regalo
+    - id: pla_ar_con_promesa
+      tipo: mensaje
+      x: 720
+      y: 14950
+      titulo: Intro · contribución
+      steps:
+        - type: text
+          body_variants:
+            - "*¡Hola! 😊 Soy Sofía* de *TIENDA PLANTILLAS* 💛"
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Es un material digital de plantillas para imprimir y usar 📚
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              Funciona así 💛
+
+              1️⃣ Te envío el material *primero*, con total confianza.
+              2️⃣ Lo revisas.
+              3️⃣ Luego haces una *contribución voluntaria*, del valor que tú elijas.
+
+              *¿Aceptas?*
+
+              *1* → Sí, acepto
+              *2* → No, gracias
+
+              Escríbeme el número 😊
+          delay_after_sec: 4
+          decisions:
+            - id: pla_ar_con_promesa_acepto
+              title: 1 · Sí, acepto
+              keywords:
+                - "1"
+                - uno
+                - opcion 1
+                - la primera
+                - el primero
+              color: ""
+              steps: []
+            - id: pla_ar_con_promesa_no
+              title: 2 · No, gracias
+              keywords:
+                - "2"
+                - dos
+                - opcion 2
+                - la segunda
+                - el segundo
+              color: ""
+              steps: []
+      presenta:
+        - ptpla_aporte
+    - id: pla_ar_con_segP
+      tipo: seguimientos
+      x: 720
+      y: 15380
+      titulo: Seguimientos · si no contesta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_ar_con_segP_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_con_segP_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Sigues por ahí? 😊 Si quieres el material, solo dime que aceptas y te lo envío ahora mismo 💛
+
+                      *1* → Sí, acepto
+                      *2* → No, gracias
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_con_segP_acepto
+                      title: 1 · Sí, acepto
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_con_segP_no
+                      title: 2 · No, gracias
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+        - id: pla_ar_con_segP_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_con_segP_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Último aviso 💛 El material sigue reservado para ti: ¿lo quieres?
+
+                      *1* → Sí, acepto
+                      *2* → No, gracias
+
+                      Escríbeme el número 😊
+                  delay_after_sec: 4
+                  decisions:
+                    - id: pla_ar_con_segP_acepto
+                      title: 1 · Sí, acepto
+                      keywords:
+                        - "1"
+                        - uno
+                        - opcion 1
+                        - la primera
+                        - el primero
+                      color: ""
+                      steps: []
+                    - id: pla_ar_con_segP_no
+                      title: 2 · No, gracias
+                      keywords:
+                        - "2"
+                        - dos
+                        - opcion 2
+                        - la segunda
+                        - el segundo
+                      color: ""
+                      steps: []
+    - id: pla_ar_con_no
+      tipo: mensaje
+      x: 1050
+      y: 15380
+      titulo: Dijo que no
+      steps:
+        - type: text
+          body_variants:
+            - ¡No te preocupes! 💛 Si más adelante lo quieres, aquí estaré ✨
+          delay_after_sec: 4
+    - id: pla_ar_con_entrega
+      tipo: entregar
+      x: 1050
+      y: 14950
+      titulo: Entrega · MATERIAL POR CONTRIBUCIÓN
+      producto_id: ptpla_aporte
+    - id: pla_ar_con_cobro
+      tipo: cobro
+      x: 1380
+      y: 14950
+      titulo: Contribución
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Ahora puedes hacer tu contribución para apoyar este proyecto 💛
+
+              💰 *$ 2.000 ARS*
+              Material completo
+
+              💰 *$ 5.000 ARS*
+              Material completo + Colección extra
+
+              💰 *$ 8.000 ARS*
+              Todo lo anterior + Acceso total
+
+              Te dejo los datos para tu aporte 👇
+          delay_after_sec: 4
+      cobro:
+        modo: abierto
+        minimo_por_pais:
+          AR: 2000
+        tramos_por_pais:
+          AR:
+            - id: n2000
+              desde: 2000
+            - id: n5000
+              desde: 5000
+            - id: n8000
+              desde: 8000
+    - id: pla_ar_con_rec
+      tipo: seguimientos
+      x: 1380
+      y: 15380
+      titulo: Recordatorios · si no aporta
+      presenta:
+        - ptpla_aporte
+      seguimientos:
+        - id: pla_ar_con_rec_1
+          minutos: 120
+          variantes:
+            - id: pla_ar_con_rec_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - ¡Hola de nuevo! ✨ Espero que estés disfrutando el material. Cuando hagas tu contribución, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+        - id: pla_ar_con_rec_2
+          minutos: 600
+          variantes:
+            - id: pla_ar_con_rec_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - Paso por última vez 💛 Si deseas hacer tu contribución hoy, aún estás a tiempo. ¡Gracias por valorar este trabajo!
+                  delay_after_sec: 4
+    - id: pla_ar_con_nivel2000
+      tipo: mensaje
+      x: 1710
+      y: 14950
+      titulo: Nivel $ 2.000 ARS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ar-2000
+          delay_after_sec: 4
+    - id: pla_ar_con_nivel5000
+      tipo: mensaje
+      x: 1710
+      y: 15380
+      titulo: Nivel $ 5.000 ARS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Material completo + Colección extra* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ar-5000
+          delay_after_sec: 4
+    - id: pla_ar_con_nivel8000
+      tipo: mensaje
+      x: 1710
+      y: 15810
+      titulo: Nivel $ 8.000 ARS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🙏 *¡Gracias de corazón por tu contribución!* 💛
+
+              Tu aporte desbloquea: *Todo lo anterior + Acceso total* ✨
+
+              📁 Aquí tienes tu acceso:
+              https://example.com/plantillas/nivel-ar-8000
+          delay_after_sec: 4
+  cables:
+    - id: cpl1
+      de: pla_pe_inicio
+      salida: siguiente
+      a: pla_pe_reparto
+    - id: cpl2
+      de: pla_pe_lin_intro
+      salida: btn:pla_pe_lin_intro_quiere
+      a: pla_pe_lin_cobro
+    - id: cpl3
+      de: pla_pe_lin_intro
+      salida: siguiente
+      a: pla_pe_lin_segA
+    - id: cpl4
+      de: pla_pe_lin_segA
+      salida: btn:pla_pe_lin_segA_quiere
+      a: pla_pe_lin_cobro
+    - id: cpl5
+      de: pla_pe_lin_cobro
+      salida: pagado
+      a: pla_pe_lin_ent_b
+    - id: cpl6
+      de: pla_pe_lin_cobro
+      salida: sin_pago
+      a: pla_pe_lin_segB
+    - id: cpl7
+      de: pla_pe_lin_upsell1
+      salida: btn:pla_pe_lin_u1_si
+      a: pla_pe_lin_cobro_u1
+    - id: cpl8
+      de: pla_pe_lin_upsell1
+      salida: btn:pla_pe_lin_u1_no
+      a: pla_pe_lin_no_u1
+    - id: cpl9
+      de: pla_pe_lin_upsell1
+      salida: sin_respuesta
+      a: pla_pe_lin_regalo
+    - id: cpl10
+      de: pla_pe_lin_cobro_u1
+      salida: pagado
+      a: pla_pe_lin_ent_u1
+    - id: cpl11
+      de: pla_pe_lin_cobro_u1
+      salida: sin_pago
+      a: pla_pe_lin_regalo
+    - id: cpl12
+      de: pla_pe_lin_ent_u1
+      salida: siguiente
+      a: pla_pe_lin_regalo
+    - id: cpl13
+      de: pla_pe_lin_no_u1
+      salida: siguiente
+      a: pla_pe_lin_regalo
+    - id: cpl14
+      de: pla_pe_lin_ent_b
+      salida: siguiente
+      a: pla_pe_lin_upsell1
+    - id: cpl15
+      de: pla_pe_reparto
+      salida: rep:lineal
+      a: pla_pe_lin_intro
+    - id: cpl16
+      de: pla_pe_ob_intro
+      salida: btn:pla_pe_ob_intro_quiere
+      a: pla_pe_ob_ob
+    - id: cpl17
+      de: pla_pe_ob_intro
+      salida: siguiente
+      a: pla_pe_ob_segA
+    - id: cpl18
+      de: pla_pe_ob_segA
+      salida: btn:pla_pe_ob_segA_quiere
+      a: pla_pe_ob_ob
+    - id: cpl19
+      de: pla_pe_ob_ob
+      salida: btn:pla_pe_ob_ob_basico
+      a: pla_pe_ob_cobro_b
+    - id: cpl20
+      de: pla_pe_ob_ob
+      salida: btn:pla_pe_ob_ob_pack
+      a: pla_pe_ob_cobro_p
+    - id: cpl21
+      de: pla_pe_ob_ob
+      salida: siguiente
+      a: pla_pe_ob_segB
+    - id: cpl22
+      de: pla_pe_ob_segB
+      salida: btn:pla_pe_ob_segB_basico
+      a: pla_pe_ob_cobro_b
+    - id: cpl23
+      de: pla_pe_ob_segB
+      salida: btn:pla_pe_ob_segB_pack
+      a: pla_pe_ob_cobro_p
+    - id: cpl24
+      de: pla_pe_ob_cobro_b
+      salida: pagado
+      a: pla_pe_ob_ent_b
+    - id: cpl25
+      de: pla_pe_ob_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_pe_ob_ent_p
+    - id: cpl26
+      de: pla_pe_ob_cobro_b
+      salida: sin_pago
+      a: pla_pe_ob_segB
+    - id: cpl27
+      de: pla_pe_ob_cobro_p
+      salida: pagado
+      a: pla_pe_ob_ent_p
+    - id: cpl28
+      de: pla_pe_ob_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_pe_ob_ent_b
+    - id: cpl29
+      de: pla_pe_ob_cobro_p
+      salida: sin_pago
+      a: pla_pe_ob_segB
+    - id: cpl30
+      de: pla_pe_ob_upsell1
+      salida: btn:pla_pe_ob_u1_si
+      a: pla_pe_ob_cobro_u1
+    - id: cpl31
+      de: pla_pe_ob_upsell1
+      salida: btn:pla_pe_ob_u1_no
+      a: pla_pe_ob_no_u1
+    - id: cpl32
+      de: pla_pe_ob_upsell1
+      salida: sin_respuesta
+      a: pla_pe_ob_regalo
+    - id: cpl33
+      de: pla_pe_ob_cobro_u1
+      salida: pagado
+      a: pla_pe_ob_ent_u1
+    - id: cpl34
+      de: pla_pe_ob_cobro_u1
+      salida: sin_pago
+      a: pla_pe_ob_regalo
+    - id: cpl35
+      de: pla_pe_ob_ent_u1
+      salida: siguiente
+      a: pla_pe_ob_regalo
+    - id: cpl36
+      de: pla_pe_ob_no_u1
+      salida: siguiente
+      a: pla_pe_ob_regalo
+    - id: cpl37
+      de: pla_pe_ob_ent_b
+      salida: siguiente
+      a: pla_pe_ob_upsell1
+    - id: cpl38
+      de: pla_pe_ob_ent_p
+      salida: siguiente
+      a: pla_pe_ob_upsell1
+    - id: cpl39
+      de: pla_pe_reparto
+      salida: rep:ob
+      a: pla_pe_ob_intro
+    - id: cpl40
+      de: pla_pe_dou_intro
+      salida: btn:pla_pe_dou_intro_basico
+      a: pla_pe_dou_cobro_b
+    - id: cpl41
+      de: pla_pe_dou_intro
+      salida: btn:pla_pe_dou_intro_pack
+      a: pla_pe_dou_cobro_p
+    - id: cpl42
+      de: pla_pe_dou_intro
+      salida: siguiente
+      a: pla_pe_dou_seg
+    - id: cpl43
+      de: pla_pe_dou_seg
+      salida: btn:pla_pe_dou_seg_basico
+      a: pla_pe_dou_cobro_b
+    - id: cpl44
+      de: pla_pe_dou_seg
+      salida: btn:pla_pe_dou_seg_pack
+      a: pla_pe_dou_cobro_p
+    - id: cpl45
+      de: pla_pe_dou_cobro_b
+      salida: pagado
+      a: pla_pe_dou_ent_b
+    - id: cpl46
+      de: pla_pe_dou_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_pe_dou_ent_p
+    - id: cpl47
+      de: pla_pe_dou_cobro_b
+      salida: sin_pago
+      a: pla_pe_dou_seg
+    - id: cpl48
+      de: pla_pe_dou_cobro_p
+      salida: pagado
+      a: pla_pe_dou_ent_p
+    - id: cpl49
+      de: pla_pe_dou_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_pe_dou_ent_b
+    - id: cpl50
+      de: pla_pe_dou_cobro_p
+      salida: sin_pago
+      a: pla_pe_dou_seg
+    - id: cpl51
+      de: pla_pe_dou_upsell1
+      salida: btn:pla_pe_dou_u1_si
+      a: pla_pe_dou_cobro_u1
+    - id: cpl52
+      de: pla_pe_dou_upsell1
+      salida: btn:pla_pe_dou_u1_no
+      a: pla_pe_dou_no_u1
+    - id: cpl53
+      de: pla_pe_dou_upsell1
+      salida: sin_respuesta
+      a: pla_pe_dou_regalo
+    - id: cpl54
+      de: pla_pe_dou_cobro_u1
+      salida: pagado
+      a: pla_pe_dou_ent_u1
+    - id: cpl55
+      de: pla_pe_dou_cobro_u1
+      salida: sin_pago
+      a: pla_pe_dou_regalo
+    - id: cpl56
+      de: pla_pe_dou_ent_u1
+      salida: siguiente
+      a: pla_pe_dou_regalo
+    - id: cpl57
+      de: pla_pe_dou_no_u1
+      salida: siguiente
+      a: pla_pe_dou_regalo
+    - id: cpl58
+      de: pla_pe_dou_ent_b
+      salida: siguiente
+      a: pla_pe_dou_upgrade
+    - id: cpl59
+      de: pla_pe_dou_upgrade
+      salida: btn:pla_pe_dou_up_si
+      a: pla_pe_dou_cobro_up
+    - id: cpl60
+      de: pla_pe_dou_upgrade
+      salida: btn:pla_pe_dou_up_no
+      a: pla_pe_dou_upsell1
+    - id: cpl61
+      de: pla_pe_dou_upgrade
+      salida: sin_respuesta
+      a: pla_pe_dou_upsell1
+    - id: cpl62
+      de: pla_pe_dou_cobro_up
+      salida: pagado
+      a: pla_pe_dou_ent_p
+    - id: cpl63
+      de: pla_pe_dou_cobro_up
+      salida: sin_pago
+      a: pla_pe_dou_upsell1
+    - id: cpl64
+      de: pla_pe_dou_ent_p
+      salida: siguiente
+      a: pla_pe_dou_upsell1
+    - id: cpl65
+      de: pla_pe_reparto
+      salida: rep:dou
+      a: pla_pe_dou_intro
+    - id: cpl66
+      de: pla_pe_con_promesa
+      salida: btn:pla_pe_con_promesa_acepto
+      a: pla_pe_con_entrega
+    - id: cpl67
+      de: pla_pe_con_promesa
+      salida: btn:pla_pe_con_promesa_no
+      a: pla_pe_con_no
+    - id: cpl68
+      de: pla_pe_con_promesa
+      salida: siguiente
+      a: pla_pe_con_segP
+    - id: cpl69
+      de: pla_pe_con_segP
+      salida: btn:pla_pe_con_segP_acepto
+      a: pla_pe_con_entrega
+    - id: cpl70
+      de: pla_pe_con_segP
+      salida: btn:pla_pe_con_segP_no
+      a: pla_pe_con_no
+    - id: cpl71
+      de: pla_pe_con_entrega
+      salida: siguiente
+      a: pla_pe_con_cobro
+    - id: cpl72
+      de: pla_pe_con_cobro
+      salida: sin_pago
+      a: pla_pe_con_rec
+    - id: cpl73
+      de: pla_pe_con_cobro
+      salida: tramo:n5
+      a: pla_pe_con_nivel5
+    - id: cpl74
+      de: pla_pe_con_cobro
+      salida: tramo:n10
+      a: pla_pe_con_nivel10
+    - id: cpl75
+      de: pla_pe_con_cobro
+      salida: tramo:n15
+      a: pla_pe_con_nivel15
+    - id: cpl76
+      de: pla_pe_reparto
+      salida: rep:contrib
+      a: pla_pe_con_promesa
+    - id: cpl77
+      de: pla_ec_inicio
+      salida: siguiente
+      a: pla_ec_reparto
+    - id: cpl78
+      de: pla_ec_lin_intro
+      salida: dec:pla_ec_lin_intro_quiere
+      a: pla_ec_lin_cobro
+    - id: cpl79
+      de: pla_ec_lin_intro
+      salida: siguiente
+      a: pla_ec_lin_segA
+    - id: cpl80
+      de: pla_ec_lin_segA
+      salida: dec:pla_ec_lin_segA_quiere
+      a: pla_ec_lin_cobro
+    - id: cpl81
+      de: pla_ec_lin_cobro
+      salida: pagado
+      a: pla_ec_lin_ent_b
+    - id: cpl82
+      de: pla_ec_lin_cobro
+      salida: sin_pago
+      a: pla_ec_lin_segB
+    - id: cpl83
+      de: pla_ec_lin_upsell1
+      salida: dec:pla_ec_lin_u1_si
+      a: pla_ec_lin_cobro_u1
+    - id: cpl84
+      de: pla_ec_lin_upsell1
+      salida: dec:pla_ec_lin_u1_no
+      a: pla_ec_lin_no_u1
+    - id: cpl85
+      de: pla_ec_lin_upsell1
+      salida: sin_respuesta
+      a: pla_ec_lin_regalo
+    - id: cpl86
+      de: pla_ec_lin_cobro_u1
+      salida: pagado
+      a: pla_ec_lin_ent_u1
+    - id: cpl87
+      de: pla_ec_lin_cobro_u1
+      salida: sin_pago
+      a: pla_ec_lin_regalo
+    - id: cpl88
+      de: pla_ec_lin_ent_u1
+      salida: siguiente
+      a: pla_ec_lin_regalo
+    - id: cpl89
+      de: pla_ec_lin_no_u1
+      salida: siguiente
+      a: pla_ec_lin_regalo
+    - id: cpl90
+      de: pla_ec_lin_ent_b
+      salida: siguiente
+      a: pla_ec_lin_upsell1
+    - id: cpl91
+      de: pla_ec_reparto
+      salida: rep:lineal
+      a: pla_ec_lin_intro
+    - id: cpl92
+      de: pla_ec_ob_intro
+      salida: dec:pla_ec_ob_intro_quiere
+      a: pla_ec_ob_ob
+    - id: cpl93
+      de: pla_ec_ob_intro
+      salida: siguiente
+      a: pla_ec_ob_segA
+    - id: cpl94
+      de: pla_ec_ob_segA
+      salida: dec:pla_ec_ob_segA_quiere
+      a: pla_ec_ob_ob
+    - id: cpl95
+      de: pla_ec_ob_ob
+      salida: dec:pla_ec_ob_ob_basico
+      a: pla_ec_ob_cobro_b
+    - id: cpl96
+      de: pla_ec_ob_ob
+      salida: dec:pla_ec_ob_ob_pack
+      a: pla_ec_ob_cobro_p
+    - id: cpl97
+      de: pla_ec_ob_ob
+      salida: siguiente
+      a: pla_ec_ob_segB
+    - id: cpl98
+      de: pla_ec_ob_segB
+      salida: dec:pla_ec_ob_segB_basico
+      a: pla_ec_ob_cobro_b
+    - id: cpl99
+      de: pla_ec_ob_segB
+      salida: dec:pla_ec_ob_segB_pack
+      a: pla_ec_ob_cobro_p
+    - id: cpl100
+      de: pla_ec_ob_cobro_b
+      salida: pagado
+      a: pla_ec_ob_ent_b
+    - id: cpl101
+      de: pla_ec_ob_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_ec_ob_ent_p
+    - id: cpl102
+      de: pla_ec_ob_cobro_b
+      salida: sin_pago
+      a: pla_ec_ob_segB
+    - id: cpl103
+      de: pla_ec_ob_cobro_p
+      salida: pagado
+      a: pla_ec_ob_ent_p
+    - id: cpl104
+      de: pla_ec_ob_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_ec_ob_ent_b
+    - id: cpl105
+      de: pla_ec_ob_cobro_p
+      salida: sin_pago
+      a: pla_ec_ob_segB
+    - id: cpl106
+      de: pla_ec_ob_upsell1
+      salida: dec:pla_ec_ob_u1_si
+      a: pla_ec_ob_cobro_u1
+    - id: cpl107
+      de: pla_ec_ob_upsell1
+      salida: dec:pla_ec_ob_u1_no
+      a: pla_ec_ob_no_u1
+    - id: cpl108
+      de: pla_ec_ob_upsell1
+      salida: sin_respuesta
+      a: pla_ec_ob_regalo
+    - id: cpl109
+      de: pla_ec_ob_cobro_u1
+      salida: pagado
+      a: pla_ec_ob_ent_u1
+    - id: cpl110
+      de: pla_ec_ob_cobro_u1
+      salida: sin_pago
+      a: pla_ec_ob_regalo
+    - id: cpl111
+      de: pla_ec_ob_ent_u1
+      salida: siguiente
+      a: pla_ec_ob_regalo
+    - id: cpl112
+      de: pla_ec_ob_no_u1
+      salida: siguiente
+      a: pla_ec_ob_regalo
+    - id: cpl113
+      de: pla_ec_ob_ent_b
+      salida: siguiente
+      a: pla_ec_ob_upsell1
+    - id: cpl114
+      de: pla_ec_ob_ent_p
+      salida: siguiente
+      a: pla_ec_ob_upsell1
+    - id: cpl115
+      de: pla_ec_reparto
+      salida: rep:ob
+      a: pla_ec_ob_intro
+    - id: cpl116
+      de: pla_ec_dou_intro
+      salida: dec:pla_ec_dou_intro_basico
+      a: pla_ec_dou_cobro_b
+    - id: cpl117
+      de: pla_ec_dou_intro
+      salida: dec:pla_ec_dou_intro_pack
+      a: pla_ec_dou_cobro_p
+    - id: cpl118
+      de: pla_ec_dou_intro
+      salida: siguiente
+      a: pla_ec_dou_seg
+    - id: cpl119
+      de: pla_ec_dou_seg
+      salida: dec:pla_ec_dou_seg_basico
+      a: pla_ec_dou_cobro_b
+    - id: cpl120
+      de: pla_ec_dou_seg
+      salida: dec:pla_ec_dou_seg_pack
+      a: pla_ec_dou_cobro_p
+    - id: cpl121
+      de: pla_ec_dou_cobro_b
+      salida: pagado
+      a: pla_ec_dou_ent_b
+    - id: cpl122
+      de: pla_ec_dou_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_ec_dou_ent_p
+    - id: cpl123
+      de: pla_ec_dou_cobro_b
+      salida: sin_pago
+      a: pla_ec_dou_seg
+    - id: cpl124
+      de: pla_ec_dou_cobro_p
+      salida: pagado
+      a: pla_ec_dou_ent_p
+    - id: cpl125
+      de: pla_ec_dou_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_ec_dou_ent_b
+    - id: cpl126
+      de: pla_ec_dou_cobro_p
+      salida: sin_pago
+      a: pla_ec_dou_seg
+    - id: cpl127
+      de: pla_ec_dou_upsell1
+      salida: dec:pla_ec_dou_u1_si
+      a: pla_ec_dou_cobro_u1
+    - id: cpl128
+      de: pla_ec_dou_upsell1
+      salida: dec:pla_ec_dou_u1_no
+      a: pla_ec_dou_no_u1
+    - id: cpl129
+      de: pla_ec_dou_upsell1
+      salida: sin_respuesta
+      a: pla_ec_dou_regalo
+    - id: cpl130
+      de: pla_ec_dou_cobro_u1
+      salida: pagado
+      a: pla_ec_dou_ent_u1
+    - id: cpl131
+      de: pla_ec_dou_cobro_u1
+      salida: sin_pago
+      a: pla_ec_dou_regalo
+    - id: cpl132
+      de: pla_ec_dou_ent_u1
+      salida: siguiente
+      a: pla_ec_dou_regalo
+    - id: cpl133
+      de: pla_ec_dou_no_u1
+      salida: siguiente
+      a: pla_ec_dou_regalo
+    - id: cpl134
+      de: pla_ec_dou_ent_b
+      salida: siguiente
+      a: pla_ec_dou_upgrade
+    - id: cpl135
+      de: pla_ec_dou_upgrade
+      salida: dec:pla_ec_dou_up_si
+      a: pla_ec_dou_cobro_up
+    - id: cpl136
+      de: pla_ec_dou_upgrade
+      salida: dec:pla_ec_dou_up_no
+      a: pla_ec_dou_upsell1
+    - id: cpl137
+      de: pla_ec_dou_upgrade
+      salida: sin_respuesta
+      a: pla_ec_dou_upsell1
+    - id: cpl138
+      de: pla_ec_dou_cobro_up
+      salida: pagado
+      a: pla_ec_dou_ent_p
+    - id: cpl139
+      de: pla_ec_dou_cobro_up
+      salida: sin_pago
+      a: pla_ec_dou_upsell1
+    - id: cpl140
+      de: pla_ec_dou_ent_p
+      salida: siguiente
+      a: pla_ec_dou_upsell1
+    - id: cpl141
+      de: pla_ec_reparto
+      salida: rep:dou
+      a: pla_ec_dou_intro
+    - id: cpl142
+      de: pla_ec_con_promesa
+      salida: dec:pla_ec_con_promesa_acepto
+      a: pla_ec_con_entrega
+    - id: cpl143
+      de: pla_ec_con_promesa
+      salida: dec:pla_ec_con_promesa_no
+      a: pla_ec_con_no
+    - id: cpl144
+      de: pla_ec_con_promesa
+      salida: siguiente
+      a: pla_ec_con_segP
+    - id: cpl145
+      de: pla_ec_con_segP
+      salida: dec:pla_ec_con_segP_acepto
+      a: pla_ec_con_entrega
+    - id: cpl146
+      de: pla_ec_con_segP
+      salida: dec:pla_ec_con_segP_no
+      a: pla_ec_con_no
+    - id: cpl147
+      de: pla_ec_con_entrega
+      salida: siguiente
+      a: pla_ec_con_cobro
+    - id: cpl148
+      de: pla_ec_con_cobro
+      salida: sin_pago
+      a: pla_ec_con_rec
+    - id: cpl149
+      de: pla_ec_con_cobro
+      salida: tramo:n1
+      a: pla_ec_con_nivel1
+    - id: cpl150
+      de: pla_ec_con_cobro
+      salida: tramo:n2
+      a: pla_ec_con_nivel2
+    - id: cpl151
+      de: pla_ec_con_cobro
+      salida: tramo:n3
+      a: pla_ec_con_nivel3
+    - id: cpl152
+      de: pla_ec_reparto
+      salida: rep:contrib
+      a: pla_ec_con_promesa
+    - id: cpl153
+      de: pla_ar_inicio
+      salida: siguiente
+      a: pla_ar_reparto
+    - id: cpl154
+      de: pla_ar_lin_intro
+      salida: dec:pla_ar_lin_intro_quiere
+      a: pla_ar_lin_cobro
+    - id: cpl155
+      de: pla_ar_lin_intro
+      salida: siguiente
+      a: pla_ar_lin_segA
+    - id: cpl156
+      de: pla_ar_lin_segA
+      salida: dec:pla_ar_lin_segA_quiere
+      a: pla_ar_lin_cobro
+    - id: cpl157
+      de: pla_ar_lin_cobro
+      salida: pagado
+      a: pla_ar_lin_ent_b
+    - id: cpl158
+      de: pla_ar_lin_cobro
+      salida: sin_pago
+      a: pla_ar_lin_segB
+    - id: cpl159
+      de: pla_ar_lin_upsell1
+      salida: dec:pla_ar_lin_u1_si
+      a: pla_ar_lin_cobro_u1
+    - id: cpl160
+      de: pla_ar_lin_upsell1
+      salida: dec:pla_ar_lin_u1_no
+      a: pla_ar_lin_no_u1
+    - id: cpl161
+      de: pla_ar_lin_upsell1
+      salida: sin_respuesta
+      a: pla_ar_lin_regalo
+    - id: cpl162
+      de: pla_ar_lin_cobro_u1
+      salida: pagado
+      a: pla_ar_lin_ent_u1
+    - id: cpl163
+      de: pla_ar_lin_cobro_u1
+      salida: sin_pago
+      a: pla_ar_lin_regalo
+    - id: cpl164
+      de: pla_ar_lin_ent_u1
+      salida: siguiente
+      a: pla_ar_lin_regalo
+    - id: cpl165
+      de: pla_ar_lin_no_u1
+      salida: siguiente
+      a: pla_ar_lin_regalo
+    - id: cpl166
+      de: pla_ar_lin_ent_b
+      salida: siguiente
+      a: pla_ar_lin_upsell1
+    - id: cpl167
+      de: pla_ar_reparto
+      salida: rep:lineal
+      a: pla_ar_lin_intro
+    - id: cpl168
+      de: pla_ar_ob_intro
+      salida: dec:pla_ar_ob_intro_quiere
+      a: pla_ar_ob_ob
+    - id: cpl169
+      de: pla_ar_ob_intro
+      salida: siguiente
+      a: pla_ar_ob_segA
+    - id: cpl170
+      de: pla_ar_ob_segA
+      salida: dec:pla_ar_ob_segA_quiere
+      a: pla_ar_ob_ob
+    - id: cpl171
+      de: pla_ar_ob_ob
+      salida: dec:pla_ar_ob_ob_basico
+      a: pla_ar_ob_cobro_b
+    - id: cpl172
+      de: pla_ar_ob_ob
+      salida: dec:pla_ar_ob_ob_pack
+      a: pla_ar_ob_cobro_p
+    - id: cpl173
+      de: pla_ar_ob_ob
+      salida: siguiente
+      a: pla_ar_ob_segB
+    - id: cpl174
+      de: pla_ar_ob_segB
+      salida: dec:pla_ar_ob_segB_basico
+      a: pla_ar_ob_cobro_b
+    - id: cpl175
+      de: pla_ar_ob_segB
+      salida: dec:pla_ar_ob_segB_pack
+      a: pla_ar_ob_cobro_p
+    - id: cpl176
+      de: pla_ar_ob_cobro_b
+      salida: pagado
+      a: pla_ar_ob_ent_b
+    - id: cpl177
+      de: pla_ar_ob_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_ar_ob_ent_p
+    - id: cpl178
+      de: pla_ar_ob_cobro_b
+      salida: sin_pago
+      a: pla_ar_ob_segB
+    - id: cpl179
+      de: pla_ar_ob_cobro_p
+      salida: pagado
+      a: pla_ar_ob_ent_p
+    - id: cpl180
+      de: pla_ar_ob_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_ar_ob_ent_b
+    - id: cpl181
+      de: pla_ar_ob_cobro_p
+      salida: sin_pago
+      a: pla_ar_ob_segB
+    - id: cpl182
+      de: pla_ar_ob_upsell1
+      salida: dec:pla_ar_ob_u1_si
+      a: pla_ar_ob_cobro_u1
+    - id: cpl183
+      de: pla_ar_ob_upsell1
+      salida: dec:pla_ar_ob_u1_no
+      a: pla_ar_ob_no_u1
+    - id: cpl184
+      de: pla_ar_ob_upsell1
+      salida: sin_respuesta
+      a: pla_ar_ob_regalo
+    - id: cpl185
+      de: pla_ar_ob_cobro_u1
+      salida: pagado
+      a: pla_ar_ob_ent_u1
+    - id: cpl186
+      de: pla_ar_ob_cobro_u1
+      salida: sin_pago
+      a: pla_ar_ob_regalo
+    - id: cpl187
+      de: pla_ar_ob_ent_u1
+      salida: siguiente
+      a: pla_ar_ob_regalo
+    - id: cpl188
+      de: pla_ar_ob_no_u1
+      salida: siguiente
+      a: pla_ar_ob_regalo
+    - id: cpl189
+      de: pla_ar_ob_ent_b
+      salida: siguiente
+      a: pla_ar_ob_upsell1
+    - id: cpl190
+      de: pla_ar_ob_ent_p
+      salida: siguiente
+      a: pla_ar_ob_upsell1
+    - id: cpl191
+      de: pla_ar_reparto
+      salida: rep:ob
+      a: pla_ar_ob_intro
+    - id: cpl192
+      de: pla_ar_dou_intro
+      salida: dec:pla_ar_dou_intro_basico
+      a: pla_ar_dou_cobro_b
+    - id: cpl193
+      de: pla_ar_dou_intro
+      salida: dec:pla_ar_dou_intro_pack
+      a: pla_ar_dou_cobro_p
+    - id: cpl194
+      de: pla_ar_dou_intro
+      salida: siguiente
+      a: pla_ar_dou_seg
+    - id: cpl195
+      de: pla_ar_dou_seg
+      salida: dec:pla_ar_dou_seg_basico
+      a: pla_ar_dou_cobro_b
+    - id: cpl196
+      de: pla_ar_dou_seg
+      salida: dec:pla_ar_dou_seg_pack
+      a: pla_ar_dou_cobro_p
+    - id: cpl197
+      de: pla_ar_dou_cobro_b
+      salida: pagado
+      a: pla_ar_dou_ent_b
+    - id: cpl198
+      de: pla_ar_dou_cobro_b
+      salida: prod:ptpla_pack
+      a: pla_ar_dou_ent_p
+    - id: cpl199
+      de: pla_ar_dou_cobro_b
+      salida: sin_pago
+      a: pla_ar_dou_seg
+    - id: cpl200
+      de: pla_ar_dou_cobro_p
+      salida: pagado
+      a: pla_ar_dou_ent_p
+    - id: cpl201
+      de: pla_ar_dou_cobro_p
+      salida: prod:ptpla_basico
+      a: pla_ar_dou_ent_b
+    - id: cpl202
+      de: pla_ar_dou_cobro_p
+      salida: sin_pago
+      a: pla_ar_dou_seg
+    - id: cpl203
+      de: pla_ar_dou_upsell1
+      salida: dec:pla_ar_dou_u1_si
+      a: pla_ar_dou_cobro_u1
+    - id: cpl204
+      de: pla_ar_dou_upsell1
+      salida: dec:pla_ar_dou_u1_no
+      a: pla_ar_dou_no_u1
+    - id: cpl205
+      de: pla_ar_dou_upsell1
+      salida: sin_respuesta
+      a: pla_ar_dou_regalo
+    - id: cpl206
+      de: pla_ar_dou_cobro_u1
+      salida: pagado
+      a: pla_ar_dou_ent_u1
+    - id: cpl207
+      de: pla_ar_dou_cobro_u1
+      salida: sin_pago
+      a: pla_ar_dou_regalo
+    - id: cpl208
+      de: pla_ar_dou_ent_u1
+      salida: siguiente
+      a: pla_ar_dou_regalo
+    - id: cpl209
+      de: pla_ar_dou_no_u1
+      salida: siguiente
+      a: pla_ar_dou_regalo
+    - id: cpl210
+      de: pla_ar_dou_ent_b
+      salida: siguiente
+      a: pla_ar_dou_upgrade
+    - id: cpl211
+      de: pla_ar_dou_upgrade
+      salida: dec:pla_ar_dou_up_si
+      a: pla_ar_dou_cobro_up
+    - id: cpl212
+      de: pla_ar_dou_upgrade
+      salida: dec:pla_ar_dou_up_no
+      a: pla_ar_dou_upsell1
+    - id: cpl213
+      de: pla_ar_dou_upgrade
+      salida: sin_respuesta
+      a: pla_ar_dou_upsell1
+    - id: cpl214
+      de: pla_ar_dou_cobro_up
+      salida: pagado
+      a: pla_ar_dou_ent_p
+    - id: cpl215
+      de: pla_ar_dou_cobro_up
+      salida: sin_pago
+      a: pla_ar_dou_upsell1
+    - id: cpl216
+      de: pla_ar_dou_ent_p
+      salida: siguiente
+      a: pla_ar_dou_upsell1
+    - id: cpl217
+      de: pla_ar_reparto
+      salida: rep:dou
+      a: pla_ar_dou_intro
+    - id: cpl218
+      de: pla_ar_con_promesa
+      salida: dec:pla_ar_con_promesa_acepto
+      a: pla_ar_con_entrega
+    - id: cpl219
+      de: pla_ar_con_promesa
+      salida: dec:pla_ar_con_promesa_no
+      a: pla_ar_con_no
+    - id: cpl220
+      de: pla_ar_con_promesa
+      salida: siguiente
+      a: pla_ar_con_segP
+    - id: cpl221
+      de: pla_ar_con_segP
+      salida: dec:pla_ar_con_segP_acepto
+      a: pla_ar_con_entrega
+    - id: cpl222
+      de: pla_ar_con_segP
+      salida: dec:pla_ar_con_segP_no
+      a: pla_ar_con_no
+    - id: cpl223
+      de: pla_ar_con_entrega
+      salida: siguiente
+      a: pla_ar_con_cobro
+    - id: cpl224
+      de: pla_ar_con_cobro
+      salida: sin_pago
+      a: pla_ar_con_rec
+    - id: cpl225
+      de: pla_ar_con_cobro
+      salida: tramo:n2000
+      a: pla_ar_con_nivel2000
+    - id: cpl226
+      de: pla_ar_con_cobro
+      salida: tramo:n5000
+      a: pla_ar_con_nivel5000
+    - id: cpl227
+      de: pla_ar_con_cobro
+      salida: tramo:n8000
+      a: pla_ar_con_nivel8000
+    - id: cpl228
+      de: pla_ar_reparto
+      salida: rep:contrib
+      a: pla_ar_con_promesa
+  cajas:
+    - id: caja-pla_pe-lineal
+      x: 680
+      y: -70
+      ancho: 2680
+      alto: 1170
+      titulo: LINEAL · con BOTONES
+    - id: caja-pla_pe-ob
+      x: 680
+      y: 1180
+      ancho: 2680
+      alto: 1170
+      titulo: ORDER BUMP · con BOTONES
+    - id: caja-pla_pe-dou
+      x: 680
+      y: 2430
+      ancho: 2680
+      alto: 1170
+      titulo: DOBLE OFERTA · con BOTONES
+    - id: caja-pla_pe-contrib
+      x: 680
+      y: 3680
+      ancho: 2680
+      alto: 1170
+      titulo: CONTRIBUCIÓN · con BOTONES
+    - id: manta-pla_pe_inicio
+      x: 20
+      y: -140
+      ancho: 3440
+      alto: 5120
+      titulo: ""
+      inicio: pla_pe_inicio
+    - id: caja-pla_ec-lineal
+      x: 680
+      y: 5530
+      ancho: 2680
+      alto: 1170
+      titulo: LINEAL · con PALABRAS (SI DICE)
+    - id: caja-pla_ec-ob
+      x: 680
+      y: 6780
+      ancho: 2680
+      alto: 1170
+      titulo: ORDER BUMP · con PALABRAS (SI DICE)
+    - id: caja-pla_ec-dou
+      x: 680
+      y: 8030
+      ancho: 2680
+      alto: 1170
+      titulo: DOBLE OFERTA · con PALABRAS (SI DICE)
+    - id: caja-pla_ec-contrib
+      x: 680
+      y: 9280
+      ancho: 2680
+      alto: 1170
+      titulo: CONTRIBUCIÓN · con PALABRAS (SI DICE)
+    - id: manta-pla_ec_inicio
+      x: 20
+      y: 5460
+      ancho: 3440
+      alto: 5120
+      titulo: ""
+      inicio: pla_ec_inicio
+    - id: caja-pla_ar-lineal
+      x: 680
+      y: 11130
+      ancho: 2680
+      alto: 1170
+      titulo: LINEAL · con NÚMEROS (escribe 1 o 2)
+    - id: caja-pla_ar-ob
+      x: 680
+      y: 12380
+      ancho: 2680
+      alto: 1170
+      titulo: ORDER BUMP · con NÚMEROS (escribe 1 o 2)
+    - id: caja-pla_ar-dou
+      x: 680
+      y: 13630
+      ancho: 2680
+      alto: 1170
+      titulo: DOBLE OFERTA · con NÚMEROS (escribe 1 o 2)
+    - id: caja-pla_ar-contrib
+      x: 680
+      y: 14880
+      ancho: 2680
+      alto: 1170
+      titulo: CONTRIBUCIÓN · con NÚMEROS (escribe 1 o 2)
+    - id: manta-pla_ar_inicio
+      x: 20
+      y: 11060
+      ancho: 3440
+      alto: 5120
+      titulo: ""
+      inicio: pla_ar_inicio

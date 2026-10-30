@@ -1,0 +1,111 @@
+enabled: false
+use_content: false
+modality_templates:
+  lineal:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""
+  order_bump:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""
+  bioferta:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""
+  doble_oferta_dos:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""
+  doble_oferta_upsell:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""
+  upsell:
+    intro_groups: []
+    followups: []
+    payment: []
+    delivery: []
+    delivery_groups: []
+    order_bump_intro_groups: []
+    upsell_intro_groups: []
+    order_bump_choice_prompt: ""
+    upsell_pregunta_steps: []
+    upsell_boton_si: ""
+    upsell_boton_no: ""
+    upsell_respuesta_rechazo: ""
+    post_sale:
+      whatsappPreference: ""
+      deliveryUsage: ""
+      lifetimeAccess: ""
+      farewells: ""

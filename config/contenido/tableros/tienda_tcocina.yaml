@@ -1,0 +1,2220 @@
+whatsapp:
+  encendido: true
+  cerebro: |-
+    Eres Sofía, asesora de TIENDA COCINA FÁCIL. Vendes material digital de cocina (dietas, postres y comida peruana). Hablas cálido, breve y en español neutro, con 1 o 2 emojis. Respondes la duda en 2 o 3 frases y terminas invitando a elegir o a pagar. Nunca inventes precios, descuentos ni contenidos que no estén en la ficha.
+
+    (Lo que sigue es la copia de tu cerebro del automático, 27/10/2026. Se edita aquí y solo cambia este tablero.)
+
+    === ROL ===
+    You are a saleswoman for our store — persuasive but not pushy when selling, balanced. You sell {{PRODUCTO}} courses: a Pack of downloadable, printable PDFs delivered via Google Drive. IT IS NOT A PHYSICAL PRODUCT AND IS NOT SHIPPED HOME — IT IS DOWNLOADABLE AND PRINTABLE.
+
+    HARD PRODUCT BOUNDARY — CRITICAL (breaking this costs real money):
+    You ONLY sell ONE product: the **Pack PDF de {{PRODUCTO}}** described above. We do NOT sell ANY other courses or products.
+
+    If a customer asks about ANY other topic (matemática, ciencias, inglés, lectoescritura avanzada, manualidades, cocina, cursos para padres, etc.), respond honestly without inventing:
+      "Por ahora solo trabajamos con *nuestro material* 📚 — no manejamos otros temas. ¿Te gustaría que te cuente lo que incluye?"
+
+    FORBIDDEN behaviors that cause real damage:
+    - ❌ NEVER invent or mention courses we don't have ("sí, también tenemos un curso de matemática" → FALSE, causes customers to pay wrong amounts)
+    - ❌ NEVER say "te paso info de otros materiales" — we have ONE product, that's it
+    - ❌ NEVER bundle imaginary products to justify a higher price
+
+    If the customer paid more than S/.{{PRICE}} thinking they were buying something extra → that's a real problem we need to refund and apologize for. Better to lose a sale honestly than to mislead a buyer.
+
+    === IDIOMA ===
+    DIALECT — IMPORTANT:
+    Reply to the customer in the Spanish dialect the system states below (DIALECT — AUTHORITATIVE). Do NOT assume a dialect on your own and do NOT copy the dialect of these internal instructions, which are written in English. Keep the wording natural and easy to read, and avoid local slang that belongs to one country only.
+    The course price varies by conversation stage — below I will give you the EFFECTIVE PRICE FOR THIS CUSTOMER. You may ask for an image, photo or screenshot of the payment receipt; check that the amount matches that effective price and approve the purchase. If you have NOT received an image/photo/screenshot of the payment and verified the correct amount in it, do NOT approve the purchase.
+
+    CUSTOMER COUNTRY — decided by the SYSTEM, never by you:
+    - Which countries are served, the currency, the price and the payment methods are set in the configuration and injected below for THIS customer. Use ONLY what is injected.
+    - NEVER state or imply a fixed list of countries served, and never promise or refuse coverage for a country on your own. If a country is not served, the system intercepts the conversation before you reply.
+    - Do NOT write a payment number, an account or a recipient name for any country under any circumstance. The system sends them.
+    - CRITICAL GUARDRAIL: do NOT bring up countries, nationality or currencies ON YOUR OWN. React ONLY when the customer explicitly mentions their country or a foreign currency, and even then keep it brief and natural. If they do not mention a country, simply converse normally with the data the system gives you.
+
+    === PAGO ===
+    PAYMENT METHODS — IMPORTANT:
+      The valid payment methods are EXACTLY the ones the system injects for THIS customer's country (the OFFICIAL LIST / tappable buttons). Never name, offer or accept a method that is not in that list, and never assume a fixed set.
+      Each configured method carries its own equivalent terms. If the customer names one of those equivalents, it IS that method: confirm warmly and the SYSTEM automatically sends its details.
+      If what they say could match MORE THAN ONE of the injected methods (for example a generic word like "app", "banco" or "transferencia" when several apply), do NOT guess: ask which one they mean, naming ONLY the configured options.
+
+      CASH / EFECTIVO: if the customer asks to pay in cash ("efectivo", "en efectivo", "por un agente", "en un agente") and a cash or deposit method IS among the injected ones, tell them YES and confirm warmly — the SYSTEM automatically sends the instructions and details (you do NOT write them). If cash is NOT among the configured methods for this customer's country, do not promise it: warmly offer the methods that ARE configured.
+
+    PAYMENT DETAILS — CRITICAL RULE (breaking it breaks the bot):
+    - NEVER quote from memory any account, card, wallet or routing number, phone number or recipient name. That data lives in the system and ONLY the system sends it when the customer picks a method.
+    - ESPECIALLY FORBIDDEN: mixing up two different methods, or claiming that a bank account and a phone-based wallet share the same number. A bank transfer uses an account number, never a phone number. Mixing them gives the customer FALSE information.
+    - If the customer asks "¿cuáles son los métodos?", "¿cómo pago?", "¿qué opciones tengo?" or similar, present ONLY the injected methods, ALWAYS in this format (one per line, one emoji per line, NEVER in a horizontal line):
+
+        Puedes elegir tu método de pago entre las siguientes opciones:
+
+        • *MÉTODO 1* 🤳🏼
+        • *MÉTODO 2* 📲
+
+        ¿Cuál prefieres?
+
+      FORBIDDEN: a linear format like "Tenemos X, Y y Z" — always the bulleted version. And NEVER add numbers, accounts or names there (the system sends those).
+    - When the customer says a method keyword or one of its equivalents → the SYSTEM AUTOMATICALLY sends the correct details. You do NOT repeat them and do NOT anticipate them.
+    - If the customer insists you give the details without having chosen a method ("dame los datos", "envíame todo"), ask them warmly to first tell you which of the available options they prefer, naming ONLY the injected ones. 😊
+
+    DISTRUST OR FEAR OF BEING SCAMMED — LISTEN AND REASSURE (never ignore it):
+    If the customer shows fear or distrust, or says they were scammed before ("no confío en pagar primero", "¿no será estafa?", "tengo miedo"), do NOT just send payment details as if they hadn't spoken. FIRST acknowledge their feeling with empathy, THEN reassure honestly and briefly:
+      - It's a one-time payment with INSTANT delivery: the moment the receipt is verified, the material arrives automatically right here in the chat.
+      - The recipient name on the receipt is verifiable and always the same registered name — a sign of a real, traceable account, not an anonymous scam.
+      - We are a real store with many satisfied customers.
+    Then gently invite them to continue whenever they feel comfortable. Be warm and patient — winning their trust is more important than rushing the sale.
+
+    === PRECIO Y CIERRE ===
+    PRICE QUESTIONS — RESPOND DIRECTLY, DO NOT DEFLECT:
+    When the customer asks the price directly ("¿cuánto cuesta?", "¿precio?", "¿valor?", "¿cuánto?", etc.), respond with the effective price + brief value reinforcement (pago único, acceso de por vida) + a persuasive CTA that mentions the bonus PDFs. Do NOT deflect with "tell me your payment method first" — that frustrates the customer.
+
+    Rotate between these CTA variants so it doesn't feel repetitive (pick a different one each time):
+
+      Variant A:
+        "¡Claro! 😊 La inversión es de *{{PRECIO_COMPLETO}}* — un único pago con acceso de por vida, sin mensualidades.
+        ¿Quieres que te indique cómo adquirirlo y llevarte los bonos de obsequio en PDF? 🎁"
+
+      Variant B:
+        "¡Sí! 😊 Es *{{PRECIO_COMPLETO}}*, un solo pago sin mensualidades — acceso permanente al material.
+        ¿Quieres que te oriente cómo proceder con tu pago para que te lleves estos regalos? 🎁"
+
+      Variant C:
+        "¡Por supuesto! 😊 Son *{{PRECIO_COMPLETO}}*, pago único con acceso de por vida.
+        ¿Quieres que te ayude con los métodos de pago para que puedas adquirirlo y recibir también los bonos de obsequio? 📚🎁"
+
+    Keep the response SHORT — do not dump the full intro content (modules, pages, etc.). Just price + brief value + CTA. The intro_data already has the full description.
+
+    WRITING FORMAT AND TONE:
+    - Always write the price with the {{PRECIO_COMPLETO}} wildcard, exactly as the system renders it for this customer (amount and currency). Never convert it, never rewrite it in another currency and never put it in all caps. (All-caps in image captions is intentional for visual emphasis, but your conversational text must be normal mixed case.)
+    - BOLD (*with asterisks*): use it ONLY to highlight what matters — the price, the course name, the payment method, specific keywords. Do NOT bold everything; if everything stands out, nothing does. 2-4 bolds per message is a good ceiling.
+    - EMOJIS — GLOBAL RULE PER RESPONSE, NOT PER LINE:
+      - Think of your full response as ONE single set, even if you split it with a double line break (
+
+    ) so it looks like several WhatsApp bubbles.
+      - Across the whole set: use ONE single friendly face (😊, 🙂, 😄...) — somewhere, not in every bubble. If you put it at the end of the body, do NOT repeat it in the CTA. If you saved it for the CTA, do NOT also put it in the body.
+      - Optionally add 1-2 thematic emojis related to the content (📚 for the material, 💳 for the payment method, 🎁 for a bonus, etc.). But TOTAL 2-3 emojis across the whole set, not per bubble.
+      - FORBIDDEN: repeating the same emoji in different bubbles of the same message (e.g. 😊 at the end of the body AND 😊 at the end of the CTA — it looks saturated and robotic).
+      - ALSO FORBIDDEN: saturated messages like "🎉📚✨💫🔥".
+
+    CLOSING / CALL-TO-ACTION (CTA) — MANDATORY IN EVERY RESPONSE:
+    - ALWAYS, without exception, end your messages with a soft closing question, separated by a line break. THIS INCLUDES short/one-line responses (e.g. the customer asks "¿cuánto cuesta?" and you answer "{{PRECIO_COMPLETO}}" — the CTA still goes below it). A response without a question leaves the conversation COLD and kills it.
+    - ROTATION — CRITICAL, DO NOT SKIP IT: before choosing the CTA, REVIEW your last 2 responses in the history. Pick a variant DIFFERENT from those — never the same one twice in a row, ideally never the same one within 3 turns. The customer should feel variety, not mechanical insistence (e.g. if you already used "método de pago" → use "adquirirlo ahora" or "proceder").
+    - Do NOT hook the CTA to the most recent topic: if the customer asked about price, do NOT always close with "método de pago"; alternate.
+    - AVOID the word "compra" in the CTA — prefer "adquirirlo", "obtenerlo", "proceder", "método de pago". It sounds more natural. FORBIDDEN the exact text "¿Te gustaría proceder con la compra?" — it sounds formal and invasive.
+    - Do NOT attach a face emoji to the CTA if you already used one in the body — the global emoji rule wins.
+
+      VARIANTS FOR THE FIRST 1-2 TURNS (before payment methods have been discussed):
+        - "¿Te gustaría que te indique cómo adquirirlo?"
+        - "¿Deseas las instrucciones para adquirirlo?"
+        - "¿Deseas saber los métodos de pago?"
+        - "¿Te gustaría que te ayude con el método de pago?"
+        - "¿Te gustaría que te indique cómo proceder?"
+        - "¿Quieres que te explique cómo obtenerlo?"
+        - "¿Te muestro los pasos para tenerlo?"
+        - "¿Deseas avanzar con tu acceso y adquirirlo?"
+        - "¿Te interesa que te guíe para conseguirlo?"
+        - "¿Te gustaría asegurar tu acceso hoy?"
+
+      VARIANTS FOR LATER TURNS (once the process has been discussed at least once):
+        - "¿Te animaste a adquirirlo?"
+        - "¿Te gustaría adquirirlo ahora?"
+        - "¿Ya decidiste adquirirlo y poder ayudarte?"
+        - "¿Te gustaría que te ayude a obtenerlo ahora?"
+        - "¿Te gustaría que te ayude con el método de pago?"
+        - "¿Te gustaría que te indique cómo proceder?"
+        - "¿Deseas asegurar y adquirirlo hoy mismo?"
+        - "¿Deseas avanzar al siguiente paso?"
+        - "¿Te ayudo a tenerlo ahora?"
+        - "¿Quieres que avancemos juntos con tu acceso?"
+        - "¿Te animas a obtenerlo hoy?"
+
+    ONLY EXCEPTION where the CTA does NOT go — WAITING FOR THE RECEIPT: once the customer has chosen a payment method and the system sent them the payment details (in THIS turn OR any PREVIOUS turn), we are waiting for their receipt. From that point on, do NOT add sales CTAs. If the customer writes something while we wait, answer briefly and, at most, close with a natural line like "Quedo pendiente de tu comprobante para darte acceso 😊" — NEVER re-ask them to send the receipt as a question (it was already requested in the payment details).
+
+    GRAMMAR — FORBIDDEN CONSTRUCTION: never phrase a request as "¿Te gustaría que me envíes…?" / "¿Te gustaría que me [verbo]…?" — it is grammatically wrong and confusing (the CUSTOMER is the one who sends/does the action, not you). If you ever need to ask them to send something, say it directly and correctly, e.g. "¿Me compartes la foto de tu comprobante?".
+
+    === POSTVENTA ===
+    EMAIL CAPTURE — RIGHT AFTER PAGO APROBADO:
+
+    The system asks for the customer's email to send the link permanently. The email is OPTIONAL. If the customer responds without sending it (gracias, ok, listo, etc.), you may remind them GENTLY *once* that the email helps to receive the link permanently.
+
+    If the customer refuses, says they don't have email, asks for the link by WhatsApp, or shows any resistance:
+    - Accept gracefully, do NOT insist
+    - Tell them the link is ALREADY available in the PAGO APROBADO message above — they just need to tap on it
+    - Suggest they save or print the material for safety
+    - Close with a warm farewell
+
+    NEVER ask for the email more than once. ONE polite reminder is the maximum.
+
+    Example response (tuteo peruano) when the customer prefers WhatsApp or refuses email:
+      "¡No te preocupes! 😊 Tu enlace ya está en el mensaje de *PAGO APROBADO* de arriba — solo tócalo desde ahí para descargar el material. Guárdalo o envíatelo a tu correo cuando puedas, para tenerlo siempre seguro 📥"
+
+    POST-SALE BEHAVIOR (once the customer has received the "PAGO APROBADO" links):
+
+      If the customer asks things like:
+      - "¿Cómo lo descargo?"
+      - "¿Cómo lo abro / imprimo?"
+      - "¿Es de por vida?"
+      - "¿Eso es todo?"
+      - "¿Me llegó al correo?"
+      - ...or other questions about using the material
+
+      Your response must ALWAYS redirect them to the *carpetas de Drive que ya recibiste* in the PAGO APROBADO message (the material you already received). Speak as if you know the content, WITHOUT inventing specific steps. Phrases like:
+
+        "Todo está en las carpetas de Drive que te envié: abres el enlace, descargas tu material, y las imprimes las veces que quieras 😊🖨️📔"
+
+        "Sí, el acceso es de por vida — el material queda siempre en tu Drive 💾"
+
+      RULES:
+      - Do NOT invent specific steps (e.g. do NOT say "haz clic en X, luego en Y").
+      - Do NOT repeat the download links (they already have them in the chat and by email).
+      - Your sales role is OVER. Be warm but do NOT invite more questions — the bot is for selling, not for extended post-sale support.
+      - NEVER say phrases that open the door to more questions, such as:
+        - "Si tienes alguna otra pregunta, aquí estoy"
+        - "Cualquier duda, no dudes en escribirme"
+        - "Estoy para ayudarte en lo que necesites"
+        - "Cualquier cosa avísame"
+      - Instead, close with a warm farewell that does NOT invite continuation:
+        - "¡Recuerda que el acceso a tu material está mas arribita luego de tu pago, Les deseo lo mejor practicando con su peque o la persona que más quiera!."
+        - "!Recuerda que tu enlace de descargar está justo después de la foto de tu comprobante. Que tenga un buen progreso practicando con la persona que tanto quiere! 🤗"
+        - "Recuerde que su enlace de descarga está luego de su foto de pago, ¡Éxitos en esta nueva etapa en el aprendizaje con este bonito material! 🤗✨"
+      - If the customer reports a REAL technical problem (can't download, link won't open, didn't receive the material) → that IS a real emergency, invoke notify_admin_emergency. For everything else, briefly redirect to the Drive folders and close.
+
+    PAYMENT IMAGE NOT VISIBLE / RECEIPT REJECTED — handle empathetically:
+
+    When the system rejects a payment image (you receive REJECTED from the tool, OR the tool says "no se recibió ninguna imagen del comprobante"), the customer is often confused and frustrated. They DID send something — the bot just couldn't process it. Common causes:
+      - WhatsApp compressed the image so much it's unreadable
+      - Image + text arrived in the wrong order and the system misses the image
+      - The vision model couldn't extract the amount or recipient clearly
+      - The image got lost in transit
+
+    DO NOT robotically repeat "no puedo ver la imagen" every time. That feels like mockery (a real customer literally said "se está burlando de mí" because of this).
+
+    HOW TO HANDLE (vary your response — never the same robotic message twice):
+
+    ATTEMPT 1 (first time the receipt fails):
+      Warmly acknowledge the customer's effort. Ask specifically:
+        "Mil disculpas, parece que la imagen no me llegó del todo bien 🙏. ¿Podrías enviármela DE NUEVO como una foto fresca (mejor sacarla otra vez con la cámara, no reenviarla), y sin texto en el mismo mensaje? Así me aseguro de captarla correctamente 😊"
+
+    ATTEMPT 2 (second failure):
+      Apologize sincerely. Suggest a different angle/method:
+        "De verdad lo lamento mucho 🙏. A veces WhatsApp comprime las imágenes y se vuelven difíciles de leer. ¿Podrías intentar tomarle una foto a la pantalla de tu Yape con el celular (no captura de pantalla), o también podrías escribirme el monto y el nombre del receptor mientras lo intentamos de nuevo?"
+
+    ATTEMPT 3 OR MORE — ESCALATE TO HUMAN ADVISOR:
+      When the tool response includes `failed_attempts_count >= 3` (or you notice you've rejected this customer 3+ times), STOP retrying mechanically. Acknowledge the frustration and offer the human advisor IMMEDIATELY:
+
+        "De verdad lamento mucho la complicación 🙏. Voy a pasarte directamente con un asesor humano para que te ayude a registrar tu pago sin más vueltas. Por favor, comunicate al *📲 +51935286681* — te van a atender en breve para resolver esto."
+
+      THEN invoke notify_admin_emergency with reason "Cliente tuvo 3+ rechazos de comprobante, necesita atención humana inmediata". After that, DO NOT keep rejecting more images — let the human handle it.
+
+    FORBIDDEN at any attempt count:
+      - ❌ Repeating the SAME literal rejection text twice (varies it, vary it, vary it)
+      - ❌ Implying the customer is lying ("¿seguro que enviaste la imagen?") — they did, the system failed
+      - ❌ Asking for "comprobante" when they ALREADY sent one — acknowledge they tried
+      - ❌ Being cold or robotic when the customer is clearly frustrated
+  fichas:
+    - id: coc_pe_inicio
+      tipo: inicio
+      x: 60
+      y: 0
+      titulo: Tubería doble oferta
+      pais: PE
+    - id: coc_pe_intro
+      tipo: mensaje
+      x: 390
+      y: 0
+      titulo: Intro
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+              🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+              ✅ Menú semanal listo para 4 semanas.
+              ✅ Lista de compras por semana.
+              ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+
+              *Bonitos complementos para empezar hoy* 🤗
+          delay_after_sec: 5
+        - type: video
+          drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+          caption_variants:
+            - Mira cómo se ve el material por dentro 👀 (video referencial)
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Tenemos *dos opciones* para ti 👇
+
+              1️⃣ *{{PRODUCTO_BASE}}*
+              ❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*
+
+              2️⃣ *{{PRODUCTO_FULL}}*
+              ❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*
+
+              *¿Cuál prefieres?* 😊
+          delay_after_sec: 4
+          buttons:
+            - id: coc_pe_b_basico
+              label: Opción 1
+              action: send_steps
+              steps: []
+            - id: coc_pe_b_pack
+              label: Opción 2 (el pack)
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+        - ptcocina_pack
+    - id: coc_pe_cobro_b
+      tipo: cobro
+      x: 720
+      y: 0
+      titulo: Cobro · RECETARIO DIETAS FIT
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_dietas
+        acepta:
+          - ptcocina_pack
+        metodos: true
+    - id: coc_pe_seg_b
+      tipo: seguimientos
+      x: 720
+      y: 330
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: coc_pe_seg_b_1
+          minutos: 2
+          variantes:
+            - id: coc_pe_seg_b_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *SEGUIMIENTO 1* Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_pe_seg_b_1b
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: coc_pe_seg_b_2
+          minutos: 5
+          variantes:
+            - id: coc_pe_seg_b_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *SEGUIMIENTO 2* Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: coc_pe_cobro_p
+      tipo: cobro
+      x: 720
+      y: 660
+      titulo: Cobro · PACK DIETAS FIT + POSTRES
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_pack
+        acepta:
+          - ptcocina_dietas
+        metodos: true
+    - id: coc_pe_seg_p
+      tipo: seguimientos
+      x: 720
+      y: 990
+      titulo: Seguimientos · PACK DIETAS FIT + POSTRES
+      presenta:
+        - ptcocina_pack
+      seguimientos:
+        - id: coc_pe_seg_p_1
+          minutos: 2
+          variantes:
+            - id: coc_pe_seg_p_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *SEGUIMIENTO 1* Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_pe_seg_p_1b
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *SEGUIMIENTO 1* ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: coc_pe_seg_p_2
+          minutos: 5
+          variantes:
+            - id: coc_pe_seg_p_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      *SEGUIMIENTO 2* Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: coc_pe_ent_b
+      tipo: entregar
+      x: 1050
+      y: 0
+      titulo: Entrega · RECETARIO DIETAS FIT
+      producto_id: ptcocina_dietas
+    - id: coc_pe_ent_p
+      tipo: entregar
+      x: 1050
+      y: 660
+      titulo: Entrega · PACK DIETAS FIT + POSTRES
+      producto_id: ptcocina_pack
+    - id: coc_pe_upgrade
+      tipo: mensaje
+      x: 3905
+      y: -913
+      titulo: Upgrade al pack
+      steps:
+        - type: text
+          body_variants:
+            - "🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?"
+          delay_after_sec: 4
+          buttons:
+            - id: coc_pe_up_si
+              label: Sí, completar
+              action: send_steps
+              steps: []
+            - id: coc_pe_up_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+        - ptcocina_pack
+      instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS el otro producto, y solo paga la diferencia.
+    - id: coc_pe_cobro_up
+      tipo: cobro
+      x: 4224
+      y: -946
+      titulo: Cobro · upgrade (diferencia)
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              ¡Genial! 🙌 Para completar a *{{PRODUCTO}}* solo pagas la diferencia: *{{PRECIO_COMPLETO}}*.
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 4
+      sin_pago_min: 60
+      cobro:
+        modo: producto
+        producto_id: ptcocina_pack
+        acepta:
+          - ptcocina_dietas
+        metodos: true
+        diferencia: true
+    - id: coc_pe_upsell1
+      tipo: mensaje
+      x: 1710
+      y: 0
+      titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+              ✅ Paso a paso con fotos.
+              ✅ Secretos de las abuelas para el punto exacto.
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: coc_pe_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: coc_pe_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_peruanas
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: coc_pe_cobro_u1
+      tipo: cobro
+      x: 1705
+      y: 418
+      titulo: Cobro · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_peruanas
+        metodos: true
+    - id: coc_pe_seg_u1
+      tipo: seguimientos
+      x: 1936
+      y: 792
+      titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+      presenta:
+        - ptcocina_peruanas
+      seguimientos:
+        - id: coc_pe_seg_u1_1
+          minutos: 2
+          variantes:
+            - id: coc_pe_seg_u1_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_pe_seg_u1_1b
+              nombre: Versión B
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: coc_pe_seg_u1_2
+          minutos: 5
+          variantes:
+            - id: coc_pe_seg_u1_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+            - id: v-mvtxg2i1-3h7
+              nombre: Versión A
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: coc_pe_ent_u1
+      tipo: entregar
+      x: 2079
+      y: 319
+      titulo: Entrega · COMIDAS PERUANAS CASERAS
+      producto_id: ptcocina_peruanas
+    - id: coc_pe_regalo
+      tipo: regalo
+      x: 2370
+      y: 0
+      titulo: Regalo
+    - id: coc_ec_inicio
+      tipo: inicio
+      x: 60
+      y: 1600
+      titulo: Tubería order bump
+      pais: EC
+    - id: coc_ec_intro
+      tipo: mensaje
+      x: 390
+      y: 1600
+      titulo: Intro
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+              🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+              ✅ Menú semanal listo para 4 semanas.
+              ✅ Lista de compras por semana.
+              ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+
+              *Bonitos complementos para empezar hoy* 🤗
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              🟣 *¿CÓMO ADQUIRIRLO?*
+
+              - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+              - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+              *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+          delay_after_sec: 4
+          buttons:
+            - id: coc_ec_b_pagar
+              label: Quiero pagar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+    - id: coc_ec_ob
+      tipo: intro_ob
+      x: 720
+      y: 1600
+      titulo: Order bump
+      presenta:
+        - ptcocina_dietas
+        - ptcocina_pack
+      variantes:
+        - id: coc_ec_ob_v1
+          nombre: Versión A
+          peso: 1
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *¡Espera!* Antes de pagar te cuento algo 👇
+
+                  Por solo *{{PRECIO_COMPLEMENTARIO}}* más puedes llevar *{{PRODUCTO_FULL}}* (en total *{{PRECIO_FULL}}*, antes ~{{PRECIO_ANTES_FULL}}~).
+
+                  ✅ TODO el RECETARIO DIETAS FIT (120 recetas y menú de 4 semanas).
+                  ✅ MÁS los 80 POSTRES SIN HORNO.
+                  ✅ Bonus: 20 postres fit para no romper la dieta.
+              delay_after_sec: 4
+            - type: text
+              body_variants:
+                - |-
+                  *¿Cuál prefieres?*
+
+                  1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                  2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+              delay_after_sec: 4
+              buttons:
+                - id: coc_ec_ob_basico
+                  label: Solo el básico
+                  action: send_steps
+                  steps: []
+                - id: coc_ec_ob_pack
+                  label: Quiero el pack
+                  action: send_steps
+                  steps: []
+    - id: coc_ec_cobro_b
+      tipo: cobro
+      x: 1050
+      y: 1600
+      titulo: Cobro · RECETARIO DIETAS FIT
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_dietas
+        acepta:
+          - ptcocina_pack
+        metodos: true
+    - id: coc_ec_seg_b
+      tipo: seguimientos
+      x: 1050
+      y: 1930
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: coc_ec_seg_b_1
+          minutos: 120
+          variantes:
+            - id: coc_ec_seg_b_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_ec_seg_b_1b
+              nombre: Versión B
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+        - id: coc_ec_seg_b_2
+          minutos: 600
+          variantes:
+            - id: coc_ec_seg_b_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+    - id: coc_ec_cobro_p
+      tipo: cobro
+      x: 1050
+      y: 2260
+      titulo: Cobro · PACK DIETAS FIT + POSTRES
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_pack
+        acepta:
+          - ptcocina_dietas
+        metodos: true
+    - id: coc_ec_seg_p
+      tipo: seguimientos
+      x: 1050
+      y: 2590
+      titulo: Seguimientos · PACK DIETAS FIT + POSTRES
+      presenta:
+        - ptcocina_pack
+      seguimientos:
+        - id: coc_ec_seg_p_1
+          minutos: 120
+          variantes:
+            - id: coc_ec_seg_p_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_ec_seg_p_1b
+              nombre: Versión B
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+        - id: coc_ec_seg_p_2
+          minutos: 600
+          variantes:
+            - id: coc_ec_seg_p_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+    - id: coc_ec_ent_b
+      tipo: entregar
+      x: 1380
+      y: 1600
+      titulo: Entrega · RECETARIO DIETAS FIT
+      producto_id: ptcocina_dietas
+    - id: coc_ec_ent_p
+      tipo: entregar
+      x: 1380
+      y: 2260
+      titulo: Entrega · PACK DIETAS FIT + POSTRES
+      producto_id: ptcocina_pack
+    - id: coc_ec_upsell1
+      tipo: mensaje
+      x: 1710
+      y: 1600
+      titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+              ✅ Paso a paso con fotos.
+              ✅ Secretos de las abuelas para el punto exacto.
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: coc_ec_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: coc_ec_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_peruanas
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: coc_ec_cobro_u1
+      tipo: cobro
+      x: 1710
+      y: 1930
+      titulo: Cobro · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_peruanas
+        metodos: true
+    - id: coc_ec_seg_u1
+      tipo: seguimientos
+      x: 1710
+      y: 2260
+      titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+      presenta:
+        - ptcocina_peruanas
+      seguimientos:
+        - id: coc_ec_seg_u1_1
+          minutos: 120
+          variantes:
+            - id: coc_ec_seg_u1_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_ec_seg_u1_1b
+              nombre: Versión B
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+        - id: coc_ec_seg_u1_2
+          minutos: 600
+          variantes:
+            - id: coc_ec_seg_u1_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+    - id: coc_ec_ent_u1
+      tipo: entregar
+      x: 2040
+      y: 1930
+      titulo: Entrega · COMIDAS PERUANAS CASERAS
+      producto_id: ptcocina_peruanas
+    - id: coc_ec_regalo
+      tipo: regalo
+      x: 2370
+      y: 1600
+      titulo: Regalo
+    - id: coc_ar_inicio
+      tipo: inicio
+      x: 60
+      y: 3200
+      titulo: Tubería lineal
+      pais: AR
+    - id: coc_ar_intro
+      tipo: mensaje
+      x: 390
+      y: 3200
+      titulo: Intro
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+              🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+              ✅ Menú semanal listo para 4 semanas.
+              ✅ Lista de compras por semana.
+              ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+
+              *Bonitos complementos para empezar hoy* 🤗
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              🟣 *¿CÓMO ADQUIRIRLO?*
+
+              - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+              - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+              *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+          delay_after_sec: 4
+          buttons:
+            - id: coc_ar_b_pagar
+              label: Quiero pagar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+    - id: coc_ar_cobro
+      tipo: cobro
+      x: 720
+      y: 3200
+      titulo: Cobro · RECETARIO DIETAS FIT
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_dietas
+        metodos: true
+    - id: coc_ar_seg_b
+      tipo: seguimientos
+      x: 720
+      y: 3530
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: coc_ar_seg_b_1
+          minutos: 2
+          variantes:
+            - id: coc_ar_seg_b_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_ar_seg_b_1b
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: coc_ar_seg_b_2
+          minutos: 5
+          variantes:
+            - id: coc_ar_seg_b_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: coc_ar_ent_b
+      tipo: entregar
+      x: 1050
+      y: 3200
+      titulo: Entrega · RECETARIO DIETAS FIT
+      por_correo: true
+      producto_id: ptcocina_dietas
+    - id: coc_ar_upsell1
+      tipo: mensaje
+      x: 1380
+      y: 3200
+      titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+              ✅ Paso a paso con fotos.
+              ✅ Secretos de las abuelas para el punto exacto.
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: coc_ar_u1_si
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: coc_ar_u1_no
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_peruanas
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: coc_ar_cobro_u1
+      tipo: cobro
+      x: 1380
+      y: 3530
+      titulo: Cobro · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_peruanas
+        metodos: true
+    - id: coc_ar_seg_u1
+      tipo: seguimientos
+      x: 1375
+      y: 3861
+      titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+      presenta:
+        - ptcocina_peruanas
+      seguimientos:
+        - id: coc_ar_seg_u1_1
+          minutos: 2
+          variantes:
+            - id: coc_ar_seg_u1_1a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: coc_ar_seg_u1_1b
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: coc_ar_seg_u1_2
+          minutos: 5
+          variantes:
+            - id: coc_ar_seg_u1_2a
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: coc_ar_ent_u1
+      tipo: entregar
+      x: 1710
+      y: 3530
+      titulo: Entrega · COMIDAS PERUANAS CASERAS
+      por_correo: true
+      producto_id: ptcocina_peruanas
+    - id: coc_ar_regalo
+      tipo: regalo
+      x: 2040
+      y: 3200
+      titulo: Regalo
+    - id: coc_otros
+      tipo: inicio
+      x: 60
+      y: 4400
+      titulo: Otros países
+    - id: coc_otros_msg
+      tipo: mensaje
+      x: 390
+      y: 4400
+      titulo: No vendemos aquí
+      steps:
+        - type: text
+          body_variants:
+            - ¡Hola! 😊 Gracias por escribirnos. Por ahora este material solo está disponible en Perú, Ecuador y Argentina. Un asesor revisará si podemos ayudarte 🙏
+          delay_after_sec: 4
+    - id: coc_otros_humano
+      tipo: humano
+      x: 720
+      y: 4400
+      titulo: Pasa a un asesor
+    - id: f-mvu306rc-l3ug5
+      tipo: mensaje
+      x: 286
+      y: -1529
+      titulo: Intro
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+              🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+              ✅ Menú semanal listo para 4 semanas.
+              ✅ Lista de compras por semana.
+              ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+
+              *Bonitos complementos para empezar hoy* 🤗
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              🟣 *¿CÓMO ADQUIRIRLO?*
+
+              - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+              - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+              *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+          delay_after_sec: 4
+          buttons:
+            - id: b-mvu306rd-lkh9e
+              label: Quiero pagar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+    - id: f-mvu306rd-p9mvs
+      tipo: cobro
+      x: 616
+      y: -1529
+      titulo: Cobro · RECETARIO DIETAS FIT
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_dietas
+    - id: f-mvu306rd-mri0e
+      tipo: seguimientos
+      x: 957
+      y: -1078
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: s-mvu306rd-k5mis
+          minutos: 2
+          variantes:
+            - id: v-mvu306rd-p48l9
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: v-mvu306rd-66brs
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvu306rd-f1xr5
+          minutos: 5
+          variantes:
+            - id: v-mvu306rd-p1xjy
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mvu306rd-ivoed
+      tipo: entregar
+      x: 946
+      y: -1529
+      titulo: Entrega · RECETARIO DIETAS FIT
+      por_correo: true
+      producto_id: ptcocina_dietas
+    - id: f-mvu306rd-g0c53
+      tipo: mensaje
+      x: 1276
+      y: -1529
+      titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+              ✅ Paso a paso con fotos.
+              ✅ Secretos de las abuelas para el punto exacto.
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: b-mvu306rd-xnc32
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: b-mvu306rd-zu7w8
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_peruanas
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: f-mvu306rd-kicgk
+      tipo: cobro
+      x: 1683
+      y: -1441
+      titulo: Cobro · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ¿Con qué método prefieres pagar? 👇
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - Así te paso los datos exactos para tu pago 😊
+          delay_after_sec: 4
+      cobro:
+        modo: producto
+        producto_id: ptcocina_peruanas
+        metodos: true
+    - id: f-mvu306rd-7dmlq
+      tipo: seguimientos
+      x: 2068
+      y: -1056
+      titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+      presenta:
+        - ptcocina_peruanas
+      seguimientos:
+        - id: s-mvu306rd-g0zxz
+          minutos: 2
+          variantes:
+            - id: v-mvu306rd-escfd
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: v-mvu306rd-nbued
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvu306rd-3m8e4
+          minutos: 5
+          variantes:
+            - id: v-mvu306rd-35h67
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mvu306rd-uf09r
+      tipo: entregar
+      x: 2145
+      y: -1276
+      titulo: Entrega · COMIDAS PERUANAS CASERAS
+      por_correo: true
+      producto_id: ptcocina_peruanas
+    - id: f-mvu306rd-uojjy
+      tipo: regalo
+      x: 2574
+      y: -1419
+      titulo: Regalo
+    - id: f-mvuo5fvc-y8ape
+      tipo: mensaje
+      x: 3993
+      y: -1595
+      titulo: Intro
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+              🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+          caption_variants:
+            - |-
+              Este es nuestro producto
+
+              *{{PRODUCTO_BASE}}* 📚
+
+              ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+              ✅ Menú semanal listo para 4 semanas.
+              ✅ Lista de compras por semana.
+              ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+              (Imagen referencial)
+          delay_after_sec: 5
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+              - 🎁 Guía de inicio rápido
+              - 🎁 Plantillas para imprimir
+              - 🎁 Acceso de por vida
+
+              *Bonitos complementos para empezar hoy* 🤗
+          delay_after_sec: 5
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+              ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+              🟣 *¿CÓMO ADQUIRIRLO?*
+
+              - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+              - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+              *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+          delay_after_sec: 4
+          buttons:
+            - id: b-mvuo5fvc-zksc9
+              label: Quiero pagar
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_dietas
+    - id: f-mvuo5fvc-uppvm
+      tipo: cobro
+      x: 4323
+      y: -1595
+      titulo: Cobro · RECETARIO DIETAS FIT
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ✅ Puedes adquirirlo con cualquiera de estos datos 😊👇
+
+              📲 *Yape:* {{CUENTA_YAPE}}
+              📲 *Plin:* {{CUENTA_PLIN}}
+              🏦 *BCP:* {{CUENTA_BCP}}
+              👨‍🏫 A nombre de: *{{NOMBRE_COMPLETO}}*
+
+              Cuando lo realices, envíame la foto de tu comprobante 🤳 y al instante te llega tu enlace de descarga.
+          delay_after_sec: 3
+      cobro:
+        modo: producto
+        producto_id: ptcocina_dietas
+    - id: f-mvuo5fvc-vhhf8
+      tipo: seguimientos
+      x: 4620
+      y: -1166
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: s-mvuo5fvc-6by3m
+          minutos: 2
+          variantes:
+            - id: v-mvuo5fvc-5sgd2
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: v-mvuo5fvc-oa4so
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvuo5fvc-wfwi1
+          minutos: 5
+          variantes:
+            - id: v-mvuo5fvc-60hc4
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mvuo5fvd-g5qsa
+      tipo: entregar
+      x: 4653
+      y: -1595
+      titulo: Entrega · RECETARIO DIETAS FIT
+      por_correo: true
+      producto_id: ptcocina_dietas
+    - id: f-mvuo5fvd-jrjam
+      tipo: mensaje
+      x: 4983
+      y: -1595
+      titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+              ✅ Paso a paso con fotos.
+              ✅ Secretos de las abuelas para el punto exacto.
+
+              *¿Lo agregas?*
+          delay_after_sec: 4
+          buttons:
+            - id: b-mvuo5fvd-3alhc
+              label: Sí, lo quiero
+              action: send_steps
+              steps: []
+            - id: b-mvuo5fvd-fb63u
+              label: No, gracias
+              action: send_steps
+              steps: []
+      presenta:
+        - ptcocina_peruanas
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: f-mvuo5fvd-o7kn6
+      tipo: cobro
+      x: 5390
+      y: -1507
+      titulo: Cobro · COMIDAS PERUANAS CASERAS
+      steps:
+        - type: text
+          body_variants:
+            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+          delay_after_sec: 3
+        - type: text
+          body_variants:
+            - |-
+              ✅ Puedes adquirirlo con cualquiera de estos datos 😊👇
+
+              📲 *Yape:* {{CUENTA_YAPE}}
+              📲 *Plin:* {{CUENTA_PLIN}}
+              🏦 *BCP:* {{CUENTA_BCP}}
+              👨‍🏫 A nombre de: *{{NOMBRE_COMPLETO}}*
+
+              Cuando lo realices, envíame la foto de tu comprobante 🤳 y al instante te llega tu enlace de descarga.
+          delay_after_sec: 3
+      cobro:
+        modo: producto
+        producto_id: ptcocina_peruanas
+        metodos: true
+    - id: f-mvuo5fvd-sdvm4
+      tipo: seguimientos
+      x: 5775
+      y: -1122
+      titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+      presenta:
+        - ptcocina_peruanas
+      seguimientos:
+        - id: s-mvuo5fvd-xo1js
+          minutos: 2
+          variantes:
+            - id: v-mvuo5fvd-5fae2
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: v-mvuo5fvd-bx6j2
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvuo5fvd-a0r2y
+          minutos: 5
+          variantes:
+            - id: v-mvuo5fvd-pk0lj
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mvuo5fvd-4bbz1
+      tipo: entregar
+      x: 5852
+      y: -1342
+      titulo: Entrega · COMIDAS PERUANAS CASERAS
+      por_correo: true
+      producto_id: ptcocina_peruanas
+    - id: f-mvuo5fvd-clvu8
+      tipo: regalo
+      x: 6281
+      y: -1485
+      titulo: Regalo
+  cables:
+    - id: c2
+      de: coc_pe_intro
+      salida: btn:coc_pe_b_basico
+      a: coc_pe_cobro_b
+    - id: c3
+      de: coc_pe_cobro_b
+      salida: sin_pago
+      a: coc_pe_seg_b
+    - id: c4
+      de: coc_pe_intro
+      salida: btn:coc_pe_b_pack
+      a: coc_pe_cobro_p
+    - id: c5
+      de: coc_pe_cobro_p
+      salida: sin_pago
+      a: coc_pe_seg_p
+    - id: c6
+      de: coc_pe_cobro_b
+      salida: pagado
+      a: coc_pe_ent_b
+    - id: c7
+      de: coc_pe_cobro_b
+      salida: prod:ptcocina_pack
+      a: coc_pe_ent_p
+    - id: c8
+      de: coc_pe_cobro_p
+      salida: pagado
+      a: coc_pe_ent_p
+    - id: c9
+      de: coc_pe_cobro_p
+      salida: prod:ptcocina_dietas
+      a: coc_pe_ent_b
+    - id: c12
+      de: coc_pe_cobro_up
+      salida: pagado
+      a: coc_pe_ent_p
+    - id: c14
+      de: coc_pe_ent_p
+      salida: siguiente
+      a: coc_pe_upsell1
+    - id: c15
+      de: coc_pe_upsell1
+      salida: btn:coc_pe_u1_si
+      a: coc_pe_cobro_u1
+    - id: c17
+      de: coc_pe_cobro_u1
+      salida: pagado
+      a: coc_pe_ent_u1
+    - id: c18
+      de: coc_pe_upsell1
+      salida: btn:coc_pe_u1_no
+      a: coc_pe_regalo
+    - id: c19
+      de: coc_pe_ent_u1
+      salida: siguiente
+      a: coc_pe_regalo
+    - id: c20
+      de: coc_ec_inicio
+      salida: siguiente
+      a: coc_ec_intro
+    - id: c21
+      de: coc_ec_intro
+      salida: btn:coc_ec_b_pagar
+      a: coc_ec_ob
+    - id: c22
+      de: coc_ec_ob
+      salida: btn:coc_ec_ob_basico
+      a: coc_ec_cobro_b
+    - id: c23
+      de: coc_ec_cobro_b
+      salida: sin_pago
+      a: coc_ec_seg_b
+    - id: c24
+      de: coc_ec_ob
+      salida: btn:coc_ec_ob_pack
+      a: coc_ec_cobro_p
+    - id: c25
+      de: coc_ec_cobro_p
+      salida: sin_pago
+      a: coc_ec_seg_p
+    - id: c26
+      de: coc_ec_cobro_b
+      salida: pagado
+      a: coc_ec_ent_b
+    - id: c27
+      de: coc_ec_cobro_b
+      salida: prod:ptcocina_pack
+      a: coc_ec_ent_p
+    - id: c28
+      de: coc_ec_cobro_p
+      salida: pagado
+      a: coc_ec_ent_p
+    - id: c29
+      de: coc_ec_cobro_p
+      salida: prod:ptcocina_dietas
+      a: coc_ec_ent_b
+    - id: c30
+      de: coc_ec_ent_b
+      salida: siguiente
+      a: coc_ec_upsell1
+    - id: c31
+      de: coc_ec_ent_p
+      salida: siguiente
+      a: coc_ec_upsell1
+    - id: c32
+      de: coc_ec_upsell1
+      salida: btn:coc_ec_u1_si
+      a: coc_ec_cobro_u1
+    - id: c33
+      de: coc_ec_cobro_u1
+      salida: sin_pago
+      a: coc_ec_seg_u1
+    - id: c34
+      de: coc_ec_cobro_u1
+      salida: pagado
+      a: coc_ec_ent_u1
+    - id: c35
+      de: coc_ec_upsell1
+      salida: btn:coc_ec_u1_no
+      a: coc_ec_regalo
+    - id: c36
+      de: coc_ec_ent_u1
+      salida: siguiente
+      a: coc_ec_regalo
+    - id: c37
+      de: coc_ar_inicio
+      salida: siguiente
+      a: coc_ar_intro
+    - id: c38
+      de: coc_ar_intro
+      salida: btn:coc_ar_b_pagar
+      a: coc_ar_cobro
+    - id: c39
+      de: coc_ar_cobro
+      salida: sin_pago
+      a: coc_ar_seg_b
+    - id: c40
+      de: coc_ar_cobro
+      salida: pagado
+      a: coc_ar_ent_b
+    - id: c41
+      de: coc_ar_ent_b
+      salida: siguiente
+      a: coc_ar_upsell1
+    - id: c42
+      de: coc_ar_upsell1
+      salida: btn:coc_ar_u1_si
+      a: coc_ar_cobro_u1
+    - id: c43
+      de: coc_ar_cobro_u1
+      salida: sin_pago
+      a: coc_ar_seg_u1
+    - id: c44
+      de: coc_ar_cobro_u1
+      salida: pagado
+      a: coc_ar_ent_u1
+    - id: c45
+      de: coc_ar_upsell1
+      salida: btn:coc_ar_u1_no
+      a: coc_ar_regalo
+    - id: c46
+      de: coc_ar_ent_u1
+      salida: siguiente
+      a: coc_ar_regalo
+    - id: c47
+      de: coc_otros
+      salida: siguiente
+      a: coc_otros_msg
+    - id: c48
+      de: coc_otros_msg
+      salida: siguiente
+      a: coc_otros_humano
+    - id: c_coc_pe_upsell1_sin_respuesta
+      de: coc_pe_upsell1
+      salida: sin_respuesta
+      a: coc_pe_regalo
+    - id: c_coc_pe_seg_u1_fin
+      de: coc_pe_seg_u1
+      salida: fin
+      a: coc_pe_regalo
+    - id: c_coc_ec_upsell1_sin_respuesta
+      de: coc_ec_upsell1
+      salida: sin_respuesta
+      a: coc_ec_regalo
+    - id: c_coc_ec_seg_u1_fin
+      de: coc_ec_seg_u1
+      salida: fin
+      a: coc_ec_regalo
+    - id: c_coc_ar_upsell1_sin_respuesta
+      de: coc_ar_upsell1
+      salida: sin_respuesta
+      a: coc_ar_regalo
+    - id: c_coc_ar_seg_u1_fin
+      de: coc_ar_seg_u1
+      salida: fin
+      a: coc_ar_regalo
+    - id: coc_pe_intro_sinresp_sig
+      de: coc_pe_intro
+      salida: siguiente
+      a: coc_pe_seg_b
+    - id: coc_ec_intro_sinresp_sig
+      de: coc_ec_intro
+      salida: siguiente
+      a: coc_ec_seg_b
+    - id: coc_ec_ob_sinresp_sig
+      de: coc_ec_ob
+      salida: siguiente
+      a: coc_ec_seg_b
+    - id: coc_ar_intro_sinresp_sig
+      de: coc_ar_intro
+      salida: siguiente
+      a: coc_ar_seg_b
+    - id: c-mvu1ko5b-xvn
+      de: coc_pe_ent_b
+      salida: siguiente
+      a: coc_pe_upsell1
+    - id: c-mvu306rd-2x07b
+      de: f-mvu306rc-l3ug5
+      salida: btn:b-mvu306rd-lkh9e
+      a: f-mvu306rd-p9mvs
+    - id: c-mvu306rd-alvsw
+      de: f-mvu306rd-p9mvs
+      salida: sin_pago
+      a: f-mvu306rd-mri0e
+    - id: c-mvu306rd-a9td6
+      de: f-mvu306rd-p9mvs
+      salida: pagado
+      a: f-mvu306rd-ivoed
+    - id: c-mvu306rd-12xwi
+      de: f-mvu306rd-ivoed
+      salida: siguiente
+      a: f-mvu306rd-g0c53
+    - id: c-mvu306rd-xlj7q
+      de: f-mvu306rd-g0c53
+      salida: btn:b-mvu306rd-xnc32
+      a: f-mvu306rd-kicgk
+    - id: c-mvu306rd-y8998
+      de: f-mvu306rd-kicgk
+      salida: sin_pago
+      a: f-mvu306rd-7dmlq
+    - id: c-mvu306rd-ihi6i
+      de: f-mvu306rd-kicgk
+      salida: pagado
+      a: f-mvu306rd-uf09r
+    - id: c-mvu306rd-oibfh
+      de: f-mvu306rd-g0c53
+      salida: btn:b-mvu306rd-zu7w8
+      a: f-mvu306rd-uojjy
+    - id: c-mvu306rd-qjhfr
+      de: f-mvu306rd-uf09r
+      salida: siguiente
+      a: f-mvu306rd-uojjy
+    - id: c-mvu306rd-2gtg1
+      de: f-mvu306rd-g0c53
+      salida: sin_respuesta
+      a: f-mvu306rd-uojjy
+    - id: c-mvu306rd-78hmo
+      de: f-mvu306rd-7dmlq
+      salida: fin
+      a: f-mvu306rd-uojjy
+    - id: c-mvu306rd-7ozkp
+      de: f-mvu306rc-l3ug5
+      salida: siguiente
+      a: f-mvu306rd-mri0e
+    - id: c-mvuo5fvd-dzt7n
+      de: f-mvuo5fvc-y8ape
+      salida: btn:b-mvuo5fvc-zksc9
+      a: f-mvuo5fvc-uppvm
+    - id: c-mvuo5fvd-a3zky
+      de: f-mvuo5fvc-uppvm
+      salida: sin_pago
+      a: f-mvuo5fvc-vhhf8
+    - id: c-mvuo5fvd-zdxmi
+      de: f-mvuo5fvc-uppvm
+      salida: pagado
+      a: f-mvuo5fvd-g5qsa
+    - id: c-mvuo5fvd-f3e82
+      de: f-mvuo5fvd-g5qsa
+      salida: siguiente
+      a: f-mvuo5fvd-jrjam
+    - id: c-mvuo5fvd-kmwbi
+      de: f-mvuo5fvd-jrjam
+      salida: btn:b-mvuo5fvd-3alhc
+      a: f-mvuo5fvd-o7kn6
+    - id: c-mvuo5fvd-s4n7u
+      de: f-mvuo5fvd-o7kn6
+      salida: sin_pago
+      a: f-mvuo5fvd-sdvm4
+    - id: c-mvuo5fvd-3y47z
+      de: f-mvuo5fvd-o7kn6
+      salida: pagado
+      a: f-mvuo5fvd-4bbz1
+    - id: c-mvuo5fvd-npxyb
+      de: f-mvuo5fvd-jrjam
+      salida: btn:b-mvuo5fvd-fb63u
+      a: f-mvuo5fvd-clvu8
+    - id: c-mvuo5fvd-pxz6f
+      de: f-mvuo5fvd-4bbz1
+      salida: siguiente
+      a: f-mvuo5fvd-clvu8
+    - id: c-mvuo5fvd-x3osi
+      de: f-mvuo5fvd-jrjam
+      salida: sin_respuesta
+      a: f-mvuo5fvd-clvu8
+    - id: c-mvuo5fvd-s2djt
+      de: f-mvuo5fvd-sdvm4
+      salida: fin
+      a: f-mvuo5fvd-clvu8
+    - id: c-mvuo5fvd-atl0c
+      de: f-mvuo5fvc-y8ape
+      salida: siguiente
+      a: f-mvuo5fvc-vhhf8
+    - id: c-mvup328t-vbl
+      de: coc_pe_inicio
+      salida: siguiente
+      a: f-mvuo5fvc-y8ape
+  cajas:
+    - id: manta-coc_pe_inicio
+      x: 20
+      y: -70
+      ancho: 2640
+      alto: 1350
+      titulo: ""
+      inicio: coc_pe_inicio
+    - id: manta-coc_ec_inicio
+      x: 20
+      y: 1530
+      ancho: 2640
+      alto: 1350
+      titulo: ""
+      inicio: coc_ec_inicio
+    - id: manta-coc_ar_inicio
+      x: 20
+      y: 3130
+      ancho: 2310
+      alto: 1020
+      titulo: ""
+      inicio: coc_ar_inicio
+    - id: manta-coc_otros
+      x: 20
+      y: 4330
+      ancho: 1280
+      alto: 620
+      titulo: ""
+      inicio: coc_otros
+    - id: caja-pe-datos-de-frente-mvuo5fvd
+      x: 3960
+      y: -1661
+      ancho: 2618
+      alto: 833
+      titulo: "🇵🇪 PERÚ · lineal con los datos de frente (SIN CONECTAR: conéctala tú al Inicio"
