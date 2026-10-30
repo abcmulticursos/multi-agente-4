@@ -36957,14 +36957,34 @@ function EditorEmojiInput({
 type FraseDelTexto = { inicio: number; fin: number; texto: string };
 function frasesDelTexto(texto: string): FraseDelTexto[] {
   const out: FraseDelTexto[] = [];
-  const re = /[^\n.!?…]+(?:[.!?…]+|$)/g;
-  for (const m of texto.matchAll(re)) {
-    const crudo = m[0];
-    const sinBlancosIzq = crudo.length - crudo.trimStart().length;
-    const t = crudo.trim();
-    if (!/[\p{L}\d]/u.test(t)) continue;
-    const inicio = (m.index ?? 0) + sinBlancosIzq;
-    out.push({ inicio, fin: inicio + t.length, texto: t });
+  // DÓNDE TERMINA UNA FRASE (31/10/2026, él: «no todos los saltos de línea los reconoce»): en cada salto de línea
+  // (también una línea SIN punto final), o en . ! ? … seguidos de un espacio y algo que no sea un número («S/. 10»
+  // no se corta). Los cierres de formato que van pegados (* _ ~ » ") se quedan con su frase: «*¿Sientes…?*».
+  const cortes: number[] = [];
+  for (let i = 0; i < texto.length; i++) {
+    if (texto[i] === "\n") {
+      cortes.push(i);
+      continue;
+    }
+    if (!/[.!?…]/.test(texto[i])) continue;
+    let j = i;
+    while (j + 1 < texto.length && /[.!?…]/.test(texto[j + 1])) j++;
+    while (j + 1 < texto.length && /[*_~»"')]/.test(texto[j + 1])) j++;
+    const resto = texto.slice(j + 1);
+    if (resto === "" || /^[ \t]+(?!\d)\S/.test(resto) || resto.startsWith("\n")) {
+      cortes.push(j + 1);
+      i = j;
+    }
+  }
+  let desde = 0;
+  for (const corte of [...cortes, texto.length]) {
+    const trozo = texto.slice(desde, corte);
+    const t = trozo.trim();
+    if (/[\p{L}\d]/u.test(t)) {
+      const inicio = desde + (trozo.length - trozo.trimStart().length);
+      out.push({ inicio, fin: inicio + t.length, texto: t });
+    }
+    desde = corte;
   }
   return out;
 }
@@ -36983,6 +37003,8 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   const [pidiendo, setPidiendo] = useState(false);
   const [error, setError] = useState("");
   const [costo, setCosto] = useState<string>("");
+  // CUÁNTAS VARIANTES POR FRASE (31/10/2026, él: «falta elegir cuántas variantes uno quiere, por ejemplo 2, 3…»).
+  const [cuantas, setCuantas] = useState(3);
   // Por frase: sus variantes (editables) y cuáles van.
   const [propuestas, setPropuestas] = useState<Record<number, Array<{ texto: string; va: boolean }>>>({});
   useEffect(() => {
@@ -37001,7 +37023,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
       const r = await fetch("/api/spintax", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texto, partes: indices.map((i) => frases[i].texto) }),
+        body: JSON.stringify({ texto, partes: indices.map((i) => frases[i].texto), cuantas }),
       });
       const d = (await r.json()) as { variantes?: string[][]; error?: string; costo?: number | null; tokens?: number };
       if (!r.ok) throw new Error(d.error ?? "No se pudo.");
@@ -37093,6 +37115,18 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
           <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-relleno">
             Cancelar
           </button>
+          {!hayPropuestas && (
+            <label className="flex items-center gap-1 text-xs text-tinta" title="Cuántas variantes nuevas por frase (además de la original)">
+              Variantes por frase
+              <select value={cuantas} onChange={(e) => setCuantas(Number(e.target.value))} className="rounded border border-borde bg-tarjeta px-1 py-1 text-xs">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {hayPropuestas ? (
             <>
               <button type="button" onClick={() => setPropuestas({})} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-relleno">

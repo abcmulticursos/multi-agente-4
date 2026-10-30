@@ -41,7 +41,7 @@ function sirve(original: string, variante: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { texto?: unknown; partes?: unknown };
+  let body: { texto?: unknown; partes?: unknown; cuantas?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -50,6 +50,9 @@ export async function POST(req: NextRequest) {
   const texto = typeof body.texto === "string" ? body.texto.slice(0, 6000) : "";
   const partes = Array.isArray(body.partes) ? body.partes.filter((p): p is string => typeof p === "string" && !!p.trim()).slice(0, 12) : [];
   if (partes.length === 0) return NextResponse.json({ error: "Marca al menos una frase." }, { status: 400 });
+  // Cuántas quiere por frase (1 a 5; 3 si no dice). Se piden 2 más: los candados descartan algunas.
+  const cuantas = Math.min(5, Math.max(1, Math.round(Number(body.cuantas) || 3)));
+  const pedidas = cuantas + 2;
   const modelo = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
   try {
     const r = await getClient().chat.completions.create({
@@ -61,11 +64,11 @@ export async function POST(req: NextRequest) {
           role: "system",
           content:
             "Eres redactor de mensajes de WhatsApp para ventas, en español latino natural. Te paso el MENSAJE completo (solo de contexto) y unas FRASES de él. " +
-            "Para CADA frase escribe 3 variantes que digan exactamente lo mismo con otras palabras, sin perder la riqueza ni la intención del mensaje: mismo tono, " +
+            `Para CADA frase escribe ${pedidas} variantes DISTINTAS entre sí que digan exactamente lo mismo con otras palabras, sin perder la riqueza ni la intención del mensaje: mismo tono, ` +
             "largo parecido, el mismo formato de WhatsApp (*negrita*, _cursiva_) en UNA sola línea, y la MISMA cantidad de emojis (iguales o equivalentes; si la frase no tiene, ninguno). " +
             "NO cambies nunca: los comodines {{…}}, los números, precios y montos, los enlaces, ni las palabras en MAYÚSCULAS (son nombres de productos). " +
             "No uses los caracteres { } |. " +
-            'Responde SOLO con JSON, sin nada más: {"frases": [["variante 1","variante 2","variante 3"], ...]} en el mismo orden que las frases.',
+            'Responde SOLO con JSON, sin nada más: {"frases": [["variante 1","variante 2", ...], ...]} en el mismo orden que las frases.',
         },
         {
           role: "user",
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
     const listas = Array.isArray((dichas as { frases?: unknown })?.frases) ? ((dichas as { frases: unknown[] }).frases as unknown[]) : [];
     const variantes = partes.map((p, i) => {
       const suyas = Array.isArray(listas[i]) ? (listas[i] as unknown[]).filter((x): x is string => typeof x === "string") : [];
-      return [...new Set(suyas.map((x) => x.trim()))].filter((v) => sirve(p, v)).slice(0, 4);
+      return [...new Set(suyas.map((x) => x.trim()))].filter((v) => sirve(p, v)).slice(0, cuantas);
     });
     const uso = r.usage as { prompt_tokens?: number; completion_tokens?: number; cost?: number } | undefined;
     console.log(`[spintax] ${partes.length} frase(s) → ${variantes.map((v) => v.length).join("/")} variantes · ${uso?.prompt_tokens ?? "?"}+${uso?.completion_tokens ?? "?"} tokens${typeof uso?.cost === "number" ? ` · $${uso.cost.toFixed(5)}` : ""}`);
