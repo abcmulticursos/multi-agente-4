@@ -994,7 +994,17 @@ const AFIRMA_SUELTO = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`
 // acababa de ofrecer). La lista de arriba no lo tenía. En vez de sumarle palabras, se usa además la regla del
 // automático para lo mismo (`soloEstaDeAcuerdo`, config.ts): el mensaje no dice NADA MÁS que estar de acuerdo
 // (cerrada por defecto: «esta bien pero que trae» o «ya no» dicen que no).
-const AFIRMA = { test: (s: string) => AFIRMA_SUELTO.test(s) || soloEstaDeAcuerdo(s) };
+// «AH OK SI» TAMBIÉN (31/10/2026, su conversación 153): en el regalo la IA le ofreció COMIDAS PERUANAS («¿te
+// indico cómo adquirirlo?»), contestó «ah ok si» y la «ah» lo dejó sin sí: la IA repreguntó dos veces y al
+// final le pidió el método. Las interjecciones sueltas («ah», «oh», «eh», «mmm») no dicen nada: se quitan antes
+// de mirar. Solas no son un sí (queda vacío), y «ah no» o «mmm no sé» siguen siendo lo que eran.
+const INTERJECCION = /^(a+h+|o+h+|e+h+|u+h+|h?m{2,})$/;
+const AFIRMA = {
+  test: (s: string) => {
+    const sinInterjecciones = s.trim().split(/\s+/).filter((w) => w && !INTERJECCION.test(w)).join(" ");
+    return !!sinInterjecciones && (AFIRMA_SUELTO.test(sinInterjecciones) || soloEstaDeAcuerdo(sinInterjecciones));
+  },
+};
 
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 /**
