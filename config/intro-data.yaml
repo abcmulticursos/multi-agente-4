@@ -126890,6 +126890,277 @@ tableros:
           x: 2574
           y: -1419
           titulo: Regalo
+        - id: f-mvuo5fvc-y8ape
+          tipo: mensaje
+          x: 2900
+          y: -1529
+          titulo: Intro
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  *{¡Hola! 😊 Te saluda Sofía|¡Hola! 😊 Soy Sofía|¡Hola! 😊 Mi nombre es Sofía}* y soy parte del equipo 🙋🏻‍♀️
+
+                  🔴 Veo que te llamó la atención *{{PRODUCTO_BASE}}*
+              delay_after_sec: 4
+            - type: image
+              drive_url: https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link
+              caption_variants:
+                - |-
+                  Este es nuestro producto
+
+                  *{{PRODUCTO_BASE}}* 📚
+
+                  ✅ 120 recetas bajas en calorías, con porciones y calorías de cada plato.
+                  ✅ Menú semanal listo para 4 semanas.
+                  ✅ Lista de compras por semana.
+                  ✅ Tabla de reemplazos (qué cambiar si no consigues un ingrediente).
+
+                  (Imagen referencial)
+              delay_after_sec: 5
+            - type: image
+              drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+              caption_variants:
+                - |-
+                  *{Además|Y además|Como extra} recibe {GRATIS|DE REGALO|SIN COSTO} estos bonos* ‼️ 😱👇🏼
+
+                  - 🎁 Guía de inicio rápido
+                  - 🎁 Plantillas para imprimir
+                  - 🎁 Acceso de por vida
+
+                  *Bonitos complementos para empezar hoy* 🤗
+              delay_after_sec: 5
+            - type: text
+              body_variants:
+                - |-
+                  ❌*(antes)* ~{{PRECIO_ANTES_BASE}}~
+                  ✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️
+
+                  🟣 *¿CÓMO ADQUIRIRLO?*
+
+                  - *1).-* 💵 Realiza un único pago de *{{PRECIO_BASE}}*
+                  - *2).-* 📲 Envíanos tu comprobante de pago 🤳
+
+                  *¡Y recibe tu enlace de descarga + bonos en segundos!* 😊⚡
+              delay_after_sec: 4
+              buttons:
+                - id: b-mvuo5fvc-zksc9
+                  label: Quiero pagar
+                  action: send_steps
+                  steps: []
+          presenta:
+            - ptcocina_dietas
+        - id: f-mvuo5fvc-uppvm
+          tipo: cobro
+          x: 3230
+          y: -1529
+          titulo: Cobro · RECETARIO DIETAS FIT
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ✅ Puedes adquirirlo con cualquiera de estos datos 😊👇
+
+                  📲 *Yape:* {{CUENTA_YAPE}}
+                  📲 *Plin:* {{CUENTA_PLIN}}
+                  🏦 *BCP:* {{CUENTA_BCP}}
+                  👨‍🏫 A nombre de: *{{NOMBRE_COMPLETO}}*
+
+                  Cuando lo realices, envíame la foto de tu comprobante 🤳 y al instante te llega tu enlace de descarga.
+              delay_after_sec: 3
+          cobro:
+            modo: producto
+            producto_id: ptcocina_dietas
+        - id: f-mvuo5fvc-vhhf8
+          tipo: seguimientos
+          x: 3527
+          y: -1100
+          titulo: Seguimientos · RECETARIO DIETAS FIT
+          presenta:
+            - ptcocina_dietas
+          seguimientos:
+            - id: s-mvuo5fvc-6by3m
+              minutos: 2
+              variantes:
+                - id: v-mvuo5fvc-5sgd2
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                - id: v-mvuo5fvc-oa4so
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvuo5fvc-wfwi1
+              minutos: 5
+              variantes:
+                - id: v-mvuo5fvc-60hc4
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvuo5fvd-g5qsa
+          tipo: entregar
+          x: 3560
+          y: -1529
+          titulo: Entrega · RECETARIO DIETAS FIT
+          por_correo: true
+          producto_id: ptcocina_dietas
+        - id: f-mvuo5fvd-jrjam
+          tipo: mensaje
+          x: 3890
+          y: -1529
+          titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
+          steps:
+            - type: text
+              body_variants:
+                - |-
+                  🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+                  Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+                  ✅ 60 platos peruanos caseros: ceviche, lomo saltado, ají de gallina, causa y más.
+                  ✅ Paso a paso con fotos.
+                  ✅ Secretos de las abuelas para el punto exacto.
+
+                  *¿Lo agregas?*
+              delay_after_sec: 4
+              buttons:
+                - id: b-mvuo5fvd-3alhc
+                  label: Sí, lo quiero
+                  action: send_steps
+                  steps: []
+                - id: b-mvuo5fvd-fb63u
+                  label: No, gracias
+                  action: send_steps
+                  steps: []
+          presenta:
+            - ptcocina_peruanas
+          instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+          sin_respuesta_min: 3
+          espera_min: 2
+        - id: f-mvuo5fvd-o7kn6
+          tipo: cobro
+          x: 4297
+          y: -1441
+          titulo: Cobro · COMIDAS PERUANAS CASERAS
+          steps:
+            - type: text
+              body_variants:
+                - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+              delay_after_sec: 3
+            - type: text
+              body_variants:
+                - |-
+                  ✅ Puedes adquirirlo con cualquiera de estos datos 😊👇
+
+                  📲 *Yape:* {{CUENTA_YAPE}}
+                  📲 *Plin:* {{CUENTA_PLIN}}
+                  🏦 *BCP:* {{CUENTA_BCP}}
+                  👨‍🏫 A nombre de: *{{NOMBRE_COMPLETO}}*
+
+                  Cuando lo realices, envíame la foto de tu comprobante 🤳 y al instante te llega tu enlace de descarga.
+              delay_after_sec: 3
+          cobro:
+            modo: producto
+            producto_id: ptcocina_peruanas
+            metodos: true
+        - id: f-mvuo5fvd-sdvm4
+          tipo: seguimientos
+          x: 4682
+          y: -1056
+          titulo: Seguimientos · COMIDAS PERUANAS CASERAS
+          presenta:
+            - ptcocina_peruanas
+          seguimientos:
+            - id: s-mvuo5fvd-xo1js
+              minutos: 2
+              variantes:
+                - id: v-mvuo5fvd-5fae2
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                          Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                      delay_after_sec: 4
+                - id: v-mvuo5fvd-bx6j2
+                  nombre: Versión B
+                  peso: 0
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                          ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                      delay_after_sec: 4
+              ignora_silencio: true
+              ignora_tardio: true
+            - id: s-mvuo5fvd-a0r2y
+              minutos: 5
+              variantes:
+                - id: v-mvuo5fvd-pk0lj
+                  nombre: Versión A
+                  peso: 1
+                  steps:
+                    - type: text
+                      body_variants:
+                        - |-
+                          Paso rapidito por aquí ✨
+
+                          Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                          Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                      delay_after_sec: 4
+              activa_oferta: true
+              ignora_silencio: true
+              ignora_tardio: true
+        - id: f-mvuo5fvd-4bbz1
+          tipo: entregar
+          x: 4759
+          y: -1276
+          titulo: Entrega · COMIDAS PERUANAS CASERAS
+          por_correo: true
+          producto_id: ptcocina_peruanas
+        - id: f-mvuo5fvd-clvu8
+          tipo: regalo
+          x: 5188
+          y: -1419
+          titulo: Regalo
       cables:
         - id: c2
           de: coc_pe_intro
@@ -127159,6 +127430,54 @@ tableros:
           de: coc_pe_inicio
           salida: siguiente
           a: f-mvu306rc-l3ug5
+        - id: c-mvuo5fvd-dzt7n
+          de: f-mvuo5fvc-y8ape
+          a: f-mvuo5fvc-uppvm
+          salida: btn:b-mvuo5fvc-zksc9
+        - id: c-mvuo5fvd-a3zky
+          de: f-mvuo5fvc-uppvm
+          a: f-mvuo5fvc-vhhf8
+          salida: sin_pago
+        - id: c-mvuo5fvd-zdxmi
+          de: f-mvuo5fvc-uppvm
+          a: f-mvuo5fvd-g5qsa
+          salida: pagado
+        - id: c-mvuo5fvd-f3e82
+          de: f-mvuo5fvd-g5qsa
+          a: f-mvuo5fvd-jrjam
+          salida: siguiente
+        - id: c-mvuo5fvd-kmwbi
+          de: f-mvuo5fvd-jrjam
+          a: f-mvuo5fvd-o7kn6
+          salida: btn:b-mvuo5fvd-3alhc
+        - id: c-mvuo5fvd-s4n7u
+          de: f-mvuo5fvd-o7kn6
+          a: f-mvuo5fvd-sdvm4
+          salida: sin_pago
+        - id: c-mvuo5fvd-3y47z
+          de: f-mvuo5fvd-o7kn6
+          a: f-mvuo5fvd-4bbz1
+          salida: pagado
+        - id: c-mvuo5fvd-npxyb
+          de: f-mvuo5fvd-jrjam
+          a: f-mvuo5fvd-clvu8
+          salida: btn:b-mvuo5fvd-fb63u
+        - id: c-mvuo5fvd-pxz6f
+          de: f-mvuo5fvd-4bbz1
+          a: f-mvuo5fvd-clvu8
+          salida: siguiente
+        - id: c-mvuo5fvd-x3osi
+          de: f-mvuo5fvd-jrjam
+          a: f-mvuo5fvd-clvu8
+          salida: sin_respuesta
+        - id: c-mvuo5fvd-s2djt
+          de: f-mvuo5fvd-sdvm4
+          a: f-mvuo5fvd-clvu8
+          salida: fin
+        - id: c-mvuo5fvd-atl0c
+          de: f-mvuo5fvc-y8ape
+          a: f-mvuo5fvc-vhhf8
+          salida: siguiente
       cajas:
         - id: manta-coc_pe_inicio
           x: 20
@@ -127188,6 +127507,12 @@ tableros:
           alto: 620
           titulo: ""
           inicio: coc_otros
+        - id: caja-pe-datos-de-frente-mvuo5fvd
+          x: 2860
+          y: -1599
+          ancho: 2618
+          alto: 833
+          titulo: "🇵🇪 PERÚ · lineal con los datos de frente (SIN CONECTAR: conéctala tú al Inicio de Perú)"
   tienda_tninos:
     whatsapp:
       encendido: true

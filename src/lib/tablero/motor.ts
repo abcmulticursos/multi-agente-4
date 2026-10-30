@@ -4181,7 +4181,12 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       const { cuando, sinSilencio } = cuandoSaleElSeguimiento(fresca, siguiente, proximo, desde);
       programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: proximo, token }, cuando, sinSilencio);
     } else {
-      const espera = Math.max(seg.minutos - (segs[idx - 1]?.minutos ?? 0), 60);
+      // «TERMINARON SIN RESPUESTA», CON SUS TIEMPOS (30/10/2026). Antes había aquí un mínimo ESCONDIDO de 60 min
+      // (copiado del automático el 25/10) que no se veía en ninguna ficha: con sus seguimientos a 2 y 5 min y el
+      // Regalo a 3 min, el regalo le salía una hora después (su conversación «HO»). Él: «¿por qué tiene que
+      // esperar 60 minutos si está configurado para que salga en 3?». Ahora: lo mismo que hay entre sus dos
+      // últimos seguimientos (con uno solo, sus minutos), y nunca menos de 1 min.
+      const espera = Math.max(seg.minutos - (segs[idx - 1]?.minutos ?? 0), 1);
       programar(fresca, ACCION_SEGUIMIENTO, { ficha, idx: segs.length, token }, ahora() + espera * 60);
     }
   }
