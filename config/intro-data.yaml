@@ -121909,6 +121909,7 @@ tiendas:
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
+    foto: /avatares/avatar-01.png
     por_pais:
       PE:
         titular: Melissa Mamani
@@ -121919,6 +121920,7 @@ cobradores:
           bcp: "5039485093411111"
   - id: cobra_mupawqae
     nombre: Carlos Quimi
+    foto: /avatares/avatar-11.png
     por_pais:
       EC:
         titular: Carlos Quimi
@@ -121930,6 +121932,7 @@ cobradores:
         nombre_completo: Carlos Quimi
   - id: cobra_mupr2sfs
     nombre: Franko Robles
+    foto: /avatares/avatar-46.png
     por_pais:
       AR:
         titular: Franko Robles
@@ -121939,6 +121942,7 @@ cobradores:
         nombre_completo: Franko robles
   - id: cobra_murah2f0
     nombre: Alberto Salinas
+    foto: /avatares/avatar-28.png
     por_pais:
       PE:
         titular: Alberto Salinas
