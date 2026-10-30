@@ -31205,10 +31205,12 @@ function PantallaDelTablero({
               }
               if (!vacioEnEsteCanal(cfg.tableros?.[tiendaId]?.[canal]) && !window.confirm(`El tablero de ${canal === "messenger" ? "Messenger" : "Instagram"} ya tiene fichas. ¿Reemplazarlo por una copia del de WhatsApp?`))
                 return;
-              guardar({ ...JSON.parse(JSON.stringify(deWhatsApp)), encendido: false });
+              // IGUAL QUE EL DE WHATSAPP, TAMBIÉN ENCENDIDO (31/10/2026): «quisiera que llegue igualito… yo importo y
+              // listo… solo en casos excepcionales lo desconectaría». Antes nacía apagado.
+              guardar({ ...JSON.parse(JSON.stringify(deWhatsApp)), encendido: deWhatsApp?.encendido === true });
             }}
             className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
-            title="Copia fichas, burbujas, botones y cables del tablero de WhatsApp. Luego lo cambias sin tocar el de WhatsApp. Nace apagado."
+            title="Copia el tablero de WhatsApp tal cual: fichas, burbujas, botones, cables, y encendido o apagado como esté. Luego lo cambias sin tocar el de WhatsApp."
           >
             ⧉ Clonar desde WhatsApp
           </button>
