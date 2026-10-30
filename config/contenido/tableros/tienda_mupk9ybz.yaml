@@ -1055,6 +1055,47 @@ whatsapp:
               ▫️ *BANCO DEL BARRIO:* 📲
               ▫️ *Mi vecino:* 🧾
           delay_after_sec: 6
+    - id: f-mvvg2ytw-1u2w7
+      tipo: mensaje
+      x: 1749
+      y: 2673
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🌟 Antes de Compartirte tu método de pago te quiero comentar algo que quizas te guste: 😊
+
+              Tenemos un KIT PREESCOLAR! con muchas actividades para niños de 2 a 6 años. 📚👶🏻
+
+              ✅ Super Completo Con todo lo que ves en la Imagen! 🤗👆🏼
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔴 *Si deseas Puedes Adquirir 1 o los 2 juntos o por separado!*  😊
+              __________
+
+              1️⃣ *PACK 2 EN 1 - (Los 2 Kits juntos 📚+📚) 👉🏼 $ 4.5 Dólares*
+
+              💡 *AGREGANDO $ 1.5 Dólares MÁS* que el Grafismo Fonético te llevas en total:
+
+              🅰️) *EL KIT DE GRAFISMO FONETICO* 📔
+              🅱️) *➕ EL KIT PREESCOLAR* 📗
+              Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
+              __________
+
+              2️⃣ *Pero si deseas solo el KIT DE GRAFISMO FONETICO*  📚 solamente por *$ 3 Dólares*. 😊💵
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              🟢 *PACK 2 EN 1* - (Los 2 Kits juntos 📚+📚) 👉🏼 *$ 4.5 Dólares*
+
+              🟠 *SOLO GRAFISMO FONETICO* 👉🏼 *$ 3 Dólares*
+          delay_after_sec: 6
   cables:
     - id: c-mvveb856-3
       de: inicio-mvveb83v-1
@@ -1120,6 +1161,10 @@ whatsapp:
       de: f-mvvfyvy5-34lw
       salida: siguiente
       a: f-mvvfznys-u8svs
+    - id: c-mvvg3zqx-zm8
+      de: f-mvvfznys-u8svs
+      salida: siguiente
+      a: f-mvvg2ytw-1u2w7
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
