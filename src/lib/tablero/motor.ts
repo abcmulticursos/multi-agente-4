@@ -63,6 +63,7 @@ import {
   type WorkflowConfig,
   getPaymentMethods,
   getPaymentMethodsOfCountry,
+  soloEstaDeAcuerdo,
 } from "@/lib/workflow/config";
 import {
   AVISO_DE_ACTUALIZACION_POR_DEFECTO,
@@ -987,7 +988,13 @@ const QUIERE_PAGAR =
 const SI_SUELTO =
   "si+|sip|claro|dale|ok|okey|okay|oki|de una|va|vale|bueno|listo|por supuesto|perfecto|ya|aja|simon|me interesa|si me interesa|si quiero|si deseo|si por favor|claro que si|obvio";
 const RELLENO = "por favor|porfa|gracias|tambien|pues|ps|nomas|no mas|entonces|amiga|amigo|hermano|seño";
-const AFIRMA = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`);
+const AFIRMA_SUELTO = new RegExp(`^(${SI_SUELTO})( (${RELLENO}|${SI_SUELTO}))*$`);
+// «OK ESTA BIEN» TAMBIÉN ES SÍ (30/10/2026, sus conversaciones 146, 147 y 148): a «¿te indico cómo adquirirlo?»
+// contestó «ok esta bien» y no salieron los datos (en el regalo, aceptó el regalo en vez del upsell que la IA
+// acababa de ofrecer). La lista de arriba no lo tenía. En vez de sumarle palabras, se usa además la regla del
+// automático para lo mismo (`soloEstaDeAcuerdo`, config.ts): el mensaje no dice NADA MÁS que estar de acuerdo
+// (cerrada por defecto: «esta bien pero que trae» o «ya no» dicen que no).
+const AFIRMA = { test: (s: string) => AFIRMA_SUELTO.test(s) || soloEstaDeAcuerdo(s) };
 
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 /**
@@ -1042,7 +1049,7 @@ function esUnPedazo(normal: string): boolean {
 
 const INVITA_A_COMPRAR =
   // («cuál de LOS dos» también: la IA lo escribe así y el «sí» se iba a ella, que inventaba la elección.)
-  /(adquir|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres|te quedas|te gusta))/;
+  /(adquir|agregar?lo|lo agregas|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres|te quedas|te gusta))/;
 
 const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
@@ -1988,6 +1995,22 @@ async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQ
  * con su precio en la misma burbuja, terminando en pregunta (la misma regla que «sí a lo ofrecido» de
  * `comprarDespuesDeComprar`: lo estable del texto del bot es el precio). Si no hay uno claro, null.
  */
+/**
+ * LAS PALABRAS DE UN TEXTO PARA RECONOCER EL NOMBRE DE UN PRODUCTO, sin el final de género y número
+ * (30/10/2026, ronda 62 en la copia): la IA escribió «60 platos peruanos caseros» de *COMIDAS PERUANAS
+ * CASERAS* y no se reconoció («peruanos» ≠ «peruanas»), así que el «ok esta bien» se fue al regalo.
+ * «peruanas» y «peruanos» quedan en «peruan»; las palabras cortas, enteras.
+ */
+function palabrasParaReconocerUnNombre(s: string): Set<string> {
+  return new Set(
+    sinTildes(s)
+      .replace(/[^a-z0-9ñ\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w))
+      .map((w) => (w.length >= 6 ? w.replace(/(as|os|es|a|o|e|s)$/, "") : w))
+  );
+}
+
 function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string): LoQuePuedeComprar | null {
   const opciones = loQuePuedeComprar(convo, t, pais);
   if (opciones.length === 0) return null;
@@ -1997,7 +2020,7 @@ function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string):
   const turno: string[] = [];
   for (let i = antes.length - 1; i >= 0 && antes[i].role !== "user"; i--) turno.unshift(antes[i].content ?? "");
   if (!turno.some((b) => b.includes("?"))) return null;
-  const palabras = (s: string) => new Set(sinTildes(s).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w)));
+  const palabras = palabrasParaReconocerUnNombre;
   const conjuntos = opciones.map((o) => palabras(o.nombre));
   const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
   const conSuPrecio = (o: LoQuePuedeComprar, texto: string) => {
@@ -2074,7 +2097,7 @@ async function comprarDespuesDeComprar(
   const ultimaDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
   const respondeAMiPregunta = ultimaDelBot.startsWith(PREGUNTA_A_CUAL);
   // ¿Cuál nombra? Por una palabra que solo tiene una de las opciones.
-  const palabras = (s: string) => new Set(sinTildes(s).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter((w) => w.length >= 3 && !PALABRAS_COMUNES.has(w)));
+  const palabras = palabrasParaReconocerUnNombre;
   const conjuntos = opciones.map((o) => palabras(o.nombre));
   const dichas = palabras(contenido);
   const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));

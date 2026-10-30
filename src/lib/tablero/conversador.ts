@@ -398,6 +398,10 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
       : "",
     "- Si ya compró (postventa) o tiene un problema, no cierres con pregunta de venta.",
     "- Lo que ya compró no se le vuelve a ofrecer ni a cobrar.",
+    // ENVÍO FÍSICO, SOLO SI LO PIDE (30/10/2026, sus conversaciones 145 y 147): «me lo puede enviar por chalom» → la
+    // IA entendió «reenviarte lo que ya tienes». Hay clientes que creen que les llega a su casa por una agencia. Sin
+    // nombres de empresas: cada país tiene las suyas y el cliente las escribe como le sale.
+    "- ENVÍO FÍSICO: SOLO si el cliente pide recibirlo en su casa o mandarlo «por» una agencia, courier o empresa de envíos (aunque escriba mal su nombre: si después de «enviar por» / «mandar por» viene un nombre que no reconoces, es una empresa de envíos) y lo que vendes es digital (PDF, enlace o descarga), dile con amabilidad que es digital: no se envía nada físico, le llega aquí por WhatsApp (y por correo si lo quiere), listo para descargar e imprimir. Si no lo pregunta, NO lo menciones.",
   ]
     .filter(Boolean)
     .join("\n");
