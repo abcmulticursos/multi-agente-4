@@ -36948,6 +36948,176 @@ function EditorEmojiInput({
   );
 }
 
+/**
+ * EL SPINTAX DE LAS FRASES QUE ÉL ELIGE (31/10/2026). Él: «agarro el texto, me lo llevo a ChatGPT y le digo:
+ * spintaxea solo la primera frase y la última, sin romper la riqueza de lo que se quiere decir». Aquí: el texto
+ * partido en frases con su casilla (o el trozo que tenía seleccionado), la IA propone 3 variantes de cada una
+ * (`/api/spintax`, con sus candados), él marca las que quiere y recién al «Aplicar» queda `{original|v1|v2}`.
+ */
+type FraseDelTexto = { inicio: number; fin: number; texto: string };
+function frasesDelTexto(texto: string): FraseDelTexto[] {
+  const out: FraseDelTexto[] = [];
+  const re = /[^\n.!?…]+(?:[.!?…]+|$)/g;
+  for (const m of texto.matchAll(re)) {
+    const crudo = m[0];
+    const sinBlancosIzq = crudo.length - crudo.trimStart().length;
+    const t = crudo.trim();
+    if (!/[\p{L}\d]/u.test(t)) continue;
+    const inicio = (m.index ?? 0) + sinBlancosIzq;
+    out.push({ inicio, fin: inicio + t.length, texto: t });
+  }
+  return out;
+}
+const yaTieneSpintax = (s: string) => /\{[^{}|]*\|[^{}]*\}/.test(s.replace(/\{\{[^}]*\}\}/g, ""));
+
+function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: string; seleccion: [number, number] | null; onAplicar: (nuevo: string) => void; onCerrar: () => void }) {
+  const frases = useMemo<FraseDelTexto[]>(
+    () => (seleccion ? [{ inicio: seleccion[0], fin: seleccion[1], texto: texto.slice(seleccion[0], seleccion[1]) }] : frasesDelTexto(texto)),
+    [texto, seleccion]
+  );
+  // Por defecto, la primera y la última (lo que él hace casi siempre); con un trozo seleccionado, ése.
+  const [marcadas, setMarcadas] = useState<Set<number>>(() => {
+    const libres = frases.map((f, i) => (yaTieneSpintax(f.texto) ? -1 : i)).filter((i) => i >= 0);
+    return new Set(seleccion ? libres : [libres[0], libres[libres.length - 1]].filter((i) => i !== undefined));
+  });
+  const [pidiendo, setPidiendo] = useState(false);
+  const [error, setError] = useState("");
+  const [costo, setCosto] = useState<string>("");
+  // Por frase: sus variantes (editables) y cuáles van.
+  const [propuestas, setPropuestas] = useState<Record<number, Array<{ texto: string; va: boolean }>>>({});
+  useEffect(() => {
+    const alPulsar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCerrar();
+    };
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [onCerrar]);
+  const pedir = async () => {
+    const indices = [...marcadas].sort((a, b) => a - b);
+    if (indices.length === 0) return;
+    setPidiendo(true);
+    setError("");
+    try {
+      const r = await fetch("/api/spintax", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto, partes: indices.map((i) => frases[i].texto) }),
+      });
+      const d = (await r.json()) as { variantes?: string[][]; error?: string; costo?: number | null; tokens?: number };
+      if (!r.ok) throw new Error(d.error ?? "No se pudo.");
+      const nuevas: Record<number, Array<{ texto: string; va: boolean }>> = {};
+      indices.forEach((i, k) => (nuevas[i] = (d.variantes?.[k] ?? []).map((v) => ({ texto: v, va: true }))));
+      setPropuestas(nuevas);
+      setCosto(typeof d.costo === "number" ? `Costó $${d.costo.toFixed(4)}` : d.tokens ? `${d.tokens} tokens` : "");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo.");
+    } finally {
+      setPidiendo(false);
+    }
+  };
+  const aplicar = () => {
+    let nuevo = texto;
+    // De atrás hacia adelante: cambiar una frase no corre las posiciones de las de antes.
+    for (const i of Object.keys(propuestas).map(Number).sort((a, b) => b - a)) {
+      const elegidas = propuestas[i].filter((v) => v.va && v.texto.trim()).map((v) => v.texto.trim().replace(/[{}|]/g, ""));
+      if (elegidas.length === 0) continue;
+      const f = frases[i];
+      nuevo = nuevo.slice(0, f.inicio) + `{${[f.texto, ...elegidas].join("|")}}` + nuevo.slice(f.fin);
+    }
+    onAplicar(nuevo);
+  };
+  const hayPropuestas = Object.keys(propuestas).length > 0;
+  return (
+    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={onCerrar} data-ventana-del-tablero>
+      <div className="my-10 w-full max-w-2xl rounded-xl border border-borde bg-tarjeta p-4 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
+          <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
+            ✕
+          </button>
+        </div>
+        <p className="mb-3 text-[11px] text-tinta-suave">
+          La IA propone otras formas de decir lo mismo. No toca comodines, precios, números ni nombres en MAYÚSCULAS. Nada cambia hasta que pulses «Aplicar».
+        </p>
+        <div className="flex flex-col gap-2">
+          {frases.map((f, i) => {
+            const conSpintax = yaTieneSpintax(f.texto);
+            const suyas = propuestas[i];
+            return (
+              <div key={`${f.inicio}-${i}`} className={`rounded-lg border px-2 py-1.5 ${marcadas.has(i) ? "border-violet-400 bg-violet-50 oscuro:bg-violet-500/10" : "border-borde"}`}>
+                <label className={`flex items-start gap-2 text-xs ${conSpintax ? "opacity-50" : "cursor-pointer"}`} title={conSpintax ? "Esta frase ya tiene spintax" : undefined}>
+                  <input
+                    type="checkbox"
+                    disabled={conSpintax || hayPropuestas}
+                    checked={marcadas.has(i)}
+                    onChange={(e) => {
+                      const n = new Set(marcadas);
+                      if (e.target.checked) n.add(i);
+                      else n.delete(i);
+                      setMarcadas(n);
+                    }}
+                    className="mt-0.5"
+                  />
+                  <span className="whitespace-pre-wrap text-tinta">
+                    <span className="mr-1 text-[10px] font-bold text-tinta-suave">{seleccion ? "Trozo" : `${i + 1}ª`}</span>
+                    {f.texto}
+                    {conSpintax && <span className="ml-1 text-[10px] text-tinta-suave">(ya tiene spintax)</span>}
+                  </span>
+                </label>
+                {suyas && (
+                  <div className="mt-1.5 flex flex-col gap-1 pl-6">
+                    {suyas.length === 0 && <p className="text-[11px] text-amber-700">La IA no dio variantes que respeten los candados. Prueba otra vez.</p>}
+                    {suyas.map((v, k) => (
+                      <label key={k} className="flex items-center gap-2 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={v.va}
+                          onChange={(e) => setPropuestas({ ...propuestas, [i]: suyas.map((x, j) => (j === k ? { ...x, va: e.target.checked } : x)) })}
+                        />
+                        <input
+                          value={v.texto}
+                          onChange={(e) => setPropuestas({ ...propuestas, [i]: suyas.map((x, j) => (j === k ? { ...x, texto: e.target.value } : x)) })}
+                          className="min-w-0 flex-1 rounded border border-borde bg-tarjeta px-2 py-1 text-xs text-tinta"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {error && <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>}
+        <div className="mt-3 flex items-center justify-end gap-2">
+          {costo && <span className="mr-auto text-[11px] text-tinta-suave">{costo}</span>}
+          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-relleno">
+            Cancelar
+          </button>
+          {hayPropuestas ? (
+            <>
+              <button type="button" onClick={() => setPropuestas({})} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-relleno">
+                ↺ Otras frases
+              </button>
+              <button type="button" onClick={aplicar} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+                Aplicar
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled={pidiendo || marcadas.size === 0}
+              onClick={pedir}
+              className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-50"
+            >
+              {pidiendo ? "Pensando…" : `✨ Pedir variantes (${marcadas.size})`}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EditorEmojiTextarea({
   value,
   onChange,
@@ -36973,6 +37143,7 @@ function EditorEmojiTextarea({
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const placeholderOptions = useContext(PlaceholderOptionsContext);
   const [placeholderQuery, setPlaceholderQuery] = useState<string | null>(null);
+  const [spintax, setSpintax] = useState<{ seleccion: [number, number] | null } | null>(null);
   const hasPlaceholders = /\{\{\s*[A-Za-z0-9_]+\s*\}\}/.test(value);
   // UN NÚMERO DE CUENTA ESCRITO A MANO (23/10/2026): si cambias la cuenta o el usuario que cobra,
   // aquí no cambia. Se avisa y, si la cuenta tiene comodín, se cambia con un clic.
@@ -37039,7 +37210,39 @@ function EditorEmojiTextarea({
     <div className="block w-full min-w-0">
       <TextVariantToolbar onEmoji={insertAtCursor}>
         {sideActions}
+        {/* EL SPINTAX DE LO QUE ÉL ELIGE (31/10/2026): con un trozo seleccionado, ese trozo; si no, las frases. */}
+        {value.trim() && (
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              // Se toma la selección ANTES de que el botón se lleve el foco.
+              const ta = textareaRef.current;
+              const a = ta?.selectionStart ?? 0;
+              const b = ta?.selectionEnd ?? 0;
+              e.preventDefault();
+              // (Un trozo de varias líneas no puede ser un solo spintax —el bot lo lee por línea—: va por frases.)
+              const trozo = value.slice(a, b);
+              setSpintax({ seleccion: b > a && trozo.trim() && !trozo.includes("\n") ? [a, b] : null });
+            }}
+            title="Spintax con IA: marca las frases (o selecciona un trozo antes) y la IA propone otras formas de decirlo"
+            className="rounded border border-violet-300 bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 hover:bg-violet-100 oscuro:bg-violet-500/10 oscuro:text-violet-200"
+          >
+            🔀 Spintax
+          </button>
+        )}
       </TextVariantToolbar>
+      {spintax && (
+        <VentanaDeSpintax
+          texto={value}
+          seleccion={spintax.seleccion}
+          onCerrar={() => setSpintax(null)}
+          onAplicar={(nuevo) => {
+            onFocus?.();
+            onChange(nuevo);
+            setSpintax(null);
+          }}
+        />
+      )}
       <div className="relative block w-full min-w-0">
         <textarea
           ref={textareaRef}
