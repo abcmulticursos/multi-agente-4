@@ -274,6 +274,8 @@ const Contexto = createContext<{
   faltas: Map<string, Map<string, string>> | null;
   /** Por país: quién cobra ahí (su avatar y su nombre), para el Inicio. Solo pantalla. */
   quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
+  /** Clic en la cara del Inicio: abre los datos de la tienda (quién cobra por país). */
+  alTocarQuienCobra?: () => void;
 } | null>(null);
 
 /** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…). */
@@ -299,8 +301,14 @@ function QuienCobraEnElInicio({ pais }: { pais?: string }) {
   const deLaGaleria = foto.startsWith("/avatares/");
   return (
     <div
-      className="pointer-events-auto absolute -right-6 -top-5 flex flex-col items-center"
-      title={`Cobra aquí: ${q.nombre}${q.porDefecto ? " (por defecto: los Datos para pago del país)" : ""}.\nSe cambia en Mis tiendas → Quién cobra.`}
+      role="button"
+      tabIndex={0}
+      className="nodrag pointer-events-auto absolute -right-6 -top-5 flex cursor-pointer flex-col items-center"
+      title={`Cobra aquí: ${q.nombre}${q.porDefecto ? " (por defecto: los Datos para pago del país)" : ""}.\nClic: cambiar quién cobra en cada país.`}
+      onClick={(e) => {
+        e.stopPropagation();
+        ctx?.alTocarQuienCobra?.();
+      }}
     >
       {foto && !roto ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -1169,9 +1177,12 @@ export default function LienzoDelTablero({
   numeros,
   onFichaTocada,
   quienCobra,
+  alTocarQuienCobra,
 }: {
   /** Por país: quién cobra ahí, para mostrar su avatar en el Inicio (29/10/2026). Solo pantalla. */
   quienCobra?: Record<string, { foto?: string; nombre: string; porDefecto: boolean }>;
+  /** Clic en esa cara: abrir los datos de la tienda (quién cobra por país), sin salir del tablero. */
+  alTocarQuienCobra?: () => void;
   /** Al tocar una ficha: para poner la bandera en el país de su manta (27/10/2026). */
   onFichaTocada?: (id: string) => void;
   tablero: TableroEnElEditor;
@@ -1218,6 +1229,8 @@ export default function LienzoDelTablero({
   const t = TEMA[tema];
 
   // Estables (no cambian en cada redibujo): así el contexto de las fichas tampoco.
+  const alTocarQuienCobraVivo = useRef(alTocarQuienCobra);
+  alTocarQuienCobraVivo.current = alTocarQuienCobra;
   const alCambiar = useRef(onCambiar);
   alCambiar.current = onCambiar;
   const cambiar = useCallback((n: TableroEnElEditor) => alCambiar.current(n), []);
@@ -1558,6 +1571,7 @@ export default function LienzoDelTablero({
       setVerEntrantes,
       faltas: faltasPorFicha,
       quienCobra,
+      alTocarQuienCobra: () => alTocarQuienCobraVivo.current?.(),
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -576,6 +576,16 @@ function leeTiendas(
         // QUIÉN COBRA en esta tienda, por id del almacén de usuarios. Vacío =
         // cobra la cuenta del país, que es lo de siempre.
         ...(str(t?.cobrador).trim() ? { cobrador: str(t.cobrador).trim() } : {}),
+        // QUIÉN COBRA EN CADA PAÍS (29/10/2026): país → id del almacén de usuarios. Solo los elegidos.
+        ...(() => {
+          const crudo = t?.cobradores_por_pais && typeof t.cobradores_por_pais === "object" ? (t.cobradores_por_pais as Record<string, unknown>) : {};
+          const por = Object.fromEntries(
+            Object.entries(crudo)
+              .map(([pais, id]) => [String(pais).trim().toUpperCase(), str(id).trim()] as const)
+              .filter(([pais, id]) => pais && id)
+          );
+          return Object.keys(por).length ? { cobradores_por_pais: por } : {};
+        })(),
         // SU CONJUNTO DE DATOS de Meta —él lo llama «el pixel»—, donde se marcan las
         // compras de esta tienda. Vacío = el elegido en Meta Connect, que es lo de
         // siempre. Lo pidió el 01/10/2026: «para marcar la compra se necesita waba,

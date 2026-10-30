@@ -25,6 +25,7 @@ import {
   aplicarPase,
   avisosDeNumeros,
   buscarNumerosAMano,
+  paisesQueVenden,
   claveDeCuenta,
   comodinDeCuenta,
   conCuentaDelPais,
@@ -2341,6 +2342,8 @@ interface TiendaEditor {
   /** QUIÉN COBRA aquí, por id del almacén de usuarios. Vacío = la cuenta del
    *  país, como siempre. Ver `CobradoresDelProyecto`. */
   cobrador?: string;
+  /** QUIÉN COBRA EN CADA PAÍS (29/10/2026): país → id del usuario. Un país sin elegir usa `cobrador`. */
+  cobradores_por_pais?: Record<string, string>;
   /** SU CONJUNTO DE DATOS de Meta —él lo llama «el pixel»—, donde se marcan las
    *  compras de esta tienda. Vacío = el de Meta Connect. Ver `Tienda.pixel`. */
   pixel?: string;
@@ -31135,6 +31138,18 @@ function PantallaDelTablero({
             ))}
           </select>
         )}
+        {/* LA TIENDA CON UN CLIC (29/10/2026). Él: «necesito que en el modo pizarra se pueda entrar a esa tienda
+            con un click, no quiero ensuciar la pantalla». Abre «Datos de esta tienda» (la del ☰) encima. */}
+        {!esWorkflow && tienda && (
+          <button
+            type="button"
+            onClick={() => setVentanaDeHerramienta("tienda")}
+            title="Datos de esta tienda: número, página, pixel, quién cobra en cada país…"
+            className="rounded-md border border-borde bg-relleno px-1.5 py-1 text-xs hover:bg-neutral-100 oscuro:hover:bg-white/10"
+          >
+            ⚙
+          </button>
+        )}
         <span className="text-xs font-bold">{esWorkflow ? "▶▶ Workflow" : "🧩 Tablero"}</span>
         {/* EL BUSCADOR, EN LA BARRA como en la pizarra: las que coinciden se marcan y lo demás queda tenue. */}
         <input
@@ -31312,6 +31327,7 @@ function PantallaDelTablero({
           nombres={nombres}
           paisesDisponibles={paises}
           quienCobra={quienCobraPorPais}
+          alTocarQuienCobra={tienda ? () => setVentanaDeHerramienta("tienda") : undefined}
           onCambiar={guardar}
           onAbrir={(fid, burbuja) => {
             const f = tablero.fichas.find((x) => x.id === fid);
@@ -33656,11 +33672,12 @@ function QuienCobraEnElPais({ cfg, tienda, pais }: { cfg: FullConfig; tienda: Ti
 }
 
 /** Quién cobra en ese país, leído como el bot (`elCobroDelPais`). Lo usan la ventana y la tarjeta. */
-function quienCobraEn(cfg: FullConfig, tienda: Pick<TiendaEditor, "cobrador"> | null | undefined, pais: string) {
+function quienCobraEn(cfg: FullConfig, tienda: Pick<TiendaEditor, "cobrador" | "cobradores_por_pais"> | null | undefined, pais: string) {
   const limpio = (v: unknown) => String(v ?? "").trim();
   const k = pais as CountryCode;
   const perfil = cfg.modality_payment_profiles?.[activeModality(cfg)]?.[k] ?? cfg.payment_profiles_by_country?.[k];
-  const idDelCobrador = limpio(tienda?.cobrador);
+  // El de ese país si lo hay (29/10/2026), si no el de toda la tienda: la regla del bot (`idDelCobradorEn`).
+  const idDelCobrador = limpio(tienda?.cobradores_por_pais?.[String(pais).toUpperCase()]) || limpio(tienda?.cobrador);
   const cobrador = idDelCobrador ? (cfg.cobradores ?? []).find((c) => limpio(c.id) === idDelCobrador) : undefined;
   const suyo = cobrador?.por_pais?.[k] as
     | { titular?: string; nombre_completo?: string; numero_de_cuenta?: string; cuentas_por_metodo?: Record<string, string>; metodos_apagados?: string[] }
@@ -33686,6 +33703,96 @@ function quienCobraEn(cfg: FullConfig, tienda: Pick<TiendaEditor, "cobrador"> | 
     });
   const deQuien = cobrador && suyo ? cobrador.nombre?.trim() || "su cobrador" : null;
   return { nombre, titular, cuenta, porMetodo, cobrador, deQuien };
+}
+
+/**
+ * QUIÉN COBRA EN CADA PAÍS (29/10/2026). Él: «en una sola tienda pueden haber hasta 4 personas que cobran ya que
+ * puedo trabajar en 4 países al mismo tiempo, lo que falta es definir quién cobra por país». Una fila por país
+ * donde vende esta tienda (los Inicios de su tablero, o los países que venden): su cara y su selector. Vacío =
+ * «como toda la tienda». Dos avisos, porque el dinero es lo que no perdona:
+ *   · la persona elegida no tiene cuenta en ese país → cobra la cuenta del país (lo dice);
+ *   · hay números escritos a mano en textos que leen los clientes de ese país → le pagarían a ESE número, no a la
+ *     persona elegida, y el comprobante no se aprobaría (rojo, con dónde arreglarlo).
+ */
+function CobradorPorPais({
+  cfg,
+  tienda,
+  onCambiar,
+}: {
+  cfg: FullConfig;
+  tienda: TiendaEditor;
+  onCambiar: (pais: string, id: string) => void;
+}) {
+  const limpio = (v: unknown) => String(v ?? "").trim();
+  const elegidos = tienda.cobradores_por_pais ?? {};
+  const paises = useMemo(() => {
+    const deSuTablero = Object.values(cfg.tableros?.[tienda.id] ?? {}).flatMap((t) =>
+      ((t as TableroEnElEditor | undefined)?.fichas ?? []).filter((f) => f.tipo === "inicio" && f.pais).map((f) => String(f.pais).toUpperCase())
+    );
+    const base = deSuTablero.length ? deSuTablero : paisesQueVenden(comoCuentas(cfg)).map((p) => p.toUpperCase());
+    return [...new Set([...base, ...Object.keys(elegidos)])];
+  }, [cfg, tienda.id, elegidos]);
+  // Solo si eligió a alguien por país: buscar los números a mano recorre todo su contenido.
+  const hayElegidos = Object.keys(elegidos).length > 0;
+  const hallazgos = useMemo(() => (hayElegidos ? buscarNumerosAMano(comoCuentas(cfg)).filter((h) => h.tipo === "numero") : []), [cfg, hayElegidos]);
+  const cobradores = (cfg.cobradores ?? []).filter((c) => limpio(c?.id));
+  if (paises.length === 0) return null;
+  const nombreDeToda = cobradores.find((c) => c.id === limpio(tienda.cobrador))?.nombre?.trim();
+  return (
+    <div className="block text-xs font-medium text-tinta-suave">
+      Quién cobra en cada país
+      <div className="mt-1 space-y-1.5">
+        {paises.map((pais) => {
+          const q = quienCobraEn(cfg, tienda, pais);
+          const elegido = limpio(elegidos[pais]);
+          const deLaPersona = q.deQuien && q.cobrador;
+          const aMano = elegido ? hallazgos.filter((h) => h.paises.some((p) => p.pais === pais && p.textos > 0)) : [];
+          return (
+            <div key={pais} className="rounded-md border border-borde bg-tarjeta px-2 py-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-14 shrink-0 text-xs font-bold text-tinta">
+                  {banderaDe(pais)} {pais}
+                </span>
+                <RetratoDelCobrador
+                  foto={deLaPersona ? q.cobrador?.foto : (cfg.modality_payment_profiles?.[activeModality(cfg)]?.[pais as CountryCode] ?? cfg.payment_profiles_by_country?.[pais as CountryCode])?.foto}
+                  nombre={q.nombre}
+                />
+                <select
+                  value={elegido}
+                  onChange={(e) => onCambiar(pais, e.target.value)}
+                  className="min-w-0 flex-1 rounded-md border border-borde bg-tarjeta px-2 py-1 text-sm"
+                >
+                  <option value="">Como toda la tienda · {nombreDeToda || "la cuenta del país"}</option>
+                  {cobradores.map((c, j) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre?.trim() || `Usuario ${j + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mt-1 text-[11px] text-tinta-suave">
+                Cobra: <strong>{q.nombre || "—"}</strong>
+                {deLaPersona ? "" : " · por defecto (la cuenta del país)"}
+              </div>
+              {elegido && !deLaPersona && (
+                <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-200">
+                  ⚠️ {cobradores.find((c) => c.id === elegido)?.nombre?.trim() || "Esa persona"} no tiene cuenta en {pais}: cobra la cuenta del país.
+                  Ponle su cuenta en menú usuarios → su tarjeta → «Sus cuentas».
+                </div>
+              )}
+              {aMano.length > 0 && (
+                <div className="mt-1 rounded bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-800 oscuro:bg-red-500/10 oscuro:text-red-200">
+                  🔴 {aMano.length} número(s) de cuenta escritos a mano en textos que leen los clientes de {pais}. Esos clientes le pagarían a ese
+                  número, no a {q.nombre || "la persona elegida"}, y su comprobante no se aprobaría. Cámbialos por el comodín en menú usuarios →
+                  🔎 Números escritos a mano.
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function VentanaDelCobro({
@@ -56236,6 +56343,17 @@ function TiendasDelProyecto({
                 </select>
                 </span>
               </label>
+              <CobradorPorPais
+                cfg={cfg}
+                tienda={tienda}
+                onCambiar={(pais, id) => {
+                  onSnapshot();
+                  const por = { ...(tienda.cobradores_por_pais ?? {}) };
+                  if (id) por[pais] = id;
+                  else delete por[pais];
+                  parchar(i, { cobradores_por_pais: Object.keys(por).length ? por : undefined });
+                }}
+              />
               <label className="block text-xs font-medium text-tinta-suave">
                 Cómo presenta esta tienda
                 <select

@@ -3878,6 +3878,10 @@ export interface Tienda {
    *  `elCobroDelPais`. Varias tiendas pueden apuntar al MISMO cobrador: se
    *  escribe una vez y se elige donde haga falta. */
   cobrador?: string;
+  /** QUIÉN COBRA EN CADA PAÍS (29/10/2026). Él: «en una sola tienda pueden haber hasta 4 personas que cobran
+   *  ya que puedo trabajar en 4 países al mismo tiempo». País → id del almacén de usuarios. Un país sin
+   *  elegir usa `cobrador` (el de toda la tienda), y sin ése, la cuenta del país: lo de siempre. */
+  cobradores_por_pais?: Record<string, string>;
   /**
    * SU CONJUNTO DE DATOS DE META —él lo llama «el pixel»—, al que se le reportan
    * las compras de esta tienda.
@@ -9843,6 +9847,19 @@ export function getPaymentText(phone?: string | null): string {
  * del titular y sin respaldo global para el número —que era y sigue siendo
  * deliberado, porque una cuenta es de un país concreto—.
  */
+/**
+ * QUIÉN COBRA EN ESTE PAÍS, EN ESTA TIENDA (29/10/2026): el elegido para ese país (`cobradores_por_pais`), o si
+ * no hay, el de toda la tienda (`cobrador`). Vacío = la cuenta del país. Sin elegir nada por país devuelve
+ * EXACTAMENTE lo de antes. La única puerta: la usan el cobro, los métodos apagados y la pantalla.
+ */
+export function idDelCobradorEn(
+  tienda: { cobrador?: string; cobradores_por_pais?: Record<string, string> } | null | undefined,
+  country: string
+): string {
+  const delPais = String(tienda?.cobradores_por_pais?.[String(country).trim().toUpperCase()] ?? "").trim();
+  return delPais || String(tienda?.cobrador ?? "").trim();
+}
+
 export function elCobroDelPais(
   country: CountryCode,
   config?: WorkflowConfig | null,
@@ -9857,7 +9874,8 @@ export function elCobroDelPais(
   const perfil = resolveCountryPaymentProfile(country, cfg);
   // EL COBRADOR DE LA TIENDA QUE ATIENDE. Se resuelve por el mismo almacén que
   // todo lo demás: la tienda del turno ya está puesta desde que entró el mensaje.
-  const idDelCobrador = String(laTiendaDelTurno()?.cobrador ?? "").trim();
+  // (Por país desde el 29/10/2026: `idDelCobradorEn`.)
+  const idDelCobrador = idDelCobradorEn(laTiendaDelTurno(), country);
   const suyo = idDelCobrador
     ? (cfg?.cobradores ?? []).find(
         (c) => String(c?.id ?? "").trim() === idDelCobrador
@@ -9938,7 +9956,7 @@ export function metodosApagadosDelCobro(
   config?: WorkflowConfig | null
 ): string[] {
   const cfg = config ?? loadWorkflowConfig();
-  const idDelCobrador = String(laTiendaDelTurno()?.cobrador ?? "").trim();
+  const idDelCobrador = idDelCobradorEn(laTiendaDelTurno(), country);
   if (!idDelCobrador) return [];
   const suyo = (cfg?.cobradores ?? []).find(
     (c) => String(c?.id ?? "").trim() === idDelCobrador
