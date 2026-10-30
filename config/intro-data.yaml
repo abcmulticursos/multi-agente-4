@@ -126802,8 +126802,8 @@ tableros:
           espera_min: 2
         - id: f-mvu306rd-kicgk
           tipo: cobro
-          x: 1276
-          y: -1199
+          x: 1683
+          y: -1441
           titulo: Cobro · COMIDAS PERUANAS CASERAS
           steps:
             - type: text
@@ -126827,8 +126827,8 @@ tableros:
             metodos: true
         - id: f-mvu306rd-7dmlq
           tipo: seguimientos
-          x: 1276
-          y: -869
+          x: 2068
+          y: -1056
           titulo: Seguimientos · COMIDAS PERUANAS CASERAS
           presenta:
             - ptcocina_peruanas
@@ -126881,15 +126881,15 @@ tableros:
               ignora_tardio: true
         - id: f-mvu306rd-uf09r
           tipo: entregar
-          x: 1606
-          y: -1199
+          x: 2145
+          y: -1276
           titulo: Entrega · COMIDAS PERUANAS CASERAS
           por_correo: true
           producto_id: ptcocina_peruanas
         - id: f-mvu306rd-uojjy
           tipo: regalo
-          x: 1936
-          y: -1529
+          x: 2574
+          y: -1419
           titulo: Regalo
       cables:
         - id: c2
