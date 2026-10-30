@@ -119125,7 +119125,7 @@ biblioteca_de_productos:
     precios_por_pais:
       PE:
         price_soles: 15
-        discount_price_soles: 15
+        discount_price_soles: 10
         market_price: 45
       EC:
         price_soles: 3
