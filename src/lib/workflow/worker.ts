@@ -8,6 +8,7 @@ import { executeAction } from "@/lib/workflow/engine";
 import { ejecutarAccionDelTablero } from "@/lib/tablero/motor";
 import { maybePurgeStaleConversations } from "@/lib/workflow/purge";
 import { tickComentarios } from "@/lib/meta/comments";
+import { publicarSiToca } from "@/lib/contenido";
 
 const POLL_INTERVAL_MS = 2 * 1000;
 const BATCH_SIZE = 50;
@@ -36,6 +37,14 @@ export async function tick(): Promise<void> {
       maybePurgeStaleConversations();
     } catch (err) {
       console.error("[purge] error en autopurga:", err);
+    }
+
+    // EL RESPALDO DEL CONTENIDO EN GITHUB (30/10/2026): lo guardado que aún no subió se reintenta solo.
+    // Sin esperar (no frena las acciones de abajo) y solo si hay algo pendiente y ya toca.
+    try {
+      publicarSiToca();
+    } catch (err) {
+      console.error("[contenido] error al reintentar el respaldo:", err);
     }
 
     // Respuesta a comentarios de Facebook. Se lanza SIN esperar y con su

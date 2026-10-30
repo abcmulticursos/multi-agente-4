@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { parse as parseYaml } from "yaml";
+import { contenidoCompleto } from "@/lib/contenido";
 import {
   countryFromPhone,
   formatCurrencyAmount,
@@ -2737,16 +2737,12 @@ function readConfigFromDisk(): { config: WorkflowConfig | null; path: string } {
     console.warn(`[wf] no existe config (${filePath})`);
     return { config: null, path: filePath };
   }
-  let raw: string;
-  try {
-    raw = fs.readFileSync(filePath, "utf8");
-  } catch (err) {
-    console.error(`[wf] error leyendo ${filePath}:`, err);
-    return { config: null, path: filePath };
-  }
   let parsed: unknown;
   try {
-    parsed = useYaml ? parseYaml(raw) : JSON.parse(raw);
+    // EL CONTENIDO EN PIEZAS (30/10/2026): el YAML se arma de su archivo general y sus piezas (cada canal,
+    // cada tablero, las plantillas) — el MISMO objeto que leer el archivo entero. Sin piezas, lo de siempre.
+    // Solo se vuelven a leer las piezas que cambiaron. Ver `@/lib/contenido`.
+    parsed = useYaml ? contenidoCompleto() : JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (err) {
     console.error(`[wf] ${filePath} no es válido:`, err);
     return { config: null, path: filePath };

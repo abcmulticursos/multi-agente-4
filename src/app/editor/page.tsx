@@ -9206,17 +9206,28 @@ export default function EditorPage() {
       // saltárselo, porque el que dice que no es el otro lado.
       // EL CANDADO DE LA PESTAÑA VIEJA (18/10/2026): con la huella del archivo que se abrió.
       let encima = false;
-      const enviar = (extra: Record<string, unknown> = {}) =>
-        fetch("/api/workflow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...clean,
-            ...(huellaAlAbrir.current ? { version_del_archivo: huellaAlAbrir.current } : {}),
-            ...(encima ? { guardar_encima: true } : {}),
-            ...extra,
-          }),
+      // COMPRIMIDO (30/10/2026): el contenido entero pesa ~4,7 MB; en gzip viaja ~10 veces más liviano por
+      // la conexión de su casa. Un navegador sin `CompressionStream` lo manda como siempre.
+      const enviar = async (extra: Record<string, unknown> = {}) => {
+        const texto = JSON.stringify({
+          ...clean,
+          ...(huellaAlAbrir.current ? { version_del_archivo: huellaAlAbrir.current } : {}),
+          ...(encima ? { guardar_encima: true } : {}),
+          ...extra,
         });
+        let comprimido: ArrayBuffer | null = null;
+        try {
+          if (typeof CompressionStream !== "undefined")
+            comprimido = await new Response(new Blob([texto]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer();
+        } catch {
+          comprimido = null;
+        }
+        return fetch("/api/workflow", {
+          method: "POST",
+          headers: comprimido ? { "Content-Type": "application/json", "X-Cuerpo": "gzip" } : { "Content-Type": "application/json" },
+          body: comprimido ?? texto,
+        });
+      };
       let res = await enviar();
       let data = await res.json();
       if (res.status === 409 && data?.otraVersion) {
@@ -9260,6 +9271,8 @@ export default function EditorPage() {
       if (!res.ok) throw new Error(data?.error ?? "Error al guardar");
       // La huella nueva: el siguiente guardado de esta pestaña compara contra lo que acaba de escribir.
       if (typeof data?.version_del_archivo === "string") huellaAlAbrir.current = data.version_del_archivo;
+      // Y el «☁» de abajo a la izquierda mira cómo va la subida a GitHub (30/10/2026).
+      window.dispatchEvent(new Event("contenido-guardado"));
       // El archivo ya es otro: la referencia del cerrojo se pone al día. Sin
       // esto, el siguiente guardado compararía contra lo de antes y saltaría
       // por un cambio que tú mismo acabas de guardar.
@@ -10948,6 +10961,7 @@ export default function EditorPage() {
           <div className="rounded-xl bg-tarjeta px-5 py-3 text-sm font-bold text-tinta shadow-2xl">💾 Guardando… espera un momento</div>
         </div>
       )}
+      <IndicadorDelRespaldo />
       {toast && (
         <div
           role="status"
@@ -46634,6 +46648,83 @@ const EL_CLIC_FUERA_CIERRA_LA_VENTANA = false;
  * Mientras está subiendo se calla: ahí ya lo cuenta el propio botón
  * («Guardando…») y dos mensajes a la vez para lo mismo hacen dudar.
  */
+/**
+ * EL RESPALDO EN GITHUB, A LA VISTA (30/10/2026). Guardar ya no espera a GitHub: lo guardado queda en el
+ * servidor al instante y sube por detrás. Aquí se ve: «☁ respaldando…» mientras sube, «☁ ✓» unos segundos
+ * al terminar, y en amarillo «sin respaldar» si GitHub no responde (se reintenta solo; lo guardado no se
+ * pierde). Se mira al guardar (evento «contenido-guardado») y cada 3 s mientras haya algo pendiente.
+ */
+function IndicadorDelRespaldo() {
+  const [estado, setEstado] = useState<{ pendientes: number; ultimoError: string | null } | null>(null);
+  const [listo, setListo] = useState(false);
+  const habia = useRef(false);
+  useEffect(() => {
+    let vivo = true;
+    let reloj: ReturnType<typeof setTimeout> | null = null;
+    const mirar = async () => {
+      if (reloj) clearTimeout(reloj);
+      try {
+        const r = await fetch("/api/workflow/respaldo", { cache: "no-store" });
+        const e = (await r.json()) as { pendientes: number; ultimoError: string | null };
+        if (!vivo) return;
+        setEstado(e);
+        if (e.pendientes > 0) {
+          habia.current = true;
+          reloj = setTimeout(mirar, 3000);
+        } else if (habia.current) {
+          habia.current = false;
+          setListo(true);
+          reloj = setTimeout(() => vivo && setListo(false), 5000);
+        }
+      } catch {
+        if (vivo) reloj = setTimeout(mirar, 10000);
+      }
+    };
+    void mirar();
+    const alGuardar = () => {
+      habia.current = true;
+      setListo(false);
+      void mirar();
+    };
+    window.addEventListener("contenido-guardado", alGuardar);
+    return () => {
+      vivo = false;
+      if (reloj) clearTimeout(reloj);
+      window.removeEventListener("contenido-guardado", alGuardar);
+    };
+  }, []);
+  const pendientes = estado?.pendientes ?? 0;
+  if (!pendientes && !listo) return null;
+  const conError = pendientes > 0 && !!estado?.ultimoError;
+  return (
+    <div
+      className={`fixed bottom-3 left-3 z-[60] flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold shadow ${
+        conError ? "border-amber-400 bg-amber-50 text-amber-900" : "border-borde bg-tarjeta text-tinta-suave"
+      }`}
+      title={conError ? `GitHub no respondió: ${estado?.ultimoError}. Lo guardado está a salvo en el servidor y se reintenta solo.` : "Copia de seguridad en GitHub"}
+    >
+      {pendientes > 0 ? (conError ? "☁ sin respaldar · se reintenta solo" : "☁ respaldando…") : "☁ ✓ respaldado"}
+      {conError && (
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              const r = await fetch("/api/workflow/respaldo", { method: "POST" });
+              setEstado((await r.json()) as { pendientes: number; ultimoError: string | null });
+              window.dispatchEvent(new Event("contenido-guardado"));
+            } catch {
+              /* se reintenta solo */
+            }
+          }}
+          className="rounded-full border border-amber-400 bg-tarjeta px-2 py-0.5 text-[10px] font-bold hover:bg-amber-100"
+        >
+          Reintentar
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AvisoDeSinGuardar({
   sucio,
   guardando,

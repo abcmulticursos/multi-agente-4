@@ -3,7 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { parseDocument, visit, Scalar, isSeq, isMap, type Document } from "yaml";
-import { isGithubPublishConfigured, publishFileToGithub } from "@/lib/github";
+import { isGithubPublishConfigured } from "@/lib/github";
+// EL CONTENIDO EN PIEZAS Y GITHUB POR DETRÁS (30/10/2026). Ver el comentario de arriba de ese archivo.
+import {
+  contenidoCompleto,
+  documentoCompleto,
+  escribirYRespaldar,
+  huellaDelContenido,
+  partirParaGuardar,
+  selloDelContenido,
+} from "@/lib/contenido";
 import {
   PROMPT_SECTION_DEFS,
   defaultPromptSections,
@@ -15,7 +24,6 @@ import {
   getPaymentButtons,
   topeDeOrganicos,
 } from "@/lib/workflow/config";
-import { writeTextFileAtomically } from "@/lib/product-profiles";
 // LA PIZARRA: se lee y se escribe con la MISMA función. Ver `lee-pizarra.ts`.
 import { leePizarra } from "@/lib/editor/lee-pizarra";
 import { leeTableros, leeTablerosPorTienda } from "@/lib/tablero/datos";
@@ -1684,45 +1692,23 @@ function annotateSteps(node: unknown, steps: { type?: string }[]) {
  * guarda como JSON (liviano en memoria) junto a la fecha y el tamaño del archivo: si el archivo
  * cambió (un guardado, un despliegue, una edición a mano), se vuelve a leer.
  */
-let contenidoYaLeido: { mtimeMs: number; size: number; json: string } | null = null;
+let contenidoYaLeido: { mtimeMs: number; size: number; sello?: string; json: string; objeto?: Record<string, unknown> } | null = null;
 /**
  * Y EL DOCUMENTO YA LEÍDO, PARA GUARDAR (25/10/2026): leer el YAML cuesta ~3,5 s; clonar el ya leído,
  * ~0,6 s (y ocupa ~40 MB). Solo vale mientras el archivo sea el mismo (fecha y tamaño). Nunca se
  * cambia el guardado: cada guardado trabaja sobre un CLON.
  */
-let documentoYaLeido: { mtimeMs: number; size: number; doc: ReturnType<typeof parseDocument> } | null = null;
-function documentoDelArchivo(raw: string): ReturnType<typeof parseDocument> {
-  try {
-    const st = fs.statSync(CONFIG_PATH);
-    if (documentoYaLeido && documentoYaLeido.mtimeMs === st.mtimeMs && documentoYaLeido.size === st.size) return documentoYaLeido.doc.clone();
-    const doc = parseDocument(raw);
-    documentoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, doc };
-    return doc.clone();
-  } catch {
-    return parseDocument(raw);
-  }
-}
-function recordarDocumento(doc: ReturnType<typeof parseDocument>): void {
-  try {
-    const st = fs.statSync(CONFIG_PATH);
-    documentoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, doc };
-  } catch {
-    documentoYaLeido = null;
-  }
-}
-function recordarContenido(js: unknown): void {
-  try {
-    const st = fs.statSync(CONFIG_PATH);
-    contenidoYaLeido = { mtimeMs: st.mtimeMs, size: st.size, json: JSON.stringify(js) };
-  } catch {
-    contenidoYaLeido = null;
-  }
+// (El DOCUMENTO ya leído, para guardar, vive ahora en `@/lib/contenido`, POR PIEZA: guardar un tablero ya
+// no vuelve a leer los canales. 30/10/2026.) La fecha y el tamaño son los de TODAS las piezas (`selloDelContenido`).
+// (Se guarda el objeto y se copia al LEER, no al guardar: así el guardado no paga ~0,4 s en convertirlo.)
+function recordarContenido(js: unknown, sello: string): void {
+  contenidoYaLeido = { mtimeMs: 0, size: 0, sello, json: "", objeto: js as Record<string, unknown> };
 }
 function contenidoRecordado(): Record<string, unknown> | null {
   if (!contenidoYaLeido) return null;
   try {
-    const st = fs.statSync(CONFIG_PATH);
-    if (st.mtimeMs !== contenidoYaLeido.mtimeMs || st.size !== contenidoYaLeido.size) return null;
+    if (contenidoYaLeido.sello !== selloDelContenido()) return null;
+    if (contenidoYaLeido.objeto) return structuredClone(contenidoYaLeido.objeto);
     return JSON.parse(contenidoYaLeido.json) as Record<string, unknown>;
   } catch {
     return null;
@@ -1730,10 +1716,7 @@ function contenidoRecordado(): Record<string, unknown> | null {
 }
 
 export async function GET() {
-  let raw: string;
-  try {
-    raw = fs.readFileSync(CONFIG_PATH, "utf8");
-  } catch {
+  if (!fs.existsSync(CONFIG_PATH)) {
     return NextResponse.json(
       { error: "No se pudo leer config/intro-data.yaml" },
       { status: 500 }
@@ -1745,8 +1728,9 @@ export async function GET() {
     const recordado = contenidoRecordado();
     if (recordado) config = recordado;
     else {
-      config = parseDocument(raw).toJS() as Record<string, unknown>;
-      recordarContenido(config);
+      const sello = selloDelContenido();
+      config = contenidoCompleto();
+      recordarContenido(structuredClone(config), sello);
     }
   } catch {
     return NextResponse.json(
@@ -3083,7 +3067,7 @@ export async function GET() {
       prompt_section_defs,
       gift,
       // LA HUELLA DEL ARCHIVO QUE SE ABRIÓ (18/10/2026). Ver `huellaDelArchivo`.
-      version_del_archivo: huellaDelArchivo(raw),
+      version_del_archivo: huellaDelContenido(),
     },
     { headers: { "Cache-Control": "no-store" } }
   );
@@ -3094,22 +3078,38 @@ export async function GET() {
  * de otro guardado —otra pestaña, o un arreglo subido mientras tanto— tiene la versión VIEJA, y
  * al guardar la escribía encima: así se habría vuelto a perder la ruta COMO OB que se devolvió.
  * El editor manda la huella con la que abrió; si el archivo ya es otro, no se guarda sin preguntar.
+ *
+ * Desde el 30/10/2026 la huella es la del contenido ENTERO, con sus piezas (`huellaDelContenido`); sin
+ * piezas es exactamente la de antes (la del archivo).
  */
-function huellaDelArchivo(raw: string): string {
-  return createHash("sha256").update(raw.replace(/\r\n/g, "\n")).digest("hex").slice(0, 16);
-}
 
 export async function POST(req: NextRequest) {
+  // CUÁNTO TARDA CADA PASO DEL GUARDADO (30/10/2026), en una línea del registro: si vuelve a estar lento,
+  // se ve dónde sin adivinar.
+  const reloj: Array<[string, number]> = [["inicio", Date.now()]];
+  const marca = (paso: string) => reloj.push([paso, Date.now()]);
   let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    // EL CUERPO COMPRIMIDO (30/10/2026): el editor manda su contenido (~4,7 MB) en gzip (~10 veces menos
+    // por la conexión de su casa). Sin la cabecera, lo de siempre: JSON tal cual.
+    if (req.headers.get("x-cuerpo") === "gzip") {
+      const { gunzipSync } = await import("node:zlib");
+      body = JSON.parse(gunzipSync(Buffer.from(await req.arrayBuffer())).toString("utf8")) as Record<string, unknown>;
+    } else body = (await req.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  let raw: string;
+  marca("recibir");
+  let doc: ReturnType<typeof parseDocument>;
+  let huellaDeAhora: string;
   try {
-    raw = fs.readFileSync(CONFIG_PATH, "utf8");
+    huellaDeAhora = huellaDelContenido();
+    // EL DOCUMENTO ENTERO, ARMADO DE SUS PIEZAS (con sus comentarios). Lo de abajo trabaja igual que
+    // siempre sobre él; al final se vuelve a partir y solo se escribe lo que cambió.
+    // (Sin copiar las piezas: aquí canales, tableros y plantillas solo se reemplazan enteros, nunca se
+    // cambian por dentro. Ver `documentoCompleto`.)
+    doc = documentoCompleto(true) as ReturnType<typeof parseDocument>;
   } catch {
     return NextResponse.json(
       { error: "No se pudo leer config/intro-data.yaml" },
@@ -3120,7 +3120,7 @@ export async function POST(req: NextRequest) {
   // EL CANDADO DE LA PESTAÑA VIEJA (18/10/2026). Solo si el editor manda su huella (uno viejo,
   // sin ella, guarda como siempre) y no pidió guardar encima a sabiendas.
   const suHuella = typeof body.version_del_archivo === "string" ? body.version_del_archivo : "";
-  if (suHuella && body.guardar_encima !== true && suHuella !== huellaDelArchivo(raw)) {
+  if (suHuella && body.guardar_encima !== true && suHuella !== huellaDeAhora) {
     return NextResponse.json(
       {
         error: "El archivo cambió desde que abriste el editor.",
@@ -3130,7 +3130,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const doc = documentoDelArchivo(raw);
+  marca("armar");
   // LO QUE HABÍA, para el seguro contra el vaciado (más abajo). Se toma AQUÍ, del documento ya leído
   // y antes de cambiarlo, en vez de volver a leer el archivo entero (25/10/2026: cada lectura de 5 MB
   // son segundos de espera al guardar).
@@ -4964,13 +4964,19 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const output = doc.toString({ lineWidth: 0 });
-  // UNA SOLA RELECTURA del resultado: comprueba que es YAML válido y sirve también al seguro y a la
-  // carga siguiente (antes se releía tres veces: aquí, y dos en el seguro).
+  // EN PIEZAS (30/10/2026): se parte el documento en el archivo general y sus piezas (cada canal, cada
+  // tablero, las plantillas). Una pieza igual a la que ya está escrita no se reescribe ni se relee; las
+  // que cambiaron se releen (si no fueran YAML válido, no se guarda nada). `loQueQueda` es el contenido
+  // entero tal como queda, para el seguro, igual que antes.
+  marca("secciones");
+  let partido: ReturnType<typeof partirParaGuardar>;
   let loQueQueda: Record<string, unknown>;
   try {
-    loQueQueda = parseDocument(output).toJS() as Record<string, unknown>;
-  } catch {
+    partido = partirParaGuardar(doc);
+    loQueQueda = partido.loQueQueda;
+    marca("partir");
+  } catch (err) {
+    console.error("[workflow] el guardado no se pudo partir/releer:", err);
     return NextResponse.json(
       { error: "El resultado no sería YAML válido, no se guardó" },
       { status: 500 }
@@ -4992,6 +4998,13 @@ export async function POST(req: NextRequest) {
       seVaciarian = [];
     }
     if (seVaciarian.length > 0) {
+      // En el registro, qué había y qué quedaría (30/10/2026): si el seguro salta sin motivo, se ve por qué.
+      console.warn(
+        `[workflow] el seguro paró el guardado: ${seVaciarian.join(", ")} · ` +
+          SECCIONES_VIGILADAS.filter(([, n]) => seVaciarian.includes(n))
+            .map(([k]) => `${k}: ${JSON.stringify(loQueHabia[k]).slice(0, 60)} → ${JSON.stringify(loQueQueda[k]).slice(0, 60)}`)
+            .join(" · ")
+      );
       return NextResponse.json(
         {
           error: "Este guardado dejaría vacías secciones que hoy tienen contenido.",
@@ -5014,30 +5027,31 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const publish = await publishFileToGithub(
-    "config/intro-data.yaml",
-    output,
-    "editor: actualiza flujo"
-  );
-  if (!publish.ok) {
-    return NextResponse.json(
-      { error: publish.error ?? "No se pudo publicar el cambio en GitHub." },
-      { status: 500 }
-    );
-  }
-
+  // GUARDADO YA, Y GITHUB POR DETRÁS (30/10/2026): antes se esperaba a GitHub (15–20 s con 7 MB). Ahora lo
+  // que cambió queda en la cola del disco permanente (`data/`) y en el contenido, y se sube después, con
+  // reintentos; un deploy en medio no lo pierde (al arrancar se vuelve a poner). Ver `@/lib/contenido`.
   try {
-    writeTextFileAtomically(CONFIG_PATH, output);
+    escribirYRespaldar(partido.archivos);
   } catch {
     return NextResponse.json(
-      { error: "Publicado en GitHub, pero no se pudo actualizar el archivo local" },
+      { error: "No se pudo guardar en el servidor. No se cambió nada." },
       { status: 500 }
     );
   }
+  marca("escribir");
   // La próxima vez que se abra el editor (o se guarde), el contenido nuevo ya está leído.
-  recordarContenido(loQueQueda);
-  recordarDocumento(doc);
+  try {
+    recordarContenido(loQueQueda, selloDelContenido());
+  } catch {
+    contenidoYaLeido = null;
+  }
+  marca("recordar");
+  console.log(
+    `[workflow] guardado en ${reloj[reloj.length - 1][1] - reloj[0][1]} ms: ` +
+      reloj.slice(1).map(([p, t], i) => `${p} ${t - reloj[i][1]}`).join(" · ") +
+      ` · ${partido.archivos.map((a) => a.rel.split("/").pop()).join(", ")}`
+  );
 
   // La huella nueva: el siguiente guardado de ESTA pestaña compara contra lo que ella escribió.
-  return NextResponse.json({ ok: true, tokenConfigured, persisted: true, version_del_archivo: huellaDelArchivo(output) });
+  return NextResponse.json({ ok: true, tokenConfigured, persisted: true, version_del_archivo: partido.huella });
 }

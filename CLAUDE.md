@@ -1211,6 +1211,25 @@ necesarios para vender, hechos juntos y probados en una sola ronda («las cuatro
 Prueba: `scripts/recorrido-ronda.mjs` (sus casos) + `recorrido-tiendas-ejemplo.mjs` adaptado; en la
 copia, `ronda-copia.cjs` y `tiempos-upsell-copia.mjs` del scratchpad.
 
+### El contenido en piezas y GitHub por detrás (30/10/2026)
+
+«Guardar se demora 15, a veces 20 segundos… quiero guardar y listo, como cualquier programa». Medido: su
+`intro-data.yaml` de 6,8 MB costaba ~4 s leerlo, ~3,4 s releerlo al guardar, y el guardado esperaba a GitHub.
+Ahora (`src/lib/contenido.ts`):
+- **Piezas:** cada canal (`config/contenido/canales/<canal>.yaml`), cada tablero (`contenido/tableros/<tienda>.yaml`)
+  y las plantillas (`contenido/plantillas.yaml`) van aparte; en el general queda una marca `@pieza:<archivo>` en su
+  sitio. Al leer se arma EL MISMO objeto (comprobado letra por letra, con el orden de las claves). Un archivo SIN
+  marcas se lee como siempre (la copia de pruebas, un perfil de producto). El primer guardado tras el deploy lo parte.
+- **Guardar:** solo se escribe y se sube lo que cambió; el general se reescribe siempre en el disco (su fecha avisa al
+  bot). El editor manda el cuerpo en gzip (`x-cuerpo: gzip`). Medido en la copia: ~1,3–2,4 s (antes 15–20).
+- **GitHub por detrás:** lo guardado va a una cola en `data/contenido-pendiente/` (disco permanente) y sube con
+  reintentos (10 s, 20 s… hasta 5 min; el obrero lo reintenta). Al arrancar, lo pendiente se vuelve a poner en
+  `config/` antes de leer nada (un deploy en medio no pierde nada). El editor lo enseña abajo a la izquierda: «☁».
+- **Herramientas que leen `intro-data.yaml` a mano** (los `scripts/`, el simulador): en la copia, usar el contenido
+  en UN archivo (`textoCompleto()` o el comparador del scratchpad); con marcas no ven canales ni tableros.
+- Pruebas con GitHub de mentira: `GITHUB_SIMULADO_DIR` (solo sin `GITHUB_TOKEN`) escribe en una carpeta, y falla
+  si en ella hay un archivo `FALLA`.
+
 ## LO LOGRADO, LO INTOCABLE, Y QUÉ HACER EN UNA EMERGENCIA
 
 > Escrito el 17 de septiembre de 2026, a petición del dueño: «deja escrito el

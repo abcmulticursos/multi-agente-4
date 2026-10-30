@@ -88,7 +88,7 @@ function validStore(value: unknown): value is ProductProfileStore {
  * Migra de forma no destructiva el bot actual al primer perfil. El YAML activo
  * sigue siendo el unico archivo que lee el motor en produccion.
  */
-export function ensureProductProfiles(activeYaml: string): ProductProfileStore {
+export function ensureProductProfiles(activo: string | (() => string)): ProductProfileStore {
   fs.mkdirSync(PROFILES_DIR, { recursive: true });
   try {
     const parsed = JSON.parse(fs.readFileSync(INDEX_PATH, "utf8")) as unknown;
@@ -96,6 +96,8 @@ export function ensureProductProfiles(activeYaml: string): ProductProfileStore {
   } catch {
     // Primera ejecucion: se crea el perfil inicial abajo.
   }
+  // El contenido activo se pide SOLO aquí (30/10/2026): armarlo entero en un YAML cuesta segundos.
+  const activeYaml = typeof activo === "function" ? activo() : activo;
 
   const createdAt = nowIso();
   const initial: ProductProfileMeta = {

@@ -12,7 +12,19 @@ const DEFAULT_BRANCH = "main";
 const PROJECT_IDENTITY_PATH = "config/project-identity.json";
 
 export function isGithubPublishConfigured(): boolean {
-  return Boolean(process.env.GITHUB_TOKEN?.trim());
+  return Boolean(process.env.GITHUB_TOKEN?.trim()) || githubSimulado() !== null;
+}
+
+/**
+ * EL GITHUB DE MENTIRA, SOLO PARA LA COPIA DE PRUEBAS (30/10/2026). Con `GITHUB_SIMULADO_DIR` y SIN
+ * `GITHUB_TOKEN`, «publicar» escribe los archivos en esa carpeta tras una espera, y falla si en ella hay
+ * un archivo `FALLA` (para probar «GitHub caído»). Así se prueba guardar de punta a punta sin tocar el
+ * repositorio de verdad. Con un token puesto NO se usa nunca.
+ */
+function githubSimulado(): string | null {
+  if (process.env.GITHUB_TOKEN?.trim()) return null;
+  const dir = process.env.GITHUB_SIMULADO_DIR?.trim();
+  return dir ? dir : null;
 }
 
 function normalizeRepo(repo: string): string {
@@ -178,6 +190,20 @@ export async function publishFilesToGithub(
   commitMessage: string
 ): Promise<PublishResult> {
   if (files.length === 0) return { ok: true };
+  const simulado = githubSimulado();
+  if (simulado) {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    await new Promise((r) => setTimeout(r, 1500));
+    if (fs.existsSync(path.join(simulado, "FALLA"))) return { ok: false, error: "GitHub simulado: caído" };
+    for (const f of files) {
+      const abs = path.join(simulado, f.path);
+      fs.mkdirSync(path.dirname(abs), { recursive: true });
+      fs.writeFileSync(abs, f.content, "utf8");
+    }
+    fs.appendFileSync(path.join(simulado, "commits.log"), `${new Date().toISOString()} ${commitMessage}: ${files.map((f) => f.path).join(", ")}\n`);
+    return { ok: true };
+  }
   const token = process.env.GITHUB_TOKEN?.trim();
   if (!token) return { ok: false, error: "GITHUB_TOKEN no configurado" };
   const repo = process.env.GITHUB_REPO?.trim();

@@ -16,14 +16,19 @@ import {
   type ProductProfileStore,
 } from "@/lib/product-profiles";
 import { resetUnpaidConversationsForProductSwitch } from "@/lib/db";
+import { publicarPendientes, textoCompleto } from "@/lib/contenido";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const CONFIG_PATH = path.join(process.cwd(), "config", "intro-data.yaml");
 
+/**
+ * EL CONTENIDO ACTIVO COMO UN SOLO YAML (30/10/2026): desde que el contenido vive en piezas, el archivo
+ * general solo tiene marcas; un perfil de producto guarda el contenido ENTERO (`textoCompleto`).
+ */
 function readActiveYaml(): string {
-  return fs.readFileSync(CONFIG_PATH, "utf8");
+  return textoCompleto();
 }
 
 function productResponse(store: ProductProfileStore) {
@@ -46,14 +51,20 @@ function requireGithub(): NextResponse | null {
 }
 
 export async function GET(req: NextRequest) {
-  let activeYaml: string;
-  try {
-    activeYaml = readActiveYaml();
-  } catch {
+  // Se arma SOLO si hace falta (exportar el activo, o la primera vez): armar el contenido entero en un
+  // solo YAML cuesta segundos, y esta ruta se llama al abrir el editor.
+  let leido: string | null = null;
+  const activo = () => (leido ??= readActiveYaml());
+  if (!fs.existsSync(CONFIG_PATH)) {
     return NextResponse.json({ error: "No se pudo leer la configuracion activa." }, { status: 500 });
   }
 
-  const store = ensureProductProfiles(activeYaml);
+  let store: ProductProfileStore;
+  try {
+    store = ensureProductProfiles(activo);
+  } catch {
+    return NextResponse.json({ error: "No se pudo leer la configuracion activa." }, { status: 500 });
+  }
   const exportId = req.nextUrl.searchParams.get("export");
   if (!exportId) {
     return NextResponse.json(productResponse(store), {
@@ -69,7 +80,7 @@ export async function GET(req: NextRequest) {
   try {
     raw =
       product.id === store.active_product_id
-        ? activeYaml
+        ? activo()
         : fs.readFileSync(profileYamlPath(product.id), "utf8");
   } catch {
     return NextResponse.json({ error: "No se pudo leer el producto guardado." }, { status: 500 });
@@ -118,14 +129,24 @@ export async function POST(req: NextRequest) {
   const githubError = requireGithub();
   if (githubError) return githubError;
 
-  let activeYaml: string;
+  const action = body.action;
+  // Lo guardado del editor que aún no subió a GitHub va PRIMERO: crear o activar un producto escribe el
+  // contenido entero, y una subida pendiente de antes lo pisaría después (30/10/2026).
+  if (action === "create" || action === "activate") {
+    await publicarPendientes();
+    const { estadoDelRespaldo } = await import("@/lib/contenido");
+    if (estadoDelRespaldo().pendientes > 0) {
+      return NextResponse.json({ error: "Tu último guardado todavía se está subiendo a GitHub. Espera unos segundos y vuelve a intentar." }, { status: 409 });
+    }
+  }
+  let activeYaml = "";
+  let store: ProductProfileStore;
   try {
-    activeYaml = readActiveYaml();
+    if (action === "create" || action === "activate") activeYaml = readActiveYaml();
+    store = ensureProductProfiles(() => activeYaml || (activeYaml = readActiveYaml()));
   } catch {
     return NextResponse.json({ error: "No se pudo leer la configuracion activa." }, { status: 500 });
   }
-  const store = ensureProductProfiles(activeYaml);
-  const action = body.action;
 
   if (action === "create") {
     const name = body.name?.trim();
