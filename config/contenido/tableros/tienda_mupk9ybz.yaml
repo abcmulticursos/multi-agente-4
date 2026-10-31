@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: 60
-      y: 0
+      x: 726
+      y: 2189
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
@@ -986,7 +986,7 @@ whatsapp:
               *Antes de enviarte la información*, cuéntame por favor: 👇
 
               🔴 *¿Cómo te llamas?* ¿con quién tengo el gusto? 😊
-          delay_after_sec: 6
+          delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
       x: 1353
@@ -1051,14 +1051,12 @@ whatsapp:
 
               🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
-              ▫️ *TRANSFERENCIA:* (Pichincha) 
-              ▫️ *BANCO DEL BARRIO:* 📲
-              ▫️ *Mi vecino:* 🧾
+              {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 1771
-      y: 2750
+      x: 1782
+      y: 2783
       steps:
         - type: text
           body_variants:
@@ -1098,8 +1096,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg4f2j-8t6dd
       tipo: mensaje
-      x: 2090
-      y: 3058
+      x: 2178
+      y: 3047
       steps:
         - type: text
           body_variants:
@@ -1124,10 +1122,6 @@ whatsapp:
               *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼
           delay_after_sec: 6
   cables:
-    - id: c-mvveb856-3
-      de: inicio-mvveb83v-1
-      salida: siguiente
-      a: intro-mvveb83v-2
     - id: c-mvveb857-c
       de: seg-mvveb857-a
       salida: dec:d-mvveb856-7qb3
@@ -1192,6 +1186,10 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: siguiente
       a: f-mvvg2ytw-1u2w7
+    - id: c-mvvn5vh1-v4l
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: f-mvvfyvy5-34lw
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
