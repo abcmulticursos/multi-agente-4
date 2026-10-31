@@ -39012,8 +39012,13 @@ function BubbleDecisionsEditor({
                 decision.enabled === false
                   ? "border-neutral-300 bg-neutral-200 text-neutral-500 line-through"
                   : CLASE_DE_COLOR(decision.color)
-              } ${elegidos.has(decision.id) ? "ring-2 ring-sky-500 ring-offset-2" : ""}`}
+              } ${
+                // BIEN VISIBLE (01/11/2026): el anillo celeste fino casi no se veía sobre cuadritos de color («no sé
+                // qué cuadritos estoy eligiendo»). Borde grueso oscuro (outline: no lo tapa ninguna sombra) y ✓.
+                elegidos.has(decision.id) ? "outline outline-[3px] outline-offset-2 outline-slate-900 oscuro:outline-white" : ""
+              }`}
             >
+              {elegidos.has(decision.id) && <span className="mr-1">✓</span>}
               {decision.title?.trim() || "sin título"}
               {/* La cadenita dice de un vistazo cuáles están linkeados, sin
                   abrir uno por uno. */}

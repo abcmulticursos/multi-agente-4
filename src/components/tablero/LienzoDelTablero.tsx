@@ -836,7 +836,6 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           {(() => {
             const yaPuestas = new Set<string>();
             const porClave = new Map(visibles.map((s) => [s.clave, s]));
-            const caminos = caminosDeCompra(ctx.tablero, f, ctx.nombres);
             return filasDeSeguimientos(f).map((fila) => (
               <div key={fila.n} className="flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-900">
@@ -849,23 +848,24 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
                   yaPuestas.add(clave);
                   return [<div key={`${fila.n}-${clave}`} className="pl-3">{pastilla(s, primera, `${fila.n}-${clave}`)}</div>];
                 })}
-                {/* EL CAMINO DE COMPRA DE ESTE SEGUIMIENTO (31/10/2026): «lo normal es que del seguimiento 1 y 2
-                    aparezca un conector por cada seguimiento… eso parte de la aceptación en el seguimiento». Un
-                    dibujo de lo que el bot ya hace: si responde a ESTE seguimiento y paga, va por ahí. No se jala. */}
-                {caminos.map((cam) => (
-                  <div key={`${fila.n}-${cam.clave}`} className="pl-3">
-                    <div
-                      className="relative flex items-center gap-1.5 rounded-full border border-emerald-400 bg-emerald-50 px-2 py-0.5 pr-4 text-[11px] font-semibold text-emerald-800"
-                      title={`${cam.etiqueta}, después del seguimiento ${fila.n}: va a ${ctx.numeroDe[cam.destino.id] ?? ""} ${cam.destino.titulo?.trim() || ASPECTO[cam.destino.tipo].nombre}.\nSi el cliente responde a este seguimiento y paga, sigue por ahí: mientras salen los seguimientos, el cobro sigue abierto.\nLo hace el bot solo (no se jala ni se corta). Clic derecho en la línea: cable o colita.`}
-                    >
-                      <span className="truncate">{cam.etiqueta}</span>
-                      <span className="ml-auto shrink-0 text-[9px] font-normal opacity-70">al responder</span>
-                      <Handle type="source" position={Position.Right} id={`${cam.clave}:${fila.n}`} isConnectable={false} className={`${PUNTO_NARANJA} !bg-emerald-500`} />
-                    </div>
-                  </div>
-                ))}
               </div>
             ));
+          })()}
+          {/* SIN LÍNEAS AUTOMÁTICAS (01/11/2026). Él: «esas conexiones automáticas me cagan, me marean». En su lugar,
+              una línea de texto: mientras salen los seguimientos, el cliente sigue en la ficha de la que cuelgan, y si
+              compra sale por los cables de esa ficha (el bot no cambia). */}
+          {(() => {
+            const padres = ctx.tablero.cables
+              .filter((c) => c.a === f.id && (c.salida === "siguiente" || c.salida === "sin_respuesta" || c.salida === "sin_pago"))
+              .map((c) => ctx.tablero.fichas.find((x) => x.id === c.de))
+              .filter((x): x is FichaEnElEditor => !!x && !x.guardada);
+            if (!padres.length || !caminosDeCompra(ctx.tablero, f, ctx.nombres).length) return null;
+            const nombres = [...new Set(padres.map((p) => `«${p.titulo?.trim() || ASPECTO[p.tipo].nombre}»`))].join(", ");
+            return (
+              <div className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] leading-4 text-emerald-900" title="Mientras salen los seguimientos, el cliente sigue en esa ficha: si elige o paga, sale por los cables de esa ficha.">
+                {padres.every((p) => p.tipo === "cobro") ? `🛒 Si paga: sigue por los cables de ${nombres}` : `🛒 Si compra: sigue por los cables de ${nombres}`}
+              </div>
+            );
           })()}
           {visibles.filter((s) => !s.clave.startsWith("btn:") && !s.clave.startsWith("dec:")).map((s) => pastilla(s, true, s.clave))}
         </div>
@@ -1555,10 +1555,12 @@ export default function LienzoDelTablero({
 
   // EL CAMINO «🛒 SI COMPRA» DE CADA CAJA DE SEGUIMIENTOS (31/10/2026): se dibuja solo; no está en
   // `tablero.cables` (no es un cable suyo ni lo lee el bot). Ver `caminosDeCompra`.
+  // 01/11/2026: YA NO SE DIBUJAN («esas conexiones automáticas me marean»): la tarjeta lo dice en una línea.
+  const dibujarCaminos = false;
   const caminosDeLaCompra = useMemo<Edge[]>(
     () =>
       visibles
-        .filter((f) => f.tipo === "seguimientos")
+        .filter((f) => dibujarCaminos && f.tipo === "seguimientos")
         .flatMap((seg) =>
           caminosDeCompra(tablero, seg, nombres)
             .filter((cam) => visibles.some((f) => f.id === cam.destino.id))
@@ -2344,6 +2346,28 @@ export default function LienzoDelTablero({
               })()}
             {menu.m.tipo === "cable" && (
               <>
+                {/* DE DÓNDE SALE Y A DÓNDE VA (01/11/2026). Él: «puedo quitar los cables con clic derecho pero no dice
+                    por ningún lado a qué ficha va al recortarlos». Arriba, antes de tocar nada. */}
+                {(() => {
+                  const c = tablero.cables.find((x) => x.id === (menu.m as { cableId: string }).cableId);
+                  if (!c) return null;
+                  const de = tablero.fichas.find((f) => f.id === c.de);
+                  const a = tablero.fichas.find((f) => f.id === c.a);
+                  const nombreDe = (f?: FichaEnElEditor) =>
+                    !f ? "(ficha borrada)" : f.tipo === "inicio" ? `Inicio${f.pais ? ` ${banderaDe(f.pais)} ${f.pais}` : ""}` : `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
+                  const salida = de ? salidasDeLaFicha(de as FichaDelTablero, paisVisto, nombres).find((s) => s.clave === c.salida)?.etiqueta : undefined;
+                  return (
+                    <div className="max-w-xs border-b border-slate-200 px-3 py-1.5 text-[11px] leading-4 text-slate-600">
+                      <div>
+                        <span className="font-semibold text-slate-500">De:</span> {nombreDe(de)}
+                        {salida ? <span className="text-slate-500"> ({salida})</span> : null}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-500">A:</span> {nombreDe(a)}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {/* CABLE O COLITA, A ELECCIÓN SUYA (27/10/2026): lo que se agrega, se quita. */}
                 {(() => {
                   const id = (menu.m as { cableId: string }).cableId;
