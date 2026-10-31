@@ -1247,7 +1247,8 @@ whatsapp:
             - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
           delay_after_sec: 6
       cobro:
-        modo: abierto
+        modo: producto
+        producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
       x: 957
@@ -1651,7 +1652,8 @@ whatsapp:
             - "*Luego de eso nos envías la imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
           delay_after_sec: 6
       cobro:
-        modo: abierto
+        modo: producto
+        producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
       x: 2156
@@ -1729,11 +1731,6 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: dec:686b130a-c73f-4f74-b5d9-1ae244f23b53
       a: f-mvvo1ibc-s0tdo
-    - id: c-mvvoidfo-4tr
-      de: f-mvvo695b-vxex
-      salida: dec:8a032a4c-1bee-48fb-ae98-eba1bfc85e6d
-      a: f-mvvo1ibc-s0tdo
-      vista: colita
     - id: c-mvvop8kj-04l
       de: f-mvvo1ibc-s0tdo
       salida: btn:63c2239a-f51e-480f-9aca-67348ff9ae51
