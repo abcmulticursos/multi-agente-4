@@ -1349,10 +1349,6 @@ export default function LienzoDelTablero({
   // EL «+» SE CIERRA AL HACER CLIC FUERA (25/10/2026): «solo se colapsa presionando nuevamente el +».
   // (Con Escape también: ver el teclado, más abajo.)
   const cajaDelMas = useRef<HTMLDivElement>(null);
-  const cierreDelMas = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
-  }, []);
   useEffect(() => {
     if (!menuMas) return;
     const fuera = (e: PointerEvent) => {
@@ -1928,18 +1924,13 @@ export default function LienzoDelTablero({
         <div className="absolute left-3 top-3 z-20 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {antesDelMas}
           {/* SE ABRE AL PASAR EL PUNTERO (31/10/2026). Él: «con solo pasar el puntero del mouse ahí, que se
-              despliegue». Al salir se cierra con una pausa corta, para poder cruzar al menú sin que se esconda. */}
+              despliegue». Al salir se cierra AL INSTANTE (él: «la desaparición tiene que ser al instante»); el
+              menú va pegado al botón (sin hueco), así se baja a él sin salir. */}
           <div
             className="relative"
             ref={cajaDelMas}
-            onMouseEnter={() => {
-              if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
-              setMenuMas(true);
-            }}
-            onMouseLeave={() => {
-              if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
-              cierreDelMas.current = setTimeout(() => setMenuMas(false), 350);
-            }}
+            onMouseEnter={() => setMenuMas(true)}
+            onMouseLeave={() => setMenuMas(false)}
           >
             <button
               type="button"
@@ -1950,7 +1941,9 @@ export default function LienzoDelTablero({
               {menuMas ? "×" : "+"}
             </button>
             {menuMas && (
-              <div className="absolute left-0 top-11 z-50 max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
+              // El relleno de arriba (pt-2) es parte del menú: el puntero baja del «+» al menú sin salir de él.
+              <div className="absolute left-0 top-full z-50 pt-2">
+              <div className="max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
                 <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">Agregar al tablero</div>
                 {TIPOS_PARA_CREAR.map((tipo) => (
                   <button
@@ -2001,6 +1994,7 @@ export default function LienzoDelTablero({
                 >
                   <span className="h-2.5 w-3.5 rounded-sm border-2 border-dashed border-slate-400" /> Caja libre (solo fondo, sin país)
                 </button>
+              </div>
               </div>
             )}
           </div>

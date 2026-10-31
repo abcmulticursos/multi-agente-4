@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEscapeEnPila } from "@/lib/escape-en-pila";
 import EmojiPicker from "@/components/EmojiPicker";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
@@ -22326,18 +22327,15 @@ function escribiendoEnUnCampo(objetivo: EventTarget | null): boolean {
  */
 function useMenuDeCajon() {
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  // Escape cierra solo el menú, no la ventana de debajo (`useEscapeEnPila`).
+  useEscapeEnPila(() => setMenu(null), !!menu);
   useEffect(() => {
     if (!menu) return;
     const cerrar = () => setMenu(null);
-    const conEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenu(null);
-    };
     window.addEventListener("mousedown", cerrar);
-    window.addEventListener("keydown", conEscape);
     window.addEventListener("scroll", cerrar, true);
     return () => {
       window.removeEventListener("mousedown", cerrar);
-      window.removeEventListener("keydown", conEscape);
       window.removeEventListener("scroll", cerrar, true);
     };
   }, [menu]);
@@ -23927,6 +23925,12 @@ function GlobalPlaceholderAutocomplete() {
       update(event.target);
     };
     const onKeyDown = (event: KeyboardEvent) => {
+      // Con el menú de «{{» abierto, Escape cierra SOLO el menú, no la ventana de la burbuja (31/10/2026).
+      if (event.key === "Escape" && state) {
+        event.stopPropagation();
+        setState(null);
+        return;
+      }
       if (event.key === "Escape") setState(null);
       if (event.key === "Enter" && state && filtered.length > 0) {
         event.preventDefault();
@@ -25581,15 +25585,10 @@ function JourneyPreviewModal({
   //
   // Va DESPUÉS de `editingStep` a propósito: sus dependencias se evalúan al
   // renderizar, y declararlo antes rompía por usar la variable sin declarar.
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (editingStep) return;
-      onClose();
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [onClose, editingStep]);
+  useEscapeEnPila(() => {
+    if (editingStep) return;
+    onClose();
+  });
   /* AQUÍ IBA EL EFECTO QUE SUBÍA LO QUE SE ACABABA DE APLICAR EN UNA BURBUJA.
      Se retira el 28/09/2026 a petición del dueño, junto con su bandera. El
      porqué, con sus palabras y con las dos fechas, está unas líneas más arriba.
@@ -30833,13 +30832,8 @@ function VentanaFlotante({
   ancho?: string;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !document.querySelector("[data-ventana-de-producto]")) onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  // Escape cierra solo la de más arriba (`useEscapeEnPila`): con un producto abierto encima, se cierra ése.
+  useEscapeEnPila(() => onCerrar());
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={onCerrar}>
       <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl`} onClick={(e) => e.stopPropagation()}>
@@ -32547,11 +32541,7 @@ function AjustesDeLaFicha({
   const ponTramos = (lista: typeof tramos) => ponCobro({ ...cobro, tramos_por_pais: { ...(cobro.tramos_por_pais ?? {}), [pais]: lista } });
   const etiqueta = "block text-xs font-semibold text-tinta";
   const ayuda = "mt-0.5 block text-[11px] font-normal text-tinta-suave";
-  useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  useEscapeEnPila(() => onCerrar());
   const selector = (valor: string | undefined, onCambio: (v: string | undefined) => void, lista: Array<{ id: string; nombre: string }>, vacio: string) => (
     <select value={valor ?? ""} onChange={(e) => onCambio(e.target.value || undefined)} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
       <option value="">{vacio}</option>
@@ -33132,17 +33122,15 @@ function MisTiendas({
     }
     leerNumeros();
   };
+  useEscapeEnPila(() => setMenuDe(null), !!menuDe);
   useEffect(() => {
     if (!menuDe) return;
     const cerrar = (e: Event) => {
-      if (e instanceof KeyboardEvent && e.key !== "Escape") return;
       if (e instanceof PointerEvent && (e.target as HTMLElement | null)?.closest?.("[data-menu-tienda]")) return;
       setMenuDe(null);
     };
-    window.addEventListener("keydown", cerrar);
     window.addEventListener("pointerdown", cerrar);
     return () => {
-      window.removeEventListener("keydown", cerrar);
       window.removeEventListener("pointerdown", cerrar);
     };
   }, [menuDe]);
@@ -33661,14 +33649,7 @@ function VentanaDeTexto({
 }) {
   const productosFicha = useContext(ProductosDeLaFichaContext);
   const [texto, setTexto] = useState(valor);
-  useEffect(() => {
-    if (incrustado) return;
-    const alPulsar = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar, incrustado]);
+  useEscapeEnPila(() => onCerrar(), !incrustado);
   const original = useRef(valor);
   const alIrse = useRef<() => void>(() => {});
   alIrse.current = () => {
@@ -33941,14 +33922,7 @@ function VentanaDelCobro({
   /** Dentro de un gestor (19/10/2026): sin ventana encima. Lo de aquí se aplica al momento. */
   incrustado?: boolean;
 }) {
-  useEffect(() => {
-    if (incrustado) return;
-    const alPulsar = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar, incrustado]);
+  useEscapeEnPila(() => onCerrar(), !incrustado);
   const cobradores = cfg.cobradores ?? [];
   const cuerpo = (
     <div className="space-y-4">
@@ -34116,16 +34090,7 @@ function VentanaDelCajon({
   }, []);
   const [nuevoNombre, setNuevoNombre] = useState(nombre ?? "");
   const [susAnuncios, setSusAnuncios] = useState(anuncios ? { claves: anuncios.claves, dirigir: anuncios.dirigir } : null);
-  useEffect(() => {
-    if (incrustado) return;
-    const alPulsar = (evento: KeyboardEvent) => {
-      if (evento.key !== "Escape") return;
-      evento.preventDefault();
-      onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar, incrustado]);
+  useEscapeEnPila(() => onCerrar(), !incrustado);
   // INCRUSTADO: lo editado se aplica al irse (cambiar de paso o cerrar el gestor), salvo que lo
   // haya descartado. Con refs, para aplicar lo último y no lo del primer dibujo.
   const original = useRef({ steps, nombre: nombre ?? "", anuncios: anuncios ? { claves: anuncios.claves, dirigir: anuncios.dirigir } : null });
@@ -36409,16 +36374,8 @@ function JourneyStepEditorModal({
     onClose();
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      // Escape DESCARTA: no se llama a onChange.
-      onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  // Escape DESCARTA: no se llama a onChange.
+  useEscapeEnPila(() => onClose());
   const step = borrador[stepIndex];
   if (!step) return null;
   const update = (patch: Partial<EditorStep>) => {
@@ -37112,13 +37069,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   const [cuantas, setCuantas] = useState(3);
   // Por frase: sus variantes (editables) y cuáles van.
   const [propuestas, setPropuestas] = useState<Record<number, Array<{ texto: string; va: boolean }>>>({});
-  useEffect(() => {
-    const alPulsar = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  useEscapeEnPila(() => onCerrar());
   const pedir = async () => {
     const indices = [...marcadas].sort((a, b) => a - b);
     if (indices.length === 0) return;
@@ -37393,7 +37344,11 @@ function EditorEmojiTextarea({
             setPlaceholderQuery(match ? match[1] ?? "" : null);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setPlaceholderQuery(null);
+            if (e.key === "Escape" && placeholderQuery !== null) {
+              // Cierra solo la lista de comodines, no la ventana de la burbuja (31/10/2026).
+              e.stopPropagation();
+              setPlaceholderQuery(null);
+            }
             if (false && e.key === "Enter" && filteredPlaceholders.length > 0) {
               e.preventDefault();
               insertPlaceholder(filteredPlaceholders[0].token);
@@ -37842,15 +37797,7 @@ function BubbleButtonStepsModal({
   idPrefix: string;
 }) {
   const [borrador, setBorrador] = useState<EditorStep[]>(steps);
-  useEffect(() => {
-    const alPulsar = (evento: KeyboardEvent) => {
-      if (evento.key !== "Escape") return;
-      evento.preventDefault();
-      onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  useEscapeEnPila(() => onCerrar());
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4"
@@ -38469,21 +38416,15 @@ function BubbleDecisionModal({
   const metodosDisponibles = useContext(PaymentMethodsContext);
   const [workflowElegido, setWorkflowElegido] = useState(decision.workflow_id ?? "");
   const workflowsDisponibles = useContext(WorkflowsContext);
-  useEffect(() => {
-    const alPulsar = (evento: KeyboardEvent) => {
-      if (evento.key !== "Escape") return;
-      evento.preventDefault();
-      // Con la ventana de palabras abierta, Escape cierra ESA. Cerrando las dos
-      // se perdería todo lo escrito en la decisión por querer salir del campo.
-      if (palabrasAbiertas) {
-        setPalabrasAbiertas(false);
-        return;
-      }
-      onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar, palabrasAbiertas]);
+  useEscapeEnPila(() => {
+    // Con la ventana de palabras abierta, Escape cierra ESA. Cerrando las dos
+    // se perdería todo lo escrito en la decisión por querer salir del campo.
+    if (palabrasAbiertas) {
+      setPalabrasAbiertas(false);
+      return;
+    }
+    onCerrar();
+  });
   const guardar = () =>
     onGuardar({
       title: titulo.trim(),
@@ -45467,15 +45408,7 @@ function GiftTextEditorModal({
   basicoPrice?: number;
   previewContext?: PreviewContext;
 }) {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useEscapeEnPila(() => onClose());
 
   return (
     <div
@@ -45529,15 +45462,7 @@ function VisorDeVariacion({
   onClose: () => void;
   previewContext?: PreviewContext;
 }) {
-  useEffect(() => {
-    const alPulsar = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      onClose();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onClose]);
+  useEscapeEnPila(() => onClose());
 
   // El motor sustituye {{ENLACE_ANUNCIO}} justo antes de enviar, y si el cajón
   // no tiene enlace DESCARTA la variación entera. El visor tiene que hacer lo
@@ -47267,16 +47192,8 @@ function VentanaDeProducto({
   // El clic fuera ya estaba a salvo: el fondo de la ventana de dentro cuelga
   // de esta caja, y la caja corta la propagación del clic.
   const contenedor = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const alPulsar = (evento: KeyboardEvent) => {
-      if (evento.key !== "Escape") return;
-      if (contenedor.current?.querySelector('[role="dialog"]')) return;
-      evento.preventDefault();
-      salir();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [salir]);
+  // Una ventana abierta dentro se apunta a la pila encima de ésta: Escape la cierra a ella primero.
+  useEscapeEnPila(() => salir());
   const tono = tonoDelBoton(color, colorPorDefecto);
   return (
     // CENTRADA, Y SIN CORTAR LAS LARGAS.
@@ -50781,15 +50698,7 @@ function VentanaDeRespuesta({
   onEdit: (label?: string) => void;
   idPrefix: string;
 }) {
-  useEffect(() => {
-    const alPulsar = (evento: KeyboardEvent) => {
-      if (evento.key !== "Escape") return;
-      evento.preventDefault();
-      onCerrar();
-    };
-    window.addEventListener("keydown", alPulsar);
-    return () => window.removeEventListener("keydown", alPulsar);
-  }, [onCerrar]);
+  useEscapeEnPila(() => onCerrar());
   return (
     // Centrada igual que la ventana del precio: el envoltorio ocupa toda la
     // altura, así una corta queda en medio y una larga empieza arriba y se
@@ -54241,13 +54150,7 @@ const AVATARES = Array.from({ length: 49 }, (_, i) => `/avatares/avatar-${String
  */
 function ElegirAvatar({ actual, onListo, onCerrar }: { actual?: string; onListo: (a: string) => void; onCerrar: () => void }) {
   const [elegido, setElegido] = useState(actual ?? "");
-  useEffect(() => {
-    const tecla = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCerrar();
-    };
-    window.addEventListener("keydown", tecla);
-    return () => window.removeEventListener("keydown", tecla);
-  }, [onCerrar]);
+  useEscapeEnPila(() => onCerrar());
   return (
     <span
       className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40"

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TwemojiGlyph } from "@/components/TwemojiText";
+import { useEscapeEnPila } from "@/lib/escape-en-pila";
 
 /**
  * Selector de emojis del panel (chat y editor).
@@ -122,6 +123,9 @@ export default function EmojiPicker({
       cancelado = true;
     };
   }, [open, catalogo]);
+
+  // ESCAPE CIERRA SOLO LOS EMOJIS (31/10/2026), no la ventana de la burbuja que hay debajo.
+  useEscapeEnPila(() => setOpen(false), open);
 
   useEffect(() => {
     if (!open) return;
