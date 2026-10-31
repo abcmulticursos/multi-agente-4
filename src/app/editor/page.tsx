@@ -38158,9 +38158,6 @@ function BubbleDecisionsEditor({
   idPrefix: string;
 }) {
   const [abierta, setAbierta] = useState<number | null>(null);
-  const [menu, setMenu] = useState<{ index: number; x: number; y: number } | null>(
-    null
-  );
   const update = (index: number, patch: Partial<EditorBubbleDecision>) => {
     onEdit(`${idPrefix}:${index}`);
     onChange(
@@ -38168,18 +38165,24 @@ function BubbleDecisionsEditor({
     );
   };
   const laAbierta = abierta !== null ? decisions[abierta] : undefined;
-  // ELEGIR VARIOS: Shift (o Ctrl) + clic. Escape suelta la selección antes que cerrar la burbuja.
+  // ELEGIR (01/11/2026, como lo pidió él): clic derecho elige, Shift + clic suma o quita uno, y un clic
+  // en cualquier otra parte (o Escape) suelta. Las acciones van en la barra de los elegidos.
   const [elegidos, setElegidos] = useState<Set<string>>(() => new Set());
   useEscapeEnPila(() => setElegidos(new Set()), elegidos.size > 0);
   const copiados = useCuadritosCopiados();
-  // Con el menú del clic derecho abierto, Escape cierra solo el menú.
-  useEscapeEnPila(() => setMenu(null), !!menu);
-  /** Sobre qué actúa el menú: los elegidos si el tocado es uno de ellos; si no, solo el tocado. */
-  const losDelMenu = (index: number): EditorBubbleDecision[] => {
-    const d = decisions[index];
-    if (!d) return [];
-    return elegidos.has(d.id) && elegidos.size > 1 ? decisions.filter((x) => elegidos.has(x.id)) : [d];
-  };
+  const losElegidos = decisions.filter((d) => elegidos.has(d.id));
+  // Los cuadritos de OTRA burbuja también son «afuera»: nunca quedan dos selecciones a la vez.
+  const raiz = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (elegidos.size === 0) return;
+    const alTocar = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && raiz.current?.contains(t) && t.closest("[data-cuadrito], [data-barra-de-elegidos]")) return;
+      setElegidos(new Set());
+    };
+    document.addEventListener("mousedown", alTocar);
+    return () => document.removeEventListener("mousedown", alTocar);
+  }, [elegidos]);
   /** Mete copias nuevas detrás de la posición `despues` (o al final). */
   const insertar = (lista: EditorBubbleDecision[], despues?: number) => {
     if (lista.length === 0) return;
@@ -38204,7 +38207,7 @@ function BubbleDecisionsEditor({
     return () => window.removeEventListener("keydown", alPulsar);
   }, [elegidos, decisions]);
   return (
-    <div className="mt-4 border-t border-emerald-200 pt-3">
+    <div ref={raiz} className="mt-4 border-t border-emerald-200 pt-3">
       {laAbierta && abierta !== null && (
         <BubbleDecisionModal
           decision={laAbierta}
@@ -38218,104 +38221,6 @@ function BubbleDecisionsEditor({
           onEdit={onEdit}
           idPrefix={`${idPrefix}:${laAbierta.id}`}
         />
-      )}
-      {menu && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setMenu(null)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              setMenu(null);
-            }}
-          />
-          <div
-            className="fixed z-50 rounded-md border border-neutral-300 bg-tarjeta py-1 shadow-lg"
-            style={{ left: menu.x, top: menu.y }}
-          >
-            {(() => {
-              const cuales = losDelMenu(menu.index);
-              const cuantos = cuales.length > 1 ? ` (${cuales.length})` : "";
-              const clase = "block w-full whitespace-nowrap px-4 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100";
-              return (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      insertar(cuales, decisions.findIndex((d) => d.id === cuales[cuales.length - 1]?.id));
-                      setMenu(null);
-                    }}
-                    className={clase}
-                  >
-                    ⧉ Duplicar{cuantos}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      copiarCuadritos(cuales);
-                      setMenu(null);
-                    }}
-                    className={clase}
-                  >
-                    📋 Copiar{cuantos}
-                  </button>
-                  {copiados.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        insertar(copiados, menu.index);
-                        setMenu(null);
-                      }}
-                      className={clase}
-                    >
-                      📥 Pegar aquí ({copiados.length})
-                    </button>
-                  )}
-                  <div className="my-1 border-t border-neutral-200" />
-                </>
-              );
-            })()}
-            <button
-              type="button"
-              onClick={() => {
-                onSnapshot();
-                update(menu.index, {
-                  enabled: decisions[menu.index]?.enabled === false,
-                });
-                setMenu(null);
-              }}
-              className="block w-full whitespace-nowrap px-4 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100"
-            >
-              {decisions[menu.index]?.enabled === false
-                ? "🟢 Encender esta decisión"
-                : "⚪ Apagar esta decisión"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                // CON CONFIRMACIÓN. Antes borraba al primer clic: un clic
-                // derecho mal apuntado se llevaba el cuadrito con todo su
-                // contenido, y lo que se pierde ahí es texto escrito a mano.
-                const cual =
-                  decisions[menu.index]?.title?.trim() || "esta decisión";
-                if (
-                  !confirm(
-                    `¿Borrar «${cual}» y todo lo que escribiste dentro? Puedes deshacerlo con ↶ Deshacer.`
-                  )
-                ) {
-                  setMenu(null);
-                  return;
-                }
-                onSnapshot();
-                onChange(decisions.filter((_, i) => i !== menu.index));
-                setMenu(null);
-              }}
-              className="block w-full whitespace-nowrap px-4 py-1.5 text-left text-sm text-red-700 hover:bg-red-50"
-            >
-              🗑️ Borrar esta decisión
-            </button>
-          </div>
-        </>
       )}
       <div className="mb-2 flex items-center justify-between gap-2">
         <div>
@@ -38364,7 +38269,7 @@ function BubbleDecisionsEditor({
           >
             + Agregar decisiones
           </button>
-          {/* PEGAR, también en una burbuja sin cuadritos (ahí no hay a quién hacerle clic derecho). */}
+          {/* PEGAR, también en una burbuja sin cuadritos. */}
           {copiados.length > 0 && (
             <button
               type="button"
@@ -38378,26 +38283,48 @@ function BubbleDecisionsEditor({
         </div>
       </div>
       {elegidos.size > 0 && (
-        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
+        <div data-barra-de-elegidos className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
           <strong>{elegidos.size} elegido{elegidos.size === 1 ? "" : "s"}</strong>
           <button
             type="button"
-            onClick={() => copiarCuadritos(decisions.filter((d) => elegidos.has(d.id)))}
+            onClick={() => copiarCuadritos(losElegidos)}
             className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
           >
             📋 Copiar
           </button>
           <button
             type="button"
-            onClick={() => insertar(decisions.filter((d) => elegidos.has(d.id)), decisions.reduce((m, d, i) => (elegidos.has(d.id) ? i : m), -1))}
+            onClick={() => insertar(losElegidos, decisions.reduce((m, d, i) => (elegidos.has(d.id) ? i : m), -1))}
             className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
           >
             ⧉ Duplicar
           </button>
-          <button type="button" onClick={() => setElegidos(new Set())} className="rounded px-2 py-0.5 font-semibold hover:bg-sky-100">
-            Soltar
+          <button
+            type="button"
+            onClick={() => {
+              onSnapshot();
+              const apagar = losElegidos.some((d) => d.enabled !== false);
+              onChange(decisions.map((d) => (elegidos.has(d.id) ? { ...d, enabled: !apagar } : d)));
+            }}
+            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
+          >
+            {losElegidos.some((d) => d.enabled !== false) ? "⚪ Apagar" : "🟢 Encender"}
           </button>
-          <span className="text-sky-800">Ctrl+C copia · luego «📥 Pegar» en otra burbuja</span>
+          <button
+            type="button"
+            onClick={() => {
+              // CON CONFIRMACIÓN: lo que se pierde ahí es texto escrito a mano.
+              const cuales = losElegidos.map((d) => `«${d.title?.trim() || "sin título"}»`).join(", ");
+              if (!confirm(`¿Borrar ${cuales} y todo lo que escribiste dentro? Puedes deshacerlo con ↶ Deshacer.`)) return;
+              onSnapshot();
+              onChange(decisions.filter((d) => !elegidos.has(d.id)));
+              setElegidos(new Set());
+            }}
+            className="rounded border border-red-300 bg-tarjeta px-2 py-0.5 font-semibold text-red-700 hover:bg-red-50"
+          >
+            🗑️ Borrar
+          </button>
+          <span className="text-sky-800">Ctrl+C / Cmd+C copia · luego «📥 Pegar» en otra burbuja · clic afuera suelta</span>
         </div>
       )}
       {decisions.length === 0 ? (
@@ -38410,8 +38337,9 @@ function BubbleDecisionsEditor({
             <button
               key={decision.id}
               type="button"
+              data-cuadrito
               onClick={(evento) => {
-                // Shift o Ctrl + clic: elegir o soltar este, sin abrirlo.
+                // Shift (o Ctrl/Cmd) + clic: sumar o quitar este, sin abrirlo.
                 if (evento.shiftKey || evento.ctrlKey || evento.metaKey) {
                   setElegidos((antes) => {
                     const sig = new Set(antes);
@@ -38425,10 +38353,11 @@ function BubbleDecisionsEditor({
                 setAbierta(index);
               }}
               onContextMenu={(evento) => {
+                // Clic derecho elige este (si ya estaba elegido, la selección se queda como está).
                 evento.preventDefault();
-                setMenu({ index, x: evento.clientX, y: evento.clientY });
+                if (!elegidos.has(decision.id)) setElegidos(new Set([decision.id]));
               }}
-              title="Clic para editar · Shift+clic para elegir varios · clic derecho: duplicar, copiar, pegar, apagar o borrar"
+              title="Clic para editar · clic derecho para elegir · Shift+clic suma otro · clic afuera suelta"
               className={`min-w-[92px] rounded-md border px-4 py-2 text-sm font-bold uppercase tracking-wide shadow-sm ${
                 decision.enabled === false
                   ? "border-neutral-300 bg-neutral-200 text-neutral-500 line-through"
@@ -38446,7 +38375,7 @@ function BubbleDecisionsEditor({
       {decisions.length > 0 && (
         <div className="mt-2 space-y-1 text-[11px]">
           <p className="text-neutral-500">
-            Clic para llenar · Shift+clic para elegir varios · clic derecho: duplicar, copiar, pegar, apagar o borrar.
+            Clic para llenar · clic derecho para elegir · Shift+clic suma otro · Ctrl+C / Cmd+C copia · clic afuera suelta.
           </p>
           {/* El estado se LEE de los cuadritos, no de un interruptor: así lo
               que dice aquí no puede contradecir lo que se ve arriba. */}
