@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1573
-      y: -11
+      x: 1958
+      y: -22
       steps:
         - type: text
           body_variants:
@@ -1251,7 +1251,7 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 627
+      x: 715
       y: 242
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
@@ -1350,7 +1350,7 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 880
+      x: 957
       y: -143
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
@@ -1534,8 +1534,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1573
-      y: 682
+      x: 1958
+      y: 671
       steps:
         - type: text
           body_variants:
@@ -1554,15 +1554,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2486
-      y: 0
+      x: 2871
+      y: -11
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: -77
-      y: -385
+      x: -88
+      y: -165
       seguimientos:
         - id: s-mvw6hswp-o7ekg
           minutos: 2
@@ -1852,20 +1852,20 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2519
-      y: 693
+      x: 2904
+      y: 682
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 3179
-      y: 352
+      x: 3564
+      y: 341
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 1826
-      y: -363
+      x: 2211
+      y: -374
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2048,8 +2048,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
-      x: 1826
-      y: 363
+      x: 2211
+      y: 352
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
