@@ -1231,7 +1231,7 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1837
+      x: 2629
       y: 341
       steps:
         - type: text
@@ -1350,8 +1350,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 1166
-      y: 187
+      x: 2079
+      y: 209
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1534,7 +1534,7 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1859
+      x: 2651
       y: 748
       steps:
         - type: text
@@ -1554,7 +1554,7 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2596
+      x: 3388
       y: 484
       producto_id: "@tienda:full"
       entregas:
@@ -1844,20 +1844,20 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2574
+      x: 3366
       y: 836
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 3234
+      x: 4026
       y: 693
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 2200
-      y: 220
+      x: 2970
+      y: 22
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2040,7 +2040,7 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
-      x: 2288
+      x: 3080
       y: 990
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
@@ -2389,8 +2389,8 @@ whatsapp:
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
-      y: -114
-      ancho: 3168
-      alto: 2054
+      y: 1840
+      ancho: 160
+      alto: 100
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
       inicio: inicio-mvveb83v-1
