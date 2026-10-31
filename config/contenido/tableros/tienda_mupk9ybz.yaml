@@ -1634,6 +1634,17 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+        - id: s-mvw6b3qa-t58
+          minutos: 123
+          variantes:
+            - id: v-mvw6b3qa-qzq
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
       x: 1749
@@ -1767,14 +1778,6 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: siguiente
       a: f-mvw3fadn-4b4pu
-    - id: c-mvw3iob6-d6v
-      de: f-mvw3fadn-4b4pu
-      salida: dec:d-mvw3fadn-fowyf
-      a: f-mvvo0a7c-uyvc
-    - id: c-mvw3kde2-qe6
-      de: f-mvw3fadn-4b4pu
-      salida: dec:d-mvw3fadn-980bv
-      a: f-mvvo0a7c-uyvc
     - id: c-mvw3m1ua-8tk
       de: f-mvw3fadn-4b4pu
       salida: dec:d-mvw3fadn-6w2h1
