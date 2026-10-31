@@ -989,8 +989,8 @@ whatsapp:
           delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: 418
-      y: 143
+      x: 517
+      y: 198
       steps:
         - type: text
           body_variants:
@@ -998,7 +998,7 @@ whatsapp:
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
 
-              *Con GRAFISMO FONÉTICO* transformarás el aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
+              *Con {{PRODUCTO_BASE}}* transformarás el aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
 
               ✅ Ideal para mantener su atención *sin obligarlo*
 
@@ -1007,7 +1007,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Con el Kit Escencial de GRAFISMO FONETICO* recibirás:
+              *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
 
               📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
               * 👨‍👩‍👦 Imágenes de personas, 
@@ -1039,7 +1039,7 @@ whatsapp:
 
               🟠 *¿COMO LO ADQUIERO?*
 
-              * 1.- 💴 Realiza un único pago de *$ 3 Dólares*
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
               *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
