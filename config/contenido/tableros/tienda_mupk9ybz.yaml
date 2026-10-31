@@ -1035,7 +1035,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original $ 15 Dólares~
-              ✅ 📚 *HOY: $ 3 Dólares* ‼️
+              ✅ 📚 *{{PRECIO_BASE}}* ‼️
 
               🟠 *¿COMO LO ADQUIERO?*
 
