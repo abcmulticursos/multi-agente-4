@@ -569,7 +569,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   {
     token: "{{PRODUCTO}}",
     label: "Producto principal",
-    description: "Nombre del producto configurado.",
+    description: "Nombre del producto de la ficha (en un cobro, el que cobra). Igual que {{PRODUCTO_UPSELL}}.",
   },
   {
     token: "{{LISTA_METODOS_POR_PAIS}}",
@@ -585,6 +585,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{METODO_DE_PAGO_PRINCIPAL}}",
+    oculto: true,
     label: "Método de pago principal (campo propio)",
     description:
       "Campo independiente: el método de pago principal del país (para el pago SIN elección del order bump). Se edita en Precios y pagos → país → 'Método de pago PRINCIPAL'.",
@@ -615,30 +616,35 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{OPCION_ELEGIDA}}",
+    oculto: true,
     label: "Opción elegida (Order Bump)",
     description:
       "Solo en Confirmación al elegir una opción de Order Bump.",
   },
   {
     token: "{{PRECIO_OPCION_ELEGIDA}}",
+    oculto: true,
     label: "Precio de la opción elegida (Order Bump)",
     description:
       "Solo en Confirmación al elegir una opción de Order Bump; incluye símbolo y moneda.",
   },
   {
     token: "{{MONTO_FALTANTE}}",
+    oculto: true,
     label: "Monto faltante para el Combo",
     description:
       "Solo en Mensaje para completar al Combo de Order Bump.",
   },
   {
     token: "{{MONTO_ABONADO}}",
+    oculto: true,
     label: "Monto ya abonado (Order Bump)",
     description:
       "Importe que el cliente ya pagó al cambiar de opción.",
   },
   {
     token: "{{PRODUCTO_SECUNDARIO}}",
+    oculto: true,
     label: "Nombre del segundo producto",
     description:
       "El segundo producto de la pestaña Contenido. Su papel depende de la modalidad: en Order Bump es el complemento, en Doble Oferta + Upsell es el producto base. No confundir con la opción 2, que es el nombre de la opción barata de la modalidad.",
@@ -690,6 +696,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{OPCION_1}}",
+    oculto: true,
     label: "Nombre opcion 1",
     description: "Nombre comercial de la opcion 1 (combo).",
   },
@@ -701,6 +708,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{OPCION_2}}",
+    oculto: true,
     label: "Nombre opcion 2",
     description: "Nombre comercial de la opcion 2 (basico).",
   },
@@ -736,9 +744,8 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{PRECIO_EXTRA}}",
-    oculto: true,
-    label: "Diferencia de precio",
-    description: "Diferencia entre combo y opción 2.",
+    label: "Diferencia de precio (solo el número)",
+    description: "Cuánto más cuesta el full que el básico, solo el número (ej.: 4). Igual que {{PRECIO_ADICIONAL}}. Con moneda: {{PRECIO_DIFERENCIA}}.",
   },
   {
     token: "{{PRECIO_EXTRA_COMPLETO}}",
@@ -788,11 +795,13 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   // que no haya que recordar cuál tiene cuál.
   {
     token: "{{PRODUCTO_UPSELL}}",
+    oculto: true,
     label: "Nombre del producto adicional",
     description: "El 3er producto, el que se ofrece después de entregar.",
   },
   {
     token: "{{PRECIO_UPSELL}}",
+    oculto: true,
     label: "Precio del producto adicional",
     description: "Precio del 3er producto en Doble Oferta + Upsell.",
   },
@@ -817,29 +826,28 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   {
     token: "{{PRECIO_COMPLETO}}",
     label: "Precio completo",
-    description: "Precio con símbolo y nombre de moneda según país.",
+    description: "Precio del producto de la ficha (en un cobro, el que cobra), con su moneda según país. Igual que {{PRECIO_UPSELL}}.",
   },
   {
     token: "{{PRECIO_COMPLETO_MAYUSCULAS}}",
-    oculto: true,
     label: "Precio completo en mayúsculas",
     description: "Ej.: S/. 7 SOLES o $ 2 DÓLARES, según país.",
   },
   {
     token: "{{PRECIO_COMPLETO_MINUSCULAS}}",
-    oculto: true,
     label: "Precio completo en minúsculas",
     description: "Ej.: S/. 7 soles o $ 2 dólares, según país.",
   },
   {
     token: "{{PRECIO_MERCADO}}",
     label: "Precio anterior / de mercado",
-    description: "Precio referencial con simbolo y moneda segun pais.",
+    description: "Precio «antes» del producto de la ficha, con su moneda según país. Igual que {{PRECIO_ANTES_UPSELL}}.",
   },
   {
     // Funcionaba desde siempre pero no estaba en la lista: existía y era
     // invisible. Quien no lo tuviera ya escrito no podía descubrirlo.
     token: "{{ENLACE_ANUNCIO}}",
+    oculto: true,
     label: "Enlace del anuncio",
     description:
       "El enlace propio del anuncio por el que entró ese cliente. Se llena en la variante del regalo; sin enlace configurado no imprime nada.",
@@ -863,16 +871,16 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
     // básico, y aquí lo que cuesta. Antes el producto y su precio se llamaban
     // distinto —"complementario" y "diferencia"— y no se emparejaban al escribir.
     token: "{{PRECIO_COMPLEMENTARIO}}",
+    oculto: true,
     label: "Precio del producto complementario",
     description:
       "Solo en Order Bump: lo que cuesta sumarle el complementario al básico, que es lo mismo que le falta pagar a quien ya se llevó el básico y quiere el full. Con su moneda.",
   },
   {
     token: "{{PRECIO_DIFERENCIA}}",
-    oculto: true,
-    label: "Diferencia para subir al full",
+    label: "Diferencia para subir al full (con moneda)",
     description:
-      "El mismo dato que el precio del complementario, con su nombre viejo. Sigue funcionando en los textos ya escritos; para escribir nuevos usa el de arriba.",
+      "Cuánto más cuesta el full que el básico, con su moneda (ej.: S/. 4 Soles). Igual que {{PRECIO_COMPLEMENTARIO}} y {{PRECIO_EXTRA_COMPLETO}}, que siguen funcionando.",
   },
   {
     token: "{{PRECIO_ANTES_BASE}}",
@@ -886,6 +894,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{PRECIO_ANTES_UPSELL}}",
+    oculto: true,
     label: "Precio anterior del extra",
     description: "El «antes» tachado del tercer producto, con su moneda.",
   },
@@ -912,6 +921,7 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{NOMBRE_RECEPTOR}}",
+    oculto: true,
     label: "Nombre del receptor de pago",
     description:
       "Nombre configurado para validar el comprobante del país seleccionado.",
@@ -930,20 +940,17 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{METODOS_DE_PAGO_POR_PAIS}}",
-    oculto: true,
     label: "Métodos de pago por país",
     description:
       "Inserta el texto de métodos configurado para el país del cliente, en esta misma burbuja.",
   },
   {
     token: "{{MONEDA}}",
-    oculto: true,
     label: "Símbolo de moneda",
     description: "S/, $, Bs, etc. según país.",
   },
   {
     token: "{{CURRENCY}}",
-    oculto: true,
     label: "Código de moneda",
     description: "PEN, USD, COP, MXN, etc. para referencia técnica.",
   },
@@ -1262,13 +1269,11 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
   // semimodalidad se elige en la tienda) y ese filtro escondía los de básico, full y upsell que sus
   // tiendas de doble oferta y order bump sí usan, y que el tablero llena con los productos de cada
   // ficha (ver tablero/comodines.ts). La descripción de cada uno ya dice dónde se llena.
-  // Y TAMBIÉN LOS «OCULTOS» (24/10/2026): «te pedí todos los comodines y no aparecen todos». Son
-  // alias y formas de la moneda que siguen funcionando; van al final para no estorbar a los de uso
-  // diario.
-  const base = [
-    ...BASE_PLACEHOLDER_OPTIONS.filter((option) => !option.oculto),
-    ...BASE_PLACEHOLDER_OPTIONS.filter((option) => option.oculto),
-  ];
+  // LOS «OCULTOS» YA NO SALEN (01/11/2026). Él: «esconde los que no llevan a ningún lado… que no salgan ni
+  // en el selector de comodines al escribir "{{" ni en la lista de comodines». Son los que en el tablero no
+  // funcionan y los repetidos (de cada grupo que da lo mismo queda uno a la vista). Escritos en un texto
+  // siguen funcionando igual: esto es la lista, no el bot.
+  const base = BASE_PLACEHOLDER_OPTIONS.filter((option) => !option.oculto);
   const custom = (cfg?.custom_placeholders ?? [])
     .map((item) => {
       const key = normalizePlaceholderKey(item.key ?? "");
@@ -37669,7 +37674,9 @@ function EditorEmojiTextarea({
               .toLowerCase()
               .includes(placeholderQuery.toLowerCase())
           )
-          .slice(0, 8);
+          // TODOS, CON SU BARRA (01/11/2026): el tope de 8 escondía comodines sin avisar. Él: «que todos los
+          // comodines sí se puedan seleccionar».
+          .slice(0, 200);
 
   function insertAtCursor(text: string) {
     const ta = textareaRef.current;
@@ -53273,15 +53280,14 @@ function AjustesTab({
           </div>
           <p className="mt-2 text-[11px] text-emerald-900">
             Estos comodines no se eliminan desde aquí porque forman parte del
-            motor del bot. La lista muestra los que se ofrecen al escribir{" "}
-            <code>{"{{"}</code>; cada modalidad ve solo los que tienen sentido
-            en ella.{" "}
+            motor del bot. La lista muestra los mismos que se ofrecen al escribir{" "}
+            <code>{"{{"}</code>, todos.{" "}
             {BASE_PLACEHOLDER_OPTIONS.filter((option) => option.oculto).length >
               0 && (
               <>
                 Hay{" "}
                 {BASE_PLACEHOLDER_OPTIONS.filter((option) => option.oculto).length}{" "}
-                más que ya no se proponen por repetir lo que hace otro, y que{" "}
+                más escondidos (repetidos de otro, o que en el tablero no llevan a ningún lado) que{" "}
                 <strong>siguen funcionando</strong> si los tienes escritos.
               </>
             )}
