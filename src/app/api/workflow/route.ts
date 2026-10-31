@@ -1715,7 +1715,30 @@ function contenidoRecordado(): Record<string, unknown> | null {
   }
 }
 
-export async function GET() {
+/** Por tienda: los canales cuyo tablero tiene fichas. Lo enseña Mis tiendas sin cargar los tableros. */
+function resumenDeTableros(t: unknown): Record<string, { canales: string[]; encendidos: string[] }> {
+  const fuera: Record<string, { canales: string[]; encendidos: string[] }> = {};
+  for (const [id, porCanal] of Object.entries((t ?? {}) as Record<string, unknown>)) {
+    if (!porCanal || typeof porCanal !== "object") continue;
+    const p = porCanal as Record<string, { fichas?: unknown[] } | undefined>;
+    // Lo guardado antes de los canales es el tablero de WhatsApp (como `leeTablerosPorTienda`).
+    const comoCanales = Array.isArray((p as { fichas?: unknown[] }).fichas) ? { whatsapp: p as { fichas?: unknown[] } } : p;
+    const lista = Object.entries(comoCanales) as Array<[string, { fichas?: unknown[]; encendido?: boolean } | undefined]>;
+    fuera[id] = {
+      canales: lista.filter(([, c]) => Array.isArray(c?.fichas) && c.fichas.length > 0).map(([k]) => k),
+      encendidos: lista.filter(([, c]) => c?.encendido === true).map(([k]) => k),
+    };
+  }
+  return fuera;
+}
+
+export async function GET(req: NextRequest) {
+  // TIENDA POR TIENDA (01/11/2026): «?tableros=no» = todo menos los tableros (con un resumen de qué tienda
+  // tiene tablero en qué canal); «?tablero=<tienda>» = solo el tablero de esa tienda, en el formato del editor.
+  // Sin nada, lo de siempre (todo).
+  const pide = req?.nextUrl?.searchParams;
+  const sinTableros = pide?.get("tableros") === "no";
+  const soloTablero = pide?.get("tablero") ?? "";
   if (!fs.existsSync(CONFIG_PATH)) {
     return NextResponse.json(
       { error: "No se pudo leer config/intro-data.yaml" },
@@ -1737,6 +1760,12 @@ export async function GET() {
       { error: "El YAML actual no es válido, revísalo antes de editar" },
       { status: 422 }
     );
+  }
+
+  if (soloTablero) {
+    const suyo = (config?.tableros as Record<string, unknown> | undefined)?.[soloTablero];
+    const leido = suyo ? leeTablerosPorTienda({ [soloTablero]: suyo }, (pasos) => pasos.map((p) => readStep(p as Record<string, unknown>))) : {};
+    return NextResponse.json({ tienda: soloTablero, tablero: (leido as Record<string, unknown>)[soloTablero] ?? null });
   }
 
   const intro_sequence: EditorStep[] = Array.isArray(config?.intro_sequence)
@@ -2948,9 +2977,11 @@ export async function GET() {
       // EL TABLERO (22/10/2026): a diferencia de la pizarra, el bot SÍ lo lee. Las burbujas van
       // en el formato del editor, como las demás.
       // Uno por tienda Y POR CANAL (23/10/2026); los guardados antes, como el de WhatsApp.
-      tableros: leeTablerosPorTienda(config?.tableros, (pasos) =>
-        pasos.map((p) => readStep(p as Record<string, unknown>))
-      ),
+      tableros: sinTableros
+        ? undefined
+        : leeTablerosPorTienda(config?.tableros, (pasos) => pasos.map((p) => readStep(p as Record<string, unknown>))),
+      // Sin tableros: qué tienda tiene tablero en qué canal (Mis tiendas lo enseña) y si tiene fichas.
+      tableros_resumen: sinTableros ? resumenDeTableros(config?.tableros) : undefined,
       // Los WORKFLOWS: tableros sin tienda que arrancan cuando algo los activa.
       workflows: leeTableros(config?.workflows, (pasos) =>
         pasos.map((p) => readStep(p as Record<string, unknown>))
@@ -3258,10 +3289,27 @@ export async function POST(req: NextRequest) {
   }
   // EL TABLERO, por el mismo carril. Solo si el panel lo manda: un editor viejo no lo borra.
   if (body.tableros && typeof body.tableros === "object") {
-    doc.set(
-      "tableros",
-      leeTablerosPorTienda(body.tableros, (pasos) => pasos.map((p) => writeStep(p as EditorStep)))
-    );
+    const nuevos = leeTablerosPorTienda(body.tableros, (pasos) => pasos.map((p) => writeStep(p as EditorStep))) as Record<string, unknown>;
+    if (body.tableros_parciales === true) {
+      // TIENDA POR TIENDA (01/11/2026). Él: «debería cargar tienda por tienda». El editor solo trae los tableros
+      // de las tiendas que abrió, y solo esos manda. LOS DEMÁS SE QUEDAN TAL CUAL (los de antes, sin tocar ni
+      // un byte). Y un tablero que llega VACÍO cuando en el disco tiene fichas no pisa al del disco: sería un
+      // tablero que no terminó de cargar, no uno que él vació.
+      const antes = (loQueHabia.tableros && typeof loQueHabia.tableros === "object" ? loQueHabia.tableros : {}) as Record<string, unknown>;
+      const fichasDe = (t: unknown) =>
+        Object.values((t ?? {}) as Record<string, { fichas?: unknown[] } | undefined>).reduce((n, c) => n + (Array.isArray(c?.fichas) ? c.fichas.length : 0), 0);
+      const mezcla: Record<string, unknown> = { ...antes };
+      for (const [id, t] of Object.entries(nuevos)) {
+        if (fichasDe(t) === 0 && fichasDe(antes[id]) > 0) {
+          console.warn(`[guardar] el tablero de ${id} llegó vacío y en el disco tiene fichas: se conserva el del disco`);
+          continue;
+        }
+        mezcla[id] = t;
+      }
+      doc.set("tableros", mezcla);
+    } else {
+      doc.set("tableros", nuevos);
+    }
   }
   if (body.workflows && typeof body.workflows === "object") {
     doc.set(

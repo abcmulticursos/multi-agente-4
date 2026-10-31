@@ -1099,6 +1099,18 @@ const PlaceholderOptionsContext = createContext<PlaceholderOption[]>(
 );
 
 /**
+ * TIENDA POR TIENDA (01/11/2026). Él: «debería cargar tienda por tienda, tener todas las tiendas abiertas en
+ * segundo plano es una locura». `listo(id)`: su tablero ya está en el editor (o no tiene ninguno en el disco).
+ * `cargar(id)`: lo trae (una vez) y lo devuelve. Mientras no está listo, el tablero NO se puede editar: así
+ * nunca se guarda uno a medio cargar (y el servidor, además, no deja que uno vacío pise al del disco).
+ */
+type CargaDeTableros = {
+  listo: (tiendaId: string) => boolean;
+  cargar: (tiendaId: string) => Promise<NonNullable<FullConfig["tableros"]>[string] | null>;
+};
+const CargaDeTablerosContext = createContext<CargaDeTableros | null>(null);
+
+/**
  * LAS CUENTAS GUARDADAS (sus cifras → su comodín), para el aviso amarillo de cada caja de texto:
  * un número escrito a mano no cambia al cambiar la cuenta ni el usuario que cobra (23/10/2026).
  * Ver `src/lib/editor/numeros-a-mano.ts`.
@@ -2453,6 +2465,12 @@ interface FullConfig {
   /** EL TABLERO DE CADA TIENDA (22/10/2026): la ruta armable que el bot SÍ sigue. Ver
    *  `PantallaDelTablero` y src/lib/tablero/. */
   tableros?: Record<string, Partial<Record<"whatsapp" | "messenger" | "instagram", TableroEnElEditor>>>;
+  /**
+   * TIENDA POR TIENDA (01/11/2026): el editor abre SIN los tableros y trae cada uno al entrar a su tienda
+   * (`CargaDeTablerosContext`). Esto dice qué tiendas tienen tablero en el disco (y en qué canales con fichas).
+   * Sin esto (un servidor viejo), todos vienen cargados como antes. No se guarda.
+   */
+  tableros_resumen?: Record<string, { canales: string[]; encendidos?: string[] }>;
   /** LOS WORKFLOWS (23/10/2026): tableros sin tienda, que arrancan cuando algo los activa. */
   workflows?: Record<string, TableroEnElEditor>;
   /** Tus productos. El papel que juega cada uno lo decide la alineación de cada
@@ -7509,6 +7527,49 @@ export default function EditorPage() {
     cfgRef.current = cfg;
   }, [cfg]);
 
+  // TIENDA POR TIENDA (01/11/2026): trae el tablero de una tienda al entrar a ella. Se pone en el borrador Y
+  // en la referencia de «sin guardar», así traerlo no cuenta como un cambio tuyo.
+  const tablerosEnCamino = useRef(new Map<string, Promise<NonNullable<FullConfig["tableros"]>[string] | null>>());
+  const cargaDeTableros = useMemo<CargaDeTableros>(
+    () => ({
+      listo: (id) => {
+        // El de ESTA pintada (la referencia se pone al día después de pintar).
+        const c = cfg;
+        if (!id || !c?.tableros_resumen) return true;
+        return !!c.tableros?.[id] || !(id in c.tableros_resumen);
+      },
+      cargar: (id) => {
+        const c = cfgRef.current;
+        if (!id || !c) return Promise.resolve(null);
+        if (c.tableros?.[id] || !c.tableros_resumen || !(id in c.tableros_resumen)) return Promise.resolve(c.tableros?.[id] ?? null);
+        const enCamino = tablerosEnCamino.current.get(id);
+        if (enCamino) return enCamino;
+        const promesa = (async () => {
+          const r = await fetch(`/api/workflow?tablero=${encodeURIComponent(id)}`, { cache: "no-store" });
+          const d = (await r.json()) as { tablero?: NonNullable<FullConfig["tableros"]>[string] | null; error?: string };
+          if (!r.ok) throw new Error(d?.error ?? "No se pudo cargar el tablero");
+          const t = d.tablero ?? {};
+          setCfg((antes) => (antes && !antes.tableros?.[id] ? { ...antes, tableros: { ...(antes.tableros ?? {}), [id]: t } } : antes));
+          setBaseline((antes) => {
+            try {
+              const b = JSON.parse(antes) as FullConfig;
+              if (b.tableros?.[id]) return antes;
+              b.tableros = { ...(b.tableros ?? {}), [id]: t };
+              return JSON.stringify(b);
+            } catch {
+              return antes;
+            }
+          });
+          return t;
+        })().finally(() => tablerosEnCamino.current.delete(id));
+        tablerosEnCamino.current.set(id, promesa);
+        return promesa;
+      },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cfg]
+  );
+
   useEffect(() => {
     if (!cfg || postventaFarewellsFocusedRef.current) return;
     const source = cfg.prompt_sections.postventa ?? "";
@@ -8023,9 +8084,11 @@ export default function EditorPage() {
   async function load() {
     setLoadError(null);
     try {
-      const res = await fetch("/api/workflow", { cache: "no-store" });
+      // TIENDA POR TIENDA (01/11/2026): sin los tableros; cada uno llega al entrar a su tienda.
+      const res = await fetch("/api/workflow?tableros=no", { cache: "no-store" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Error al cargar");
+      if (data && typeof data === "object" && !(data as FullConfig).tableros) (data as FullConfig).tableros = {};
       // La huella va aparte: no es contenido y no debe viajar dentro de la configuración.
       huellaAlAbrir.current = typeof data?.version_del_archivo === "string" ? data.version_del_archivo : "";
       delete (data as { version_del_archivo?: unknown }).version_del_archivo;
@@ -9230,6 +9293,8 @@ export default function EditorPage() {
           ...clean,
           ...(huellaAlAbrir.current ? { version_del_archivo: huellaAlAbrir.current } : {}),
           ...(encima ? { guardar_encima: true } : {}),
+          // Solo van los tableros que se abrieron: el servidor deja los demás como están.
+          ...(clean.tableros_resumen ? { tableros_parciales: true, tableros_resumen: undefined } : {}),
           ...extra,
         });
         let comprimido: ArrayBuffer | null = null;
@@ -10237,6 +10302,7 @@ export default function EditorPage() {
   ) : null;
 
   return (
+    <CargaDeTablerosContext.Provider value={cargaDeTableros}>
     <PlaceholderOptionsContext.Provider value={placeholderOptions}>
     <NumerosGuardadosContext.Provider value={numerosGuardados}>
     <PaymentMethodsContext.Provider value={metodosDePagoConfigurados}>
@@ -17772,6 +17838,7 @@ export default function EditorPage() {
     </PaymentMethodsContext.Provider>
     </NumerosGuardadosContext.Provider>
     </PlaceholderOptionsContext.Provider>
+    </CargaDeTablerosContext.Provider>
   );
 }
 
@@ -27131,6 +27198,7 @@ function VistaPizarra({
 
   // LO ÚLTIMO DE TODO, para que cada clic trabaje sobre lo que hay AHORA en el borrador.
   const vivo = useRef({ cfg, canal, tiendaId, semi, piezas: [] as PiezaDePizarra[] });
+  const cargaDeTableros = useContext(CargaDeTablerosContext);
   vivo.current = { ...vivo.current, cfg, canal, tiendaId, semi };
   const aplicar = (nuevo: FullConfig | null) => {
     if (!nuevo) return;
@@ -29818,8 +29886,19 @@ function VistaPizarra({
               <button
                 type="button"
                 disabled={!tienda}
-                onClick={() => {
-                  const datos = tienda ? exportarTienda(vivo.current.cfg, tienda.id) : null;
+                onClick={async () => {
+                  // TIENDA POR TIENDA: su tablero primero (puede no estar cargado), para que el archivo lo lleve.
+                  let base = vivo.current.cfg;
+                  if (tienda && cargaDeTableros && !cargaDeTableros.listo(tienda.id)) {
+                    try {
+                      const t = await cargaDeTableros.cargar(tienda.id);
+                      if (t) base = { ...base, tableros: { ...(base.tableros ?? {}), [tienda.id]: t } };
+                    } catch {
+                      window.alert("No pude traer el tablero de esta tienda. Vuelve a intentarlo.");
+                      return;
+                    }
+                  }
+                  const datos = tienda ? exportarTienda(base, tienda.id) : null;
                   if (!datos) return;
                   const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
                   const a = document.createElement("a");
@@ -30908,7 +30987,53 @@ function textoDeLaBurbuja(s: EditorStep | undefined): string {
   return (s.texts ?? []).find((t) => t?.trim())?.trim() ?? "";
 }
 
-function PantallaDelTablero({
+/**
+ * EL CANDADO DE LA CARGA (01/11/2026): mientras el tablero de esta tienda no llegó, no se pinta el tablero
+ * (no se puede editar ni guardar uno a medio cargar). Cuando llega, el de siempre.
+ */
+function PantallaDelTablero(props: Parameters<typeof PantallaDelTableroCargada>[0]) {
+  const carga = useContext(CargaDeTablerosContext);
+  const esWorkflow = props.clave.startsWith("wf:");
+  const tiendas = props.cfg.tiendas ?? [];
+  const tienda = esWorkflow ? undefined : tiendas.find((t) => t.id === props.clave) ?? tiendas[0];
+  const tiendaId = tienda?.id ?? "";
+  const listo = esWorkflow || !carga || !tiendaId || carga.listo(tiendaId);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (listo || !carga) return;
+    setError(null);
+    carga.cargar(tiendaId).catch((e) => setError(e instanceof Error ? e.message : "No se pudo cargar el tablero"));
+  }, [listo, tiendaId, carga]);
+  if (listo) return <PantallaDelTableroCargada {...props} />;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-8 text-tinta">
+      {error ? (
+        <>
+          <p className="text-sm font-semibold text-rose-700">No pude traer el tablero de «{tienda?.nombre?.trim() || "esta tienda"}»: {error}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              carga?.cargar(tiendaId).catch((e) => setError(e instanceof Error ? e.message : "No se pudo cargar el tablero"));
+            }}
+            className="rounded-md bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700"
+          >
+            Reintentar
+          </button>
+        </>
+      ) : (
+        <p className="text-sm text-tinta-suave" data-cargando-tablero>
+          Cargando el tablero de «{tienda?.nombre?.trim() || "la tienda"}»…
+        </p>
+      )}
+      <button type="button" onClick={props.onVolver} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-relleno">
+        ← Mis tiendas
+      </button>
+    </div>
+  );
+}
+
+function PantallaDelTableroCargada({
   cfg,
   clave,
   tema,
@@ -33512,6 +33637,7 @@ function MisTiendas({
   const [menuDe, setMenuDe] = useState<string | null>(null);
   const [datosDe, setDatosDe] = useState<string | null>(null);
   const [duplicarDe, setDuplicarDe] = useState<string | null>(null);
+  const carga = useContext(CargaDeTablerosContext);
   const [buscar, setBuscar] = useState("");
   // EL ESTADO REAL DE CADA NÚMERO (22/10/2026): «🟢 Activa» salía aunque su número estuviera pausado
   // o ni siquiera conectado aquí, y entonces nadie contestaba. Solo lee la base, nada de Meta.
@@ -33686,9 +33812,12 @@ function MisTiendas({
                 {onTablero &&
                   (() => {
                     // Encendido en algún canal: se dice en cuáles.
-                    const enCanales = Object.entries(cfg.tableros?.[t.id] ?? {})
-                      .filter(([, tb]) => tb?.encendido)
-                      .map(([c]) => (c === "whatsapp" ? "🟢" : c === "messenger" ? "🔵" : "🟣"));
+                    // Sin su tablero cargado (tienda por tienda), lo dice el resumen que trajo el editor al abrir.
+                    const enCanales = (
+                      cfg.tableros?.[t.id]
+                        ? Object.entries(cfg.tableros[t.id] ?? {}).filter(([, tb]) => tb?.encendido).map(([c]) => c)
+                        : cfg.tableros_resumen?.[t.id]?.encendidos ?? []
+                    ).map((c) => (c === "whatsapp" ? "🟢" : c === "messenger" ? "🔵" : "🟣"));
                     return (
                       <button
                         type="button"
@@ -33935,8 +34064,20 @@ function MisTiendas({
         <GuardarTiendaComo
           original={aDuplicar.nombre?.trim() || "Tienda"}
           onCerrar={() => setDuplicarDe(null)}
-          onGuardar={(nombre) => {
-            const r = duplicarTienda(cfg, aDuplicar.id, nombre);
+          onGuardar={async (nombre) => {
+            // Primero su tablero (tienda por tienda: puede no estar cargado todavía), para copiarlo entero.
+            let base = cfg;
+            if (carga && !carga.listo(aDuplicar.id)) {
+              try {
+                const t = await carga.cargar(aDuplicar.id);
+                if (t) base = { ...cfg, tableros: { ...(cfg.tableros ?? {}), [aDuplicar.id]: t } };
+              } catch {
+                setDuplicarDe(null);
+                window.alert("No pude traer el tablero de esa tienda para copiarlo. Vuelve a intentarlo.");
+                return;
+              }
+            }
+            const r = duplicarTienda(base, aDuplicar.id, nombre);
             setDuplicarDe(null);
             if (!r) return;
             onCambiar(r.cfg);
