@@ -1350,7 +1350,7 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 891
+      x: 880
       y: -143
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
@@ -1596,6 +1596,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mvw6hswp-gghur
+                      enabled: false
                       title: YAPE
                       keywords:
                         - yape
@@ -1623,6 +1624,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw6hswp-1xxiz
+                      enabled: false
                       title: PLIN
                       keywords:
                         - pli
@@ -1650,6 +1652,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw6hswp-1u1nm
+                      enabled: false
                       title: BCP
                       keywords:
                         - bcp
@@ -1678,6 +1681,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw6hswp-g6abf
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -1733,6 +1737,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: dc700b60-f7c7-4719-a760-f2b80515381e
+                      enabled: false
                       title: YAPE
                       keywords:
                         - yape
@@ -1760,6 +1765,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: 3f0b983a-fc43-405d-8a0a-374081278629
+                      enabled: false
                       title: PLIN
                       keywords:
                         - pli
@@ -1787,6 +1793,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: dfe2b6d9-5d20-406f-afc7-706586aaa976
+                      enabled: false
                       title: BCP
                       keywords:
                         - bcp
@@ -1815,6 +1822,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: efc10a91-7673-431d-ae65-98b1c271aa21
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
