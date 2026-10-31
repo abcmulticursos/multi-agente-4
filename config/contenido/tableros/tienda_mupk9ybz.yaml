@@ -990,7 +990,7 @@ whatsapp:
     - id: f-mvvfznys-u8svs
       tipo: mensaje
       x: -330
-      y: 198
+      y: 187
       steps:
         - type: text
           body_variants:
@@ -1561,8 +1561,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: -88
-      y: -165
+      x: -77
+      y: -286
       seguimientos:
         - id: s-mvw6hswp-o7ekg
           minutos: 2
@@ -1594,6 +1594,15 @@ whatsapp:
 
                       ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
                   delay_after_sec: 6
+                  buttons:
+                    - id: 2028ad46-32ef-4a1d-8cf9-005648061475
+                      label: SUPER PACK
+                      action: send_steps
+                      steps: []
+                    - id: f10dc3e2-6aa8-4fc4-ac4e-3426b1d1fa34
+                      label: SOLO GRAFISMO
+                      action: send_steps
+                      steps: []
                   decisions:
                     - id: d-mvw6hswp-gghur
                       enabled: false
@@ -1735,6 +1744,15 @@ whatsapp:
 
                       *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                   delay_after_sec: 6
+                  buttons:
+                    - id: 0fed6169-b197-4869-acd8-2e0e610e5739
+                      label: SUPER PACK
+                      action: send_steps
+                      steps: []
+                    - id: 39b2da38-e654-4a9b-8cde-408bedb7cb2f
+                      label: SOLO GRAFISMO
+                      action: send_steps
+                      steps: []
                   decisions:
                     - id: dc700b60-f7c7-4719-a760-f2b80515381e
                       enabled: false
@@ -2396,6 +2414,26 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: siguiente
       a: f-mvw6hswp-ld1vx
+    - id: c-mvwudtex-18j
+      de: f-mvw6hswp-ld1vx
+      salida: btn:2028ad46-32ef-4a1d-8cf9-005648061475
+      a: f-mvvo0a7c-uyvc
+      vista: colita
+    - id: c-mvwudxvt-eyr
+      de: f-mvw6hswp-ld1vx
+      salida: btn:0fed6169-b197-4869-acd8-2e0e610e5739
+      a: f-mvvo0a7c-uyvc
+      vista: colita
+    - id: c-mvwue2ld-6jm
+      de: f-mvw6hswp-ld1vx
+      salida: btn:f10dc3e2-6aa8-4fc4-ac4e-3426b1d1fa34
+      a: f-mvw3kh4y-eknk7
+      vista: colita
+    - id: c-mvwue5qh-nzo
+      de: f-mvw6hswp-ld1vx
+      salida: btn:39b2da38-e654-4a9b-8cde-408bedb7cb2f
+      a: f-mvw3kh4y-eknk7
+      vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
