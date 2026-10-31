@@ -3,13 +3,13 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: 55
-      y: 0
+      x: 88
+      y: 22
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
-      x: 385
-      y: 0
+      x: 3531
+      y: -1243
       titulo: GRAFISMO FONETICO INTRO 1
       steps:
         - type: text
@@ -387,8 +387,8 @@ whatsapp:
         - pmugne9ti
     - id: cobro-mvveb856-4
       tipo: cobro
-      x: 1050
-      y: 330
+      x: 4202
+      y: -913
       titulo: Cobro · GRAFISMO FONETICO
       steps:
         - type: text
@@ -420,8 +420,8 @@ whatsapp:
         metodos: true
     - id: seg-mvveb857-a
       tipo: seguimientos
-      x: 720
-      y: 990
+      x: 3872
+      y: -253
       titulo: Seguimientos
       presenta:
         - pmu39gpb1
@@ -913,8 +913,8 @@ whatsapp:
                   enabled: false
     - id: cobro-mvveb857-b
       tipo: cobro
-      x: 1050
-      y: 660
+      x: 4202
+      y: -583
       titulo: Cobro · SUPER PACK 2 EN 1
       steps:
         - type: text
@@ -946,8 +946,8 @@ whatsapp:
         metodos: true
     - id: msg-mvveb857-e
       tipo: mensaje
-      x: 1380
-      y: 1650
+      x: 4532
+      y: 407
       titulo: NO GRACIAS
       steps:
         - type: text
@@ -956,25 +956,25 @@ whatsapp:
           delay_after_sec: 6
     - id: entrega-mvveb857-i
       tipo: entregar
-      x: 1380
-      y: 0
+      x: 4532
+      y: -1243
       titulo: Entrega · GRAFISMO FONETICO
       producto_id: pmu39gpb1
     - id: entrega-mvveb857-k
       tipo: entregar
-      x: 1380
-      y: 660
+      x: 4532
+      y: -583
       titulo: Entrega · SUPER PACK 2 EN 1
       producto_id: pmugne9ti
     - id: regalo-mvveb857-o
       tipo: regalo
-      x: 1710
-      y: 0
+      x: 4862
+      y: -1243
       titulo: Regalo
     - id: f-mvvfyvy5-34lw
       tipo: mensaje
-      x: 3443
-      y: 1771
+      x: 407
+      y: -176
       steps:
         - type: text
           body_variants:
@@ -989,8 +989,8 @@ whatsapp:
           delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: 3751
-      y: 2057
+      x: 418
+      y: 143
       steps:
         - type: text
           body_variants:
@@ -1019,7 +1019,7 @@ whatsapp:
               📲 *Se envía directamente a tu Whatsapp o correo* 💌
           delay_after_sec: 6
         - type: image
-          drive_url: ""
+          drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
               *Además recibirás GRATIS estos complementos* ‼️👇🏼
@@ -1138,8 +1138,8 @@ whatsapp:
                   enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 5302
-      y: 2354
+      x: 2211
+      y: 594
       steps:
         - type: text
           body_variants:
@@ -1179,8 +1179,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg4f2j-8t6dd
       tipo: mensaje
-      x: 5346
-      y: 2695
+      x: 2255
+      y: 935
       steps:
         - type: text
           body_variants:
@@ -1206,8 +1206,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 4983
-      y: 1925
+      x: 1892
+      y: 165
       steps:
         - type: text
           body_variants:
@@ -1217,17 +1217,37 @@ whatsapp:
         modo: abierto
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 4301
-      y: 2013
+      x: 979
+      y: 253
       titulo: ficha intro de order bump
       steps:
-        - type: text
-          body_variants:
-            - antes de compartirte tu método de pago quiero comentarte algo que quizas te guste
+        - type: image
+          drive_url: https://drive.google.com/file/d/1rHdmJwTAd01NKnHr40qWQLCMEDn-ZOfu/view?usp=drive_link
+          caption_variants:
+            - |-
+              🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊
+
+              *Tenemos un KIT PREESCOLAR!* con muchas actividades *para niños de 2 a 6 años*. 📚👶🏻
+
+              ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
-        - type: text
-          body_variants:
-            - tenemos un {{PRODUCTO_FULL}} con tan solo {{precio_adicional}}
+        - type: image
+          drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
+          caption_variants:
+            - |-
+              🔴 *Si deseas Puedes Adquirir 1 o los 2 juntos o por separado!*  😊
+              __________
+
+              1️⃣ *PACK 2 EN 1 - (Los 2 Kits juntos 📚+📚) 👉🏼 $ 4.50 Dólares*
+
+              💡 *AGREGANDO $ 1.50 Dólares MÁS* que el Grafismo Fonético te llevas en total:
+
+              🅰️) *EL KIT DE GRAFISMO FONETICO* 📔
+              🅱️) *➕ EL KIT PREESCOLAR* 📗
+              Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
+              __________
+
+              2️⃣ *Pero si deseas solo el KIT DE GRAFISMO FONETICO*  📚 solamente por *$ 3 Dólares*. 😊💵
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -1260,8 +1280,8 @@ whatsapp:
               steps: []
     - id: f-mvvo695b-vxex
       tipo: seguimientos
-      x: 4323
-      y: 2585
+      x: 979
+      y: 803
       seguimientos:
         - id: s-mvvo695b
           minutos: 3
@@ -1361,10 +1381,6 @@ whatsapp:
       de: intro-mvveb83v-2
       salida: siguiente
       a: seg-mvveb857-a
-    - id: c-mvvg1xak-zzj
-      de: f-mvvfyvy5-34lw
-      salida: siguiente
-      a: f-mvvfznys-u8svs
     - id: c-mvvo8pmm-2c6
       de: f-mvvfznys-u8svs
       salida: siguiente
@@ -1390,6 +1406,10 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: btn:63c2239a-f51e-480f-9aca-67348ff9ae51
       a: f-mvvo0a7c-uyvc
+    - id: c-mvw2fn0o-xlb
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: f-mvvfznys-u8svs
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
