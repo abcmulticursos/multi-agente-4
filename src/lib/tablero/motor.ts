@@ -24,6 +24,7 @@ import {
   listMetaWhatsAppConnections,
   scheduleAction,
   setClientEmail,
+  setClientName,
   setConversationState,
   setIntroPausedIndex,
   setMode,
@@ -68,6 +69,7 @@ import {
 import {
   AVISO_DE_ACTUALIZACION_POR_DEFECTO,
   esUnAcuseSeco,
+  extractNameFromMessage,
   messageHasPaymentConcern,
   scheduleGiftConsentWithDelay,
   sendConfiguredSteps,
@@ -101,6 +103,7 @@ import {
   pasosDeLaFicha,
   entregasDeLaFicha,
   eligeDeLaFicha,
+  pideElNombre,
 } from "./datos";
 import { laEntrega } from "./entregas";
 import {
@@ -653,6 +656,16 @@ async function irA(
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta.
       anotarPresentados(convoId, f.presenta ?? []);
       const { botones, cuadritos } = opcionesDe(pasosAEnviar);
+      // PIDE EL NOMBRE (01/11/2026): espera su respuesta (la lee `turnoDelTablero`). Si no contesta, sigue
+      // por «⏳ Si no responde» (o sus Seguimientos colgados ahí). Su «→» es «al dar su nombre».
+      if (pideElNombre(f)) {
+        const colgadosDelNombre = fichaDeSeguimientos(t, f.id, "sin_respuesta");
+        if (colgadosDelNombre) colgarSeguimientos(convo, colgadosDelNombre, t);
+        else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+          programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
+        console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» pregunta su nombre y espera`);
+        return;
+      }
       // Sin opciones sigue de largo… salvo que elija de palabra («✍️ Si elige X»): entonces espera.
       if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0) {
         await seguir("siguiente");
@@ -2632,6 +2645,19 @@ function laFichaHabloUltimo(conversationId: number, fichas: FichaDelTablero[]): 
   return false;
 }
 
+/**
+ * ¿ES SU PRIMERA RESPUESTA desde que la ficha habló? Se miran los mensajes desde que llegó a la ficha
+ * (`desde`), a partir de la primera burbuja del bot: si después del primer mensaje del cliente el bot
+ * ya contestó algo, esto ya no es la respuesta a esa pregunta.
+ */
+function esSuPrimeraRespuesta(conversationId: number, desde: number): boolean {
+  const desdeAhi = ultimosMensajes(conversationId, 30).filter((m) => Number(m.created_at) >= desde);
+  const habla = desdeAhi.findIndex((m) => m.role !== "user");
+  const despues = habla < 0 ? desdeAhi : desdeAhi.slice(habla);
+  const primero = despues.findIndex((m) => m.role === "user");
+  return primero < 0 || despues.slice(primero).every((m) => m.role === "user");
+}
+
 /** Lo reenvía, como la venta de siempre («Claro, te lo reenvío ahora mismo» + lo comprado). */
 function reenviarSiLoPide(convo: ConversationRow, texto: string): boolean {
   if (!texto.trim() || entregasDelCliente(convo.id).length === 0 || !pideLoQueCompro(texto)) return false;
@@ -2778,6 +2804,32 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   }
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+
+  // «AQUÍ LE PREGUNTO SU NOMBRE» (01/11/2026). Está en una ficha que pidió el nombre y esto es lo PRIMERO que
+  // contesta: se guarda como su nombre (el mismo lector de la venta de siempre) y sigue por «👤 Al dar su
+  // nombre». Si no parece un nombre (una pregunta, «precio»), la IA le contesta y sigue igual: la ficha no se
+  // queda esperando para siempre. Un comprobante o un botón no son un nombre: siguen su camino.
+  if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "") && !contenido.startsWith("bubble:")) {
+    const aqui = t.fichas.find((f) => f.id === estado?.ficha_id);
+    if (
+      aqui &&
+      !aqui.apagada &&
+      pideElNombre(aqui) &&
+      esSuPrimeraRespuesta(convo.id, estado.desde) &&
+      !hayComprobantePendiente(convo.id, estado.comprobante_leido ?? null)
+    ) {
+      const nombre = extractNameFromMessage(contenido);
+      if (nombre) {
+        setClientName(convo.id, nombre);
+        console.log(`[tablero] convo ${convo.id}: nombre capturado en «${aqui.titulo || aqui.id}»: "${nombre}"`);
+      } else {
+        console.log(`[tablero] convo ${convo.id}: «${aqui.titulo || aqui.id}» pidió el nombre y no parece uno → la IA contesta y sigue`);
+        await contestarConIA(convo, t);
+      }
+      if (!(await seguirPor(convo.id, t, aqui.id, "siguiente", 0))) tocarVuelta(convo.id);
+      return true;
+    }
+  }
 
   // «CON LO QUE PAGUÉ, ¿ME LLEVO X?» (28/10/2026, su conversación 101: la IA contestó «¡claro que sí! con lo
   // que ya pagaste puedes llevarte 100 CITAS sin pagar nada extra» — falso: el upsell va aparte y se paga

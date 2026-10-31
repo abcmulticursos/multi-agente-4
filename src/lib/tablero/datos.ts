@@ -423,6 +423,19 @@ export function eligeDeLaFicha(f: FichaDelTablero): string[] {
   return botones.length + cuadritos.length === 0 ? presenta : [];
 }
 
+/**
+ * «AQUÍ LE PREGUNTO SU NOMBRE» EN EL TABLERO (01/11/2026). Un Mensaje sin botones ni cuadritos con una
+ * burbuja que pide el nombre ESPERA la respuesta: lo que conteste se guarda como su nombre y sigue por
+ * «👤 Al dar su nombre»; si no contesta, por «⏳ Si no responde». Con botones o cuadritos no aplica: ahí
+ * lo que escriba es una elección, no un nombre.
+ */
+export function pideElNombre(f: FichaDelTablero): boolean {
+  if (f.tipo !== "mensaje") return false;
+  const pasos = pasosDeLaFicha(f);
+  const { botones, cuadritos } = opcionesDe(pasos);
+  return botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && pasos.some((s) => s.capturar_nombre === true);
+}
+
 const FICHAS_CON_RESPUESTA: TipoDeFicha[] = ["mensaje", "intro_ob", "seguimientos"];
 
 /** LO QUE MANDA UNA FICHA «ENTREGAR», en orden: su lista de entregas, o la principal de su producto. */
@@ -495,6 +508,15 @@ export function salidasDeLaFicha(
       // «⏳ Seguimientos» va a sus Seguimientos (salen mientras no elige; sus opciones siguen valiendo), y
       // «⏳ Si no responde» siempre se ve (a sus minutos, o al silencio del regalo si no tiene).
       if (!pregunta) {
+        // PIDE EL NOMBRE (01/11/2026): espera su respuesta, como una pregunta.
+        if (pideElNombre(f)) {
+          salidas.push({ clave: "siguiente", etiqueta: "👤 Al dar su nombre" });
+          salidas.push({
+            clave: "sin_respuesta",
+            etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde",
+          });
+          return salidas;
+        }
         salidas.push({ clave: "siguiente", etiqueta: "→" });
         return salidas;
       }

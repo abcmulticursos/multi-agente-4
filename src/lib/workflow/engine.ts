@@ -11904,7 +11904,8 @@ function normalizeSelectedPaymentMethod(route: string, msg: string): string {
     : route;
 }
 
-function extractNameFromMessage(msg: string): string | null {
+// Exportada (01/11/2026) para que el tablero lea el nombre con el MISMO lector; aquí no cambia nada.
+export function extractNameFromMessage(msg: string): string | null {
   const text = msg.trim();
   if (!text || text.length > 60) return null;
 

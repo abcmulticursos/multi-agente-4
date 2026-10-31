@@ -31508,18 +31508,31 @@ function PantallaDelTablero({
                       ["anuncios", "📣", "Anuncios", "Tus campañas y anuncios, y a qué ficha de este tablero lleva cada uno"],
                       ["prueba", "💬", "Simulador", "Chatea con el bot como un cliente, sin enviar nada a Meta"],
                       ["exportar", "⇅", "Exportar / importar tienda", "La tienda entera (con su tablero) en un archivo JSON, y traerla de vuelta"],
+                      ["duplicar", "⧉", "Duplicar esta tienda", "Una copia completa (productos, tablero, pizarra, cobrador), sin número y apagada: te quedas en la copia"],
                     ] as const
                   ).map(([v, icono, texto, ayuda]) => (
                     <button
                       key={v}
                       type="button"
                       title={ayuda}
-                      disabled={(v === "tienda" || v === "exportar") && !tienda}
+                      disabled={(v === "tienda" || v === "exportar" || v === "duplicar") && !tienda}
                       onClick={() => {
                         setMenuHerramientas(false);
                         // El simulador, en su propia pestaña (31/10/2026), como el botón verde.
                         if (v === "prueba") window.open("/simulador", "_blank", "noopener");
-                        else setVentanaDeHerramienta(v);
+                        // DUPLICAR DESDE EL TABLERO (01/11/2026). Él: «duplico la tienda y sobre ella trabajo». Es el
+                        // mismo «⧉ Duplicar» de Mis tiendas (`duplicarTienda`), y deja abierta la copia.
+                        else if (v === "duplicar") {
+                          if (!tienda) return;
+                          const r = duplicarTienda(cfg, tienda.id);
+                          if (!r) return;
+                          onSnapshot();
+                          aplicar(r.cfg);
+                          onTienda(r.id);
+                          setAvisoDelTablero(
+                            `Copia creada: «${tienda.nombre?.trim() || "Tienda"} (copia)». Ya estás en ella, sin número y con el tablero apagado. Guarda para que quede.`
+                          );
+                        } else setVentanaDeHerramienta(v);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
                     >
@@ -31841,6 +31854,21 @@ function PantallaDelTablero({
           workflows={workflows.filter((w) => w.id !== wfId)}
           paises={paises}
           paisInicial={paisDeSuManta(tablero, fichaDeAjustes, paisVisto)}
+          despuesDeLaVenta={(() => {
+            // ¿Se llega a esta ficha DESDE una Entrega (directo o pasando por otras)? Solo ahí sirve
+            // «Espera antes de salir» (el upsell): en la venta confundía (01/11/2026).
+            const vistos = new Set(tablero.fichas.filter((f) => f.tipo === "entregar").map((f) => f.id));
+            const cola = [...vistos];
+            while (cola.length) {
+              const id = cola.shift()!;
+              for (const c of tablero.cables)
+                if (c.de === id && !vistos.has(c.a)) {
+                  vistos.add(c.a);
+                  cola.push(c.a);
+                }
+            }
+            return vistos.has(fichaDeAjustes.id) && fichaDeAjustes.tipo !== "entregar";
+          })()}
           onAbrirPagos={(p) => {
             setAjustes(null);
             setPaisDePagos(p);
@@ -32514,11 +32542,14 @@ function AjustesDeLaFicha({
   workflows,
   paises,
   paisInicial,
+  despuesDeLaVenta = false,
   onAbrirBurbujas,
   onGuardar,
   onCerrar,
   onAbrirPagos,
 }: {
+  /** La ficha va después de una Entrega: solo ahí se ofrece «⏳ Espera antes de salir». */
+  despuesDeLaVenta?: boolean;
   /** Abre «Datos de pago por país» en ese país (los textos que el cobro manda por método). */
   onAbrirPagos?: (pais: string) => void;
   ficha: FichaEnElEditor;
@@ -32603,14 +32634,12 @@ function AjustesDeLaFicha({
             </div>
           )}
           {/* «⏳ ESPERA ANTES DE SALIR» (25/10/2026, punto 9): el upsell no sale en el mismo segundo de la
-              entrega. Vive aquí dentro; la tarjeta no muestra nada. */}
-          {ficha.tipo === "mensaje" && (
+              entrega. Vive aquí dentro; la tarjeta no muestra nada. Desde el 01/11/2026 solo se ve en las fichas
+              que van DESPUÉS de una Entrega (o si ya tiene un tiempo puesto): en la venta confundía. */}
+          {ficha.tipo === "mensaje" && (despuesDeLaVenta || (b.espera_min ?? 0) > 0) && (
             <div className={etiqueta}>
               ⏳ Espera antes de salir <span className="ml-2"><CampoDeTiempoDelTablero valor={b.espera_min} onCambio={(m) => setB({ ...b, espera_min: m })} /></span>
-              <span className={ayuda}>
-                Para el upsell después de la entrega: espera estos minutos antes de mandar sus burbujas. Si el cliente escribe mientras tanto, vuelve a
-                contar. Vacío = sale enseguida.
-              </span>
+              <span className={ayuda}>Después de la venta: cuánto espera antes de mandar estos mensajes. Vacío = enseguida.</span>
             </div>
           )}
           {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
@@ -32619,7 +32648,7 @@ function AjustesDeLaFicha({
               <span className={ayuda}>
                 {ficha.tipo === "correo"
                   ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
-                  : "Con botones o cuadritos, la salida «⏳ Si no responde» siempre se ve. Aquí pones cuánto espera, contado desde su último mensaje; vacío = el silencio del regalo de tus Ajustes. Si tiene «⏳ Seguimientos» conectados, mandan ellos y esta salida no se usa (por eso no se ve)."}
+                  : "Si nadie contesta en ese tiempo, pasa a la ficha conectada en «⏳ Si no responde». Vacío = el tiempo del regalo de tus Ajustes."}
               </span>
             </div>
           )}
@@ -38171,6 +38200,7 @@ function BubbleDecisionsEditor({
   useEscapeEnPila(() => setElegidos(new Set()), elegidos.size > 0);
   const copiados = useCuadritosCopiados();
   const losElegidos = decisions.filter((d) => elegidos.has(d.id));
+  const enElTablero = useContext(EnElTableroContext);
   // Los cuadritos de OTRA burbuja también son «afuera»: nunca quedan dos selecciones a la vez.
   const raiz = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -38426,8 +38456,10 @@ function BubbleDecisionsEditor({
       {/* EL PLAZO DE ESTA BURBUJA.
           Solo sale si la burbuja de verdad espera algo: un cuadrito ENCENDIDO o
           la pregunta del nombre. Sin eso no hay pausa que medir, y una casilla
-          de tiempo ahí sería un número que no hace nada. */}
-      {(pideNombre || decisions.some((d) => d.enabled !== false)) && (
+          de tiempo ahí sería un número que no hace nada.
+          En el TABLERO no sale (01/11/2026): ahí la espera es de la ficha
+          («⏰ Si no responde en») y esta casilla no hacía nada. */}
+      {!enElTablero && (pideNombre || decisions.some((d) => d.enabled !== false)) && (
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
           <label className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-amber-950">
             <span aria-hidden>🕐</span>
