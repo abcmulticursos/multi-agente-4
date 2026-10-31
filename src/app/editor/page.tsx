@@ -33083,7 +33083,7 @@ function AjustesDeLaFicha({
   const [buscarEntrega, setBuscarEntrega] = useState("");
   const [pais, setPais] = useState(paisInicial);
   const a = ASPECTO[ficha.tipo];
-  const cobro = b.cobro ?? { modo: "abierto" as const };
+  const cobro = b.cobro ?? { modo: "producto" as const };
   const tramos = cobro.tramos_por_pais?.[pais] ?? [];
   const ponCobro = (c: typeof cobro) => setB({ ...b, cobro: c });
   const ponTramos = (lista: typeof tramos) => ponCobro({ ...cobro, tramos_por_pais: { ...(cobro.tramos_por_pais ?? {}), [pais]: lista } });
@@ -33420,7 +33420,7 @@ function AjustesDeLaFicha({
           {ficha.tipo === "cobro" && (
             <div className="space-y-3">
               <div className="flex gap-2 text-xs">
-                {(["abierto", "producto"] as const).map((m) => (
+                {(["producto", "abierto"] as const).map((m) => (
                   <button key={m} type="button" onClick={() => ponCobro({ ...cobro, modo: m })} className={`rounded-md border px-3 py-1 font-semibold ${cobro.modo === m ? "border-amber-500 bg-amber-50" : "border-borde"}`}>
                     {m === "abierto" ? "Pago abierto (contribución)" : "Precio de un producto"}
                   </button>

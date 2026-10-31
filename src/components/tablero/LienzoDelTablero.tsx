@@ -1629,7 +1629,9 @@ export default function LienzoDelTablero({
       tipo,
       x: Math.round(donde.x),
       y: Math.round(donde.y),
-      ...(tipo === "cobro" ? { cobro: { modo: "abierto" as const } } : {}),
+      // UN COBRO NUEVO COBRA UN PRODUCTO (01/11/2026): nacía como «Pago abierto (contribución)» y él no
+      // encontraba dónde elegir el producto. La contribución se elige a propósito en sus ajustes.
+      ...(tipo === "cobro" ? { cobro: { modo: "producto" as const, metodos: true } } : {}),
       ...(tipo === "condicion" ? { condicion: { tipo: "compro" as const } } : {}),
       ...(tipo === "esperar" ? { minutos: 60 } : {}),
       ...(tipo === "reparto" ? { reparto: [{ id: "r1", peso: 1 }, { id: "r2", peso: 1 }] } : {}),
