@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 2123
-      y: 363
+      x: 2013
+      y: 407
       steps:
         - type: text
           body_variants:
@@ -1534,8 +1534,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 2134
-      y: 715
+      x: 2013
+      y: 704
       steps:
         - type: text
           body_variants:
@@ -1844,8 +1844,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2629
-      y: 781
+      x: 2596
+      y: 704
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
@@ -1997,6 +1997,16 @@ whatsapp:
       de: f-mvw3kh4y-eknk7
       salida: pagado
       a: f-mvw719ry-3fmww
+    - id: c-mvw732da-hel
+      de: f-mvw3kh4y-eknk7
+      salida: sin_pago
+      a: f-mvw3fadn-4b4pu
+      vista: colita
+    - id: c-mvw734y5-n3e
+      de: f-mvvo0a7c-uyvc
+      salida: sin_pago
+      a: f-mvw3fadn-4b4pu
+      vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
