@@ -10838,7 +10838,7 @@ export default function EditorPage() {
       {puertaDeModalidad && cfg && (
         <div
           className="fixed inset-0 z-[60] overflow-y-auto bg-black/50 p-4"
-          onClick={() => setPuertaDeModalidad(false)}
+          onClick={() => EL_CLIC_FUERA_CIERRA_LA_VENTANA && setPuertaDeModalidad(false)}
           role="dialog"
           aria-modal="true"
           aria-label="Qué modalidad deseas editar"
@@ -30835,7 +30835,9 @@ function VentanaFlotante({
   // Escape cierra solo la de más arriba (`useEscapeEnPila`): con un producto abierto encima, se cierra ése.
   useEscapeEnPila(() => onCerrar());
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={onCerrar}>
+    // SIN CERRAR AL HACER CLIC AFUERA (31/10/2026): «se cerró y todos mis cambios desaparecieron… la única
+    // manera de cerrarlos será con escape, cancelar o listo». Ver `EL_CLIC_FUERA_CIERRA_LA_VENTANA`.
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
       <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <div>
@@ -32553,7 +32555,7 @@ function AjustesDeLaFicha({
     </select>
   );
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={onCerrar}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
       <div className="prolijo max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <p className="text-sm font-black">
           {a.icono} {a.nombre}
@@ -33698,7 +33700,7 @@ function VentanaDeTexto({
     );
   }
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={onCerrar}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
       <div className="my-8 w-full max-w-4xl rounded-lg border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           <div>
@@ -33947,7 +33949,7 @@ function VentanaDelCobro({
   );
   if (incrustado) return cuerpo;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={onCerrar}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
       <div className="my-8 w-full max-w-4xl rounded-lg border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           <div>
@@ -37106,7 +37108,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   };
   const hayPropuestas = Object.keys(propuestas).length > 0;
   return (
-    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={onCerrar} data-ventana-del-tablero>
+    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined} data-ventana-del-tablero>
       <div className="my-10 w-full max-w-2xl rounded-xl border border-borde bg-tarjeta p-4 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
@@ -38474,7 +38476,7 @@ function BubbleDecisionModal({
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
           onClick={(evento) => {
             evento.stopPropagation();
-            setPalabrasAbiertas(false);
+            if (EL_CLIC_FUERA_CIERRA_LA_VENTANA) setPalabrasAbiertas(false);
           }}
         >
           <div
@@ -54156,7 +54158,7 @@ function ElegirAvatar({ actual, onListo, onCerrar }: { actual?: string; onListo:
       className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40"
       onClick={(e) => {
         e.stopPropagation();
-        onCerrar();
+        if (EL_CLIC_FUERA_CIERRA_LA_VENTANA) onCerrar();
       }}
     >
       <span
@@ -55978,7 +55980,7 @@ function VentanaClaveDelCerebro({
       aria-modal="true"
       aria-label="Contraseña para cambiar el Cerebro"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onCerrar();
+        if (EL_CLIC_FUERA_CIERRA_LA_VENTANA && e.target === e.currentTarget) onCerrar();
       }}
     >
       <form
@@ -57079,7 +57081,7 @@ function AdTagPicker({
         )}
       </div>
       {editingKey && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4" onMouseDown={() => setEditingKey(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4" onMouseDown={() => EL_CLIC_FUERA_CIERRA_LA_VENTANA && setEditingKey(null)}>
           <div className="w-full max-w-lg rounded-lg bg-tarjeta p-5 shadow-xl" onMouseDown={(event) => event.stopPropagation()}>
             {editing ? <>
               <div className="mb-3 flex items-center justify-between"><h3 className="font-bold text-neutral-900">Editar anuncio</h3><button type="button" onClick={() => setEditingKey(null)} className="text-sm text-neutral-500">Cerrar</button></div>
