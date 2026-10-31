@@ -424,6 +424,37 @@ export function eligeDeLaFicha(f: FichaDelTablero): string[] {
 }
 
 /**
+ * LOS CABLES HUÉRFANOS (01/11/2026). Él: «¿por qué de la ficha 4 sale un cable automáticamente de "si compra" al
+ * cobro?». Al borrar un botón o un cuadrito su cable se quedaba guardado, sin verse, y la línea «🛒 si compra»
+ * de los Seguimientos lo seguía dibujando. Aquí se quitan los cables «btn:» y «dec:» cuyo botón o cuadrito ya no
+ * está en su ficha. Se miran TODAS sus burbujas, también las apagadas y los cuadritos apagados: esos existen y
+ * su cable se queda. Sin huérfanos devuelve el MISMO objeto.
+ */
+export function sinCablesHuerfanos<
+  T extends {
+    fichas: Array<{ id: string; steps?: unknown[]; variantes?: Array<{ steps?: unknown[] }>; seguimientos?: Array<{ variantes?: Array<{ steps?: unknown[] }> }> }>;
+    cables: CableDelTablero[];
+  },
+>(t: T): T {
+  const ids = new Map<string, Set<string>>();
+  const juntar = (pasos: unknown[] | undefined, en: Set<string>) => {
+    for (const p of (pasos ?? []) as Array<{ buttons?: Array<{ id?: string }>; decisions?: Array<{ id?: string }> }>) {
+      for (const b of p?.buttons ?? []) if (b?.id) en.add(`btn:${b.id}`);
+      for (const d of p?.decisions ?? []) if (d?.id) en.add(`dec:${d.id}`);
+    }
+  };
+  for (const f of t.fichas) {
+    const en = new Set<string>();
+    juntar(f.steps, en);
+    for (const v of f.variantes ?? []) juntar(v.steps, en);
+    for (const s of f.seguimientos ?? []) for (const v of s.variantes ?? []) juntar(v.steps, en);
+    ids.set(f.id, en);
+  }
+  const quedan = t.cables.filter((c) => !(/^(btn|dec):/.test(c.salida) && ids.has(c.de) && !ids.get(c.de)!.has(c.salida)));
+  return quedan.length === t.cables.length ? t : { ...t, cables: quedan };
+}
+
+/**
  * «EL BÁSICO / EL FULL DE LA TIENDA» (01/11/2026). Él: «pensé que ya que la tienda tiene sus productos
  * definidos, el sistema debe entender automáticamente cuál es full y cuál es básico». Un Cobro o una Entrega
  * pueden guardar estos códigos en vez de un producto; al leer el tablero se cambian por los de la alineación

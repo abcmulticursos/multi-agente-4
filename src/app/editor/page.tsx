@@ -30,7 +30,7 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
-import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda } from "@/lib/tablero/datos";
+import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda, sinCablesHuerfanos } from "@/lib/tablero/datos";
 import { comodinesDeLaFichaEnTexto, type ProductoConPrecio } from "@/lib/tablero/comodines";
 import {
   aplicarPase,
@@ -31078,9 +31078,11 @@ function PantallaDelTableroCargada({
       window.localStorage.setItem("tablero-canal", c);
     } catch {}
   };
-  const tablero: TableroEnElEditor = esWorkflow
-    ? cfg.workflows?.[wfId] ?? tableroVacio()
-    : cfg.tableros?.[tiendaId]?.[canal] ?? tableroVacio();
+  const tableroGuardado: TableroEnElEditor | undefined = esWorkflow ? cfg.workflows?.[wfId] : cfg.tableros?.[tiendaId]?.[canal];
+  // SIN LOS CABLES DE BOTONES Y CUADRITOS YA BORRADOS (01/11/2026): no se dibujan, y con el próximo cambio
+  // (`guardar`) desaparecen del contenido. Ver `sinCablesHuerfanos`.
+  const tableroLimpio = useMemo(() => (tableroGuardado ? sinCablesHuerfanos(tableroGuardado) : undefined), [tableroGuardado]);
+  const tablero: TableroEnElEditor = tableroLimpio ?? tableroVacio();
   const [cajon, setCajon] = useState<string | null>(null);
   const [burbujaDelCajon, setBurbujaDelCajon] = useState<number | null>(null);
   const [verCerebro, setVerCerebro] = useState(false);
@@ -31225,12 +31227,14 @@ function PantallaDelTableroCargada({
           : { foto: perfil?.foto, color: perfil?.color_etiqueta, nombre: q.nombre || q.titular || "Cuenta del país", porDefecto: true };
     }
 
-  const guardar = (t: TableroEnElEditor) =>
-    aplicar(
+  const guardar = (sucio: TableroEnElEditor) => {
+    const t = sinCablesHuerfanos(sucio);
+    return aplicar(
       esWorkflow
         ? { ...cfg, workflows: { ...(cfg.workflows ?? {}), [wfId]: t } }
         : { ...cfg, tableros: { ...(cfg.tableros ?? {}), [tiendaId]: { ...(cfg.tableros?.[tiendaId] ?? {}), [canal]: t } } }
     );
+  };
   const cambiarFicha = (fid: string, cambio: Partial<FichaEnElEditor>) =>
     guardar({ ...tablero, fichas: tablero.fichas.map((f) => (f.id === fid ? { ...f, ...cambio } : f)) });
 

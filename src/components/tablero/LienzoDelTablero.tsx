@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, eligeDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -176,8 +176,16 @@ function caminosDeCompra(
       out.set(p.id, { clave: `compra:${p.id}`, destino: p, etiqueta: "🛒 si paga" });
       continue;
     }
+    // SOLO LO QUE EL BOT MANDA (01/11/2026): un botón de una burbuja APAGADA o un cuadrito apagado no se ve, así
+    // que tampoco lleva a comprar (él vio «si compra» saliendo de un botón apagado). Su cable se queda guardado.
+    const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(p as FichaDelTablero));
+    const activas = new Set([
+      ...botones.map((b) => `btn:${b.id}`),
+      ...cuadritos.map((d) => `dec:${d.id}`),
+      ...eligeDeLaFicha(p as FichaDelTablero).map((id) => `elige:${id}`),
+    ]);
     for (const c of t.cables) {
-      if (c.de !== p.id || !/^(btn|dec|elige):/.test(c.salida)) continue;
+      if (c.de !== p.id || !activas.has(c.salida)) continue;
       const d = t.fichas.find((f) => f.id === c.a);
       if (d && (d.tipo === "cobro" || d.tipo === "intro_ob")) destinos.set(d.id, d);
     }
