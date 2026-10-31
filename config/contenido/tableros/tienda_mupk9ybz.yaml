@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -275
-      y: 44
+      x: -715
+      y: 22
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
@@ -989,8 +989,8 @@ whatsapp:
           delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: 132
-      y: 154
+      x: -330
+      y: 198
       steps:
         - type: text
           body_variants:
@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 2629
-      y: 341
+      x: 1573
+      y: -22
       steps:
         - type: text
           body_variants:
@@ -1251,8 +1251,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 616
-      y: 165
+      x: 627
+      y: 242
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -1350,8 +1350,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 2079
-      y: 209
+      x: 891
+      y: -143
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1534,8 +1534,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 2651
-      y: 748
+      x: 1573
+      y: 682
       steps:
         - type: text
           body_variants:
@@ -1554,15 +1554,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 3388
-      y: 484
+      x: 2475
+      y: -11
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: 616
-      y: 638
+      x: -77
+      y: -385
       seguimientos:
         - id: s-mvw6hswp-o7ekg
           minutos: 2
@@ -1844,20 +1844,20 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 3366
-      y: 836
+      x: 2519
+      y: 693
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 4026
-      y: 693
+      x: 3179
+      y: 352
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 2970
-      y: 22
+      x: 1826
+      y: -440
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2040,8 +2040,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
-      x: 3080
-      y: 990
+      x: 1826
+      y: 363
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2327,20 +2327,16 @@ whatsapp:
       salida: dec:d-mvw6hswp-g6abf
       a: f-mvvo1ibc-s0tdo
       vista: colita
-    - id: c-mvw6irsg-0z9
-      de: f-mvvfznys-u8svs
-      salida: siguiente
-      a: f-mvw6hswp-ld1vx
     - id: c-mvw6kzg0-the
       de: f-mvvo1ibc-s0tdo
       salida: dec:defb6c56-875e-4fdb-8f9c-2c2c966490c0
       a: f-mvvo0a7c-uyvc
-      vista: colita
+      vista: cable
     - id: c-mvw6l580-cjt
       de: f-mvvo1ibc-s0tdo
       salida: dec:61346feb-5471-47ce-8d49-c608ccc1bf1f
       a: f-mvw3kh4y-eknk7
-      vista: colita
+      vista: cable
     - id: c-mvw6w0g7-oqk
       de: f-mvvo1ibc-s0tdo
       salida: sin_respuesta
@@ -2374,10 +2370,12 @@ whatsapp:
       de: f-mvw3mqwi-ngia
       salida: siguiente
       a: f-mvw8ibzi-4n26e
+      vista: cable
     - id: c-mvw8imw5-i4e
       de: f-mvw719ry-3fmww
       salida: siguiente
       a: f-mvw8ibzi-4n26e
+      vista: cable
     - id: c-mvw94hxd-l16
       de: f-mvvo0a7c-uyvc
       salida: sin_pago
@@ -2386,6 +2384,10 @@ whatsapp:
       de: f-mvw3kh4y-eknk7
       salida: sin_pago
       a: f-mvw9452y-yws1d
+    - id: c-mvwf1uvz-8pc
+      de: f-mvvfznys-u8svs
+      salida: siguiente
+      a: f-mvw6hswp-ld1vx
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
