@@ -1161,6 +1161,8 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
+      presenta:
+        - "@tienda:basico"
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
       x: 6930
@@ -1350,7 +1352,7 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 957
+      x: 968
       y: -143
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
@@ -1563,6 +1565,8 @@ whatsapp:
       tipo: seguimientos
       x: -77
       y: -286
+      presenta:
+        - "@tienda:basico"
       seguimientos:
         - id: s-mvw6hswp-o7ekg
           minutos: 2
@@ -1596,11 +1600,15 @@ whatsapp:
                   delay_after_sec: 6
                   buttons:
                     - id: 2028ad46-32ef-4a1d-8cf9-005648061475
-                      label: SUPER PACK
+                      label: YAPE
                       action: send_steps
                       steps: []
                     - id: f10dc3e2-6aa8-4fc4-ac4e-3426b1d1fa34
-                      label: SOLO GRAFISMO
+                      label: PLIN
+                      action: send_steps
+                      steps: []
+                    - id: 312e478d-f545-4213-ab7b-f602fbbd5f52
+                      label: BCP
                       action: send_steps
                       steps: []
                   decisions:
@@ -1746,11 +1754,15 @@ whatsapp:
                   delay_after_sec: 6
                   buttons:
                     - id: 0fed6169-b197-4869-acd8-2e0e610e5739
-                      label: SUPER PACK
+                      label: YAPE
                       action: send_steps
                       steps: []
                     - id: 39b2da38-e654-4a9b-8cde-408bedb7cb2f
-                      label: SOLO GRAFISMO
+                      label: PLIN
+                      action: send_steps
+                      steps: []
+                    - id: a674ceee-3f43-434e-aa84-de7af6cc7616
+                      label: BCP
                       action: send_steps
                       steps: []
                   decisions:
@@ -2414,25 +2426,35 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: siguiente
       a: f-mvw6hswp-ld1vx
-    - id: c-mvwudtex-18j
+    - id: c-mvwwum0c-rwf
       de: f-mvw6hswp-ld1vx
       salida: btn:2028ad46-32ef-4a1d-8cf9-005648061475
-      a: f-mvvo0a7c-uyvc
+      a: f-mvvo1ibc-s0tdo
       vista: colita
-    - id: c-mvwudxvt-eyr
-      de: f-mvw6hswp-ld1vx
-      salida: btn:0fed6169-b197-4869-acd8-2e0e610e5739
-      a: f-mvvo0a7c-uyvc
-      vista: colita
-    - id: c-mvwue2ld-6jm
+    - id: c-mvwwunw4-9l8
       de: f-mvw6hswp-ld1vx
       salida: btn:f10dc3e2-6aa8-4fc4-ac4e-3426b1d1fa34
-      a: f-mvw3kh4y-eknk7
+      a: f-mvvo1ibc-s0tdo
       vista: colita
-    - id: c-mvwue5qh-nzo
+    - id: c-mvwwupes-f6a
+      de: f-mvw6hswp-ld1vx
+      salida: btn:0fed6169-b197-4869-acd8-2e0e610e5739
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvwwuqx8-j5x
       de: f-mvw6hswp-ld1vx
       salida: btn:39b2da38-e654-4a9b-8cde-408bedb7cb2f
-      a: f-mvw3kh4y-eknk7
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvwwusn8-rqn
+      de: f-mvw6hswp-ld1vx
+      salida: btn:a674ceee-3f43-434e-aa84-de7af6cc7616
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvwwv1vw-l9l
+      de: f-mvw6hswp-ld1vx
+      salida: btn:312e478d-f545-4213-ab7b-f602fbbd5f52
+      a: f-mvvo1ibc-s0tdo
       vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
