@@ -1136,6 +1136,31 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
+            - id: be0e11de-636a-4a1a-b4af-a9f51a281f13
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
       x: 2211
