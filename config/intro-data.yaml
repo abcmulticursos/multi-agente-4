@@ -5239,6 +5239,22 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: false
 biblioteca_de_productos:
+  - id: pmvvnouch
+    name: ""
+    aliases: []
+    price_soles: 0
+    delivery: []
+    image_gallery: []
+    course_content: ""
+    etiqueta: ""
+  - id: pmvvnome5
+    name: ""
+    aliases: []
+    price_soles: 0
+    delivery: []
+    image_gallery: []
+    course_content: ""
+    etiqueta: ""
   - id: pmv5xqgst
     name: MIS PRIMEROS TRAZOS
     aliases: []
