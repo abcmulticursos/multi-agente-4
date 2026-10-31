@@ -1283,6 +1283,9 @@ function salidasDeArriba(t: TableroEnElEditor, f: FichaEnElEditor): Set<string> 
     return c ? t.fichas.find((x) => x.id === c.a) : undefined;
   };
   for (const c of t.cables) if (c.de === f.id && t.fichas.find((x) => x.id === c.a)?.tipo === "seguimientos") arriba.add(c.salida);
+  // UN SOLO CONECTOR ARRIBA (01/11/2026, «¿por qué la estación 3 tiene 2 conectores arriba?»): si ya cuelga
+  // unos Seguimientos por otra salida («Si no responde»), no se ofrece además la vacía.
+  if (arriba.size > 0) return arriba;
   const suya = f.tipo === "cobro" ? "sin_pago" : pideElNombre(f as FichaDelTablero) ? "" : "siguiente";
   if (suya && (!destino(suya) || destino(suya)?.tipo === "seguimientos")) arriba.add(suya);
   return arriba;
@@ -1301,7 +1304,11 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const arriba = salidasDeArriba(ctx.tablero, f);
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres).filter(
-    (s) => (s.clave !== "otra" || conCable.has("otra")) && !(s.clave === "sin_respuesta" && arriba.has("siguiente") && conCable.has("siguiente") && !conCable.has("sin_respuesta"))
+    (s) =>
+      (s.clave !== "otra" || conCable.has("otra")) &&
+      !(s.clave === "sin_respuesta" && arriba.has("siguiente") && conCable.has("siguiente") && !conCable.has("sin_respuesta")) &&
+      // Sus Seguimientos ya cuelgan por otra salida: la de «⏳ Seguimientos» vacía no se ofrece.
+      !(s.clave === "siguiente" && !conCable.has("siguiente") && !arriba.has("siguiente") && arriba.size > 0)
   );
   const deArriba = salidas.filter((s) => arriba.has(s.clave));
   const aLaDerecha = salidas.filter((s) => !arriba.has(s.clave));
@@ -1333,9 +1340,9 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               }}
             />
           ))}
-          <span className="text-3xl leading-none">🚉</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest opacity-90">Estación</span>
-          <span className="text-4xl font-black leading-none">{n ?? ""}</span>
+          {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
+          <span className="text-5xl leading-none">🚉</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest opacity-90">Estación</span>
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
         <div className="absolute left-1/2 top-[calc(100%+8px)] -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold text-white shadow">{queEspera(f)}</div>
@@ -1492,7 +1499,8 @@ export default function LienzoDelTablero({
   buscar?: string;
   /** LOS BOTONES REDONDOS DE ARRIBA A LA IZQUIERDA, como en la pizarra: ← antes del «+», ☰ después. */
   antesDelMas?: ReactNode;
-  despuesDelMas?: ReactNode;
+  /** El ☰. Como función, recibe las opciones de vista del lienzo para ponerlas en su lista (01/11/2026). */
+  despuesDelMas?: ReactNode | ((herramientas: ReactNode) => ReactNode);
   /** LOS NÚMEROS DE CADA FICHA (25/10/2026), como los de las rutas de la pizarra. */
   numeros?: Record<string, { clientes: number; ventas: number; ahora?: number }>;
 }) {
@@ -2302,39 +2310,36 @@ export default function LienzoDelTablero({
               </div>
             )}
           </div>
-          {despuesDelMas}
-          {/* EL MODO ESTACIONES (01/11/2026): solo cómo se ve; se apaga y vuelve la vista de siempre. */}
-          <button
-            type="button"
-            onClick={() => cambiarEstaciones(!estaciones)}
-            title="Ver el camino por estaciones, como Sendy: cada ficha que espera al cliente con su bolita, sus caminos afuera y sus Seguimientos arriba. Solo cambia cómo se ve."
-            className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-md ${
-              estaciones ? "border-emerald-400 bg-emerald-50 text-emerald-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
-            }`}
-          >
-            🚉 {estaciones ? "Estaciones: sí" : "Ver estaciones"}
-          </button>
-          {estaciones && (
-            <button
-              type="button"
-              onClick={acomodarComoCamino}
-              title="Separa las fichas para que quepan sus estaciones: el camino de izquierda a derecha, las ramas una debajo de otra y los seguimientos encima de su estación. Después mueves todo libremente. Ctrl+Z lo deshace."
-              className="flex h-9 items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 text-xs font-bold text-emerald-800 shadow-md hover:bg-emerald-50"
-            >
-              📐 Acomodar como camino
-            </button>
-          )}
-          {/* «🔍 QUÉ FALTA CONECTAR» y «VER TODO COMO CABLE» (27/10/2026) */}
-          <button
-            type="button"
-            onClick={() => setRevisando((v) => !v)}
-            title="Marca en rojo las salidas que, sin cable, dejan al cliente sin camino o te dejan sin la venta"
-            className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-md ${
-              revisando ? "border-red-400 bg-red-50 text-red-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
-            }`}
-          >
-            🔍 {revisando ? "Dejar de revisar" : "Qué falta conectar"}
-          </button>
+          {/* LA BARRA LIMPIA (01/11/2026). Él: «me confunde lo de los menús que están arriba… quitan espacio,
+              meterlos en el menú hamburguesa». Estaciones, acomodar, qué falta conectar y ver todo como cable van
+              DENTRO del ☰ (`despuesDelMas` los recibe y los pone en su lista). */}
+          {typeof despuesDelMas === "function"
+            ? despuesDelMas(
+                <>
+                  <div className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-tinta-suave">Cómo se ve el tablero</div>
+                  {(
+                    [
+                      ["🚉", estaciones ? "Estaciones: sí (quitar)" : "Ver estaciones", "El camino por estaciones, como Sendy. Solo cambia cómo se ve.", () => cambiarEstaciones(!estaciones), estaciones],
+                      ...(estaciones
+                        ? ([["📐", "Acomodar como camino", "Separa las fichas para que quepan sus estaciones. Ctrl+Z lo deshace.", acomodarComoCamino, false]] as const)
+                        : []),
+                      ["🔍", revisando ? "Dejar de revisar" : "Qué falta conectar", "Marca en rojo las salidas que, sin cable, dejan al cliente sin camino.", () => setRevisando((v) => !v), revisando],
+                      ["〰", todoCable ? "Volver al modo inalámbrico" : "Ver todo como cable", "Solo para mirar: todas las conexiones como línea.", () => setTodoCable((v) => !v), todoCable],
+                    ] as Array<readonly [string, string, string, () => void, boolean]>
+                  ).map(([icono, texto, ayuda, hacer, activo]) => (
+                    <button
+                      key={texto}
+                      type="button"
+                      title={ayuda}
+                      onClick={hacer}
+                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno ${activo ? "font-bold text-emerald-700" : ""}`}
+                    >
+                      <span className="w-5 text-center">{icono}</span> {texto}
+                    </button>
+                  ))}
+                </>
+              )
+            : despuesDelMas}
           {faltas && (
             <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow ${faltas.length ? "bg-red-100 text-red-900" : "bg-emerald-100 text-emerald-900"}`}>
               {faltas.length === 0 ? (
@@ -2354,16 +2359,6 @@ export default function LienzoDelTablero({
               )}
             </span>
           )}
-          <button
-            type="button"
-            onClick={() => setTodoCable((v) => !v)}
-            title="Solo para mirar: muestra todas las conexiones como línea, sin cambiar lo que elegiste en cada una"
-            className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-md ${
-              todoCable ? "border-sky-400 bg-sky-50 text-sky-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
-            }`}
-          >
-            {todoCable ? "📡 Modo inalámbrico" : "〰 Ver todo como cable"}
-          </button>
           {coincidentes && (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow">
               {coincidentes.size === 0 ? (

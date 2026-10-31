@@ -31644,26 +31644,7 @@ function PantallaDelTableroCargada({
             </div>
           </VentanaFlotante>
         )}
-        <span className="ml-auto" />
-        <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Tema">
-          {(
-            [
-              ["claro", "☀️ Claro"],
-              ["mixto", "🌗 Mixto"],
-              ["oscuro", "🌙 Oscuro"],
-            ] as const
-          ).map(([v, n]) => (
-            <button
-              key={v}
-              type="button"
-              aria-pressed={tema === v}
-              onClick={() => onTema(v)}
-              className={`px-2 py-1 font-semibold ${tema === v ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
-            >
-              {n}
-            </button>
-          ))}
-        </span>
+        {/* «Montos de», al lado del Cerebro (01/11/2026); el tema (claro/mixto/oscuro) pasó al ☰. */}
         <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
           Montos de
           <select value={paisVisto} onChange={(e) => setPaisVisto(e.target.value)} className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta">
@@ -31720,7 +31701,7 @@ function PantallaDelTableroCargada({
               ←
             </button>
           }
-          despuesDelMas={
+          despuesDelMas={(herramientasDelLienzo: React.ReactNode) => (
             <div className="relative flex items-center gap-2" ref={refDeHerramientasDelTablero}>
               {/* EL SIMULADOR, A LA VISTA (27/10/2026): un botón propio, no escondido en el ☰.
                   EN SU PROPIA PESTAÑA (31/10/2026). Él: «mi intención no era que el simulador se abra en la misma
@@ -31775,12 +31756,34 @@ function PantallaDelTableroCargada({
                       <span className="w-5 text-center">{icono}</span> {texto}
                     </button>
                   ))}
+                  {/* LA VISTA DEL TABLERO (01/11/2026): estaciones, acomodar, qué falta, cables; y el tema. */}
+                  <div className="my-1 border-t border-borde" />
+                  {herramientasDelLienzo}
+                  <div className="flex gap-1 px-3 py-1.5" role="group" aria-label="Tema">
+                    {(
+                      [
+                        ["claro", "☀️ Claro"],
+                        ["mixto", "🌗 Mixto"],
+                        ["oscuro", "🌙 Oscuro"],
+                      ] as const
+                    ).map(([v, n]) => (
+                      <button
+                        key={v}
+                        type="button"
+                        aria-pressed={tema === v}
+                        onClick={() => onTema(v)}
+                        className={`flex-1 rounded px-2 py-1 text-xs font-semibold ${tema === v ? "bg-carbon-fuerte text-white" : "bg-relleno text-tinta-suave hover:bg-tarjeta"}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 </div>
               )}
               </div>
             </div>
-          }
+          )}
         />
       </div>
       {duplicando && tienda && (
