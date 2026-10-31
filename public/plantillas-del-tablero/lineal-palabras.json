@@ -1,0 +1,468 @@
+{
+ "formato": "plantilla-del-tablero",
+ "version": 1,
+ "id": "lineal-palabras",
+ "nombre": "Lineal · 💬 Palabras",
+ "tipo": "lineal",
+ "forma": "palabras",
+ "descripcion": "Un producto, su cobro, entrega, upsell y regalo. El cliente escribe; cuadritos con palabras deciden.",
+ "productos": [
+  {
+   "token": "@BASICO",
+   "etiqueta": "Producto básico",
+   "nombre": "BÁSICO"
+  },
+  {
+   "token": "@UPSELL",
+   "etiqueta": "Upsell (se ofrece después de la compra)",
+   "nombre": "UPSELL"
+  }
+ ],
+ "upsell": [
+  "pla_ec_lin_upsell1",
+  "pla_ec_lin_cobro_u1",
+  "pla_ec_lin_no_u1",
+  "pla_ec_lin_ent_u1"
+ ],
+ "regalo": "pla_ec_lin_regalo",
+ "aporte": null,
+ "fichas": [
+  {
+   "id": "pla_ec_lin_intro",
+   "tipo": "mensaje",
+   "x": 0,
+   "y": 0,
+   "titulo": "Intro · lineal",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "*{¡Hola! 😊 Te saluda ✏️Tu nombre|¡Hola! 😊 Soy ✏️Tu nombre}* y soy parte del equipo de *✏️ TU TIENDA* 🙋🏻‍♀️"
+     ],
+     "delay_after_sec": 4
+    },
+    {
+     "type": "image",
+     "drive_url": "https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link",
+     "caption_variants": [
+      "Este es nuestro producto\n\n*{{PRODUCTO_BASE}}* 📚\n\n✅ Guía principal paso a paso.\n✅ 50 plantillas listas para usar.\n✅ Checklist imprimible.\n✅ Acceso de por vida.\n\n(Imagen referencial)"
+     ],
+     "delay_after_sec": 5
+    },
+    {
+     "type": "image",
+     "drive_url": "https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing",
+     "caption_variants": [
+      "*{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼\n\n- 🎁 Guía de inicio rápido\n- 🎁 Plantillas para imprimir\n- 🎁 Acceso de por vida"
+     ],
+     "delay_after_sec": 5
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "❌*(antes)* ~{{PRECIO_ANTES_BASE}}~\n✅ 🚀 *HOY: {{PRECIO_BASE}}* ‼️\n\n*¿Lo quieres?*\n\nEscríbeme *«quiero comprar»* 😊"
+     ],
+     "delay_after_sec": 4,
+     "decisions": [
+      {
+       "id": "pla_ec_lin_intro_quiere",
+       "title": "Quiero comprar",
+       "keywords": [
+        "quiero comprar",
+        "quiero pagar",
+        "lo quiero",
+        "como pago",
+        "comprar",
+        "dale",
+        "si quiero"
+       ],
+       "color": "",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@BASICO"
+   ]
+  },
+  {
+   "id": "pla_ec_lin_cobro",
+   "tipo": "cobro",
+   "x": 330,
+   "y": 0,
+   "titulo": "Cobro · ⟨BASICO⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@BASICO",
+    "metodos": true
+   }
+  },
+  {
+   "id": "pla_ec_lin_segA",
+   "tipo": "seguimientos",
+   "x": 0,
+   "y": 430,
+   "titulo": "Seguimientos · si no responde a la Intro",
+   "presenta": [
+    "@BASICO"
+   ],
+   "seguimientos": [
+    {
+     "id": "pla_ec_lin_segA_1",
+     "minutos": 120,
+     "variantes": [
+      {
+       "id": "pla_ec_lin_segA_1a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Hola 😊 {¿Pudiste revisar|¿Alcanzaste a ver} lo de *{{PRODUCTO}}*?\n\nSigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~).\n\nEscríbeme *«quiero comprar»* 😊"
+         ],
+         "delay_after_sec": 4,
+         "decisions": [
+          {
+           "id": "pla_ec_lin_segA_quiere",
+           "title": "Quiero comprar",
+           "keywords": [
+            "quiero comprar",
+            "quiero pagar",
+            "lo quiero",
+            "como pago",
+            "comprar",
+            "dale",
+            "si quiero"
+           ],
+           "color": "",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pla_ec_lin_segA_2",
+     "minutos": 600,
+     "variantes": [
+      {
+       "id": "pla_ec_lin_segA_2a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Paso rapidito por aquí ✨ Muchas personas ya están usando *{{PRODUCTO}}* 🙌\n\nEs un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡\n\nEscríbeme *«quiero comprar»* 😊"
+         ],
+         "delay_after_sec": 4,
+         "decisions": [
+          {
+           "id": "pla_ec_lin_segA_quiere",
+           "title": "Quiero comprar",
+           "keywords": [
+            "quiero comprar",
+            "quiero pagar",
+            "lo quiero",
+            "como pago",
+            "comprar",
+            "dale",
+            "si quiero"
+           ],
+           "color": "",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_lin_ent_b",
+   "tipo": "entregar",
+   "x": 660,
+   "y": 0,
+   "titulo": "Entrega · ⟨BASICO⟩",
+   "producto_id": "@BASICO"
+  },
+  {
+   "id": "pla_ec_lin_segB",
+   "tipo": "seguimientos",
+   "x": 330,
+   "y": 430,
+   "titulo": "Seguimientos · si no paga",
+   "presenta": [
+    "@BASICO"
+   ],
+   "seguimientos": [
+    {
+     "id": "pla_ec_lin_segB_1",
+     "minutos": 120,
+     "variantes": [
+      {
+       "id": "pla_ec_lin_segB_1a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Te dejo tus datos a la mano 😊 Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸"
+         ],
+         "delay_after_sec": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pla_ec_lin_segB_2",
+     "minutos": 600,
+     "variantes": [
+      {
+       "id": "pla_ec_lin_segB_2a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "¿Pudiste hacer el pago? Si tuviste algún problema, escríbeme y te ayudo 🙌"
+         ],
+         "delay_after_sec": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_lin_upsell1",
+   "tipo": "mensaje",
+   "x": 990,
+   "y": 0,
+   "titulo": "Upsell · ⟨UPSELL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🎁 *{¡Una cosita más!|¡Antes de irte!}*\n\nPor ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱\n\n*¿Lo agregas?*\n\nEscríbeme *«si»* o *«no»* 😊"
+     ],
+     "delay_after_sec": 4,
+     "decisions": [
+      {
+       "id": "pla_ec_lin_u1_si",
+       "title": "Sí, lo quiero",
+       "keywords": [
+        "si",
+        "sí",
+        "claro",
+        "dale",
+        "lo quiero",
+        "ok",
+        "va"
+       ],
+       "color": "",
+       "steps": []
+      },
+      {
+       "id": "pla_ec_lin_u1_no",
+       "title": "No, gracias",
+       "keywords": [
+        "no",
+        "no gracias",
+        "ahora no",
+        "paso",
+        "luego"
+       ],
+       "color": "",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@UPSELL"
+   ],
+   "instrucciones": "Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.",
+   "espera_min": 2
+  },
+  {
+   "id": "pla_ec_lin_cobro_u1",
+   "tipo": "cobro",
+   "x": 1320,
+   "y": 0,
+   "titulo": "Cobro · ⟨UPSELL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@UPSELL",
+    "metodos": true
+   }
+  },
+  {
+   "id": "pla_ec_lin_no_u1",
+   "tipo": "mensaje",
+   "x": 1320,
+   "y": 430,
+   "titulo": "Si dice que no",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_lin_regalo",
+   "tipo": "regalo",
+   "x": 1980,
+   "y": 0,
+   "titulo": "Regalo"
+  },
+  {
+   "id": "pla_ec_lin_ent_u1",
+   "tipo": "entregar",
+   "x": 1650,
+   "y": 0,
+   "titulo": "Entrega · ⟨UPSELL⟩",
+   "producto_id": "@UPSELL"
+  }
+ ],
+ "cables": [
+  {
+   "id": "cpl78",
+   "de": "pla_ec_lin_intro",
+   "salida": "dec:pla_ec_lin_intro_quiere",
+   "a": "pla_ec_lin_cobro"
+  },
+  {
+   "id": "cpl79",
+   "de": "pla_ec_lin_intro",
+   "salida": "siguiente",
+   "a": "pla_ec_lin_segA"
+  },
+  {
+   "id": "cpl80",
+   "de": "pla_ec_lin_segA",
+   "salida": "dec:pla_ec_lin_segA_quiere",
+   "a": "pla_ec_lin_cobro"
+  },
+  {
+   "id": "cpl81",
+   "de": "pla_ec_lin_cobro",
+   "salida": "pagado",
+   "a": "pla_ec_lin_ent_b"
+  },
+  {
+   "id": "cpl82",
+   "de": "pla_ec_lin_cobro",
+   "salida": "sin_pago",
+   "a": "pla_ec_lin_segB"
+  },
+  {
+   "id": "cpl83",
+   "de": "pla_ec_lin_upsell1",
+   "salida": "dec:pla_ec_lin_u1_si",
+   "a": "pla_ec_lin_cobro_u1"
+  },
+  {
+   "id": "cpl84",
+   "de": "pla_ec_lin_upsell1",
+   "salida": "dec:pla_ec_lin_u1_no",
+   "a": "pla_ec_lin_no_u1"
+  },
+  {
+   "id": "cpl85",
+   "de": "pla_ec_lin_upsell1",
+   "salida": "sin_respuesta",
+   "a": "pla_ec_lin_regalo"
+  },
+  {
+   "id": "cpl86",
+   "de": "pla_ec_lin_cobro_u1",
+   "salida": "pagado",
+   "a": "pla_ec_lin_ent_u1"
+  },
+  {
+   "id": "cpl87",
+   "de": "pla_ec_lin_cobro_u1",
+   "salida": "sin_pago",
+   "a": "pla_ec_lin_regalo"
+  },
+  {
+   "id": "cpl88",
+   "de": "pla_ec_lin_ent_u1",
+   "salida": "siguiente",
+   "a": "pla_ec_lin_regalo"
+  },
+  {
+   "id": "cpl89",
+   "de": "pla_ec_lin_no_u1",
+   "salida": "siguiente",
+   "a": "pla_ec_lin_regalo"
+  },
+  {
+   "id": "cpl90",
+   "de": "pla_ec_lin_ent_b",
+   "salida": "siguiente",
+   "a": "pla_ec_lin_upsell1"
+  }
+ ]
+}

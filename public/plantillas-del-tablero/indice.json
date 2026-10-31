@@ -1,0 +1,98 @@
+[
+ {
+  "id": "lineal-botones",
+  "nombre": "Lineal · 🔘 Botones",
+  "tipo": "lineal",
+  "forma": "botones",
+  "descripcion": "Un producto, su cobro, entrega, upsell y regalo. El cliente toca botones.",
+  "fichas": 10
+ },
+ {
+  "id": "order_bump-botones",
+  "nombre": "Order bump · 🔘 Botones",
+  "tipo": "order_bump",
+  "forma": "botones",
+  "descripcion": "Presenta el básico; al querer pagar, destapa el full. El cliente toca botones.",
+  "fichas": 13
+ },
+ {
+  "id": "doble_oferta-botones",
+  "nombre": "Doble oferta · 🔘 Botones",
+  "tipo": "doble_oferta",
+  "forma": "botones",
+  "descripcion": "Básico y full desde el inicio, con upgrade. El cliente toca botones.",
+  "fichas": 13
+ },
+ {
+  "id": "contribucion-botones",
+  "nombre": "Contribución · 🔘 Botones",
+  "tipo": "contribucion",
+  "forma": "botones",
+  "descripcion": "Entrega primero y premia según el aporte. El cliente toca botones.",
+  "fichas": 9
+ },
+ {
+  "id": "lineal-palabras",
+  "nombre": "Lineal · 💬 Palabras",
+  "tipo": "lineal",
+  "forma": "palabras",
+  "descripcion": "Un producto, su cobro, entrega, upsell y regalo. El cliente escribe; cuadritos con palabras deciden.",
+  "fichas": 10
+ },
+ {
+  "id": "order_bump-palabras",
+  "nombre": "Order bump · 💬 Palabras",
+  "tipo": "order_bump",
+  "forma": "palabras",
+  "descripcion": "Presenta el básico; al querer pagar, destapa el full. El cliente escribe; cuadritos con palabras deciden.",
+  "fichas": 13
+ },
+ {
+  "id": "doble_oferta-palabras",
+  "nombre": "Doble oferta · 💬 Palabras",
+  "tipo": "doble_oferta",
+  "forma": "palabras",
+  "descripcion": "Básico y full desde el inicio, con upgrade. El cliente escribe; cuadritos con palabras deciden.",
+  "fichas": 13
+ },
+ {
+  "id": "contribucion-palabras",
+  "nombre": "Contribución · 💬 Palabras",
+  "tipo": "contribucion",
+  "forma": "palabras",
+  "descripcion": "Entrega primero y premia según el aporte. El cliente escribe; cuadritos con palabras deciden.",
+  "fichas": 9
+ },
+ {
+  "id": "lineal-numeros",
+  "nombre": "Lineal · 🔢 Números",
+  "tipo": "lineal",
+  "forma": "numeros",
+  "descripcion": "Un producto, su cobro, entrega, upsell y regalo. El cliente escribe 1 o 2; cuadritos con números deciden.",
+  "fichas": 10
+ },
+ {
+  "id": "order_bump-numeros",
+  "nombre": "Order bump · 🔢 Números",
+  "tipo": "order_bump",
+  "forma": "numeros",
+  "descripcion": "Presenta el básico; al querer pagar, destapa el full. El cliente escribe 1 o 2; cuadritos con números deciden.",
+  "fichas": 13
+ },
+ {
+  "id": "doble_oferta-numeros",
+  "nombre": "Doble oferta · 🔢 Números",
+  "tipo": "doble_oferta",
+  "forma": "numeros",
+  "descripcion": "Básico y full desde el inicio, con upgrade. El cliente escribe 1 o 2; cuadritos con números deciden.",
+  "fichas": 13
+ },
+ {
+  "id": "contribucion-numeros",
+  "nombre": "Contribución · 🔢 Números",
+  "tipo": "contribucion",
+  "forma": "numeros",
+  "descripcion": "Entrega primero y premia según el aporte. El cliente escribe 1 o 2; cuadritos con números deciden.",
+  "fichas": 9
+ }
+]

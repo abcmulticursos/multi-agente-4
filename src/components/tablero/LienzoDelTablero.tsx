@@ -1310,7 +1310,16 @@ export default function LienzoDelTablero({
   onFichaTocada,
   quienCobra,
   alTocarQuienCobra,
+  onPlantillas,
+  onGuardarPlantilla,
+  enfocar,
 }: {
+  /** Llevar la vista a estas fichas (las recién traídas de una plantilla). Cambia `vez` para repetirlo. */
+  enfocar?: { ids: string[]; vez: number };
+  /** «📋 Plantillas» del «+»: abre la ventana de plantillas; las fichas llegan alrededor de `centro`. */
+  onPlantillas?: (centro: { x: number; y: number }) => void;
+  /** Clic derecho con varias fichas elegidas: guardarlas como plantilla (archivo). */
+  onGuardarPlantilla?: (ids: string[]) => void;
   /** Por país: quién cobra ahí, para mostrar su avatar en el Inicio (29/10/2026). Solo pantalla. */
   quienCobra?: Record<string, { foto?: string; color?: string; nombre: string; porDefecto: boolean }>;
   /** Clic en esa cara: abrir los datos de la tienda (quién cobra por país), sin salir del tablero. */
@@ -1347,6 +1356,16 @@ export default function LienzoDelTablero({
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
   const [menuMas, setMenuMas] = useState(false);
+  // LA VISTA VA A LO RECIÉN TRAÍDO (una plantilla llega a la derecha de lo suyo, 01/11/2026).
+  useEffect(() => {
+    if (!enfocar?.ids.length) return;
+    const id = window.setTimeout(
+      () => instancia.current?.fitView({ nodes: enfocar.ids.map((x) => ({ id: x })), padding: 0.15, maxZoom: 1, duration: 500 }),
+      120
+    );
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enfocar?.vez]);
   // EL «+» SE CIERRA AL HACER CLIC FUERA (25/10/2026): «solo se colapsa presionando nuevamente el +».
   // (Con Escape también: ver el teclado, más abajo.)
   const cajaDelMas = useRef<HTMLDivElement>(null);
@@ -1949,6 +1968,20 @@ export default function LienzoDelTablero({
               <div className="absolute left-0 top-full z-50 pt-2">
               <div className="max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
                 <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">Agregar al tablero</div>
+                {/* LAS PLANTILLAS (01/11/2026), como importar en n8n: una tubería entera, conectada por dentro, al
+                    lado de lo suyo y sin conectar a ningún país. */}
+                {onPlantillas && (
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left font-semibold text-violet-800 hover:bg-violet-50"
+                    onClick={() => {
+                      setMenuMas(false);
+                      onPlantillas(centroDeLaVista());
+                    }}
+                  >
+                    <span className="w-5 text-center">📋</span> Plantillas (tubería armada)…
+                  </button>
+                )}
                 {TIPOS_PARA_CREAR.map((tipo) => (
                   <button
                     key={tipo}
@@ -2222,6 +2255,28 @@ export default function LienzoDelTablero({
                     >
                       📦 Guardar en «Fichas guardadas»
                     </button>
+                    {/* GUARDAR COMO PLANTILLA (01/11/2026), como exportar en n8n: las elegidas, o esta ficha y
+                        todo lo que sigue por sus cables. Se baja un archivo; se trae con «📋 Plantillas». */}
+                    {onGuardarPlantilla &&
+                      (() => {
+                        const varias = elegidas().filter((id) => vivo.current.fichas.find((x) => x.id === id)?.tipo !== "inicio");
+                        const usaElegidas = varias.length > 1 && varias.includes(fichaDelMenu.id);
+                        const ids = usaElegidas
+                          ? varias
+                          : [...rutaDe(vivo.current, fichaDelMenu.id)].filter((id) => vivo.current.fichas.find((x) => x.id === id)?.tipo !== "inicio");
+                        return (
+                          <button
+                            type="button"
+                            className={opcionDeMenu}
+                            onClick={() => {
+                              onGuardarPlantilla(ids);
+                              setMenu(null);
+                            }}
+                          >
+                            📋 Guardar como plantilla ({usaElegidas ? `las ${ids.length} elegidas` : `esta y lo que sigue: ${ids.length}`})
+                          </button>
+                        );
+                      })()}
                   </>
                 )}
                 <button

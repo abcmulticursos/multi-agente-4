@@ -10,6 +10,16 @@ import { ASPECTO } from "@/components/tablero/aspecto";
 import type { FichaEnElEditor, TableroEnElEditor, VersionEnElEditor } from "@/components/tablero/LienzoDelTablero";
 import { tableroDesdeLaPizarra, type TiendaExportada } from "@/lib/tablero/desde-la-pizarra";
 import { copiarFichas, mantaPara } from "@/lib/tablero/copiar";
+import {
+  armarPlantilla,
+  leePlantilla,
+  loQueFaltaElegir,
+  plantillaDeFichas,
+  productosQueUsa,
+  type EleccionDePlantilla,
+  type PlantillaDelIndice,
+  type PlantillaDelTablero,
+} from "@/lib/tablero/plantillas";
 import { TwemojiText } from "@/components/TwemojiText";
 import { DEFAULT_SAMPLES_AFTER_TEXT } from "@/lib/workflow/defaults";
 import {
@@ -30972,6 +30982,10 @@ function PantallaDelTablero({
   const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "prueba" | "pagos" | "anuncios" | "exportar">(null);
   const [regaloAbierto, setRegaloAbierto] = useState<string | null>(null);
   const [avisoDelTablero, setAvisoDelTablero] = useState<string | null>(null);
+  // LAS PLANTILLAS (01/11/2026): la ventana abierta, y a qué fichas llevar la vista al traer una.
+  const [ventanaDePlantillas, setVentanaDePlantillas] = useState(false);
+  const [duplicando, setDuplicando] = useState(false);
+  const [enfocarFichas, setEnfocarFichas] = useState<{ ids: string[]; vez: number } | undefined>(undefined);
   // LOS NÚMEROS DE CADA FICHA (25/10/2026): clientes que llegaron y cuántos pagaron, como en la
   // pizarra. Se piden al abrir y cada minuto; si falla, simplemente no se muestran.
   const [numeros, setNumeros] = useState<Record<string, { clientes: number; ventas: number; ahora?: number }>>({});
@@ -31095,6 +31109,57 @@ function PantallaDelTablero({
     );
     setVentanaDeHerramienta(null);
     setAvisoDelTablero([dicho, ...r.avisos].join(" "));
+  };
+
+  /**
+   * TRAER UNA PLANTILLA (01/11/2026): sus fichas llegan a la DERECHA de lo suyo, conectadas entre ellas, sin
+   * Inicio y sin conectar a ningún país; la vista va a ellas. Con códigos nuevos (`copiarFichas`). Los
+   * productos que un archivo suyo trae y aquí faltan se agregan (los que ya están no se tocan).
+   */
+  const traerPlantilla = (p: PlantillaDelTablero, e: EleccionDePlantilla, productosDelArchivo: ProductoEditor[] = []) => {
+    const { fichas, cables } = armarPlantilla(p, e);
+    if (fichas.length === 0) return;
+    const puestas = tablero.fichas.filter((f) => !f.guardada);
+    const derecha = puestas.length ? Math.max(...puestas.map((f) => f.x + 250)) + 300 : 0;
+    const arriba = puestas.length ? Math.min(...puestas.map((f) => f.y)) : 0;
+    const minX = Math.min(...fichas.map((f) => f.x));
+    const minY = Math.min(...fichas.map((f) => f.y));
+    const copia = copiarFichas(fichas as FichaEnElEditor[], cables, { x: derecha - minX, y: arriba - minY });
+    const yaEstan = new Set((cfg.biblioteca_de_productos ?? []).map((x) => x?.id));
+    const faltan = productosDelArchivo.filter((x) => x?.id && !yaEstan.has(x.id));
+    const base: FullConfig = faltan.length ? { ...cfg, biblioteca_de_productos: [...(cfg.biblioteca_de_productos ?? []), ...faltan] } : cfg;
+    const nuevo = { ...tablero, fichas: [...tablero.fichas, ...copia.fichas], cables: [...tablero.cables, ...copia.cables] };
+    onSnapshot();
+    aplicar(
+      esWorkflow
+        ? { ...base, workflows: { ...(base.workflows ?? {}), [wfId]: nuevo } }
+        : { ...base, tableros: { ...(base.tableros ?? {}), [tiendaId]: { ...(base.tableros?.[tiendaId] ?? {}), [canal]: nuevo } } }
+    );
+    // La primera: la que no recibe ningún cable de dentro (su intro).
+    const primera = copia.fichas.find((f) => !copia.cables.some((c) => c.a === f.id)) ?? copia.fichas[0];
+    setVentanaDePlantillas(false);
+    setEnfocarFichas({ ids: copia.fichas.map((f) => f.id), vez: Date.now() });
+    setAvisoDelTablero(
+      `«${p.nombre}»: ${copia.fichas.length} fichas traídas a la derecha, conectadas entre ellas y sin conectar a ningún país. ` +
+        `Cambia los textos con ✏️ y tira el cable desde tu Inicio a «${primera?.titulo || "la primera"}».` +
+        (faltan.length ? ` Se agregaron ${faltan.length} producto(s) que no estaban.` : "")
+    );
+  };
+  /** GUARDAR COMO PLANTILLA: esas fichas, con sus cables de dentro y los productos que usan, en un archivo. */
+  const guardarComoPlantilla = (ids: string[]) => {
+    const sugerido = tablero.fichas.find((f) => f.id === ids[0])?.titulo?.trim() || "Mi plantilla";
+    const nombre = window.prompt("¿Qué nombre le pones a esta plantilla?", sugerido);
+    if (!nombre?.trim()) return;
+    const p = plantillaDeFichas(tablero, ids, nombre.trim());
+    const texto = JSON.stringify(p);
+    const usados = (cfg.biblioteca_de_productos ?? []).filter((x) => x?.id && (texto.includes(`"${x.id}"`) || texto.includes(`"${x.id}#`) || texto.includes(`:${x.id}"`)));
+    const archivo = new Blob([JSON.stringify({ ...p, productos_incluidos: usados }, null, 1)], { type: "application/json" });
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(archivo);
+    enlace.download = `plantilla-${nombre.trim().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").toLowerCase() || "tablero"}.json`;
+    enlace.click();
+    window.setTimeout(() => URL.revokeObjectURL(enlace.href), 2000);
+    setAvisoDelTablero(`Plantilla «${nombre.trim()}» guardada en tus descargas (${p.fichas.length} fichas). Se trae con «+» → «📋 Plantillas» → «Traer una plantilla guardada».`);
   };
 
   const inicios = tablero.fichas.filter((f) => f.tipo === "inicio");
@@ -31445,6 +31510,9 @@ function PantallaDelTablero({
           quienCobra={quienCobraPorPais}
           alTocarQuienCobra={tienda ? () => setVentanaDeHerramienta("tienda") : undefined}
           onCambiar={guardar}
+          onPlantillas={() => setVentanaDePlantillas(true)}
+          onGuardarPlantilla={guardarComoPlantilla}
+          enfocar={enfocarFichas}
           onAbrir={(fid, burbuja) => {
             const f = tablero.fichas.find((x) => x.id === fid);
             setBurbujaDelCajon(burbuja ?? null);
@@ -31523,15 +31591,7 @@ function PantallaDelTablero({
                         // DUPLICAR DESDE EL TABLERO (01/11/2026). Él: «duplico la tienda y sobre ella trabajo». Es el
                         // mismo «⧉ Duplicar» de Mis tiendas (`duplicarTienda`), y deja abierta la copia.
                         else if (v === "duplicar") {
-                          if (!tienda) return;
-                          const r = duplicarTienda(cfg, tienda.id);
-                          if (!r) return;
-                          onSnapshot();
-                          aplicar(r.cfg);
-                          onTienda(r.id);
-                          setAvisoDelTablero(
-                            `Copia creada: «${tienda.nombre?.trim() || "Tienda"} (copia)». Ya estás en ella, sin número y con el tablero apagado. Guarda para que quede.`
-                          );
+                          if (tienda) setDuplicando(true);
                         } else setVentanaDeHerramienta(v);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
@@ -31545,6 +31605,31 @@ function PantallaDelTablero({
           }
         />
       </div>
+      {duplicando && tienda && (
+        <GuardarTiendaComo
+          original={tienda.nombre?.trim() || "Tienda"}
+          onCerrar={() => setDuplicando(false)}
+          onGuardar={(nombre) => {
+            const r = duplicarTienda(cfg, tienda.id, nombre);
+            setDuplicando(false);
+            if (!r) return;
+            onSnapshot();
+            aplicar(r.cfg);
+            onTienda(r.id);
+            setAvisoDelTablero(`Tienda «${nombre}» creada. Ya estás en su tablero, sin número y apagado. Guarda para que quede.`);
+          }}
+        />
+      )}
+      {ventanaDePlantillas && (
+        <VentanaDePlantillas
+          productos={entregasPorProducto.map((p) => ({ id: p.id, nombre: p.nombre, propio: p.propio }))}
+          paises={paises}
+          paisInicial={paisVisto}
+          onTraer={traerPlantilla}
+          onAviso={setAvisoDelTablero}
+          onCerrar={() => setVentanaDePlantillas(false)}
+        />
+      )}
       {regaloAbierto && tienda && (
         <GestorDelRegaloDelTablero
           cfg={cfg}
@@ -32534,6 +32619,283 @@ function ListaDeEleccion({
   );
 }
 
+/**
+ * «📋 PLANTILLAS» (01/11/2026): elegir tipo y forma, sus productos, y si lleva upsell, regalo y correo. O
+ * traer una plantilla guardada (archivo). Las de fábrica se piden al abrir (`/plantillas-del-tablero/`).
+ */
+const TIPOS_DE_PLANTILLA = [
+  { tipo: "lineal", nombre: "Lineal", ayuda: "Un producto" },
+  { tipo: "order_bump", nombre: "Order bump", ayuda: "Básico y full oculto" },
+  { tipo: "doble_oferta", nombre: "Doble oferta", ayuda: "Básico y full juntos" },
+  { tipo: "contribucion", nombre: "Contribución", ayuda: "Entrega primero, paga lo que quiera" },
+];
+const FORMAS_DE_PLANTILLA = [
+  { forma: "botones", nombre: "🔘 Botones", ayuda: "El cliente toca botones" },
+  { forma: "palabras", nombre: "💬 Palabras", ayuda: "El cliente escribe (cuadritos con palabras)" },
+  { forma: "numeros", nombre: "🔢 Números", ayuda: "El cliente escribe 1 o 2 (cuadritos)" },
+];
+
+/**
+ * «GUARDAR COMO» AL DUPLICAR UNA TIENDA (01/11/2026). Él: «que al duplicar la tienda salga una especie de
+ * SAVE AS, y ponerle nombre a la tienda, y al guardarla yo estar dentro de ella en el tablero».
+ */
+function GuardarTiendaComo({ original, onGuardar, onCerrar }: { original: string; onGuardar: (nombre: string) => void; onCerrar: () => void }) {
+  const [nombre, setNombre] = useState(`${original} (copia)`);
+  useEscapeEnPila(() => onCerrar());
+  const listo = nombre.trim().length > 0;
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4" data-ventana-del-tablero>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (listo) onGuardar(nombre.trim());
+        }}
+        className="w-full max-w-md rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl"
+      >
+        <p className="text-sm font-black">⧉ Duplicar «{original}»</p>
+        <label className="mt-3 block text-xs font-semibold">
+          Nombre de la tienda nueva
+          <input
+            autoFocus
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1.5 text-sm font-normal"
+          />
+        </label>
+        <p className="mt-2 text-[11px] text-tinta-suave">Copia completa (productos, tablero, pizarra, cobrador), sin número y con el tablero apagado. Al guardar, entras a su tablero.</p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-relleno">
+            Cancelar
+          </button>
+          <button type="submit" disabled={!listo} className="rounded-md bg-violet-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40">
+            Guardar y abrir
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function VentanaDePlantillas({
+  productos,
+  paises,
+  paisInicial,
+  onTraer,
+  onAviso,
+  onCerrar,
+}: {
+  productos: Array<{ id: string; nombre: string; propio: boolean }>;
+  paises: string[];
+  paisInicial: string;
+  onTraer: (p: PlantillaDelTablero, e: EleccionDePlantilla, productosDelArchivo?: ProductoEditor[]) => void;
+  onAviso: (texto: string) => void;
+  onCerrar: () => void;
+}) {
+  const [indice, setIndice] = useState<PlantillaDelIndice[] | null>(null);
+  const [tipo, setTipo] = useState<string | null>(null);
+  const [forma, setForma] = useState<string | null>(null);
+  const [plantilla, setPlantilla] = useState<PlantillaDelTablero | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [eleccion, setEleccion] = useState<EleccionDePlantilla>({ productos: {}, nombres: {}, conUpsell: true, conRegalo: true, porCorreo: false, pais: paisInicial || paises[0] });
+  useEffect(() => {
+    fetch("/plantillas-del-tablero/indice.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setIndice(Array.isArray(d) ? d : []))
+      .catch(() => setError("No pude cargar las plantillas. Vuelve a intentarlo en un momento."));
+  }, []);
+  const elegida = indice?.find((x) => x.tipo === tipo && x.forma === forma) ?? null;
+  useEffect(() => {
+    // Sin tipo y forma elegidos no se toca: puede ser una traída de un archivo.
+    if (!elegida) return;
+    setPlantilla(null);
+    let vivo = true;
+    fetch(`/plantillas-del-tablero/${elegida.id}.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => {
+        const p = leePlantilla(d);
+        if (!vivo) return;
+        if ("error" in p) setError(p.error);
+        else setPlantilla(p);
+      })
+      .catch(() => vivo && setError("No pude cargar esa plantilla."));
+    return () => {
+      vivo = false;
+    };
+  }, [elegida?.id]);
+  const usados = plantilla ? productosQueUsa(plantilla, eleccion) : [];
+  const falta = plantilla ? loQueFaltaElegir(plantilla, eleccion) : [];
+  const tieneEntrega = !!plantilla?.fichas.some((f) => f.tipo === "entregar");
+  const propios = productos.filter((p) => p.propio);
+  const otros = productos.filter((p) => !p.propio);
+  const chip = (activo: boolean) =>
+    `rounded-lg border px-3 py-2 text-left text-sm ${activo ? "border-violet-500 bg-violet-50 font-bold text-violet-900 oscuro:bg-violet-500/20 oscuro:text-violet-100" : "border-borde bg-relleno hover:bg-tarjeta"}`;
+  return (
+    <VentanaFlotante
+      titulo="📋 Plantillas · una tubería armada"
+      detalle="Llega a la derecha de lo tuyo, conectada por dentro y sin conectar a ningún país. Tú cambias los textos con ✏️ y la conectas a tu Inicio."
+      ancho="max-w-2xl"
+      onCerrar={onCerrar}
+    >
+      <div className="space-y-4 p-4 text-sm text-tinta">
+        {error && <p className="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800">{error}</p>}
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wide text-tinta-suave">1. ¿Qué tipo de venta?</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {TIPOS_DE_PLANTILLA.map((x) => (
+              <button key={x.tipo} type="button" onClick={() => setTipo(x.tipo)} className={chip(tipo === x.tipo)}>
+                {x.nombre}
+                <span className="block text-[11px] font-normal text-tinta-suave">{x.ayuda}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wide text-tinta-suave">2. ¿Cómo responde el cliente?</p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {FORMAS_DE_PLANTILLA.map((x) => (
+              <button key={x.forma} type="button" onClick={() => setForma(x.forma)} className={chip(forma === x.forma)}>
+                {x.nombre}
+                <span className="block text-[11px] font-normal text-tinta-suave">{x.ayuda}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {elegida && !plantilla && !error && <p className="text-xs text-tinta-suave">Cargando…</p>}
+        {plantilla && (
+          <div className="space-y-3 rounded-lg border border-borde bg-relleno p-3">
+            <p className="text-xs text-tinta-suave">{plantilla.descripcion}</p>
+            {(plantilla.upsell ?? []).length > 0 && (
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={eleccion.conUpsell} onChange={(e) => setEleccion({ ...eleccion, conUpsell: e.target.checked })} />
+                ¿Llevará upsell? <span className="text-xs text-tinta-suave">(otro producto después de la compra)</span>
+              </label>
+            )}
+            {plantilla.regalo && (
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={eleccion.conRegalo} onChange={(e) => setEleccion({ ...eleccion, conRegalo: e.target.checked })} />
+                ¿Con regalo al final?
+              </label>
+            )}
+            {tieneEntrega && (
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={eleccion.porCorreo} onChange={(e) => setEleccion({ ...eleccion, porCorreo: e.target.checked })} />
+                ¿Se envía también por correo? <span className="text-xs text-tinta-suave">(pregunta si lo quiere por correo)</span>
+              </label>
+            )}
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">3. Tus productos</p>
+              {usados.map((x) => (
+                <label key={x.token} className="block text-xs font-semibold">
+                  {x.etiqueta}
+                  <select
+                    value={eleccion.productos[x.token] ?? ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const nombre = productos.find((p) => p.id === id)?.nombre ?? "";
+                      setEleccion({ ...eleccion, productos: { ...eleccion.productos, [x.token]: id }, nombres: { ...eleccion.nombres, [x.token]: nombre } });
+                    }}
+                    className="mt-1 w-full rounded-md border border-borde bg-tarjeta px-2 py-1.5 text-sm font-normal"
+                  >
+                    <option value="">Elegir…</option>
+                    {propios.length > 0 && (
+                      <optgroup label="De esta tienda">
+                        {propios.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nombre}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label={propios.length > 0 ? "Otros productos" : "Tus productos"}>
+                      {otros.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.nombre}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </label>
+              ))}
+            </div>
+            {plantilla.aporte && (
+              <label className="block text-xs font-semibold">
+                País de los montos del aporte
+                <select
+                  value={eleccion.pais ?? ""}
+                  onChange={(e) => setEleccion({ ...eleccion, pais: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-borde bg-tarjeta px-2 py-1.5 text-sm font-normal"
+                >
+                  {paises.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <span className="mt-1 block font-normal text-tinta-suave">
+                  Montos de ejemplo: {(plantilla.aporte.montos_de_ejemplo ?? []).join(" / ")}. Cámbialos en los ajustes del cobro «Contribución».
+                </span>
+              </label>
+            )}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-borde pt-3">
+          <label className="cursor-pointer rounded-md border border-borde bg-relleno px-3 py-2 text-xs font-semibold hover:bg-tarjeta">
+            ⬆ Traer una plantilla guardada (archivo)
+            <input
+              type="file"
+              accept="application/json,.json"
+              data-importar-plantilla
+              className="hidden"
+              onChange={async (e) => {
+                const archivo = e.target.files?.[0];
+                e.target.value = "";
+                if (!archivo) return;
+                let datos: unknown;
+                try {
+                  datos = JSON.parse(await archivo.text());
+                } catch {
+                  onAviso("Ese archivo no es un JSON válido.");
+                  return;
+                }
+                const p = leePlantilla(datos);
+                if ("error" in p) {
+                  onAviso(p.error);
+                  return;
+                }
+                // Una de fábrica (con productos por elegir): se elige aquí mismo antes de traerla.
+                if (p.productos.length > 0) {
+                  setTipo(null);
+                  setForma(null);
+                  setError(null);
+                  setPlantilla(p);
+                  return;
+                }
+                const incluidos = ((datos as { productos_incluidos?: ProductoEditor[] }).productos_incluidos ?? []).filter((x) => x?.id);
+                onTraer(p, { productos: {}, nombres: {}, conUpsell: true, conRegalo: true, porCorreo: false }, incluidos);
+              }}
+            />
+          </label>
+          <div className="flex gap-2">
+            <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-2 text-xs font-semibold hover:bg-relleno">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              disabled={!plantilla || falta.length > 0}
+              title={falta.length ? `Falta elegir: ${falta.join(", ")}` : undefined}
+              onClick={() => plantilla && onTraer(plantilla, eleccion)}
+              className="rounded-md bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40"
+            >
+              📋 Traer al tablero
+            </button>
+          </div>
+        </div>
+      </div>
+    </VentanaFlotante>
+  );
+}
+
 function AjustesDeLaFicha({
   ficha,
   productos,
@@ -33122,6 +33484,7 @@ function MisTiendas({
   const almacen = cfg.biblioteca_de_productos ?? [];
   const [menuDe, setMenuDe] = useState<string | null>(null);
   const [datosDe, setDatosDe] = useState<string | null>(null);
+  const [duplicarDe, setDuplicarDe] = useState<string | null>(null);
   const [buscar, setBuscar] = useState("");
   // EL ESTADO REAL DE CADA NÚMERO (22/10/2026): «🟢 Activa» salía aunque su número estuviera pausado
   // o ni siquiera conectado aquí, y entonces nadie contestaba. Solo lee la base, nada de Meta.
@@ -33183,6 +33546,7 @@ function MisTiendas({
     return !q || `${t.nombre ?? ""} ${productosDe(t)} ${t.numero ?? ""}`.toLowerCase().includes(q);
   });
   const enDatos = tiendas.find((t) => t.id === datosDe);
+  const aDuplicar = tiendas.find((t) => t.id === duplicarDe);
   return (
     // `prolijo`: la letra de Sendy, y su oscuro con la pizarra en 🌙 (globals.css).
     <div className="prolijo min-h-0 flex-1 overflow-y-auto bg-fondo p-6">
@@ -33365,8 +33729,7 @@ function MisTiendas({
                         type="button"
                         onClick={() => {
                           setMenuDe(null);
-                          const r = duplicarTienda(cfg, t.id);
-                          if (r) onCambiar(r.cfg);
+                          setDuplicarDe(t.id);
                         }}
                         className="block w-full px-3 py-1.5 text-left hover:bg-relleno"
                       >
@@ -33541,6 +33904,20 @@ function MisTiendas({
         )}
       </div>
       {/* CAMBIAR SUS DATOS: la MISMA ficha de menú ajustes → Tiendas, ya abierta en ésta. */}
+      {aDuplicar && (
+        <GuardarTiendaComo
+          original={aDuplicar.nombre?.trim() || "Tienda"}
+          onCerrar={() => setDuplicarDe(null)}
+          onGuardar={(nombre) => {
+            const r = duplicarTienda(cfg, aDuplicar.id, nombre);
+            setDuplicarDe(null);
+            if (!r) return;
+            onCambiar(r.cfg);
+            // Al guardar, a su tablero (él: «que el tablero se active con la nueva tienda»).
+            onTablero?.(r.id);
+          }}
+        />
+      )}
       {enDatos && (
         <VentanaDeDatosDeTienda
           cfg={cfg}
@@ -35003,14 +35380,15 @@ function hacerPropiaLaTienda(
  * cambiaría—, y quedan solo de la copia. Las «🌐 todas las tiendas» ya le valen sin copiarlas.
  * Los «mensajes principales» de un seguimiento no se copian: son del seguimiento entero.
  */
-function duplicarTienda(cfg: FullConfig, tiendaId: string): { cfg: FullConfig; id: string } | null {
+function duplicarTienda(cfg: FullConfig, tiendaId: string, nombre?: string): { cfg: FullConfig; id: string } | null {
   const original = (cfg.tiendas ?? []).find((t) => t.id === tiendaId);
   if (!original) return null;
   const id = `tienda_${Date.now().toString(36)}`;
   const copia: TiendaEditor = {
     ...JSON.parse(JSON.stringify(original)),
     id,
-    nombre: `${original.nombre?.trim() || "Tienda"} (copia)`,
+    // «GUARDAR COMO» (01/11/2026): el nombre que él escribe; sin nombre, «(copia)» como antes.
+    nombre: nombre?.trim() || `${original.nombre?.trim() || "Tienda"} (copia)`,
     numero: "",
     pagina: "",
   };

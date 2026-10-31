@@ -1,0 +1,435 @@
+{
+ "formato": "plantilla-del-tablero",
+ "version": 1,
+ "id": "contribucion-palabras",
+ "nombre": "Contribución · 💬 Palabras",
+ "tipo": "contribucion",
+ "forma": "palabras",
+ "descripcion": "Entrega primero y premia según el aporte. El cliente escribe; cuadritos con palabras deciden.",
+ "productos": [
+  {
+   "token": "@MATERIAL",
+   "etiqueta": "Material que se entrega primero",
+   "nombre": "MATERIAL"
+  }
+ ],
+ "upsell": [],
+ "regalo": null,
+ "aporte": {
+  "ficha": "pla_ec_con_cobro",
+  "montos_de_ejemplo": [
+   1,
+   2,
+   3
+  ]
+ },
+ "fichas": [
+  {
+   "id": "pla_ec_con_promesa",
+   "tipo": "mensaje",
+   "x": 0,
+   "y": 0,
+   "titulo": "Intro · contribución",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "*¡Hola! 😊 Soy ✏️Tu nombre* de *✏️ TU TIENDA* 💛"
+     ],
+     "delay_after_sec": 4
+    },
+    {
+     "type": "image",
+     "drive_url": "https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link",
+     "caption_variants": [
+      "Es un material digital de plantillas para imprimir y usar 📚\n\n(Imagen referencial)"
+     ],
+     "delay_after_sec": 5
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Funciona así 💛\n\n1️⃣ Te envío el material *primero*, con total confianza.\n2️⃣ Lo revisas.\n3️⃣ Luego haces una *contribución voluntaria*, del valor que tú elijas.\n\n*¿Aceptas?*\n\nEscríbeme *«acepto»* o *«no»* 😊"
+     ],
+     "delay_after_sec": 4,
+     "decisions": [
+      {
+       "id": "pla_ec_con_promesa_acepto",
+       "title": "Sí, acepto",
+       "keywords": [
+        "acepto",
+        "si acepto",
+        "si",
+        "sí",
+        "dale",
+        "claro",
+        "lo quiero"
+       ],
+       "color": "",
+       "steps": []
+      },
+      {
+       "id": "pla_ec_con_promesa_no",
+       "title": "No, gracias",
+       "keywords": [
+        "no",
+        "no gracias",
+        "ahora no",
+        "paso",
+        "luego"
+       ],
+       "color": "",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@MATERIAL"
+   ]
+  },
+  {
+   "id": "pla_ec_con_entrega",
+   "tipo": "entregar",
+   "x": 330,
+   "y": 0,
+   "titulo": "Entrega · ⟨MATERIAL⟩",
+   "producto_id": "@MATERIAL"
+  },
+  {
+   "id": "pla_ec_con_no",
+   "tipo": "mensaje",
+   "x": 330,
+   "y": 430,
+   "titulo": "Dijo que no",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "¡No te preocupes! 💛 Si más adelante lo quieres, aquí estaré ✨"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_con_segP",
+   "tipo": "seguimientos",
+   "x": 0,
+   "y": 430,
+   "titulo": "Seguimientos · si no contesta",
+   "presenta": [
+    "@MATERIAL"
+   ],
+   "seguimientos": [
+    {
+     "id": "pla_ec_con_segP_1",
+     "minutos": 120,
+     "variantes": [
+      {
+       "id": "pla_ec_con_segP_1a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "¿Sigues por ahí? 😊 Si quieres el material, solo dime que aceptas y te lo envío ahora mismo 💛\n\nEscríbeme *«acepto»* o *«no»* 😊"
+         ],
+         "delay_after_sec": 4,
+         "decisions": [
+          {
+           "id": "pla_ec_con_segP_acepto",
+           "title": "Sí, acepto",
+           "keywords": [
+            "acepto",
+            "si acepto",
+            "si",
+            "sí",
+            "dale",
+            "claro",
+            "lo quiero"
+           ],
+           "color": "",
+           "steps": []
+          },
+          {
+           "id": "pla_ec_con_segP_no",
+           "title": "No, gracias",
+           "keywords": [
+            "no",
+            "no gracias",
+            "ahora no",
+            "paso",
+            "luego"
+           ],
+           "color": "",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pla_ec_con_segP_2",
+     "minutos": 600,
+     "variantes": [
+      {
+       "id": "pla_ec_con_segP_2a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Último aviso 💛 El material sigue reservado para ti: ¿lo quieres?\n\nEscríbeme *«acepto»* o *«no»* 😊"
+         ],
+         "delay_after_sec": 4,
+         "decisions": [
+          {
+           "id": "pla_ec_con_segP_acepto",
+           "title": "Sí, acepto",
+           "keywords": [
+            "acepto",
+            "si acepto",
+            "si",
+            "sí",
+            "dale",
+            "claro",
+            "lo quiero"
+           ],
+           "color": "",
+           "steps": []
+          },
+          {
+           "id": "pla_ec_con_segP_no",
+           "title": "No, gracias",
+           "keywords": [
+            "no",
+            "no gracias",
+            "ahora no",
+            "paso",
+            "luego"
+           ],
+           "color": "",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_con_cobro",
+   "tipo": "cobro",
+   "x": 660,
+   "y": 0,
+   "titulo": "Contribución",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "Ahora puedes hacer tu contribución para apoyar este proyecto 💛\n\n💰 *✏️ Monto 1*\nMaterial completo\n\n💰 *✏️ Monto 2*\nMaterial completo + Colección extra\n\n💰 *✏️ Monto 3*\nTodo lo anterior + Acceso total"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "💳 ✏️ Pon aquí tus datos para el aporte (o usa {{LISTA_METODOS_POR_PAIS}})\n\n📷 Envía tu comprobante de pago por aquí."
+     ],
+     "delay_after_sec": 3
+    }
+   ],
+   "cobro": {
+    "modo": "abierto",
+    "minimo_por_pais": {
+     "@PAIS": 1
+    },
+    "tramos_por_pais": {
+     "@PAIS": [
+      {
+       "id": "n1",
+       "desde": 1
+      },
+      {
+       "id": "n2",
+       "desde": 2
+      },
+      {
+       "id": "n3",
+       "desde": 3
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "pla_ec_con_rec",
+   "tipo": "seguimientos",
+   "x": 660,
+   "y": 430,
+   "titulo": "Recordatorios · si no aporta",
+   "presenta": [
+    "@MATERIAL"
+   ],
+   "seguimientos": [
+    {
+     "id": "pla_ec_con_rec_1",
+     "minutos": 120,
+     "variantes": [
+      {
+       "id": "pla_ec_con_rec_1a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "¡Hola de nuevo! ✨ Espero que estés disfrutando el material. Cuando hagas tu contribución, me envías la fotito del comprobante por aquí 📸"
+         ],
+         "delay_after_sec": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pla_ec_con_rec_2",
+     "minutos": 600,
+     "variantes": [
+      {
+       "id": "pla_ec_con_rec_2a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Paso por última vez 💛 Si deseas hacer tu contribución hoy, aún estás a tiempo. ¡Gracias por valorar este trabajo!"
+         ],
+         "delay_after_sec": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_con_nivel1",
+   "tipo": "mensaje",
+   "x": 990,
+   "y": 0,
+   "titulo": "Nivel 1",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🙏 *¡Gracias de corazón por tu contribución!* 💛\n\nTu aporte desbloquea: *Material completo* ✨\n\n📁 Aquí tienes tu acceso:\n✏️ (pon aquí tu enlace)"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_con_nivel2",
+   "tipo": "mensaje",
+   "x": 990,
+   "y": 430,
+   "titulo": "Nivel 2",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🙏 *¡Gracias de corazón por tu contribución!* 💛\n\nTu aporte desbloquea: *Material completo + Colección extra* ✨\n\n📁 Aquí tienes tu acceso:\n✏️ (pon aquí tu enlace)"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  },
+  {
+   "id": "pla_ec_con_nivel3",
+   "tipo": "mensaje",
+   "x": 990,
+   "y": 860,
+   "titulo": "Nivel 3",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🙏 *¡Gracias de corazón por tu contribución!* 💛\n\nTu aporte desbloquea: *Todo lo anterior + Acceso total* ✨\n\n📁 Aquí tienes tu acceso:\n✏️ (pon aquí tu enlace)"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  }
+ ],
+ "cables": [
+  {
+   "id": "cpl142",
+   "de": "pla_ec_con_promesa",
+   "salida": "dec:pla_ec_con_promesa_acepto",
+   "a": "pla_ec_con_entrega"
+  },
+  {
+   "id": "cpl143",
+   "de": "pla_ec_con_promesa",
+   "salida": "dec:pla_ec_con_promesa_no",
+   "a": "pla_ec_con_no"
+  },
+  {
+   "id": "cpl144",
+   "de": "pla_ec_con_promesa",
+   "salida": "siguiente",
+   "a": "pla_ec_con_segP"
+  },
+  {
+   "id": "cpl145",
+   "de": "pla_ec_con_segP",
+   "salida": "dec:pla_ec_con_segP_acepto",
+   "a": "pla_ec_con_entrega"
+  },
+  {
+   "id": "cpl146",
+   "de": "pla_ec_con_segP",
+   "salida": "dec:pla_ec_con_segP_no",
+   "a": "pla_ec_con_no"
+  },
+  {
+   "id": "cpl147",
+   "de": "pla_ec_con_entrega",
+   "salida": "siguiente",
+   "a": "pla_ec_con_cobro"
+  },
+  {
+   "id": "cpl148",
+   "de": "pla_ec_con_cobro",
+   "salida": "sin_pago",
+   "a": "pla_ec_con_rec"
+  },
+  {
+   "id": "cpl149",
+   "de": "pla_ec_con_cobro",
+   "salida": "tramo:n1",
+   "a": "pla_ec_con_nivel1"
+  },
+  {
+   "id": "cpl150",
+   "de": "pla_ec_con_cobro",
+   "salida": "tramo:n2",
+   "a": "pla_ec_con_nivel2"
+  },
+  {
+   "id": "cpl151",
+   "de": "pla_ec_con_cobro",
+   "salida": "tramo:n3",
+   "a": "pla_ec_con_nivel3"
+  }
+ ]
+}

@@ -1,0 +1,593 @@
+{
+ "formato": "plantilla-del-tablero",
+ "version": 1,
+ "id": "doble_oferta-botones",
+ "nombre": "Doble oferta · 🔘 Botones",
+ "tipo": "doble_oferta",
+ "forma": "botones",
+ "descripcion": "Básico y full desde el inicio, con upgrade. El cliente toca botones.",
+ "productos": [
+  {
+   "token": "@BASICO",
+   "etiqueta": "Producto básico",
+   "nombre": "BÁSICO"
+  },
+  {
+   "token": "@FULL",
+   "etiqueta": "Producto full (el más completo)",
+   "nombre": "FULL"
+  },
+  {
+   "token": "@UPSELL",
+   "etiqueta": "Upsell (se ofrece después de la compra)",
+   "nombre": "UPSELL"
+  }
+ ],
+ "upsell": [
+  "pla_pe_dou_upsell1",
+  "pla_pe_dou_cobro_u1",
+  "pla_pe_dou_no_u1",
+  "pla_pe_dou_ent_u1"
+ ],
+ "regalo": "pla_pe_dou_regalo",
+ "aporte": null,
+ "fichas": [
+  {
+   "id": "pla_pe_dou_intro",
+   "tipo": "mensaje",
+   "x": 0,
+   "y": 0,
+   "titulo": "Intro · doble oferta",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "*{¡Hola! 😊 Te saluda ✏️Tu nombre|¡Hola! 😊 Soy ✏️Tu nombre}* y soy parte del equipo de *✏️ TU TIENDA* 🙋🏻‍♀️"
+     ],
+     "delay_after_sec": 4
+    },
+    {
+     "type": "image",
+     "drive_url": "https://drive.google.com/file/d/1_8j4S77O9GtTrHEnZ-uT5rIwPh-pm5AV/view?usp=drive_link",
+     "caption_variants": [
+      "Este es nuestro producto\n\n*{{PRODUCTO_BASE}}* 📚\n\n✅ Guía principal paso a paso.\n✅ 50 plantillas listas para usar.\n✅ Checklist imprimible.\n✅ Acceso de por vida.\n\n(Imagen referencial)"
+     ],
+     "delay_after_sec": 5
+    },
+    {
+     "type": "image",
+     "drive_url": "https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing",
+     "caption_variants": [
+      "*{Además|Y además} recibe {GRATIS|DE REGALO} estos bonos* ‼️ 😱👇🏼\n\n- 🎁 Guía de inicio rápido\n- 🎁 Plantillas para imprimir\n- 🎁 Acceso de por vida"
+     ],
+     "delay_after_sec": 5
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Tenemos *dos opciones* para ti 👇\n\n1️⃣ *{{PRODUCTO_BASE}}*\n❌ antes ~{{PRECIO_ANTES_BASE}}~ ✅ HOY *{{PRECIO_BASE}}*\n\n2️⃣ *{{PRODUCTO_FULL}}*\n❌ antes ~{{PRECIO_ANTES_FULL}}~ ✅ HOY *{{PRECIO_FULL}}*\n\n*¿Cuál prefieres?*"
+     ],
+     "delay_after_sec": 4,
+     "buttons": [
+      {
+       "id": "pla_pe_dou_intro_basico",
+       "label": "Solo el básico",
+       "action": "send_steps",
+       "steps": []
+      },
+      {
+       "id": "pla_pe_dou_intro_pack",
+       "label": "Quiero el pack",
+       "action": "send_steps",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@BASICO",
+    "@FULL"
+   ]
+  },
+  {
+   "id": "pla_pe_dou_cobro_b",
+   "tipo": "cobro",
+   "x": 330,
+   "y": 0,
+   "titulo": "Cobro · ⟨BASICO⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@BASICO",
+    "acepta": [
+     "@FULL"
+    ],
+    "metodos": true
+   }
+  },
+  {
+   "id": "pla_pe_dou_cobro_p",
+   "tipo": "cobro",
+   "x": 330,
+   "y": 430,
+   "titulo": "Cobro · ⟨FULL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@FULL",
+    "acepta": [
+     "@BASICO"
+    ],
+    "metodos": true
+   }
+  },
+  {
+   "id": "pla_pe_dou_seg",
+   "tipo": "seguimientos",
+   "x": 0,
+   "y": 430,
+   "titulo": "Seguimientos · si no elige o no paga",
+   "presenta": [
+    "@BASICO",
+    "@FULL"
+   ],
+   "seguimientos": [
+    {
+     "id": "pla_pe_dou_seg_1",
+     "minutos": 120,
+     "variantes": [
+      {
+       "id": "pla_pe_dou_seg_1a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "¿Ya elegiste? 😊\n\n1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*\n2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*"
+         ],
+         "delay_after_sec": 4,
+         "buttons": [
+          {
+           "id": "pla_pe_dou_seg_basico",
+           "label": "Solo el básico",
+           "action": "send_steps",
+           "steps": []
+          },
+          {
+           "id": "pla_pe_dou_seg_pack",
+           "label": "Quiero el pack",
+           "action": "send_steps",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pla_pe_dou_seg_2",
+     "minutos": 600,
+     "variantes": [
+      {
+       "id": "pla_pe_dou_seg_2a",
+       "nombre": "Versión A",
+       "peso": 1,
+       "steps": [
+        {
+         "type": "text",
+         "body_variants": [
+          "Te guardé los dos precios un ratito más ⏳\n\n1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*\n2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*"
+         ],
+         "delay_after_sec": 4,
+         "buttons": [
+          {
+           "id": "pla_pe_dou_seg_basico",
+           "label": "Solo el básico",
+           "action": "send_steps",
+           "steps": []
+          },
+          {
+           "id": "pla_pe_dou_seg_pack",
+           "label": "Quiero el pack",
+           "action": "send_steps",
+           "steps": []
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pla_pe_dou_ent_b",
+   "tipo": "entregar",
+   "x": 660,
+   "y": 0,
+   "titulo": "Entrega · ⟨BASICO⟩",
+   "producto_id": "@BASICO"
+  },
+  {
+   "id": "pla_pe_dou_ent_p",
+   "tipo": "entregar",
+   "x": 660,
+   "y": 430,
+   "titulo": "Entrega · ⟨FULL⟩",
+   "producto_id": "@FULL"
+  },
+  {
+   "id": "pla_pe_dou_upgrade",
+   "tipo": "mensaje",
+   "x": 990,
+   "y": 0,
+   "titulo": "Upgrade al pack",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?"
+     ],
+     "delay_after_sec": 4,
+     "buttons": [
+      {
+       "id": "pla_pe_dou_up_si",
+       "label": "Sí, completar",
+       "action": "send_steps",
+       "steps": []
+      },
+      {
+       "id": "pla_pe_dou_up_no",
+       "label": "No, gracias",
+       "action": "send_steps",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@BASICO",
+    "@FULL"
+   ],
+   "instrucciones": "Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia."
+  },
+  {
+   "id": "pla_pe_dou_upsell1",
+   "tipo": "mensaje",
+   "x": 1320,
+   "y": 0,
+   "titulo": "Upsell · ⟨UPSELL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "🎁 *{¡Una cosita más!|¡Antes de irte!}*\n\nPor ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱\n\n*¿Lo agregas?*"
+     ],
+     "delay_after_sec": 4,
+     "buttons": [
+      {
+       "id": "pla_pe_dou_u1_si",
+       "label": "Sí, lo quiero",
+       "action": "send_steps",
+       "steps": []
+      },
+      {
+       "id": "pla_pe_dou_u1_no",
+       "label": "No, gracias",
+       "action": "send_steps",
+       "steps": []
+      }
+     ]
+    }
+   ],
+   "presenta": [
+    "@UPSELL"
+   ],
+   "instrucciones": "Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.",
+   "espera_min": 2
+  },
+  {
+   "id": "pla_pe_dou_cobro_up",
+   "tipo": "cobro",
+   "x": 990,
+   "y": 430,
+   "titulo": "Cobro · ⟨FULL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@FULL",
+    "acepta": [
+     "@BASICO"
+    ],
+    "metodos": true,
+    "diferencia": true
+   }
+  },
+  {
+   "id": "pla_pe_dou_cobro_u1",
+   "tipo": "cobro",
+   "x": 1650,
+   "y": 0,
+   "titulo": "Cobro · ⟨UPSELL⟩",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "¿Con qué método prefieres pagar? 👇\n\n{{LISTA_METODOS_POR_PAIS}}"
+     ],
+     "delay_after_sec": 3
+    },
+    {
+     "type": "text",
+     "body_variants": [
+      "Así te paso los datos exactos para tu pago 😊"
+     ],
+     "delay_after_sec": 4
+    }
+   ],
+   "cobro": {
+    "modo": "producto",
+    "producto_id": "@UPSELL",
+    "metodos": true
+   }
+  },
+  {
+   "id": "pla_pe_dou_no_u1",
+   "tipo": "mensaje",
+   "x": 1650,
+   "y": 430,
+   "titulo": "Si dice que no",
+   "steps": [
+    {
+     "type": "text",
+     "body_variants": [
+      "¡Entendido! 😊 Gracias por tu compra. Disfruta mucho tu material 💛"
+     ],
+     "delay_after_sec": 4
+    }
+   ]
+  },
+  {
+   "id": "pla_pe_dou_regalo",
+   "tipo": "regalo",
+   "x": 2310,
+   "y": 0,
+   "titulo": "Regalo"
+  },
+  {
+   "id": "pla_pe_dou_ent_u1",
+   "tipo": "entregar",
+   "x": 1980,
+   "y": 0,
+   "titulo": "Entrega · ⟨UPSELL⟩",
+   "producto_id": "@UPSELL"
+  }
+ ],
+ "cables": [
+  {
+   "id": "cpl40",
+   "de": "pla_pe_dou_intro",
+   "salida": "btn:pla_pe_dou_intro_basico",
+   "a": "pla_pe_dou_cobro_b"
+  },
+  {
+   "id": "cpl41",
+   "de": "pla_pe_dou_intro",
+   "salida": "btn:pla_pe_dou_intro_pack",
+   "a": "pla_pe_dou_cobro_p"
+  },
+  {
+   "id": "cpl42",
+   "de": "pla_pe_dou_intro",
+   "salida": "siguiente",
+   "a": "pla_pe_dou_seg"
+  },
+  {
+   "id": "cpl43",
+   "de": "pla_pe_dou_seg",
+   "salida": "btn:pla_pe_dou_seg_basico",
+   "a": "pla_pe_dou_cobro_b"
+  },
+  {
+   "id": "cpl44",
+   "de": "pla_pe_dou_seg",
+   "salida": "btn:pla_pe_dou_seg_pack",
+   "a": "pla_pe_dou_cobro_p"
+  },
+  {
+   "id": "cpl45",
+   "de": "pla_pe_dou_cobro_b",
+   "salida": "pagado",
+   "a": "pla_pe_dou_ent_b"
+  },
+  {
+   "id": "cpl46",
+   "de": "pla_pe_dou_cobro_b",
+   "salida": "prod:@FULL",
+   "a": "pla_pe_dou_ent_p"
+  },
+  {
+   "id": "cpl47",
+   "de": "pla_pe_dou_cobro_b",
+   "salida": "sin_pago",
+   "a": "pla_pe_dou_seg"
+  },
+  {
+   "id": "cpl48",
+   "de": "pla_pe_dou_cobro_p",
+   "salida": "pagado",
+   "a": "pla_pe_dou_ent_p"
+  },
+  {
+   "id": "cpl49",
+   "de": "pla_pe_dou_cobro_p",
+   "salida": "prod:@BASICO",
+   "a": "pla_pe_dou_ent_b"
+  },
+  {
+   "id": "cpl50",
+   "de": "pla_pe_dou_cobro_p",
+   "salida": "sin_pago",
+   "a": "pla_pe_dou_seg"
+  },
+  {
+   "id": "cpl51",
+   "de": "pla_pe_dou_upsell1",
+   "salida": "btn:pla_pe_dou_u1_si",
+   "a": "pla_pe_dou_cobro_u1"
+  },
+  {
+   "id": "cpl52",
+   "de": "pla_pe_dou_upsell1",
+   "salida": "btn:pla_pe_dou_u1_no",
+   "a": "pla_pe_dou_no_u1"
+  },
+  {
+   "id": "cpl53",
+   "de": "pla_pe_dou_upsell1",
+   "salida": "sin_respuesta",
+   "a": "pla_pe_dou_regalo"
+  },
+  {
+   "id": "cpl54",
+   "de": "pla_pe_dou_cobro_u1",
+   "salida": "pagado",
+   "a": "pla_pe_dou_ent_u1"
+  },
+  {
+   "id": "cpl55",
+   "de": "pla_pe_dou_cobro_u1",
+   "salida": "sin_pago",
+   "a": "pla_pe_dou_regalo"
+  },
+  {
+   "id": "cpl56",
+   "de": "pla_pe_dou_ent_u1",
+   "salida": "siguiente",
+   "a": "pla_pe_dou_regalo"
+  },
+  {
+   "id": "cpl57",
+   "de": "pla_pe_dou_no_u1",
+   "salida": "siguiente",
+   "a": "pla_pe_dou_regalo"
+  },
+  {
+   "id": "cpl58",
+   "de": "pla_pe_dou_ent_b",
+   "salida": "siguiente",
+   "a": "pla_pe_dou_upgrade"
+  },
+  {
+   "id": "cpl59",
+   "de": "pla_pe_dou_upgrade",
+   "salida": "btn:pla_pe_dou_up_si",
+   "a": "pla_pe_dou_cobro_up"
+  },
+  {
+   "id": "cpl60",
+   "de": "pla_pe_dou_upgrade",
+   "salida": "btn:pla_pe_dou_up_no",
+   "a": "pla_pe_dou_upsell1"
+  },
+  {
+   "id": "cpl61",
+   "de": "pla_pe_dou_upgrade",
+   "salida": "sin_respuesta",
+   "a": "pla_pe_dou_upsell1"
+  },
+  {
+   "id": "cpl62",
+   "de": "pla_pe_dou_cobro_up",
+   "salida": "pagado",
+   "a": "pla_pe_dou_ent_p"
+  },
+  {
+   "id": "cpl63",
+   "de": "pla_pe_dou_cobro_up",
+   "salida": "sin_pago",
+   "a": "pla_pe_dou_upsell1"
+  },
+  {
+   "id": "cpl64",
+   "de": "pla_pe_dou_ent_p",
+   "salida": "siguiente",
+   "a": "pla_pe_dou_upsell1"
+  }
+ ]
+}
