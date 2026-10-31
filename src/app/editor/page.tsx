@@ -30,7 +30,7 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
-import { CEREBRO_DE_FABRICA } from "@/lib/tablero/datos";
+import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda } from "@/lib/tablero/datos";
 import { comodinesDeLaFichaEnTexto, type ProductoConPrecio } from "@/lib/tablero/comodines";
 import {
   aplicarPase,
@@ -31143,8 +31143,23 @@ function PantallaDelTableroCargada({
   const vivoCfg = useRef(cfg);
   vivoCfg.current = cfg;
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
+  // «EL BÁSICO / EL FULL DE LA TIENDA» (01/11/2026): sus nombres, para el selector y las tarjetas.
+  const alineacionDeLaTienda = (tienda?.alineacion ?? {}) as Record<string, unknown>;
+  const nombreDeId = (v: unknown) => (typeof v === "string" && v ? productos.find((p) => p.id === v)?.name?.trim() || "" : "");
+  const deLaTienda = esWorkflow
+    ? undefined
+    : {
+        basico: nombreDeId(alineacionDeLaTienda.basico) || nombreDeId(alineacionDeLaTienda.unico),
+        full: nombreDeId(alineacionDeLaTienda.full),
+      };
   const nombres: Record<string, string> = {
     ...Object.fromEntries(productos.map((p) => [p.id, p.name?.trim() || p.id])),
+    ...(deLaTienda
+      ? {
+          [BASICO_DE_LA_TIENDA]: `Básico de la tienda${deLaTienda.basico ? ` (${deLaTienda.basico})` : " (sin elegir)"}`,
+          [FULL_DE_LA_TIENDA]: `Full de la tienda${deLaTienda.full ? ` (${deLaTienda.full})` : " (sin elegir)"}`,
+        }
+      : {}),
     // Los anuncios por su nombre, para las salidas del Inicio «📣 anuncio» (26/10/2026).
     ...Object.fromEntries(((cfg as { ad_registry?: Array<{ key: string; name?: string }> }).ad_registry ?? []).map((a) => [`anuncio:${a.key}`, a.name?.trim() || a.key])),
   };
@@ -31164,7 +31179,22 @@ function PantallaDelTableroCargada({
     const texto = JSON.stringify(tablero.fichas ?? []);
     for (const p of productos) if (texto.includes(`"${p.id}"`) || texto.includes(`"${p.id}#`)) enEsteTablero.add(p.id);
   }
-  const entregasPorProducto = [...productos]
+  const entregasPorProducto = [
+    // Primero «el básico / el full de la tienda»: siguen a la tienda aunque le cambies los productos.
+    ...(deLaTienda
+      ? [
+          {
+            id: "@tienda",
+            nombre: "🏪 De esta tienda (sigue a sus productos)",
+            propio: true,
+            opciones: [
+              { clave: BASICO_DE_LA_TIENDA, nombre: nombres[BASICO_DE_LA_TIENDA] },
+              { clave: FULL_DE_LA_TIENDA, nombre: nombres[FULL_DE_LA_TIENDA] },
+            ],
+          },
+        ]
+      : []),
+    ...[...productos]
     .sort((x, y) => Number(enEsteTablero.has(y.id)) - Number(enEsteTablero.has(x.id)))
     .map((p) => ({
       id: p.id,
@@ -31174,7 +31204,8 @@ function PantallaDelTableroCargada({
         { clave: p.id, nombre: "entrega principal" },
         ...(p.entregas_extra ?? []).map((e) => ({ clave: `${p.id}#${e.id}`, nombre: e.nombre?.trim() || "Entrega sin nombre" })),
       ],
-    }));
+    })),
+  ];
   const workflows = Object.entries(cfg.workflows ?? {}).map(([id, w]) => ({ id, nombre: w.nombre?.trim() || "Workflow sin nombre" }));
   // QUIÉN COBRA EN CADA PAÍS, PARA SU INICIO (29/10/2026). Él: «que automáticamente aparezca el avatar del
   // cobrador que está activo… o si se olvidó de seleccionarlo, el que es por defecto… yo solo miro la pizarra y
@@ -31765,7 +31796,10 @@ function PantallaDelTableroCargada({
       )}
       {ventanaDePlantillas && (
         <VentanaDePlantillas
-          productos={entregasPorProducto.map((p) => ({ id: p.id, nombre: p.nombre, propio: p.propio }))}
+          productos={entregasPorProducto.flatMap((p) =>
+            p.id === "@tienda" ? p.opciones.map((o) => ({ id: o.clave, nombre: `🏪 ${o.nombre}`, propio: true })) : [{ id: p.id, nombre: p.nombre, propio: p.propio }]
+          )}
+          tieneTienda={!!deLaTienda}
           paises={paises}
           paisInicial={paisVisto}
           onTraer={traerPlantilla}
@@ -32076,7 +32110,16 @@ function PantallaDelTableroCargada({
       {fichaDeAjustes && (
         <AjustesDeLaFicha
           ficha={fichaDeAjustes}
-          productos={productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id }))}
+          productos={[
+            // «El básico / el full de la tienda» arriba de todo: el bot los cambia por los de la tienda.
+            ...(deLaTienda
+              ? [
+                  { id: BASICO_DE_LA_TIENDA, nombre: `🏪 ${nombres[BASICO_DE_LA_TIENDA]}` },
+                  { id: FULL_DE_LA_TIENDA, nombre: `🏪 ${nombres[FULL_DE_LA_TIENDA]}` },
+                ]
+              : []),
+            ...productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id })),
+          ]}
           entregasPorProducto={entregasPorProducto}
           anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
           workflows={workflows.filter((w) => w.id !== wfId)}
@@ -32827,7 +32870,10 @@ function VentanaDePlantillas({
   onTraer,
   onAviso,
   onCerrar,
+  tieneTienda = false,
 }: {
+  /** En una tienda: el básico y el full de la plantilla nacen como «los de la tienda» (01/11/2026). */
+  tieneTienda?: boolean;
   productos: Array<{ id: string; nombre: string; propio: boolean }>;
   paises: string[];
   paisInicial: string;
@@ -32840,7 +32886,14 @@ function VentanaDePlantillas({
   const [forma, setForma] = useState<string | null>(null);
   const [plantilla, setPlantilla] = useState<PlantillaDelTablero | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [eleccion, setEleccion] = useState<EleccionDePlantilla>({ productos: {}, nombres: {}, conUpsell: true, conRegalo: true, porCorreo: false, pais: paisInicial || paises[0] });
+  const [eleccion, setEleccion] = useState<EleccionDePlantilla>({
+    productos: tieneTienda ? { "@BASICO": BASICO_DE_LA_TIENDA, "@FULL": FULL_DE_LA_TIENDA } : {},
+    nombres: tieneTienda ? { "@BASICO": "BÁSICO", "@FULL": "FULL" } : {},
+    conUpsell: true,
+    conRegalo: true,
+    porCorreo: false,
+    pais: paisInicial || paises[0],
+  });
   useEffect(() => {
     fetch("/plantillas-del-tablero/indice.json")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -34187,6 +34240,8 @@ function productosParaElVisor(
   let ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
   if (f.tipo !== "cobro" && ids.length === 0 && deLaTienda)
     ids = [deLaTienda.basico, deLaTienda.unico, deLaTienda.full].filter((x): x is string => typeof x === "string" && !!x);
+  // «El básico / el full de la tienda»: el visor los cambia como el bot (`conProductosDeLaTienda`).
+  ids = ids.map((x) => (x ? conProductosDeLaTienda(x, deLaTienda) : x));
   // EL PRECIO QUE COBRARÁ EL BOT (25/10/2026): «¿en los visores se pueden ver los precios ya rebajados
   // según la etapa?». Un cobro «Siempre el de oferta» enseña el de oferta; los demás, el normal (y el
   // gestor de seguimientos lo cambia al de oferta desde el que lo activa, ver `GestorDeVersiones`).

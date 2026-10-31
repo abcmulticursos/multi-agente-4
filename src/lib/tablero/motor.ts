@@ -104,6 +104,7 @@ import {
   entregasDeLaFicha,
   eligeDeLaFicha,
   pideElNombre,
+  conProductosDeLaTienda,
 } from "./datos";
 import { laEntrega } from "./entregas";
 import {
@@ -175,7 +176,9 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
   if (!clave) return null;
   const crudo = config as { tableros?: unknown; workflows?: unknown } | null;
   if (esClaveDeWorkflow(clave)) return leeTableros(crudo?.workflows)[clave.slice(3)] ?? null;
-  return leeTablerosPorTienda(crudo?.tableros)[clave]?.[canal] ?? null;
+  const t = leeTablerosPorTienda(crudo?.tableros)[clave]?.[canal] ?? null;
+  // «El básico / el full de la tienda» (01/11/2026): aquí, y solo aquí, se cambian por sus productos.
+  return conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
 }
 
 function producto(config: WorkflowConfig | null, id: string | undefined | null): ProductoDeLaBiblioteca | null {

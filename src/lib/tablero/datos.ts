@@ -424,6 +424,31 @@ export function eligeDeLaFicha(f: FichaDelTablero): string[] {
 }
 
 /**
+ * «EL BÁSICO / EL FULL DE LA TIENDA» (01/11/2026). Él: «pensé que ya que la tienda tiene sus productos
+ * definidos, el sistema debe entender automáticamente cuál es full y cuál es básico». Un Cobro o una Entrega
+ * pueden guardar estos códigos en vez de un producto; al leer el tablero se cambian por los de la alineación
+ * de SU tienda (básico, o el único si no hay básico; full). Así, al duplicar la tienda y cambiarle los
+ * productos, su tablero cobra y entrega los nuevos sin tocar ficha por ficha.
+ */
+export const BASICO_DE_LA_TIENDA = "@tienda:basico";
+export const FULL_DE_LA_TIENDA = "@tienda:full";
+
+/** El tablero con los códigos de la tienda cambiados por sus productos (si no los usa, el MISMO objeto). */
+export function conProductosDeLaTienda<T>(t: T, alineacion: Record<string, unknown> | undefined | null): T {
+  if (!t) return t;
+  const texto = JSON.stringify(t);
+  if (!texto.includes("@tienda:")) return t;
+  const id = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
+  const basico = id(alineacion?.basico) || id(alineacion?.unico);
+  const full = id(alineacion?.full);
+  let fuera = texto;
+  // Sin ese producto en la tienda, el código se queda: el cobro no encuentra producto (como hoy uno sin elegir).
+  if (basico) fuera = fuera.split(BASICO_DE_LA_TIENDA).join(basico);
+  if (full) fuera = fuera.split(FULL_DE_LA_TIENDA).join(full);
+  return JSON.parse(fuera) as T;
+}
+
+/**
  * «AQUÍ LE PREGUNTO SU NOMBRE» EN EL TABLERO (01/11/2026). Un Mensaje sin botones ni cuadritos con una
  * burbuja que pide el nombre ESPERA la respuesta: lo que conteste se guarda como su nombre y sigue por
  * «👤 Al dar su nombre»; si no contesta, por «⏳ Si no responde». Con botones o cuadritos no aplica: ahí
