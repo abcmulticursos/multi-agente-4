@@ -1437,6 +1437,10 @@ whatsapp:
       de: inicio-mvveb83v-1
       salida: siguiente
       a: f-mvvfznys-u8svs
+    - id: c-mvw35ml9-ow6
+      de: f-mvvfznys-u8svs
+      salida: dec:be0e11de-636a-4a1a-b4af-a9f51a281f13
+      a: f-mvvo1ibc-s0tdo
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
