@@ -20390,7 +20390,12 @@ function BibliotecaDeProductos({
   onEdit,
   onMarcarPunto,
   onCancelarVentana,
+  deLaTienda,
 }: {
+  /** LOS DE ESTA TIENDA (31/10/2026). Él: «me sale la lista enorme de todos los productos que no tienen nada
+   *  que ver con la tienda». Desde la pizarra: su nombre y los productos que juega (su selector y los que usa
+   *  su tablero, los mismos de «Lo que se entrega»). Solo filtra lo que se ve. */
+  deLaTienda?: { nombre: string; ids: Set<string> };
   /** Hace falta entera para saber qué precio manda en cada país. */
   cfg: FullConfig;
   productos: ProductoEditor[];
@@ -20475,13 +20480,18 @@ function BibliotecaDeProductos({
    *  no se acuerda del nombre exacto. Sin tildes a los dos lados: nadie escribe
    *  «impresión» con tilde en un buscador. */
   const filtro = sinTildes(busqueda);
-  const visibles = filtro
+  const [soloDeLaTienda, setSoloDeLaTienda] = useState(!!deLaTienda && deLaTienda.ids.size > 0);
+  const visibles = (filtro
     ? enPantalla.filter(({ producto }) =>
         sinTildes(
           `${producto.name ?? ""} ${(producto.aliases ?? []).join(" ")}`
         ).includes(filtro)
       )
-    : enPantalla;
+    : enPantalla
+  ).filter(
+    // El recién creado o el abierto se ven siempre: si no, «+ Agregar» crearía uno que no aparece.
+    ({ producto }) => !soloDeLaTienda || !deLaTienda || deLaTienda.ids.has(producto.id) || producto.id === recienCreado || producto.id === abierto
+  );
 
   /**
    * SUBIR Y BAJAR, CON TOPE.
@@ -20660,6 +20670,26 @@ function BibliotecaDeProductos({
               className="block w-full rounded-full border border-borde bg-tarjeta py-2 pl-9 pr-3 text-sm text-tinta placeholder:text-tinta-suave focus:border-acento focus:outline-none focus:ring-1 focus:ring-acento"
             />
           </label>
+          {deLaTienda && (
+            <span className="inline-flex shrink-0 overflow-hidden rounded-full border border-borde text-xs" role="group" aria-label="Qué productos ver">
+              {(
+                [
+                  [true, `🏪 Solo ${deLaTienda.nombre} (${deLaTienda.ids.size})`],
+                  [false, `Todos (${productos.length})`],
+                ] as const
+              ).map(([v, texto]) => (
+                <button
+                  key={String(v)}
+                  type="button"
+                  aria-pressed={soloDeLaTienda === v}
+                  onClick={() => setSoloDeLaTienda(v)}
+                  className={`px-3 py-1.5 font-semibold ${soloDeLaTienda === v ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+                >
+                  {texto}
+                </button>
+              ))}
+            </span>
+          )}
           {filtro && (
             <span className="shrink-0 text-xs font-semibold text-tinta-suave">
               {visibles.length} de {productos.length}
@@ -20705,13 +20735,15 @@ function BibliotecaDeProductos({
             // el buscador puesto se apagan — reordenar una lista a medio filtrar
             // mueve cosas que no se están viendo.
             const sinPuesto = rango === SIN_PUESTO;
+            // Igual con «Solo esta tienda»: la lista también está a medio filtrar.
+            const filtrada = !!filtro || (soloDeLaTienda && !!deLaTienda);
             const puedeSubir =
-              !filtro &&
+              !filtrada &&
               sinPuesto &&
               fila > 0 &&
               visibles[fila - 1].rango === SIN_PUESTO;
             const puedeBajar =
-              !filtro && sinPuesto && fila < visibles.length - 1;
+              !filtrada && sinPuesto && fila < visibles.length - 1;
             // DÓNDE ESTÁ JUGANDO ESTE PRODUCTO, si es que juega. Se lee de la
             // alineación de la modalidad, que es quien decide. Aquí solo se
             // ENSEÑA: repartir los puestos se hace arriba.
@@ -29459,7 +29491,9 @@ function VistaPizarra({
                       disabled={clave === "tienda" && !tiendaId}
                       onClick={() => {
                         setMenuHerramientas(false);
-                        setVentanaDeHerramienta(clave);
+                        // El simulador, en su propia pestaña (31/10/2026): «que me lleve al simulador».
+                        if (clave === "prueba") window.open("/simulador", "_blank", "noopener");
+                        else setVentanaDeHerramienta(clave);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
                     >
@@ -30918,6 +30952,8 @@ function PantallaDelTablero({
   const [paisVisto, setPaisVisto] = useState<string>("PE");
   // EL BUSCADOR EN LA BARRA y el ☰ HERRAMIENTAS, como en la pizarra (24/10/2026).
   const [buscar, setBuscar] = useState("");
+  const [eligiendoTienda, setEligiendoTienda] = useState(false);
+  const [buscarTienda, setBuscarTienda] = useState("");
   const [menuHerramientas, setMenuHerramientas] = useState(false);
   // ESCAPE O UN CLIC AFUERA CIERRAN EL ☰ (25/10/2026), como en la pizarra (`refDeHerramientas`).
   const refDeHerramientasDelTablero = useRef<HTMLDivElement>(null);
@@ -31143,18 +31179,69 @@ function PantallaDelTablero({
             title="El nombre con el que lo eliges en «Activar workflow»"
           />
         ) : (
-          <select
-            value={tiendaId}
-            onChange={(e) => onTienda(e.target.value)}
-            className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
-            title="Tienda"
-          >
-            {tiendas.map((t, i) => (
-              <option key={t.id} value={t.id}>
-                🏪 {t.nombre?.trim() || `Tienda ${i + 1}`}
-              </option>
-            ))}
-          </select>
+          // EL SELECTOR DE TIENDAS CON BUSCADOR (31/10/2026). Él: «un buscador de tiendas para facilitar la
+          // búsqueda». Se escribe y quedan las que coinciden; Enter elige la primera, Esc cierra.
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setBuscarTienda("");
+                setEligiendoTienda((v) => !v);
+              }}
+              className="flex items-center gap-1 rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
+              title="Cambiar de tienda"
+            >
+              🏪 {tienda?.nombre?.trim() || `Tienda ${tiendas.findIndex((t) => t.id === tiendaId) + 1}`} <span className="text-tinta-suave">▾</span>
+            </button>
+            {eligiendoTienda && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setEligiendoTienda(false)} />
+                <div className="absolute left-0 top-8 z-50 w-72 overflow-hidden rounded-xl border border-borde bg-tarjeta text-sm text-tinta shadow-2xl">
+                  {(() => {
+                    const sinTildes = (s: string) => s.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase();
+                    const q = sinTildes(buscarTienda.trim());
+                    const lista = tiendas
+                      .map((t, i) => ({ id: t.id, nombre: t.nombre?.trim() || `Tienda ${i + 1}` }))
+                      .filter((t) => !q || sinTildes(t.nombre).includes(q));
+                    const elegir = (id: string) => {
+                      setEligiendoTienda(false);
+                      if (id !== tiendaId) onTienda(id);
+                    };
+                    return (
+                      <>
+                        <input
+                          autoFocus
+                          type="search"
+                          value={buscarTienda}
+                          onChange={(e) => setBuscarTienda(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setEligiendoTienda(false);
+                            if (e.key === "Enter" && lista[0]) elegir(lista[0].id);
+                          }}
+                          placeholder="🔍 Buscar tienda…"
+                          className="block w-full border-b border-borde bg-relleno px-3 py-2 text-xs text-tinta focus:outline-none"
+                        />
+                        <div className="max-h-80 overflow-y-auto py-1">
+                          {lista.length === 0 && <div className="px-3 py-2 text-xs text-tinta-suave">Ninguna tienda se llama así.</div>}
+                          {lista.map((t) => (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => elegir(t.id)}
+                              className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-relleno ${t.id === tiendaId ? "font-bold" : ""}`}
+                            >
+                              🏪 {t.nombre}
+                              {t.id === tiendaId && <span className="ml-auto text-tinta-suave">✓</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </>
+            )}
+          </div>
         )}
         {/* LA TIENDA CON UN CLIC (29/10/2026). Él: «necesito que en el modo pizarra se pueda entrar a esa tienda
             con un click, no quiero ensuciar la pantalla». Abre «Datos de esta tienda» (la del ☰) encima. */}
@@ -31166,6 +31253,18 @@ function PantallaDelTablero({
             className="rounded-md border border-borde bg-relleno px-1.5 py-1 text-xs hover:bg-neutral-100 oscuro:hover:bg-white/10"
           >
             ⚙
+          </button>
+        )}
+        {/* LOS PRODUCTOS DE ESTA TIENDA CON UN CLIC (31/10/2026). Él: «que desde el mismo editor yo pueda entrar a
+            los productos de la tienda sin tener que hacer muchos pasos». Abre «Productos y precios» con solo los suyos. */}
+        {!esWorkflow && tienda && (
+          <button
+            type="button"
+            onClick={() => setVentanaDeHerramienta("productos")}
+            title="Los productos de esta tienda: precio por país, entrega y contenido"
+            className="rounded-md border border-borde bg-relleno px-1.5 py-1 text-xs hover:bg-neutral-100 oscuro:hover:bg-white/10"
+          >
+            📦 Productos
           </button>
         )}
         <span className="text-xs font-bold">{esWorkflow ? "▶▶ Workflow" : "🧩 Tablero"}</span>
@@ -31381,15 +31480,18 @@ function PantallaDelTablero({
           }
           despuesDelMas={
             <div className="relative flex items-center gap-2" ref={refDeHerramientasDelTablero}>
-              {/* EL SIMULADOR, A LA VISTA (27/10/2026): un botón propio, no escondido en el ☰. */}
-              <button
-                type="button"
-                onClick={() => setVentanaDeHerramienta("prueba")}
-                title="Simulador: chatea con el bot como un cliente, sin enviar nada a Meta"
+              {/* EL SIMULADOR, A LA VISTA (27/10/2026): un botón propio, no escondido en el ☰.
+                  EN SU PROPIA PESTAÑA (31/10/2026). Él: «mi intención no era que el simulador se abra en la misma
+                  pizarra, sino que haya un hipervínculo… que me lleve al simulador». */}
+              <a
+                href="/simulador"
+                target="_blank"
+                rel="noopener"
+                title="Abre el simulador en otra pestaña: chatea con el bot como un cliente, sin enviar nada a Meta"
                 className="order-2 flex h-9 items-center gap-1 rounded-full bg-emerald-600 px-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700"
               >
-                💬 Simulador
-              </button>
+                💬 Simulador ↗
+              </a>
               <button
                 type="button"
                 onClick={() => setMenuHerramientas((v) => !v)}
@@ -31418,7 +31520,9 @@ function PantallaDelTablero({
                       disabled={(v === "tienda" || v === "exportar") && !tienda}
                       onClick={() => {
                         setMenuHerramientas(false);
-                        setVentanaDeHerramienta(v);
+                        // El simulador, en su propia pestaña (31/10/2026), como el botón verde.
+                        if (v === "prueba") window.open("/simulador", "_blank", "noopener");
+                        else setVentanaDeHerramienta(v);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
                     >
@@ -31475,6 +31579,7 @@ function PantallaDelTablero({
             onEdit={() => onSnapshot()}
             onMarcarPunto={() => {}}
             onCancelarVentana={() => {}}
+            deLaTienda={tienda ? { nombre: tienda.nombre?.trim() || "esta tienda", ids: enEsteTablero } : undefined}
           />
         </VentanaFlotante>
       )}

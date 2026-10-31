@@ -1349,6 +1349,10 @@ export default function LienzoDelTablero({
   // EL «+» SE CIERRA AL HACER CLIC FUERA (25/10/2026): «solo se colapsa presionando nuevamente el +».
   // (Con Escape también: ver el teclado, más abajo.)
   const cajaDelMas = useRef<HTMLDivElement>(null);
+  const cierreDelMas = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
+  }, []);
   useEffect(() => {
     if (!menuMas) return;
     const fuera = (e: PointerEvent) => {
@@ -1923,7 +1927,20 @@ export default function LienzoDelTablero({
             modo automático». Lo demás se abre al pulsarlos. */}
         <div className="absolute left-3 top-3 z-20 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {antesDelMas}
-          <div className="relative" ref={cajaDelMas}>
+          {/* SE ABRE AL PASAR EL PUNTERO (31/10/2026). Él: «con solo pasar el puntero del mouse ahí, que se
+              despliegue». Al salir se cierra con una pausa corta, para poder cruzar al menú sin que se esconda. */}
+          <div
+            className="relative"
+            ref={cajaDelMas}
+            onMouseEnter={() => {
+              if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
+              setMenuMas(true);
+            }}
+            onMouseLeave={() => {
+              if (cierreDelMas.current) clearTimeout(cierreDelMas.current);
+              cierreDelMas.current = setTimeout(() => setMenuMas(false), 350);
+            }}
+          >
             <button
               type="button"
               onClick={() => setMenuMas((v) => !v)}
