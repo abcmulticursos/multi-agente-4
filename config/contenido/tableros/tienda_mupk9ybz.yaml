@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1881
-      y: 451
+      x: 1914
+      y: 429
       steps:
         - type: text
           body_variants:
@@ -1353,10 +1353,10 @@ whatsapp:
       x: 1298
       y: -22
       vista_compra:
-        f-mvw3kh4y-eknk7:2: colita
-        f-mvvo0a7c-uyvc:2: colita
-        f-mvw3kh4y-eknk7:1: colita
-        f-mvvo0a7c-uyvc:1: colita
+        f-mvw3kh4y-eknk7:2: cable
+        f-mvvo0a7c-uyvc:2: cable
+        f-mvw3kh4y-eknk7:1: cable
+        f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 2
@@ -1534,8 +1534,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1804
-      y: 737
+      x: 1903
+      y: 726
       steps:
         - type: text
           body_variants:
