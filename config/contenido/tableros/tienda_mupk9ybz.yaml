@@ -1138,8 +1138,8 @@ whatsapp:
                   enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 2266
-      y: 2739
+      x: 2904
+      y: 2772
       steps:
         - type: text
           body_variants:
@@ -1179,8 +1179,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg4f2j-8t6dd
       tipo: mensaje
-      x: 2178
-      y: 3047
+      x: 2948
+      y: 3113
       steps:
         - type: text
           body_variants:
@@ -1217,8 +1217,8 @@ whatsapp:
         modo: abierto
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 1892
-      y: 2156
+      x: 1903
+      y: 2431
       steps:
         - type: text
           body_variants:
@@ -1259,15 +1259,50 @@ whatsapp:
               steps: []
     - id: f-mvvo695b-vxex
       tipo: seguimientos
-      x: 1793
-      y: 2948
+      x: 1925
+      y: 3003
       seguimientos:
         - id: s-mvvo695b
           minutos: 3
           variantes:
             - id: v-mvvo695b
               peso: 1
-              steps: []
+              steps:
+                - type: text
+                  body_variants:
+                    - "Hola pasaba por aquí y preguntar si habías recibido la información correcta:"
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      Quiero comentarte que tenemos el 
+
+                      {{PRODUCTO_BASE}} a tan solo a tan solo {{PRECIO_BASE}}
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      Elige un método de pago para que puedas adquirirlo
+
+                      {{LISTA_METODOS_POR_PAIS}}
+                  delay_after_sec: 6
+                  decisions:
+                    - id: 8a032a4c-1bee-48fb-ae98-eba1bfc85e6d
+                      title: YAPE
+                      keywords:
+                        - llape
+                        - yape
+                        - yap
+                        - iape
+                        - con yape
+                        - yapeo
+                        - donde yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - YAPE
+                          delay_after_sec: 6
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -1337,6 +1372,23 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: siguiente
       a: f-mvvo695b-vxex
+    - id: c-mvvoeakd-9em
+      de: f-mvvfznys-u8svs
+      salida: dec:2e5a074d-6d2e-4315-b110-fa09c3af18a4
+      a: f-mvvo1ibc-s0tdo
+    - id: c-mvvoec0t-l6a
+      de: f-mvvfznys-u8svs
+      salida: dec:7e51c4f6-cce2-4396-bd89-a42fe3c8c3eb
+      a: f-mvvo1ibc-s0tdo
+    - id: c-mvvoed85-8nw
+      de: f-mvvfznys-u8svs
+      salida: dec:686b130a-c73f-4f74-b5d9-1ae244f23b53
+      a: f-mvvo1ibc-s0tdo
+    - id: c-mvvoidfo-4tr
+      de: f-mvvo695b-vxex
+      salida: dec:8a032a4c-1bee-48fb-ae98-eba1bfc85e6d
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
