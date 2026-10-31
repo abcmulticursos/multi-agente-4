@@ -1979,7 +1979,7 @@ export default function LienzoDelTablero({
                       onPlantillas(centroDeLaVista());
                     }}
                   >
-                    <span className="w-5 text-center">📋</span> Plantillas (tubería armada)…
+                    <span className="w-5 text-center">📋</span> Plantillas de modalidad…
                   </button>
                 )}
                 {TIPOS_PARA_CREAR.map((tipo) => (

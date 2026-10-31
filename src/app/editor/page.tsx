@@ -31322,6 +31322,18 @@ function PantallaDelTablero({
             ⚙
           </button>
         )}
+        {/* DUPLICAR LA TIENDA AL LADO DEL ⚙ (01/11/2026). Él: «que el duplicador de tiendas no esté en el menú, que
+            tenga ese símbolo de copiar al lado del engranaje». Pide el nombre («Guardar como») y abre la copia. */}
+        {!esWorkflow && tienda && (
+          <button
+            type="button"
+            onClick={() => setDuplicando(true)}
+            title="Duplicar esta tienda: una copia completa con otro nombre, sin número y apagada"
+            className="rounded-md border border-borde bg-relleno px-1.5 py-1 text-xs hover:bg-neutral-100 oscuro:hover:bg-white/10"
+          >
+            ⧉
+          </button>
+        )}
         {/* LOS PRODUCTOS DE ESTA TIENDA CON UN CLIC (31/10/2026). Él: «que desde el mismo editor yo pueda entrar a
             los productos de la tienda sin tener que hacer muchos pasos». Abre «Productos y precios» con solo los suyos. */}
         {!esWorkflow && tienda && (
@@ -31562,6 +31574,9 @@ function PantallaDelTablero({
               >
                 💬 Simulador ↗
               </a>
+              {/* SE ABRE AL PASAR EL PUNTERO Y SE CIERRA AL INSTANTE AL SALIR, como el «+» (01/11/2026). Él: «ese
+                  menú hamburguesa que tenga la misma característica del menú "+"». El menú va pegado (pt-2, sin hueco). */}
+              <div className="relative" onMouseEnter={() => setMenuHerramientas(true)} onMouseLeave={() => setMenuHerramientas(false)}>
               <button
                 type="button"
                 onClick={() => setMenuHerramientas((v) => !v)}
@@ -31571,7 +31586,8 @@ function PantallaDelTablero({
                 {menuHerramientas ? "×" : "☰"}
               </button>
               {menuHerramientas && (
-                <div className="absolute left-0 top-11 z-50 w-72 overflow-hidden rounded-xl border border-borde bg-tarjeta py-1 text-sm text-tinta shadow-2xl">
+                <div className="absolute left-0 top-full z-50 pt-2">
+                <div className="w-72 overflow-hidden rounded-xl border border-borde bg-tarjeta py-1 text-sm text-tinta shadow-2xl">
                   <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-tinta-suave">Sin salir del tablero</div>
                   {(
                     [
@@ -31581,23 +31597,18 @@ function PantallaDelTablero({
                       ["anuncios", "📣", "Anuncios", "Tus campañas y anuncios, y a qué ficha de este tablero lleva cada uno"],
                       ["prueba", "💬", "Simulador", "Chatea con el bot como un cliente, sin enviar nada a Meta"],
                       ["exportar", "⇅", "Exportar / importar tienda", "La tienda entera (con su tablero) en un archivo JSON, y traerla de vuelta"],
-                      ["duplicar", "⧉", "Duplicar esta tienda", "Una copia completa (productos, tablero, pizarra, cobrador), sin número y apagada: te quedas en la copia"],
                     ] as const
                   ).map(([v, icono, texto, ayuda]) => (
                     <button
                       key={v}
                       type="button"
                       title={ayuda}
-                      disabled={(v === "tienda" || v === "exportar" || v === "duplicar") && !tienda}
+                      disabled={(v === "tienda" || v === "exportar") && !tienda}
                       onClick={() => {
                         setMenuHerramientas(false);
                         // El simulador, en su propia pestaña (31/10/2026), como el botón verde.
                         if (v === "prueba") window.open("/simulador", "_blank", "noopener");
-                        // DUPLICAR DESDE EL TABLERO (01/11/2026). Él: «duplico la tienda y sobre ella trabajo». Es el
-                        // mismo «⧉ Duplicar» de Mis tiendas (`duplicarTienda`), y deja abierta la copia.
-                        else if (v === "duplicar") {
-                          if (tienda) setDuplicando(true);
-                        } else setVentanaDeHerramienta(v);
+                        else setVentanaDeHerramienta(v);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-relleno disabled:opacity-40"
                     >
@@ -31605,7 +31616,9 @@ function PantallaDelTablero({
                     </button>
                   ))}
                 </div>
+                </div>
               )}
+              </div>
             </div>
           }
         />
@@ -32737,38 +32750,47 @@ function VentanaDePlantillas({
     `rounded-lg border px-3 py-2 text-left text-sm ${activo ? "border-violet-500 bg-violet-50 font-bold text-violet-900 oscuro:bg-violet-500/20 oscuro:text-violet-100" : "border-borde bg-relleno hover:bg-tarjeta"}`;
   return (
     <VentanaFlotante
-      titulo="📋 Plantillas · una tubería armada"
-      detalle="Llega a la derecha de lo tuyo, conectada por dentro y sin conectar a ningún país. Tú cambias los textos con ✏️ y la conectas a tu Inicio."
+      titulo="📋 Plantillas de modalidad"
+      detalle="Modalidades ya armadas. Llega a la derecha de lo tuyo, conectada por dentro y sin conectar a ningún país. Tú cambias los textos con ✏️ y la conectas a tu Inicio."
       ancho="max-w-2xl"
       onCerrar={onCerrar}
     >
       <div className="space-y-4 p-4 text-sm text-tinta">
         {error && <p className="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800">{error}</p>}
-        <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-wide text-tinta-suave">1. ¿Qué tipo de venta?</p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {TIPOS_DE_PLANTILLA.map((x) => (
-              <button key={x.tipo} type="button" onClick={() => setTipo(x.tipo)} className={chip(tipo === x.tipo)}>
-                {x.nombre}
-                <span className="block text-[11px] font-normal text-tinta-suave">{x.ayuda}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-wide text-tinta-suave">2. ¿Cómo responde el cliente?</p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {FORMAS_DE_PLANTILLA.map((x) => (
-              <button key={x.forma} type="button" onClick={() => setForma(x.forma)} className={chip(forma === x.forma)}>
-                {x.nombre}
-                <span className="block text-[11px] font-normal text-tinta-suave">{x.ayuda}</span>
-              </button>
-            ))}
-          </div>
+        {/* LA GALERÍA (01/11/2026). Él: «pensé que estarían ahí para importar… mejor haz un grupo de plantillas
+            ya hechas y yo la importo». Las 12 a la vista, por modalidad: un clic elige una. */}
+        <div className="space-y-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">1. Elige una plantilla</p>
+          {!indice && !error && <p className="text-xs text-tinta-suave">Cargando las plantillas…</p>}
+          {TIPOS_DE_PLANTILLA.map((x) => (
+            <div key={x.tipo} className="rounded-lg border border-borde p-2">
+              <p className="mb-1.5 text-sm font-bold">
+                {x.nombre} <span className="text-[11px] font-normal text-tinta-suave">· {x.ayuda}</span>
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {FORMAS_DE_PLANTILLA.filter((y) => indice?.some((p) => p.tipo === x.tipo && p.forma === y.forma)).map((y) => (
+                  <button
+                    key={y.forma}
+                    type="button"
+                    data-plantilla={`${x.tipo}-${y.forma}`}
+                    onClick={() => {
+                      setTipo(x.tipo);
+                      setForma(y.forma);
+                    }}
+                    className={chip(tipo === x.tipo && forma === y.forma)}
+                  >
+                    {y.nombre}
+                    <span className="block text-[11px] font-normal text-tinta-suave">{y.ayuda}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
         {elegida && !plantilla && !error && <p className="text-xs text-tinta-suave">Cargando…</p>}
         {plantilla && (
           <div className="space-y-3 rounded-lg border border-borde bg-relleno p-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-tinta-suave">2. {plantilla.nombre}</p>
             <p className="text-xs text-tinta-suave">{plantilla.descripcion}</p>
             {(plantilla.upsell ?? []).length > 0 && (
               <label className="flex items-center gap-2">
