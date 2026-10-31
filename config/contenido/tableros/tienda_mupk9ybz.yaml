@@ -1231,12 +1231,20 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1771
-      y: 440
+      x: 1738
+      y: 264
       steps:
         - type: text
           body_variants:
-            - Compra aprobada
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
           delay_after_sec: 6
       cobro:
         modo: abierto
@@ -1450,8 +1458,8 @@ whatsapp:
                           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 1364
-      y: 330
+      x: 1309
+      y: 275
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 3
@@ -1591,6 +1599,25 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+    - id: f-mvw3kh4y-eknk7
+      tipo: cobro
+      x: 1738
+      y: 550
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Para pagar a través de yape ó  BPC* puedes hacerlo a través de estos datos 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías la imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: abierto
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -1705,11 +1732,23 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: siguiente
       a: f-mvw3fadn-4b4pu
+    - id: c-mvw3iob6-d6v
+      de: f-mvw3fadn-4b4pu
+      salida: dec:d-mvw3fadn-fowyf
+      a: f-mvvo0a7c-uyvc
+    - id: c-mvw3kde2-qe6
+      de: f-mvw3fadn-4b4pu
+      salida: dec:d-mvw3fadn-980bv
+      a: f-mvvo0a7c-uyvc
+    - id: c-mvw3m1ua-8tk
+      de: f-mvw3fadn-4b4pu
+      salida: dec:d-mvw3fadn-6w2h1
+      a: f-mvw3kh4y-eknk7
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
-      y: -70
-      ancho: 1980
-      alto: 2010
+      y: -114
+      ancho: 3168
+      alto: 2054
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
       inicio: inicio-mvveb83v-1
