@@ -1138,8 +1138,8 @@ whatsapp:
                   enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 1749
-      y: 2959
+      x: 2266
+      y: 2739
       steps:
         - type: text
           body_variants:
@@ -1217,8 +1217,8 @@ whatsapp:
         modo: abierto
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 2475
-      y: 2893
+      x: 1892
+      y: 2156
       steps:
         - type: text
           body_variants:
@@ -1226,117 +1226,48 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - tenemos un {{PRODUCTO_FULL}} con tan solo {{PRECIO_EXTRA_COMPLETO}}
-          delay_after_sec: 6
-        - type: image
-          drive_url: ""
-          caption_variants:
-            - |-
-              *Además recibirás GRATIS estos complementos* ‼️👇🏼
-
-              * 🔢 Cuaderno de los Números
-              * 🎴 Tarjetitas gráficas
-              * 📕 Cuaderno de Sílabas simples
-              * 🔤 Alfabeto con caritas
-              * 🎁 Alfabeto con Imagen
-              * 🎁 Alfabeto con rompecabezas y más...
+            - tenemos un {{PRODUCTO_FULL}} con tan solo {{precio_adicional}}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              ❌*(antes)* ~precio original $ 15 Dólares~
-              ✅ 📚 *HOY: $ 3 Dólares* ‼️
+              Puedes adquir ambos o los 2 juntos
 
-              🟠 *¿COMO LO ADQUIERO?*
+              {{PRODUCTO_BASE}} a tan solo {{PRECIO_BASE}}
 
-              * 1.- 💴 Realiza un único pago de *$ 3 Dólares*
-              * 2.- 📲 Y envíanos tu comprobante de pago
-
-              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+              {{PRODUCTO_FULL}} a {{PRECIO_FULL}}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+              Elige uno 
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              {{PRODUCTO_BASE}}
 
-              {{LISTA_METODOS_POR_PAIS}}
+              {{PRODUCTO_FULL}}
+
+              Cual eliges?
           delay_after_sec: 6
-          decisions:
-            - id: d-mvvo1ibc-ez6o1
-              title: YAPE
-              keywords:
-                - yape
-                - llape
-                - iape
-                - con yape
-                - yapeo
-                - a donde yapeo
-                - como yapeo
-              color: esmeralda
-              steps:
-                - type: text
-                  body_variants:
-                    - "Genial puees pagar al siguiente número:"
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - "{{LISTA_METODOS_POR_PAIS}}"
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - Luego nos envías tu comprobante y tu acceso será al instante
-                  delay_after_sec: 6
-            - id: d-mvvo1ibc-pui8r
-              title: PLIN
-              keywords:
-                - pli
-                - plin
-                - pln
-                - pilin
-                - con pln
-                - plinear
-                - tengo plin
-              color: ambar
-              steps:
-                - type: text
-                  body_variants:
-                    - Chevere puedes pagar al siguiente enlace
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - "{{LISTA_METODOS_POR_PAIS}}"
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
-                  delay_after_sec: 6
-            - id: d-mvvo1ibc-845u8
-              title: BCP
-              keywords:
-                - bcp
-                - transferencia
-                - con bcp
-                - trasfencia
-                - traferencia
-                - traferir
-                - transferir
-                - trnsferencia
-              color: violeta
-              steps:
-                - type: text
-                  body_variants:
-                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - "{{METODO_DE_PAGO_1}}"
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - luego nos envias tu comprobante y tendrás acceso al instante.
-                  delay_after_sec: 6
+          buttons:
+            - id: 63c2239a-f51e-480f-9aca-67348ff9ae51
+              label: LECTOESCRITURA
+              action: send_steps
+              steps: []
+            - id: a8ed957a-0fe2-4477-833b-c2d9990a37f7
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+    - id: f-mvvo695b-vxex
+      tipo: seguimientos
+      x: 1793
+      y: 2948
+      seguimientos:
+        - id: s-mvvo695b
+          minutos: 3
+          variantes:
+            - id: v-mvvo695b
+              peso: 1
+              steps: []
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -1398,14 +1329,14 @@ whatsapp:
       de: f-mvvfyvy5-34lw
       salida: siguiente
       a: f-mvvfznys-u8svs
-    - id: c-mvvg3zqx-zm8
-      de: f-mvvfznys-u8svs
-      salida: siguiente
-      a: f-mvvg2ytw-1u2w7
     - id: c-mvvn5vh1-v4l
       de: inicio-mvveb83v-1
       salida: siguiente
       a: f-mvvfyvy5-34lw
+    - id: c-mvvo8pmm-2c6
+      de: f-mvvfznys-u8svs
+      salida: siguiente
+      a: f-mvvo695b-vxex
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
