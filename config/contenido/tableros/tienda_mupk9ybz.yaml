@@ -1242,8 +1242,8 @@ whatsapp:
         modo: abierto
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 979
-      y: 253
+      x: 957
+      y: 275
       titulo: ficha intro de order bump
       steps:
         - type: image
@@ -1316,41 +1316,30 @@ whatsapp:
             - id: v-mvvo695b
               peso: 1
               steps:
-                - type: text
-                  body_variants:
-                    - "Hola pasaba por aquí y preguntar si habías recibido la información correcta:"
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                  caption_variants:
                     - |-
-                      Quiero comentarte que tenemos el 
+                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      {{PRODUCTO_BASE}} a tan solo a tan solo {{PRECIO_BASE}}
+                      📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                      🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
                   delay_after_sec: 6
-                - type: text
-                  body_variants:
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+                  caption_variants:
                     - |-
-                      Elige un método de pago para que puedas adquirirlo
+                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      __________
 
                       {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
                   delay_after_sec: 6
-                  decisions:
-                    - id: 8a032a4c-1bee-48fb-ae98-eba1bfc85e6d
-                      title: YAPE
-                      keywords:
-                        - llape
-                        - yape
-                        - yap
-                        - iape
-                        - con yape
-                        - yapeo
-                        - donde yapeo
-                      color: esmeralda
-                      steps:
-                        - type: text
-                          body_variants:
-                            - YAPE
-                          delay_after_sec: 6
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
