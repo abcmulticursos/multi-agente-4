@@ -1227,7 +1227,7 @@ whatsapp:
             - |-
               🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊
 
-              *Tenemos un KIT PREESCOLAR!* con muchas actividades *para niños de 2 a 6 años*. 📚👶🏻
+              *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para niños de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
@@ -1235,19 +1235,19 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              🔴 *Si deseas Puedes Adquirir 1 o los 2 juntos o por separado!*  😊
+              🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊
               __________
 
-              1️⃣ *PACK 2 EN 1 - (Los 2 Kits juntos 📚+📚) 👉🏼 $ 4.50 Dólares*
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
 
-              💡 *AGREGANDO $ 1.50 Dólares MÁS* que el Grafismo Fonético te llevas en total:
+              💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
 
-              🅰️) *EL KIT DE GRAFISMO FONETICO* 📔
-              🅱️) *➕ EL KIT PREESCOLAR* 📗
+              🅰️) *EL KIT DE {{PRODUCTO_BASE}}* 📔
+              🅱️) *➕ EL {{PRODUCTO_COMPLEMENTARIO}}* 📗
               Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
               __________
 
-              2️⃣ *Pero si deseas solo el KIT DE GRAFISMO FONETICO*  📚 solamente por *$ 3 Dólares*. 😊💵
+              2️⃣ *Pero si deseas solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -1255,9 +1255,9 @@ whatsapp:
               🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
               __________
 
-              🟢 *PACK 2 EN 1* - (Los 2 Kits juntos 📚+📚) 👉🏼 *$ 4.50 Dólares*
+              🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
 
-              🟠 *SOLO GRAFISMO FONETICO* 👉🏼 *$ 3 Dólares*
+              🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
         - type: text
           body_variants:
