@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1738
-      y: 264
+      x: 1749
+      y: 275
       steps:
         - type: text
           body_variants:
@@ -1350,7 +1350,7 @@ whatsapp:
     - id: f-mvvo695b-vxex
       tipo: seguimientos
       x: 968
-      y: 583
+      y: 594
       seguimientos:
         - id: s-mvvo695b
           minutos: 3
@@ -1493,7 +1493,7 @@ whatsapp:
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
       x: 1309
-      y: 275
+      y: 22
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 3
