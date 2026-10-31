@@ -858,18 +858,23 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             ));
           })()}
           {/* SIN LÍNEAS AUTOMÁTICAS (01/11/2026). Él: «esas conexiones automáticas me cagan, me marean». En su lugar,
-              una línea de texto: mientras salen los seguimientos, el cliente sigue en la ficha de la que cuelgan, y si
-              compra sale por los cables de esa ficha (el bot no cambia). */}
+              solo el nombre de su ficha master (él: «no le pongas que continúa de tal o tal, solo cuál es su ficha
+              master»). El bot no cambia. */}
           {(() => {
             const padres = ctx.tablero.cables
               .filter((c) => c.a === f.id && (c.salida === "siguiente" || c.salida === "sin_respuesta" || c.salida === "sin_pago"))
               .map((c) => ctx.tablero.fichas.find((x) => x.id === c.de))
               .filter((x): x is FichaEnElEditor => !!x && !x.guardada);
-            if (!padres.length || !caminosDeCompra(ctx.tablero, f, ctx.nombres).length) return null;
-            const nombres = [...new Set(padres.map((p) => `«${p.titulo?.trim() || ASPECTO[p.tipo].nombre}»`))].join(", ");
+            if (!padres.length) return null;
+            // «👑 MASTER» (01/11/2026, su palabra): la ficha de la que son accesorios. «Si compra sigue por los cables de…»
+            // hacía pensar que el cliente regresaba allí.
+            const nombres = [...new Set(padres.map((p) => `${ctx.numeroDe[p.id] !== undefined ? `ficha ${ctx.numeroDe[p.id]} · ` : ""}${p.titulo?.trim() || ASPECTO[p.tipo].nombre}`))].join(", ");
             return (
-              <div className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] leading-4 text-emerald-900" title="Mientras salen los seguimientos, el cliente sigue en esa ficha: si elige o paga, sale por los cables de esa ficha.">
-                {padres.every((p) => p.tipo === "cobro") ? `🛒 Si paga: sigue por los cables de ${nombres}` : `🛒 Si compra: sigue por los cables de ${nombres}`}
+              <div
+                className="flex items-start gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-bold leading-4 text-amber-900"
+                title="Estos seguimientos son recordatorios de su master. Si el cliente responde, decide el master con sus botones, cuadritos o el nombre del producto (y los botones propios de estos seguimientos, si los tienen)."
+              >
+                👑 Master: {nombres}
               </div>
             );
           })()}
@@ -1340,6 +1345,9 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               }}
             />
           ))}
+          {/* SU PUNTO DE LLEGADA, A LA IZQUIERDA (01/11/2026, «la estación no tiene punto receptor de cable a la
+              izquierda»): donde llega el trazo de su ficha. Soltar un cable aquí es soltarlo en la ficha. */}
+          <Handle type="target" position={Position.Left} id="entra-estacion" className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
           {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
           <span className="text-5xl leading-none">🚉</span>
           <span className="text-[11px] font-bold uppercase tracking-widest opacity-90">Estación</span>
