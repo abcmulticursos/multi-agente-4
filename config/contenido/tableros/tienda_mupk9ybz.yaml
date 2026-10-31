@@ -1232,7 +1232,7 @@ whatsapp:
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
       x: 1573
-      y: -22
+      y: -11
       steps:
         - type: text
           body_variants:
@@ -1554,8 +1554,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2475
-      y: -11
+      x: 2486
+      y: 0
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
@@ -1857,7 +1857,7 @@ whatsapp:
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
       x: 1826
-      y: -440
+      y: -363
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
