@@ -1070,14 +1070,17 @@ whatsapp:
                   body_variants:
                     - "Genial puees pagar al siguiente número:"
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - "{{LISTA_METODOS_POR_PAIS}}"
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
+                  enabled: false
             - id: 7e51c4f6-cce2-4396-bd89-a42fe3c8c3eb
               title: PLIN
               keywords:
@@ -1094,14 +1097,17 @@ whatsapp:
                   body_variants:
                     - Chevere puedes pagar al siguiente enlace
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - "{{LISTA_METODOS_POR_PAIS}}"
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
+                  enabled: false
             - id: 686b130a-c73f-4f74-b5d9-1ae244f23b53
               title: BCP
               keywords:
@@ -1119,18 +1125,21 @@ whatsapp:
                   body_variants:
                     - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - "{{METODO_DE_PAGO_1}}"
                   delay_after_sec: 6
+                  enabled: false
                 - type: text
                   body_variants:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
+                  enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 1782
-      y: 2783
+      x: 1749
+      y: 2959
       steps:
         - type: text
           body_variants:
@@ -1195,6 +1204,139 @@ whatsapp:
 
               *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼
           delay_after_sec: 6
+    - id: f-mvvo0a7c-uyvc
+      tipo: cobro
+      x: 2717
+      y: 2376
+      steps:
+        - type: text
+          body_variants:
+            - Compra aprobada
+          delay_after_sec: 6
+      cobro:
+        modo: abierto
+    - id: f-mvvo1ibc-s0tdo
+      tipo: mensaje
+      x: 2475
+      y: 2893
+      steps:
+        - type: text
+          body_variants:
+            - antes de compartirte tu método de pago quiero comentarte algo que quizas te guste
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - tenemos un {{PRODUCTO_FULL}} con tan solo {{PRECIO_EXTRA_COMPLETO}}
+          delay_after_sec: 6
+        - type: image
+          drive_url: ""
+          caption_variants:
+            - |-
+              *Además recibirás GRATIS estos complementos* ‼️👇🏼
+
+              * 🔢 Cuaderno de los Números
+              * 🎴 Tarjetitas gráficas
+              * 📕 Cuaderno de Sílabas simples
+              * 🔤 Alfabeto con caritas
+              * 🎁 Alfabeto con Imagen
+              * 🎁 Alfabeto con rompecabezas y más...
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~precio original $ 15 Dólares~
+              ✅ 📚 *HOY: $ 3 Dólares* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *$ 3 Dólares*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mvvo1ibc-ez6o1
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+            - id: d-mvvo1ibc-pui8r
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+            - id: d-mvvo1ibc-845u8
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
