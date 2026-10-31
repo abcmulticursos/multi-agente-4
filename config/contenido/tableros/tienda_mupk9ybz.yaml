@@ -1163,8 +1163,8 @@ whatsapp:
                   enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 2211
-      y: 594
+      x: 2662
+      y: 286
       steps:
         - type: text
           body_variants:
@@ -1204,8 +1204,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg4f2j-8t6dd
       tipo: mensaje
-      x: 2255
-      y: 935
+      x: 2651
+      y: 671
       steps:
         - type: text
           body_variants:
@@ -1292,6 +1292,40 @@ whatsapp:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          decisions:
+            - id: defb6c56-875e-4fdb-8f9c-2c2c966490c0
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: 61346feb-5471-47ce-8d49-c608ccc1bf1f
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
         - type: text
           body_variants:
             - |-
@@ -1601,8 +1635,8 @@ whatsapp:
                           enabled: false
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1738
-      y: 550
+      x: 1749
+      y: 605
       steps:
         - type: text
           body_variants:
@@ -1618,6 +1652,10 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: abierto
+    - id: f-mvw3mqwi-ngia
+      tipo: entregar
+      x: 2156
+      y: 253
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -1744,6 +1782,10 @@ whatsapp:
       de: f-mvw3fadn-4b4pu
       salida: dec:d-mvw3fadn-6w2h1
       a: f-mvw3kh4y-eknk7
+    - id: c-mvw3mz31-m29
+      de: f-mvvo0a7c-uyvc
+      salida: pagado
+      a: f-mvw3mqwi-ngia
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
