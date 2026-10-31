@@ -1525,8 +1525,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1749
-      y: 605
+      x: 1760
+      y: 627
       steps:
         - type: text
           body_variants:
