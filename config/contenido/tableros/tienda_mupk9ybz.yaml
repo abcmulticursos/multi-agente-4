@@ -1244,7 +1244,7 @@ whatsapp:
       tipo: mensaje
       x: 957
       y: 275
-      titulo: ficha intro de order bump
+      titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
           drive_url: https://drive.google.com/file/d/1rHdmJwTAd01NKnHr40qWQLCMEDn-ZOfu/view?usp=drive_link
@@ -1307,8 +1307,8 @@ whatsapp:
           enabled: false
     - id: f-mvvo695b-vxex
       tipo: seguimientos
-      x: 979
-      y: 803
+      x: 957
+      y: 583
       seguimientos:
         - id: s-mvvo695b
           minutos: 3
@@ -1538,6 +1538,26 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: dec:be0e11de-636a-4a1a-b4af-a9f51a281f13
       a: f-mvvo1ibc-s0tdo
+    - id: c-mvw3c62j-vys
+      de: f-mvvo695b-vxex
+      salida: dec:84c90095-41a9-433b-a7c1-d260d95ce757
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw3c9tf-ejb
+      de: f-mvvo695b-vxex
+      salida: dec:d0f6bb92-a74d-498a-bb83-ed604b3ab82f
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw3cbdf-axn
+      de: f-mvvo695b-vxex
+      salida: dec:c5effe3e-d777-4b6f-b162-fb50c56f5f4a
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw3cdaj-w8e
+      de: f-mvvo695b-vxex
+      salida: dec:f8b06372-82de-4041-bae5-e1fe8bf484ba
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
