@@ -7539,7 +7539,10 @@ export default function EditorPage() {
         return !!c.tableros?.[id] || !(id in c.tableros_resumen);
       },
       cargar: (id) => {
-        const c = cfgRef.current;
+        // El `cfg` de esta pintada, no `cfgRef`: al refrescar con un tablero abierto, la pantalla del tablero
+        // pide el suyo ANTES de que la referencia se ponga al día (los efectos del hijo van primero), recibía
+        // null y se quedaba en «Cargando el tablero de…» para siempre (01/11/2026).
+        const c = cfg ?? cfgRef.current;
         if (!id || !c) return Promise.resolve(null);
         if (c.tableros?.[id] || !c.tableros_resumen || !(id in c.tableros_resumen)) return Promise.resolve(c.tableros?.[id] ?? null);
         const enCamino = tablerosEnCamino.current.get(id);
