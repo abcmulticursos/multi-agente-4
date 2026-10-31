@@ -1219,6 +1219,7 @@ whatsapp:
       tipo: mensaje
       x: 1903
       y: 2431
+      titulo: INTRO DE ORDER BUMP
       steps:
         - type: text
           body_variants:
