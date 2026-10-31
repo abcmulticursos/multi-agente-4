@@ -240,10 +240,20 @@ function productosDeLaFicha(
   return fuera;
 }
 
-/** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente. */
+/** Los productos de la tienda para los comodines: su básico (o único) y su full (sin el complementario). */
+function productosDeLaTienda(tiendaId: string): string[] {
+  const a = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === tiendaId)?.alineacion as Record<string, unknown> | undefined;
+  if (!a) return [];
+  return [...new Set([a.basico, a.unico, a.full].filter((x): x is string => typeof x === "string" && !!x))];
+}
+
+/** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente; si nada, los de su tienda. */
 function idsParaComodines(convoId: number, f: FichaDelTablero, t?: Tablero): string[] {
   const e = estadoEnElTablero(convoId);
-  const base = f.presenta?.length ? f.presenta : e ? presentadosDe(e) : [];
+  let base = f.presenta?.length ? f.presenta : e ? presentadosDe(e) : [];
+  // SIN NADA PRESENTADO, LOS DE SU TIENDA (01/11/2026). Él: «en mi tienda dice producto full el pack 2 en 1,
+  // ¿no debería representar el comodín lo que es?». Su básico (o único) y su full, de la tienda.
+  if (base.length === 0 && e?.tienda_id) base = productosDeLaTienda(e.tienda_id);
   // EN LOS SEGUIMIENTOS, EL QUE ESTÁ PAGANDO VA PRIMERO (25/10/2026, punto 23): una sola ficha de
   // seguimientos sirve para el básico y el pack — {{PRODUCTO}} y {{PRECIO}} dicen lo que ESTE cliente
   // eligió (el del cobro abierto). Base/full siguen saliendo del más barato y el más caro.

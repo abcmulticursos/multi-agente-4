@@ -31892,7 +31892,7 @@ function PantallaDelTablero({
       )}
       {fichaDeCajon && (
         <EnElTableroContext.Provider value={true}>
-          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeCajon, paisVisto, tablero)}>
+          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeCajon, paisVisto, tablero, tienda?.alineacion as Record<string, unknown> | undefined)}>
           <VentanaDelCajon
             key={fichaDeCajon.id}
             titulo={`${fichaDeCajon.tipo === "cobro" ? "💰" : fichaDeCajon.tipo === "correo" ? "📧" : "💬"} ${
@@ -31917,7 +31917,7 @@ function PantallaDelTablero({
       )}
       {fichaDeGestor && (
         <EnElTableroContext.Provider value={true}>
-          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeGestor, paisVisto, tablero)}>
+          <ProductosDeLaFichaContext.Provider value={productosParaElVisor(cfg, fichaDeGestor, paisVisto, tablero, tienda?.alineacion as Record<string, unknown> | undefined)}>
           <GestorDeVersiones
             key={fichaDeGestor.id}
             ficha={fichaDeGestor}
@@ -34010,11 +34010,15 @@ function productosParaElVisor(
   cfg: FullConfig,
   f: FichaEnElEditor | undefined,
   paisVisto: string,
-  tablero?: TableroEnElEditor
+  tablero?: TableroEnElEditor,
+  /** La alineación de la tienda: sin productos en la ficha, sus comodines usan el básico y el full de la tienda (como el bot). */
+  deLaTienda?: Record<string, unknown>
 ): ProductosDeLaFicha | null {
   if (!f) return null;
   const pais = tablero ? paisDeSuManta(tablero, f, paisVisto) : paisVisto;
-  const ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
+  let ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
+  if (f.tipo !== "cobro" && ids.length === 0 && deLaTienda)
+    ids = [deLaTienda.basico, deLaTienda.unico, deLaTienda.full].filter((x): x is string => typeof x === "string" && !!x);
   // EL PRECIO QUE COBRARÁ EL BOT (25/10/2026): «¿en los visores se pueden ver los precios ya rebajados
   // según la etapa?». Un cobro «Siempre el de oferta» enseña el de oferta; los demás, el normal (y el
   // gestor de seguimientos lo cambia al de oferta desde el que lo activa, ver `GestorDeVersiones`).
