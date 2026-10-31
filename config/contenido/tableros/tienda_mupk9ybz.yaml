@@ -1,5 +1,5 @@
 whatsapp:
-  encendido: false
+  encendido: true
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
