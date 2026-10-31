@@ -1350,8 +1350,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 1309
-      y: 22
+      x: 1298
+      y: -22
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 2
@@ -1839,11 +1839,11 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: siguiente
       a: f-mvw6hswp-ld1vx
-    - id: c-mvw6jb9l-mll
+    - id: c-mvw6kzg0-the
       de: f-mvvo1ibc-s0tdo
       salida: dec:defb6c56-875e-4fdb-8f9c-2c2c966490c0
       a: f-mvvo0a7c-uyvc
-    - id: c-mvw6jiwa-lwq
+    - id: c-mvw6l580-cjt
       de: f-mvvo1ibc-s0tdo
       salida: dec:61346feb-5471-47ce-8d49-c608ccc1bf1f
       a: f-mvw3kh4y-eknk7
