@@ -32,6 +32,11 @@ if (typeof window !== "undefined" && !(window as unknown as Record<string, unkno
   window.addEventListener("keydown", alPulsar);
 }
 
+/** ¿Hay alguna ventana abierta encima? (El lienzo no usa Ctrl+C / Ctrl+V / Supr mientras haya una.) */
+export function hayVentanaAbierta(): boolean {
+  return pila.length > 0;
+}
+
 /** Mientras `activo`, esta ventana está en la pila: Escape la cierra a ella sola si es la de más arriba. */
 export function useEscapeEnPila(cerrar: (e: KeyboardEvent) => void, activo = true) {
   const ultimo = useRef(cerrar);

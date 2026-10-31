@@ -44,6 +44,7 @@ import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/l
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
 import { copiarFichas, mantaPara, rutaDe } from "@/lib/tablero/copiar";
+import { hayVentanaAbierta } from "@/lib/escape-en-pila";
 export { copiarFichas, mantaPara };
 
 /** El tablero tal como lo tiene el editor: igual que el del bot, con las burbujas del editor. */
@@ -1641,6 +1642,9 @@ export default function LienzoDelTablero({
       const el = document.activeElement as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
       if (document.querySelector("[data-ventana-del-tablero]")) return;
+      // Con una ventana abierta encima (una burbuja, sus cuadritos…), las teclas son de ella, no del lienzo
+      // (31/10/2026): Ctrl+V o Supr dentro de una burbuja tocaban las fichas de detrás.
+      if (hayVentanaAbierta()) return;
       const tecla = e.key.toLowerCase();
       const actual = vivo.current;
       // ESCAPE, como en la pizarra: cierra el menú abierto y suelta lo elegido.

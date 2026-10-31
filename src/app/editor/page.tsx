@@ -129,6 +129,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -38103,6 +38104,36 @@ function PlazoEnMinutos({
   );
 }
 
+/**
+ * LOS CUADRITOS COPIADOS (31/10/2026). Él: «que se puedan duplicar con click derecho y también copiar y
+ * pegar… selecciono las 3, las copio y me las llevo a las otras burbujas». Un portapapeles del editor,
+ * compartido por todas las burbujas (de cualquier ficha o pestaña) mientras la página esté abierta.
+ * Pegar da a cada cuadrito un id y códigos de botón NUEVOS: dos cuadritos con el mismo id serían el mismo
+ * para el bot y para los cables del tablero. Por eso el pegado llega sin cable (nada se conecta solo).
+ */
+let cuadritosCopiados: EditorBubbleDecision[] = [];
+const oyentesDeCuadritos = new Set<() => void>();
+const SIN_CUADRITOS: EditorBubbleDecision[] = [];
+function copiarCuadritos(lista: EditorBubbleDecision[]) {
+  cuadritosCopiados = JSON.parse(JSON.stringify(lista)) as EditorBubbleDecision[];
+  oyentesDeCuadritos.forEach((f) => f());
+}
+function useCuadritosCopiados(): EditorBubbleDecision[] {
+  return useSyncExternalStore(
+    (f) => {
+      oyentesDeCuadritos.add(f);
+      return () => oyentesDeCuadritos.delete(f);
+    },
+    () => cuadritosCopiados,
+    () => SIN_CUADRITOS
+  );
+}
+const idDeCuadrito = () =>
+  typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+/** Una copia que es OTRO cuadrito: id nuevo y botones con códigos nuevos. Lo demás, igual (también apagado). */
+const cuadritoNuevoDe = (d: EditorBubbleDecision): EditorBubbleDecision =>
+  conBotonesNuevos({ ...(JSON.parse(JSON.stringify(d)) as EditorBubbleDecision), id: idDeCuadrito() });
+
 function BubbleDecisionsEditor({
   decisions,
   onChange,
@@ -38137,6 +38168,41 @@ function BubbleDecisionsEditor({
     );
   };
   const laAbierta = abierta !== null ? decisions[abierta] : undefined;
+  // ELEGIR VARIOS: Shift (o Ctrl) + clic. Escape suelta la selección antes que cerrar la burbuja.
+  const [elegidos, setElegidos] = useState<Set<string>>(() => new Set());
+  useEscapeEnPila(() => setElegidos(new Set()), elegidos.size > 0);
+  const copiados = useCuadritosCopiados();
+  // Con el menú del clic derecho abierto, Escape cierra solo el menú.
+  useEscapeEnPila(() => setMenu(null), !!menu);
+  /** Sobre qué actúa el menú: los elegidos si el tocado es uno de ellos; si no, solo el tocado. */
+  const losDelMenu = (index: number): EditorBubbleDecision[] => {
+    const d = decisions[index];
+    if (!d) return [];
+    return elegidos.has(d.id) && elegidos.size > 1 ? decisions.filter((x) => elegidos.has(x.id)) : [d];
+  };
+  /** Mete copias nuevas detrás de la posición `despues` (o al final). */
+  const insertar = (lista: EditorBubbleDecision[], despues?: number) => {
+    if (lista.length === 0) return;
+    onSnapshot();
+    const nuevos = lista.map(cuadritoNuevoDe);
+    const donde = despues === undefined ? decisions.length : despues + 1;
+    onChange([...decisions.slice(0, donde), ...nuevos, ...decisions.slice(donde)]);
+    setElegidos(new Set(nuevos.map((d) => d.id)));
+  };
+  // Ctrl+C con cuadritos elegidos (y sin estar escribiendo en un campo) los copia.
+  useEffect(() => {
+    if (elegidos.size === 0) return;
+    const alPulsar = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "c") return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      if ((window.getSelection()?.toString() ?? "").trim()) return;
+      e.preventDefault();
+      copiarCuadritos(decisions.filter((d) => elegidos.has(d.id)));
+    };
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [elegidos, decisions]);
   return (
     <div className="mt-4 border-t border-emerald-200 pt-3">
       {laAbierta && abierta !== null && (
@@ -38167,6 +38233,48 @@ function BubbleDecisionsEditor({
             className="fixed z-50 rounded-md border border-neutral-300 bg-tarjeta py-1 shadow-lg"
             style={{ left: menu.x, top: menu.y }}
           >
+            {(() => {
+              const cuales = losDelMenu(menu.index);
+              const cuantos = cuales.length > 1 ? ` (${cuales.length})` : "";
+              const clase = "block w-full whitespace-nowrap px-4 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100";
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      insertar(cuales, decisions.findIndex((d) => d.id === cuales[cuales.length - 1]?.id));
+                      setMenu(null);
+                    }}
+                    className={clase}
+                  >
+                    ⧉ Duplicar{cuantos}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      copiarCuadritos(cuales);
+                      setMenu(null);
+                    }}
+                    className={clase}
+                  >
+                    📋 Copiar{cuantos}
+                  </button>
+                  {copiados.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        insertar(copiados, menu.index);
+                        setMenu(null);
+                      }}
+                      className={clase}
+                    >
+                      📥 Pegar aquí ({copiados.length})
+                    </button>
+                  )}
+                  <div className="my-1 border-t border-neutral-200" />
+                </>
+              );
+            })()}
             <button
               type="button"
               onClick={() => {
@@ -38256,8 +38364,42 @@ function BubbleDecisionsEditor({
           >
             + Agregar decisiones
           </button>
+          {/* PEGAR, también en una burbuja sin cuadritos (ahí no hay a quién hacerle clic derecho). */}
+          {copiados.length > 0 && (
+            <button
+              type="button"
+              onClick={() => insertar(copiados)}
+              title={`Pega al final: ${copiados.map((d) => d.title?.trim() || "sin título").join(", ")}. Llegan sin cable.`}
+              className="rounded border border-sky-300 bg-sky-50 px-2 py-1 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+            >
+              📥 Pegar {copiados.length} cuadrito{copiados.length === 1 ? "" : "s"}
+            </button>
+          )}
         </div>
       </div>
+      {elegidos.size > 0 && (
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
+          <strong>{elegidos.size} elegido{elegidos.size === 1 ? "" : "s"}</strong>
+          <button
+            type="button"
+            onClick={() => copiarCuadritos(decisions.filter((d) => elegidos.has(d.id)))}
+            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
+          >
+            📋 Copiar
+          </button>
+          <button
+            type="button"
+            onClick={() => insertar(decisions.filter((d) => elegidos.has(d.id)), decisions.reduce((m, d, i) => (elegidos.has(d.id) ? i : m), -1))}
+            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
+          >
+            ⧉ Duplicar
+          </button>
+          <button type="button" onClick={() => setElegidos(new Set())} className="rounded px-2 py-0.5 font-semibold hover:bg-sky-100">
+            Soltar
+          </button>
+          <span className="text-sky-800">Ctrl+C copia · luego «📥 Pegar» en otra burbuja</span>
+        </div>
+      )}
       {decisions.length === 0 ? (
         <p className="text-xs text-neutral-500">
           Sin decisiones, esta burbuja funciona como siempre.
@@ -38268,17 +38410,30 @@ function BubbleDecisionsEditor({
             <button
               key={decision.id}
               type="button"
-              onClick={() => setAbierta(index)}
+              onClick={(evento) => {
+                // Shift o Ctrl + clic: elegir o soltar este, sin abrirlo.
+                if (evento.shiftKey || evento.ctrlKey || evento.metaKey) {
+                  setElegidos((antes) => {
+                    const sig = new Set(antes);
+                    if (sig.has(decision.id)) sig.delete(decision.id);
+                    else sig.add(decision.id);
+                    return sig;
+                  });
+                  return;
+                }
+                setElegidos(new Set());
+                setAbierta(index);
+              }}
               onContextMenu={(evento) => {
                 evento.preventDefault();
                 setMenu({ index, x: evento.clientX, y: evento.clientY });
               }}
-              title="Clic para editar · clic derecho para apagar o borrar"
+              title="Clic para editar · Shift+clic para elegir varios · clic derecho: duplicar, copiar, pegar, apagar o borrar"
               className={`min-w-[92px] rounded-md border px-4 py-2 text-sm font-bold uppercase tracking-wide shadow-sm ${
                 decision.enabled === false
                   ? "border-neutral-300 bg-neutral-200 text-neutral-500 line-through"
                   : CLASE_DE_COLOR(decision.color)
-              }`}
+              } ${elegidos.has(decision.id) ? "ring-2 ring-sky-500 ring-offset-2" : ""}`}
             >
               {decision.title?.trim() || "sin título"}
               {/* La cadenita dice de un vistazo cuáles están linkeados, sin
@@ -38291,7 +38446,7 @@ function BubbleDecisionsEditor({
       {decisions.length > 0 && (
         <div className="mt-2 space-y-1 text-[11px]">
           <p className="text-neutral-500">
-            Clic para llenar · clic derecho para apagar o borrar.
+            Clic para llenar · Shift+clic para elegir varios · clic derecho: duplicar, copiar, pegar, apagar o borrar.
           </p>
           {/* El estado se LEE de los cuadritos, no de un interruptor: así lo
               que dice aquí no puede contradecir lo que se ve arriba. */}
