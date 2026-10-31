@@ -1252,11 +1252,12 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              Puedes adquir ambos o los 2 juntos
+              🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              __________
 
-              {{PRODUCTO_BASE}} a tan solo {{PRECIO_BASE}}
+              🟢 *PACK 2 EN 1* - (Los 2 Kits juntos 📚+📚) 👉🏼 *$ 4.50 Dólares*
 
-              {{PRODUCTO_FULL}} a {{PRECIO_FULL}}
+              🟠 *SOLO GRAFISMO FONETICO* 👉🏼 *$ 3 Dólares*
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -1278,6 +1279,7 @@ whatsapp:
               label: SUPER PACK 2 EN 1
               action: send_steps
               steps: []
+          enabled: false
     - id: f-mvvo695b-vxex
       tipo: seguimientos
       x: 979
