@@ -33135,7 +33135,16 @@ function AjustesDeLaFicha({
   onGuardar: (cambio: Partial<FichaEnElEditor>) => void;
   onCerrar: () => void;
 }) {
-  const [b, setB] = useState<FichaEnElEditor>(ficha);
+  const [b, setB] = useState<FichaEnElEditor>(() => {
+    // UN COBRO «CONTRIBUCIÓN» SIN MONTOS NI TRAMOS SE ABRE COMO «PRECIO DE UN PRODUCTO» (01/11/2026). Él: «cuando
+    // abro la ficha de cobro automáticamente aparece seleccionado el modo contribución». Así nacían los Cobros
+    // (antes de a013811): nunca se configuraron como contribución. Al dar Listo queda guardado como producto;
+    // con Cancelar no cambia nada. Una contribución de verdad (con mínimo o tramos) se abre como siempre.
+    const c = ficha.cobro;
+    const sinMontos =
+      !!c && c.modo === "abierto" && Object.keys(c.minimo_por_pais ?? {}).length === 0 && !Object.values(c.tramos_por_pais ?? {}).some((l) => (l ?? []).length > 0);
+    return ficha.tipo === "cobro" && sinMontos ? { ...ficha, cobro: { ...c, modo: "producto" } } : ficha;
+  });
   // EL BUSCADOR DE «LO QUE SE ENTREGA» (27/10/2026): con muchos productos, la lista era eterna.
   const [buscarEntrega, setBuscarEntrega] = useState("");
   const [pais, setPais] = useState(paisInicial);
