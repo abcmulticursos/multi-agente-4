@@ -1350,8 +1350,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 1298
-      y: -22
+      x: 1430
+      y: 66
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1558,8 +1558,8 @@ whatsapp:
       y: 297
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: 957
-      y: 616
+      x: 1012
+      y: 869
       seguimientos:
         - id: s-mvw6hswp-o7ekg
           minutos: 2
@@ -1728,6 +1728,114 @@ whatsapp:
 
                       *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                   delay_after_sec: 6
+                  decisions:
+                    - id: dc700b60-f7c7-4719-a760-f2b80515381e
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: 3f0b983a-fc43-405d-8a0a-374081278629
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: dfe2b6d9-5d20-406f-afc7-706586aaa976
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: efc10a91-7673-431d-ae65-98b1c271aa21
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
@@ -1812,10 +1920,6 @@ whatsapp:
       de: f-mvvfznys-u8svs
       salida: dec:be0e11de-636a-4a1a-b4af-a9f51a281f13
       a: f-mvvo1ibc-s0tdo
-    - id: c-mvw3fg7v-t7p
-      de: f-mvvo1ibc-s0tdo
-      salida: siguiente
-      a: f-mvw3fadn-4b4pu
     - id: c-mvw3mz31-m29
       de: f-mvvo0a7c-uyvc
       salida: pagado
@@ -1852,6 +1956,30 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: dec:61346feb-5471-47ce-8d49-c608ccc1bf1f
       a: f-mvw3kh4y-eknk7
+    - id: c-mvw6w0g7-oqk
+      de: f-mvvo1ibc-s0tdo
+      salida: sin_respuesta
+      a: f-mvw3fadn-4b4pu
+    - id: c-mvw6xm3e-izj
+      de: f-mvw6hswp-ld1vx
+      salida: dec:dc700b60-f7c7-4719-a760-f2b80515381e
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw6xo0m-mvn
+      de: f-mvw6hswp-ld1vx
+      salida: dec:3f0b983a-fc43-405d-8a0a-374081278629
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw6xprr-2s3
+      de: f-mvw6hswp-ld1vx
+      salida: dec:dfe2b6d9-5d20-406f-afc7-706586aaa976
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
+    - id: c-mvw6xrs6-69w
+      de: f-mvw6hswp-ld1vx
+      salida: dec:efc10a91-7673-431d-ae65-98b1c271aa21
+      a: f-mvvo1ibc-s0tdo
+      vista: colita
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
