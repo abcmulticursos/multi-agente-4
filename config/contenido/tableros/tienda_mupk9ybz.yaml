@@ -1835,6 +1835,18 @@ whatsapp:
       salida: dec:d-mvw6hswp-g6abf
       a: f-mvvo1ibc-s0tdo
       vista: colita
+    - id: c-mvw6irsg-0z9
+      de: f-mvvfznys-u8svs
+      salida: siguiente
+      a: f-mvw6hswp-ld1vx
+    - id: c-mvw6jb9l-mll
+      de: f-mvvo1ibc-s0tdo
+      salida: dec:defb6c56-875e-4fdb-8f9c-2c2c966490c0
+      a: f-mvvo0a7c-uyvc
+    - id: c-mvw6jiwa-lwq
+      de: f-mvvo1ibc-s0tdo
+      salida: dec:61346feb-5471-47ce-8d49-c608ccc1bf1f
+      a: f-mvw3kh4y-eknk7
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
