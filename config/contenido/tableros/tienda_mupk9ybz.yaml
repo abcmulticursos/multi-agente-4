@@ -1219,7 +1219,7 @@ whatsapp:
       tipo: mensaje
       x: 1903
       y: 2431
-      titulo: INTRO DE ORDER BUMP
+      titulo: ficha intro de order bump
       steps:
         - type: text
           body_variants:
