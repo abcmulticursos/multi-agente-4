@@ -332,6 +332,8 @@ const Contexto = createContext<{
   alTocarQuienCobra?: () => void;
   /** El modo estaciones (01/11/2026): las salidas de las fichas que esperan salen de su bolita. Solo dibujo. */
   estaciones: boolean;
+  /** En modo estaciones: el robot «Agente IA» (sí) o la bolita 🚉 (no). Solo dibujo. */
+  comoAgente: boolean;
 } | null>(null);
 
 /** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…).
@@ -710,7 +712,25 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           </span>
         )}
         <span className="shrink-0 text-xs">{a.icono}</span>
-        <span className="truncate text-xs font-bold" title={titulo}>
+        {/* EL HINT DEL TÍTULO (01/11/2026): «que aparezca completo al pasar el mouse… algo que me indique el nombre
+            para no tener que clickear», en TODAS las fichas: su tipo, el título entero y lo que cobra, entrega o
+            presenta. */}
+        <span
+          className="truncate text-xs font-bold"
+          title={(() => {
+            const nombre = (id?: string) => (id ? ctx.nombres?.[id.split("#")[0]] ?? "" : "");
+            const lista = (ids?: string[]) => [...new Set((ids ?? []).map(nombre).filter(Boolean))].join(", ");
+            const lineas = [ctx.numeroDe[f.id] !== undefined ? `${ctx.numeroDe[f.id]} · ${a.nombre}` : a.nombre];
+            if (f.titulo?.trim()) lineas.push(f.titulo.trim());
+            if (f.tipo === "cobro" && nombre(f.cobro?.producto_id)) lineas.push(`💰 Cobra: ${nombre(f.cobro?.producto_id)}`);
+            if (f.tipo === "entregar") {
+              const e = lista(f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []);
+              if (e) lineas.push(`📦 Entrega: ${e}`);
+            }
+            if (lista(f.presenta)) lineas.push(`📣 Presenta: ${lista(f.presenta)}`);
+            return lineas.join("\n");
+          })()}
+        >
           {titulo}
         </span>
         {tenue && <span className="ml-auto shrink-0 text-[10px]">APAGADA</span>}
@@ -1328,7 +1348,11 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
       </svg>
       <div className="relative flex flex-col items-center" title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
         {/* GRANDE Y NOTORIA, como en Sendy (él: «tiene que haber algo ahí que sea importante y notorio»). */}
-        <div className={`relative flex h-36 w-36 flex-col items-center justify-center gap-0.5 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl ${f.apagada ? "opacity-50" : ""}`}>
+        <div
+          className={`relative flex h-36 w-36 flex-col items-center justify-center gap-0.5 text-white shadow-xl ${
+            ctx.comoAgente ? "rounded-2xl border-2 border-emerald-500 bg-white" : "rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600"
+          } ${f.apagada ? "opacity-50" : ""}`}
+        >
           {/* Arriba: a sus Seguimientos. */}
           {deArriba.map((s, i) => (
             <Handle
@@ -1349,11 +1373,22 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               izquierda»): donde llega el trazo de su ficha. Soltar un cable aquí es soltarlo en la ficha. */}
           <Handle type="target" position={Position.Left} id="entra-estacion" className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
           {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
-          <span className="text-5xl leading-none">🚉</span>
-          <span className="text-[11px] font-bold uppercase tracking-widest opacity-90">Estación</span>
+          {ctx.comoAgente ? (
+            // SU AGENTE (01/11/2026, su PNG cuadrado): las esquinas redondeadas las pone el tablero.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/tablero/agente.png" alt="Agente IA" draggable={false} className="h-full w-full rounded-2xl object-contain p-1" />
+          ) : (
+            <>
+              <span className="text-5xl leading-none">🚉</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest opacity-90">Estación</span>
+            </>
+          )}
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
-        <div className="absolute left-1/2 top-[calc(100%+8px)] -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold text-white shadow">{queEspera(f)}</div>
+        <div className="absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold leading-4 text-white shadow">
+          {ctx.comoAgente && <span className="text-[14px]">Agente IA</span>}
+          <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f)}</span>
+        </div>
       </div>
       {/* LOS BRAZOS (su imagen): rectas desde el centro de la estación hasta cada camino. Alto fijo por camino
           (28 px + 6 de separación), así cada brazo cae justo en el medio de su pastilla. */}
@@ -1574,6 +1609,21 @@ export default function LienzoDelTablero({
     setEstaciones(v);
     try {
       window.localStorage.setItem("tablero-estaciones", v ? "1" : "0");
+    } catch {}
+  };
+  // CÓMO SE VE LA ESTACIÓN (01/11/2026): su robot «Agente IA» o la bolita 🚉, a su gusto («si no me gusta, lo
+  // dejamos en estación»). Recordado en este navegador; por defecto el agente.
+  const [comoAgente, setComoAgente] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem("tablero-estacion-aspecto") !== "estacion";
+    } catch {
+      return true;
+    }
+  });
+  const cambiarComoAgente = (v: boolean) => {
+    setComoAgente(v);
+    try {
+      window.localStorage.setItem("tablero-estacion-aspecto", v ? "agente" : "estacion");
     } catch {}
   };
   /** La ficha de verdad detrás de un nodo (la bolita «est:<id>» es su ficha). */
@@ -2045,10 +2095,11 @@ export default function LienzoDelTablero({
       quienCobra,
       alTocarQuienCobra: () => alTocarQuienCobraVivo.current?.(),
       estaciones,
+      comoAgente,
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones]
+    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));
@@ -2329,7 +2380,16 @@ export default function LienzoDelTablero({
                     [
                       ["🚉", estaciones ? "Estaciones: sí (quitar)" : "Ver estaciones", "El camino por estaciones, como Sendy. Solo cambia cómo se ve.", () => cambiarEstaciones(!estaciones), estaciones],
                       ...(estaciones
-                        ? ([["📐", "Acomodar como camino", "Separa las fichas para que quepan sus estaciones. Ctrl+Z lo deshace.", acomodarComoCamino, false]] as const)
+                        ? ([
+                            [
+                              comoAgente ? "🚉" : "🤖",
+                              comoAgente ? "Verlas como estación" : "Verlas como Agente IA",
+                              "Solo cambia el dibujo: el robot o la bolita de estación.",
+                              () => cambiarComoAgente(!comoAgente),
+                              false,
+                            ],
+                            ["📐", "Acomodar como camino", "Separa las fichas para que quepan sus estaciones. Ctrl+Z lo deshace.", acomodarComoCamino, false],
+                          ] as const)
                         : []),
                       ["🔍", revisando ? "Dejar de revisar" : "Qué falta conectar", "Marca en rojo las salidas que, sin cable, dejan al cliente sin camino.", () => setRevisando((v) => !v), revisando],
                       ["〰", todoCable ? "Volver al modo inalámbrico" : "Ver todo como cable", "Solo para mirar: todas las conexiones como línea.", () => setTodoCable((v) => !v), todoCable],
