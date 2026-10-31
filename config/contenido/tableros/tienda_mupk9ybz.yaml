@@ -1206,8 +1206,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 2717
-      y: 2376
+      x: 2585
+      y: 2343
       steps:
         - type: text
           body_variants:
@@ -1389,6 +1389,10 @@ whatsapp:
       salida: dec:8a032a4c-1bee-48fb-ae98-eba1bfc85e6d
       a: f-mvvo1ibc-s0tdo
       vista: colita
+    - id: c-mvvop8kj-04l
+      de: f-mvvo1ibc-s0tdo
+      salida: btn:63c2239a-f51e-480f-9aca-67348ff9ae51
+      a: f-mvvo0a7c-uyvc
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
