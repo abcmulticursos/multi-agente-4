@@ -457,7 +457,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
       <div className={`rounded-t-[10px] px-3 py-2 text-white ${color.banda}`}>
         <div className="text-sm font-bold">▶ Inicio</div>
         <div className="text-[11px] opacity-90">
-          {!conectado ? "Desconectado" : estado === "revision" ? "En revisión · no recibe" : estado === "apagado" ? "Apagado · venta automática" : "El cliente escribe"}
+          {!conectado ? "Desconectado" : estado === "revision" ? "En revisión · no recibe" : estado === "apagado" ? "Apagado · no contesta" : "El cliente escribe"}
         </div>
       </div>
       <div className="flex flex-col gap-1.5 p-2">
@@ -534,10 +534,10 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
           className={`nodrag rounded-md border px-2 py-1 text-left text-[11px] font-bold ${
             estado === "venta" ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-slate-300 bg-slate-100 text-slate-700"
           }`}
-          title={"Vender en este país con el tablero.\nApagado: los clientes de este país van a la venta automática de la tienda."}
+          title={"Vender en este país con el tablero.\nApagado: el bot no les contesta a los clientes nuevos de este país."}
           onClick={() => cambiar({ sin_venta: !f.sin_venta, en_revision: false })}
         >
-          {estado === "venta" ? "🟢 Vende con el tablero" : estado === "revision" ? "🔵 En revisión · no recibe" : "⚪ Apagado · venta automática"}
+          {estado === "venta" ? "🟢 Vende con el tablero" : estado === "revision" ? "🔵 En revisión · no recibe" : "⚪ Apagado · no contesta"}
         </button>
         {estado !== "venta" && (
           <button
@@ -908,9 +908,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   );
   // MODO ESTACIONES: la ficha y su estación son UN SOLO BLOQUE (se arrastran juntas).
   if (!(ctx.estaciones && esEstacion(f))) return tarjeta;
+  // SE ELIGE SOLO TOCANDO ALGO SUYO (01/11/2026). Él: «al seleccionar solo "su aire" se selecciona y es incómodo,
+  // no puedo mover con la manito». El aire entre la ficha, el agente y sus caminos no atrapa el ratón (el nodo
+  // tampoco: ver `pointerEvents` al armar los nodos); la ficha, el agente, sus puntos y sus caminos, sí.
   return (
-    <div className="flex items-center">
-      {tarjeta}
+    <div className="pointer-events-none flex items-center">
+      <div className="pointer-events-auto">{tarjeta}</div>
       <EstacionDeLaFicha f={f} />
     </div>
   );
@@ -1344,13 +1347,14 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
     <div data-estacion className="flex items-center self-center" onDoubleClick={(e) => (e.stopPropagation(), ctx.abrir(f.id))}>
       {/* De la ficha a su estación: el mismo trazo punteado de los cables, del color de la ficha. */}
       <svg width={56} height={8} className="shrink-0 overflow-visible">
-        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={3} strokeDasharray="9 6" />
+        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={3} strokeDasharray="9 6" className="pointer-events-auto" />
       </svg>
       <div className="relative flex flex-col items-center" title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
         {/* GRANDE Y NOTORIA, como en Sendy (él: «tiene que haber algo ahí que sea importante y notorio»). */}
         <div
-          className={`relative flex h-36 w-36 flex-col items-center justify-center gap-0.5 text-white shadow-xl ${
-            ctx.comoAgente ? "rounded-2xl border-2 border-emerald-500 bg-white" : "rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600"
+          // El agente, 20 % más grande que la estación (01/11/2026: «hazlo un 20 % más»).
+          className={`pointer-events-auto relative flex flex-col items-center justify-center gap-0.5 text-white shadow-xl ${
+            ctx.comoAgente ? "h-[173px] w-[173px] rounded-2xl border-2 border-emerald-500 bg-white" : "h-36 w-36 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600"
           } ${f.apagada ? "opacity-50" : ""}`}
         >
           {/* Arriba: a sus Seguimientos. */}
@@ -1385,7 +1389,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
           )}
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
-        <div className="absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold leading-4 text-white shadow">
+        <div className="pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold leading-4 text-white shadow">
           {ctx.comoAgente && <span className="text-[14px]">Agente IA</span>}
           <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f)}</span>
         </div>
@@ -1403,7 +1407,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               {aLaDerecha.map((s, i) => {
                 const y = i * (FILA + SEP) + FILA / 2;
                 return (
-                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke="#10b981" strokeWidth={2.5} strokeDasharray="7 5" />
+                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke="#10b981" strokeWidth={2.5} strokeDasharray="7 5" className="pointer-events-auto" />
                 );
               })}
             </svg>
@@ -1418,7 +1422,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
             <div
               key={s.clave}
               title={falta ?? s.etiqueta}
-              className={`relative flex h-7 min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 pr-5 text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
+              className={`pointer-events-auto relative flex h-7 min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 pr-5 text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
             >
               <span className="truncate">{s.etiqueta.replace(/^(🔘|💬|✍️) /, s.clave.startsWith("btn:") ? "botón " : s.clave.startsWith("dec:") ? "si dice " : s.clave.startsWith("elige:") ? "" : "")}</span>
               <Handle
@@ -1756,7 +1760,14 @@ export default function LienzoDelTablero({
     // (Modo estaciones: la estación va DENTRO del mismo bloque de su ficha —ver `NodoDeFicha`—: se mueve con
     // ella y todo queda libre como siempre. Nada se acomoda solo.)
     for (const f of visibles)
-      nodos.push({ id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: { x: f.x, y: f.y }, data: { ficha: f } });
+      nodos.push({
+        id: f.id,
+        type: f.tipo === "inicio" ? "inicio" : "ficha",
+        position: { x: f.x, y: f.y },
+        data: { ficha: f },
+        // En modo estaciones el bloque es ancho y casi todo aire: el aire deja pasar el ratón al fondo (la manito).
+        ...(estaciones && esEstacion(f) ? { style: { pointerEvents: "none" as const } } : {}),
+      });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tablero, tema, cajaElegida, paisVisto, mirando, estaciones]);

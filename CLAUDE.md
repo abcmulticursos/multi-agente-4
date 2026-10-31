@@ -735,6 +735,12 @@ y el plan entero en PLAN-TABLERO.md. ALBERTO 2 no lo tiene: él trabaja ahí y n
 1. **Una conversación, un solo motor.** Entra SOLO al nacer (`state = new`) en una tienda con
    tablero **encendido y con el Inicio conectado**; queda con fila en `tablero_estado` y
    `state = "tablero"`. Las demás no pasan por ahí.
+   **Apagado = no atiende (01/11/2026, aprobado por él):** «es una cojudez apagar el tablero y que salga
+   el automático… se apaga y no funciona, se activa y funciona, punto». Una tienda cuyo tablero de ese
+   canal YA TIENE FICHAS (`laTiendaTieneTablero`) no cae en la venta automática: apagado, sin Inicio de
+   su país o con ese Inicio sin vender, al cliente nuevo no se le contesta (la conversación sigue `new`
+   y entra al encenderlo). Sin fichas, el automático de siempre. Las conversaciones ya empezadas siguen
+   en su motor. Lo prueba `prueba-apagado-no-contesta.mjs` del scratchpad (simulador de la copia).
 2. **Una sola entrada** en `handler.ts`, después de `leContestamos` y la moderación y antes de
    `tryWorkflowOnIncoming`. El regalo (`payment_approved`…`awaiting_facebook_comment`) lo sigue
    haciendo el motor de siempre.

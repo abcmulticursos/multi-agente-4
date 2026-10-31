@@ -6,7 +6,10 @@
  *     tienda con el tablero de SU canal encendido y el Inicio de SU país conectado; desde ahí
  *     tiene su fila en `tablero_estado`. Las demás no pasan por aquí: `alRecibirMensaje` devuelve
  *     false y sigue el motor de siempre. (La otra puerta es «Activar workflow», que se elige a mano.)
- *  2. Sin cables, nada cambia: una tienda sin tablero encendido y conectado vende como siempre.
+ *  2. Sin tablero, nada cambia: una tienda sin fichas en el tablero de ese canal vende como siempre.
+ *     CON fichas, el tablero manda (01/11/2026, «se apaga y no funciona, se activa y funciona»): apagado,
+ *     sin Inicio de su país o con ese Inicio sin vender, el cliente nuevo no recibe respuesta
+ *     (`laTiendaTieneTablero`); ya no cae en la venta automática.
  *  3. Lo compartido se usa, no se modifica: burbujas (`sendConfiguredSteps`), entrega del
  *     producto, regalo, avisos, registro en Meta, horas de silencio y la ventana de 24 h.
  *  4. Lo programado lleva su dueño: los `tablero_*` van aquí desde el obrero, nunca al de siempre.
@@ -94,6 +97,7 @@ import {
   canalDelTablero,
   claveDeWorkflow,
   elTableroAtiende,
+  laTiendaTieneTablero,
   esClaveDeWorkflow,
   inicioDelPais,
   leeTablero,
@@ -2793,7 +2797,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const tienda = laTiendaDeLaConversacion(convo) ?? tiendaDelCanal ?? null;
     const canal = canalDelTablero(convo);
     const t = tableroDe(config, tienda?.id, canal);
-    if (!tienda?.id || !t || !elTableroAtiende(t, pais)) return false;
+    if (!tienda?.id || !t) return false;
+    if (!elTableroAtiende(t, pais)) {
+      // APAGADO = NO ATIENDE (01/11/2026). Una tienda que ya tiene tablero no cae en la venta automática cuando
+      // está apagado (o sin Inicio de su país, o ese Inicio no vende): no se le contesta. La conversación sigue
+      // «new»: al encenderlo, su próximo mensaje entra por el Inicio. Sin tablero, el automático de siempre.
+      if (!laTiendaTieneTablero(t)) return false;
+      console.log(`[tablero] convo ${convo.id}: «${tienda.nombre ?? tienda.id}» tiene tablero y no atiende (${canal}, ${pais}: ${t.encendido ? "su Inicio no vende" : "apagado"}) → no se le contesta`);
+      return true;
+    }
     const inicio = inicioDelPais(t, pais)!;
     if (!entrarAlTablero(convo.id, tienda.id, inicio.id, canal)) return false;
     setConversationState(convo.id, "tablero");

@@ -30920,15 +30920,22 @@ function VentanaFlotante({
   onCerrar,
   ancho = "max-w-5xl",
   children,
+  onListo,
+  onCancelar,
 }: {
   titulo: string;
   detalle?: string;
   onCerrar: () => void;
   ancho?: string;
   children: React.ReactNode;
+  /** «✓ Listo» deja los cambios (01/11/2026). Con él, la ventana enseña «Cancelar» y «✓ Listo» en vez de «✕ Cerrar». */
+  onListo?: () => void;
+  /** «Cancelar» (y Escape) deja la ficha como estaba al abrir. */
+  onCancelar?: () => void;
 }) {
   // Escape cierra solo la de más arriba (`useEscapeEnPila`): con un producto abierto encima, se cierra ése.
-  useEscapeEnPila(() => onCerrar());
+  // Con «Listo / Cancelar», Escape es Cancelar: nunca guarda en silencio.
+  useEscapeEnPila(() => (onCancelar ?? onCerrar)());
   return (
     // SIN CERRAR AL HACER CLIC AFUERA (31/10/2026): «se cerró y todos mis cambios desaparecieron… la única
     // manera de cerrarlos será con escape, cancelar o listo». Ver `EL_CLIC_FUERA_CIERRA_LA_VENTANA`.
@@ -30939,9 +30946,20 @@ function VentanaFlotante({
             <h3 className="text-sm font-bold text-tinta">{titulo}</h3>
             {detalle && <p className="text-xs text-tinta-suave">{detalle}</p>}
           </div>
-          <button type="button" onClick={onCerrar} className="rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
-            ✕ Cerrar
-          </button>
+          {onListo ? (
+            <span className="flex shrink-0 items-center gap-2">
+              <button type="button" onClick={onCancelar ?? onCerrar} className="rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
+                Cancelar
+              </button>
+              <button type="button" onClick={onListo} className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+                ✓ Listo
+              </button>
+            </span>
+          ) : (
+            <button type="button" onClick={onCerrar} className="rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
+              ✕ Cerrar
+            </button>
+          )}
         </div>
         <div className="p-4">{children}</div>
       </div>
@@ -31558,7 +31576,7 @@ function PantallaDelTableroCargada({
             type="button"
             onClick={() => guardar({ ...tablero, encendido: !tablero.encendido })}
             className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-500 hover:bg-slate-600"}`}
-            title="Encendido: los clientes NUEVOS de esta tienda, en este canal, van por el tablero. Apagado: venta automática."
+            title="Encendido: los clientes NUEVOS de esta tienda, en este canal, van por el tablero. Apagado: el bot no les contesta."
           >
             {tablero.encendido ? "● Encendido" : "○ Apagado"}
           </button>
@@ -31568,9 +31586,12 @@ function PantallaDelTableroCargada({
             ? "Arranca cuando un botón, cuadrito o ficha lo activa."
             : atiende
               ? `Los clientes nuevos (${conectados.map((f) => f.pais ?? "otros países").join(", ")}) van por este tablero.`
-              : !tablero.encendido
-                ? "Apagado: esta tienda vende con la venta automática en este canal."
-                : "Falta conectar un ▶ Inicio: mientras tanto, venta automática."}
+              : // APAGADO = NO ATIENDE (01/11/2026): con fichas, la tienda ya no cae en la venta automática.
+                !tablero.fichas.some((f) => f.tipo !== "inicio" && !f.guardada)
+                ? "Tablero vacío: mientras no tenga fichas, esta tienda vende con la venta automática."
+                : !tablero.encendido
+                  ? "Apagado: el bot no les contesta a los clientes nuevos de esta tienda en este canal."
+                  : "Falta conectar un ▶ Inicio: mientras tanto, el bot no les contesta."}
         </span>
         {/* EL CEREBRO GENERAL (24/10/2026): uno por tablero, con el de fábrica si no se escribe. */}
         <button
@@ -32206,6 +32227,14 @@ function GestorDeVersiones({
   const vivo = useRef({ segs, versiones });
   vivo.current = { segs, versiones };
   const aplicar = (s: Seg[], v: Version[]) => onCambiar(esSeg ? { seguimientos: s } : { variantes: v });
+  // «LISTO» Y «CANCELAR» (01/11/2026). Él: «en el pop up de seguimientos le faltan los botones de "listo" y
+  // "cancelar"; solo dice "cerrar"». Lo de aquí se sigue viendo en la ficha al ir cambiando; Cancelar (o
+  // Escape) la deja como estaba al abrir.
+  const [alAbrir] = useState(() => ({ segs: JSON.parse(JSON.stringify(ficha.seguimientos ?? [])) as Seg[], versiones: JSON.parse(JSON.stringify(ficha.variantes ?? [])) as Version[] }));
+  const cancelar = () => {
+    if (JSON.stringify(vivo.current) !== JSON.stringify(alAbrir)) aplicar(alAbrir.segs, alAbrir.versiones);
+    onCerrar();
+  };
   const ponerSegs = (s: Seg[]) => {
     setSegs(s);
     aplicar(s, vivo.current.versiones);
@@ -32248,7 +32277,9 @@ function GestorDeVersiones({
           ? "Cada seguimiento sale a su tiempo desde el último mensaje del cliente (si escribe, vuelve a contar) y se detiene si paga. Respeta las 24 h, las horas de silencio, el lead tardío y la cola antirráfaga de Ajustes."
           : "Destapa el producto oculto. Antes de esta ficha la IA no sabe nada de él. Con varias versiones, el bot sortea por peso."
       }
-      onCerrar={onCerrar}
+      onCerrar={cancelar}
+      onListo={onCerrar}
+      onCancelar={cancelar}
       ancho={ANCHO_DEL_GESTOR}
     >
       <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">

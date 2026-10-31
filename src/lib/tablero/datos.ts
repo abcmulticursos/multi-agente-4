@@ -637,6 +637,15 @@ export function cableDeLaSalida(t: Tablero, fichaId: string, salida: string): Ca
  * ¿Este tablero atiende a un cliente de ese país? Encendido, con el Inicio de su país (o el de
  * «Otros países») vendiendo, fuera de revisión y con su cable puesto.
  */
+/**
+ * ¿ESTA TIENDA YA SE VENDE CON TABLERO en este canal? (01/11/2026). Tiene alguna ficha además del Inicio. Él:
+ * «es una cojudez apagar el tablero y que salga el automático… se apaga y no funciona, se activa y funciona,
+ * punto». Una tienda así ya no cae en la venta automática: si su tablero no atiende, no se le contesta.
+ */
+export function laTiendaTieneTablero(t: Tablero | null | undefined): boolean {
+  return !!t && t.fichas.some((f) => f.tipo !== "inicio" && !f.guardada);
+}
+
 export function elTableroAtiende(t: Tablero | null | undefined, pais?: string): boolean {
   if (!t?.encendido) return false;
   const inicio = pais ? inicioDelPais(t, pais) : t.fichas.find((f) => f.tipo === "inicio");
@@ -656,7 +665,7 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
   switch (f.tipo) {
     case "inicio":
       if (!tieneCable("siguiente")) avisos.push("El Inicio no tiene cable: ningún cliente entra a esta ruta.");
-      if (f.sin_venta) avisos.push("«Vender en este país» está apagado: sus clientes van a la venta automática.");
+      if (f.sin_venta) avisos.push("«Vender en este país» está apagado: el bot no les contesta a sus clientes nuevos.");
       if (f.en_revision) avisos.push("En revisión: no recibe clientes.");
       break;
     case "mensaje":
