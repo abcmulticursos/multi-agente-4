@@ -1231,8 +1231,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1749
-      y: 275
+      x: 1881
+      y: 451
       steps:
         - type: text
           body_variants:
@@ -1352,6 +1352,11 @@ whatsapp:
       tipo: seguimientos
       x: 1298
       y: -22
+      vista_compra:
+        f-mvw3kh4y-eknk7:2: colita
+        f-mvvo0a7c-uyvc:2: colita
+        f-mvw3kh4y-eknk7:1: colita
+        f-mvvo0a7c-uyvc:1: colita
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 2
@@ -1385,6 +1390,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mvw3fadn-fowyf
+                      enabled: false
                       title: YAPE
                       keywords:
                         - yape
@@ -1412,6 +1418,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw3fadn-980bv
+                      enabled: false
                       title: PLIN
                       keywords:
                         - pli
@@ -1439,6 +1446,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw3fadn-6w2h1
+                      enabled: false
                       title: BCP
                       keywords:
                         - bcp
@@ -1467,6 +1475,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mvw3fadn-emy3h
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -1525,8 +1534,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1760
-      y: 627
+      x: 1804
+      y: 737
       steps:
         - type: text
           body_variants:
@@ -1545,8 +1554,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2156
-      y: 253
+      x: 2288
+      y: 297
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
       x: 957
@@ -1807,10 +1816,6 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: siguiente
       a: f-mvw3fadn-4b4pu
-    - id: c-mvw3m1ua-8tk
-      de: f-mvw3fadn-4b4pu
-      salida: dec:d-mvw3fadn-6w2h1
-      a: f-mvw3kh4y-eknk7
     - id: c-mvw3mz31-m29
       de: f-mvvo0a7c-uyvc
       salida: pagado
