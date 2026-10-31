@@ -654,7 +654,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       : f.tipo === "intro_ob"
         ? resumenDeBurbujas(f.variantes?.[0]?.steps)
         : [];
-  return (
+  const tarjeta = (
     <div
       onDoubleClick={() => ctx.abrir(f.id)}
       onContextMenu={(e) => {
@@ -672,7 +672,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         ...(conColitas && !destacada ? { outline: "2px dotted rgba(100,116,139,0.55)", outlineOffset: 4 } : {}),
       }}
     >
-      <Handle type="target" position={Position.Left} id="entra" className={PUNTO_VERDE} style={{ top: 18 }} />
+      {/* El punto de entrada: en modo estaciones, en el CENTRO del costado (como Sendy). */}
+      <Handle type="target" position={Position.Left} id="entra" className={PUNTO_VERDE} style={ctx.estaciones ? undefined : { top: 18 }} />
       {/* «NADIE LLEGA», ARRIBA DE LA FICHA (27/10/2026): el punto rojo junto al conector estorbaba al
           soltar el cable ahí. */}
       {!leLlega && (
@@ -799,10 +800,6 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
         )}
       </div>
-      {/* MODO ESTACIONES: sus salidas salen de su bolita; aquí solo el cable corto hacia ella. */}
-      {ctx.estaciones && esEstacion(f) && (
-        <Handle type="source" position={Position.Right} id="a-estacion" isConnectable={false} className="!h-2 !w-2 !border-0 !bg-emerald-600" style={{ top: 40 }} />
-      )}
       {ctx.estaciones && f.tipo === "seguimientos" && (
         <Handle type="target" position={Position.Bottom} id="abajo" className={PUNTO_VERDE} />
       )}
@@ -882,6 +879,14 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       {salidas.length === 0 && (
         <div className="mt-1.5 border-t border-slate-200 px-2 py-1 text-[10px] text-slate-500">🏁 Aquí termina esta ruta</div>
       )}
+    </div>
+  );
+  // MODO ESTACIONES: la ficha y su estación son UN SOLO BLOQUE (se arrastran juntas).
+  if (!(ctx.estaciones && esEstacion(f))) return tarjeta;
+  return (
+    <div className="flex items-center">
+      {tarjeta}
+      <EstacionDeLaFicha f={f} />
     </div>
   );
 }
@@ -1290,9 +1295,9 @@ function queEspera(f: FichaEnElEditor): string {
   return "¿qué responde?";
 }
 
-function NodoDeEstacion({ data }: NodeProps) {
+/** La estación de una ficha, DENTRO de su mismo bloque (se mueve con ella). Sus salidas son las de la ficha. */
+function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const ctx = useContext(Contexto)!;
-  const f = (data as { ficha: FichaEnElEditor }).ficha;
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const arriba = salidasDeArriba(ctx.tablero, f);
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres).filter(
@@ -1303,31 +1308,59 @@ function NodoDeEstacion({ data }: NodeProps) {
   const faltan = ctx.faltas?.get(f.id);
   const n = ctx.numeroDe[f.id];
   return (
-    <div className="relative" style={{ width: 76, height: 76 }} onDoubleClick={() => ctx.abrir(f.id)} title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
-      <Handle type="target" position={Position.Left} id="entra" isConnectable={false} className="!h-2 !w-2 !border-0 !bg-emerald-600" />
-      {/* Arriba: a sus Seguimientos (el cable naranja). */}
-      {deArriba.map((s, i) => (
-        <Handle
-          key={s.clave}
-          type="source"
-          position={Position.Top}
-          id={s.clave}
-          title={`${s.etiqueta}${conCable.has(s.clave) ? "" : "\nSin cable: tíralo hacia sus Seguimientos"}`}
-          className={`${PUNTO_NARANJA} ${conCable.has(s.clave) ? "" : "punto-pide-cable"}`}
-          style={{ left: 38 + (i - (deArriba.length - 1) / 2) * 18 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
-          }}
-        />
-      ))}
-      <div className={`flex h-full w-full flex-col items-center justify-center rounded-full border-4 border-white bg-emerald-500 text-white shadow-lg ${f.apagada ? "opacity-50" : ""}`}>
-        <span className="text-[10px] leading-none">🚉</span>
-        <span className="text-lg font-black leading-tight">{n ?? ""}</span>
+    // EL BLOQUE: una barra corta desde la ficha, la estación grande (como en Sendy) y sus caminos afuera.
+    <div data-estacion className="flex items-center self-center" onDoubleClick={(e) => (e.stopPropagation(), ctx.abrir(f.id))}>
+      {/* De la ficha a su estación: el mismo trazo punteado de los cables, del color de la ficha. */}
+      <svg width={56} height={8} className="shrink-0 overflow-visible">
+        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={3} strokeDasharray="9 6" />
+      </svg>
+      <div className="relative flex flex-col items-center" title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
+        {/* GRANDE Y NOTORIA, como en Sendy (él: «tiene que haber algo ahí que sea importante y notorio»). */}
+        <div className={`relative flex h-36 w-36 flex-col items-center justify-center gap-0.5 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl ${f.apagada ? "opacity-50" : ""}`}>
+          {/* Arriba: a sus Seguimientos. */}
+          {deArriba.map((s, i) => (
+            <Handle
+              key={s.clave}
+              type="source"
+              position={Position.Top}
+              id={s.clave}
+              title={`${s.etiqueta}${conCable.has(s.clave) ? "" : "\nSin cable: tíralo hacia sus Seguimientos"}`}
+              className={`${PUNTO_NARANJA} ${conCable.has(s.clave) ? "" : "punto-pide-cable"}`}
+              style={{ left: `calc(50% + ${(i - (deArriba.length - 1) / 2) * 22}px)` }}
+              onClick={(e) => {
+                e.stopPropagation();
+                ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
+              }}
+            />
+          ))}
+          <span className="text-3xl leading-none">🚉</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest opacity-90">Estación</span>
+          <span className="text-4xl font-black leading-none">{n ?? ""}</span>
+        </div>
+        {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
+        <div className="absolute left-1/2 top-[calc(100%+8px)] -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold text-white shadow">{queEspera(f)}</div>
       </div>
-      <div className="absolute left-1/2 top-[80px] w-28 -translate-x-1/2 text-center text-[10px] font-bold text-emerald-700">{queEspera(f)}</div>
-      {/* A la derecha: sus caminos, afuera, como pastillas (su boceto). */}
-      <div className="absolute left-[88px] top-1/2 flex -translate-y-1/2 flex-col gap-1">
+      {/* LOS BRAZOS (su imagen): rectas desde el centro de la estación hasta cada camino. Alto fijo por camino
+          (28 px + 6 de separación), así cada brazo cae justo en el medio de su pastilla. */}
+      {aLaDerecha.length > 0 &&
+        (() => {
+          const FILA = 28;
+          const SEP = 6;
+          const alto = aLaDerecha.length * FILA + (aLaDerecha.length - 1) * SEP;
+          return (
+            // Curvas suaves, punteadas como los cables (no rectas toscas).
+            <svg width={52} height={alto} className="shrink-0 overflow-visible">
+              {aLaDerecha.map((s, i) => {
+                const y = i * (FILA + SEP) + FILA / 2;
+                return (
+                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke="#10b981" strokeWidth={2.5} strokeDasharray="7 5" />
+                );
+              })}
+            </svg>
+          );
+        })()}
+      {/* A la derecha: sus caminos. */}
+      <div className="flex flex-col gap-1.5">
         {aLaDerecha.map((s) => {
           const falta = faltan?.get(s.clave);
           const pide = !!falta || ((s.clave.startsWith("btn:") || s.clave.startsWith("dec:") || s.clave.startsWith("elige:") || s.clave === "sin_pago") && !conCable.has(s.clave));
@@ -1335,7 +1368,7 @@ function NodoDeEstacion({ data }: NodeProps) {
             <div
               key={s.clave}
               title={falta ?? s.etiqueta}
-              className={`relative flex min-w-[130px] max-w-[220px] items-center gap-1 whitespace-nowrap rounded-full border bg-white px-2.5 py-0.5 pr-5 text-[11px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-300 text-emerald-900"}`}
+              className={`relative flex h-7 min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 pr-5 text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
             >
               <span className="truncate">{s.etiqueta.replace(/^(🔘|💬|✍️) /, s.clave.startsWith("btn:") ? "botón " : s.clave.startsWith("dec:") ? "si dice " : s.clave.startsWith("elige:") ? "" : "")}</span>
               <Handle
@@ -1356,7 +1389,7 @@ function NodoDeEstacion({ data }: NodeProps) {
   );
 }
 
-const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, estacion: NodoDeEstacion };
+const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja };
 const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
 
 /** Quitar fichas con sus cables. Si se va un Inicio, se va también su manta (las fichas se quedan). */
@@ -1529,13 +1562,97 @@ export default function LienzoDelTablero({
   };
   /** La ficha de verdad detrás de un nodo (la bolita «est:<id>» es su ficha). */
   const fichaDelNodo = (id: string) => (id.startsWith("est:") ? id.slice(4) : id);
+
+  /**
+   * «📐 ACOMODAR COMO CAMINO» (01/11/2026): solo cuando él lo toca (nada se mueve solo) y con Ctrl+Z. Desde cada
+   * Inicio, por sus cables: una columna por etapa, cada columna tan ancha como su bloque más ancho (ficha +
+   * estación + caminos, medido en pantalla); los Seguimientos de una sola estación, encima de ella; los
+   * países uno debajo del otro, cada uno con su manta alrededor.
+   */
+  const acomodarComoCamino = () => {
+    const t = vivo.current;
+    const porId = new Map(t.fichas.filter((f) => !f.guardada).map((f) => [f.id, f]));
+    const medida = (f: FichaEnElEditor) => {
+      const m = instancia.current?.getNode(f.id)?.measured;
+      const ancho = m?.width ?? (estaciones && esEstacion(f) ? 760 : f.tipo === "inicio" ? 200 : 250);
+      return { w: ancho, h: m?.height ?? 280 };
+    };
+    // Los Seguimientos que cuelgan de UNA sola ficha (van encima de ella).
+    const colgados = new Map<string, string>();
+    const vecesColgado = new Map<string, number>();
+    for (const c of t.cables) {
+      const d = porId.get(c.a);
+      if (d?.tipo === "seguimientos" && porId.has(c.de)) {
+        vecesColgado.set(d.id, (vecesColgado.get(d.id) ?? 0) + 1);
+        colgados.set(d.id, c.de);
+      }
+    }
+    const encimaDe = new Map<string, FichaEnElEditor>();
+    for (const [seg, duena] of colgados) if (vecesColgado.get(seg) === 1) encimaDe.set(duena, porId.get(seg)!);
+    const puestos = new Map<string, Punto>();
+    const inicios = [...porId.values()].filter((f) => f.tipo === "inicio").sort((a, b) => a.y - b.y || a.x - b.x);
+    if (!inicios.length) return;
+    const x0 = Math.min(...inicios.map((f) => f.x));
+    let y0 = Math.min(...inicios.map((f) => f.y));
+    const mantas: Array<{ inicio: string; x: number; y: number; ancho: number; alto: number }> = [];
+    for (const ini of inicios) {
+      // Las columnas: el Inicio y, etapa por etapa, lo que sale de la anterior (cada ficha una vez).
+      const columnas: string[][] = [[ini.id]];
+      const vista = new Set([ini.id]);
+      for (let col = 0; col < columnas.length; col++)
+        for (const id of columnas[col])
+          for (const c of t.cables.filter((x) => x.de === id)) {
+            const d = porId.get(c.a);
+            if (!d || vista.has(d.id) || d.tipo === "seguimientos" || d.tipo === "inicio") continue;
+            vista.add(d.id);
+            (columnas[col + 1] ??= []).push(d.id);
+          }
+      let x = x0;
+      let fondo = y0;
+      for (const ids of columnas) {
+        let y = y0;
+        let anchoCol = 0;
+        for (const id of ids) {
+          const f = porId.get(id)!;
+          const { w, h } = medida(f);
+          const seg = encimaDe.get(id);
+          const altoSeg = seg ? medida(seg).h + 70 : 0;
+          const yFicha = y + altoSeg;
+          puestos.set(id, { x, y: yFicha });
+          if (seg) {
+            // Encima de la estación (el centro del círculo queda ~250+56+72 px a la derecha de la ficha).
+            const centro = estaciones && esEstacion(f) ? x + 250 + 56 + 72 : x + 125;
+            puestos.set(seg.id, { x: Math.round(centro - medida(seg).w / 2), y: y });
+          }
+          anchoCol = Math.max(anchoCol, w);
+          y = yFicha + h + 110;
+        }
+        fondo = Math.max(fondo, y);
+        x += anchoCol + 140;
+      }
+      mantas.push({ inicio: ini.id, x: x0 - 40, y: y0 - 70, ancho: x - x0 + 40, alto: fondo - y0 + 40 });
+      y0 = fondo + 160;
+    }
+    cambiar({
+      ...t,
+      fichas: t.fichas.map((f) => {
+        const p = puestos.get(f.id);
+        return p ? { ...f, x: Math.round(p.x), y: Math.round(p.y) } : f;
+      }),
+      cajas: (t.cajas ?? []).map((c) => {
+        const m = c.inicio ? mantas.find((x) => x.inicio === c.inicio) : undefined;
+        return m ? { ...c, x: m.x, y: m.y, ancho: m.ancho, alto: m.alto } : c;
+      }),
+    });
+    setAviso("Acomodado como camino. Si no te gusta, Ctrl+Z lo deja como estaba.");
+    window.setTimeout(() => instancia.current?.fitView({ padding: 0.1, duration: 400 }), 80);
+  };
   const nodosDesdeProps = useMemo<Node[]>(() => {
     const nodos: Node[] = [];
     // LAS MANTAS YA NO SE DIBUJAN SOLAS (24/10/2026): «la manta no debe ser automatizada, la controlo
     // yo desde las esquinas», como en la pizarra. Cada país tiene su caja (`inicio`), que nace con su
     // Inicio y se estira a mano; las fichas entran y salen de ella libremente.
-    // En el modo estaciones las cajas y mantas no se ven: el camino se acomoda solo y quedarían fuera de sitio.
-    for (const c of estaciones ? [] : tablero.cajas ?? []) {
+    for (const c of tablero.cajas ?? []) {
       const ini = c.inicio ? tablero.fichas.find((f) => f.id === c.inicio && f.tipo === "inicio") : undefined;
       nodos.push({
         id: `caja:${c.id}`,
@@ -1570,70 +1687,10 @@ export default function LienzoDelTablero({
         zIndex: -10,
       });
     }
-    // MODO ESTACIONES: EL CAMINO SE ACOMODA SOLO, SOLO EN LA VISTA (01/11/2026). Él: «un reacomodo visual, sin
-    // cambiar nada». Desde cada Inicio, por sus cables (sin los que van a Seguimientos ni los que vuelven):
-    // una columna por etapa, las ramas una debajo de otra. Lo guardado no se toca: al apagar el modo, todo
-    // vuelve a su sitio (por eso en este modo las fichas acomodadas no se arrastran).
-    const enCamino = new Map<string, Punto>();
-    if (estaciones) {
-      const porId = new Map(visibles.map((f) => [f.id, f]));
-      const ANCHO = 640;
-      const ALTO = 780;
-      let filaLibre = 0;
-      // Los países uno debajo del otro, desde la esquina del primero: no se montan.
-      const inicios = visibles.filter((f) => f.tipo === "inicio").sort((a, b) => a.y - b.y || a.x - b.x);
-      const x0 = Math.min(...inicios.map((f) => f.x));
-      const y0 = Math.min(...inicios.map((f) => f.y)) + 420;
-      for (const ini of inicios) {
-        if (enCamino.has(ini.id)) continue;
-        const base = { x: x0, y: y0 + filaLibre * ALTO };
-        enCamino.set(ini.id, base);
-        const filasPorColumna = new Map<number, number>();
-        const cola: Array<{ id: string; col: number; fila: number }> = [{ id: ini.id, col: 0, fila: 0 }];
-        let filaMax = 0;
-        while (cola.length) {
-          const { id, col, fila } = cola.shift()!;
-          const salen = tablero.cables.filter((c) => c.de === id).map((c) => porId.get(c.a)).filter((f): f is FichaEnElEditor => !!f && f.tipo !== "seguimientos" && f.tipo !== "inicio");
-          let rama = 0;
-          for (const d of salen) {
-            if (enCamino.has(d.id)) continue;
-            const c2 = col + 1;
-            const libre = Math.max(fila + rama, filasPorColumna.get(c2) ?? 0);
-            filasPorColumna.set(c2, libre + 1);
-            filaMax = Math.max(filaMax, libre);
-            enCamino.set(d.id, { x: base.x + 260 + (c2 - 1) * ANCHO, y: base.y + libre * ALTO });
-            cola.push({ id: d.id, col: c2, fila: libre });
-            rama++;
-          }
-        }
-        filaLibre += filaMax + 1;
-      }
-    }
-    const dondeSe = (f: FichaEnElEditor): Punto => enCamino.get(f.id) ?? { x: f.x, y: f.y };
-    // La bolita a la derecha de su ficha; los Seguimientos de UNA sola estación, colgados encima de ella.
-    const bolitas = new Map<string, Punto>();
-    if (estaciones) for (const f of visibles) if (esEstacion(f)) bolitas.set(f.id, { x: dondeSe(f).x + 300, y: dondeSe(f).y + 6 });
-    const colgadosDe = new Map<string, string[]>();
-    if (estaciones)
-      for (const c of tablero.cables)
-        if (bolitas.has(c.de) && tablero.fichas.find((x) => x.id === c.a)?.tipo === "seguimientos")
-          colgadosDe.set(c.a, [...new Set([...(colgadosDe.get(c.a) ?? []), c.de])]);
-    for (const f of visibles) {
-      const duenas = colgadosDe.get(f.id);
-      const arriba = duenas?.length === 1 ? bolitas.get(duenas[0]) : undefined;
-      const acomodada = enCamino.get(f.id);
-      nodos.push(
-        arriba
-          ? { id: f.id, type: "ficha", position: { x: arriba.x - 87, y: arriba.y - 60 }, origin: [0, 1], draggable: false, data: { ficha: f } }
-          : acomodada
-            ? { id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: acomodada, draggable: false, data: { ficha: f } }
-            : { id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: { x: f.x, y: f.y }, data: { ficha: f } }
-      );
-    }
-    for (const [id, p] of bolitas) {
-      const f = visibles.find((x) => x.id === id)!;
-      nodos.push({ id: `est:${id}`, type: "estacion", position: p, draggable: false, selectable: false, data: { ficha: f } });
-    }
+    // (Modo estaciones: la estación va DENTRO del mismo bloque de su ficha —ver `NodoDeFicha`—: se mueve con
+    // ella y todo queda libre como siempre. Nada se acomoda solo.)
+    for (const f of visibles)
+      nodos.push({ id: f.id, type: f.tipo === "inicio" ? "inicio" : "ficha", position: { x: f.x, y: f.y }, data: { ficha: f } });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tablero, tema, cajaElegida, paisVisto, mirando, estaciones]);
@@ -1795,12 +1852,13 @@ export default function LienzoDelTablero({
           // EL CABLE, SIEMPRE DEL COLOR DE LA SOLAPA DE LA FICHA DE DONDE SALE (27/10/2026).
           const color = origen ? ASPECTO[origen.tipo].trazo : "#6366f1";
           const aSeguimientos = destino?.tipo === "seguimientos";
-          // MODO ESTACIONES: sale de la bolita; hacia sus Seguimientos, por arriba y entrando por abajo.
+          // MODO ESTACIONES: el MISMO cable de siempre (mismo estilo); solo cambia dónde se engancha: sale de la
+          // estación de su ficha (mismo bloque) y, hacia sus Seguimientos, entra por abajo de ellos.
           const deEstacion = estaciones && !!origen && esEstacion(origen);
           const comoColita = esColita(tablero, c, todoCable) && !(deEstacion && aSeguimientos);
           return {
             id: c.id,
-            source: deEstacion ? `est:${c.de}` : c.de,
+            source: c.de,
             sourceHandle: c.salida,
             target: c.a,
             targetHandle: estaciones && aSeguimientos && deEstacion ? "abajo" : "entra",
@@ -1811,31 +1869,13 @@ export default function LienzoDelTablero({
               : {}),
             // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra; los de Seguimientos, finos.
             style: {
-              stroke: deEstacion && aSeguimientos ? "#f97316" : color,
-              strokeWidth: deEstacion && aSeguimientos ? 3 : aSeguimientos ? 1.5 : 3,
-              strokeDasharray: deEstacion && aSeguimientos ? undefined : aSeguimientos ? "3 5" : "9 6",
+              stroke: color,
+              strokeWidth: aSeguimientos ? 1.5 : 3,
+              strokeDasharray: aSeguimientos ? "3 5" : "9 6",
               opacity: origen?.apagada ? 0.4 : 1,
             },
           };
-        })
-        .concat(
-          // El cable corto de cada ficha a su bolita (solo dibujo: no se corta ni se mueve).
-          estaciones
-            ? visibles
-                .filter((f) => esEstacion(f))
-                .map((f) => ({
-                  id: `a-estacion-${f.id}`,
-                  source: f.id,
-                  sourceHandle: "a-estacion",
-                  target: `est:${f.id}`,
-                  targetHandle: "entra",
-                  deletable: false,
-                  selectable: false,
-                  focusable: false,
-                  style: { stroke: "#10b981", strokeWidth: 4 },
-                }) as Edge)
-            : []
-        ),
+        }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tablero, todoCable, tirando, numeroDe, estaciones]
   );
@@ -2274,6 +2314,16 @@ export default function LienzoDelTablero({
           >
             🚉 {estaciones ? "Estaciones: sí" : "Ver estaciones"}
           </button>
+          {estaciones && (
+            <button
+              type="button"
+              onClick={acomodarComoCamino}
+              title="Separa las fichas para que quepan sus estaciones: el camino de izquierda a derecha, las ramas una debajo de otra y los seguimientos encima de su estación. Después mueves todo libremente. Ctrl+Z lo deshace."
+              className="flex h-9 items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 text-xs font-bold text-emerald-800 shadow-md hover:bg-emerald-50"
+            >
+              📐 Acomodar como camino
+            </button>
+          )}
           {/* «🔍 QUÉ FALTA CONECTAR» y «VER TODO COMO CABLE» (27/10/2026) */}
           <button
             type="button"
