@@ -8,8 +8,8 @@ whatsapp:
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
-      x: 3531
-      y: -1243
+      x: 1518
+      y: -2673
       titulo: GRAFISMO FONETICO INTRO 1
       steps:
         - type: text
@@ -387,8 +387,8 @@ whatsapp:
         - pmugne9ti
     - id: cobro-mvveb856-4
       tipo: cobro
-      x: 4202
-      y: -913
+      x: 2189
+      y: -2343
       titulo: Cobro · GRAFISMO FONETICO
       steps:
         - type: text
@@ -420,8 +420,8 @@ whatsapp:
         metodos: true
     - id: seg-mvveb857-a
       tipo: seguimientos
-      x: 3872
-      y: -253
+      x: 1859
+      y: -1683
       titulo: Seguimientos
       presenta:
         - pmu39gpb1
@@ -913,8 +913,8 @@ whatsapp:
                   enabled: false
     - id: cobro-mvveb857-b
       tipo: cobro
-      x: 4202
-      y: -583
+      x: 2189
+      y: -2013
       titulo: Cobro · SUPER PACK 2 EN 1
       steps:
         - type: text
@@ -946,8 +946,8 @@ whatsapp:
         metodos: true
     - id: msg-mvveb857-e
       tipo: mensaje
-      x: 4532
-      y: 407
+      x: 2519
+      y: -1023
       titulo: NO GRACIAS
       steps:
         - type: text
@@ -956,25 +956,25 @@ whatsapp:
           delay_after_sec: 6
     - id: entrega-mvveb857-i
       tipo: entregar
-      x: 4532
-      y: -1243
+      x: 2519
+      y: -2673
       titulo: Entrega · GRAFISMO FONETICO
       producto_id: pmu39gpb1
     - id: entrega-mvveb857-k
       tipo: entregar
-      x: 4532
-      y: -583
+      x: 2519
+      y: -2013
       titulo: Entrega · SUPER PACK 2 EN 1
       producto_id: pmugne9ti
     - id: regalo-mvveb857-o
       tipo: regalo
-      x: 4862
-      y: -1243
+      x: 2849
+      y: -2673
       titulo: Regalo
     - id: f-mvvfyvy5-34lw
       tipo: mensaje
-      x: 407
-      y: -176
+      x: 6380
+      y: -407
       steps:
         - type: text
           body_variants:
@@ -1163,8 +1163,8 @@ whatsapp:
                   enabled: false
     - id: f-mvvg2ytw-1u2w7
       tipo: mensaje
-      x: 3641
-      y: 440
+      x: 6930
+      y: -803
       steps:
         - type: text
           body_variants:
@@ -1204,8 +1204,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvvg4f2j-8t6dd
       tipo: mensaje
-      x: 3696
-      y: 792
+      x: 6985
+      y: -451
       steps:
         - type: text
           body_variants:
@@ -1350,13 +1350,13 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 1485
-      y: 352
+      x: 1463
+      y: 132
       vista_compra:
-        f-mvw3kh4y-eknk7:2: colita
-        f-mvvo0a7c-uyvc:2: colita
-        f-mvw3kh4y-eknk7:1: colita
-        f-mvvo0a7c-uyvc:1: colita
+        f-mvw3kh4y-eknk7:2: cable
+        f-mvvo0a7c-uyvc:2: cable
+        f-mvw3kh4y-eknk7:1: cable
+        f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mvw3fadn-yoyzi
           minutos: 2
@@ -1972,7 +1972,7 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: sin_respuesta
       a: f-mvw3fadn-4b4pu
-      vista: colita
+      vista: cable
     - id: c-mvw6xm3e-izj
       de: f-mvw6hswp-ld1vx
       salida: dec:dc700b60-f7c7-4719-a760-f2b80515381e
