@@ -1271,7 +1271,7 @@ whatsapp:
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
       x: 968
-      y: -143
+      y: -44
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1481,8 +1481,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: -77
-      y: -286
+      x: -66
+      y: -209
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -2508,9 +2508,9 @@ whatsapp:
       a: f-mvw8ibzi-4n26e
   cajas:
     - id: manta-inicio-mvveb83v-1
-      x: -1058
-      y: -899
-      ancho: 8619
-      alto: 2322
+      x: -948
+      y: -547
+      ancho: 6804
+      alto: 1684
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
       inicio: inicio-mvveb83v-1
