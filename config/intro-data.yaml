@@ -5227,6 +5227,39 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: false
 biblioteca_de_productos:
+  - id: pmvxom7h2
+    name: MEGA PACK DE RAZONAMIENTO VERBAL
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            YA PUEDES DESCARGAR TU PACK FICTICIO DE RAZONAMIENTO VERBAL
+
+            HTTPS:GOOGLE.DRIVE/OUROQ/PRUEBITA
+        delay_after_sec: 6
+    image_gallery: []
+    course_content: |-
+      📘 MEGAPACK DE RAZONAMIENTO VERBAL
+
+      📚 Es un pack completo que incluye:
+
+      ✅ 12 juegos armables: dominó de analogías, bingo de conectores, carrera por equipos y más
+      ✅ 90 fichas en 3 niveles (10 a 15 años): 900 ejercicios, de lo más fácil a lo más difícil
+      ✅ 6 simulacros con diagnóstico por tema
+      ✅ Solucionario explicado para corregir en minutos
+      ✅ Guía con plan de 10 semanas
+
+      Todo viene en formato PDF listo para imprimir y usar en tus clases 🤩
+
+      ✨ Resultado: alumnos que leen mejor, piensan más rápido y llegan seguros a sus exámenes… y tú recuperas 
+    etiqueta: ""
+    precios_por_pais:
+      PE:
+        price_soles: 20
+        discount_price_soles: 15
+        market_price: 65
   - id: pmvxl0fp8
     name: LENGUA Y LITERATURA EN ACCION
     aliases: []
