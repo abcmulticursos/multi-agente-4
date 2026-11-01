@@ -3229,13 +3229,13 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxnewvh-mbuow
       tipo: regalo
-      x: 2497
-      y: 22
+      x: 3388
+      y: -22
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
-      x: 1793
-      y: -22
+      x: 1804
+      y: -77
       titulo: Upsell 1 -
       steps:
         - type: text
@@ -3308,6 +3308,86 @@ whatsapp:
           delay_after_sec: 6
       presenta:
         - pmvxom7h2
+    - id: f-mvxoujcd-z0l5w
+      tipo: mensaje
+      x: 2024
+      y: -550
+      titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+              ✅ Paseos, juegos, retos y sesiones de fotos.
+              ✅ Tarjetas para sacar al azar.
+
+              *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+          delay_after_sec: 4
+          buttons:
+            - id: b-mvxoujcd-mnz3b
+              label: si quiero
+              action: send_steps
+              steps: []
+            - id: b-mvxoujcd-szosw
+              label: por ahora no
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mvxoujcd-0421m
+              enabled: false
+              title: Sí
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - bueno
+                - va
+              color: ""
+              steps: []
+            - id: d-mvxoujcd-3ady0
+              enabled: false
+              title: No
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - despues
+                - luego
+                - paso
+                - en otra oportunidad
+              color: ""
+              steps: []
+      presenta:
+        - pmv5xqgst
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: f-mvxovbd8-cn0ck
+      tipo: cobro
+      x: 2574
+      y: -187
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
