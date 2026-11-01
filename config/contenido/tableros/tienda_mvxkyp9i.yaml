@@ -2778,6 +2778,116 @@ whatsapp:
 
               quedo atento!
           delay_after_sec: 6
+          decisions:
+            - id: d9376444-fec4-4214-b1ff-e4fcc5d134d9
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+                - esta bien
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: 2ae44d87-9fd2-48f3-b677-810a1b001660
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+                - esta bien
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: 09acaba0-82cb-45a2-bf30-3e7416f8fb83
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: 756fb4f9-6783-486e-93ab-7cb458381887
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1rddsLec7-ps4O9KSfiJn6kiVT_qORokC/view?usp=drive_link
           caption_variants:
@@ -2934,8 +3044,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxm55mm-q9w8
       tipo: seguimientos
-      x: -66
-      y: -418
+      x: -209
+      y: -385
       seguimientos:
         - id: s-mvxm55mm
           minutos: 2
@@ -2961,176 +3071,10 @@ whatsapp:
                   delay_after_sec: 6
           ignora_silencio: true
           ignora_tardio: true
-    - id: f-mvxm9szh-cy0n1
-      tipo: mensaje
-      x: -77
-      y: 110
-      steps:
-        - type: text
-          body_variants:
-            - |-
-              👋 *¡Hola, docente!* 😊 Somos el Equipo Oficial de Cocreando Online.
-
-              ¿Te pasa que...?
-
-              ⏰ Pasas horas preparando tus clases.
-              🔎 Buscas actividades en diferentes lugares.
-              📖 Tus estudiantes leen, pero no comprenden lo que leen.
-              😴 La gramática y la ortografía les parecen aburridas.
-
-              Si te identificaste con alguno, esto es para ti 👇
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              Por eso creamos el
-              📚 *{{PRODUCTO_BASE}}*
-
-              Una colección digital con *más de 200 actividades, armables, plegables y recursos educativos* para enseñar Lengua de una manera mucho más visual, práctica y divertida. ✂️
-
-              💡Ideal para tus alumnos de primaria y secundaria.
-          delay_after_sec: 6
-        - type: image
-          drive_url: https://drive.google.com/file/d/14eFG1JoDfFaoRBCYjQ9hV3TC0hS2RqCd/view?usp=drive_link
-          caption_variants:
-            - ""
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              📚 ¿Qué incluye el Megapack?
-              _6 KITS COMPLETOS_
-
-              📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
-              ✅ Adjetivos y determinantes
-              ✅ Pronombres
-              ✅ Verbos: tiempos, modos y conjugación
-              ✅ Adverbios, preposiciones y conjunciones
-              ✅ Sujeto y predicado
-              ✅ Tipos de oraciones
-              ✅ Análisis morfológico y sintáctico
-
-              ✏️ *KIT 2: ORTOGRAFÍA Y VOCABULARIO*
-              ✅ Agudas, graves y esdrújulas
-              ✅ Tilde diacrítica, diptongo e hiato
-              ✅ B/V, C/S/Z, G/J, H, LL/Y, R/RR
-              ✅ Signos de puntuación
-              ✅ Mayúsculas
-              ✅ Sinónimos, antónimos, homónimos y parónimos
-              ✅ Prefijos, sufijos y familias de palabras
-              ✅ Polisemia y sentido figurado
-
-              📖 *KIT 3: COMPRENSIÓN LECTORA*
-              ✅ Antes, durante y después de leer
-              ✅ Idea principal, tema y resumen
-              ✅ Comprensión literal e inferencial
-              ✅ Secuencia, causa y consecuencia
-              ✅ Subrayado, esquemas y mapas conceptuales
-              ✅ Infografías, tablas y gráficos
-              ✅ Hechos, opiniones y argumentos
-              ✅ Lectura crítica y fuentes confiables
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*
-              ✅ Párrafos con coherencia y cohesión
-              ✅ Conectores
-              ✅ Planificar, redactar y corregir
-              ✅ Cuentos y descripciones
-              ✅ Informes e instructivos
-              ✅ Ensayos, reseñas y argumentación
-              ✅ Textos periodísticos
-              ✅ Historietas, diálogos y guiones
-
-              🎭 *KIT 5: LITERATURA EN ACCIÓN*
-              ✅ Géneros literarios
-              ✅ Cuento, novela, fábula, mito y leyenda
-              ✅ Narrador, personajes, tiempo y espacio
-              ✅ Poesía: verso, estrofa y rima
-              ✅ Figuras literarias
-              ✅ Teatro: actos, escenas y acotaciones
-              ✅ Literatura latinoamericana 
-              ✅ Análisis y creación literaria
-
-              🗣️ *KIT 6: COMUNICACIÓN Y EXPRESIÓN ORAL*
-              ✅ Elementos de la comunicación
-              ✅ Comunicación verbal y no verbal
-              ✅ Registros y variedades del lenguaje
-              ✅ Escucha activa y diálogo
-              ✅ Exposición oral
-              ✅ Entrevista y debate
-              ✅ Narración y dramatización
-              ✅ Publicidad y ciudadanía digital
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              ✂️ Dentro del material encontrarás:
-
-              ⭐ Armables interactivos
-              ⭐ Plegables y minilibros educativos
-              ⭐ Crucigramas, pupiletras y sopas de letras
-              ⭐ Juegos y dinámicas para trabajar en equipo
-              ⭐ Actividades listas para imprimir
-              ⭐ Respuestas y explicación detallada de cada armable
-
-              _Ideal para primaria y secundaria - bachilerato_
-
-              💡 Todo organizado para que tus estudiantes lean más, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤩
-          delay_after_sec: 6
-        - type: image
-          drive_url: https://drive.google.com/file/d/1XyiZ-LT8K34JqlTc44c7iAac9bf3Olyh/view?usp=drive_link
-          caption_variants:
-            - ""
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              ¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS! ⚡✨
-
-              🎁 *BONO 1 · BANCO DE LECTURAS CON COMPRENSIÓN*
-
-              📚 40 lecturas listas para imprimir, organizadas en 4 niveles de dificultad.
-              👉 Ideal para tareas, evaluaciones y reforzar la comprensión lectora.
-
-              🎁 *BONO 2 · +100 DINÁMICAS DE LECTURA Y ESCRITURA*
-
-              🎯 102 actividades dinámicas para estudiantes de 10 a 15 años.
-              ✅ 60 dinámicas sin materiales y 42 con recursos listos para imprimir.
-              📚 Trabaja gramática, ortografía, comprensión lectora, escritura creativa, literatura y oralidad.
-
-              ⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*
-          delay_after_sec: 6
-        - type: image
-          drive_url: https://drive.google.com/file/d/18B723A_zU1tLzGRb-pBydvIKc_0aiJUt/view?usp=drive_link
-          caption_variants:
-            - ""
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - |-
-              Docente, esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO 📚✨
-
-              📚 6 kits completos
-              🎁 +2 regalos especiales
-
-              📥 Todo en formato PDF, listo para descargar e imprimir
-
-              🔥 *TODO POR SOLO {{PRECIO_BASE}}*
-
-              💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
-
-              {{LISTA_METODOS_POR_PAIS}}
-
-              quedo atento!
-          delay_after_sec: 6
-      presenta:
-        - "@tienda:basico"
     - id: f-mvxma6rp-tlsv
       tipo: mensaje
-      x: 209
-      y: -198
+      x: 594
+      y: -330
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -3476,6 +3420,10 @@ whatsapp:
       de: inicio-mvveb83v-1
       salida: siguiente
       a: f-mvxln1u9-dsfgt
+    - id: c-mvxmmsvd-qli
+      de: f-mvxln1u9-dsfgt
+      salida: siguiente
+      a: f-mvxm55mm-q9w8
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
