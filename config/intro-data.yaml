@@ -5243,7 +5243,20 @@ biblioteca_de_productos:
     name: LENGUA Y LITERATURA EN ACCION
     aliases: []
     price_soles: 0
-    delivery: []
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            Excelente, muchas gracias por tu compra!
+
+            Aquí te mando el pack completo:
+
+            ✅ *Lengua y Literatura en Acción*: 😊👇️https://drive.google.com/drive/folders/1vij69JX6WI7UxhHb9xrNQWKY6rEUnwM7?usp=sharing
+
+            🎁 *REGALOS AQUI:*  😊👇️https://drive.google.com/drive/folders/1xUgrBd9piV3eN812y3du5yiubTYjASvz?usp=sharing
+
+            Gracias la confianza y por tu preferencia! 🤩
+        delay_after_sec: 6
     image_gallery: []
     course_content: |-
       Lengua y Literatura en Acción:
