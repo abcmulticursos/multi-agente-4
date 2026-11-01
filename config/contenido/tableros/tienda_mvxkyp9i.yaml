@@ -3308,6 +3308,7 @@ whatsapp:
           delay_after_sec: 6
       presenta:
         - pmvxom7h2
+      instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
     - id: f-mvxoujcd-z0l5w
       tipo: mensaje
       x: 2024
@@ -3370,8 +3371,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvxovbd8-cn0ck
       tipo: cobro
-      x: 2574
-      y: -187
+      x: 2475
+      y: -121
       steps:
         - type: text
           body_variants:
