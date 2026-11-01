@@ -989,8 +989,8 @@ whatsapp:
           delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: -330
-      y: 187
+      x: -308
+      y: 297
       steps:
         - type: text
           body_variants:
@@ -1889,8 +1889,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 3564
-      y: 341
+      x: 4532
+      y: 682
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
@@ -2260,6 +2260,67 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mvx71e53-8pbnj
+      tipo: mensaje
+      x: 3245
+      y: 429
+      titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              🎁 *{¡Una cosita más!|¡Antes de irte!|¡Tengo algo especial para ti!}*
+
+              Por ser cliente, puedes llevar *{{PRODUCTO_UPSELL}}* a solo *{{PRECIO_UPSELL}}* (antes ~{{PRECIO_ANTES_UPSELL}}~) 😱
+
+              ✅ 100 planes para pasar tiempo de calidad con tu mascota.
+              ✅ Paseos, juegos, retos y sesiones de fotos.
+              ✅ Tarjetas para sacar al azar.
+
+              *¿Lo agregas?* Escríbeme *sí* o *no* 😊
+          delay_after_sec: 4
+          decisions:
+            - id: d-mvx71e53-94710
+              title: Sí
+              keywords:
+                - si
+                - sí
+                - claro
+                - dale
+                - lo quiero
+                - ok
+                - bueno
+                - va
+              color: ""
+              steps: []
+            - id: d-mvx71e53-urk9v
+              title: No
+              keywords:
+                - no
+                - no gracias
+                - ahora no
+                - despues
+                - luego
+                - paso
+              color: ""
+              steps: []
+      presenta:
+        - pmv5xqgst
+      instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
+      sin_respuesta_min: 3
+      espera_min: 2
+    - id: f-mvx76sva-2c7p9
+      tipo: entregar
+      x: 4455
+      y: 198
+      titulo: Entrega · MIS PRIMEROS TRAZOS
+      producto_id: pmv5xqgst
+      entregas:
+        - pmv5xqgst
+    - id: f-mvx78w0e-z55d
+      tipo: mensaje
+      x: 4081
+      y: 528
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -2404,16 +2465,6 @@ whatsapp:
       de: f-mvw3kh4y-eknk7
       salida: pagado
       a: f-mvw719ry-3fmww
-    - id: c-mvw8ilau-rpf
-      de: f-mvw3mqwi-ngia
-      salida: siguiente
-      a: f-mvw8ibzi-4n26e
-      vista: cable
-    - id: c-mvw8imw5-i4e
-      de: f-mvw719ry-3fmww
-      salida: siguiente
-      a: f-mvw8ibzi-4n26e
-      vista: cable
     - id: c-mvw94hxd-l16
       de: f-mvvo0a7c-uyvc
       salida: sin_pago
@@ -2456,6 +2507,23 @@ whatsapp:
       salida: btn:312e478d-f545-4213-ab7b-f602fbbd5f52
       a: f-mvvo1ibc-s0tdo
       vista: colita
+    - id: c-mvx71w3k-ieu
+      de: f-mvw3mqwi-ngia
+      salida: siguiente
+      a: f-mvx71e53-8pbnj
+    - id: c-mvx71xpz-0tm
+      de: f-mvw719ry-3fmww
+      salida: siguiente
+      a: f-mvx71e53-8pbnj
+    - id: c-mvx72elb-yha
+      de: f-mvx71e53-8pbnj
+      salida: sin_respuesta
+      a: f-mvw8ibzi-4n26e
+      vista: cable
+    - id: c-mvx76w1h-9uz
+      de: f-mvx71e53-8pbnj
+      salida: dec:d-mvx71e53-94710
+      a: f-mvx76sva-2c7p9
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20

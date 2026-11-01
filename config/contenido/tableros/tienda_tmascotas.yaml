@@ -2803,8 +2803,8 @@ whatsapp:
       producto_id: ptmascotas_pack
     - id: f-rec26-lu28
       tipo: mensaje
-      x: 4110
-      y: 5364
+      x: 3509
+      y: 5478
       titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
       steps:
         - type: text
@@ -4348,10 +4348,6 @@ whatsapp:
       de: f-mvnp7cc7-k3s0b
       salida: siguiente
       a: mas_pe_upsell1
-    - id: c-mvnpp10s-hwl
-      de: f-mvnpmsvw-ph32e
-      salida: btn:b-mvnpmsvw-w1t1o
-      a: f-mvnpmsvw-fa2fp
     - id: c-mvnpub83-rn7
       de: f-mvnpmsvw-fa2fp
       salida: btn:b-mvnpmsvw-fzpte
