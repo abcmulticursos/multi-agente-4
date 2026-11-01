@@ -3073,8 +3073,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxma6rp-tlsv
       tipo: mensaje
-      x: 594
-      y: -330
+      x: 1045
+      y: -121
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
