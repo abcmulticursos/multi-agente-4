@@ -254,6 +254,29 @@ function productosDeLaTienda(tiendaId: string): string[] {
   return [...new Set([a.basico, a.unico, a.full].filter((x): x is string => typeof x === "string" && !!x))];
 }
 
+/**
+ * DE QUÉ PRODUCTOS PUEDE HABLAR LA IA DESDE ESTA FICHA, sin marcar nada (01/11/2026). Él: «no quiero seleccionar en
+ * las fichas los productos, quiero que trabaje con los productos de la tienda… solo la regla, nada de conexiones
+ * nuevas». Lo marcado a mano en «Presenta» manda. Si no, los productos de los Cobros a los que llevan SUS cables
+ * (la intro del order bump → los dos; una doble oferta → los dos; un upsell → el suyo); si no lleva a ningún
+ * Cobro, el básico (o único) de su tienda: así el oculto del order bump sigue oculto hasta su intro.
+ * Sin tienda (un workflow) y sin Cobros, nada (lo de antes).
+ */
+function loQuePresentaLaFicha(t: Tablero | null | undefined, f: FichaDelTablero, tiendaId: string | null | undefined): string[] {
+  if (f.presenta?.length) return f.presenta;
+  if (!t) return [];
+  const deSusCobros = t.cables
+    .filter((c) => c.de === f.id)
+    .map((c) => t.fichas.find((x) => x.id === c.a))
+    .filter((x): x is FichaDelTablero => !!x && x.tipo === "cobro" && !x.apagada && x.cobro?.modo === "producto" && !!x.cobro.producto_id)
+    .map((x) => x.cobro!.producto_id!);
+  if (deSusCobros.length) return [...new Set(deSusCobros)];
+  if (!tiendaId || esClaveDeWorkflow(tiendaId)) return [];
+  const a = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === tiendaId)?.alineacion as Record<string, unknown> | undefined;
+  const basico = [a?.basico, a?.unico].find((x): x is string => typeof x === "string" && !!x);
+  return basico ? [basico] : [];
+}
+
 /** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente; si nada, los de su tienda. */
 function idsParaComodines(convoId: number, f: FichaDelTablero, t?: Tablero): string[] {
   const e = estadoEnElTablero(convoId);
@@ -670,8 +693,8 @@ async function irA(
         pais
       );
       await sendConfiguredSteps(convo, pasosAEnviar as never);
-      // Desde aquí la IA ya puede hablar de lo que esta ficha presenta.
-      anotarPresentados(convoId, f.presenta ?? []);
+      // Desde aquí la IA ya puede hablar de lo que esta ficha presenta (lo marcado o, sin marcar, por sus cables).
+      anotarPresentados(convoId, loQuePresentaLaFicha(t, f, estadoEnElTablero(convoId)?.tienda_id));
       const { botones, cuadritos } = opcionesDe(pasosAEnviar);
       // PIDE EL NOMBRE (01/11/2026): espera su respuesta (la lee `turnoDelTablero`). Si no contesta, sigue
       // por «⏳ Si no responde» (o sus Seguimientos colgados ahí). Su «→» es «al dar su nombre».
@@ -787,8 +810,19 @@ async function irA(
       const estado = estadoEnElTablero(convoId);
       const deOferta = f.cobro?.precio === "oferta" || (f.cobro?.precio !== "normal" && estado?.oferta === 1);
       const precios: Record<string, number> = {};
+      // SIN «ACEPTA» ESCRITO, ACEPTA LO QUE YA SE LE PRESENTÓ (01/11/2026, su conv 166): eligió el SUPER PACK, el
+      // seguimiento le ofreció GRAFISMO a S/7, pagó 7 y el cobro (que solo conocía el PACK) contestó «te falta
+      // S/3» y no entregó nada. Como el automático, el precio de otra opción ya presentada se reconoce: «¿fue
+      // una confusión o prefieres GRAFISMO?», o se le entrega la más cara si pagó su precio. Lo ya comprado no
+      // cuenta (un upsell no confunde su pago con el del básico) y lo oculto sigue oculto.
+      const acepta = f.cobro?.acepta?.length
+        ? f.cobro.acepta
+        : (() => {
+            const comprados = new Set(comprasDelCliente(convoId).map((c) => c.producto_id).filter(Boolean));
+            return presentadosDe(estado).filter((id) => id !== f.cobro?.producto_id && !comprados.has(id));
+          })();
       if (f.cobro?.modo === "producto")
-        for (const id of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
+        for (const id of [f.cobro.producto_id, ...acepta]) {
           const v = id ? precioDelProducto(producto(config, id), pais, deOferta) : null;
           if (id && v !== null) precios[id] = v;
         }
@@ -1067,7 +1101,16 @@ function esPreguntaQueNoElige(contenido: string): boolean {
   if (esUnPedazo(n)) return true;
   if (/\b(quiero|quisiera|dame|deme|me llevo|elijo|escojo|prefiero|me quedo|mandame|pasame|sea)\b/.test(n)) return false;
   if (/\b(como|donde)\b.{0,20}\b(pag\w*|deposit\w*|yape\w*|transfier\w*|compr\w*|adquier\w*|adquir\w*)\b/.test(n)) return false;
-  return /[?¿]/.test(contenido) || /^(y )?(que|cual|cuales|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye|son)\b/.test(n);
+  if (/[?¿]/.test(contenido) || /^(y )?(que|cual|cuales|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye|son)\b/.test(n)) return true;
+  // LA PREGUNTA A MEDIA FRASE (01/11/2026, sus conv 165 y 166): «y el pack cuánto cuesta» y «el super pack creo que
+  // es más completo no» se leyeron como «elijo el PACK» y le llegaron los datos de pago. La pregunta por el precio o
+  // el contenido en cualquier lugar de la frase, la duda («creo que») y la coletilla que pide confirmación («…no»,
+  // «…verdad») tampoco eligen. (Elegir de verdad —«quiero», «me quedo», «prefiero»— ya salió arriba.)
+  return (
+    /\b(cuanto|cuantos|cuesta|cuestan|precio|vale|valen|costo|valor|que trae|que tiene|que incluye|que contiene|cual es|cuales son|diferencia)\b/.test(n) ||
+    /\bcreo que\b/.test(n) ||
+    /\b(no|verdad|cierto|o no)\s*$/.test(n)
+  );
 }
 
 /** ¿La ficha lleva a DOS o más compras distintas (por sus botones y cuadritos)? Con una sola, nada cambia. */
@@ -3941,7 +3984,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
       const acertados = destinos.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
       // UNA PREGUNTA NO ELIGE («¿cuánto cuesta el pack?», «¿qué trae el básico?»): ésa la contesta la IA.
-      const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
+      // (La misma regla de los cuadritos, 01/11/2026: «el super pack creo que es más completo no» pasaba el paso 5
+      // y aquí, por la palabra «pack», abría el cobro.)
+      const esPregunta = esPreguntaQueNoElige(contenido) || /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
       const porPalabra = acertados.length === 1 && !esPregunta ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
       // POR SU PRECIO, SIN IA (29/10/2026, ronda 41 en la copia): «el de 2» con «Solo el básico · $2» y «Quiero el
       // pack · $3» → la IA solo veía el texto de los botones y leyó «2» como la opción 2 (le cobró el pack). Si nombra
@@ -4275,8 +4320,8 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
         }
       }
     }
-    // Lo que este seguimiento presenta, desde ahora la IA lo puede contar.
-    anotarPresentados(convo.id, f.presenta ?? []);
+    // Lo que este seguimiento presenta, desde ahora la IA lo puede contar (lo marcado o, sin marcar, por sus cables).
+    anotarPresentados(convo.id, loQuePresentaLaFicha(t, f, estadoEnElTablero(convo.id)?.tienda_id));
     // QUEDA MARCADO (por su texto): no se le vuelve a mandar en esta etapa, ni desde un duplicado.
     marcarSeguimientoHecho(convo.id, huellaDelSeguimiento(seg));
     console.log(`[tablero] convo ${convo.id}: seguimiento ${idx + 1} de «${f.titulo || "Seguimientos"}»`);
