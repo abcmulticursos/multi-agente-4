@@ -3044,8 +3044,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxm55mm-q9w8
       tipo: seguimientos
-      x: -209
-      y: -495
+      x: -253
+      y: -407
       seguimientos:
         - id: s-mvxm55mm
           minutos: 2
@@ -3069,6 +3069,56 @@ whatsapp:
 
                       Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
                   delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvxn940y-2xj
+          minutos: 5
+          variantes:
+            - id: v-mvxn940y-v22
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *15 soles*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
     - id: f-mvxn5dkf-b4473
