@@ -3,13 +3,13 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -869
-      y: -33
+      x: -946
+      y: -55
       pais: PE
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: -341
-      y: 264
+      x: -495
+      y: -1320
       steps:
         - type: text
           body_variants:
@@ -186,8 +186,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1958
-      y: -22
+      x: 1804
+      y: -1606
       steps:
         - type: text
           body_variants:
@@ -206,8 +206,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 704
-      y: 297
+      x: 550
+      y: -1287
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -305,8 +305,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 968
-      y: -44
+      x: 814
+      y: -1628
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -489,8 +489,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1947
-      y: 759
+      x: 1793
+      y: -825
       steps:
         - type: text
           body_variants:
@@ -509,15 +509,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2871
-      y: -11
+      x: 2717
+      y: -1595
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: -66
-      y: -209
+      x: -220
+      y: -1793
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -835,20 +835,20 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2882
-      y: 715
+      x: 2728
+      y: -869
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 5302
-      y: 759
+      x: 5148
+      y: -825
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 2211
-      y: -374
+      x: 2057
+      y: -1958
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1031,8 +1031,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
-      x: 2211
-      y: 451
+      x: 2057
+      y: -1133
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1215,8 +1215,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvx71e53-8pbnj
       tipo: mensaje
-      x: 3245
-      y: 429
+      x: 3091
+      y: -1155
       titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
       steps:
         - type: text
@@ -1275,16 +1275,16 @@ whatsapp:
       espera_min: 2
     - id: f-mvx76sva-2c7p9
       tipo: entregar
-      x: 5049
-      y: 0
+      x: 4895
+      y: -1584
       titulo: Entrega · MIS PRIMEROS TRAZOS
       producto_id: pmv5xqgst
       entregas:
         - pmv5xqgst
     - id: f-mvx78w0e-z55d
       tipo: mensaje
-      x: 4301
-      y: 429
+      x: 4147
+      y: -1155
       steps:
         - type: text
           body_variants:
@@ -1292,8 +1292,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvx9pvfr-bo9zj
       tipo: cobro
-      x: 4147
-      y: 55
+      x: 3993
+      y: -1529
       steps:
         - type: text
           body_variants:
@@ -2616,13 +2616,13 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mvxln1u9-dsfgt
       tipo: mensaje
-      x: -660
-      y: 10164
+      x: -528
+      y: -33
       steps:
         - type: text
           body_variants:
             - |-
-              👋 ¡Hola, docente! 😊 Somos el Equipo Oficial de Cocreando Online.
+              👋 *¡Hola, docente!* 😊 Somos el Equipo Oficial de Cocreando Online.
 
               ¿Te pasa que...?
 
@@ -2637,7 +2637,7 @@ whatsapp:
           body_variants:
             - |-
               Por eso creamos el
-              📚 *MEGAPACK COMUNICACIÓN EN ACCIÓN*
+              📚 *{{PRODUCTO_BASE}}*
 
               Una colección digital con *más de 200 actividades, armables, plegables y recursos educativos* para enseñar Lengua de una manera mucho más visual, práctica y divertida. ✂️
 
@@ -2787,7 +2787,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+              ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE {{PRODUCTO_BASE}}*! 😍
 
               Cada vez más docentes buscan transformar sus clases de Español con recursos visuales, prácticos y fáciles de utilizar.
 
@@ -2948,10 +2948,6 @@ whatsapp:
       de: f-mvvo1ibc-s0tdo
       salida: btn:63c2239a-f51e-480f-9aca-67348ff9ae51
       a: f-mvvo0a7c-uyvc
-    - id: c-mvw2fn0o-xlb
-      de: inicio-mvveb83v-1
-      salida: siguiente
-      a: f-mvvfznys-u8svs
     - id: c-mvw35ml9-ow6
       de: f-mvvfznys-u8svs
       salida: dec:be0e11de-636a-4a1a-b4af-a9f51a281f13
@@ -3276,6 +3272,10 @@ whatsapp:
       de: f-mvxllt4j-ct60m
       salida: sin_pago
       a: f-mvxllt4j-e11gd
+    - id: c-mvxm4r26-tbu
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: f-mvxln1u9-dsfgt
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
