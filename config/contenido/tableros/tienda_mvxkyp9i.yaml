@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -946
-      y: -55
+      x: -1221
+      y: -187
       pais: PE
     - id: f-mvvfznys-u8svs
       tipo: mensaje
@@ -3123,8 +3123,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxn5dkf-b4473
       tipo: cobro
-      x: 341
-      y: 0
+      x: 396
+      y: -11
       steps:
         - type: text
           body_variants:
@@ -3143,14 +3143,14 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvxn7wbz-8qjdg
       tipo: entregar
-      x: 1232
-      y: -363
+      x: 1309
+      y: 0
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvxnco7i-rym9e
       tipo: seguimientos
-      x: 605
+      x: 671
       y: -396
       seguimientos:
         - id: s-mvxnco7i-tilne
@@ -3227,6 +3227,11 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mvxnewvh-mbuow
+      tipo: regalo
+      x: 1837
+      y: 44
+      titulo: Regalo
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -3600,6 +3605,10 @@ whatsapp:
       de: f-mvxn5dkf-b4473
       salida: sin_pago
       a: f-mvxnco7i-rym9e
+    - id: c-mvxnf3wl-bwg
+      de: f-mvxn7wbz-8qjdg
+      salida: siguiente
+      a: f-mvxnewvh-mbuow
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
