@@ -1252,7 +1252,7 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: producto
-        producto_id: "@tienda:full"
+        producto_id: pmv5xqgst
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
       x: 715
