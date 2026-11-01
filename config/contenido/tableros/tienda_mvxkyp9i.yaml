@@ -3234,8 +3234,9 @@ whatsapp:
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
-      x: 1837
-      y: 11
+      x: 1793
+      y: -22
+      titulo: Upsell 1 -
       steps:
         - type: text
           body_variants:
@@ -3246,6 +3247,67 @@ whatsapp:
           caption_variants:
             - ""
           delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              📘 MEGAPACK DE RAZONAMIENTO VERBAL
+
+              📚 Es un pack completo que incluye:
+
+              ✅ 12 juegos armables: dominó de analogías, bingo de conectores, carrera por equipos y más
+              ✅ 90 fichas en 3 niveles (10 a 15 años): 900 ejercicios, de lo más fácil a lo más difícil
+              ✅ 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado para corregir en minutos
+              ✅ Guía con plan de 10 semanas
+
+              Todo viene en formato PDF listo para imprimir y usar en tus clases 🤩
+
+              ✨ Resultado: alumnos que leen mejor, piensan más rápido y llegan seguros a sus exámenes… y tú recuperas tu tiempo.
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1jH-ruFDKJboPmIBXl7BNux7-dMQwD7Pq/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 Y si hoy llevas el MEGAPACK DE RAZONAMIENTO VERBAL, te llevas GRATIS el Kit “Crea tus propios juegos”:
+
+              ✏️ Plantillas editables «Crea tus propias tarjetas»: versiones en blanco y rellenables en el PDF del dominó, el bingo, las cartas reto y la memoria
+
+              🎯 4 juegos de ejemplo ya completos listos para usar en clase.
+
+              🎡 Ruleta en blanco: editable, de 8 sectores y con su flecha, para crear ruletas de cualquier tema
+
+              🏷️ Etiquetas para los sobres: para escribir el nombre del juego, la materia y el curso, y guardar cada juego ordenado
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1RVQo-J0rm5AFaFMCDmjOZo64wA_H3TE-/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 OFERTA ESPECIAL: MEGAPACK DE RAZONAMIENTO VERBAL
+
+              Llévate el PACK COMPLETO y transforma tus clases de razonamiento verbal con material creativo, listo para imprimir y usar:
+
+              🎲 12 juegos armables (dominó de analogías, bingo de conectores, carrera por equipos y más)
+              📝 90 fichas en 3 niveles - 900 ejercicios
+              📊 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado + 🗓️ Guía con plan de 10 semanas
+              🎁 + REGALO GRATIS: Kit “Crea tus propios juegos”
+
+              🔥 TODO POR SOLO {{PRECIO_UPSELL}}.
+
+              Te dejo los datos si quieres aprovecharlo ahora:
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+      presenta:
+        - pmvxom7h2
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
