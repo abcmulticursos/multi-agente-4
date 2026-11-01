@@ -3030,6 +3030,101 @@ whatsapp:
               ✅ Hechos, opiniones y argumentos
               ✅ Lectura crítica y fuentes confiables
           delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*
+              ✅ Párrafos con coherencia y cohesión
+              ✅ Conectores
+              ✅ Planificar, redactar y corregir
+              ✅ Cuentos y descripciones
+              ✅ Informes e instructivos
+              ✅ Ensayos, reseñas y argumentación
+              ✅ Textos periodísticos
+              ✅ Historietas, diálogos y guiones
+
+              🎭 *KIT 5: LITERATURA EN ACCIÓN*
+              ✅ Géneros literarios
+              ✅ Cuento, novela, fábula, mito y leyenda
+              ✅ Narrador, personajes, tiempo y espacio
+              ✅ Poesía: verso, estrofa y rima
+              ✅ Figuras literarias
+              ✅ Teatro: actos, escenas y acotaciones
+              ✅ Literatura latinoamericana 
+              ✅ Análisis y creación literaria
+
+              🗣️ *KIT 6: COMUNICACIÓN Y EXPRESIÓN ORAL*
+              ✅ Elementos de la comunicación
+              ✅ Comunicación verbal y no verbal
+              ✅ Registros y variedades del lenguaje
+              ✅ Escucha activa y diálogo
+              ✅ Exposición oral
+              ✅ Entrevista y debate
+              ✅ Narración y dramatización
+              ✅ Publicidad y ciudadanía digital
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ✂️ Dentro del material encontrarás:
+
+              ⭐ Armables interactivos
+              ⭐ Plegables y minilibros educativos
+              ⭐ Crucigramas, pupiletras y sopas de letras
+              ⭐ Juegos y dinámicas para trabajar en equipo
+              ⭐ Actividades listas para imprimir
+              ⭐ Respuestas y explicación detallada de cada armable
+
+              _Ideal para primaria y secundaria - bachilerato_
+
+              💡 Todo organizado para que tus estudiantes lean más, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤩
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1XyiZ-LT8K34JqlTc44c7iAac9bf3Olyh/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS! ⚡✨
+
+              🎁 *BONO 1 · BANCO DE LECTURAS CON COMPRENSIÓN*
+
+              📚 40 lecturas listas para imprimir, organizadas en 4 niveles de dificultad.
+              👉 Ideal para tareas, evaluaciones y reforzar la comprensión lectora.
+
+              🎁 *BONO 2 · +100 DINÁMICAS DE LECTURA Y ESCRITURA*
+
+              🎯 102 actividades dinámicas para estudiantes de 10 a 15 años.
+              ✅ 60 dinámicas sin materiales y 42 con recursos listos para imprimir.
+              📚 Trabaja gramática, ortografía, comprensión lectora, escritura creativa, literatura y oralidad.
+
+              ⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/18B723A_zU1tLzGRb-pBydvIKc_0aiJUt/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Docente, esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO 📚✨
+
+              📚 6 kits completos
+              🎁 +2 regalos especiales
+
+              📥 Todo en formato PDF, listo para descargar e imprimir
+
+              🔥 *TODO POR SOLO {{PRECIO_BASE}}*
+
+              💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              quedo atento!
+          delay_after_sec: 6
       presenta:
         - "@tienda:basico"
     - id: f-mvxma6rp-tlsv
