@@ -2616,7 +2616,7 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mvxln1u9-dsfgt
       tipo: mensaje
-      x: -528
+      x: -517
       y: -66
       steps:
         - type: text
@@ -3150,8 +3150,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxnco7i-rym9e
       tipo: seguimientos
-      x: 671
-      y: -396
+      x: 660
+      y: -407
       seguimientos:
         - id: s-mvxnco7i-tilne
           minutos: 2
