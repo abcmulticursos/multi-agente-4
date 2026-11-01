@@ -2938,18 +2938,15 @@ payment_profiles_by_country:
       🔴 *Yape : {{CUENTA_YAPE}}*
       🏦 BCP: {{CUENTA_BCP}}
       👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-      💰️ *Precio:* {precio}
     metodo_pago_2: |-
       🔴 *Yape : {{CUENTA_YAPE}}*
       🏦 BCP: {{CUENTA_BCP}}
       👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-      💰️ *Precio:* {precio}
     metodo_pago_3: ""
     metodo_pago_principal: |-
       🔴 *Yape : {{CUENTA_YAPE}}*
       🏦 BCP: {{CUENTA_BCP}}
       👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-      💰️ *Precio:* {precio}
     numero_de_cuenta: "19120023958019"
     cuentas_por_metodo:
       yape: 935 286 681
@@ -3650,18 +3647,15 @@ modality_payment_profiles:
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_2: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_3: ""
       metodo_pago_principal: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       numero_de_cuenta: "19120023958019"
       cuentas_por_metodo:
         yape: 935 286 681
@@ -4057,18 +4051,15 @@ modality_payment_profiles:
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_2: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_3: ""
       metodo_pago_principal: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       numero_de_cuenta: "19120023958019"
       cuentas_por_metodo:
         yape: 935 286 681
@@ -4470,18 +4461,15 @@ modality_payment_profiles:
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_2: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       metodo_pago_3: ""
       metodo_pago_principal: |-
         🔴 *Yape : {{CUENTA_YAPE}}*
         🏦 BCP: {{CUENTA_BCP}}
         👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-        💰️ *Precio:* {precio}
       numero_de_cuenta: "19120023958019"
       cuentas_por_metodo:
         yape: 935 286 681
