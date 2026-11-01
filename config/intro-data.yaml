@@ -5239,6 +5239,84 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: false
 biblioteca_de_productos:
+  - id: pmvxl0fp8
+    name: LENGUA Y LITERATURA EN ACCION
+    aliases: []
+    price_soles: 0
+    delivery: []
+    image_gallery: []
+    course_content: |-
+      Lengua y Literatura en Acción:
+
+      6 KITS DIDACTICOS COMPLETOS:
+
+      INCLUYE:
+      Gramática
+      Ortografía y Vocabulario
+      Comprensión lectora
+      escritura y producción de textos
+      literatura
+      comunicación y expresión oral
+
+      Es un pack educativo diseñado para transformar las clases de comunicación y literatura mediante más de 200 recursos visuales, creativos e interactivos, dirigido a estudiantes de primaria y secundaria.
+
+      Formatos Interactivos Incluidos:
+      🍿Pop-ups literarios
+      📚️ Flipbooks
+      📔 Minilibros 
+      🧩 Rompecabezas
+      📖 Álbumes interactivos
+      🖼️ Plegables 3D
+      * Crucigramas y pupiletras
+      * Organizadores gráficos
+
+      Estructura de los 6 Kits Didácticos:
+
+      * Kit 1: Gramática
+        * Sustantivos y adjetivos
+        * Verbos
+        * Sujeto y predicado
+        * Análisis sintáctico
+
+      * Kit 2: Ortografía y Vocabulario
+        * Acentuación
+        * Uso de letras
+        * Puntuación
+        * Sinónimos y antónimos
+
+      * Kit 3: Comprensión Lectora
+        * Idea principal
+        * Inferencias
+        * Hecho y opinión
+        * Lectura crítica
+
+      * Kit 4: Escritura y Producción de Textos
+        * Párrafos y conectores
+        * Textos narrativos
+        * Textos argumentativos
+        * Textos periodísticos
+
+      * Kit 5: Literatura
+        * Géneros literarios
+        * Figuras literarias
+        * Poesía y teatro
+        * Literatura latinoamericana
+
+      * Kit 6: Comunicación y Expresión Oral
+        * Elementos de la comunicación
+        * Exposición oral
+        * Entrevista y debate
+        * Ciudadanía digital
+
+      INCLUYE 2 BONOS DE OBSEQUIO
+
+      Al entregar la información agregar emojis para que no se vea fría la información, máximo de 3 burbujas.
+    etiqueta: ""
+    precios_por_pais:
+      PE:
+        price_soles: 20
+        discount_price_soles: 15
+        market_price: 65
   - id: pmvxkzdhz
     name: ""
     aliases: []
