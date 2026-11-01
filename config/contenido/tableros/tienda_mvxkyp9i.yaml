@@ -3229,9 +3229,23 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxnewvh-mbuow
       tipo: regalo
-      x: 1837
-      y: 44
+      x: 2497
+      y: 22
       titulo: Regalo
+    - id: f-mvxoh57z-19dq
+      tipo: mensaje
+      x: 1837
+      y: 11
+      steps:
+        - type: text
+          body_variants:
+            - Antes de terminar, tengo algo especial que puede ayudarte a hacer tus clases aún más didácticas y nutritivas para tus alumnos ...
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/12mIrQEjhtK7KP8XubScdAVSJLWfOQGSa/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -3605,10 +3619,10 @@ whatsapp:
       de: f-mvxn5dkf-b4473
       salida: sin_pago
       a: f-mvxnco7i-rym9e
-    - id: c-mvxnf3wl-bwg
+    - id: c-mvxohnv3-nmg
       de: f-mvxn7wbz-8qjdg
       salida: siguiente
-      a: f-mvxnewvh-mbuow
+      a: f-mvxoh57z-19dq
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
