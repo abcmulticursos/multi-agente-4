@@ -1064,6 +1064,7 @@ whatsapp:
                 - yapeo
                 - a donde yapeo
                 - como yapeo
+                - esta bien
               color: esmeralda
               steps:
                 - type: text
@@ -1091,6 +1092,7 @@ whatsapp:
                 - con pln
                 - plinear
                 - tengo plin
+                - esta bien
               color: ambar
               steps:
                 - type: text
