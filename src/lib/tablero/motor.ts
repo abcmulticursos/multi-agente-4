@@ -262,6 +262,19 @@ function productosDeLaTienda(tiendaId: string): string[] {
  * Cobro, el básico (o único) de su tienda: así el oculto del order bump sigue oculto hasta su intro.
  * Sin tienda (un workflow) y sin Cobros, nada (lo de antes).
  */
+/**
+ * LAS ALTERNATIVAS DE UN COBRO, sin escribir «acepta» (01/11/2026, su conv 174): los productos de los otros Cobros
+ * a los que lleva la misma ficha que lleva a éste (la intro del order bump → Cobro PACK y Cobro GRAFISMO: son la
+ * misma elección). Con ellas vuelven el upgrade («¿puedo completar para el otro?» → paga la diferencia) y «ya
+ * está incluido». Un upsell, que sale de otra ficha, no es alternativa de nadie: se sigue pagando entero.
+ */
+function alternativasDelCobro(t: Tablero | null | undefined, f: FichaDelTablero): string[] {
+  if (!t || f.tipo !== "cobro") return [];
+  if (f.cobro?.acepta?.length) return f.cobro.acepta;
+  const padres = t.cables.filter((c) => c.a === f.id).map((c) => t.fichas.find((x) => x.id === c.de)).filter((x): x is FichaDelTablero => !!x);
+  return [...new Set(padres.flatMap((p) => productosDeSusCobros(t, p)))].filter((id) => id !== f.cobro?.producto_id);
+}
+
 /** Los productos de los Cobros (por producto, encendidos) a los que llevan los cables de esta ficha. */
 function productosDeSusCobros(t: Tablero | null | undefined, f: FichaDelTablero): string[] {
   if (!t) return [];
@@ -824,17 +837,15 @@ async function irA(
       const estado = estadoEnElTablero(convoId);
       const deOferta = f.cobro?.precio === "oferta" || (f.cobro?.precio !== "normal" && estado?.oferta === 1);
       const precios: Record<string, number> = {};
-      // SIN «ACEPTA» ESCRITO, ACEPTA LO QUE YA SE LE PRESENTÓ (01/11/2026, su conv 166): eligió el SUPER PACK, el
+      // SIN «ACEPTA» ESCRITO, ACEPTA SUS ALTERNATIVAS (01/11/2026, su conv 166): eligió el SUPER PACK, el
       // seguimiento le ofreció GRAFISMO a S/7, pagó 7 y el cobro (que solo conocía el PACK) contestó «te falta
       // S/3» y no entregó nada. Como el automático, el precio de otra opción ya presentada se reconoce: «¿fue
       // una confusión o prefieres GRAFISMO?», o se le entrega la más cara si pagó su precio. Lo ya comprado no
       // cuenta (un upsell no confunde su pago con el del básico) y lo oculto sigue oculto.
-      const acepta = f.cobro?.acepta?.length
-        ? f.cobro.acepta
-        : (() => {
-            const comprados = new Set(comprasDelCliente(convoId).map((c) => c.producto_id).filter(Boolean));
-            return presentadosDe(estado).filter((id) => id !== f.cobro?.producto_id && !comprados.has(id));
-          })();
+      // SOLO SUS ALTERNATIVAS de la misma elección (`alternativasDelCobro`), aunque ya las haya comprado: así el
+      // upgrade cobra la diferencia. No «todo lo ya visto»: el cobro de un upsell entregaba el SUPER PACK a quien
+      // pagaba de más por el upsell (caso 15 en la copia, 01/11/2026).
+      const acepta = f.cobro?.acepta?.length ? f.cobro.acepta : alternativasDelCobro(t, f);
       if (f.cobro?.modo === "producto")
         for (const id of [f.cobro.producto_id, ...acepta]) {
           const v = id ? precioDelProducto(producto(config, id), pais, deOferta) : null;
@@ -2023,7 +2034,7 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
   for (const f of t.fichas) {
     if (f.tipo !== "cobro" || f.cobro?.modo !== "producto" || !f.cobro.producto_id || !comprados.has(f.cobro.producto_id)) continue;
     const suyo = precioDelProducto(producto(config, f.cobro.producto_id), pais, estado?.oferta === 1) ?? 0;
-    for (const otro of f.cobro.acepta ?? []) {
+    for (const otro of alternativasDelCobro(t, f)) {
       const suPrecio = precioDelProducto(producto(config, otro), pais, estado?.oferta === 1);
       if (suPrecio !== null && suPrecio <= suyo) yaIncluidos.add(otro);
     }
@@ -2038,7 +2049,7 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
       const p = producto(config, pid);
       const lleno = precioDelProducto(p, pais, estado?.oferta === 1);
       if (!p || lleno === null) continue;
-      const deLoComprado = (f.cobro.acepta ?? []).filter((x) => comprados.has(x));
+      const deLoComprado = alternativasDelCobro(t, f).filter((x) => comprados.has(x));
       const upgrade = deLoComprado.length > 0 || !!f.cobro.diferencia;
       const pagado = upgrade
         ? Math.max(0, ...compras.filter((c) => c.producto_id && (deLoComprado.includes(c.producto_id) || f.cobro!.diferencia)).map((c) => c.monto))
@@ -3736,13 +3747,17 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // datos del nuevo con el método que ya eligió, sin repreguntar.
   if (estado.cobro_ficha_id && !contenido.startsWith("bubble:")) {
     const cobro = t.fichas.find((x) => x.id === estado!.cobro_ficha_id);
-    if (cobro?.cobro?.metodos) {
+    // «MEJOR EL OTRO» TAMBIÉN EN UN COBRO SIN «PREGUNTAR EL MÉTODO» (01/11/2026, caso 7 con su tablero): eligió el
+    // SUPER PACK, dijo «mejor el grafismo» y le volvieron a llegar los datos del PACK a S/14. El cambio de producto
+    // vale en cualquier cobro por producto; lo del método, solo en el que lo pregunta (como antes).
+    const conMetodos = !!cobro?.cobro?.metodos;
+    if (cobro?.cobro && cobro.cobro.modo === "producto" && (conMetodos || estado.cobro_pagado <= 0)) {
       const precios = preciosDelCobro(estado);
       const elegidoId = estado.cobro_elegido ?? cobro.cobro.producto_id ?? null;
       // Nombrar el método para quejarse («me estafaron con el yape») no es elegirlo: la misma guarda
       // de la venta de siempre (`messageHasPaymentConcern`), y contesta la IA con empatía.
       // (El mismo `metodoDicho` de arriba: también reconoce el pedazo que llega en otro turno, ronda 51.)
-      const metodo = metodoDicho;
+      const metodo = conMetodos ? metodoDicho : null;
       if (metodo) {
         respondio(convo, t);
         if (await mandarDatosDelMetodo(convo, metodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
@@ -3788,7 +3803,19 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           return opciones.find((id) => id !== elegidoId) ?? null;
         })();
         if (porOtro) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 25)}» → ${porOtro} (el otro de los dos)`);
-        const decide = porNumero ?? porOtro ?? (esPreguntaQueNoElige(contenido) ? null : await elegirOpcionConIA(
+        // Sin «preguntar el método», la IA solo se consulta si NOMBRA uno de los productos (por su nombre o sus alias):
+        // así un «ok» o «ya te pago» en ese cobro no gasta una llamada ni cambia nada.
+        const nombraUno =
+          conMetodos ||
+          opciones.some((id) => {
+            const p = producto(config, id);
+            const dicho = ` ${sinTildes(contenido).replace(/[^a-z0-9ñ\s]/g, " ")} `;
+            return [p?.name ?? "", ...(p?.aliases ?? [])]
+              .flatMap((x) => sinTildes(x).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/))
+              .filter((w) => w.length >= 4 && !PALABRAS_COMUNES.has(w))
+              .some((w) => dicho.includes(` ${w} `));
+          });
+        const decide = porNumero ?? porOtro ?? (esPreguntaQueNoElige(contenido) || !nombraUno ? null : await elegirOpcionConIA(
           convo.id,
           contenido,
           opciones.map((id) => ({
@@ -3813,7 +3840,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
             productosDeLaFicha(config, [decide, ...Object.keys(precios)], pais, false, precios),
             pais
           );
-          if (!yaElegido || !(await mandarDatosDelMetodo(convo, yaElegido, precios[decide], nombre)))
+          // Sin «preguntar el método»: sus burbujas del cobro otra vez, ya con el producto nuevo y su precio.
+          if (!conMetodos) await sendConfiguredSteps(convo, pasos as never);
+          else if (!yaElegido || !(await mandarDatosDelMetodo(convo, yaElegido, precios[decide], nombre)))
             await preguntarElMetodo(convo, pasos as never, precios[decide], nombre);
           return true;
         }
