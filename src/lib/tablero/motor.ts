@@ -2751,6 +2751,40 @@ function reenviarSiLoPide(convo: ConversationRow, texto: string): boolean {
   return true;
 }
 
+/**
+ * «SÍ» AL REGALO QUE EL BOT ACABA DE OFRECER O EXPLICAR (01/11/2026, su conv 191 y la prueba de «ya pues mándamelo»).
+ * Con la pregunta del regalo aún por salir (payment_approved) preguntó «como es lo del regalo», la IA se lo explicó
+ * y cerró «¿te gustaría que te lo envíe?»: su «si» volvió a la IA, que dijo «te lo envío ahora mismo» y no salió
+ * nada. Y con el regalo ya ofrecido, «ya pues mándamelo» se leyó como «no me llegó» y se le reenvió lo comprado.
+ * Si el último turno del bot habló del regalo (y no de un precio) y él lo acepta, es aceptarlo: la misma función
+ * que el «sí» de siempre. El sí pelado se lee sin IA; lo demás («ok está bien», «lo quiero», «mándamelo») lo decide
+ * la IA (él: «¿por qué palabritas? ¿no es mejor confirmación?»).
+ */
+async function aceptaElRegalo(convo: ConversationRow, texto: string): Promise<boolean> {
+  const fresca = getConversationById(convo.id) ?? convo;
+  if (fresca.state !== "payment_approved" && fresca.state !== "awaiting_gift_consent") return false;
+  const dicho = sinTildes(texto).replace(/[^a-z0-9ñ\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (!dicho || texto.startsWith("bubble:")) return false;
+  const turnoBot = sinTildes(ultimoTurnoDelBot(convo.id));
+  const hablaronDelRegalo =
+    /\b(regalo|regalito|plus|obsequio|gratis|gratuito)\b/.test(turnoBot) &&
+    turnoBot.includes("?") &&
+    !/\b(s\/|soles|\$|precio)\b|\d+\s*(soles|dolares|pesos)/.test(turnoBot);
+  if (!hablaronDelRegalo) return false;
+  const acepta =
+    AFIRMA.test(dicho) ||
+    (await elegirOpcionConIA(convo.id, texto, [
+      { id: "acepta", etiqueta: "Acepta recibir el regalo gratis que se le acaba de ofrecer o explicar (sí, ok, lo quiero, mándamelo…)" },
+      { id: "otra", etiqueta: "No lo quiere, duda, o habla de otra cosa (lo que compró, que no le llegó su compra, otro producto)" },
+    ])) === "acepta";
+  if (!acepta) return false;
+  const { acceptGiftConsent } = await import("@/lib/workflow/engine");
+  acceptGiftConsent(fresca);
+  anotarMuestras(convo.id, [REGALO_HECHO]);
+  console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 25)}» al regalo que se le ofreció → acepta el regalo`);
+  return true;
+}
+
 export async function contestarEnElRegalo(convo: ConversationRow): Promise<boolean> {
   return conSuPrecio(convo.id, () => contestarEnElRegaloDentro(convo));
 }
@@ -2764,6 +2798,8 @@ async function contestarEnElRegaloDentro(convo: ConversationRow): Promise<boolea
     // «NO ME LLEGÓ» DENTRO DEL REGALO (H4, 27/10/2026): antes iba a la IA, que no podía reenviar y
     // ofrecía un asesor. Ahora, como la venta de siempre en ese mismo paso: reenvío directo.
     const ultimoTexto = ultimosMensajes(convo.id, 2).filter((m) => m.role === "user").pop()?.content ?? "";
+    // (Antes que el «no me llegó»: «mándamelo» con el regalo recién ofrecido es el regalo, no un reenvío.)
+    if (await aceptaElRegalo(convo, ultimoTexto)) return true;
     if (reenviarSiLoPide(convo, ultimoTexto)) {
       recordarElRegaloUnaVez(convo.id);
       return true;
@@ -2773,7 +2809,8 @@ async function contestarEnElRegaloDentro(convo: ConversationRow): Promise<boolea
         ? "Está en el paso del REGALO: se le acaba de ofrecer (míralo en tus últimos mensajes). Contesta su duda sobre ese regalo con lo que dice ese ofrecimiento, sin inventar, y al final pregúntale con tus palabras si lo quiere. Ya compró: no le ofrezcas ni le cobres ningún producto."
         : convo.state === "awaiting_facebook_comment"
           ? "Está en el paso del REGALO de dejar su comentario (míralo en tus últimos mensajes). Contesta su duda con lo que dice ese mensaje, sin inventar, y recuérdale que cuando deje su comentario y mande la captura le envías su regalo. Ya compró: no le ofrezcas ni le cobres ningún producto."
-          : "Ya compró y está recibiendo su regalo. Contesta su duda con amabilidad, sin inventar. No le ofrezcas ni le cobres ningún producto.";
+          : // (01/11/2026, conv 191: «¿puedes revisar en los enlaces? ahí también está tu regalo» — no lo estaba.)
+            "Ya compró y está recibiendo su regalo. Contesta su duda con amabilidad, sin inventar. No le ofrezcas ni le cobres ningún producto. Si pregunta por el regalo extra, AÚN NO SE LE HA ENVIADO: explícale qué es y pregúntale si lo quiere; nunca le digas que ya lo tiene ni que está en los enlaces.";
     console.log(`[tablero] convo ${convo.id}: en el regalo (${convo.state}) contesta la IA del tablero, no la de la venta de siempre`);
     await contestarConIA(convo, t, nota);
     return true;
@@ -3185,6 +3222,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
             "Habla CLARAMENTE de OTRA cosa: nombra un producto que se le ofreció o que compró, completar o pagar la diferencia, recibirlo por correo, que no le llegó algo",
         },
       ])) !== "otra";
+    // Del regalo y lo acepta con sus palabras («ya pues mándamelo»): lo acepta aquí; el motor de siempre lo leía
+    // como «no me llegó» y le reenviaba lo comprado (01/11/2026).
+    if (delRegalo && t && !hayComprobantePendiente(convo.id, estado.comprobante_leido) && (await aceptaElRegalo(convo, contenido))) return true;
     if (delRegalo) return false;
     // «NO ME LLEGÓ» EN EL REGALO (H4, 27/10/2026): como la venta de siempre en ese paso (primero el regalo,
     // después su detector), reenvío directo; antes contestaba la IA, sin poder reenviar.
