@@ -2770,12 +2770,11 @@ whatsapp:
 
               📥 Todo en formato PDF, listo para descargar e imprimir
 
-              🔥 *TODO POR SOLO 20 soles*
+              🔥 *TODO POR SOLO {{PRECIO_BASE}}*
 
               💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
 
-              ✅ Yape
-              ✅ Transferencia bancaria
+              {{LISTA_METODOS_POR_PAIS}}
 
               quedo atento!
           delay_after_sec: 6
@@ -2784,6 +2783,7 @@ whatsapp:
           caption_variants:
             - ""
           delay_after_sec: 6
+          enabled: false
         - type: text
           body_variants:
             - |-
@@ -2795,6 +2795,7 @@ whatsapp:
 
               Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
           delay_after_sec: 6
+          enabled: false
         - type: text
           body_variants:
             - |-
