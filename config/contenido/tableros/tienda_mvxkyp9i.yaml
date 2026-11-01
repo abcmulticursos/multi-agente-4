@@ -2931,6 +2931,35 @@ whatsapp:
           enabled: false
       presenta:
         - "@tienda:basico"
+    - id: f-mvxm55mm-q9w8
+      tipo: seguimientos
+      x: -341
+      y: -341
+      seguimientos:
+        - id: s-mvxm55mm
+          minutos: 2
+          variantes:
+            - id: v-mvxm55mm
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1rddsLec7-ps4O9KSfiJn6kiVT_qORokC/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      Cada vez más docentes buscan transformar sus clases de Español con recursos visuales, prácticos y fáciles de utilizar.
+
+                      💙 Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
