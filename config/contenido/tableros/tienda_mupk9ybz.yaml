@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -715
-      y: 22
+      x: -869
+      y: -33
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
@@ -989,8 +989,8 @@ whatsapp:
           delay_after_sec: 30
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: -308
-      y: 297
+      x: -341
+      y: 264
       steps:
         - type: text
           body_variants:
@@ -1255,8 +1255,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 715
-      y: 242
+      x: 704
+      y: 297
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -1538,8 +1538,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1958
-      y: 671
+      x: 1947
+      y: 759
       steps:
         - type: text
           body_variants:
@@ -1884,8 +1884,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2904
-      y: 682
+      x: 2882
+      y: 715
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
@@ -2081,7 +2081,7 @@ whatsapp:
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
       x: 2211
-      y: 352
+      y: 451
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2281,8 +2281,18 @@ whatsapp:
 
               *¿Lo agregas?* Escríbeme *sí* o *no* 😊
           delay_after_sec: 4
+          buttons:
+            - id: 2941e422-c094-4623-88f8-3045f241a08d
+              label: si quiero
+              action: send_steps
+              steps: []
+            - id: 75ee3285-1ac5-4a82-8d35-c538feea7422
+              label: por ahora no
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mvx71e53-94710
+              enabled: false
               title: Sí
               keywords:
                 - si
@@ -2295,6 +2305,7 @@ whatsapp:
               color: ""
               steps: []
             - id: d-mvx71e53-urk9v
+              enabled: false
               title: No
               keywords:
                 - no
@@ -2303,6 +2314,7 @@ whatsapp:
                 - despues
                 - luego
                 - paso
+                - en otra oportunidad
               color: ""
               steps: []
       presenta:
