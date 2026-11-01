@@ -3108,7 +3108,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      💰 Solo por los próximos 20 minutos: *15 soles*
+                      💰 Solo por los próximos 20 minutos: *{{PRECIO_BASE}}*
 
                       ✅ *Paso 1: Realiza el pago*
 
