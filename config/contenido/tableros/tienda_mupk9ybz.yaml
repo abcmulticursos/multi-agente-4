@@ -2288,7 +2288,6 @@ whatsapp:
                 - claro
                 - dale
                 - lo quiero
-                - ok
                 - bueno
                 - va
               color: ""
@@ -2311,8 +2310,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvx76sva-2c7p9
       tipo: entregar
-      x: 4455
-      y: 198
+      x: 5093
+      y: 88
       titulo: Entrega · MIS PRIMEROS TRAZOS
       producto_id: pmv5xqgst
       entregas:
@@ -2326,6 +2325,26 @@ whatsapp:
           body_variants:
             - No te preocupes, gracias por tu compra y que tengas un excelente día ☺️
           delay_after_sec: 6
+    - id: f-mvx9pvfr-bo9zj
+      tipo: cobro
+      x: 4147
+      y: 55
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -2525,10 +2544,6 @@ whatsapp:
       salida: sin_respuesta
       a: f-mvw8ibzi-4n26e
       vista: cable
-    - id: c-mvx76w1h-9uz
-      de: f-mvx71e53-8pbnj
-      salida: dec:d-mvx71e53-94710
-      a: f-mvx76sva-2c7p9
     - id: c-mvx79qxp-20q
       de: f-mvx71e53-8pbnj
       salida: dec:d-mvx71e53-urk9v
@@ -2537,6 +2552,14 @@ whatsapp:
       de: f-mvx78w0e-z55d
       salida: siguiente
       a: f-mvw8ibzi-4n26e
+    - id: c-mvx9qdcf-gg6
+      de: f-mvx71e53-8pbnj
+      salida: dec:d-mvx71e53-94710
+      a: f-mvx9pvfr-bo9zj
+    - id: c-mvx9qgzi-e2s
+      de: f-mvx9pvfr-bo9zj
+      salida: pagado
+      a: f-mvx76sva-2c7p9
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
