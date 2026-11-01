@@ -5239,6 +5239,14 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: false
 biblioteca_de_productos:
+  - id: pmvxkzdhz
+    name: ""
+    aliases: []
+    price_soles: 0
+    delivery: []
+    image_gallery: []
+    course_content: ""
+    etiqueta: ""
   - id: pmvvnouch
     name: ""
     aliases: []
@@ -9156,6 +9164,35 @@ tiendas:
 
         ¡Que tengas un excelente día!
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
+  - id: tienda_mvxkyp9i
+    nombre: LENGUA Y LITERATURA EN ACCION
+    numero: ""
+    pagina: ""
+    semimodalidad: segunda_oculta
+    alineacion:
+      basico: pmu39gpb1
+      unico: pmu39gpb1
+      complementario: pmugniyvb
+      full: pmugne9ti
+      upsell: pmv5xqgst
+    upsell_apagado: pmtxy45s7
+    cobrador: cobra_murah2f0
+    pixel: "904898786014909"
+    color: "#ea580c"
+    regalo:
+      consent_sequence:
+        - type: image
+          drive_url: https://drive.google.com/file/d/1t94_pAcG_2pVj0tQ_ATKmD3XQWjRiyj1/view?usp=sharing
+          caption_variants:
+            - |-
+              🎁 *{¿Deseas recibir un Regalito Adicional extra|¿Te gustaría recibir un Regalito Adicional extra|¿Quieres recibir un Regalito Adicional extra}*
+
+              Es un pequeño cuadernito de *ACTIVIDADES DE ARTETERAPIA* para la relajación mental 🎨🖍️
+
+              ✨ *También 2 PDF de Corazones en Papercraft tipo Origami 3D*  📚✨
+
+              🎁 *{¿Quieres recibir este Plus de manera gratuita?|¿Deseas descargar este Plus de manera gratuita?|¿Te gustaría descargar este Plus de manera gratuita?}* 😊
+          delay_after_sec: 6
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -12535,6 +12572,108 @@ pizarra:
         - seg:1:42
         - seg:1:43
       enlaces: []
+    tienda_mvxkyp9i|whatsapp:
+      posiciones: {}
+      cajas:
+        - id: caja:carril:PE
+          x: 223
+          y: -845
+          ancho: 6735
+          alto: 1250
+          titulo: 🇵🇪 🇵🇪 Peru
+        - id: caja:carril:EC
+          x: 268
+          y: 588
+          ancho: 6685
+          alto: 1025
+          titulo: 🇪🇨 🇪🇨 Ecuador
+        - id: caja:carril:AR
+          x: 270
+          y: 1722
+          ancho: 6678
+          alto: 957
+          titulo: 🇦🇷 🇦🇷 Argentina
+    tienda_mvxkyp9i|whatsapp|lineal:
+      posiciones: {}
+      cajas:
+        - id: caja:carril:PE
+          x: 204
+          y: -1744
+          ancho: 6754
+          alto: 2149
+          titulo: 🇵🇪 🇵🇪 Peru
+        - id: caja:carril:EC
+          x: 268
+          y: 588
+          ancho: 6685
+          alto: 1025
+          titulo: 🇪🇨 🇪🇨 Ecuador
+        - id: caja:carril:AR
+          x: 241
+          y: 1722
+          ancho: 6707
+          alto: 2620
+          titulo: 🇦🇷 🇦🇷 Argentina
+        - id: caja:carril:CO
+          x: 228
+          y: 4482
+          ancho: 2002
+          alto: 184
+          titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
+    tienda_mvxkyp9i|whatsapp|ob:
+      posiciones: {}
+      cajas:
+        - id: caja:carril:PE
+          x: 168
+          y: -2524
+          ancho: 6790
+          alto: 2929
+          titulo: 🇵🇪 🇵🇪 Peru
+        - id: caja:carril:EC
+          x: 153
+          y: 1263
+          ancho: 6723
+          alto: 2247
+          titulo: 🇪🇨 🇪🇨 Ecuador
+        - id: caja:carril:AR
+          x: 162
+          y: 4369
+          ancho: 6812
+          alto: 2356
+          titulo: 🇦🇷 🇦🇷 Argentina
+        - id: caja:carril:CO
+          x: 229
+          y: 7937
+          ancho: 6837
+          alto: 2199
+          titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
+    tienda_mvxkyp9i|whatsapp|dou:
+      posiciones: {}
+      cajas:
+        - id: caja:carril:PE
+          x: 174
+          y: -2142
+          ancho: 6784
+          alto: 2547
+          titulo: 🇵🇪 🇵🇪 Peru
+        - id: caja:carril:EC
+          x: 268
+          y: 588
+          ancho: 6685
+          alto: 1025
+          titulo: 🇪🇨 🇪🇨 Ecuador
+        - id: caja:carril:AR
+          x: 270
+          y: 1722
+          ancho: 6678
+          alto: 957
+          titulo: 🇦🇷 🇦🇷 Argentina
+        - id: caja:carril:CO
+          x: 290
+          y: 3543
+          ancho: 1940
+          alto: 184
+          titulo: "🇨🇴 🇨🇴 Colombia · vacío: conecta su intro desde el Inicio"
 respaldo_entre_tiendas: true
 tableros:
   tienda_tcocina: "@pieza:tableros/tienda_tcocina.yaml"
@@ -12548,6 +12687,7 @@ tableros:
   tienda_test1: "@pieza:tableros/tienda_test1.yaml"
   tienda_test2: "@pieza:tableros/tienda_test2.yaml"
   tienda_mupk9ybz: "@pieza:tableros/tienda_mupk9ybz.yaml"
+  tienda_mvxkyp9i: "@pieza:tableros/tienda_mvxkyp9i.yaml"
 workflows:
   figurarte2:
     encendido: true
