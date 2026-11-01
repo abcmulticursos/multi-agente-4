@@ -2616,7 +2616,7 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mvxln1u9-dsfgt
       tipo: mensaje
-      x: -484
+      x: -528
       y: -66
       steps:
         - type: text
@@ -2780,7 +2780,6 @@ whatsapp:
           delay_after_sec: 6
           decisions:
             - id: d9376444-fec4-4214-b1ff-e4fcc5d134d9
-              enabled: false
               title: YAPE
               keywords:
                 - yape
@@ -2809,7 +2808,6 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 2ae44d87-9fd2-48f3-b677-810a1b001660
-              enabled: false
               title: PLIN
               keywords:
                 - pli
@@ -2838,7 +2836,6 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 09acaba0-82cb-45a2-bf30-3e7416f8fb83
-              enabled: false
               title: BCP
               keywords:
                 - bcp
@@ -2867,7 +2864,6 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 756fb4f9-6783-486e-93ab-7cb458381887
-              enabled: false
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -3048,8 +3044,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxm55mm-q9w8
       tipo: seguimientos
-      x: -44
-      y: -374
+      x: -209
+      y: -495
       seguimientos:
         - id: s-mvxm55mm
           minutos: 2
@@ -3075,10 +3071,26 @@ whatsapp:
                   delay_after_sec: 6
           ignora_silencio: true
           ignora_tardio: true
-    - id: f-mvxma6rp-tlsv
-      tipo: mensaje
-      x: 1045
-      y: -121
+    - id: f-mvxn5dkf-b4473
+      tipo: cobro
+      x: 451
+      y: -88
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
