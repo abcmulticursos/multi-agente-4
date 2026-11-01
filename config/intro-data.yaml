@@ -11079,6 +11079,8 @@ pizarra:
     tienda_mupk9ybz|whatsapp|dou:
       cortesDeRuta:
         - PE|inicio|intro:43|~|~|1
+      cortados:
+        - pv:upsells|PE
       ramasPorConectar:
         - seg:1:29|3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvgeht140
         - seg:0:34|6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04
@@ -11266,8 +11268,8 @@ pizarra:
           x: 1510
           y: -253
         pv:PE:regalo:
-          x: 5717
-          y: -1253
+          x: 3540
+          y: -1311
         pv:PE:regalo:enlace:
           x: 6164
           y: -93
@@ -11287,11 +11289,11 @@ pizarra:
           x: 1774
           y: 2162
         pv:PE:entrega:full:
-          x: 2352
-          y: -1405
+          x: 2723
+          y: -1122
         pv:PE:entrega:basico:
-          x: 2352
-          y: -1413
+          x: 2732
+          y: -1454
         pv:PE:upsell:
           x: 3602
           y: -377
@@ -11494,11 +11496,11 @@ pizarra:
           x: 824
           y: -1964
         dest:pz:PE:seg:1:seg:1:20:3:boton:03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvdofvng1:
-          x: 1472
-          y: -1461
+          x: 1353
+          y: -1605
         pv:PE:upsells:
-          x: 3191
-          y: -1713
+          x: 3135
+          y: -1613
         inicio:PE:
           x: -77
           y: -815
@@ -11566,8 +11568,8 @@ pizarra:
           x: 1878
           y: -778
         dest:pz:PE:seg:0:seg:0:21:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
-          x: 1926
-          y: -1708
+          x: 1456
+          y: -1872
         suelta:intro:43:
           x: 453
           y: -767
@@ -11662,6 +11664,8 @@ pizarra:
         - PE|intro:29|pago:full
         - PE|intro:41|pago:basico
         - PE|intro:41|pago:full
+        - PE|pago:basico|entrega:basico
+        - PE|pago:full|entrega:full
       enlaces: []
     tienda_muq67lks|whatsapp|lineal:
       posiciones: {}
