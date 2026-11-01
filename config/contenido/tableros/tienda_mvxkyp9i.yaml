@@ -3073,8 +3073,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxn5dkf-b4473
       tipo: cobro
-      x: 451
-      y: -88
+      x: 330
+      y: -264
       steps:
         - type: text
           body_variants:
@@ -3090,7 +3090,14 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: producto
-        producto_id: "@tienda:full"
+        producto_id: "@tienda:basico"
+    - id: f-mvxn7wbz-8qjdg
+      tipo: entregar
+      x: 1232
+      y: -363
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -3440,6 +3447,26 @@ whatsapp:
       de: f-mvxln1u9-dsfgt
       salida: siguiente
       a: f-mvxm55mm-q9w8
+    - id: c-mvxn5ut3-p9j
+      de: f-mvxln1u9-dsfgt
+      salida: dec:d9376444-fec4-4214-b1ff-e4fcc5d134d9
+      a: f-mvxn5dkf-b4473
+    - id: c-mvxn5zvs-q49
+      de: f-mvxln1u9-dsfgt
+      salida: dec:2ae44d87-9fd2-48f3-b677-810a1b001660
+      a: f-mvxn5dkf-b4473
+    - id: c-mvxn6107-qre
+      de: f-mvxln1u9-dsfgt
+      salida: dec:09acaba0-82cb-45a2-bf30-3e7416f8fb83
+      a: f-mvxn5dkf-b4473
+    - id: c-mvxn62cp-29q
+      de: f-mvxln1u9-dsfgt
+      salida: dec:756fb4f9-6783-486e-93ab-7cb458381887
+      a: f-mvxn5dkf-b4473
+    - id: c-mvxn80q8-f7x
+      de: f-mvxn5dkf-b4473
+      salida: pagado
+      a: f-mvxn7wbz-8qjdg
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
