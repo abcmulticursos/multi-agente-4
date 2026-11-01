@@ -2780,6 +2780,7 @@ whatsapp:
           delay_after_sec: 6
           decisions:
             - id: d9376444-fec4-4214-b1ff-e4fcc5d134d9
+              enabled: false
               title: YAPE
               keywords:
                 - yape
@@ -2808,6 +2809,7 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 2ae44d87-9fd2-48f3-b677-810a1b001660
+              enabled: false
               title: PLIN
               keywords:
                 - pli
@@ -2836,6 +2838,7 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 09acaba0-82cb-45a2-bf30-3e7416f8fb83
+              enabled: false
               title: BCP
               keywords:
                 - bcp
@@ -2864,6 +2867,7 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: 756fb4f9-6783-486e-93ab-7cb458381887
+              enabled: false
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -3044,8 +3048,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxm55mm-q9w8
       tipo: seguimientos
-      x: -209
-      y: -385
+      x: -44
+      y: -374
       seguimientos:
         - id: s-mvxm55mm
           minutos: 2
