@@ -2586,6 +2586,10 @@ whatsapp:
       de: f-mvx71e53-8pbnj
       salida: btn:75ee3285-1ac5-4a82-8d35-c538feea7422
       a: f-mvx78w0e-z55d
+    - id: c-mvxhy676-krl
+      de: f-mvx9pvfr-bo9zj
+      salida: sin_pago
+      a: f-mvw8ibzi-4n26e
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
