@@ -11077,6 +11077,8 @@ pizarra:
       sinFondo: []
       enlaces: []
     tienda_mupk9ybz|whatsapp|dou:
+      cortesDeRuta:
+        - PE|inicio|intro:43|~|~|1
       ramasPorConectar:
         - seg:1:29|3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvgeht140
         - seg:0:34|6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04
@@ -11579,26 +11581,26 @@ pizarra:
           x: 899
           y: -1003
         pz:PE:intro:intro:43:
-          x: 453
-          y: -767
+          x: 458
+          y: -267
         pz:PE:seg:0:seg:0:34:
-          x: 899
-          y: -1003
+          x: 904
+          y: -503
         pz:PE:seg:1:seg:1:33:
-          x: 899
-          y: -999
+          x: 904
+          y: -499
         dest:pz:PE:seg:0:seg:0:34:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
-          x: 1399
-          y: -1050
+          x: 1404
+          y: -550
         dest:pz:PE:seg:1:seg:1:33:3:boton:03aac4ce-a2c0-41cf-9321-5e8e65264a76~cmvh1oea81:
-          x: 1475
-          y: -795
+          x: 1480
+          y: -295
         segs:PE:K:
-          x: 899
-          y: -1003
+          x: 904
+          y: -503
         dest:pz:PE:seg:1:seg:1:33:3:boton:2b2ede82-204d-4eb0-a4ad-0761e61026fa~cmvh1oea80:
-          x: 1434
-          y: -948
+          x: 1439
+          y: -448
         dest:pz:EC:seg:0:seg:0:23:6:cuadrito:751f1ce0-4216-4074-bf71-a58e7aa16b04:
           x: 1099
           y: 969

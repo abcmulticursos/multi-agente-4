@@ -2324,8 +2324,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvx76sva-2c7p9
       tipo: entregar
-      x: 5093
-      y: 88
+      x: 5049
+      y: 0
       titulo: Entrega · MIS PRIMEROS TRAZOS
       producto_id: pmv5xqgst
       entregas:

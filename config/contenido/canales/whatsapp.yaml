@@ -7983,7 +7983,7 @@ modality_templates:
           - type: text
             body_variants:
               - |-
-                OB PERUCHO *-DOU-* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
+                ALBI OB PERUCHO *-DOU-* *{Hola|¡Hola!|Muy buenas}* 🙋🏻‍♀️ {Te saluda|Te escribe|Soy} Miss Andrea 🌟
 
                 ⚠️ *¿Sientes que tu peque se distrae rápido, no quiere mirar sus libros o pasa demasiado tiempo en el celular?* 📱💔
                 _ó tiene dificultades para aprender a leer a su edad y no llegar preparado a Primaria?_
@@ -13070,7 +13070,7 @@ modality_templates:
             delay_after_sec: 5
             enabled: false
       - name: GRAFISMO FONETICO INTRO 1 (copia)
-        enabled: true
+        enabled: false
         weight: 1
         adName: ""
         adId: ""
@@ -13083,8 +13083,7 @@ modality_templates:
           - meta_120249236901600336
           - meta_120249236901610336
         adRoutingEnabled: true
-        paises:
-          - PE
+        paises: []
         paisRoutingEnabled: true
         semimodalidad: dou
         tiendas:
