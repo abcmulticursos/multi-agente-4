@@ -2616,8 +2616,8 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mvxln1u9-dsfgt
       tipo: mensaje
-      x: -528
-      y: -33
+      x: -484
+      y: -66
       steps:
         - type: text
           body_variants:
@@ -2934,8 +2934,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvxm55mm-q9w8
       tipo: seguimientos
-      x: -341
-      y: -341
+      x: -66
+      y: -418
       seguimientos:
         - id: s-mvxm55mm
           minutos: 2
@@ -2961,6 +2961,81 @@ whatsapp:
                   delay_after_sec: 6
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mvxm9szh-cy0n1
+      tipo: mensaje
+      x: -77
+      y: 110
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              👋 *¡Hola, docente!* 😊 Somos el Equipo Oficial de Cocreando Online.
+
+              ¿Te pasa que...?
+
+              ⏰ Pasas horas preparando tus clases.
+              🔎 Buscas actividades en diferentes lugares.
+              📖 Tus estudiantes leen, pero no comprenden lo que leen.
+              😴 La gramática y la ortografía les parecen aburridas.
+
+              Si te identificaste con alguno, esto es para ti 👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Por eso creamos el
+              📚 *{{PRODUCTO_BASE}}*
+
+              Una colección digital con *más de 200 actividades, armables, plegables y recursos educativos* para enseñar Lengua de una manera mucho más visual, práctica y divertida. ✂️
+
+              💡Ideal para tus alumnos de primaria y secundaria.
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/14eFG1JoDfFaoRBCYjQ9hV3TC0hS2RqCd/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              📚 ¿Qué incluye el Megapack?
+              _6 KITS COMPLETOS_
+
+              📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
+              ✅ Adjetivos y determinantes
+              ✅ Pronombres
+              ✅ Verbos: tiempos, modos y conjugación
+              ✅ Adverbios, preposiciones y conjunciones
+              ✅ Sujeto y predicado
+              ✅ Tipos de oraciones
+              ✅ Análisis morfológico y sintáctico
+
+              ✏️ *KIT 2: ORTOGRAFÍA Y VOCABULARIO*
+              ✅ Agudas, graves y esdrújulas
+              ✅ Tilde diacrítica, diptongo e hiato
+              ✅ B/V, C/S/Z, G/J, H, LL/Y, R/RR
+              ✅ Signos de puntuación
+              ✅ Mayúsculas
+              ✅ Sinónimos, antónimos, homónimos y parónimos
+              ✅ Prefijos, sufijos y familias de palabras
+              ✅ Polisemia y sentido figurado
+
+              📖 *KIT 3: COMPRENSIÓN LECTORA*
+              ✅ Antes, durante y después de leer
+              ✅ Idea principal, tema y resumen
+              ✅ Comprensión literal e inferencial
+              ✅ Secuencia, causa y consecuencia
+              ✅ Subrayado, esquemas y mapas conceptuales
+              ✅ Infografías, tablas y gráficos
+              ✅ Hechos, opiniones y argumentos
+              ✅ Lectura crítica y fuentes confiables
+          delay_after_sec: 6
+      presenta:
+        - "@tienda:basico"
+    - id: f-mvxma6rp-tlsv
+      tipo: mensaje
+      x: 209
+      y: -198
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
