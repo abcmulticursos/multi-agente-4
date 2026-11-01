@@ -262,15 +262,25 @@ function productosDeLaTienda(tiendaId: string): string[] {
  * Cobro, el básico (o único) de su tienda: así el oculto del order bump sigue oculto hasta su intro.
  * Sin tienda (un workflow) y sin Cobros, nada (lo de antes).
  */
+/** Los productos de los Cobros (por producto, encendidos) a los que llevan los cables de esta ficha. */
+function productosDeSusCobros(t: Tablero | null | undefined, f: FichaDelTablero): string[] {
+  if (!t) return [];
+  return [
+    ...new Set(
+      t.cables
+        .filter((c) => c.de === f.id)
+        .map((c) => t.fichas.find((x) => x.id === c.a))
+        .filter((x): x is FichaDelTablero => !!x && x.tipo === "cobro" && !x.apagada && x.cobro?.modo === "producto" && !!x.cobro.producto_id)
+        .map((x) => x.cobro!.producto_id!)
+    ),
+  ];
+}
+
 function loQuePresentaLaFicha(t: Tablero | null | undefined, f: FichaDelTablero, tiendaId: string | null | undefined): string[] {
   if (f.presenta?.length) return f.presenta;
   if (!t) return [];
-  const deSusCobros = t.cables
-    .filter((c) => c.de === f.id)
-    .map((c) => t.fichas.find((x) => x.id === c.a))
-    .filter((x): x is FichaDelTablero => !!x && x.tipo === "cobro" && !x.apagada && x.cobro?.modo === "producto" && !!x.cobro.producto_id)
-    .map((x) => x.cobro!.producto_id!);
-  if (deSusCobros.length) return [...new Set(deSusCobros)];
+  const deSusCobros = productosDeSusCobros(t, f);
+  if (deSusCobros.length) return deSusCobros;
   if (!tiendaId || esClaveDeWorkflow(tiendaId)) return [];
   const a = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === tiendaId)?.alineacion as Record<string, unknown> | undefined;
   const basico = [a?.basico, a?.unico].find((x): x is string => typeof x === "string" && !!x);
@@ -280,7 +290,11 @@ function loQuePresentaLaFicha(t: Tablero | null | undefined, f: FichaDelTablero,
 /** Lo que presenta la ficha; si no dice nada, lo que ya se le presentó al cliente; si nada, los de su tienda. */
 function idsParaComodines(convoId: number, f: FichaDelTablero, t?: Tablero): string[] {
   const e = estadoEnElTablero(convoId);
-  let base = f.presenta?.length ? f.presenta : e ? presentadosDe(e) : [];
+  // SIN MARCAR NADA, LOS DE LOS COBROS A LOS QUE LLEVA (01/11/2026, su conv 169): con la regla de «de qué habla la
+  // IA», al llegar a la intro del order bump lo ya presentado era solo el básico y {{PRODUCTO_FULL}} y
+  // {{PRODUCTO_BASE}} decían los dos GRAFISMO. La ficha que lleva a los dos Cobros los nombra a los dos.
+  const deSusCobros = productosDeSusCobros(t, f);
+  let base = f.presenta?.length ? f.presenta : deSusCobros.length ? deSusCobros : e ? presentadosDe(e) : [];
   // SIN NADA PRESENTADO, LOS DE SU TIENDA (01/11/2026). Él: «en mi tienda dice producto full el pack 2 en 1,
   // ¿no debería representar el comodín lo que es?». Su básico (o único) y su full, de la tienda.
   if (base.length === 0 && e?.tienda_id) base = productosDeLaTienda(e.tienda_id);
@@ -689,7 +703,7 @@ async function irA(
       }
       pasosAEnviar = conLosComodinesDeLaFicha(
         pasosAEnviar,
-        productosDeLaFicha(config, idsParaComodines(convoId, f), pais, estadoEnElTablero(convoId)?.oferta === 1),
+        productosDeLaFicha(config, idsParaComodines(convoId, f, t), pais, estadoEnElTablero(convoId)?.oferta === 1),
         pais
       );
       await sendConfiguredSteps(convo, pasosAEnviar as never);
