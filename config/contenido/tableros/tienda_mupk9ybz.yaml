@@ -2560,6 +2560,10 @@ whatsapp:
       de: f-mvx9pvfr-bo9zj
       salida: pagado
       a: f-mvx76sva-2c7p9
+    - id: c-mvx9rnby-sra
+      de: f-mvx76sva-2c7p9
+      salida: siguiente
+      a: f-mvw8ibzi-4n26e
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: 20
