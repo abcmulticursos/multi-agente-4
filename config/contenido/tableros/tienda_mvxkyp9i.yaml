@@ -3123,8 +3123,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxn5dkf-b4473
       tipo: cobro
-      x: 330
-      y: -264
+      x: 341
+      y: 0
       steps:
         - type: text
           body_variants:
@@ -3148,6 +3148,85 @@ whatsapp:
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
+    - id: f-mvxnco7i-rym9e
+      tipo: seguimientos
+      x: 605
+      y: -396
+      seguimientos:
+        - id: s-mvxnco7i-tilne
+          minutos: 2
+          variantes:
+            - id: v-mvxnco7i-s926f
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1rddsLec7-ps4O9KSfiJn6kiVT_qORokC/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      Cada vez más docentes buscan transformar sus clases de Español con recursos visuales, prácticos y fáciles de utilizar.
+
+                      💙 Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mvxnco7i-jah79
+          minutos: 5
+          variantes:
+            - id: v-mvxnco7i-u8a0h
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *15 soles*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -3517,6 +3596,10 @@ whatsapp:
       de: f-mvxn5dkf-b4473
       salida: pagado
       a: f-mvxn7wbz-8qjdg
+    - id: c-mvxncqxb-60t
+      de: f-mvxn5dkf-b4473
+      salida: sin_pago
+      a: f-mvxnco7i-rym9e
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
