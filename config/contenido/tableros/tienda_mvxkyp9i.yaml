@@ -3143,8 +3143,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvxn7wbz-8qjdg
       tipo: entregar
-      x: 1309
-      y: 0
+      x: 1265
+      y: 11
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
@@ -3229,8 +3229,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxnewvh-mbuow
       tipo: regalo
-      x: 2904
-      y: 286
+      x: 2882
+      y: 242
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
@@ -3371,8 +3371,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvxovbd8-cn0ck
       tipo: cobro
-      x: 2761
-      y: -33
+      x: 2783
+      y: -110
       steps:
         - type: text
           body_variants:
@@ -3770,6 +3770,10 @@ whatsapp:
     - id: c-mvz1f2ro-7b4
       de: f-mvxoh57z-19dq
       salida: sin_respuesta
+      a: f-mvxnewvh-mbuow
+    - id: c-mvz2vxa3-971
+      de: f-mvxoh57z-19dq
+      salida: pagado
       a: f-mvxnewvh-mbuow
   cajas:
     - id: manta-inicio-mvveb83v-1
