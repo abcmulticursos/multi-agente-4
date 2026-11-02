@@ -1161,18 +1161,36 @@ input,
 :root[data-pizarra-variante="navy"] .burbujas-nuevo {
   --bn-visor: #0f141a;
   --bn-visor-cab: #1b222b;
-  --bn-burbuja: #0c5343;
+  /* (02/11/2026: el verde que él pidió, #0a5141.) */
+  --bn-burbuja: #0a5141;
   --bn-burbuja-texto: #e9edef;
 }
 :root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-visor {
   background-image: none;
 }
+/* (02/11/2026: «casi bold»: peso normal; sin el suavizado fino de la Mac queda un poco más grueso que el de Sendy.) */
 :root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-burbuja,
 :root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-burbuja .text-neutral-800 {
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-weight: 400;
   line-height: 1.45;
   -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* «+ AGREGAR PASO» QUE SE VEA (02/11/2026: «casi no se nota»), en todos los temas: borde punteado y letra del color de
+   acento del tema, con un fondo suave; al pasar el ratón, más fuerte. */
+.burbujas-nuevo .bn-agregar-paso {
+  border: 2px dashed var(--bn-activo);
+  color: var(--bn-activo);
+  background: color-mix(in srgb, var(--bn-activo) 10%, transparent);
+  border-radius: 14px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-agregar-paso:hover {
+  background: color-mix(in srgb, var(--bn-activo) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-activo) 30%, transparent);
 }
 
 /* EL GESTOR DE SEGUIMIENTOS, EN EL MISMO DISEÑO: su lista de la izquierda sobre el fondo del tema. */

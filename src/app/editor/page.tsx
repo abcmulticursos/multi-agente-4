@@ -24911,7 +24911,7 @@ function ChatPreview({
         (step.texts.some((t) => t && t.trim()) || step.drive_url.trim())
     );
   useEffect(() => {
-    if (!useScrollContainer || activeStepIndex == null) return;
+    if (!useScrollContainer || activeStepIndex == null || !puedeDesplazar()) return;
     const container = previewScrollRef.current;
     const node = container?.querySelector<HTMLDivElement>(
       `[data-preview-step="${activeStepIndex}"]`
@@ -36241,6 +36241,19 @@ function eliminarPieza(cfg: FullConfig, canal: ChannelKey, piezaId: string): { c
  * la recibió sigue pudiendo tocarlos. Siempre devuelve una copia honda; el original no cambia.
  */
 /**
+ * ELEGIR UNA BURBUJA SIN MOVER LA PANTALLA (02/11/2026). Él: «al duplicar, que quede seleccionada la copia», y antes: «la
+ * única acción que lleve a su cuadro editor debe ser un clic izquierdo». Durante un instante, los cajones y el visor no
+ * se desplazan hacia la burbuja que se acaba de marcar.
+ */
+let noDesplazarHasta = 0;
+function marcarSinDesplazar(): void {
+  noDesplazarHasta = Date.now() + 600;
+}
+function puedeDesplazar(): boolean {
+  return Date.now() >= noDesplazarHasta;
+}
+
+/**
  * PEGA VARIAS BURBUJAS DEBAJO DE UNA, EN SU ORDEN Y DE UNA VEZ (02/11/2026). Él: «selecciono varias burbujas, copio, y al
  * pegar solo llega 1». Se pegaban una por una y cada pegado partía de la lista de antes: la última pisaba a las demás.
  * Cada una sin botones repetidos, tampoco entre ellas (`sinBotonesRepetidos` con lo ya pegado).
@@ -37432,7 +37445,9 @@ function JourneyPreviewBlock({
     // Y SIN BOTONES REPETIDOS EN LA FICHA (18/10/2026, el del DNI): ver `sinBotonesRepetidos`.
     next.splice(index + 1, 0, sinBotonesRepetidos(step, steps));
     onStepsChange(next);
-    // (02/11/2026: sin marcarla. Él: «la única acción que lleve a su cuadro editor debe ser un clic izquierdo directo».)
+    // (02/11/2026: la copia queda ELEGIDA, sin mover la pantalla —solo el clic izquierdo lleva a su cajón—.)
+    marcarSinDesplazar();
+    setActiveStepIndex(index + 1);
   };
   const toggleStep = (index: number) => {
     if (!steps[index] || !onStepsChange) return;
@@ -37586,7 +37601,9 @@ function StepEditorPreviewPair({
     const next = [...steps];
     next.splice(index + 1, 0, copy);
     onChange(next);
-    // (02/11/2026: sin marcarla ni mover la pantalla; solo el clic izquierdo lleva a su cajón.)
+    // (02/11/2026: la copia queda ELEGIDA, sin mover la pantalla; solo el clic izquierdo lleva a su cajón.)
+    marcarSinDesplazar();
+    setActiveStepIndex(index + 1);
   };
   const togglePreviewStep = (index: number) => {
     const step = steps[index];
@@ -38349,7 +38366,7 @@ function StepList({
   sinAgregar?: boolean;
 }) {
   useEffect(() => {
-    if (activeStepIndex == null) return;
+    if (activeStepIndex == null || !puedeDesplazar()) return;
     const frame = window.requestAnimationFrame(() => {
       document
         .getElementById(`editor-step-${idPrefix}-${activeStepIndex}`)
@@ -38414,6 +38431,9 @@ function StepList({
     // Sin botones repetidos en la ficha (18/10/2026): ver `sinBotonesRepetidos`.
     copy.splice(i + 1, 0, sinBotonesRepetidos(step, steps));
     onChange(copy);
+    // (02/11/2026: la copia queda elegida, sin mover la pantalla.)
+    marcarSinDesplazar();
+    onActiveStepIndexChange?.(i + 1);
   };
   const removeStep = (i: number) => {
     if (!confirm("¿Quitar este paso? Puedes deshacerlo con ↶ Deshacer.")) return;
@@ -38586,7 +38606,7 @@ function StepList({
         <button
           type="button"
           onClick={addStep}
-          className="order-3 w-full rounded-md border-2 border-dashed border-neutral-300 py-2 text-sm text-neutral-500 hover:border-emerald-400 hover:text-emerald-600"
+          className="bn-agregar-paso order-3 w-full rounded-md border-2 border-dashed border-neutral-300 py-2 text-sm text-neutral-500 hover:border-emerald-400 hover:text-emerald-600"
         >
           ➕ Agregar paso
         </button>
