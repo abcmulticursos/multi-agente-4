@@ -3229,13 +3229,13 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxnewvh-mbuow
       tipo: regalo
-      x: 3388
-      y: -22
+      x: 3883
+      y: 11
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
-      x: 1804
-      y: -77
+      x: 1892
+      y: 110
       titulo: Upsell 1 -
       steps:
         - type: text
@@ -3371,8 +3371,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvxovbd8-cn0ck
       tipo: cobro
-      x: 2475
-      y: -121
+      x: 2882
+      y: 264
       steps:
         - type: text
           body_variants:
