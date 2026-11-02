@@ -95,10 +95,11 @@ export async function POST(req: NextRequest) {
       // no la elige: en vivo la elige la frase del primer mensaje. Aquí se elige a mano y se
       // anota igual que la anotaría la frase. Solo en WhatsApp, que es donde actúan las
       // frases. Sin frases, nada cambia.
-      const conFrases = (suya.frases_de_entrada ?? []).some((f) => String(f ?? "").trim());
-      if (channel === "whatsapp" && conFrases) {
-        fijarTiendaPorFraseSiFalta(convo.id, String(suya.id));
-      }
+      // SIEMPRE LA TIENDA ELEGIDA (01/11/2026). Él: «agarré una tienda en el simulador y me botó otro contenido;
+      // le cambié el número por uno que no tenían otras y recién funcionó… el simulador debe simular por tienda,
+      // no por número, incluso sin número». Sin frases, la tienda se buscaba por el número y, compartido, salía
+      // la primera que lo tuviera (y sin número, ninguna). Ahora se anota la elegida, en cualquier canal.
+      fijarTiendaPorFraseSiFalta(convo.id, String(suya.id));
       tiendaProbada = {
         id: String(suya.id),
         nombre: String(suya.nombre ?? "").trim() || "Tienda sin nombre",

@@ -501,14 +501,42 @@ export function entregasDeLaFicha(f: FichaDelTablero): string[] {
 }
 
 /**
+ * LA FICHA QUE COBRA SOLA (01/11/2026, su upsell de LENGUA Y LITERATURA, ficha 6). Él: «la ficha tiene un producto
+ * seleccionado y tiene un precio; si el cliente envía el comprobante se entrega, ya que la ficha tiene esa
+ * información, ¿por qué darle tanta vuelta?». Un Mensaje sin botones ni cuadritos que presenta UN producto ya no
+ * sigue de largo por «→»: espera al cliente, con «💰 Si paga» (a la Entrega) y «⏳ Si no responde» (al Regalo).
+ * Para no romper lo que ya funciona, NO si su «→» ya lleva a un Cobro (las rutas lineales de siempre).
+ * Sin tablero a mano (`t` ausente), como antes.
+ */
+export function cobraEnLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "fichas" | "cables"> | null): boolean {
+  if (!t || f.tipo !== "mensaje" || f.apagada || pideElNombre(f)) return false;
+  const presenta = [...new Set(f.presenta ?? [])];
+  if (presenta.length !== 1) return false;
+  const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
+  if (botones.length + cuadritos.length > 0) return false;
+  const siguiente = t.cables.find((c) => c.de === f.id && c.salida === "siguiente");
+  const destino = siguiente ? t.fichas.find((x) => x.id === siguiente.a) : undefined;
+  return destino?.tipo !== "cobro";
+}
+
+/**
  * LAS SALIDAS DE UNA FICHA: los puntitos de los que él tira cables. Las mismas para la pantalla y
- * para el bot, por eso viven aquí. `nombres` pone nombre a los productos (pantalla).
+ * para el bot, por eso viven aquí. `nombres` pone nombre a los productos (pantalla). `t`, el tablero, para
+ * la ficha que cobra sola (`cobraEnLaFicha`).
  */
 export function salidasDeLaFicha(
   f: FichaDelTablero,
   paisVisto?: string,
-  nombres?: Record<string, string>
+  nombres?: Record<string, string>,
+  t?: Pick<Tablero, "fichas" | "cables"> | null
 ): SalidaDeFicha[] {
+  if (cobraEnLaFicha(f, t)) {
+    const id = (f.presenta ?? [])[0];
+    return [
+      { clave: "pagado", etiqueta: `💰 Si paga${nombres?.[id] ? `: ${nombres[id]}` : ""}` },
+      { clave: "sin_respuesta", etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde" },
+    ];
+  }
   switch (f.tipo) {
     case "inicio":
       // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): una salida por cada anuncio marcado, y «→» para los demás.
@@ -718,7 +746,7 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
     avisos.push("No dice qué producto presenta: la IA no sabrá contestar «qué contiene» hasta un cobro o una entrega.");
   // Una ficha que espera respuesta y no tiene NINGÚN cable de salida deja al cliente sin camino.
   if (FICHAS_CON_RESPUESTA.includes(f.tipo) && f.tipo !== "seguimientos") {
-    const salidas = salidasDeLaFicha(f, pais);
+    const salidas = salidasDeLaFicha(f, pais, undefined, t);
     if (salidas.length > 0 && !salidas.some((s) => tieneCable(s.clave)))
       avisos.push("Ninguna de sus salidas tiene cable: aquí termina la ruta.");
   }

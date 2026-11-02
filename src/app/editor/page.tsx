@@ -32827,9 +32827,24 @@ function ListaDeEleccion({
   elegidos: string[];
   onCambio: (ids: string[]) => void;
 }) {
+  // EL BUSCADOR (01/11/2026). Él: «están los productos para seleccionarse pero no hay un buscador con el cual yo pueda
+  // encontrarlo rápidamente». Los elegidos se ven siempre; los demás, los que coinciden con lo escrito.
+  const [busca, setBusca] = useState("");
+  const q = sinTildesDelEditor(busca.trim());
+  const vistos = q ? todos.filter((x) => elegidos.includes(x.id) || sinTildesDelEditor(x.nombre).includes(q)) : todos;
   return (
+    <div className="flex flex-col gap-1">
+      {todos.length > 6 && (
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="🔍 Buscar producto…"
+          className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-normal"
+        />
+      )}
     <div className="flex flex-wrap gap-1">
-      {todos.map((x) => {
+      {vistos.length === 0 && <span className="text-[11px] italic text-tinta-suave">Ningún producto se llama así.</span>}
+      {vistos.map((x) => {
         const puesto = elegidos.includes(x.id);
         return (
           <button
@@ -32843,7 +32858,54 @@ function ListaDeEleccion({
         );
       })}
     </div>
+    </div>
   );
+}
+
+/**
+ * UN PRODUCTO, CON BUSCADOR (01/11/2026, «no hay un buscador con el cual yo pueda encontrarlo rápidamente»): lo escrito
+ * filtra la lista; el elegido sigue en ella aunque no coincida. Con pocos, solo el selector de siempre.
+ */
+function SelectorConBuscador({
+  valor,
+  onCambio,
+  lista,
+  vacio,
+}: {
+  valor: string | undefined;
+  onCambio: (v: string | undefined) => void;
+  lista: Array<{ id: string; nombre: string }>;
+  vacio: string;
+}) {
+  const [busca, setBusca] = useState("");
+  const q = sinTildesDelEditor(busca.trim());
+  const vistos = q ? lista.filter((p) => p.id === valor || sinTildesDelEditor(p.nombre).includes(q)) : lista;
+  return (
+    <span className="mt-1 flex flex-col gap-1">
+      {lista.length > 6 && (
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="🔍 Buscar producto…"
+          className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-normal"
+        />
+      )}
+      <select value={valor ?? ""} onChange={(e) => onCambio(e.target.value || undefined)} className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
+        <option value="">{vacio}</option>
+        {vistos.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.nombre}
+          </option>
+        ))}
+      </select>
+      {q && vistos.filter((p) => p.id !== valor).length === 0 && <span className="text-[11px] italic text-tinta-suave">Ningún producto se llama así.</span>}
+    </span>
+  );
+}
+
+/** Sin tildes ni mayúsculas, para buscar. */
+function sinTildesDelEditor(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 }
 
 /**
@@ -33194,14 +33256,7 @@ function AjustesDeLaFicha({
   const ayuda = "mt-0.5 block text-[11px] font-normal text-tinta-suave";
   useEscapeEnPila(() => onCerrar());
   const selector = (valor: string | undefined, onCambio: (v: string | undefined) => void, lista: Array<{ id: string; nombre: string }>, vacio: string) => (
-    <select value={valor ?? ""} onChange={(e) => onCambio(e.target.value || undefined)} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal">
-      <option value="">{vacio}</option>
-      {lista.map((p) => (
-        <option key={p.id} value={p.id}>
-          {p.nombre}
-        </option>
-      ))}
-    </select>
+    <SelectorConBuscador valor={valor} onCambio={onCambio} lista={lista} vacio={vacio} />
   );
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>

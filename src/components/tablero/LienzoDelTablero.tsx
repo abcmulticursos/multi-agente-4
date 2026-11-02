@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, eligeDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, cobraEnLaFicha, eligeDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -238,7 +238,7 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
   for (const e of t.fichas.filter((f) => f.tipo === "entregar")) for (const id of rutaDe(t, e.id)) if (id !== e.id) trasUnaEntrega.add(id);
   for (const f of t.fichas) {
     if (!enVenta.has(f.id) || f.tipo === "inicio" || f.apagada || f.guardada) continue;
-    const salidas = salidasDeLaFicha(f as FichaDelTablero, paisVisto, nombres);
+    const salidas = salidasDeLaFicha(f as FichaDelTablero, paisVisto, nombres, t as Tablero);
     for (const s of salidas) {
       if (conCable(f.id, s.clave)) continue;
       const nombre = s.etiqueta.replace(/^(🔘|💬) /, "");
@@ -334,6 +334,8 @@ const Contexto = createContext<{
   estaciones: boolean;
   /** En modo estaciones: el robot «Agente IA» (sí) o la bolita 🚉 (no). Solo dibujo. */
   comoAgente: boolean;
+  /** Las ofertas que vienen después de una Entrega (los upsells) y su número: 1, 2… Solo dibujo. */
+  upsellDe: Record<string, number>;
 } | null>(null);
 
 /** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…).
@@ -562,12 +564,36 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const f = data.ficha;
   if (!ctx) return null;
   const a = ASPECTO[f.tipo];
-  const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres);
+  const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero);
   const avisos = avisosDeLaFicha(ctx.tablero as Tablero, f as FichaDelTablero, ctx.paisVisto);
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const leLlega = ctx.tablero.cables.some((c) => c.a === f.id);
   const tenue = !!f.apagada;
   const titulo = f.titulo?.trim() || a.nombre;
+  // EL HINT Y EL PRODUCTO A LA VISTA (01/11/2026): tipo, título, y lo que cobra, entrega o presenta.
+  const nombreDeProducto = (id?: string) => (id ? ctx.nombres?.[id.split("#")[0]] ?? "" : "");
+  const listaDeProductos = (ids?: string[]) => [...new Set((ids ?? []).map(nombreDeProducto).filter(Boolean))].join(", ");
+  const cobraSola = cobraEnLaFicha(f as FichaDelTablero, ctx.tablero as Tablero);
+  // «En la ficha no aparece el nombre, solo dice cobro» (01/11/2026): el producto, bajo el título, sin pasar el ratón.
+  const productoALaVista =
+    f.tipo === "cobro"
+      ? f.cobro?.modo === "abierto"
+        ? ""
+        : nombreDeProducto(f.cobro?.producto_id)
+      : f.tipo === "entregar"
+        ? listaDeProductos(f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : [])
+        : cobraSola
+          ? nombreDeProducto((f.presenta ?? [])[0])
+          : "";
+  const productoEnLaTarjeta = f.tipo === "cobro" || cobraSola ? productoALaVista : "";
+  const hintDeLaFicha = (() => {
+    const lineas = [ctx.numeroDe[f.id] !== undefined ? `${ctx.numeroDe[f.id]} · ${a.nombre}` : a.nombre];
+    if (f.titulo?.trim()) lineas.push(f.titulo.trim());
+    if ((f.tipo === "cobro" || cobraSola) && productoALaVista) lineas.push(`💰 Cobra: ${productoALaVista}`);
+    if (f.tipo === "entregar" && productoALaVista) lineas.push(`📦 Entrega: ${productoALaVista}`);
+    if (listaDeProductos(f.presenta)) lineas.push(`📣 Presenta: ${listaDeProductos(f.presenta)}`);
+    return lineas.join("\n");
+  })();
   // MODO INALÁMBRICO (27/10/2026): cuántas colitas le llegan (al pasar el ratón se ven sus líneas), y
   // una marca sutil en la ficha que tiene alguna conexión inalámbrica.
   const colitasQueLlegan = { length: ctx.colitasQueLlegan.get(f.id) ?? 0 };
@@ -715,23 +741,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {/* EL HINT DEL TÍTULO (01/11/2026): «que aparezca completo al pasar el mouse… algo que me indique el nombre
             para no tener que clickear», en TODAS las fichas: su tipo, el título entero y lo que cobra, entrega o
             presenta. */}
-        <span
-          className="truncate text-xs font-bold"
-          title={(() => {
-            const nombre = (id?: string) => (id ? ctx.nombres?.[id.split("#")[0]] ?? "" : "");
-            const lista = (ids?: string[]) => [...new Set((ids ?? []).map(nombre).filter(Boolean))].join(", ");
-            const lineas = [ctx.numeroDe[f.id] !== undefined ? `${ctx.numeroDe[f.id]} · ${a.nombre}` : a.nombre];
-            if (f.titulo?.trim()) lineas.push(f.titulo.trim());
-            if (f.tipo === "cobro" && nombre(f.cobro?.producto_id)) lineas.push(`💰 Cobra: ${nombre(f.cobro?.producto_id)}`);
-            if (f.tipo === "entregar") {
-              const e = lista(f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []);
-              if (e) lineas.push(`📦 Entrega: ${e}`);
-            }
-            if (lista(f.presenta)) lineas.push(`📣 Presenta: ${lista(f.presenta)}`);
-            return lineas.join("\n");
-          })()}
-        >
+        {/* AL INSTANTE (01/11/2026, «el hint se demora mucho en aparecer, debería ser de inmediato»): ya no es el
+            «title» del navegador (tarda ~1 s) sino una cajita propia que sale apenas pasa el ratón. */}
+        <span className="group/hint relative min-w-0 truncate text-xs font-bold">
           {titulo}
+          <span className="pointer-events-none absolute left-0 top-full z-[60] mt-1 hidden w-max max-w-[320px] whitespace-pre-line rounded-md bg-slate-900 px-2 py-1.5 text-[11px] font-semibold leading-4 text-white shadow-xl group-hover/hint:block">
+            {hintDeLaFicha}
+          </span>
         </span>
         {tenue && <span className="ml-auto shrink-0 text-[10px]">APAGADA</span>}
         <span className={`${tenue ? "" : "ml-auto"} flex shrink-0 items-center gap-1`}>
@@ -779,6 +795,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           </button>
         </span>
       </div>
+      {/* (La Entrega ya dice en su cuerpo «Entrega: …»: aquí solo el Cobro y la ficha que cobra sola.) */}
+      {productoEnLaTarjeta && (
+        <div className="truncate border-b border-slate-200 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900" title={productoALaVista}>
+          💰 {productoEnLaTarjeta}
+        </div>
+      )}
       <div className="flex flex-col gap-1 px-2 pt-1.5">
         {burbujas.slice(0, BURBUJAS_A_LA_VISTA).map((b, i) => (
           <div key={i}>
@@ -823,7 +845,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       {ctx.estaciones && f.tipo === "seguimientos" && (
         <Handle type="target" position={Position.Bottom} id="abajo" className={PUNTO_VERDE} />
       )}
-      {visibles.length > 0 && f.tipo !== "seguimientos" && !(ctx.estaciones && esEstacion(f)) && (
+      {visibles.length > 0 && f.tipo !== "seguimientos" && !(ctx.estaciones && esEstacion(f, ctx.tablero)) && (
         <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
           {visibles.map((s) => pastilla(s, true, s.clave))}
           {/* LO QUE HACE SOLA ESTA FICHA, A LA VISTA (27/10/2026: «si hace algo y no se ve, es el muro»). Sin
@@ -907,7 +929,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     </div>
   );
   // MODO ESTACIONES: la ficha y su estación son UN SOLO BLOQUE (se arrastran juntas).
-  if (!(ctx.estaciones && esEstacion(f))) return tarjeta;
+  if (!(ctx.estaciones && esEstacion(f, ctx.tablero))) return tarjeta;
   // SE ELIGE SOLO TOCANDO ALGO SUYO (01/11/2026). Él: «al seleccionar solo "su aire" se selecciona y es incómodo,
   // no puedo mover con la manito». El aire entre la ficha, el agente y sus caminos no atrapa el ratón (el nodo
   // tampoco: ver `pointerEvents` al armar los nodos); la ficha, el agente, sus puntos y sus caminos, sí.
@@ -1296,10 +1318,12 @@ function CaminoDeCompra({ id, target, sourceX, sourceY, targetX, targetY, source
  * Seguimientos se cuelgan ARRIBA con un cable naranja. Los cables siguen siendo los mismos de la ficha: el bot
  * no cambia y desactivar el modo deja la vista de siempre.
  */
-function esEstacion(f: FichaEnElEditor): boolean {
+function esEstacion(f: FichaEnElEditor, t?: TableroEnElEditor): boolean {
   if (f.guardada) return false;
   if (f.tipo === "cobro") return true;
   if (f.tipo !== "mensaje" && f.tipo !== "intro_ob") return false;
+  // La que cobra sola (su upsell sin botones, 01/11/2026) también espera: tiene su estación.
+  if (cobraEnLaFicha(f as FichaDelTablero, t as Tablero | undefined)) return true;
   const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f as FichaDelTablero));
   return botones.length + cuadritos.length > 0 || eligeDeLaFicha(f as FichaDelTablero).length > 0 || pideElNombre(f as FichaDelTablero);
 }
@@ -1319,8 +1343,8 @@ function salidasDeArriba(t: TableroEnElEditor, f: FichaEnElEditor): Set<string> 
   return arriba;
 }
 /** Lo que espera la estación, en una frase. */
-function queEspera(f: FichaEnElEditor): string {
-  if (f.tipo === "cobro") return "¿pagó?";
+function queEspera(f: FichaEnElEditor, t?: TableroEnElEditor): string {
+  if (f.tipo === "cobro" || cobraEnLaFicha(f as FichaDelTablero, t as Tablero | undefined)) return "¿pagó?";
   if (pideElNombre(f as FichaDelTablero)) return "¿su nombre?";
   if (eligeDeLaFicha(f as FichaDelTablero).length > 0 || f.tipo === "intro_ob" || (f.presenta ?? []).length > 1) return "¿cuál elige?";
   return "¿qué responde?";
@@ -1331,7 +1355,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const ctx = useContext(Contexto)!;
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const arriba = salidasDeArriba(ctx.tablero, f);
-  const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres).filter(
+  const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero).filter(
     (s) =>
       (s.clave !== "otra" || conCable.has("otra")) &&
       !(s.clave === "sin_respuesta" && arriba.has("siguiente") && conCable.has("siguiente") && !conCable.has("sin_respuesta")) &&
@@ -1342,6 +1366,14 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const aLaDerecha = salidas.filter((s) => !arriba.has(s.clave));
   const faltan = ctx.faltas?.get(f.id);
   const n = ctx.numeroDe[f.id];
+  // QUÉ AGENTE SE VE (01/11/2026): Cobro → el cobrador; una oferta después de una Entrega → upsell con su número.
+  const nUpsell = f.tipo === "cobro" ? undefined : ctx.upsellDe[f.id];
+  const imagenDelAgente =
+    f.tipo === "cobro"
+      ? { src: "/tablero/cobrador.png", nombre: "Cobrador" }
+      : nUpsell !== undefined
+        ? { src: "/tablero/upsell.png", nombre: `Upsell ${nUpsell}` }
+        : { src: "/tablero/agente.png", nombre: "Agente IA" };
   return (
     // EL BLOQUE: una barra corta desde la ficha, la estación grande (como en Sendy) y sus caminos afuera.
     <div data-estacion className="flex items-center self-center" onDoubleClick={(e) => (e.stopPropagation(), ctx.abrir(f.id))}>
@@ -1378,9 +1410,26 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
           <Handle type="target" position={Position.Left} id="entra-estacion" className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
           {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
           {ctx.comoAgente ? (
-            // SU AGENTE (01/11/2026, su PNG cuadrado): las esquinas redondeadas las pone el tablero.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src="/tablero/agente.png" alt="Agente IA" draggable={false} className="h-full w-full rounded-2xl object-contain p-1" />
+            // SU AGENTE (01/11/2026, sus PNG cuadrados): el robot en las fichas de venta, el COBRADOR en los Cobros y
+            // el logo de UPSELL —con su número en un círculo— en las ofertas que vienen después de una Entrega.
+            // Las esquinas redondeadas las pone el tablero.
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imagenDelAgente.src}
+                alt={imagenDelAgente.nombre}
+                draggable={false}
+                className={`h-full w-full rounded-2xl ${imagenDelAgente.src === "/tablero/agente.png" ? "object-contain p-1" : "object-cover"}`}
+              />
+              {nUpsell !== undefined && (
+                <span
+                  className="absolute -right-3 -top-3 flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-amber-400 text-[17px] font-black text-slate-900 shadow-lg"
+                  title={`Upsell ${nUpsell}`}
+                >
+                  {nUpsell}
+                </span>
+              )}
+            </>
           ) : (
             <>
               <span className="text-5xl leading-none">🚉</span>
@@ -1390,8 +1439,8 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
         <div className="pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold leading-4 text-white shadow">
-          {ctx.comoAgente && <span className="text-[14px]">Agente IA</span>}
-          <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f)}</span>
+          {ctx.comoAgente && <span className="text-[14px]">{imagenDelAgente.nombre}</span>}
+          <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f, ctx.tablero)}</span>
         </div>
       </div>
       {/* LOS BRAZOS (su imagen): rectas desde el centro de la estación hasta cada camino. Alto fijo por camino
@@ -1454,6 +1503,28 @@ function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
     cables: t.cables.filter((c) => !ids.has(c.de) && !ids.has(c.a)),
     cajas: (t.cajas ?? []).filter((c) => !c.inicio || !ids.has(c.inicio)),
   };
+}
+
+/**
+ * LOS UPSELLS Y SU NÚMERO (01/11/2026, su logo de upsell «con un número en un círculo, el 1»): una ficha de
+ * oferta (Mensaje o Intro de order bump) a la que se llega pasando por N Entregas desde un Inicio es el upsell N
+ * (el menor N si hay varios caminos). Solo dibujo.
+ */
+function numerarUpsells(t: TableroEnElEditor): Record<string, number> {
+  const fuera: Record<string, number> = {};
+  const mejor = new Map<string, number>();
+  const cola: Array<[string, number]> = t.fichas.filter((f) => f.tipo === "inicio").map((f) => [f.id, 0]);
+  for (let i = 0; i < cola.length && i < 5000; i++) {
+    const [id, n] = cola[i];
+    if ((mejor.get(id) ?? Infinity) <= n) continue;
+    mejor.set(id, n);
+    const f = t.fichas.find((x) => x.id === id);
+    if (!f) continue;
+    if (n > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && !f.guardada) fuera[id] = Math.min(fuera[id] ?? Infinity, n);
+    const siguiente = f.tipo === "entregar" ? n + 1 : n;
+    for (const c of t.cables) if (c.de === id) cola.push([c.a, siguiente]);
+  }
+  return fuera;
 }
 
 /** Los números de las fichas: el camino desde cada Inicio (en orden de cables), luego las sueltas. */
@@ -1644,7 +1715,7 @@ export default function LienzoDelTablero({
     const porId = new Map(t.fichas.filter((f) => !f.guardada).map((f) => [f.id, f]));
     const medida = (f: FichaEnElEditor) => {
       const m = instancia.current?.getNode(f.id)?.measured;
-      const ancho = m?.width ?? (estaciones && esEstacion(f) ? 760 : f.tipo === "inicio" ? 200 : 250);
+      const ancho = m?.width ?? (estaciones && esEstacion(f, tablero) ? 760 : f.tipo === "inicio" ? 200 : 250);
       return { w: ancho, h: m?.height ?? 280 };
     };
     // Los Seguimientos que cuelgan de UNA sola ficha (van encima de ella).
@@ -1691,7 +1762,7 @@ export default function LienzoDelTablero({
           puestos.set(id, { x, y: yFicha });
           if (seg) {
             // Encima de la estación (el centro del círculo queda ~250+56+72 px a la derecha de la ficha).
-            const centro = estaciones && esEstacion(f) ? x + 250 + 56 + 72 : x + 125;
+            const centro = estaciones && esEstacion(f, tablero) ? x + 250 + 56 + 72 : x + 125;
             puestos.set(seg.id, { x: Math.round(centro - medida(seg).w / 2), y: y });
           }
           anchoCol = Math.max(anchoCol, w);
@@ -1766,7 +1837,7 @@ export default function LienzoDelTablero({
         position: { x: f.x, y: f.y },
         data: { ficha: f },
         // En modo estaciones el bloque es ancho y casi todo aire: el aire deja pasar el ratón al fondo (la manito).
-        ...(estaciones && esEstacion(f) ? { style: { pointerEvents: "none" as const } } : {}),
+        ...(estaciones && esEstacion(f, tablero) ? { style: { pointerEvents: "none" as const } } : {}),
       });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1836,6 +1907,7 @@ export default function LienzoDelTablero({
   // LOS NÚMEROS DE LAS FICHAS (26/10/2026, tipo Kommo): en el orden del camino, desde cada Inicio
   // siguiendo sus cables; las sueltas, al final, de izquierda a derecha. Para ubicarlas y nombrarlas.
   const numeroDe = useMemo(() => numerarFichas(tablero), [tablero]);
+  const upsellDe = useMemo(() => numerarUpsells(tablero), [tablero]);
 
   // EL MODO INALÁMBRICO (27/10/2026): cada conexión, cable o colita, como él la eligió.
   const [todoCable, setTodoCable] = useState(false);
@@ -1931,7 +2003,7 @@ export default function LienzoDelTablero({
           const aSeguimientos = destino?.tipo === "seguimientos";
           // MODO ESTACIONES: el MISMO cable de siempre (mismo estilo); solo cambia dónde se engancha: sale de la
           // estación de su ficha (mismo bloque) y, hacia sus Seguimientos, entra por abajo de ellos.
-          const deEstacion = estaciones && !!origen && esEstacion(origen);
+          const deEstacion = estaciones && !!origen && esEstacion(origen, tablero);
           const comoColita = esColita(tablero, c, todoCable) && !(deEstacion && aSeguimientos);
           return {
             id: c.id,
@@ -2107,10 +2179,11 @@ export default function LienzoDelTablero({
       alTocarQuienCobra: () => alTocarQuienCobraVivo.current?.(),
       estaciones,
       comoAgente,
+      upsellDe,
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente]
+    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));
@@ -2659,7 +2732,7 @@ export default function LienzoDelTablero({
               (() => {
                 const m = menu.m as Extract<Menu, { tipo: "conectar" }>;
                 const origen = tablero.fichas.find((f) => f.id === m.ficha);
-                const salida = origen ? salidasDeLaFicha(origen as FichaDelTablero, paisVisto, nombres).find((s) => s.clave === m.salida) : undefined;
+                const salida = origen ? salidasDeLaFicha(origen as FichaDelTablero, paisVisto, nombres, tablero as Tablero).find((s) => s.clave === m.salida) : undefined;
                 const actual = tablero.cables.find((c) => c.de === m.ficha && c.salida === m.salida);
                 // LA LISTA «CONECTAR A…» (27/10/2026): solo las fichas donde esa salida puede llegar.
                 const posibles = tablero.fichas
@@ -2705,7 +2778,7 @@ export default function LienzoDelTablero({
                   const a = tablero.fichas.find((f) => f.id === c.a);
                   const nombreDe = (f?: FichaEnElEditor) =>
                     !f ? "(ficha borrada)" : f.tipo === "inicio" ? `Inicio${f.pais ? ` ${banderaDe(f.pais)} ${f.pais}` : ""}` : `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
-                  const salida = de ? salidasDeLaFicha(de as FichaDelTablero, paisVisto, nombres).find((s) => s.clave === c.salida)?.etiqueta : undefined;
+                  const salida = de ? salidasDeLaFicha(de as FichaDelTablero, paisVisto, nombres, tablero as Tablero).find((s) => s.clave === c.salida)?.etiqueta : undefined;
                   return (
                     <div className="max-w-xs border-b border-slate-200 px-3 py-1.5 text-[11px] leading-4 text-slate-600">
                       <div>

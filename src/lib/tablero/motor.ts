@@ -107,6 +107,7 @@ import {
   pasosDeLaFicha,
   entregasDeLaFicha,
   eligeDeLaFicha,
+  cobraEnLaFicha,
   pideElNombre,
   conProductosDeLaTienda,
 } from "./datos";
@@ -182,7 +183,21 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
   if (esClaveDeWorkflow(clave)) return leeTableros(crudo?.workflows)[clave.slice(3)] ?? null;
   const t = leeTablerosPorTienda(crudo?.tableros)[clave]?.[canal] ?? null;
   // «El básico / el full de la tienda» (01/11/2026): aquí, y solo aquí, se cambian por sus productos.
-  return conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
+  const conProductos = conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
+  return conCobroEnSusFichas(conProductos);
+}
+
+/**
+ * LA FICHA QUE COBRA SOLA (01/11/2026, `cobraEnLaFicha`): para el bot es un Cobro de su producto escondido dentro
+ * del Mensaje. Así el comprobante se revisa con las MISMAS reglas de siempre (monto, titular, fecha, repetido,
+ * pagó de menos) y sale por su «💰 Si paga» (la salida «pagado», como un Cobro). Sin fichas así, el MISMO objeto.
+ */
+function conCobroEnSusFichas(t: Tablero | null): Tablero | null {
+  if (!t || !t.fichas.some((f) => cobraEnLaFicha(f, t))) return t;
+  return {
+    ...t,
+    fichas: t.fichas.map((f) => (cobraEnLaFicha(f, t) ? { ...f, cobro: { modo: "producto" as const, producto_id: (f.presenta ?? [])[0] } } : f)),
+  };
 }
 
 function producto(config: WorkflowConfig | null, id: string | undefined | null): ProductoDeLaBiblioteca | null {
@@ -722,6 +737,17 @@ async function irA(
       await sendConfiguredSteps(convo, pasosAEnviar as never);
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta (lo marcado o, sin marcar, por sus cables).
       anotarPresentados(convoId, loQuePresentaLaFicha(t, f, estadoEnElTablero(convoId)?.tienda_id));
+      // LA FICHA QUE COBRA SOLA (01/11/2026): su cobro se abre callado, con el precio de su producto (el de oferta
+      // si está activa): sus burbujas ya llevan la oferta y los datos. Un comprobante se lee contra él y sale por
+      // su «💰 Si paga»; si no responde, «⏳ Si no responde» (abajo, como una ficha con opciones).
+      if (cobraEnLaFicha(f, t) && f.cobro?.producto_id) {
+        const pid = f.cobro.producto_id;
+        const v = precioDelProducto(producto(config, pid), pais, estadoEnElTablero(convoId)?.oferta === 1);
+        if (v !== null) {
+          abrirCobro(convoId, f.id, { [pid]: v });
+          console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» cobra sola ${pid} a ${v} (espera su comprobante)`);
+        }
+      }
       const { botones, cuadritos } = opcionesDe(pasosAEnviar);
       // PIDE EL NOMBRE (01/11/2026): espera su respuesta (la lee `turnoDelTablero`). Si no contesta, sigue
       // por «⏳ Si no responde» (o sus Seguimientos colgados ahí). Su «→» es «al dar su nombre».
@@ -734,7 +760,7 @@ async function irA(
         return;
       }
       // Sin opciones sigue de largo… salvo que elija de palabra («✍️ Si elige X»): entonces espera.
-      if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0) {
+      if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && !cobraEnLaFicha(f, t)) {
         await seguir("siguiente");
         return;
       }
