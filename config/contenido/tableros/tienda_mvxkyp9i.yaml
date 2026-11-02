@@ -3229,8 +3229,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvxnewvh-mbuow
       tipo: regalo
-      x: 3883
-      y: 11
+      x: 2904
+      y: 286
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
@@ -3371,8 +3371,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvxovbd8-cn0ck
       tipo: cobro
-      x: 2783
-      y: 143
+      x: 2761
+      y: -33
       steps:
         - type: text
           body_variants:
@@ -3767,6 +3767,10 @@ whatsapp:
       de: f-mvxn7wbz-8qjdg
       salida: siguiente
       a: f-mvxoh57z-19dq
+    - id: c-mvz1f2ro-7b4
+      de: f-mvxoh57z-19dq
+      salida: sin_respuesta
+      a: f-mvxnewvh-mbuow
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
