@@ -1014,7 +1014,7 @@ function DiferenciacionPorNegocio() {
       return (
         <span className="flex shrink-0 items-center gap-2">
           {dosBots}
-          <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 oscuro:bg-emerald-500/20 oscuro:text-emerald-200">
+          <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 oscuro:bg-emerald-500/20 oscuro:text-emerald-900">
             ✓ Suscrito
           </span>
         </span>
@@ -1032,7 +1032,7 @@ function DiferenciacionPorNegocio() {
           type="button"
           disabled={suscribiendo !== null || !estadoLeido}
           onClick={() => void suscribir(id)}
-          className="rounded-lg border border-blue-600 bg-tarjeta px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60 oscuro:text-blue-300"
+          className="rounded-lg border border-blue-600 bg-tarjeta px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60 oscuro:text-blue-800"
         >
           {suscribiendo === id ? "Suscribiendo…" : "Suscribir"}
         </button>
@@ -1070,7 +1070,7 @@ function DiferenciacionPorNegocio() {
         {primeros.map((c) => fila(c.clave, caraDePixel, c.nombre))}
         {resto.length ? (
           <details className="group">
-            <summary className="cursor-pointer list-none py-1.5 pl-16 pr-4 text-sm text-blue-700 group-open:hidden oscuro:text-blue-300">
+            <summary className="cursor-pointer list-none py-1.5 pl-16 pr-4 text-sm text-blue-700 group-open:hidden oscuro:text-blue-800">
               Ver los otros {resto.length} píxeles ▾
             </summary>
             {resto.map((c) => fila(c.clave, caraDePixel, c.nombre))}

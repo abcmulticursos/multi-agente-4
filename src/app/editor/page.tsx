@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEscapeEnPila } from "@/lib/escape-en-pila";
 import EmojiPicker from "@/components/EmojiPicker";
+import InterruptorDeTema from "@/components/InterruptorDeTema";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
 import QualityBadge from "@/components/QualityBadge";
 import { MensajesDelMes } from "@/components/MensajesDelMes";
@@ -10399,7 +10400,7 @@ export default function EditorPage() {
                   encima. En oscuro se invierte: el mismo verde, pero de tinta
                   clara sobre un tinte apenas visible. */}
               <div className="flex flex-wrap items-center gap-1 rounded-lg border-2 border-emerald-500 bg-emerald-50 p-1.5 shadow-sm oscuro:bg-emerald-500/10">
-                <span className="self-center px-1 text-xs font-extrabold uppercase text-emerald-950 oscuro:text-emerald-300">
+                <span className="self-center px-1 text-xs font-extrabold uppercase text-emerald-950 oscuro:text-emerald-800">
                   Bot activo:
                 </span>
                 <select
@@ -10407,7 +10408,7 @@ export default function EditorPage() {
                   onChange={(event) => activateRuntimeModalidad(event.target.value as Modo)}
                   disabled={!cfg || saving}
                   title="Define la modalidad que venderá el bot. No cambia la modalidad que estás editando."
-                  className="rounded-md border border-emerald-500 bg-tarjeta px-2 py-1.5 text-xs font-extrabold text-emerald-950 disabled:opacity-50 oscuro:text-emerald-200"
+                  className="rounded-md border border-emerald-500 bg-tarjeta px-2 py-1.5 text-xs font-extrabold text-emerald-950 disabled:opacity-50 oscuro:text-emerald-900"
                 >
                   <option value="lineal">LINEAL</option>
                   <option value="order_bump">ORDER BUMP</option>
@@ -10416,7 +10417,7 @@ export default function EditorPage() {
                   <option value="doble_oferta_upsell">DOBLE OFERTA + UPSELL</option>
                   <option value="upsell">UPSELL</option>
                 </select>
-                <span className="self-center px-1 text-[11px] font-bold uppercase text-emerald-800 oscuro:text-emerald-300">
+                <span className="self-center px-1 text-[11px] font-bold uppercase text-emerald-800 oscuro:text-emerald-800">
                   {cfg ? `${MODALIDAD_LABEL[runtimeModality(cfg)].toUpperCase()} ACTIVO` : ""}
                 </span>
               </div>
@@ -10426,7 +10427,7 @@ export default function EditorPage() {
                   mueve nada, solo la forma de presentarlo. Compartir color
                   sería invitar a confundirlos. */}
               <div className="flex flex-wrap items-center gap-1 rounded-lg border-2 border-violet-500 bg-violet-50 p-1.5 shadow-sm oscuro:bg-violet-500/10">
-                <span className="self-center px-1 text-xs font-extrabold uppercase text-violet-950 oscuro:text-violet-300">
+                <span className="self-center px-1 text-xs font-extrabold uppercase text-violet-950 oscuro:text-violet-800">
                   Presenta:
                 </span>
                 <select
@@ -10442,7 +10443,7 @@ export default function EditorPage() {
                       ? "Esta modalidad ya vende dos opciones por su cuenta."
                       : "Cambia CÓMO se presenta lo que ya vendes. No mueve tu contenido ni cambia la modalidad activa."
                   }
-                  className="rounded-md border border-violet-500 bg-tarjeta px-2 py-1.5 text-xs font-extrabold text-violet-950 disabled:opacity-50 oscuro:text-violet-200"
+                  className="rounded-md border border-violet-500 bg-tarjeta px-2 py-1.5 text-xs font-extrabold text-violet-950 disabled:opacity-50 oscuro:text-violet-900"
                 >
                   {/* CADA OPCIÓN DICE A QUÉ MODALIDAD SE PARECE.
                       Estaban nombradas por lo que hacen —«dos juntas»,
@@ -10457,7 +10458,7 @@ export default function EditorPage() {
                     COMO -OB- · la segunda se revela al pagar
                   </option>
                 </select>
-                <span className="self-center px-1 text-[11px] font-bold uppercase text-violet-800 oscuro:text-violet-300">
+                <span className="self-center px-1 text-[11px] font-bold uppercase text-violet-800 oscuro:text-violet-800">
                   {yaVendeDosPorSuCuenta
                     ? "YA VENDE DOS"
                     : (cfg?.globals?.segunda_opcion_prestada ?? "") === "dos_juntas"
@@ -10472,7 +10473,7 @@ export default function EditorPage() {
                     hablando, ¿les cambio la forma o los dejo como empezaron?».
                     Apagado es como el bot viene funcionando. */}
                 <span
-                  className="self-center flex items-center gap-1.5 rounded-md border border-violet-500 bg-tarjeta px-2 py-1 text-[11px] font-extrabold uppercase text-violet-950 oscuro:text-violet-200"
+                  className="self-center flex items-center gap-1.5 rounded-md border border-violet-500 bg-tarjeta px-2 py-1 text-[11px] font-extrabold uppercase text-violet-950 oscuro:text-violet-900"
                   title={
                     cfg?.globals?.modo_reenganche
                       ? "REENGANCHE: quien ya está hablando pasa a la forma nueva en su siguiente mensaje. Si ya recibió los datos y dice que va a pagar, primero se le presentan las 2 opciones; si paga directamente, se le entrega sin preguntar."
@@ -10565,7 +10566,7 @@ export default function EditorPage() {
                 onClick={() => void deleteActiveProductProfile()}
                 disabled={!productProfiles || productBusy || saving}
                 title="Quita el producto activo de la lista. Su configuración queda guardada."
-                className="rounded-md border border-red-400/60 bg-tarjeta px-2 py-1.5 text-xs font-bold text-red-600 hover:bg-red-500/10 disabled:opacity-40 oscuro:text-red-300"
+                className="rounded-md border border-red-400/60 bg-tarjeta px-2 py-1.5 text-xs font-bold text-red-600 hover:bg-red-500/10 disabled:opacity-40 oscuro:text-red-800"
               >
                 Eliminar
               </button>
@@ -10586,7 +10587,7 @@ export default function EditorPage() {
                 selectPaymentProfileCountry(e.target.value as CountryCode)
               }
               title="País que editas (precios y métodos de Precios y pagos)"
-              className="mr-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-200 oscuro:hover:bg-emerald-500/20"
+              className="mr-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-900 oscuro:hover:bg-emerald-500/20"
             >
               {COUNTRY_OPTIONS.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -10640,14 +10641,14 @@ export default function EditorPage() {
             <Link
               href="/meta-connect"
               title="Abrir conexiones y cuentas de lectura de Ads"
-              className="rounded-lg border border-sky-400/50 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 oscuro:bg-sky-500/10 oscuro:text-sky-300 oscuro:hover:bg-sky-500/20"
+              className="rounded-lg border border-sky-400/50 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 oscuro:bg-sky-500/10 oscuro:text-sky-800 oscuro:hover:bg-sky-500/20"
             >
               Meta Connect
             </Link>
             <Link
               href="/simulador"
               title="Probar el bot sin enviar nada a Meta"
-              className="rounded-lg border border-emerald-400/50 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-300 oscuro:hover:bg-emerald-500/20"
+              className="rounded-lg border border-emerald-400/50 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-800 oscuro:hover:bg-emerald-500/20"
             >
               Modo prueba
             </Link>
@@ -10756,6 +10757,9 @@ export default function EditorPage() {
                 `components/InterruptorDeTema.tsx`, los colores del oscuro
                 siguen en `globals.css` y la variante `oscuro:` también.
                 Devolverlo es volver a poner esta línea. Ver `layout.tsx`. */}
+            {/* (02/11/2026: VUELVE, con el oscuro terminado y el claro nuevo. Ver `layout.tsx`.) */}
+            <InterruptorDeTema />
+
             {/* LA MARCA DE LA VERSIÓN, PARA SABER SI EL DEPLOY ENTRÓ.
                 Sin esto, mirar la pantalla y no ver un cambio tiene dos causas
                 posibles —que esté mal hecho, o que el deploy no haya tomado el
@@ -18742,7 +18746,7 @@ function FilasEnLaAlineacion({
                         {puesto.enabled === false ? " · apagado" : ""}
                       </span>
                       {avisos.length ? (
-                        <span className="block text-[11px] font-semibold text-amber-700 oscuro:text-amber-300">
+                        <span className="block text-[11px] font-semibold text-amber-700 oscuro:text-amber-800">
                           ⚠ {avisos.join(" · ")}: el bot lo salta.
                         </span>
                       ) : null}
@@ -19711,7 +19715,7 @@ function FilasDeUpsell({
     onFilas(filas.map((f, j) => (j === i ? { ...f, ...parche } : f)));
   };
   const aviso = (texto: string) => (
-    <p className="mt-0.5 text-[11px] font-semibold text-amber-700 oscuro:text-amber-300">
+    <p className="mt-0.5 text-[11px] font-semibold text-amber-700 oscuro:text-amber-800">
       · {texto}
     </p>
   );
@@ -20927,7 +20931,7 @@ function BibliotecaDeProductos({
                     className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold ${
                       donde.apagado
                         ? "border-borde bg-relleno text-tinta-suave"
-                        : "border-violet-300 bg-violet-50 text-violet-800 oscuro:border-violet-700 oscuro:bg-violet-950 oscuro:text-violet-200"
+                        : "border-violet-300 bg-violet-50 text-violet-800 oscuro:border-violet-700 oscuro:bg-violet-100 oscuro:text-violet-900"
                     }`}
                   >
                     {donde.texto}
@@ -33129,7 +33133,7 @@ function VentanaDePlantillas({
   const propios = productos.filter((p) => p.propio);
   const otros = productos.filter((p) => !p.propio);
   const chip = (activo: boolean) =>
-    `rounded-lg border px-3 py-2 text-left text-sm ${activo ? "border-violet-500 bg-violet-50 font-bold text-violet-900 oscuro:bg-violet-500/20 oscuro:text-violet-100" : "border-borde bg-relleno hover:bg-tarjeta"}`;
+    `rounded-lg border px-3 py-2 text-left text-sm ${activo ? "border-violet-500 bg-violet-50 font-bold text-violet-900 oscuro:bg-violet-500/20 oscuro:text-violet-950" : "border-borde bg-relleno hover:bg-tarjeta"}`;
   return (
     <VentanaFlotante
       titulo="📋 Plantillas de modalidad"
@@ -34736,13 +34740,13 @@ function CobradorPorPais({
                 {deLaPersona ? "" : " · por defecto (la cuenta del país)"}
               </div>
               {elegido && !deLaPersona && (
-                <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-200">
+                <div className="mt-1 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-900">
                   ⚠️ {cobradores.find((c) => c.id === elegido)?.nombre?.trim() || "Esa persona"} no tiene cuenta en {pais}: cobra la cuenta del país.
                   Ponle su cuenta en menú usuarios → su tarjeta → «Sus cuentas».
                 </div>
               )}
               {aMano.length > 0 && (
-                <div className="mt-1 rounded bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-800 oscuro:bg-red-500/10 oscuro:text-red-200">
+                <div className="mt-1 rounded bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-800 oscuro:bg-red-500/10 oscuro:text-red-900">
                   🔴 {aMano.length} número(s) de cuenta escritos a mano en textos que leen los clientes de {pais}. Esos clientes le pagarían a ese
                   número, no a {q.nombre || "la persona elegida"}, y su comprobante no se aprobaría. Cámbialos por el comodín en menú usuarios →
                   🔎 Números escritos a mano.
@@ -38251,7 +38255,7 @@ function EditorEmojiTextarea({
               setSpintax({ seleccion: b > a && trozo.trim() && !trozo.includes("\n") ? [a, b] : null });
             }}
             title="Spintax con IA: marca las frases (o selecciona un trozo antes) y la IA propone otras formas de decirlo"
-            className="rounded border border-violet-300 bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 hover:bg-violet-100 oscuro:bg-violet-500/10 oscuro:text-violet-200"
+            className="rounded border border-violet-300 bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 hover:bg-violet-100 oscuro:bg-violet-500/10 oscuro:text-violet-900"
           >
             🔀 Spintax
           </button>
@@ -48130,7 +48134,7 @@ function AvisoDeSinGuardar({
   return (
     <span
       title="Lo escrito está en pantalla pero todavía no está en el archivo. Pulsa Guardar o Ctrl+S."
-      className="self-center rounded-md border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900 oscuro:bg-amber-500/15 oscuro:text-amber-200"
+      className="self-center rounded-md border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900 oscuro:bg-amber-500/15 oscuro:text-amber-900"
     >
       Aún no has guardado tus cambios
     </span>
@@ -55406,7 +55410,7 @@ function AvisoSinBandera({ visible }: { visible: boolean }) {
       role="img"
       aria-label="Sin país: esta pestaña no se dispara"
       title="SIN PAÍS NO SE DISPARA. Elige la bandera del país al que va esta pestaña. Y ojo: con «dirigir por país» apagado es como si no tuviera bandera — el bot tampoco la envía."
-      className="inline-flex h-5 w-5 shrink-0 cursor-help items-center justify-center rounded-full border border-red-400 bg-red-50 text-[11px] font-bold text-red-700 oscuro:bg-red-500/15 oscuro:text-red-300"
+      className="inline-flex h-5 w-5 shrink-0 cursor-help items-center justify-center rounded-full border border-red-400 bg-red-50 text-[11px] font-bold text-red-700 oscuro:bg-red-500/15 oscuro:text-red-800"
     >
       ⚠
     </span>
@@ -55818,7 +55822,7 @@ function PastillaDeTiendas({
               En todas (sin etiqueta)
             </button>
             {huerfanas > 0 && (
-              <span className="px-1 pt-1 text-[10px] font-semibold text-amber-700 oscuro:text-amber-300">
+              <span className="px-1 pt-1 text-[10px] font-semibold text-amber-700 oscuro:text-amber-800">
                 {huerfanas} tienda(s) marcadas que ya no existen. Pulsa «En
                 todas» para limpiarlo.
               </span>
@@ -55949,7 +55953,7 @@ function CobradoresDelProyecto({
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-xs text-emerald-950 oscuro:bg-emerald-500/10 oscuro:text-emerald-200">
+      <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-xs text-emerald-950 oscuro:bg-emerald-500/10 oscuro:text-emerald-900">
         {/* LO PRIMERO QUE HAY QUE DECIR ES QUE ESTO NO REEMPLAZA NADA.
             Lo preguntó el dueño el 01/10/2026: «¿no se supone que todo se va a
             migrar y el que va a usarse es de la sección Otros usuarios que
@@ -56034,7 +56038,7 @@ function CobradoresDelProyecto({
               <button
                 type="button"
                 onClick={() => setAbierto(estaAbierto ? null : cobrador.id)}
-                className="rounded-md border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-200"
+                className="rounded-md border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-900"
               >
                 {estaAbierto ? "Cerrar" : "Sus cuentas"}
                 {paises.length > 0 ? ` · ${paises.length}` : ""}
@@ -56085,7 +56089,7 @@ function CobradoresDelProyecto({
                 cliente acabe en la cuenta equivocada. */}
             <p className="mt-2 text-[11px] text-tinta-suave">
               {paises.length === 0 ? (
-                <span className="font-semibold text-amber-800 oscuro:text-amber-300">
+                <span className="font-semibold text-amber-800 oscuro:text-amber-800">
                   Todavía no cobra en ningún país. Abre «Sus cuentas» y pon al
                   menos un titular.
                 </span>
@@ -56136,7 +56140,7 @@ function CobradoresDelProyecto({
                       <summary className="cursor-pointer text-xs font-bold">
                         {pais.label}
                         {puesto ? (
-                          <span className="ml-1 font-normal text-emerald-700 oscuro:text-emerald-300">
+                          <span className="ml-1 font-normal text-emerald-700 oscuro:text-emerald-800">
                             · cobra aquí
                           </span>
                         ) : (
@@ -56294,7 +56298,7 @@ function CobradoresDelProyecto({
                                 .map((x) => String(x ?? "").trim().toLowerCase())
                                 .includes(metodo.method)
                             ) && (
-                              <p className="mt-2 rounded-md border border-red-400 bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-800 oscuro:bg-red-500/10 oscuro:text-red-300">
+                              <p className="mt-2 rounded-md border border-red-400 bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-800 oscuro:bg-red-500/10 oscuro:text-red-800">
                                 ⚠ Apagaste todos los métodos de {pais.label}. Su
                                 tienda no tendría ninguna forma de cobrar aquí:
                                 deja al menos uno encendido.
@@ -56340,7 +56344,7 @@ function CobradoresDelProyecto({
                               ))}
                             </div>
                             {puesto && faltan.length > 0 && (
-                              <p className="mt-1.5 text-[11px] font-semibold text-amber-800 oscuro:text-amber-300">
+                              <p className="mt-1.5 text-[11px] font-semibold text-amber-800 oscuro:text-amber-800">
                                 ⚠ Le falta {faltan.map(([k]) => `«${nombreDeLaClave(k)}»`).join(", ")}: en su tienda, donde
                                 tus textos la nombran saldría su cuenta principal.
                               </p>
@@ -56353,7 +56357,7 @@ function CobradoresDelProyecto({
                           el titular es lo único que ata el pago a una persona. */}
                       {String(datos.numero_de_cuenta ?? "").trim() &&
                         !String(datos.titular ?? "").trim() && (
-                          <p className="mt-2 text-[11px] font-semibold text-amber-800 oscuro:text-amber-300">
+                          <p className="mt-2 text-[11px] font-semibold text-amber-800 oscuro:text-amber-800">
                             ⚠ Tiene cuenta pero no titular. Se le cobraría a esta
                             cuenta y el comprobante se aprobaría con el titular del
                             país. Escribe el titular de esta cuenta.
@@ -56630,7 +56634,7 @@ function ElegirConexion({
         <span className="flex items-center gap-2">
           <span className="truncate text-sm font-medium text-tinta">{o.etiqueta}</span>
           {o.activa && (
-            <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 oscuro:bg-emerald-500/20 oscuro:text-emerald-200">
+            <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 oscuro:bg-emerald-500/20 oscuro:text-emerald-900">
               Activa
             </span>
           )}
@@ -56644,7 +56648,7 @@ function ElegirConexion({
   return (
     <>
       {opciones.length === 0 ? (
-        <p className="mt-1 text-[10px] text-amber-700 oscuro:text-amber-300">{sinLista}</p>
+        <p className="mt-1 text-[10px] text-amber-700 oscuro:text-amber-800">{sinLista}</p>
       ) : (
         <span ref={cajaDelSelector} className="relative mt-1 block">
           <button
@@ -57291,7 +57295,7 @@ function TiendasDelProyecto({
   };
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-sky-300 bg-sky-50 p-3 text-xs text-sky-950 oscuro:bg-sky-500/10 oscuro:text-sky-200">
+      <div className="rounded-lg border border-sky-300 bg-sky-50 p-3 text-xs text-sky-950 oscuro:bg-sky-500/10 oscuro:text-sky-900">
         <p className="font-bold">Un número, una venta.</p>
         <p className="mt-1">
           Cada tienda tiene su número, su forma de presentar y sus productos —
@@ -57371,7 +57375,7 @@ function TiendasDelProyecto({
                 : ""}
             </span>
           ) : numeroSinCuenta ? (
-            <span className="mt-1 block text-[10px] font-bold text-amber-700 oscuro:text-amber-300">
+            <span className="mt-1 block text-[10px] font-bold text-amber-700 oscuro:text-amber-800">
               El número aún no tiene cuenta identificada, así que se ofrecen todas. Pulsa
               «Actualizar lista de Meta» en Meta Connect para que se ordene.
             </span>
@@ -57452,7 +57456,7 @@ function TiendasDelProyecto({
               const graves = vivos.filter((a) => a.grave).length;
               if (vivos.length === 0) {
                 return (
-                  <span className="shrink-0 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 oscuro:bg-emerald-500/10 oscuro:text-emerald-200">
+                  <span className="shrink-0 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 oscuro:bg-emerald-500/10 oscuro:text-emerald-900">
                     ✅ lista para vender
                   </span>
                 );
@@ -57475,7 +57479,7 @@ function TiendasDelProyecto({
             <button
               type="button"
               onClick={() => setTiendaAbierta(tienda.id)}
-              className="shrink-0 rounded-md border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-200"
+              className="shrink-0 rounded-md border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100 oscuro:bg-emerald-500/10 oscuro:text-emerald-900"
             >
               Abrir
             </button>
@@ -57540,7 +57544,7 @@ function TiendasDelProyecto({
               const todos = revisarTienda(tienda, i, tiendas, cfg, conexiones);
               if (todos.length === 0) {
                 return (
-                  <div className="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-xs text-emerald-900 oscuro:bg-emerald-500/10 oscuro:text-emerald-200">
+                  <div className="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-xs text-emerald-900 oscuro:bg-emerald-500/10 oscuro:text-emerald-900">
                     <p className="font-bold">✅ Lista para vender.</p>
                     <p className="mt-1">
                       Tiene su número, su página, su contenido enganchado y su entrega.
@@ -57795,7 +57799,7 @@ function TiendasDelProyecto({
                     porque la activa era la suya; con dos, las ventas del segundo se
                     medían con la página del primero y Meta las rechazaba. */}
                 {!String(tienda.pagina ?? "").trim() && (
-                  <span className="mt-1 block text-[10px] font-bold text-amber-700 oscuro:text-amber-300">
+                  <span className="mt-1 block text-[10px] font-bold text-amber-700 oscuro:text-amber-800">
                     Sin página, Meta puede no registrar las compras de esta tienda. La
                     pide en cada venta, aunque no uses Messenger.
                   </span>
@@ -57928,7 +57932,7 @@ function TiendasDelProyecto({
                     if (valor !== "") onReenganche(siguientes);
                     else onTiendas(siguientes);
                   }}
-                  className="mt-1 block w-full rounded-md border border-violet-500 bg-tarjeta px-2 py-1.5 text-sm font-bold text-violet-950 oscuro:text-violet-200"
+                  className="mt-1 block w-full rounded-md border border-violet-500 bg-tarjeta px-2 py-1.5 text-sm font-bold text-violet-950 oscuro:text-violet-900"
                 >
                   <option value="">UN PRODUCTO · como hoy</option>
                   <option value="dos_juntas">COMO -DOU- · las dos desde el principio</option>
@@ -57938,7 +57942,7 @@ function TiendasDelProyecto({
             </div>
 
             {sinNumero && tienda.enabled !== false && (
-              <p className="mt-2 text-[11px] font-semibold text-amber-800 oscuro:text-amber-300">
+              <p className="mt-2 text-[11px] font-semibold text-amber-800 oscuro:text-amber-800">
                 Preparada: ponle el número cuando quieras que empiece a vender.
               </p>
             )}
@@ -57955,7 +57959,7 @@ function TiendasDelProyecto({
                 persona. No rompe la venta —por eso se eligió así— pero es dinero
                 que no llega a quien debía, y eso se ve aquí y no en el banco. */}
             {paisesQueLeFaltan(i).length > 0 && (
-              <p className="mt-2 rounded-md border border-amber-400 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-200">
+              <p className="mt-2 rounded-md border border-amber-400 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-900">
                 ⚠ {nombreDelCobrador(i)} no tiene cuenta en{" "}
                 {paisesQueLeFaltan(i).join(", ")}. Un cliente de ahí pagaría a{" "}
                 <strong>tu</strong> cuenta del país, no a la suya.
@@ -57963,7 +57967,7 @@ function TiendasDelProyecto({
             )}
 
             {sinSeguimientos(i) && (
-              <p className="mt-2 rounded-md border border-amber-400 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-200">
+              <p className="mt-2 rounded-md border border-amber-400 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-900 oscuro:bg-amber-500/10 oscuro:text-amber-900">
                 ⚠ Esta tienda no recibiría ningún seguimiento. Todos están
                 etiquetados para otras tiendas. Quítale la etiqueta a alguno —o
                 márcalo también para ésta— si quieres que aquí también se

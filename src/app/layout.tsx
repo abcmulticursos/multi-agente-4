@@ -122,7 +122,10 @@ export const viewport: Viewport = {
  * Y NO SE BORRA LO GUARDADO: quien tenía elegido el oscuro lo recupera tal cual
  * el día que se encienda.
  */
-const ELEGIR_TEMA_ANTES_DE_PINTAR = `document.documentElement.dataset.tema="claro";`;
+// (02/11/2026: SE ENCIENDE OTRA VEZ, con su diseño nuevo — el claro de las ventanas «Claro 2» y el oscuro azul marino, con
+// los paneles de color ya pasados a su versión oscura. Él: «que tenga belleza visual y coherencia… que se vea y se pueda
+// trabajar». Se lee lo guardado; sin nada, claro.)
+const ELEGIR_TEMA_ANTES_DE_PINTAR = `try{document.documentElement.dataset.tema=localStorage.getItem("wf:tema")==="oscuro"?"oscuro":"claro"}catch(e){document.documentElement.dataset.tema="claro"}`;
 
 export default function RootLayout({
   children,
