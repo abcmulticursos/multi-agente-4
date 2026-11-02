@@ -192,6 +192,19 @@ export function ponerElPrecioPorDefecto(fn: (convo: ConversationRow) => number |
 export function precioDelTableroPara(convo: ConversationRow): number | undefined {
   return precioPorDefecto(convo);
 }
+/** Lo mismo para el REENVÍO de una entrega: sus comodines con el producto entregado (lo pone el motor, 02/11/2026). */
+let preparadorDeEntrega: (convo: ConversationRow, productoId: string, pasos: unknown) => unknown = (_c, _p, pasos) => pasos;
+export function ponerPreparadorDeEntrega(fn: (convo: ConversationRow, productoId: string, pasos: unknown) => unknown): void {
+  preparadorDeEntrega = fn;
+}
+export function prepararEntrega(convo: ConversationRow, productoId: string, pasos: unknown): unknown {
+  return preparadorDeEntrega(convo, productoId, pasos);
+}
+/** Y para los DATOS DE PAGO de un método: sus comodines con los productos del cobro abierto (lo pone el motor). */
+let preparadorDeDatos: (convo: ConversationRow, pasos: unknown) => unknown = (_c, pasos) => pasos;
+export function ponerPreparadorDeDatos(fn: (convo: ConversationRow, pasos: unknown) => unknown): void {
+  preparadorDeDatos = fn;
+}
 
 /**
  * MANDA LOS DATOS DE ESE MÉTODO con el precio de lo que eligió. Deja el método anotado en la
@@ -207,7 +220,7 @@ export async function mandarDatosDelMetodo(convo: ConversationRow, metodo: strin
   }
   const fresca = getConversationById(convo.id) ?? convo;
   console.log(`[tablero:pago] convo ${convo.id}: datos de «${metodo}» por ${precio ?? "?"}${nombre ? ` (${nombre})` : ""}`);
-  return sendConfiguredSteps(fresca, conElNombreDelProducto(pasos, nombre) as never, precio ?? precioPorDefecto(fresca));
+  return sendConfiguredSteps(fresca, preparadorDeDatos(fresca, conElNombreDelProducto(pasos, nombre)) as never, precio ?? precioPorDefecto(fresca));
 }
 
 /**
@@ -219,7 +232,8 @@ export async function preguntarElMetodo(convo: ConversationRow, pasosDeLaFicha: 
   const config = loadWorkflowConfig();
   const conBotones = config?.payment_method_buttons === true;
   precio = precio ?? precioPorDefecto(convo);
-  const salieron = pasosDeLaFicha.length > 0 && (await sendConfiguredSteps(convo, conElNombreDelProducto(pasosDeLaFicha, nombre) as never, precio));
+  const salieron =
+    pasosDeLaFicha.length > 0 && (await sendConfiguredSteps(convo, preparadorDeDatos(convo, conElNombreDelProducto(pasosDeLaFicha, nombre)) as never, precio));
   const botones = getPaymentButtons(convo.phone).map((b, i) => ({ id: `pmethod:${b.method}:${i}`, title: b.label }));
   if (conBotones && botones.length > 0) {
     const cuerpo = (config?.payment_buttons_prompt ?? "").trim();
@@ -229,6 +243,6 @@ export async function preguntarElMetodo(convo: ConversationRow, pasosDeLaFicha: 
   if (!salieron) {
     const pais = getEffectiveCountryCode(convo.phone, config);
     const menu = (resolveCountryPaymentProfile(pais, config)?.payment_text ?? "").trim();
-    if (menu) await sendConfiguredSteps(convo, [{ type: "text", body: menu } as ResponseStep] as never, precio);
+    if (menu) await sendConfiguredSteps(convo, preparadorDeDatos(convo, [{ type: "text", body: menu } as ResponseStep]) as never, precio);
   }
 }

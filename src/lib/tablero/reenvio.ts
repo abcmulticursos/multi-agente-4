@@ -39,11 +39,12 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
   // Cada entrega con SU nombre en {{PRODUCTO_ENTREGADO}}, como la entrega de la ficha (24/10/2026:
   // el reenvío salía «Entrega de **»).
   void Promise.all([import("@/lib/workflow/engine"), import("./pago")])
-    .then(([{ sendConfiguredSteps }, { conElNombreDelProducto, precioDelTableroPara }]) => {
+    .then(([{ sendConfiguredSteps }, { conElNombreDelProducto, precioDelTableroPara, prepararEntrega }]) => {
       // Cada clave es una entrega: la principal de un producto o una extra suya (muestras, un nivel…).
+      // (02/11/2026: con los comodines de SU producto, como la entrega de la ficha.)
       const pasos = productos.flatMap((clave) => {
         const e = laEntrega(config, clave);
-        return e?.pasos?.length ? conElNombreDelProducto(e.pasos as never, e.producto.name) : [];
+        return e?.pasos?.length ? (prepararEntrega(convo, e.producto.id, conElNombreDelProducto(e.pasos as never, e.producto.name)) as unknown[]) : [];
       });
       // Enmarcado como la venta de siempre (`enmarcarElReenvio`): primero «te lo reenvío».
       // (Desde el motor de siempre no: ahí ya lo dice antes de llamar.)

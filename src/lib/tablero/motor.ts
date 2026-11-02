@@ -88,7 +88,7 @@ import {
 import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
-import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, preguntarElMetodo } from "./pago";
+import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, ponerPreparadorDeDatos, ponerPreparadorDeEntrega, preguntarElMetodo } from "./pago";
 import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import {
@@ -110,6 +110,8 @@ import {
   cobraEnLaFicha,
   cobraPorSusCables,
   productosQueCobraLaFicha,
+  alternativasDelCobro,
+  productosDeSusCobros,
   BASICO_DE_LA_TIENDA,
   FULL_DE_LA_TIENDA,
   pideElNombre,
@@ -202,7 +204,41 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
  * Quien ya pasa su precio (el cobro, los datos de un método…) no cambia.
  */
 async function sendConfiguredSteps(convo: ConversationRow, steps: unknown, precio?: number): Promise<boolean> {
-  return enviarBurbujasDelMotor(convo, steps as never, precio ?? precioDelTablero(convo));
+  return enviarBurbujasDelMotor(convo, conLoEntregado(convo, steps) as never, precio ?? precioDelTablero(convo));
+}
+
+/**
+ * {{ENLACES}} Y {{MATERIAL}} EN CUALQUIER BURBUJA (02/11/2026, la revisión de comodines): eran del correo, y en una
+ * burbuja de WhatsApp le llegaban al cliente TAL CUAL, con sus llaves. Ahora valen en todas: los enlaces (o el material)
+ * de lo que el tablero ya le entregó; sin nada entregado, vacío (nunca las llaves).
+ */
+function conLoEntregado(convo: ConversationRow, steps: unknown): unknown {
+  const texto = JSON.stringify(steps ?? null);
+  if (!/\{\{\s*(ENLACES|MATERIAL)\s*\}\}/i.test(texto)) return steps;
+  const config = loadWorkflowConfig();
+  const productos: LoEntregado[] = entregasDelCliente(convo.id).flatMap((clave) => {
+    const e = laEntrega(config, clave);
+    return e ? [{ name: e.nombre, delivery: e.pasos }] : [];
+  });
+  const enlaces = productos.length ? enlacesParaElCorreo(productos) : "";
+  const material = productos.length ? materialParaElCorreo(productos) : "";
+  const cambiar = (v: unknown, llave = ""): unknown => {
+    if (typeof v === "string")
+      return llave === "drive_url" ? v : v.replace(/\{\{\s*ENLACES\s*\}\}/gi, enlaces).replace(/\{\{\s*MATERIAL\s*\}\}/gi, material);
+    if (Array.isArray(v)) return v.map((x) => cambiar(x, llave));
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, cambiar(x, k)]));
+    return v;
+  };
+  return cambiar(steps);
+}
+
+/**
+ * LOS COMODINES DE UNA ENTREGA, CON EL PRODUCTO QUE SE ENTREGA (02/11/2026, la revisión de comodines): la entrega de LENGUA
+ * decía «S/. 11» y la del SUPER PACK «S/. 7»: sus comodines los llenaba la venta de siempre con SU producto. Ahora
+ * {{PRODUCTO}}, {{PRECIO_COMPLETO}}… son los del producto entregado, en el país del cliente (con la oferta si la tiene).
+ */
+function conLosComodinesDeLaEntrega<T>(convoId: number, pasos: T, productoId: string, pais: string): T {
+  return conLosComodinesDeLaFicha(pasos, productosDeLaFicha(loadWorkflowConfig(), [productoId], pais, estadoEnElTablero(convoId)?.oferta === 1), pais);
 }
 
 function precioDelTablero(convo: ConversationRow): number | undefined {
@@ -234,8 +270,25 @@ function precioDelTablero(convo: ConversationRow): number | undefined {
   return v ?? undefined;
 }
 
-// Los datos de pago y el reenvío (pago.ts, reenvio.ts) usan el mismo precio por defecto.
+// Los datos de pago y el reenvío (pago.ts, reenvio.ts) usan el mismo precio por defecto, y el reenvío los mismos
+// comodines de la entrega.
 ponerElPrecioPorDefecto(precioDelTablero);
+ponerPreparadorDeEntrega((convo, productoId, pasos) =>
+  conLoEntregado(convo, conLosComodinesDeLaEntrega(convo.id, pasos, productoId, getEffectiveCountryCode(convo.phone, loadWorkflowConfig())))
+);
+// Los datos de pago de un método: con los productos del cobro abierto y sus precios congelados (los mismos que el cobro).
+ponerPreparadorDeDatos((convo, pasos) => {
+  const e = estadoEnElTablero(convo.id);
+  const config = loadWorkflowConfig();
+  const t = e ? tableroDe(config, e.tienda_id, (e.canal as CanalDelTablero) || "whatsapp") : null;
+  const fc = e?.cobro_ficha_id ? t?.fichas.find((x) => x.id === e.cobro_ficha_id) : undefined;
+  if (!e || !fc) return conLoEntregado(convo, pasos);
+  const precios = preciosDelCobro(e);
+  const elegido = e.cobro_elegido ?? fc.cobro?.producto_id ?? undefined;
+  const pais = getEffectiveCountryCode(convo.phone, config);
+  const ids = [elegido, ...Object.keys(precios)];
+  return conLoEntregado(convo, conLosComodinesDeLaFicha(pasos, productosDeLaFicha(config, ids, pais, e.oferta === 1, precios), pais));
+});
 
 /** «El básico / el full de la tienda» → su producto de verdad (sin ese producto en la tienda, se queda el código). */
 function elDeLaTienda(id: string, alineacion: Record<string, unknown> | undefined | null): string {
@@ -361,26 +414,7 @@ function productosDeLaTienda(tiendaId: string): string[] {
  * misma elección). Con ellas vuelven el upgrade («¿puedo completar para el otro?» → paga la diferencia) y «ya
  * está incluido». Un upsell, que sale de otra ficha, no es alternativa de nadie: se sigue pagando entero.
  */
-function alternativasDelCobro(t: Tablero | null | undefined, f: FichaDelTablero): string[] {
-  if (!t || f.tipo !== "cobro") return [];
-  if (f.cobro?.acepta?.length) return f.cobro.acepta;
-  const padres = t.cables.filter((c) => c.a === f.id).map((c) => t.fichas.find((x) => x.id === c.de)).filter((x): x is FichaDelTablero => !!x);
-  return [...new Set(padres.flatMap((p) => productosDeSusCobros(t, p)))].filter((id) => id !== f.cobro?.producto_id);
-}
-
-/** Los productos de los Cobros (por producto, encendidos) a los que llevan los cables de esta ficha. */
-function productosDeSusCobros(t: Tablero | null | undefined, f: FichaDelTablero): string[] {
-  if (!t) return [];
-  return [
-    ...new Set(
-      t.cables
-        .filter((c) => c.de === f.id)
-        .map((c) => t.fichas.find((x) => x.id === c.a))
-        .filter((x): x is FichaDelTablero => !!x && x.tipo === "cobro" && !x.apagada && x.cobro?.modo === "producto" && !!x.cobro.producto_id)
-        .map((x) => x.cobro!.producto_id!)
-    ),
-  ];
-}
+// (`alternativasDelCobro` y `productosDeSusCobros` viven en datos.ts desde el 02/11/2026: el visor usa las mismas.)
 
 function loQuePresentaLaFicha(t: Tablero | null | undefined, f: FichaDelTablero, tiendaId: string | null | undefined): string[] {
   if (f.presenta?.length) return f.presenta;
@@ -886,7 +920,7 @@ async function irA(
           console.warn(`[tablero] convo ${convoId}: la entrega «${clave}» no existe o no tiene burbujas`);
           continue;
         }
-        await sendConfiguredSteps(convo, conElNombreDelProducto(pasos as never, e.producto.name) as never);
+        await sendConfiguredSteps(convo, conLosComodinesDeLaEntrega(convoId, conElNombreDelProducto(pasos as never, e.producto.name), e.producto.id, pais) as never);
         anotarEntrega(convoId, clave);
         anotarPresentados(convoId, [e.producto.id]);
         salio++;
@@ -1445,7 +1479,11 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
   // LA ETAPA (25/10/2026): vendiendo (lo que se le ofrece aún no lo compró), con los datos de pago ya
   // enviados (espera su comprobante), o después de comprar sin nada nuevo delante.
   const fresca = getConversationById(convo.id) ?? convo;
-  const datosEnviados = !!cobro && (estado?.cobro_pagado ?? 0) <= 0 && (!cobro.cobro?.metodos || !!fresca.selected_payment_method?.trim());
+  // (02/11/2026, su conv 244: en el upsell —su ficha 6, que COBRA SOLA y deja su cobro abierto en silencio— preguntó «y
+  // esto qué es» y la IA cerró con «Quedo pendiente de tu comprobante»: él: «nunca dijo que iba a pagar… me suena a
+  // presionarlo». El cobro escondido de una ficha que no es Cobro no es «ya decidió»: sigue siendo venta.)
+  const datosEnviados =
+    !!cobro && cobro.tipo === "cobro" && (estado?.cobro_pagado ?? 0) <= 0 && (!cobro.cobro?.metodos || !!fresca.selected_payment_method?.trim());
   const yaCompro = comprados.size > 0 || entregasDelCliente(convo.id).length > 0;
   const nombresComprados = new Set([...comprados].map((id) => nombreDe(id)));
   const ofreceAlgoNuevo = ofrece.some((n) => !!n && !nombresComprados.has(n));
@@ -2595,7 +2633,10 @@ async function cerrarLaVenta(
     const e = laEntrega(config, productoId);
     const pasos = pasosActivos(e?.pasos);
     if (e && pasos.length) {
-      await sendConfiguredSteps(convo, conElNombreDelProducto(pasos as never, e.producto.name) as never);
+      await sendConfiguredSteps(
+        convo,
+        conLosComodinesDeLaEntrega(convo.id, conElNombreDelProducto(pasos as never, e.producto.name), e.producto.id, getEffectiveCountryCode(convo.phone, config)) as never
+      );
       anotarEntrega(convo.id, productoId);
       anotarPresentados(convo.id, [e.producto.id]);
       console.log(`[tablero] convo ${convo.id}: «💰 Si paga» de «${f.titulo || f.id}» → entregado ${productoId} de frente`);

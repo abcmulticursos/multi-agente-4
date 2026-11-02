@@ -30,7 +30,8 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
-import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda, sinCablesHuerfanos } from "@/lib/tablero/datos";
+import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda, idsDeComodinesDeLaFicha, sinCablesHuerfanos } from "@/lib/tablero/datos";
+import type { FichaDelTablero, Tablero } from "@/lib/tablero/tipos";
 import { comodinesDeLaFichaEnTexto, type ProductoConPrecio } from "@/lib/tablero/comodines";
 import {
   aplicarPase,
@@ -1159,7 +1160,7 @@ const EnElTableroContext = createContext(false);
  * (`comodinesDeLaFichaEnTexto`). null = no es una ficha del tablero, o no presenta productos.
  */
 const ProductosDeLaFichaContext = createContext<ProductosDeLaFicha | null>(null);
-type ProductosDeLaFicha = { productos: ProductoConPrecio[]; pais: string };
+type ProductosDeLaFicha = { productos: ProductoConPrecio[]; pais: string; /** El de {precio} (02/11/2026). */ idPorDefecto?: string };
 /** LOS WORKFLOWS DEL PROYECTO (23/10/2026), para «▶ Activar workflow» en botones y cuadritos. */
 const WorkflowsContext = createContext<Array<{ id: string; nombre: string }>>([]);
 /**
@@ -24170,8 +24171,14 @@ function applyPreviewPrices(
 ): string {
   let out = text;
   // EN UNA FICHA DEL TABLERO, sus productos primero: la misma función que el bot.
-  if (context?.productosDeLaFicha?.productos.length)
+  if (context?.productosDeLaFicha?.productos.length) {
     out = comodinesDeLaFichaEnTexto(out, context.productosDeLaFicha.productos, context.productosDeLaFicha.pais);
+    // {{ENLACES}} / {{MATERIAL}} (02/11/2026): el bot pone los enlaces (o el material) de lo que ya le entregó, o nada si
+    // aún no le entregó nada. El visor no sabe qué cliente es: dice qué irá ahí, nunca las llaves.
+    out = out
+      .replace(/\{\{\s*ENLACES\s*\}\}/gi, "[los enlaces de lo que ya se le entregó]")
+      .replace(/\{\{\s*MATERIAL\s*\}\}/gi, "[el material que ya se le entregó]");
+  }
   // {{METODO_DE_PAGO_1/2/3}}: expande el texto POR PAÍS PRIMERO, para que sus
   // comodines internos ({{NOMBRE_RECEPTOR}}, {{PRECIO_SEGUN_ELECCION}}…) los
   // resuelva el resto de esta función, igual que en vivo.
@@ -32188,7 +32195,9 @@ function PantallaDelTableroCargada({
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
             // EL PAÍS DE SU MANTA (25/10/2026), como el gestor y los ajustes: una intro de Ecuador
             // enseña sus precios en dólares aunque «Montos de» diga Perú.
-            pais={paisDeSuManta(tablero, fichaDeCajon, paisVisto)}
+            // (02/11/2026: el de la BANDERA, para todo el visor — él: «el que debería mandar es el país». Al tocar una ficha,
+            // la bandera ya pasa al país de su manta.)
+            pais={paisVisto}
             // Doble clic en una burbuja de la ficha: se abre en ESA burbuja, como en la pizarra.
             burbuja={burbujaDelCajon ?? undefined}
             onGuardar={(steps) => {
@@ -32207,7 +32216,7 @@ function PantallaDelTableroCargada({
             key={fichaDeGestor.id}
             ficha={fichaDeGestor}
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
-            pais={paisDeSuManta(tablero, fichaDeGestor, paisVisto)}
+            pais={paisVisto}
             onCambiar={(cambio) => cambiarFicha(fichaDeGestor.id, cambio)}
             onCerrar={() => setGestor(null)}
             onRegistroDeAnuncios={(ad_registry) => aplicar({ ...vivoCfg.current, ad_registry })}
@@ -34420,10 +34429,15 @@ function productosParaElVisor(
   deLaTienda?: Record<string, unknown>
 ): ProductosDeLaFicha | null {
   if (!f) return null;
-  const pais = tablero ? paisDeSuManta(tablero, f, paisVisto) : paisVisto;
-  let ids = f.tipo === "cobro" ? [f.cobro?.producto_id, ...(f.cobro?.acepta ?? [])] : (f.presenta ?? []);
-  if (f.tipo !== "cobro" && ids.length === 0 && deLaTienda)
-    ids = [deLaTienda.basico, deLaTienda.unico, deLaTienda.full].filter((x): x is string => typeof x === "string" && !!x);
+  // UN SOLO PAÍS, EL DE LA BANDERA (02/11/2026). Él: «el que debería mandar en cuanto a precio es el país». Antes aquí iba
+  // el de su manta y el resto del visor el del selector general: en Ecuador mostraba precios de Perú.
+  const pais = paisVisto;
+  // LOS MISMOS PRODUCTOS QUE EL BOT (`idsDeComodinesDeLaFicha`, datos.ts): el cobro con lo que acepta, «Presenta», los de
+  // los Cobros a los que lleva, o los de la tienda. Antes el visor no sumaba las alternativas del cobro ni seguía su orden.
+  const deLaTiendaIds = deLaTienda
+    ? [...new Set([deLaTienda.basico, deLaTienda.unico, deLaTienda.full].filter((x): x is string => typeof x === "string" && !!x))]
+    : [];
+  let ids: (string | undefined)[] = idsDeComodinesDeLaFicha(f as FichaDelTablero, tablero as Tablero | undefined, deLaTiendaIds);
   // «El básico / el full de la tienda»: el visor los cambia como el bot (`conProductosDeLaTienda`).
   ids = ids.map((x) => (x ? conProductosDeLaTienda(x, deLaTienda) : x));
   // EL PRECIO QUE COBRARÁ EL BOT (25/10/2026): «¿en los visores se pueden ver los precios ya rebajados
@@ -34448,7 +34462,15 @@ function productosParaElVisor(
       oferta,
     });
   }
-  return productos.length ? { productos, pais } : null;
+  if (!productos.length) return null;
+  // EL {precio} DEL VISOR, CON LA REGLA DEL BOT (`precioDelTablero`): el del cobro (su producto), el del único producto, o
+  // —con varios y sin elegir todavía— el del básico de la tienda.
+  const basicoDeLaTienda = [deLaTienda?.basico, deLaTienda?.unico].find((x): x is string => typeof x === "string" && !!x);
+  const idPorDefecto =
+    f.tipo === "cobro" || productos.length === 1
+      ? productos[0].id
+      : productos.find((p) => p.id === basicoDeLaTienda)?.id ?? [...productos].sort((a, b) => (a.precio ?? 0) - (b.precio ?? 0))[0].id;
+  return { productos, pais, idPorDefecto };
 }
 
 function VentanaDeTexto({
@@ -34863,10 +34885,19 @@ function VentanaDelCajon({
   // EL {precio} DEL VISOR, EL DE SU PRODUCTO (02/11/2026). Él: «en los visores se sigue representando 11». El bot ya pone
   // el precio del producto de la ficha (`precioDeLaFicha` del motor); el visor usaba el general. Con UN producto, su
   // precio en el país de su manta (el de oferta si el seguimiento ya la activó: lo trae `productosFicha`).
-  const precioDelProductoDeLaFicha =
-    productosFicha?.productos.length === 1 && typeof productosFicha.productos[0].precio === "number"
-      ? productosFicha.productos[0].precio
-      : undefined;
+  // (02/11/2026, la revisión de comodines: con la regla del bot también con varios productos —el del cobro, o el básico de
+  // la tienda mientras no elige—; antes con dos salía el precio general.)
+  const precioDelProductoDeLaFicha = (() => {
+    const p = productosFicha?.productos.find((x) => x.id === productosFicha.idPorDefecto) ?? (productosFicha?.productos.length === 1 ? productosFicha.productos[0] : undefined);
+    return typeof p?.precio === "number" ? p.precio : undefined;
+  })();
+  // EL PAÍS DEL VISOR, UNO SOLO (02/11/2026): el de la bandera, para TODOS sus comodines (moneda, {precio}, datos de pago y
+  // los de producto). Antes los de producto tomaban uno y el resto el del selector general del editor.
+  const contextoHeredado = useContext(EditorPreviewContext);
+  const contextoDelPais = useMemo<PreviewContext>(
+    () => (pais ? { ...contextoHeredado, ...previewContextFromConfig(cfgVista, pais as CountryCode), highlightPlaceholderValues: contextoHeredado.highlightPlaceholderValues } : contextoHeredado),
+    [contextoHeredado, cfgVista, pais]
+  );
   const [borrador, setBorradorDirecto] = useState<EditorStep[]>(steps);
   /**
    * CTRL+Z DENTRO DE LA VENTANA (19/10/2026): «acabo de mover una burbuja manualmente en el visor,
@@ -35012,6 +35043,7 @@ function VentanaDelCajon({
             deLaTienda={anuncios.deLaTienda}
           />
         )}
+        <EditorPreviewContext.Provider value={contextoDelPais}>
         <StepEditorPreviewPair
           steps={borrador}
           onChange={setBorrador}
@@ -35029,9 +35061,10 @@ function VentanaDelCajon({
               }
             : {})}
           {...(precioDelProductoDeLaFicha !== undefined ? { stagePriceSoles: precioDelProductoDeLaFicha } : {})}
-          previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
+          previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista, (pais || undefined) as CountryCode | undefined), productosFicha)}
           sinExpandir
         />
+        </EditorPreviewContext.Provider>
       </div>
     );
   }
@@ -35100,6 +35133,7 @@ function VentanaDelCajon({
               />
             </div>
           )}
+          <EditorPreviewContext.Provider value={contextoDelPais}>
           <StepEditorPreviewPair
             steps={borrador}
             onChange={setBorrador}
@@ -35121,9 +35155,10 @@ function VentanaDelCajon({
                 }
               : {})}
             {...(precioDelProductoDeLaFicha !== undefined ? { stagePriceSoles: precioDelProductoDeLaFicha } : {})}
-            previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
+            previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista, (pais || undefined) as CountryCode | undefined), productosFicha)}
             sinExpandir
           />
+          </EditorPreviewContext.Provider>
         </div>
       </div>
     </div>
@@ -35151,14 +35186,13 @@ function configComoLaVeLaTienda(
       ...cfg.globals,
       segunda_opcion_prestada: semi as "" | "dos_juntas" | "segunda_oculta",
     },
+    // (02/11/2026, la revisión de comodines: la de la tienda REEMPLAZA a la general, como el bot —`laAlineacionQueJuega`—.
+    // Antes se mezclaban, y el visor de una tienda sin complementario enseñaba el de la general, que al cliente no le llega.)
     ...(suya.length > 0
       ? {
           alineacion_por_modalidad: {
             ...cfg.alineacion_por_modalidad,
-            [mode]: {
-              ...(cfg.alineacion_por_modalidad?.[mode] ?? {}),
-              ...Object.fromEntries(suya),
-            } as AlineacionEditor,
+            [mode]: Object.fromEntries(suya) as AlineacionEditor,
           },
         }
       : {}),

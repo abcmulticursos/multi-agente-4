@@ -527,7 +527,18 @@ export function productosQueCobraLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "
   if (f.tipo !== "mensaje" && f.tipo !== "intro_ob") return [];
   if (f.presenta?.length) return [...new Set(f.presenta)];
   if (!t) return [];
-  const deSusCobros = [
+  const deSusCobros = productosDeSusCobros(t, f);
+  if (deSusCobros.length) return deSusCobros;
+  // El básico de la tienda, solo en LA INTRO (la que sale de un Inicio): un «gracias» o un mensaje suelto no cobra
+  // nada y no se le llena de conectores (pizarra limpia).
+  const esLaIntro = t.cables.some((c) => c.a === f.id && t.fichas.find((x) => x.id === c.de)?.tipo === "inicio");
+  return esLaIntro ? [BASICO_DE_LA_TIENDA] : [];
+}
+
+/** Los productos de los Cobros (por producto, encendidos) a los que llevan los cables de esta ficha. */
+export function productosDeSusCobros(t: Pick<Tablero, "fichas" | "cables"> | null | undefined, f: FichaDelTablero): string[] {
+  if (!t) return [];
+  return [
     ...new Set(
       t.cables
         .filter((c) => c.de === f.id)
@@ -536,11 +547,27 @@ export function productosQueCobraLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "
         .map((x) => x.cobro!.producto_id!)
     ),
   ];
-  if (deSusCobros.length) return deSusCobros;
-  // El básico de la tienda, solo en LA INTRO (la que sale de un Inicio): un «gracias» o un mensaje suelto no cobra
-  // nada y no se le llena de conectores (pizarra limpia).
-  const esLaIntro = t.cables.some((c) => c.a === f.id && t.fichas.find((x) => x.id === c.de)?.tipo === "inicio");
-  return esLaIntro ? [BASICO_DE_LA_TIENDA] : [];
+}
+
+/** Lo que un Cobro acepta: lo escrito en «acepta» o, sin escribir, los productos de los Cobros hermanos (01/11/2026). */
+export function alternativasDelCobro(t: Pick<Tablero, "fichas" | "cables"> | null | undefined, f: FichaDelTablero): string[] {
+  if (!t || f.tipo !== "cobro") return [];
+  if (f.cobro?.acepta?.length) return f.cobro.acepta;
+  const padres = t.cables.filter((c) => c.a === f.id).map((c) => t.fichas.find((x) => x.id === c.de)).filter((x): x is FichaDelTablero => !!x);
+  return [...new Set(padres.flatMap((p) => productosDeSusCobros(t, p)))].filter((id) => id !== f.cobro?.producto_id);
+}
+
+/**
+ * LOS PRODUCTOS DE LOS COMODINES DE UNA FICHA, LA MISMA REGLA PARA EL BOT Y EL VISOR (02/11/2026). Él: «en el visor decía
+ * una cosa y al cliente le llegaba otra». El visor tenía su propia regla (sin las alternativas del cobro, en otro orden).
+ * Cobro: el suyo y lo que acepta. Los demás: lo marcado en «Presenta»; si no, los de los Cobros a los que llevan sus cables;
+ * si no, los de la tienda (`deLaTienda`, su básico y su full). El primero es {{PRODUCTO}}.
+ */
+export function idsDeComodinesDeLaFicha(f: FichaDelTablero, t: Pick<Tablero, "fichas" | "cables"> | null | undefined, deLaTienda: string[]): string[] {
+  if (f.tipo === "cobro") return [f.cobro?.producto_id, ...alternativasDelCobro(t, f)].filter((x): x is string => !!x);
+  if (f.presenta?.length) return [...new Set(f.presenta)];
+  const deSusCobros = productosDeSusCobros(t, f);
+  return deSusCobros.length ? deSusCobros : deLaTienda;
 }
 
 /**
