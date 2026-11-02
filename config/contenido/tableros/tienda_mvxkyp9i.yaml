@@ -3309,6 +3309,7 @@ whatsapp:
       presenta:
         - pmvxom7h2
       instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
+      espera_min: 2
     - id: f-mvxoujcd-z0l5w
       tipo: mensaje
       x: 2002
