@@ -108,6 +108,8 @@ import {
   entregasDeLaFicha,
   eligeDeLaFicha,
   cobraEnLaFicha,
+  cobraPorSusCables,
+  productosQueCobraLaFicha,
   pideElNombre,
   conProductosDeLaTienda,
 } from "./datos";
@@ -192,11 +194,17 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
  * del Mensaje. Así el comprobante se revisa con las MISMAS reglas de siempre (monto, titular, fecha, repetido,
  * pagó de menos) y sale por su «💰 Si paga» (la salida «pagado», como un Cobro). Sin fichas así, el MISMO objeto.
  */
+// (02/11/2026: también la que tiene un «💰 Si paga» conectado, con sus productos sin marcar: el primero se cobra, los
+// demás los acepta —la intro del order bump—.)
 function conCobroEnSusFichas(t: Tablero | null): Tablero | null {
-  if (!t || !t.fichas.some((f) => cobraEnLaFicha(f, t))) return t;
+  if (!t || !t.fichas.some((f) => cobraPorSusCables(f, t))) return t;
   return {
     ...t,
-    fichas: t.fichas.map((f) => (cobraEnLaFicha(f, t) ? { ...f, cobro: { modo: "producto" as const, producto_id: (f.presenta ?? [])[0] } } : f)),
+    fichas: t.fichas.map((f) => {
+      if (!cobraPorSusCables(f, t)) return f;
+      const [principal, ...otros] = productosQueCobraLaFicha(f, t);
+      return { ...f, cobro: { modo: "producto" as const, producto_id: principal, ...(otros.length ? { acepta: otros } : {}) } };
+    }),
   };
 }
 
@@ -684,6 +692,19 @@ async function irA(
 
     case "mensaje":
     case "intro_ob": {
+      // SU COBRO, CALLADO (02/11/2026): llegó un comprobante y encaja con un «💰 Si paga» de esta ficha. No se repiten sus
+      // burbujas: se abre su cobro con sus precios y el comprobante se lee contra él (como un Cobro en silencio).
+      if (enSilencio && f.cobro?.modo === "producto" && cobraPorSusCables(f, t)) {
+        const deOferta = estadoEnElTablero(convoId)?.oferta === 1;
+        const precios: Record<string, number> = {};
+        for (const id of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
+          const v = id ? precioDelProducto(producto(config, id), pais, deOferta) : null;
+          if (id && v !== null) precios[id] = v;
+        }
+        abrirCobro(convoId, f.id, precios);
+        console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» cobra con su «💰 Si paga» (en silencio): ${JSON.stringify(precios)}`);
+        return;
+      }
       // «⏳ ESPERA» DENTRO DE LA FICHA (25/10/2026, punto 9): el upsell no sale en el mismo segundo de
       // la entrega. Se queda esperando sus minutos (si el cliente escribe, vuelven a contar, ver
       // `rearmarEspera`) y recién entonces manda sus burbujas. Mientras, la ficha no está presentada.
@@ -2058,7 +2079,7 @@ function cobroQueEncajaConElPago(
   // (También la ficha que cobra sola: su cobro va escondido dentro del Mensaje.)
   const cobros = alcanzables(t, desde)
     .map((id) => t.fichas.find((x) => x.id === id))
-    .filter((f): f is FichaDelTablero => !!f && !f.apagada && f.cobro?.modo === "producto" && (f.tipo === "cobro" || cobraEnLaFicha(f, t)));
+    .filter((f): f is FichaDelTablero => !!f && !f.apagada && f.cobro?.modo === "producto" && (f.tipo === "cobro" || cobraPorSusCables(f, t)));
   // EL DE OFERTA, SOLO SI ESTÁ EN OFERTA (01/11/2026, la causa de su conv 205 y del cliente A): el SUPER PACK en oferta
   // cuesta S/10, lo mismo que el GRAFISMO; quien pagaba 10 (o 11) sin elegir caía en el Cobro del PACK.
   const precios = (pid: string) => {
@@ -2494,6 +2515,30 @@ async function cerrarLaVenta(
     void notifyAdmin(
       `💰 *Pago en el tablero:* ${convo.client_name ?? convo.name ?? convo.phone} — ${total} ${moneda} (${f.titulo || "Cobro"}).`
     ).catch(() => {});
+  // «💰 SI PAGA» DE UNA FICHA QUE NO ES COBRO (02/11/2026). Él: «el cliente paga, recibe lo que tiene ese producto y sigue
+  // al Regalo»: si su cable no va a una Entrega, se le entrega aquí la principal del producto, y sigue. Si ya pasó por
+  // el regalo (o está en él), la ruta no sigue: como la ficha Entregar.
+  const destinoDelPago = cableDeLaSalida(t, f.id, salida);
+  const aDonde = destinoDelPago ? t.fichas.find((x) => x.id === destinoDelPago.a) : undefined;
+  if (f.tipo !== "cobro" && productoId && aDonde && aDonde.tipo !== "entregar") {
+    const config = loadWorkflowConfig();
+    const e = laEntrega(config, productoId);
+    const pasos = pasosActivos(e?.pasos);
+    if (e && pasos.length) {
+      await sendConfiguredSteps(convo, conElNombreDelProducto(pasos as never, e.producto.name) as never);
+      anotarEntrega(convo.id, productoId);
+      anotarPresentados(convo.id, [e.producto.id]);
+      console.log(`[tablero] convo ${convo.id}: «💰 Si paga» de «${f.titulo || f.id}» → entregado ${productoId} de frente`);
+      const fresca = getConversationById(convo.id);
+      const yaEnElRegalo =
+        ESTADOS_DEL_REGALO.has(fresca?.state ?? "") ||
+        fichasVisitadas(convo.id).some((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
+      if (yaEnElRegalo) {
+        console.log(`[tablero] convo ${convo.id}: entregado con el regalo ya visto → la ruta no sigue`);
+        return;
+      }
+    } else console.warn(`[tablero] convo ${convo.id}: el producto ${productoId} no tiene entrega con burbujas`);
+  }
   if (!(await seguirPor(convo.id, t, f.id, salida, 0))) {
     // «PAGÓ EL PRECIO DEL OTRO» SIN CABLE (25/10/2026, punto 21), como la venta de siempre: se le entrega
     // lo que pagó. El bot busca la ficha Entregar de ESE producto en su misma ruta y sigue por ahí.

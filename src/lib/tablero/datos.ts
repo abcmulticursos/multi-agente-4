@@ -510,13 +510,54 @@ export function entregasDeLaFicha(f: FichaDelTablero): string[] {
  */
 export function cobraEnLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "fichas" | "cables"> | null): boolean {
   if (!t || f.tipo !== "mensaje" || f.apagada || pideElNombre(f)) return false;
-  const presenta = [...new Set(f.presenta ?? [])];
-  if (presenta.length !== 1) return false;
+  if (productosQueCobraLaFicha(f, t).length === 0) return false;
   const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
   if (botones.length + cuadritos.length > 0) return false;
-  const siguiente = t.cables.find((c) => c.de === f.id && c.salida === "siguiente");
-  const destino = siguiente ? t.fichas.find((x) => x.id === siguiente.a) : undefined;
-  return destino?.tipo !== "cobro";
+  // (02/11/2026: decide su cable. Con su «→» conectado sigue de largo, como siempre; sin él, espera y cobra.)
+  return !t.cables.some((c) => c.de === f.id && c.salida === "siguiente");
+}
+
+/**
+ * «💰 SI PAGA», EN TODA FICHA QUE OFRECE (02/11/2026). Él: «cuando una ficha ya tiene un producto, automáticamente debe
+ * aparecer un conector "si paga"» y «¿por qué complicarlo?»: el producto sale solo. Lo marcado en «Presenta» (los
+ * upsells, cuyo producto no es de la tienda); si no, los de los Cobros a los que llevan sus cables (la intro del order
+ * bump → los dos); si no, el básico de la tienda (su primera intro). Mensaje e Intro de order bump.
+ */
+export function productosQueCobraLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "fichas" | "cables"> | null): string[] {
+  if (f.tipo !== "mensaje" && f.tipo !== "intro_ob") return [];
+  if (f.presenta?.length) return [...new Set(f.presenta)];
+  if (!t) return [];
+  const deSusCobros = [
+    ...new Set(
+      t.cables
+        .filter((c) => c.de === f.id)
+        .map((c) => t.fichas.find((x) => x.id === c.a))
+        .filter((x): x is FichaDelTablero => !!x && x.tipo === "cobro" && !x.apagada && x.cobro?.modo === "producto" && !!x.cobro.producto_id)
+        .map((x) => x.cobro!.producto_id!)
+    ),
+  ];
+  if (deSusCobros.length) return deSusCobros;
+  // El básico de la tienda, solo en LA INTRO (la que sale de un Inicio): un «gracias» o un mensaje suelto no cobra
+  // nada y no se le llena de conectores (pizarra limpia).
+  const esLaIntro = t.cables.some((c) => c.a === f.id && t.fichas.find((x) => x.id === c.de)?.tipo === "inicio");
+  return esLaIntro ? [BASICO_DE_LA_TIENDA] : [];
+}
+
+/**
+ * ¿LA FICHA COBRA? (02/11/2026): la que espera y cobra sola, o una con algún «💰 Si paga» CONECTADO. Sin cable de pago,
+ * la ficha es la de siempre (por eso nada de lo ya armado cambia hasta que él conecte uno).
+ */
+export function cobraPorSusCables(f: FichaDelTablero, t?: Pick<Tablero, "fichas" | "cables"> | null): boolean {
+  if (!t || f.apagada || productosQueCobraLaFicha(f, t).length === 0) return false;
+  return cobraEnLaFicha(f, t) || t.cables.some((c) => c.de === f.id && (c.salida === "pagado" || c.salida.startsWith("prod:")));
+}
+
+/** Sus «💰 Si paga»: el primero sale por «pagado» (como un Cobro), los demás por «prod:<id>». */
+function salidasDePago(f: FichaDelTablero, t: Pick<Tablero, "fichas" | "cables"> | null | undefined, nombres?: Record<string, string>): SalidaDeFicha[] {
+  return productosQueCobraLaFicha(f, t).map((id, i) => ({
+    clave: i === 0 ? "pagado" : `prod:${id}`,
+    etiqueta: `💰 Si paga${nombres?.[id] ? `: ${nombres[id]}` : ""}`,
+  }));
 }
 
 /**
@@ -530,23 +571,31 @@ export function salidasDeLaFicha(
   nombres?: Record<string, string>,
   t?: Pick<Tablero, "fichas" | "cables"> | null
 ): SalidaDeFicha[] {
+  // SIN BOTONES Y SIN «→» CONECTADO: espera al cliente. Sus «💰 Si paga», «⏳ Si no responde» y el «→» (por si quiere
+  // que siga de largo: al conectarlo, los otros se van). Con algo de pago o de espera conectado, el «→» se va.
   if (cobraEnLaFicha(f, t)) {
-    const id = (f.presenta ?? [])[0];
+    const conCable = (s: string) => !!t?.cables.some((c) => c.de === f.id && c.salida === s);
+    const pagos = salidasDePago(f, t, nombres);
+    const usaLaEspera = conCable("sin_respuesta") || pagos.some((p) => conCable(p.clave));
     return [
-      { clave: "pagado", etiqueta: `💰 Si paga${nombres?.[id] ? `: ${nombres[id]}` : ""}` },
+      ...pagos,
       { clave: "sin_respuesta", etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde" },
+      ...(usaLaEspera ? [] : [{ clave: "siguiente", etiqueta: "→ Después de enviar" }]),
     ];
   }
   switch (f.tipo) {
     case "inicio":
       // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): una salida por cada anuncio marcado, y «→» para los demás.
+      // (02/11/2026, con nombre: «→ Cuando escribe».)
       return [
         ...(f.anuncios ?? []).map((k) => ({ clave: `anuncio:${k}`, etiqueta: `📣 ${nombres?.[`anuncio:${k}`] ?? k}` })),
-        { clave: "siguiente", etiqueta: (f.anuncios ?? []).length ? "→ Los demás" : "→" },
+        { clave: "siguiente", etiqueta: (f.anuncios ?? []).length ? "→ Los demás" : "→ Cuando escribe" },
       ];
+    // LAS FLECHITAS CON NOMBRE (02/11/2026). Él: «ese "luego" confunde»: dice lo que pasa siempre al terminar.
     case "entregar":
+      return [{ clave: "siguiente", etiqueta: "→ Después de entregar" }];
     case "esperar":
-      return [{ clave: "siguiente", etiqueta: "→" }];
+      return [{ clave: "siguiente", etiqueta: "→ Después de esperar" }];
     case "humano":
     case "workflow":
       return [];
@@ -601,9 +650,13 @@ export function salidasDeLaFicha(
           });
           return salidas;
         }
-        salidas.push({ clave: "siguiente", etiqueta: "→" });
+        // Con su «→» conectado (sigue de largo): sus «💰 Si paga» también, por si paga antes de seguir.
+        salidas.push(...salidasDePago(f, t, nombres));
+        salidas.push({ clave: "siguiente", etiqueta: "→ Después de enviar" });
         return salidas;
       }
+      // «💰 SI PAGA» TAMBIÉN CON OPCIONES (02/11/2026): su intro con cuadritos o la del order bump.
+      salidas.push(...salidasDePago(f, t, nombres));
       // 27/10/2026: «"si no elige seguimientos" confunde»: se llama como lo que es, sus Seguimientos.
       salidas.push({ clave: "siguiente", etiqueta: "⏳ Seguimientos" });
       salidas.push({
