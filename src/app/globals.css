@@ -763,9 +763,9 @@ input,
   --bn-check: #107dfd;
   --bn-garabatos: #ffffff;
 }
-/* OSCURO: sus colores de «INTERFAZ OSCURA» / «OSCURO ABIERTO». */
-:root[data-pizarra-tema="oscuro"] .burbujas-nuevo,
-:root[data-pizarra-tema="mixto"] .burbujas-nuevo {
+/* OSCURO: sus colores de «INTERFAZ OSCURA» / «OSCURO ABIERTO». (Mixto = el claro, 02/11/2026: «el estilo del pop up del
+   modo mixto que sea como el del modo claro».) */
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
   --bn-fondo: linear-gradient(180deg, #12182e 0%, #0b1221 40%, #0a0f21 100%);
   --bn-cabecera: #12182e;
   --bn-titulo: #ffffff;
@@ -1125,8 +1125,57 @@ input,
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35), 0 2px 4px rgba(0, 0, 0, 0.22);
 }
 
-/* MIXTO: el marco y el visor oscuros (arriba), los cajones con los colores claros (los de por defecto). */
-:root[data-pizarra-tema="mixto"] .burbujas-nuevo .bn-cajon {
-  border-color: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+/* LA BURBUJA ELEGIDA, QUE SE NOTE (02/11/2026: «no es lo suficientemente claro para notarlo que se seleccionó junto con su
+   cajón»): el mismo color que el borde de su cajón, grueso y con halo. En claro, mixto y Dark Navy (el oscuro, como estaba). */
+:root:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo .bn-burbuja.bn-burbuja-activa,
+:root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-burbuja.bn-burbuja-activa {
+  border-color: transparent;
+  outline: 3px solid var(--bn-activo);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--bn-activo) 30%, transparent), 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+/* AL PASAR EL RATÓN, SU BORDE SE ENCIENDE (02/11/2026: «que se resalte el borde para saber que eso voy a presionar»). */
+.burbujas-nuevo .bn-chip:not(:disabled):hover,
+.burbujas-nuevo .bn-icono:not(:disabled):hover,
+.burbujas-nuevo .bn-on:hover,
+.burbujas-nuevo .bn-off:hover,
+.burbujas-nuevo .bn-sel:hover,
+.burbujas-nuevo .bn-cancelar:hover,
+.burbujas-nuevo .bn-variar:hover,
+.burbujas-nuevo .bn-agregar-boton:hover,
+.burbujas-nuevo .bn-agregar-decision:hover {
+  border-color: var(--bn-activo);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-activo) 35%, transparent);
+}
+.burbujas-nuevo .bn-basura:hover {
+  border-color: var(--bn-basura-texto);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-basura-texto) 35%, transparent);
+}
+.burbujas-nuevo .bn-listo:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-listo) 40%, transparent), 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* «DARK NAVY CORPORATE» (02/11/2026, su captura de Sendy): el oscuro tal cual, con el visor de WhatsApp oscuro: fondo casi
+   negro SIN textura, burbuja verde petróleo y letra clara, legible y sin negrita. Medidos de su captura. */
+:root[data-pizarra-variante="navy"] .burbujas-nuevo {
+  --bn-visor: #0f141a;
+  --bn-visor-cab: #1b222b;
+  --bn-burbuja: #0c5343;
+  --bn-burbuja-texto: #e9edef;
+}
+:root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-visor {
+  background-image: none;
+}
+:root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-burbuja,
+:root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-burbuja .text-neutral-800 {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  -webkit-font-smoothing: auto;
+}
+
+/* EL GESTOR DE SEGUIMIENTOS, EN EL MISMO DISEÑO: su lista de la izquierda sobre el fondo del tema. */
+.burbujas-nuevo .bn-cuerpo {
+  padding: 18px 20px;
 }

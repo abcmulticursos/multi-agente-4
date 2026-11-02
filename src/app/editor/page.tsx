@@ -27224,10 +27224,10 @@ function VistaPizarra({
    *               antes»: el fondo y sus barras oscuros; cajones editores y Mis tiendas, claros.
    *   🌙 oscuro — todo oscuro, cajones y Mis tiendas con los colores de Sendy.
    */
-  const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<"claro" | "mixto" | "oscuro">(() => {
+  const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<TemaDeLaPizarra>(() => {
     try {
       const guardado = window.localStorage.getItem("pizarra-tema");
-      return guardado === "oscuro" || guardado === "mixto" ? guardado : "claro";
+      return guardado === "oscuro" || guardado === "mixto" || guardado === "navy" ? guardado : "claro";
     } catch {
       return "claro";
     }
@@ -27238,13 +27238,19 @@ function VistaPizarra({
   // vea así… y el visor como WhatsApp oscuro». Se marca en la raíz mientras la pizarra está abierta;
   // globals.css oscurece solo lo que lleva la clase `prolijo`. Al salir de la pizarra se quita: el
   // resto del bot sigue en claro.
+  // «DARK NAVY CORPORATE» (02/11/2026): es el oscuro (todo lo oscuro sigue igual) con su visor de WhatsApp oscuro en el pop
+  // up de burbujas. Se marca como «oscuro» + `data-pizarra-variante="navy"`, para no tocar nada de lo que ya mira «oscuro».
   useEffect(() => {
-    document.documentElement.dataset.pizarraTema = temaDeLaPizarra;
+    const raiz = document.documentElement;
+    raiz.dataset.pizarraTema = temaDeLaPizarra === "navy" ? "oscuro" : temaDeLaPizarra;
+    if (temaDeLaPizarra === "navy") raiz.dataset.pizarraVariante = "navy";
+    else delete raiz.dataset.pizarraVariante;
     return () => {
-      delete document.documentElement.dataset.pizarraTema;
+      delete raiz.dataset.pizarraTema;
+      delete raiz.dataset.pizarraVariante;
     };
   }, [temaDeLaPizarra]);
-  const cambiarTemaDeLaPizarra = (siguiente: "claro" | "mixto" | "oscuro") => {
+  const cambiarTemaDeLaPizarra = (siguiente: TemaDeLaPizarra) => {
     setTemaDeLaPizarra(siguiente);
     try {
       window.localStorage.setItem("pizarra-tema", siguiente);
@@ -29460,6 +29466,7 @@ function VistaPizarra({
               ["claro", "☀️ Claro", "Todo claro"],
               ["mixto", "🌗 Mixto", "Fondo oscuro; ventanas y Mis tiendas claras"],
               ["oscuro", "🌙 Oscuro", "Todo oscuro"],
+              ["navy", "🌌 Dark Navy", "Dark Navy Corporate: todo oscuro, con el visor de WhatsApp oscuro en las burbujas"],
             ] as const
           ).map(([valor, texto, ayuda]) => (
             <button
@@ -30974,6 +30981,9 @@ function GuiaDeAnuncios({
 }
 
 /** UNA VENTANA ENCIMA DE LA PIZARRA (19/10/2026): Escape, clic afuera o ✕ la cierran. */
+/** El ☀️/🌙 de la pizarra y el tablero. «navy» = Dark Navy Corporate (02/11/2026): el oscuro con el visor de WhatsApp oscuro. */
+type TemaDeLaPizarra = "claro" | "mixto" | "oscuro" | "navy";
+
 function VentanaFlotante({
   titulo,
   detalle,
@@ -30982,7 +30992,10 @@ function VentanaFlotante({
   children,
   onListo,
   onCancelar,
+  clase = "",
 }: {
+  /** Clases de más para la ventana (02/11/2026: «burbujas-nuevo prolijo», el diseño del pop up de burbujas en Seguimientos). */
+  clase?: string;
   titulo: string;
   detalle?: string;
   onCerrar: () => void;
@@ -31000,18 +31013,18 @@ function VentanaFlotante({
     // SIN CERRAR AL HACER CLIC AFUERA (31/10/2026): «se cerró y todos mis cambios desaparecieron… la única
     // manera de cerrarlos será con escape, cancelar o listo». Ver `EL_CLIC_FUERA_CIERRA_LA_VENTANA`.
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
-      <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
+      <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl ${clase}`} onClick={(e) => e.stopPropagation()}>
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <div>
-            <h3 className="text-sm font-bold text-tinta">{titulo}</h3>
-            {detalle && <p className="text-xs text-tinta-suave">{detalle}</p>}
+            <h3 className="bn-titulo text-sm font-bold text-tinta">{titulo}</h3>
+            {detalle && <p className="bn-subtitulo text-xs text-tinta-suave">{detalle}</p>}
           </div>
           {onListo ? (
             <span className="flex shrink-0 items-center gap-2">
-              <button type="button" onClick={onCancelar ?? onCerrar} className="rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
+              <button type="button" onClick={onCancelar ?? onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
                 Cancelar
               </button>
-              <button type="button" onClick={onListo} className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+              <button type="button" onClick={onListo} className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
                 ✓ Listo
               </button>
             </span>
@@ -31128,8 +31141,8 @@ function PantallaDelTableroCargada({
   cfg: FullConfig;
   /** La tienda (su id) o un workflow (`wf:<id>`). */
   clave: string;
-  tema: "claro" | "mixto" | "oscuro";
-  onTema: (t: "claro" | "mixto" | "oscuro") => void;
+  tema: TemaDeLaPizarra;
+  onTema: (t: TemaDeLaPizarra) => void;
   onTienda: (id: string) => void;
   onVolver: () => void;
   aplicar: (c: FullConfig) => void;
@@ -31852,6 +31865,7 @@ function PantallaDelTableroCargada({
                         ["claro", "☀️ Claro"],
                         ["mixto", "🌗 Mixto"],
                         ["oscuro", "🌙 Oscuro"],
+                        ["navy", "🌌 Navy"],
                       ] as const
                     ).map(([v, n]) => (
                       <button
@@ -32347,8 +32361,10 @@ function GestorDeVersiones({
       onListo={onCerrar}
       onCancelar={cancelar}
       ancho={ANCHO_DEL_GESTOR}
+      // EL MISMO DISEÑO QUE EL POP UP DE BURBUJAS (02/11/2026). Él: «este estilo debe aplicarse a los seguimientos».
+      clase="burbujas-nuevo prolijo"
     >
-      <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
+      <div data-ventana-del-tablero className="bn-cuerpo grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           {esSeg ? (
             <>
