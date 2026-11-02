@@ -64,6 +64,8 @@ export interface ContextoDeLaIA {
    * otro?» se entienda por la etapa: el que se ofrece ahora, no el que ya compró.
    */
   ofreciendoAhora?: string;
+  /** El último turno del bot (sus burbujas, recortadas): a eso se refiere «esto» / «eso» (01/11/2026). */
+  loUltimoQueVio?: string;
   /**
    * «ENVÍAMELO A MI CORREO» (24/10/2026): ya recibió algo y lo pide por correo. Devuelve lo que la
    * IA debe decirle después (pedirle la dirección, o que ya se envió).
@@ -304,6 +306,12 @@ function cerebro(c: ContextoDeLaIA): string {
       : "",
     c.ofreciendoAhora
       ? `LO QUE LE ESTÁS OFRECIENDO AHORA: ${c.ofreciendoAhora}. Si pregunta «¿este es otro?», «¿qué es esto?» o algo así, habla de ESTE, y si ya compró otro, dile con claridad que es distinto de lo que compró.`
+      : "",
+    // «ESTO» = LO ÚLTIMO QUE VIO (01/11/2026, sus conv 206/207 y la prueba del cliente C): tras la oferta del upsell o
+    // la del regalo, «¿y esto qué es?» / «¿esto es otro?» → la IA explicaba lo que ya compró. La IA ve el chat, pero
+    // las notas de postventa la empujaban a lo comprado.
+    c.loUltimoQueVio
+      ? `LO ÚLTIMO QUE LE MANDASTE (si dice «esto», «eso», «¿esto es otro?» o «¿qué es esto?», habla de ESTO, no de lo que ya compró): «${c.loUltimoQueVio}». Si ahí hay más de una cosa (por ejemplo una oferta y un regalo) y no queda claro a cuál se refiere, pregúntale cuál. De un producto que no está en tu información no inventes qué trae ni digas que ya lo tiene.`
       : "",
     montos,
     // La venta de siempre (openrouter.ts, `discountActive`): por qué está más barato.

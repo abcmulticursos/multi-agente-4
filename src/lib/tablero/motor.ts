@@ -735,6 +735,8 @@ async function irA(
         pais
       );
       await sendConfiguredSteps(convo, pasosAEnviar as never);
+      // Que SE LE MOSTRÓ (no solo que entró a esperar): ver «la oferta que ya se le hizo no se repite».
+      if (f.espera_min) anotarMuestras(convoId, [`${MOSTRADA}${f.id}`]);
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta (lo marcado o, sin marcar, por sus cables).
       anotarPresentados(convoId, loQuePresentaLaFicha(t, f, estadoEnElTablero(convoId)?.tienda_id));
       // LA FICHA QUE COBRA SOLA (01/11/2026): su cobro se abre callado, con el precio de su producto (el de oferta
@@ -835,7 +837,12 @@ async function irA(
       // upsell y, tras la entrega, la ruta le volvió a ofrecer 100 CITAS). Como el automático, el upsell sale
       // una vez: si la ficha siguiente ya la vio, sigue hacia el regalo de esa ruta (si aún no lo vio).
       const siguienteFicha = t.fichas.find((x) => x.id === cableDeLaSalida(t, f.id, "siguiente")?.a);
-      if (siguienteFicha && siguienteFicha.tipo !== "entregar" && siguienteFicha.tipo !== "regalo" && yaVisito(convoId, siguienteFicha.id)) {
+      // (Solo si de verdad SE LE MOSTRÓ, 01/11/2026, prueba del cliente B: completó al PACK mientras el upsell
+      // esperaba sus 2 min y aquí se daba por ofrecido sin haber salido nunca. Una ficha con espera cuenta como
+      // vista cuando mandó sus burbujas.)
+      const seLeMostro = (x: FichaDelTablero) =>
+        !x.espera_min || muestrasEnviadas(estadoEnElTablero(convoId)).includes(`${MOSTRADA}${x.id}`);
+      if (siguienteFicha && siguienteFicha.tipo !== "entregar" && siguienteFicha.tipo !== "regalo" && yaVisito(convoId, siguienteFicha.id) && seLeMostro(siguienteFicha)) {
         const regalo = alcanzables(t, [siguienteFicha.id])
           .map((id) => t.fichas.find((x) => x.id === id))
           .find((x) => x?.tipo === "regalo" && !yaVisito(convoId, x.id));
@@ -1164,6 +1171,30 @@ function esPreguntaQueNoElige(contenido: string): boolean {
   );
 }
 
+/**
+ * ¿ESTÁ COMPRANDO O SOLO PREGUNTA? (01/11/2026). Un mensaje corto (1–3 palabras: «yape», «el grafismo», «solo el
+ * pack») es una elección y no gasta nada. Una frase más larga que iba a abrir un cobro la decide la IA: «no entiendo
+ * qué es mis primeros trazos» no compra; «mmm está caro, el grafismo nomás» sí. Ante la duda o un fallo, NO compra
+ * (la IA le contesta y el cliente vuelve a decirlo).
+ */
+const decisionesDeCompra = new Map<string, boolean>();
+async function decideComprarConIA(conversationId: number, contenido: string): Promise<boolean> {
+  const n = sinTildes(contenido).replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter(Boolean).length;
+  if (n <= 3 || AFIRMA.test(sinTildes(contenido).trim())) return true;
+  const clave = `${conversationId}|${contenido}`;
+  const ya = decisionesDeCompra.get(clave);
+  if (ya !== undefined) return ya;
+  const id = await elegirOpcionConIA(conversationId, contenido, [
+    { id: "compra", etiqueta: "Decide comprar o elegir ese producto (lo quiere, se lo lleva, se queda con él)" },
+    { id: "pregunta", etiqueta: "Solo pregunta, duda, no entiende o pide que le expliquen (todavía no decide)" },
+  ]).catch(() => null);
+  const compra = id === "compra";
+  decisionesDeCompra.set(clave, compra);
+  if (decisionesDeCompra.size > 500) decisionesDeCompra.clear();
+  console.log(`[tablero:ia] convo ${conversationId}: «${contenido.slice(0, 40)}» → ${compra ? "compra" : "solo pregunta (no abre el cobro)"}`);
+  return compra;
+}
+
 /** ¿La ficha lleva a DOS o más compras distintas (por sus botones y cuadritos)? Con una sola, nada cambia. */
 function variasComprasEn(t: Tablero, duena: FichaDelTablero): boolean {
   const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(duena));
@@ -1431,6 +1462,11 @@ async function contestarConIA(convo: ConversationRow, t: Tablero, nota?: string)
     cerebroGeneral: t.cerebro,
     instrucciones: ficha?.instrucciones,
     ...(ofreciendoAhora ? { ofreciendoAhora } : {}),
+    // Lo último que el bot le mandó (sin enlaces, recortado): a eso se refiere «esto» (01/11/2026).
+    ...((() => {
+      const ultimoBot = ultimoTurnoDelBot(convo.id).replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim().slice(-600);
+      return ultimoBot ? { loUltimoQueVio: ultimoBot } : {};
+    })()),
     ...(upgrade
       ? {
           completar: {
@@ -2013,22 +2049,41 @@ function cobroQueEncajaConElPago(
   monto: number,
   pais: string,
   /** Productos que no cuentan (ya comprados). */
-  excluir: Set<string> = new Set()
+  excluir: Set<string> = new Set(),
+  /** ¿El cliente ya está en el precio de oferta? Si no, el de oferta NO cuenta (ver abajo). */
+  deOferta = false
 ): FichaDelTablero | null {
   const config = loadWorkflowConfig();
   const casi = (a: number, b: number) => Math.abs(a - b) < 0.01;
-  for (const id of alcanzables(t, desde)) {
-    const f = t.fichas.find((x) => x.id === id);
-    if (f?.tipo !== "cobro" || f.apagada || f.cobro?.modo !== "producto") continue;
-    for (const pid of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
-      if (!pid || excluir.has(pid)) continue;
-      const p = producto(config, pid);
-      const normal = precioDelProducto(p, pais, false);
-      const oferta = precioDelProducto(p, pais, true);
-      if ((normal !== null && casi(normal, monto)) || (oferta !== null && casi(oferta, monto))) return f;
-    }
+  // (También la ficha que cobra sola: su cobro va escondido dentro del Mensaje.)
+  const cobros = alcanzables(t, desde)
+    .map((id) => t.fichas.find((x) => x.id === id))
+    .filter((f): f is FichaDelTablero => !!f && !f.apagada && f.cobro?.modo === "producto" && (f.tipo === "cobro" || cobraEnLaFicha(f, t)));
+  // EL DE OFERTA, SOLO SI ESTÁ EN OFERTA (01/11/2026, la causa de su conv 205 y del cliente A): el SUPER PACK en oferta
+  // cuesta S/10, lo mismo que el GRAFISMO; quien pagaba 10 (o 11) sin elegir caía en el Cobro del PACK.
+  const precios = (pid: string) => {
+    const p = producto(config, pid);
+    return [precioDelProducto(p, pais, false), deOferta ? precioDelProducto(p, pais, true) : null].filter((v): v is number => v !== null);
+  };
+  // 1) EL COBRO DE ESE PRECIO, POR SU PROPIO PRODUCTO (01/11/2026, su conv 205: pagó 10 en la intro, sin elegir, y se
+  //    abrió el Cobro del PACK —que también «acepta» el GRAFISMO—: le preguntó «¿confusión o prefieres GRAFISMO?» y
+  //    le reveló el PACK). Con 10, el Cobro del GRAFISMO; con 14, el del PACK.
+  for (const f of cobros) {
+    const pid = f.cobro?.producto_id;
+    if (pid && !excluir.has(pid) && precios(pid).some((v) => casi(v, monto))) return f;
   }
-  return null;
+  // 2) Uno que lo ACEPTA (lo de siempre).
+  for (const f of cobros)
+    for (const pid of f.cobro?.acepta ?? []) if (!excluir.has(pid) && precios(pid).some((v) => casi(v, monto))) return f;
+  // 3) NINGUNO EXACTO: el más caro que ALCANZA con lo que pagó (01/11/2026, prueba del cliente A: pagó 11 en la intro
+  //    y pasó a un asesor; el GRAFISMO cuesta 10). Como en el cobro: si alcanza, se le entrega ése.
+  let mejor: { f: FichaDelTablero; v: number } | null = null;
+  for (const f of cobros) {
+    const pid = f.cobro?.producto_id;
+    if (!pid || excluir.has(pid)) continue;
+    for (const v of precios(pid)) if (v <= monto + 0.009 && (!mejor || v > mejor.v)) mejor = { f, v };
+  }
+  return mejor?.f ?? null;
 }
 
 /**
@@ -2095,6 +2150,8 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
  */
 const REGALO_PENDIENTE = "regalo:pendiente";
 const REGALO_HECHO = "regalo:hecho";
+/** Marca de una ficha con espera que ya mandó sus burbujas (`mostrada:<id>`), entre las muestras del estado. */
+const MOSTRADA = "mostrada:";
 /** La galería ya salió en esta conversación: no vuelve a salir sola (28/10/2026). */
 const GALERIA_HECHA = "galeria:hecha";
 function anotarRegaloSinResponder(conversationId: number, state: string | null | undefined): void {
@@ -2948,6 +3005,22 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       userData: buildMessagingUserData({ channel: convo.channel, phone: convo.phone, firstName: convo.name, ctwa_clid: convo.ctwa_clid }),
     }).catch(() => {});
     void syncLeadStatus(convo.id).catch(() => {});
+    // YA PAGÓ, SIN SIQUIERA UN «HOLA» (01/11/2026). Él: «la persona puede enviar el ticket de frente sin siquiera haber
+    // dicho hola» (campañas con varios números: ve la oferta en el A y paga en el B). Si su primer mensaje es un
+    // comprobante, se le pone en la primera ficha SIN mandarle la intro y se lee su pago: si encaja con un producto
+    // de la ruta, se entrega de frente. Si no encaja, lo de siempre (la intro, y el comprobante lo revisa un asesor).
+    const primera = cableDeLaSalida(t, inicio.id, "siguiente")?.a;
+    if (primera && hayComprobantePendiente(convo.id, null)) {
+      moverA(convo.id, primera);
+      anotarVisita(convo.id, primera);
+      const antes = estadoEnElTablero(convo.id)?.cobro_ficha_id ?? null;
+      console.log(`[tablero] convo ${convo.id}: su primer mensaje es un comprobante → se lee antes de mandar la intro`);
+      await turnoDelTablero(convo, contenido, tiendaDelCanal);
+      const ahora = estadoEnElTablero(convo.id);
+      if (ahora?.cobro_ficha_id && ahora.cobro_ficha_id !== antes) return true;
+      if (entregasDelCliente(convo.id).length > 0) return true;
+      console.log(`[tablero] convo ${convo.id}: su comprobante no encajó con ningún producto → se le manda la intro`);
+    }
     await irA(convo.id, t, inicio.id);
     // SU PRIMER MENSAJE ES UN COMPROBANTE (28/10/2026, su caso real: dos números con el mismo embudo; la
     // clienta recibió los datos en uno y pagó por el otro, donde nunca había escrito, y no se le entregó).
@@ -3146,11 +3219,16 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         if (!lectura) return false; // no es un comprobante (la captura del comentario): del regalo
         const regaloId = estado.ficha_id;
         // Primero lo que puede comprar, con su precio de HOY para él (el upgrade cuesta la diferencia: su $1).
-        const porMonto = loQuePuedeComprar(convo, t, pais).find((o) => Math.abs(o.precio - lectura.monto) < 0.01);
+        // Exacto primero; si no, lo más caro que ALCANZA (01/11/2026: «¿a cuál te refieres? PACK —faltan 3— o TRAZOS»,
+        // y sin contestar mandó 5 → pasaba a un asesor. 5 alcanza para completar el PACK).
+        const lqpc = loQuePuedeComprar(convo, t, pais);
+        const porMonto =
+          lqpc.find((o) => Math.abs(o.precio - lectura.monto) < 0.01) ??
+          [...lqpc].filter((o) => o.precio <= lectura.monto + 0.009).sort((a, b) => b.precio - a.precio)[0];
         let encaja: FichaDelTablero | null = porMonto?.ficha ?? null;
         if (!encaja)
           for (const id of visitadas) {
-            encaja = cobroQueEncajaConElPago(t, [id], lectura.monto, pais, comprados);
+            encaja = cobroQueEncajaConElPago(t, [id], lectura.monto, pais, comprados, estado.oferta === 1);
             if (encaja) break;
           }
         if (encaja) {
@@ -3350,7 +3428,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     // Lo que puede comprar después de comprar, con su precio de hoy (el upgrade cuesta la diferencia).
     const porMonto = lectura ? loQuePuedeComprar(convo, t, pais).find((o) => Math.abs(o.precio - lectura.monto) < 0.01) : undefined;
     const encaja = lectura
-      ? porMonto?.ficha ?? cobroQueEncajaConElPago(t, [estado.ficha_id, ...(estado.seg_ficha ? [estado.seg_ficha] : [])], lectura.monto, pais)
+      ? porMonto?.ficha ?? cobroQueEncajaConElPago(t, [estado.ficha_id, ...(estado.seg_ficha ? [estado.seg_ficha] : [])], lectura.monto, pais, new Set(), estado.oferta === 1)
       : null;
     if (lectura && encaja) {
       await irA(convo.id, t, encaja.id, 0, { enSilencio: true, upgrade: !!porMonto?.upgrade });
@@ -4034,6 +4112,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         if (decision && conCobroAbierto && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         // Una pregunta no elige entre dos o más productos, tampoco por cuadrito (`esPreguntaQueNoElige`).
         if (decision && llevaAPagar(duena, `dec:${decision.id}`) && esPreguntaQueNoElige(contenido) && variasComprasEn(t, duena)) continue;
+        // ¿COMPRA O SOLO PREGUNTA? (01/11/2026, su conv 207: «no entiendo qué es mis primeros trazos» abrió el cobro del
+        // upsell). Una frase (4+ palabras) que lleva a pagar la decide la IA; él: «no quiero palabritas».
+        if (decision && llevaAPagar(duena, `dec:${decision.id}`) && !(await decideComprarConIA(convo.id, contenido))) continue;
         if (decision && pideElRegalo && llevaAPagar(duena, `dec:${decision.id}`)) continue;
         if (decision) {
           await actuarCuadrito(convo, t, duena, decision);
@@ -4096,7 +4177,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // (La misma regla de los cuadritos, 01/11/2026: «el super pack creo que es más completo no» pasaba el paso 5
       // y aquí, por la palabra «pack», abría el cobro.)
       const esPregunta = esPreguntaQueNoElige(contenido) || /\?|¿/.test(contenido) || /^(que|cual|cuanto|cuantos|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(sinTildes(contenido.trim())) || /\b(precio|cuesta|vale|costo|valor)\b/.test(sinTildes(contenido));
-      const porPalabra = acertados.length === 1 && !esPregunta ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
+      const porPalabra =
+        acertados.length === 1 && !esPregunta && (await decideComprarConIA(convo.id, contenido)) ? lista.filter((x) => destinoDe(x) === acertados[0]).slice(0, 1) : [];
       // POR SU PRECIO, SIN IA (29/10/2026, ronda 41 en la copia): «el de 2» con «Solo el básico · $2» y «Quiero el
       // pack · $3» → la IA solo veía el texto de los botones y leyó «2» como la opción 2 (le cobró el pack). Si nombra
       // un monto («el de 2», «el que cuesta 2», «el de 2 dolares») y es el precio de UNA sola opción, es ésa. «El 2» a

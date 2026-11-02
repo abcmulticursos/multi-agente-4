@@ -743,8 +743,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             presenta. */}
         {/* AL INSTANTE (01/11/2026, «el hint se demora mucho en aparecer, debería ser de inmediato»): ya no es el
             «title» del navegador (tarda ~1 s) sino una cajita propia que sale apenas pasa el ratón. */}
-        <span className="group/hint relative min-w-0 truncate text-xs font-bold">
-          {titulo}
+        {/* (El recorte «…» va en el texto, no en la caja: si no, el hint quedaba cortado y no se veía.) */}
+        <span className="group/hint relative min-w-0 text-xs font-bold">
+          <span className="block truncate">{titulo}</span>
           <span className="pointer-events-none absolute left-0 top-full z-[60] mt-1 hidden w-max max-w-[320px] whitespace-pre-line rounded-md bg-slate-900 px-2 py-1.5 text-[11px] font-semibold leading-4 text-white shadow-xl group-hover/hint:block">
             {hintDeLaFicha}
           </span>
