@@ -21623,14 +21623,9 @@ function GalleryCaptionBubbleEditor({ item, onChange, onSnapshot, onEdit, id, on
             }
             aplicarPasos(quedan);
           }}
-          onPasteStep={(indice, paso) => {
+          onPasteStep={(indice, nuevos) => {
             onSnapshot();
-            aplicarPasos([
-              ...pasos.slice(0, indice + 1),
-              // Sin botones repetidos en la ficha (18/10/2026): ver `sinBotonesRepetidos`.
-              sinBotonesRepetidos(cloneJson(paso), pasos),
-              ...pasos.slice(indice + 1),
-            ]);
+            aplicarPasos(pegarPasos(pasos, indice, nuevos.map((paso) => cloneJson(paso))));
           }}
           onMoveStep={(desde, hasta, donde) => {
             const destino = donde === "after" ? hasta + 1 : hasta;
@@ -24668,7 +24663,17 @@ function ChatPreview({
   channelLabel = "WhatsApp",
   perBubbleVary = false,
   sinTopeDeAncho = false,
+  pedidoDelCajon,
+  onSeleccionChange,
 }: {
+  /**
+   * EL CLIC DERECHO DE SU CAJÓN (02/11/2026). Él: «que con los cajoncitos editores se pueda hacer lo mismo que con
+   * las burbujas, con las mismas opciones». El cajón pide y el visor abre SU menú (o marca en su selección): un solo
+   * menú y una sola selección para los dos lados. `n` cambia en cada pedido.
+   */
+  pedidoDelCajon?: { tipo: "menu" | "marcar"; index: number; x: number; y: number; n: number } | null;
+  /** La selección, para que los cajones enseñen su check. */
+  onSeleccionChange?: (seleccion: Set<number> | null) => void;
   steps: EditorStep[];
   priceSoles?: number;
   comboPrice?: number;
@@ -24690,7 +24695,8 @@ function ChatPreview({
    *  moviendo, y la burbuja ya quedó a salvo en el portapapeles. Preguntarle
    *  «¿eliminar?» en mitad de un cortar y pegar asusta sin motivo. */
   onRemoveStep?: (index: number, opciones?: { sinPreguntar?: boolean }) => void;
-  onPasteStep?: (index: number, step: EditorStep) => void;
+  /** Pega TODAS de una vez, en su orden (02/11/2026: una por una, cada una pisaba a la anterior y solo quedaba 1). */
+  onPasteStep?: (index: number, steps: EditorStep[]) => void;
   onMoveStep?: (from: number, target: number, placement: "before" | "after") => void;
   /** En el visor integral, distingue los valores generados por comodines. */
   highlightPlaceholders?: boolean;
@@ -24720,6 +24726,25 @@ function ChatPreview({
    */
   const [seleccion, setSeleccion] = useState<Set<number> | null>(null);
   const seleccionadas = seleccion ? [...seleccion].sort((a, b) => a - b) : [];
+  // Lo que pide su cajón (ver `pedidoDelCajon`) y la selección hacia los cajones.
+  useEffect(() => {
+    if (!pedidoDelCajon) return;
+    if (pedidoDelCajon.tipo === "menu") setContextMenu({ index: pedidoDelCajon.index, x: pedidoDelCajon.x, y: pedidoDelCajon.y });
+    else
+      setSeleccion((antes) => {
+        if (antes === null) return antes;
+        const siguiente = new Set(antes);
+        if (siguiente.has(pedidoDelCajon.index)) siguiente.delete(pedidoDelCajon.index);
+        else siguiente.add(pedidoDelCajon.index);
+        return siguiente;
+      });
+    // Solo cuando llega un pedido nuevo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedidoDelCajon?.n]);
+  useEffect(() => {
+    onSeleccionChange?.(seleccion);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seleccion]);
   /**
    * ESCAPE SALE DEL MODO SELECCIÓN, Y NO CIERRA LA VENTANA.
    *
@@ -24994,13 +25019,35 @@ function ChatPreview({
         ? [bubbleClipboard.step]
         : [];
     if (lista.length === 0) return;
-    [...lista].reverse().forEach((paso) => onPasteStep(index, paso));
+    onPasteStep(index, lista);
     setSeleccion(null);
     setAvisoDelMenu(
       lista.length === 1
         ? `Burbuja pegada debajo de la ${index + 1}.`
         : `${lista.length} burbujas pegadas debajo de la ${index + 1}, en su orden.`
     );
+  };
+  /**
+   * «📋 CREAR BURBUJA CON LO COPIADO» (02/11/2026). Él: «copio un texto de donde sea, llego al editor, clic derecho en
+   * una burbuja y crear burbuja». Lee el portapapeles del sistema (el navegador pide permiso la primera vez) y crea una
+   * burbuja de texto con eso, justo debajo. Sin texto copiado, o sin permiso, lo dice.
+   */
+  const crearConLoCopiado = async (index: number) => {
+    if (!onPasteStep) return;
+    let texto = "";
+    try {
+      texto = (await navigator.clipboard.readText()).trim();
+    } catch {
+      setAvisoDelMenu("El navegador no dejó leer lo copiado. Acepta el permiso del portapapeles e inténtalo otra vez.");
+      return;
+    }
+    if (!texto) {
+      setAvisoDelMenu("No hay texto copiado. Copia un texto (Ctrl+C) y vuelve a intentarlo.");
+      return;
+    }
+    onPasteStep(index, [{ ...emptyStep("text"), texts: [texto] }]);
+    setSeleccion(null);
+    setAvisoDelMenu(`Burbuja creada debajo de la ${index + 1} con el texto copiado.`);
   };
   /** Cortar = copiar y quitar, igual que con una sola: primero se copia, así
    *  que si el borrado fallara las burbujas siguen en el portapapeles. */
@@ -25228,7 +25275,8 @@ function ChatPreview({
                   if (!onEditStep && !onDuplicateStep && !onToggleStep && !onRemoveStep) return;
                   event.preventDefault();
                   event.stopPropagation();
-                  onSelectStep?.(originalIndex);
+                  // EL CLIC DERECHO NO BUSCA SU CAJÓN (02/11/2026). Él: «con clic derecho que no scrollee el visor»: solo
+                  // abre el menú. El izquierdo sigue buscando su par, como siempre.
                   setContextMenu({ index: originalIndex, x: event.clientX, y: event.clientY });
                 }}
                 className={`max-w-[88%] rounded-lg rounded-tr-none bg-[#d9fdd3] px-2.5 py-1.5 shadow-sm transition ${
@@ -25424,6 +25472,9 @@ function ChatPreview({
             )}
             {onPasteStep && bubbleClipboard.steps.length > 0 && (
               <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); pegarDebajo(index); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">{bubbleClipboard.steps.length === 1 ? "Pegar debajo de esta burbuja" : `Pegar las ${bubbleClipboard.steps.length} debajo de esta`}</button>
+            )}
+            {onPasteStep && (
+              <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); void crearConLoCopiado(index); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">📋 Crear burbuja con lo copiado</button>
             )}
             {onToggleStep && (
               <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onToggleStep(index); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">{steps[contextMenu.index]?.enabled === false ? "Encender burbuja" : "Apagar burbuja"}</button>
@@ -36147,6 +36198,17 @@ function eliminarPieza(cfg: FullConfig, canal: ChannelKey, piezaId: string): { c
  * estuviera apagada. Si no está (cortar y pegar = MOVER), conserva los suyos: un cliente que ya
  * la recibió sigue pudiendo tocarlos. Siempre devuelve una copia honda; el original no cambia.
  */
+/**
+ * PEGA VARIAS BURBUJAS DEBAJO DE UNA, EN SU ORDEN Y DE UNA VEZ (02/11/2026). Él: «selecciono varias burbujas, copio, y al
+ * pegar solo llega 1». Se pegaban una por una y cada pegado partía de la lista de antes: la última pisaba a las demás.
+ * Cada una sin botones repetidos, tampoco entre ellas (`sinBotonesRepetidos` con lo ya pegado).
+ */
+function pegarPasos(pasos: EditorStep[], indice: number, nuevos: EditorStep[]): EditorStep[] {
+  const pegados: EditorStep[] = [];
+  for (const paso of nuevos) pegados.push(sinBotonesRepetidos(paso, [...pasos, ...pegados]));
+  return [...pasos.slice(0, indice + 1), ...pegados, ...pasos.slice(indice + 1)];
+}
+
 function sinBotonesRepetidos(paso: EditorStep, lista: EditorStep[]): EditorStep {
   const copia = JSON.parse(JSON.stringify(paso)) as EditorStep;
   const codigos = (v: unknown, a: Set<string>): Set<string> => {
@@ -37399,7 +37461,15 @@ function JourneyPreviewBlock({
           onDuplicateStep={onStepsChange ? duplicateStep : undefined}
           onToggleStep={onStepsChange ? toggleStep : undefined}
           onRemoveStep={onStepsChange ? removeStep : undefined}
-          onPasteStep={onStepsChange ? (index, step) => duplicateStep(index, step) : undefined}
+          onPasteStep={
+            onStepsChange
+              ? (index, nuevos) => {
+                  onSnapshot?.();
+                  onStepsChange(pegarPasos(steps, index, nuevos));
+                  setActiveStepIndex(index + 1);
+                }
+              : undefined
+          }
           onMoveStep={onStepsChange ? moveStep : undefined}
         />
       )}
@@ -37453,6 +37523,9 @@ function StepEditorPreviewPair({
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
   const [useScrollContainer, setUseScrollContainer] = useState(false);
   const [previewRolls, setPreviewRolls] = useState<Record<number, number>>({});
+  // El clic derecho de los cajones va al menú del visor (ver `pedidoDelCajon` en ChatPreview).
+  const [pedidoDelCajon, setPedidoDelCajon] = useState<{ tipo: "menu" | "marcar"; index: number; x: number; y: number; n: number } | null>(null);
+  const [seleccionDelVisor, setSeleccionDelVisor] = useState<Set<number> | null>(null);
   const varyPreviewStep = (index: number) => {
     setActiveStepIndex(index);
     setPreviewRolls((current) => ({
@@ -37647,6 +37720,9 @@ function StepEditorPreviewPair({
         activeStepIndex={activeStepIndex}
         onActiveStepIndexChange={setActiveStepIndex}
         onVaryPreviewStep={varyPreviewStep}
+        seleccion={seleccionDelVisor}
+        onMenuDelCajon={(index, x, y) => setPedidoDelCajon((p) => ({ tipo: "menu", index, x, y, n: (p?.n ?? 0) + 1 }))}
+        onMarcarCajon={(index) => setPedidoDelCajon((p) => ({ tipo: "marcar", index, x: 0, y: 0, n: (p?.n ?? 0) + 1 }))}
       />
       <div className="lg:sticky lg:top-4 lg:self-start lg:border-l lg:border-neutral-200 lg:pl-4">
         <label className="mb-2 flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
@@ -37679,8 +37755,14 @@ function StepEditorPreviewPair({
           onDuplicateStep={duplicatePreviewStep}
           onToggleStep={togglePreviewStep}
           onRemoveStep={removePreviewStep}
-          onPasteStep={(index, step) => duplicatePreviewStep(index, step)}
+          onPasteStep={(index, nuevos) => {
+            onSnapshot();
+            onChange(pegarPasos(steps, index, nuevos));
+            setActiveStepIndex(index + 1);
+          }}
           onMoveStep={movePreviewStep}
+          pedidoDelCajon={pedidoDelCajon}
+          onSeleccionChange={setSeleccionDelVisor}
         />
       </div>
       {editingStepIndex !== null && (
@@ -38198,7 +38280,15 @@ function StepList({
   onVaryPreviewStep,
   allowButtons = true,
   sinAgregar = false,
+  seleccion,
+  onMenuDelCajon,
+  onMarcarCajon,
 }: {
+  /** La selección del visor: con ella, cada cajón lleva su check (02/11/2026). */
+  seleccion?: Set<number> | null;
+  /** Clic derecho en el cajón (fuera de los campos de texto): abre el menú de su burbuja en el visor. */
+  onMenuDelCajon?: (index: number, x: number, y: number) => void;
+  onMarcarCajon?: (index: number) => void;
   steps: EditorStep[];
   onChange: (steps: EditorStep[]) => void;
   onSnapshot: () => void;
@@ -38357,7 +38447,31 @@ function StepList({
           key={i}
           // Las apagadas se van al final, debajo de su barra.
           className={`scroll-mt-4 space-y-2 ${step.enabled === false ? "order-2" : ""}`}
+          // EL MISMO MENÚ QUE SU BURBUJA (02/11/2026). En un campo de texto queda el menú de siempre (copiar, pegar,
+          // los comodines): solo fuera de los campos.
+          onContextMenu={
+            onMenuDelCajon
+              ? (evento) => {
+                  if ((evento.target as HTMLElement).closest("input, textarea, select, [contenteditable='true']")) return;
+                  evento.preventDefault();
+                  evento.stopPropagation();
+                  onMenuDelCajon(i, evento.clientX, evento.clientY);
+                }
+              : undefined
+          }
         >
+          {seleccion != null && onMarcarCajon && (
+            <label className="flex w-fit cursor-pointer items-center gap-2 rounded border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">
+              <input
+                type="checkbox"
+                checked={seleccion.has(i)}
+                onChange={() => onMarcarCajon(i)}
+                aria-label={`Seleccionar la burbuja ${i + 1}`}
+                className="h-4 w-4 accent-emerald-600"
+              />
+              Burbuja {i + 1}
+            </label>
+          )}
           {false && dragIndex !== null && dragIndex !== i && (
             <button
               type="button"

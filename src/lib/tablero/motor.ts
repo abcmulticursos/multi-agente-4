@@ -110,6 +110,8 @@ import {
   cobraEnLaFicha,
   cobraPorSusCables,
   productosQueCobraLaFicha,
+  BASICO_DE_LA_TIENDA,
+  FULL_DE_LA_TIENDA,
   pideElNombre,
   conProductosDeLaTienda,
 } from "./datos";
@@ -186,7 +188,29 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
   const t = leeTablerosPorTienda(crudo?.tableros)[clave]?.[canal] ?? null;
   // «El básico / el full de la tienda» (01/11/2026): aquí, y solo aquí, se cambian por sus productos.
   const conProductos = conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
-  return conCobroEnSusFichas(conProductos);
+  return conCobroEnSusFichas(conProductos, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
+}
+
+/** «El básico / el full de la tienda» → su producto de verdad (sin ese producto en la tienda, se queda el código). */
+function elDeLaTienda(id: string, alineacion: Record<string, unknown> | undefined | null): string {
+  const de = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
+  if (id === BASICO_DE_LA_TIENDA) return de(alineacion?.basico) || de(alineacion?.unico) || id;
+  if (id === FULL_DE_LA_TIENDA) return de(alineacion?.full) || id;
+  return id;
+}
+
+/**
+ * EL PRECIO DE LAS BURBUJAS DE UNA FICHA CON UN SOLO PRODUCTO (02/11/2026, su ficha 6 de LENGUA): sus datos de pago
+ * ({{METODO_DE_PAGO_1}}) llevan «Precio: {precio}», y sin decirle de qué producto salía el precio general de la venta de
+ * siempre (11) en vez del MEGAPACK. Con un producto, su precio (el de oferta si está en oferta); con dos o ninguno, nada.
+ */
+function precioDeLaFicha(convoId: number, f: FichaDelTablero, t: Tablero, pais: string): number | undefined {
+  const ids = productosQueCobraLaFicha(f, t);
+  if (ids.length !== 1) return undefined;
+  const e = estadoEnElTablero(convoId);
+  const alineacion = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === e?.tienda_id)?.alineacion as Record<string, unknown> | undefined;
+  const v = precioDelProducto(producto(loadWorkflowConfig(), elDeLaTienda(ids[0], alineacion)), pais, e?.oferta === 1);
+  return v ?? undefined;
 }
 
 /**
@@ -196,13 +220,13 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
  */
 // (02/11/2026: también la que tiene un «💰 Si paga» conectado, con sus productos sin marcar: el primero se cobra, los
 // demás los acepta —la intro del order bump—.)
-function conCobroEnSusFichas(t: Tablero | null): Tablero | null {
+function conCobroEnSusFichas(t: Tablero | null, alineacion?: Record<string, unknown>): Tablero | null {
   if (!t || !t.fichas.some((f) => cobraPorSusCables(f, t))) return t;
   return {
     ...t,
     fichas: t.fichas.map((f) => {
       if (!cobraPorSusCables(f, t)) return f;
-      const [principal, ...otros] = productosQueCobraLaFicha(f, t);
+      const [principal, ...otros] = productosQueCobraLaFicha(f, t).map((id) => elDeLaTienda(id, alineacion));
       return { ...f, cobro: { modo: "producto" as const, producto_id: principal, ...(otros.length ? { acepta: otros } : {}) } };
     }),
   };
@@ -755,7 +779,7 @@ async function irA(
         productosDeLaFicha(config, idsParaComodines(convoId, f, t), pais, estadoEnElTablero(convoId)?.oferta === 1),
         pais
       );
-      await sendConfiguredSteps(convo, pasosAEnviar as never);
+      await sendConfiguredSteps(convo, pasosAEnviar as never, precioDeLaFicha(convoId, f, t, pais));
       // Que SE LE MOSTRÓ (no solo que entró a esperar): ver «la oferta que ya se le hizo no se repite».
       if (f.espera_min) anotarMuestras(convoId, [`${MOSTRADA}${f.id}`]);
       // Desde aquí la IA ya puede hablar de lo que esta ficha presenta (lo marcado o, sin marcar, por sus cables).
@@ -4309,7 +4333,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
 }
 
 async function actuarCuadrito(convo: ConversationRow, t: Tablero, ficha: FichaDelTablero, d: BubbleDecision): Promise<void> {
-  if (d.steps?.length) await sendConfiguredSteps(convo, d.steps as never);
+  // (02/11/2026: con el precio del producto de su ficha, como sus burbujas — ver `precioDeLaFicha`.)
+  if (d.steps?.length)
+    await sendConfiguredSteps(convo, d.steps as never, precioDeLaFicha(convo.id, ficha, t, getEffectiveCountryCode(convo.phone, loadWorkflowConfig())));
   if (await seguirPor(convo.id, t, ficha.id, `dec:${d.id}`, 0)) return;
   respondio(convo, t);
   // Un cuadrito sin burbujas ni cable: que no se quede sin respuesta.
