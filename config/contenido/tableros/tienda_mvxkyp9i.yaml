@@ -3371,8 +3371,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvxovbd8-cn0ck
       tipo: cobro
-      x: 2882
-      y: 264
+      x: 2783
+      y: 143
       steps:
         - type: text
           body_variants:
@@ -3388,7 +3388,8 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: producto
-        producto_id: "@tienda:basico"
+        acepta:
+          - pmvxom7h2
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
