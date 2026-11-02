@@ -3548,6 +3548,8 @@ modality_payment_profiles:
             - banco
             - cuenta
             - bancaria
+            - banca movil
+            - banca móvil
       payment_responses:
         yape:
           - type: text
