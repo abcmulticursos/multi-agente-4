@@ -974,7 +974,7 @@ whatsapp:
     - id: f-mvvfznys-u8svs
       tipo: mensaje
       x: -341
-      y: 264
+      y: 363
       steps:
         - type: text
           body_variants:
@@ -1171,8 +1171,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 704
-      y: 297
+      x: 748
+      y: 407
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -1270,8 +1270,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 968
-      y: -44
+      x: 1012
+      y: -33
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1812,7 +1812,7 @@ whatsapp:
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 2211
+      x: 2222
       y: -374
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
@@ -2182,7 +2182,7 @@ whatsapp:
       tipo: mensaje
       x: 3245
       y: 429
-      titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
+      titulo: Upsell 1 · 100 MIS PRIMEROS TRAZOS
       steps:
         - type: text
           body_variants:
