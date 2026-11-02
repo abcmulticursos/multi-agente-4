@@ -3144,7 +3144,7 @@ whatsapp:
     - id: f-mvxn7wbz-8qjdg
       tipo: entregar
       x: 1265
-      y: 11
+      y: 0
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
@@ -3234,8 +3234,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
-      x: 1727
-      y: -77
+      x: 1716
+      y: -88
       titulo: Upsell 1 -
       steps:
         - type: text
@@ -3750,10 +3750,12 @@ whatsapp:
       de: f-mvxoh57z-19dq
       salida: sin_respuesta
       a: f-mvxnewvh-mbuow
+      vista: cable
     - id: c-mvz2vxa3-971
       de: f-mvxoh57z-19dq
       salida: pagado
       a: f-mvxnewvh-mbuow
+      vista: cable
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
