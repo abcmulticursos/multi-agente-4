@@ -8,8 +8,8 @@ whatsapp:
       pais: PE
     - id: f-mvvfznys-u8svs
       tipo: mensaje
-      x: -495
-      y: -1320
+      x: -517
+      y: -2134
       steps:
         - type: text
           body_variants:
@@ -186,8 +186,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
-      x: 1804
-      y: -1606
+      x: 1782
+      y: -2420
       steps:
         - type: text
           body_variants:
@@ -206,8 +206,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mvvo1ibc-s0tdo
       tipo: mensaje
-      x: 550
-      y: -1287
+      x: 528
+      y: -2101
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -305,8 +305,8 @@ whatsapp:
           enabled: false
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
-      x: 814
-      y: -1628
+      x: 792
+      y: -2442
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -489,8 +489,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw3kh4y-eknk7
       tipo: cobro
-      x: 1793
-      y: -825
+      x: 1771
+      y: -1639
       steps:
         - type: text
           body_variants:
@@ -509,15 +509,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mvw3mqwi-ngia
       tipo: entregar
-      x: 2717
-      y: -1595
+      x: 2695
+      y: -2409
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mvw6hswp-ld1vx
       tipo: seguimientos
-      x: -220
-      y: -1793
+      x: -242
+      y: -2607
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -835,20 +835,20 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw719ry-3fmww
       tipo: entregar
-      x: 2728
-      y: -869
+      x: 2706
+      y: -1683
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mvw8ibzi-4n26e
       tipo: regalo
-      x: 5148
-      y: -825
+      x: 5126
+      y: -1639
       titulo: Regalo
     - id: f-mvw9449n-xgbkb
       tipo: seguimientos
-      x: 2057
-      y: -1958
+      x: 2035
+      y: -2772
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1031,8 +1031,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvw9452y-yws1d
       tipo: seguimientos
-      x: 2057
-      y: -1133
+      x: 2035
+      y: -1947
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1215,8 +1215,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvx71e53-8pbnj
       tipo: mensaje
-      x: 3091
-      y: -1155
+      x: 3069
+      y: -1969
       titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
       steps:
         - type: text
@@ -1275,16 +1275,16 @@ whatsapp:
       espera_min: 2
     - id: f-mvx76sva-2c7p9
       tipo: entregar
-      x: 4895
-      y: -1584
+      x: 4873
+      y: -2398
       titulo: Entrega · MIS PRIMEROS TRAZOS
       producto_id: pmv5xqgst
       entregas:
         - pmv5xqgst
     - id: f-mvx78w0e-z55d
       tipo: mensaje
-      x: 4147
-      y: -1155
+      x: 4125
+      y: -1969
       steps:
         - type: text
           body_variants:
@@ -1292,8 +1292,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mvx9pvfr-bo9zj
       tipo: cobro
-      x: 3993
-      y: -1529
+      x: 3971
+      y: -2343
       steps:
         - type: text
           body_variants:
@@ -3234,8 +3234,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mvxoh57z-19dq
       tipo: mensaje
-      x: 1892
-      y: 110
+      x: 1727
+      y: -77
       titulo: Upsell 1 -
       steps:
         - type: text
@@ -3311,8 +3311,8 @@ whatsapp:
       instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
     - id: f-mvxoujcd-z0l5w
       tipo: mensaje
-      x: 2024
-      y: -550
+      x: 2002
+      y: -1364
       titulo: Upsell 1 · 100 CITAS CON TU MASCOTA
       steps:
         - type: text
@@ -3369,27 +3369,6 @@ whatsapp:
       instrucciones: Aquí se le ofrece un producto NUEVO, distinto a lo que ya compró. Si pregunta «¿es otro?», dile que sí y en una frase qué trae.
       sin_respuesta_min: 3
       espera_min: 2
-    - id: f-mvxovbd8-cn0ck
-      tipo: cobro
-      x: 2783
-      y: -110
-      steps:
-        - type: text
-          body_variants:
-            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - "{{METODO_DE_PAGO_1}}"
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        acepta:
-          - pmvxom7h2
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
