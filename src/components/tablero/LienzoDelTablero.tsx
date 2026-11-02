@@ -748,12 +748,28 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           const esOtro = ids.length > 0 && ids.every((id) => id !== BASICO_DE_LA_TIENDA && id !== ctx.nombres[ID_DEL_BASICO_DE_LA_TIENDA]);
           const sello = esFull ? "📦" : esOtro ? "🛍️" : "📚";
           return (
-            <span
-              className="pointer-events-none absolute -top-[62px] left-1/2 flex h-[60px] w-[60px] -translate-x-1/2 select-none items-center justify-center rounded-full border-[5px] border-emerald-500 bg-white text-[32px] leading-none shadow-md"
-              title={esFull ? "Entrega el full de la tienda" : esOtro ? "Entrega otro producto (upsell)" : "Entrega el básico de la tienda"}
-            >
-              {sello}
-            </span>
+            <>
+              {/* LA FLECHITA CELESTE QUE APUNTA AL SELLO (02/11/2026, su montaje «ENTREGA con flecha»). Solo pantalla. */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 80 40"
+                className="pointer-events-none absolute -top-[52px] left-1/2 h-[40px] w-[80px] -translate-x-[122px] select-none drop-shadow"
+              >
+                <defs>
+                  <linearGradient id="flecha-entrega" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#9fd4ff" />
+                    <stop offset="1" stopColor="#4aa8f0" />
+                  </linearGradient>
+                </defs>
+                <path d="M2 13h46V2l30 18-30 18V27H2z" fill="url(#flecha-entrega)" stroke="#2f86d6" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+              <span
+                className="pointer-events-none absolute -top-[62px] left-1/2 flex h-[60px] w-[60px] -translate-x-1/2 select-none items-center justify-center rounded-full border-[5px] border-emerald-500 bg-white text-[32px] leading-none shadow-md"
+                title={esFull ? "Entrega el full de la tienda" : esOtro ? "Entrega otro producto (upsell)" : "Entrega el básico de la tienda"}
+              >
+                {sello}
+              </span>
+            </>
           );
         })()}
       {colitasQueLlegan.length > 0 && (

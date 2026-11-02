@@ -1177,6 +1177,100 @@ input,
   -moz-osx-font-smoothing: auto;
 }
 
+/* «CLARO 2» (y las ventanas de «MIXTO 2»), 02/11/2026, su montaje «tema claro mas claro»: fondo casi blanco con un toque
+   celeste, cajones blancos con sombra suave, botones blancos de borde fino y letra azul, visor gris azulado claro, más aire.
+   Es el claro (`data-pizarra-tema="claro"` o `"mixto"`) con `data-pizarra-variante="claro2"`: nada más cambia. */
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo {
+  --bn-fondo: linear-gradient(180deg, #edf2f9 0%, #e3eaf4 100%);
+  --bn-cabecera: rgba(240, 245, 251, 0.96);
+  --bn-activas: #c6f6dc;
+  --bn-titulo: #0f172a;
+  --bn-subtitulo: #334155;
+  --bn-nota: #475569;
+  --bn-nota-fondo: #ffffff;
+  --bn-cancelar: #ffffff;
+  --bn-cancelar-borde: #d6dfeb;
+  --bn-cancelar-texto: #0f172a;
+  --bn-listo: #2f7cf6;
+  --bn-listo-texto: #ffffff;
+  --bn-linea: #dfe6f0;
+  --bn-cajon: #ffffff;
+  --bn-cajon-borde: #e3e9f2;
+  --bn-cajon-sombra: 0 4px 18px rgba(30, 60, 110, 0.08);
+  --bn-activo: #2f7cf6;
+  --bn-num: #2f7cf6;
+  --bn-chip: #ffffff;
+  --bn-chip-borde: #cfdcf0;
+  --bn-chip-texto: #1d5fd8;
+  --bn-sel: #ffffff;
+  --bn-sel-borde: #cfdcf0;
+  --bn-sel-texto: #0f172a;
+  --bn-icono: #ffffff;
+  --bn-icono-borde: #cfdcf0;
+  --bn-icono-texto: #1e3a5f;
+  --bn-on: #2f7cf6;
+  --bn-on-borde: #2f7cf6;
+  --bn-basura: #ffffff;
+  --bn-basura-borde: #f3b2b5;
+  --bn-basura-texto: #e11d2e;
+  --bn-texto-cajon: #0f172a;
+  --bn-caja-texto: #ffffff;
+  --bn-caja-texto-borde: #d6dfeb;
+  --bn-botones: #6d3df0;
+  --bn-botones-fondo: #ffffff;
+  --bn-decisiones: #0f2a2c;
+  --bn-decisiones-boton: #0f9d74;
+  --bn-decisiones-fondo: #ffffff;
+  --bn-nombre: #f6f9ff;
+  --bn-nombre-borde: #d6dfeb;
+  --bn-visor: #8e9cb4;
+  --bn-visor-cab: rgba(70, 86, 114, 0.42);
+  --bn-visor-texto: #f8fafc;
+  --bn-burbuja: #dcf8d8;
+  --bn-burbuja-texto: #111b21;
+  --bn-separador: #ffffff;
+}
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-cajon {
+  border-radius: 22px;
+  padding: 18px 22px;
+}
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-nota {
+  border: 1px solid var(--bn-linea);
+}
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-visor {
+  border-radius: 22px;
+  padding: 14px 16px;
+}
+/* El ícono de arriba: un globo de chat de línea en vez del robot. */
+.bn-avatar-linea {
+  display: none;
+}
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar {
+  display: none;
+}
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar-linea {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: #1e3a8a;
+}
+
+/* EL SEPARADOR DE LOS GESTORES (02/11/2026, la flecha de su captura): una barra entre la lista de la izquierda
+   (Seguimientos, Regalo…) y el editor. Blanca en los claros; la línea del tema en los oscuros. */
+.burbujas-nuevo {
+  --bn-separador: #ffffff;
+}
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
+  --bn-separador: #212b4d;
+}
+@media (min-width: 768px) {
+  .burbujas-nuevo .bn-lista-gestor {
+    border-right: 6px solid var(--bn-separador);
+    padding-right: 16px;
+  }
+}
+
 /* «+ AGREGAR PASO» QUE SE VEA (02/11/2026: «casi no se nota»), en todos los temas: borde punteado y letra del color de
    acento del tema, con un fondo suave; al pasar el ratón, más fuerte. */
 .burbujas-nuevo .bn-agregar-paso {

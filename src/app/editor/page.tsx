@@ -27234,13 +27234,13 @@ function VistaPizarra({
   const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<TemaDeLaPizarra>(() => {
     try {
       const guardado = window.localStorage.getItem("pizarra-tema");
-      return guardado === "oscuro" || guardado === "mixto" || guardado === "navy" ? guardado : "claro";
+      return guardado === "oscuro" || guardado === "mixto" || guardado === "navy" || guardado === "claro2" || guardado === "mixto2" ? guardado : "claro";
     } catch {
       return "claro";
     }
   });
   /** El fondo y las barras: oscuros en mixto y en oscuro. */
-  const fondoOscuro = temaDeLaPizarra !== "claro";
+  const fondoOscuro = temaDeLaPizarra !== "claro" && temaDeLaPizarra !== "claro2";
   // LOS CAJONES EDITORES Y MIS TIENDAS SIGUEN AL 🌙 DE LA PIZARRA (22/10/2026): «en modo oscuro se
   // vea así… y el visor como WhatsApp oscuro». Se marca en la raíz mientras la pizarra está abierta;
   // globals.css oscurece solo lo que lleva la clase `prolijo`. Al salir de la pizarra se quita: el
@@ -27249,8 +27249,12 @@ function VistaPizarra({
   // up de burbujas. Se marca como «oscuro» + `data-pizarra-variante="navy"`, para no tocar nada de lo que ya mira «oscuro».
   useEffect(() => {
     const raiz = document.documentElement;
-    raiz.dataset.pizarraTema = temaDeLaPizarra === "navy" ? "oscuro" : temaDeLaPizarra;
+    // «CLARO 2» y «MIXTO 2» (02/11/2026, su montaje «tema claro mas claro»): son el claro y el mixto de siempre, con las
+    // ventanas emergentes en su diseño más claro (`data-pizarra-variante="claro2"`). Lo demás que mira «claro»/«mixto», igual.
+    raiz.dataset.pizarraTema =
+      temaDeLaPizarra === "navy" ? "oscuro" : temaDeLaPizarra === "claro2" ? "claro" : temaDeLaPizarra === "mixto2" ? "mixto" : temaDeLaPizarra;
     if (temaDeLaPizarra === "navy") raiz.dataset.pizarraVariante = "navy";
+    else if (temaDeLaPizarra === "claro2" || temaDeLaPizarra === "mixto2") raiz.dataset.pizarraVariante = "claro2";
     else delete raiz.dataset.pizarraVariante;
     return () => {
       delete raiz.dataset.pizarraTema;
@@ -29471,7 +29475,9 @@ function VistaPizarra({
           {(
             [
               ["claro", "☀️ Claro", "Todo claro"],
+              ["claro2", "🤍 Claro 2", "Todo claro, con las ventanas en blanco y más aire"],
               ["mixto", "🌗 Mixto", "Fondo oscuro; ventanas y Mis tiendas claras"],
+              ["mixto2", "🌓 Mixto 2", "El mixto, con las ventanas como el Claro 2"],
               ["oscuro", "🌙 Oscuro", "Todo oscuro"],
               ["navy", "🌌 Dark Navy", "Dark Navy Corporate: todo oscuro, con el visor de WhatsApp oscuro en las burbujas"],
             ] as const
@@ -30173,7 +30179,7 @@ function GestorDelRegalo({
   const rg = pv.regalo;
   const [paso, setPaso] = useState<"ofrece" | "enlace" | "comento" | "premio" | "despedida">("ofrece");
   return (
-    <VentanaFlotante titulo="🎁 Regalo" detalle={rg?.deEstaTienda ? "El regalo de esta tienda." : "El de todas las tiendas: si lo editas aquí, esta tienda tendrá el suyo."} onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR}>
+    <VentanaFlotante titulo="🎁 Regalo" detalle={rg?.deEstaTienda ? "El regalo de esta tienda." : "El de todas las tiendas: si lo editas aquí, esta tienda tendrá el suyo."} onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR} clase="burbujas-nuevo prolijo">
       {selector}
       <div className="mb-3 flex items-center gap-2">
         <button
@@ -30207,7 +30213,7 @@ function GestorDelRegalo({
         )}
       </div>
       <div className="grid gap-4 md:grid-cols-[240px_minmax(0,1fr)]">
-        <div className="flex flex-col gap-1.5">
+        <div className="bn-lista-gestor flex flex-col gap-1.5">
           <PasoDelGestor n="1" titulo="Ofrecimiento" detalle="Con sus botones Sí / No" elegido={paso === "ofrece"} onElegir={() => setPaso("ofrece")} />
           <PasoDelGestor n="2" titulo="Enlace para comentar" detalle="Si dice que sí" elegido={paso === "enlace"} onElegir={() => setPaso("enlace")} />
           <PasoDelGestor n="3" titulo="Dice que comentó" detalle="Lo detecta el bot" elegido={paso === "comento"} onElegir={() => setPaso("comento")} />
@@ -30989,7 +30995,7 @@ function GuiaDeAnuncios({
 
 /** UNA VENTANA ENCIMA DE LA PIZARRA (19/10/2026): Escape, clic afuera o ✕ la cierran. */
 /** El ☀️/🌙 de la pizarra y el tablero. «navy» = Dark Navy Corporate (02/11/2026): el oscuro con el visor de WhatsApp oscuro. */
-type TemaDeLaPizarra = "claro" | "mixto" | "oscuro" | "navy";
+type TemaDeLaPizarra = "claro" | "claro2" | "mixto" | "mixto2" | "oscuro" | "navy";
 
 function VentanaFlotante({
   titulo,
@@ -31494,7 +31500,7 @@ function PantallaDelTableroCargada({
   const fichaDeGestor = tablero.fichas.find((f) => f.id === gestor);
   const fichaDeAjustes = tablero.fichas.find((f) => f.id === ajustes);
   const paises = Object.keys(COUNTRIES);
-  const fondoOscuro = tema !== "claro";
+  const fondoOscuro = tema !== "claro" && tema !== "claro2";
   const vacioEnEsteCanal = (t: TableroEnElEditor | undefined) =>
     !t || (t.fichas.filter((f) => f.tipo !== "inicio").length === 0 && t.cables.length === 0);
 
@@ -31870,7 +31876,9 @@ function PantallaDelTableroCargada({
                     {(
                       [
                         ["claro", "☀️ Claro"],
+                        ["claro2", "🤍 Claro 2"],
                         ["mixto", "🌗 Mixto"],
+                        ["mixto2", "🌓 Mixto 2"],
                         ["oscuro", "🌙 Oscuro"],
                         ["navy", "🌌 Navy"],
                       ] as const
@@ -31880,7 +31888,7 @@ function PantallaDelTableroCargada({
                         type="button"
                         aria-pressed={tema === v}
                         onClick={() => onTema(v)}
-                        className={`flex-1 rounded px-2 py-1 text-xs font-semibold ${tema === v ? "bg-carbon-fuerte text-white" : "bg-relleno text-tinta-suave hover:bg-tarjeta"}`}
+                        className={`min-w-[30%] flex-1 rounded px-2 py-1 text-xs font-semibold ${tema === v ? "bg-carbon-fuerte text-white" : "bg-relleno text-tinta-suave hover:bg-tarjeta"}`}
                       >
                         {n}
                       </button>
@@ -32374,7 +32382,8 @@ function GestorDeVersiones({
       clase="burbujas-nuevo prolijo"
     >
       <div data-ventana-del-tablero className="bn-cuerpo grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
-        <div className="flex flex-col gap-1.5">
+        {/* (02/11/2026: el separador que él marcó con una flecha, entre la lista y el editor: `bn-lista-gestor`.) */}
+        <div className="bn-lista-gestor flex flex-col gap-1.5">
           {esSeg ? (
             <>
               {segs.map((x, i) => (
@@ -32689,7 +32698,10 @@ function GestorDelRegaloDelTablero({
       }
       onCerrar={onCerrar}
       ancho={ANCHO_DEL_GESTOR}
+      // (02/11/2026: «el regalo también debe tener su respectiva apariencia»: el diseño del pop up de burbujas.)
+      clase="burbujas-nuevo prolijo"
     >
+      <div className="bn-cuerpo">
       <SelectorDeRegalo cfg={cfg} tiendaId={tiendaId} aplicar={aplicar} />
       {/* EL TIEMPO DEL REGALO, AQUÍ MISMO (26/10/2026): el mismo dato del menú ajustes («Espera del correo /
           regalo»), en minutos. Uno solo para todo el bot. */}
@@ -32715,7 +32727,7 @@ function GestorDelRegaloDelTablero({
         </span>
       </label>
       <div data-ventana-del-tablero className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
-        <div className="flex flex-col gap-1.5">
+        <div className="bn-lista-gestor flex flex-col gap-1.5">
           {pasos.map(([id, titulo, detalle], i) => (
             <PasoDelGestor key={id} n={String(i + 1)} titulo={titulo} detalle={detalle} elegido={paso === id} onElegir={() => setPaso(id)} />
           ))}
@@ -32757,6 +32769,7 @@ function GestorDelRegaloDelTablero({
             />
           )}
         </div>
+      </div>
       </div>
     </VentanaFlotante>
   );
@@ -35077,6 +35090,11 @@ function VentanaDelCajon({
         <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/tablero/agente.png" alt="" className="bn-avatar hidden" />
+          {/* (02/11/2026, Claro 2: un globo de chat de línea en vez del robot; solo se ve en ese tema.) */}
+          <svg className="bn-avatar-linea hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5A8.5 8.5 0 1 1 21 11.5z" />
+            <path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01" strokeWidth="2.4" />
+          </svg>
           <div className="min-w-0 flex-1">
             {nombre !== undefined ? (
               // EL NOMBRE SE CAMBIA AQUÍ MISMO (16/10/2026): «mejor cambiarla directamente ahí».
