@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, cobraEnLaFicha, eligeDeLaFicha, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, cobraEnLaFicha, eligeDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -75,6 +75,23 @@ const TEMA = {
 };
 const PUNTO_VERDE = "!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500";
 const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-500";
+/** El punto de un «💰 Si paga» que ENTREGA SOLO (02/11/2026, su montaje): más grande, blanco con borde verde y el ícono. */
+const PUNTO_DE_ENTREGA = "!flex !h-[50px] !w-[50px] !items-center !justify-center !rounded-full !border-[4px] !border-emerald-500 !bg-white !text-[27px] !leading-none shadow-md";
+/** Clave con la que el editor pasa el producto full de la tienda dentro de `nombres` (solo pantalla). */
+export const ID_DEL_FULL_DE_LA_TIENDA = "@tienda:full:id";
+
+/**
+ * EL ÍCONO DE LA ENTREGA AUTOMÁTICA (02/11/2026). Él: «el conector debe cambiar de apariencia cuando es entrega
+ * automática»: en el «💰 Si paga» de una ficha que no es Cobro (entrega el producto ella misma). 📦 si es el full de la
+ * tienda; 🛍️ si la ficha es un upsell; 📚 los demás. En las demás salidas, nada (el punto naranja de siempre).
+ */
+function iconoDeEntrega(f: FichaEnElEditor, clave: string, t: TableroEnElEditor, nombres: Record<string, string>, esUpsell: boolean): string | null {
+  if (f.tipo === "cobro" || (clave !== "pagado" && !clave.startsWith("prod:"))) return null;
+  const pid = clave === "pagado" ? productosQueCobraLaFicha(f as FichaDelTablero, t as Tablero)[0] : clave.slice(5);
+  if (!pid) return null;
+  if (pid === FULL_DE_LA_TIENDA || (!!nombres[ID_DEL_FULL_DE_LA_TIENDA] && pid === nombres[ID_DEL_FULL_DE_LA_TIENDA])) return "📦";
+  return esUpsell ? "🛍️" : "📚";
+}
 const ICONO: Record<string, string> = { text: "💬", image: "🖼️", video: "🎬", audio: "🎤", document: "📄" };
 const ESQUINAS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 const BURBUJAS_A_LA_VISTA = 5;
@@ -625,11 +642,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       !!falta ||
       ((boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
     const destino = destinoDe(s.clave);
+    const icono = iconoDeEntrega(f, s.clave, ctx.tablero, ctx.nombres, ctx.upsellDe[f.id] !== undefined);
     return (
       <div
         key={llave}
         title={falta ?? undefined}
-        className={`relative flex items-center gap-1.5 rounded-full border px-2 py-0.5 pr-4 text-[11px] font-semibold ${
+        className={`relative flex items-center gap-1.5 rounded-full border px-2 py-0.5 ${icono ? "pr-6" : "pr-4"} text-[11px] font-semibold ${
           falta
             ? "border-red-500 bg-red-50 text-red-800"
             : boton
@@ -665,13 +683,21 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             type="source"
             position={Position.Right}
             id={s.clave}
-            className={`${PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
-            title={pide ? (falta ?? "Sin cable: tíralo a donde lleva, o haz clic para elegir de una lista") : "Clic: elegir a dónde va de una lista"}
+            className={`${icono ? PUNTO_DE_ENTREGA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+            title={
+              icono
+                ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…), o haz clic para elegir de una lista"
+                : pide
+                  ? (falta ?? "Sin cable: tíralo a donde lleva, o haz clic para elegir de una lista")
+                  : "Clic: elegir a dónde va de una lista"
+            }
             onClick={(e) => {
               e.stopPropagation();
               ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
             }}
-          />
+          >
+            {icono && <span className="pointer-events-none select-none">{icono}</span>}
+          </Handle>
         )}
       </div>
     );
@@ -1468,23 +1494,28 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         {aLaDerecha.map((s) => {
           const falta = faltan?.get(s.clave);
           const pide = !!falta || ((s.clave.startsWith("btn:") || s.clave.startsWith("dec:") || s.clave.startsWith("elige:") || s.clave === "sin_pago") && !conCable.has(s.clave));
+          // La entrega automática, con su ícono (ver `iconoDeEntrega`): el cable sale de él.
+          const icono = iconoDeEntrega(f, s.clave, ctx.tablero, ctx.nombres, nUpsell !== undefined);
           return (
             <div
               key={s.clave}
               title={falta ?? s.etiqueta}
-              className={`pointer-events-auto relative flex h-7 min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 pr-5 text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
+              className={`pointer-events-auto relative flex ${icono ? "h-9" : "h-7"} min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 ${icono ? "pr-7" : "pr-5"} text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
             >
               <span className="truncate">{s.etiqueta.replace(/^(🔘|💬|✍️) /, s.clave.startsWith("btn:") ? "botón " : s.clave.startsWith("dec:") ? "si dice " : s.clave.startsWith("elige:") ? "" : "")}</span>
               <Handle
                 type="source"
                 position={Position.Right}
                 id={s.clave}
-                className={`${PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+                className={`${icono ? PUNTO_DE_ENTREGA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+                title={icono ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…)" : undefined}
                 onClick={(e) => {
                   e.stopPropagation();
                   ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
                 }}
-              />
+              >
+                {icono && <span className="pointer-events-none select-none">{icono}</span>}
+              </Handle>
             </div>
           );
         })}

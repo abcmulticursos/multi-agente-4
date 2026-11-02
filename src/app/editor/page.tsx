@@ -24919,7 +24919,9 @@ function ChatPreview({
     if (!container || !node) return;
     const top = node.offsetTop - container.offsetTop;
     container.scrollTo({ top, behavior: "smooth" });
-  }, [activeStepIndex, useScrollContainer, visibles.length]);
+    // (02/11/2026: sin `visibles.length`, como en los cajones: pegar o duplicar no mueve la pantalla.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStepIndex, useScrollContainer]);
 
   useEffect(() => {
     if (!onMoveStep) return;
@@ -31234,6 +31236,8 @@ function PantallaDelTableroCargada({
           [FULL_DE_LA_TIENDA]: `Full de la tienda${deLaTienda.full ? ` (${deLaTienda.full})` : " (sin elegir)"}`,
         }
       : {}),
+    // El id del full de la tienda, para el ícono 📦 de la entrega automática (02/11/2026; solo pantalla).
+    "@tienda:full:id": String((tienda?.alineacion as Record<string, unknown> | undefined)?.full ?? ""),
     // Los anuncios por su nombre, para las salidas del Inicio «📣 anuncio» (26/10/2026).
     ...Object.fromEntries(((cfg as { ad_registry?: Array<{ key: string; name?: string }> }).ad_registry ?? []).map((a) => [`anuncio:${a.key}`, a.name?.trim() || a.key])),
   };
@@ -37390,7 +37394,7 @@ function JourneyPreviewBlock({
     // Y SIN BOTONES REPETIDOS EN LA FICHA (18/10/2026, el del DNI): ver `sinBotonesRepetidos`.
     next.splice(index + 1, 0, sinBotonesRepetidos(step, steps));
     onStepsChange(next);
-    setActiveStepIndex(index + 1);
+    // (02/11/2026: sin marcarla. Él: «la única acción que lleve a su cuadro editor debe ser un clic izquierdo directo».)
   };
   const toggleStep = (index: number) => {
     if (!steps[index] || !onStepsChange) return;
@@ -37466,7 +37470,6 @@ function JourneyPreviewBlock({
               ? (index, nuevos) => {
                   onSnapshot?.();
                   onStepsChange(pegarPasos(steps, index, nuevos));
-                  setActiveStepIndex(index + 1);
                 }
               : undefined
           }
@@ -37545,7 +37548,7 @@ function StepEditorPreviewPair({
     const next = [...steps];
     next.splice(index + 1, 0, copy);
     onChange(next);
-    setActiveStepIndex(index + 1);
+    // (02/11/2026: sin marcarla ni mover la pantalla; solo el clic izquierdo lleva a su cajón.)
   };
   const togglePreviewStep = (index: number) => {
     const step = steps[index];
@@ -37757,8 +37760,8 @@ function StepEditorPreviewPair({
           onRemoveStep={removePreviewStep}
           onPasteStep={(index, nuevos) => {
             onSnapshot();
+            // Pegar no lleva a su cajón (02/11/2026): solo el clic izquierdo.
             onChange(pegarPasos(steps, index, nuevos));
-            setActiveStepIndex(index + 1);
           }}
           onMoveStep={movePreviewStep}
           pedidoDelCajon={pedidoDelCajon}
@@ -38315,7 +38318,10 @@ function StepList({
         ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [activeStepIndex, idPrefix, steps.length]);
+    // (02/11/2026: sin `steps.length`. Pegar o duplicar cambia cuántas hay y volvía a llevar a la marcada; solo cuando
+    // se marca otra —el clic izquierdo— se va a su cajón.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStepIndex, idPrefix]);
 
   const update = (i: number, patch: Partial<EditorStep>) => {
     onEdit(`${idPrefix}:${i}:meta`);
