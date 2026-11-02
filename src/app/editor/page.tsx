@@ -31238,6 +31238,10 @@ function PantallaDelTableroCargada({
       : {}),
     // El id del full de la tienda, para el ícono 📦 de la entrega automática (02/11/2026; solo pantalla).
     "@tienda:full:id": String((tienda?.alineacion as Record<string, unknown> | undefined)?.full ?? ""),
+    // Y el del básico (o único), para el sello 📚 de la ficha Entrega.
+    "@tienda:basico:id": String(
+      (tienda?.alineacion as Record<string, unknown> | undefined)?.basico ?? (tienda?.alineacion as Record<string, unknown> | undefined)?.unico ?? ""
+    ),
     // Los anuncios por su nombre, para las salidas del Inicio «📣 anuncio» (26/10/2026).
     ...Object.fromEntries(((cfg as { ad_registry?: Array<{ key: string; name?: string }> }).ad_registry ?? []).map((a) => [`anuncio:${a.key}`, a.name?.trim() || a.key])),
   };

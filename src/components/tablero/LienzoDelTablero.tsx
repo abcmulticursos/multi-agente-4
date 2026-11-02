@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, cobraEnLaFicha, eligeDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -79,6 +79,7 @@ const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-50
 const PUNTO_DE_ENTREGA = "!flex !h-[50px] !w-[50px] !items-center !justify-center !rounded-full !border-[4px] !border-emerald-500 !bg-white !text-[27px] !leading-none shadow-md";
 /** Clave con la que el editor pasa el producto full de la tienda dentro de `nombres` (solo pantalla). */
 export const ID_DEL_FULL_DE_LA_TIENDA = "@tienda:full:id";
+export const ID_DEL_BASICO_DE_LA_TIENDA = "@tienda:basico:id";
 
 /**
  * EL ÍCONO DE LA ENTREGA AUTOMÁTICA (02/11/2026). Él: «el conector debe cambiar de apariencia cuando es entrega
@@ -738,6 +739,23 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           ⚠ nadie llega
         </span>
       )}
+      {/* EL SELLO DE LA ENTREGA (02/11/2026, su montaje «entrega2.jpg»): en TODA ficha Entrega, arriba al centro, qué
+          entrega: 📦 el full de la tienda, 📚 el básico, 🛍️ otro producto (el upsell). Solo pantalla. */}
+      {f.tipo === "entregar" &&
+        (() => {
+          const ids = (f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []).map((k) => k.split("#")[0]);
+          const esFull = ids.some((id) => id === FULL_DE_LA_TIENDA || (!!ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA] && id === ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA]));
+          const esOtro = ids.length > 0 && ids.every((id) => id !== BASICO_DE_LA_TIENDA && id !== ctx.nombres[ID_DEL_BASICO_DE_LA_TIENDA]);
+          const sello = esFull ? "📦" : esOtro ? "🛍️" : "📚";
+          return (
+            <span
+              className="pointer-events-none absolute -top-[62px] left-1/2 flex h-[60px] w-[60px] -translate-x-1/2 select-none items-center justify-center rounded-full border-[5px] border-emerald-500 bg-white text-[32px] leading-none shadow-md"
+              title={esFull ? "Entrega el full de la tienda" : esOtro ? "Entrega otro producto (upsell)" : "Entrega el básico de la tienda"}
+            >
+              {sello}
+            </span>
+          );
+        })()}
       {colitasQueLlegan.length > 0 && (
         <span
           className="nodrag pointer-events-auto absolute -left-[46px] top-[34px] cursor-help rounded-full border border-slate-300 bg-white px-1.5 text-[10px] font-bold text-slate-700 shadow"
