@@ -25096,7 +25096,7 @@ function ChatPreview({
   // sirve para lo único que sirve, comprobar cómo llega el mensaje.
   return (
     <div
-      className={`rounded-xl border border-neutral-300 bg-[#efeae2] p-2 ${
+      className={`bn-visor rounded-xl border border-neutral-300 bg-[#efeae2] p-2 ${
         sinTopeDeAncho ? "" : "w-full max-w-[420px]"
       }`}
     >
@@ -25105,14 +25105,16 @@ function ChatPreview({
           ✅ {avisoDelMenu}
         </div>
       )}
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <div className="bn-visor-cab mb-2 flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className="text-[11px] font-semibold text-neutral-500">
-            📱 Vista previa (WhatsApp)
+          <span className="bn-visor-titulo text-[11px] font-semibold text-neutral-500">
+            <span className="bn-solo-viejo">📱 </span>
+            <IconoDeBurbuja nombre="whatsapp" />
+            Vista previa (WhatsApp)
           </span>
           <span
             title="Burbujas activas visibles en esta previsualización"
-            className="rounded-full border border-emerald-200 bg-white/80 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+            className="bn-activas rounded-full border border-emerald-200 bg-white/80 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
           >
             {visibles.length} {visibles.length === 1 ? "activa" : "activas"}
           </span>
@@ -25124,9 +25126,11 @@ function ChatPreview({
             onVaryAll?.();
           }}
           title="Mostrar otra combinación de variantes al azar (como hace el bot)"
-          className="rounded border border-neutral-300 bg-tarjeta px-2 py-0.5 text-[11px] text-neutral-600 hover:bg-neutral-50"
+          className="bn-variar rounded border border-neutral-300 bg-tarjeta px-2 py-0.5 text-[11px] text-neutral-600 hover:bg-neutral-50"
         >
-          🔀 Variar
+          <span className="bn-solo-viejo">🔀 </span>
+          <IconoDeBurbuja nombre="aleatorio" />
+          Variar
         </button>
       </div>
       {/* LA BARRA DE LA SELECCIÓN.
@@ -25281,7 +25285,7 @@ function ChatPreview({
                   // abre el menú. El izquierdo sigue buscando su par, como siempre.
                   setContextMenu({ index: originalIndex, x: event.clientX, y: event.clientY });
                 }}
-                className={`max-w-[88%] rounded-lg rounded-tr-none bg-[#d9fdd3] px-2.5 py-1.5 shadow-sm transition ${
+                className={`bn-burbuja max-w-[88%] rounded-lg rounded-tr-none bg-[#d9fdd3] px-2.5 py-1.5 shadow-sm transition ${
                   // UNA SOLA LÍNEA. Aquí había un borde de 2 px MÁS un aro de
                   // 2 px separado: dos líneas de verdad, que en un Mac se
                   // funden y en un PC se ven las dos.
@@ -25297,7 +25301,7 @@ function ChatPreview({
                   // Transparente cuando no está marcada: así el grosor está
                   // siempre reservado y al marcarla no se mueve nada.
                   activeStepIndex === originalIndex
-                    ? "border-2 border-emerald-600 shadow-md"
+                    ? "bn-burbuja-activa border-2 border-emerald-600 shadow-md"
                     : "border border-transparent"
                 } ${onMoveStep ? "cursor-grab active:cursor-grabbing select-none" : onSelectStep ? "cursor-pointer" : ""}`}
               >
@@ -34840,6 +34844,13 @@ function VentanaDelCajon({
   onCerrar: () => void;
 }) {
   const productosFicha = useContext(ProductosDeLaFichaContext);
+  // EL {precio} DEL VISOR, EL DE SU PRODUCTO (02/11/2026). Él: «en los visores se sigue representando 11». El bot ya pone
+  // el precio del producto de la ficha (`precioDeLaFicha` del motor); el visor usaba el general. Con UN producto, su
+  // precio en el país de su manta (el de oferta si el seguimiento ya la activó: lo trae `productosFicha`).
+  const precioDelProductoDeLaFicha =
+    productosFicha?.productos.length === 1 && typeof productosFicha.productos[0].precio === "number"
+      ? productosFicha.productos[0].precio
+      : undefined;
   const [borrador, setBorradorDirecto] = useState<EditorStep[]>(steps);
   /**
    * CTRL+Z DENTRO DE LA VENTANA (19/10/2026): «acabo de mover una burbuja manualmente en el visor,
@@ -35001,6 +35012,7 @@ function VentanaDelCajon({
                 stageBasicoPrice: previewOrderBumpPriceForFollowup(cfgVista, "basico", seguimiento),
               }
             : {})}
+          {...(precioDelProductoDeLaFicha !== undefined ? { stagePriceSoles: precioDelProductoDeLaFicha } : {})}
           previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
           sinExpandir
         />
@@ -35010,8 +35022,12 @@ function VentanaDelCajon({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
       {/* `prolijo`: la letra y el aire de Sendy, y su oscuro con la pizarra en 🌙 (globals.css). */}
-      <div className="prolijo my-8 w-full max-w-6xl rounded-xl border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+      {/* `burbujas-nuevo`: SU DISEÑO (02/11/2026, sus montajes «INTERFAZ CLARA/OSCURA» y «ABIERTO»), con sus colores medidos,
+          en claro, mixto y oscuro (el ☀️/🌙 de la pizarra). Solo este pop up: ver globals.css. */}
+      <div className="burbujas-nuevo prolijo my-8 w-full max-w-6xl rounded-xl border border-neutral-300 bg-tarjeta shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/tablero/agente.png" alt="" className="bn-avatar hidden" />
           <div className="min-w-0 flex-1">
             {nombre !== undefined ? (
               // EL NOMBRE SE CAMBIA AQUÍ MISMO (16/10/2026): «mejor cambiarla directamente ahí».
@@ -35023,16 +35039,16 @@ function VentanaDelCajon({
                 className="w-full max-w-md rounded border border-neutral-300 px-2 py-1 text-sm font-bold text-neutral-900 focus:border-emerald-500 focus:outline-none"
               />
             ) : (
-              <h3 className="text-sm font-bold text-neutral-900">{titulo}</h3>
+              <h3 className="bn-titulo text-sm font-bold text-neutral-900">{titulo}</h3>
             )}
-            <p className="mt-0.5 text-xs text-neutral-500">
+            <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">
               Todas sus burbujas. Toca una burbuja de la vista previa y te lleva a su editor.
               {pais ? ` Vista previa con los precios de ${banderaDe(pais)} ${COUNTRY_OPTIONS.find((o) => o.code === pais)?.label ?? pais}.` : ""}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] text-neutral-500 sm:inline">Escape o Cancelar = descartar</span>
-            <button type="button" onClick={onCerrar} className="rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
+            <span className="bn-nota hidden text-[11px] text-neutral-500 sm:inline">Escape o Cancelar = descartar</span>
+            <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
               Cancelar
             </button>
             <button
@@ -35044,16 +35060,17 @@ function VentanaDelCajon({
                   susAnuncios ?? undefined
                 )
               }
-              className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+              className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
             >
               Listo
+              <IconoDeBurbuja nombre="listo" />
             </button>
           </div>
         </div>
         {/* EL MISMO EDITOR CON VISOR QUE EN LOS MENÚS (16/10/2026): «en las otras yo puedo
             seleccionar una burbuja y me lleva a su cajón editor, y viceversa, duplicar burbujas,
             previsualizar los comodines y spintax… faltan funciones». */}
-        <div className="max-h-[78vh] overflow-y-auto p-4">
+        <div className="bn-cuerpo max-h-[78vh] overflow-y-auto p-4">
           {anuncios && susAnuncios && (
             <div className="mb-4">
               <AdTagPicker
@@ -35087,6 +35104,7 @@ function VentanaDelCajon({
                   stageBasicoPrice: previewOrderBumpPriceForFollowup(cfgVista, "basico", seguimiento),
                 }
               : {})}
+            {...(precioDelProductoDeLaFicha !== undefined ? { stagePriceSoles: precioDelProductoDeLaFicha } : {})}
             previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista), productosFicha)}
             sinExpandir
           />
@@ -37731,8 +37749,8 @@ function StepEditorPreviewPair({
         onMenuDelCajon={(index, x, y) => setPedidoDelCajon((p) => ({ tipo: "menu", index, x, y, n: (p?.n ?? 0) + 1 }))}
         onMarcarCajon={(index) => setPedidoDelCajon((p) => ({ tipo: "marcar", index, x: 0, y: 0, n: (p?.n ?? 0) + 1 }))}
       />
-      <div className="lg:sticky lg:top-4 lg:self-start lg:border-l lg:border-neutral-200 lg:pl-4">
-        <label className="mb-2 flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+      <div className="bn-columna-visor lg:sticky lg:top-4 lg:self-start lg:border-l lg:border-neutral-200 lg:pl-4">
+        <label className="bn-check mb-2 flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
           <input
             type="checkbox"
             checked={useScrollContainer}
@@ -39090,7 +39108,7 @@ function BubbleDecisionsEditor({
       )}
       <div className="mb-2 flex items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold text-emerald-950">Decisiones</p>
+          <p className="bn-titulo-decisiones text-sm font-semibold text-emerald-950">Decisiones</p>
           <p className="text-[11px] text-emerald-800">
             Respuestas posibles a la pregunta de esta burbuja. El cliente
             contesta escribiendo; tú defines qué palabras activan cada una.
@@ -39131,7 +39149,7 @@ function BubbleDecisionsEditor({
                 { id, title: "", keywords: [], steps: [], color: "gris" },
               ]);
             }}
-            className="rounded border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+            className="bn-agregar-decision rounded border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
           >
             + Agregar decisiones
           </button>
@@ -39277,7 +39295,7 @@ function BubbleDecisionsEditor({
           Era lo ÚNICO que el saludo sabía hacer y una burbuja no. No lleva
           cuadritos a propósito: un nombre es texto libre y no hay palabra clave
           que lo reconozca, así que esto detiene la intro por su cuenta. */}
-      <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
+      <label className="bn-caja-nombre mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
         <input
           type="checkbox"
           checked={pideNombre}
@@ -39749,14 +39767,14 @@ function BubbleButtonsEditor({
       )}
       <div className="mb-2 flex items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold text-violet-950">Botones debajo de esta burbuja</p>
+          <p className="bn-titulo-botones text-sm font-semibold text-violet-950">Botones debajo de esta burbuja</p>
           <p className="text-[11px] text-violet-800">Máximo 3. Cada botón ejecuta solo la acción que elijas.</p>
         </div>
         <button type="button" disabled={buttons.length >= 3} onClick={() => {
           onSnapshot();
           const id = typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
           onChange([...buttons, { id, label: "", action: "send_steps", steps: [] }]);
-        }} className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-800 disabled:opacity-40">+ Agregar botón</button>
+        }} className="bn-agregar-boton rounded border border-violet-300 bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-800 disabled:opacity-40">+ Agregar botón</button>
       </div>
       <div className="space-y-3">
         {buttons.map((button, index) => (
@@ -39917,6 +39935,55 @@ function BubbleButtonsEditor({
   );
 }
 
+/**
+ * LOS ÍCONOS DE LÍNEA DEL POP UP DE BURBUJAS (02/11/2026, sus montajes). Llevan `bn-solo-nuevo`: fuera del pop up
+ * (`burbujas-nuevo`) no se ven y queda el texto de siempre (`bn-solo-viejo`). Dibujados aquí, sin librerías.
+ */
+function IconoDeBurbuja({ nombre }: { nombre: "mover" | "subir" | "bajar" | "variar" | "duplicar" | "borrar" | "abrir" | "cerrar" | "whatsapp" | "aleatorio" | "listo" }) {
+  const trazo = { fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  const dibujo = (() => {
+    switch (nombre) {
+      case "mover":
+        return [6, 12, 18].flatMap((y) => [9, 15].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r={1.6} fill="currentColor" />));
+      case "subir":
+        return <path d="M12 19V5M5 12l7-7 7 7" {...trazo} />;
+      case "bajar":
+        return <path d="M12 5v14M19 12l-7 7-7-7" {...trazo} />;
+      case "variar":
+        return <path d="M12 12c-2-2.7-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.3 6-4Zm0 0c2 2.7 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.3-6 4Z" {...trazo} />;
+      case "duplicar":
+        return (
+          <>
+            <rect x="9" y="9" width="12" height="12" rx="2" {...trazo} />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" {...trazo} />
+          </>
+        );
+      case "borrar":
+        return <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" {...trazo} />;
+      case "abrir":
+        return <path d="M15 6l-7 6 7 6z" fill="currentColor" />;
+      case "cerrar":
+        return <path d="M6 9l6 7 6-7z" fill="currentColor" />;
+      case "whatsapp":
+        return (
+          <>
+            <path d="M3.5 20.5l1.3-4.1A8.5 8.5 0 1 1 8 19.6l-4.5.9Z" fill="#25d366" />
+            <path d="M9 8.6c.3-.6.6-.6.9-.6h.6c.2 0 .4.1.5.4l.7 1.6c.1.3 0 .5-.1.7l-.5.6c-.1.2-.1.4 0 .5.6 1 1.4 1.8 2.5 2.4.2.1.4.1.5 0l.6-.6c.2-.2.4-.2.7-.1l1.6.7c.3.1.4.3.4.5v.5c0 .4-.2.8-.6 1-.5.3-1.4.5-2.6 0-2.3-.9-4-2.8-4.7-4.5-.4-1-.4-2 0-2.9Z" fill="#fff" />
+          </>
+        );
+      case "aleatorio":
+        return <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22M18 2l4 4-4 4M2 6h1.9c1.5 0 2.9.9 3.6 2.2M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8M18 14l4 4-4 4" {...trazo} />;
+      case "listo":
+        return <path d="M20 6 9 17l-5-5" {...trazo} strokeWidth={2.6} />;
+    }
+  })();
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="bn-solo-nuevo bn-svg">
+      {dibujo}
+    </svg>
+  );
+}
+
 function StepCard({
   draggableId,
   droppableId,
@@ -40036,7 +40103,8 @@ function StepCard({
     <div
       ref={setDropRef}
       onClick={onActivate}
-      className={`rounded-lg p-3 transition ${
+      // `bn-*`: marcas para el diseño nuevo del pop up de burbujas (02/11/2026, globals.css). Fuera de ese pop up no hacen nada.
+      className={`bn-cajon ${isActive && !isDragging ? "bn-activo" : ""} rounded-lg p-3 transition ${
         isDragging
           ? "border-2 border-black bg-transparent shadow-none opacity-70"
           : "bg-neutral-100 shadow"
@@ -40068,7 +40136,7 @@ function StepCard({
       <div>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-carbon-suave text-xs font-medium text-white">
+          <span className="bn-num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-carbon-suave text-xs font-medium text-white">
             {index + 1}
           </span>
           {!enVentana && (
@@ -40080,34 +40148,40 @@ function StepCard({
                 {...listeners}
                 {...attributes}
                 title="Arrastrar para reordenar"
-                className="shrink-0 cursor-grab rounded border border-sky-300 bg-tarjeta px-2 py-1 text-xs font-bold text-sky-700 active:cursor-grabbing"
+                className="bn-chip shrink-0 cursor-grab rounded border border-sky-300 bg-tarjeta px-2 py-1 text-xs font-bold text-sky-700 active:cursor-grabbing"
               >
-                ⋮⋮ Mover
+                <span className="bn-solo-viejo">⋮⋮ </span>
+                <IconoDeBurbuja nombre="mover" />
+                Mover
               </button>
               <button
                 type="button"
                 onClick={() => onMove(-1)}
                 disabled={index === 0}
                 title="Subir esta burbuja"
-                className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-bold text-sky-700 hover:bg-sky-100 disabled:opacity-30"
+                className="bn-chip rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-bold text-sky-700 hover:bg-sky-100 disabled:opacity-30"
               >
-                ↑ Subir
+                <span className="bn-solo-viejo">↑ </span>
+                <IconoDeBurbuja nombre="subir" />
+                Subir
               </button>
               <button
                 type="button"
                 onClick={() => onMove(1)}
                 disabled={index === total - 1}
                 title="Bajar esta burbuja"
-                className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-bold text-sky-700 hover:bg-sky-100 disabled:opacity-30"
+                className="bn-chip rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-bold text-sky-700 hover:bg-sky-100 disabled:opacity-30"
               >
-                ↓ Bajar
+                <span className="bn-solo-viejo">↓ </span>
+                <IconoDeBurbuja nombre="bajar" />
+                Bajar
               </button>
             </>
           )}
           <select
             value={step.type}
             onChange={(e) => onUpdate({ type: e.target.value as StepType })}
-            className="min-w-0 max-w-full rounded-md border border-neutral-300 bg-tarjeta px-2 py-1 text-xs text-neutral-800"
+            className="bn-sel min-w-0 max-w-full rounded-md border border-neutral-300 bg-tarjeta px-2 py-1 text-xs text-neutral-800"
           >
             <option value="text">{TYPE_LABEL.text}</option>
             <option value="image">{TYPE_LABEL.image}</option>
@@ -40125,9 +40199,10 @@ function StepCard({
             }}
             title="Variar vista previa de esta burbuja"
             aria-label="Variar vista previa de esta burbuja"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-300 bg-tarjeta text-base font-semibold leading-none text-neutral-600 hover:bg-neutral-50"
+            className="bn-icono flex h-7 w-7 shrink-0 items-center justify-center rounded border border-neutral-300 bg-tarjeta text-base font-semibold leading-none text-neutral-600 hover:bg-neutral-50"
           >
-            ∞
+            <span className="bn-solo-viejo">∞</span>
+            <IconoDeBurbuja nombre="variar" />
           </button>
           <button
             type="button"
@@ -40137,7 +40212,7 @@ function StepCard({
                 ? "Apagada: el bot NO la envía"
                 : "Encendida: el bot la envía"
             }
-            className={`rounded border px-2 py-1 text-xs font-semibold ${
+            className={`${step.enabled === false ? "bn-off" : "bn-on"} rounded border px-2 py-1 text-xs font-semibold ${
               step.enabled === false
                 ? "border-neutral-300 bg-neutral-100 text-neutral-400"
                 : "border-emerald-300 bg-emerald-50 text-emerald-700"
@@ -40152,28 +40227,31 @@ function StepCard({
                 type="button"
                 onClick={onDuplicate}
                 title="Duplicar paso"
-                className="rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
+                className="bn-icono rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-600 hover:bg-neutral-50"
               >
-                ⧉
+                <span className="bn-solo-viejo">⧉</span>
+                <IconoDeBurbuja nombre="duplicar" />
               </button>
-              <span className="mx-1 h-6 w-px bg-neutral-300" aria-hidden="true" />
+              <span className="bn-sep mx-1 h-6 w-px bg-neutral-300" aria-hidden="true" />
               <button
                 type="button"
                 onClick={onRemove}
                 title="Eliminar paso"
-                className="rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                className="bn-basura rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
               >
-                🗑️
+                <span className="bn-solo-viejo">🗑️</span>
+                <IconoDeBurbuja nombre="borrar" />
               </button>
               {/* separador antes del triángulo (extremo derecho) */}
-              <span className="mx-1 h-6 w-px bg-neutral-300" aria-hidden="true" />
+              <span className="bn-sep mx-1 h-6 w-px bg-neutral-300" aria-hidden="true" />
               <button
                 type="button"
                 onClick={alternarDesplegable}
                 title={collapsed ? "Desplegar" : "Ocultar"}
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-tarjeta text-2xl leading-none text-neutral-700 hover:bg-neutral-200"
+                className="bn-icono bn-plegar flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-tarjeta text-2xl leading-none text-neutral-700 hover:bg-neutral-200"
               >
-                {collapsed ? "◂" : "▾"}
+                <span className="bn-solo-viejo">{collapsed ? "◂" : "▾"}</span>
+                <IconoDeBurbuja nombre={collapsed ? "abrir" : "cerrar"} />
               </button>
             </>
           )}
@@ -40183,7 +40261,7 @@ function StepCard({
       {collapsed && (
         <p
           onClick={alternarDesplegable}
-          className="cursor-pointer truncate text-xs text-neutral-500"
+          className="bn-resumen cursor-pointer truncate text-xs text-neutral-500"
           title="Desplegar"
         >
           {previewText}
@@ -40212,7 +40290,7 @@ function StepCard({
             value={step.drive_url}
             onChange={(e) => onUpdate({ drive_url: e.target.value })}
             placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
-            className="w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-xs text-neutral-800"
+            className="bn-texto w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-xs text-neutral-800"
           />
         </div>
       )}
@@ -40223,7 +40301,7 @@ function StepCard({
           manda a buscar una lista que no aparece por ninguna parte.
           En su sitio, lo que SÍ varía hoy: el spintax dentro del texto. */}
       <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-sm font-semibold text-neutral-700">
+        <span className="bn-etiqueta text-sm font-semibold text-neutral-700">
           {isMedia ? "Texto al pie (caption)" : "Texto"}
         </span>
         <span className="text-[11px] text-neutral-400">
@@ -40249,7 +40327,7 @@ function StepCard({
             onChange={(next) => onUpdateText(0, next)}
             rows={4}
             placeholder="Escribe el mensaje tal como llegará por WhatsApp…"
-            className="texto-de-burbuja w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-800"
+            className="texto-de-burbuja bn-texto w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-800"
           />
         </div>
       </div>

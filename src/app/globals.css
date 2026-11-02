@@ -678,3 +678,455 @@ input,
     opacity: inherit;
   }
 }
+
+/* ─── EL POP UP DE BURBUJAS, CON SU DISEÑO (02/11/2026) ────────────────────────────────────────────
+ *
+ * Él: «al no haber contraste se me dificulta mucho la edición y se me hace perezoso… no por cómo está
+ * diseñado, sino por el color». Sus montajes «INTERFAZ CLARA», «INTERFAZ OSCURA», «ABIERTO claro» y
+ * «OSCURO ABIERTO» (escritorio, 02/11): los colores se MIDIERON de esas imágenes. Solo dentro de
+ * `.burbujas-nuevo` (el pop up de las burbujas de una ficha); los mismos cajones en el resto del editor no
+ * cambian. Claro / mixto / oscuro siguen al ☀️/🌙 de la pizarra (`data-pizarra-tema`). Mixto = el marco
+ * oscuro con los cajones claros. Los íconos de línea (`bn-solo-nuevo`) solo se ven aquí.
+ */
+.bn-solo-nuevo {
+  display: none;
+}
+.burbujas-nuevo .bn-solo-nuevo {
+  display: inline-block;
+}
+.burbujas-nuevo .bn-solo-viejo {
+  display: none;
+}
+.burbujas-nuevo .bn-svg {
+  width: 1.05em;
+  height: 1.05em;
+  flex-shrink: 0;
+}
+
+/* LOS COLORES: claro (por defecto). */
+.burbujas-nuevo {
+  /* el marco */
+  --bn-fondo: linear-gradient(180deg, #c8daed 0%, #a9bfdc 38%, #8ba3c6 100%);
+  --bn-cabecera: rgba(200, 218, 237, 0.92);
+  --bn-titulo: #000026;
+  --bn-subtitulo: #1e2a44;
+  --bn-nota: #33415c;
+  --bn-nota-fondo: rgba(240, 248, 252, 0.75);
+  --bn-cancelar: #f0f8fc;
+  --bn-cancelar-borde: #cfdcec;
+  --bn-cancelar-texto: #0f172a;
+  --bn-listo: #277bfd;
+  --bn-listo-texto: #ffffff;
+  --bn-linea: rgba(255, 255, 255, 0.45);
+  /* el cajón */
+  --bn-cajon: #f0f5fd;
+  --bn-cajon-borde: rgba(255, 255, 255, 0.85);
+  --bn-cajon-sombra: 0 6px 18px rgba(32, 62, 112, 0.16);
+  --bn-cajon-brillo: none;
+  --bn-activo: #277bfd;
+  --bn-num: #0c82fb;
+  --bn-num-texto: #ffffff;
+  --bn-chip: #cae3fe;
+  --bn-chip-borde: #b6d6fd;
+  --bn-chip-texto: #1559e8;
+  --bn-sel: #f9fbff;
+  --bn-sel-borde: #c9d9ee;
+  --bn-sel-texto: #0f172a;
+  --bn-icono: #ebf4fd;
+  --bn-icono-borde: #a7d2f7;
+  --bn-icono-texto: #1e3a5f;
+  --bn-on: #015df9;
+  --bn-on-borde: #015df9;
+  --bn-on-texto: #ffffff;
+  --bn-basura: #f1f4fd;
+  --bn-basura-borde: #f5b3b7;
+  --bn-basura-texto: #ef2b2b;
+  --bn-texto-cajon: #000015;
+  --bn-etiqueta: #0f172a;
+  --bn-caja-texto: #fdfdfd;
+  --bn-caja-texto-borde: #cfdcec;
+  --bn-caja-texto-letra: #0f172a;
+  --bn-botones: #5a32e8;
+  --bn-botones-fondo: #f3f0ff;
+  --bn-decisiones: #0f2a2c;
+  --bn-decisiones-boton: #039a71;
+  --bn-decisiones-fondo: #ecfdf5;
+  --bn-nombre: #e6f2fe;
+  --bn-nombre-borde: #bcd6f5;
+  /* el visor */
+  --bn-visor: #3b5174;
+  --bn-visor-cab: #4b6385;
+  --bn-visor-texto: #e2e8f0;
+  --bn-activas: #22c58b;
+  --bn-burbuja: #dafbdc;
+  --bn-burbuja-texto: #111b21;
+  --bn-check: #107dfd;
+  --bn-garabatos: #ffffff;
+}
+/* OSCURO: sus colores de «INTERFAZ OSCURA» / «OSCURO ABIERTO». */
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo,
+:root[data-pizarra-tema="mixto"] .burbujas-nuevo {
+  --bn-fondo: linear-gradient(180deg, #12182e 0%, #0b1221 40%, #0a0f21 100%);
+  --bn-cabecera: #12182e;
+  --bn-titulo: #ffffff;
+  --bn-subtitulo: #c3cbe0;
+  --bn-nota: #aab3cc;
+  --bn-nota-fondo: #1a2140;
+  --bn-cancelar: #2b2e4d;
+  --bn-cancelar-borde: #3d4370;
+  --bn-cancelar-texto: #e8ecf7;
+  --bn-listo: #0ed47c;
+  --bn-listo-texto: #ffffff;
+  --bn-linea: #212b4d;
+  --bn-visor: #151f37;
+  --bn-visor-cab: #212b47;
+  --bn-visor-texto: #e2e8f0;
+  --bn-activas: #00d68a;
+  --bn-burbuja: #7ddc85;
+  --bn-burbuja-texto: #0b1a10;
+  --bn-check: #6571fc;
+}
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
+  --bn-cajon: #1f2642;
+  --bn-cajon-borde: #2a3358;
+  --bn-cajon-sombra: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --bn-cajon-brillo: -3px 0 0 0 #1279f0, -8px 0 18px -6px rgba(18, 121, 240, 0.75);
+  --bn-activo: #4c9ffd;
+  --bn-num: #3b8cf6;
+  --bn-num-texto: #ffffff;
+  --bn-chip: #0b449c;
+  --bn-chip-borde: #1658c4;
+  --bn-chip-texto: #ffffff;
+  --bn-sel: #1a203a;
+  --bn-sel-borde: #343d63;
+  --bn-sel-texto: #e8ecf7;
+  --bn-icono: #242946;
+  --bn-icono-borde: #343a5e;
+  --bn-icono-texto: #cbd5e1;
+  --bn-on: #102d37;
+  --bn-on-borde: #1ed38a;
+  --bn-on-texto: #2ef0a1;
+  --bn-basura: #2e243f;
+  --bn-basura-borde: #5b2d3f;
+  --bn-basura-texto: #ff5b62;
+  --bn-texto-cajon: #e8edf7;
+  --bn-etiqueta: #f1f5fb;
+  --bn-caja-texto: #1f2b41;
+  --bn-caja-texto-borde: #2f3c5c;
+  --bn-caja-texto-letra: #e8edf7;
+  --bn-botones: #885bfe;
+  --bn-botones-fondo: rgba(147, 102, 255, 0.1);
+  --bn-decisiones: #69f2ba;
+  --bn-decisiones-boton: #32c79f;
+  --bn-decisiones-fondo: rgba(50, 199, 159, 0.1);
+  --bn-nombre: #1d2d4a;
+  --bn-nombre-borde: #2e4a7a;
+}
+
+/* EL MARCO */
+.burbujas-nuevo.burbujas-nuevo {
+  background: var(--bn-fondo);
+  border-color: transparent;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.burbujas-nuevo .bn-cabecera {
+  background: var(--bn-cabecera);
+  border-color: var(--bn-linea);
+  padding: 14px 20px;
+  gap: 14px;
+}
+.burbujas-nuevo .bn-avatar {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.burbujas-nuevo .bn-titulo {
+  font-size: 20px;
+  color: var(--bn-titulo);
+}
+.burbujas-nuevo .bn-cabecera input {
+  font-size: 18px;
+  background: transparent;
+  color: var(--bn-titulo);
+  border-color: transparent;
+}
+.burbujas-nuevo .bn-subtitulo {
+  font-size: 13px;
+  color: var(--bn-subtitulo);
+}
+.burbujas-nuevo .bn-nota {
+  font-size: 12px;
+  color: var(--bn-nota);
+  background: var(--bn-nota-fondo);
+  border-radius: 10px;
+  padding: 7px 12px;
+}
+.burbujas-nuevo .bn-cancelar {
+  background: var(--bn-cancelar);
+  border: 1px solid var(--bn-cancelar-borde);
+  color: var(--bn-cancelar-texto);
+  border-radius: 12px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-listo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bn-listo);
+  color: var(--bn-listo-texto);
+  border-radius: 12px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+.burbujas-nuevo .bn-cuerpo {
+  padding: 18px 20px;
+}
+
+/* EL CAJÓN */
+.burbujas-nuevo .bn-cajon {
+  background: var(--bn-cajon);
+  border: 1px solid var(--bn-cajon-borde);
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: var(--bn-cajon-brillo), var(--bn-cajon-sombra);
+  color: var(--bn-texto-cajon);
+}
+:root:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo .bn-cajon {
+  box-shadow: var(--bn-cajon-sombra);
+}
+.burbujas-nuevo .bn-cajon.bn-activo {
+  border: 2px solid var(--bn-activo);
+  box-shadow: var(--bn-cajon-brillo), 0 0 0 4px color-mix(in srgb, var(--bn-activo) 22%, transparent), var(--bn-cajon-sombra);
+}
+:root:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo .bn-cajon.bn-activo {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bn-activo) 22%, transparent), var(--bn-cajon-sombra);
+}
+.burbujas-nuevo .bn-num {
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+  font-weight: 800;
+  background: var(--bn-num);
+  color: var(--bn-num-texto);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-num) 25%, transparent);
+}
+.burbujas-nuevo .bn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bn-chip);
+  border: 1px solid var(--bn-chip-borde);
+  color: var(--bn-chip-texto);
+  border-radius: 10px;
+  padding: 6px 13px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-sel {
+  background: var(--bn-sel);
+  border: 1px solid var(--bn-sel-borde);
+  color: var(--bn-sel-texto);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 128px;
+}
+.burbujas-nuevo .bn-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 34px;
+  background: var(--bn-icono);
+  border: 1px solid var(--bn-icono-borde);
+  color: var(--bn-icono-texto);
+  border-radius: 10px;
+  font-size: 16px;
+}
+.burbujas-nuevo .bn-on,
+.burbujas-nuevo .bn-off {
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.burbujas-nuevo .bn-on {
+  background: var(--bn-on);
+  border: 1.5px solid var(--bn-on-borde);
+  color: var(--bn-on-texto);
+}
+.burbujas-nuevo .bn-basura {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 34px;
+  background: var(--bn-basura);
+  border: 1.5px solid var(--bn-basura-borde);
+  color: var(--bn-basura-texto);
+  border-radius: 10px;
+  font-size: 16px;
+}
+.burbujas-nuevo .bn-sep {
+  background: transparent;
+}
+.burbujas-nuevo .bn-resumen {
+  font-size: 14px;
+  color: var(--bn-texto-cajon);
+  margin-top: 2px;
+}
+.burbujas-nuevo .bn-etiqueta {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bn-etiqueta);
+}
+.burbujas-nuevo .bn-cajon label,
+.burbujas-nuevo .bn-cajon .text-neutral-500 {
+  color: color-mix(in srgb, var(--bn-texto-cajon) 72%, transparent);
+}
+.burbujas-nuevo .bn-texto {
+  background: var(--bn-caja-texto);
+  border: 1px solid var(--bn-caja-texto-borde);
+  color: var(--bn-caja-texto-letra);
+  border-radius: 14px;
+  font-size: 15px;
+}
+.burbujas-nuevo .bn-titulo-botones {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bn-botones);
+}
+.burbujas-nuevo .bn-agregar-boton {
+  background: var(--bn-botones-fondo);
+  border: 1.5px solid var(--bn-botones);
+  color: var(--bn-botones);
+  border-radius: 12px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* «🔀 Spintax», como en su montaje: morado con borde (en oscuro su letra se perdía). */
+.burbujas-nuevo button[title^="Spintax con IA"] {
+  background: var(--bn-botones-fondo) !important;
+  border: 1.5px solid var(--bn-botones) !important;
+  color: var(--bn-botones) !important;
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-titulo-decisiones {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bn-decisiones);
+}
+.burbujas-nuevo .bn-agregar-decision {
+  background: var(--bn-decisiones-fondo);
+  border: 1.5px solid var(--bn-decisiones-boton);
+  color: var(--bn-decisiones-boton);
+  border-radius: 12px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-caja-nombre {
+  background: var(--bn-nombre);
+  border: 1px solid var(--bn-nombre-borde);
+  border-radius: 14px;
+}
+.burbujas-nuevo .bn-caja-nombre span {
+  color: var(--bn-texto-cajon);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* EL VISOR: oscuro, con sus garabatos de fondo (dibujados aquí, propios: no son los de WhatsApp). */
+.burbujas-nuevo .bn-columna-visor {
+  border-color: var(--bn-linea);
+}
+.burbujas-nuevo .bn-check {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bn-titulo);
+}
+.burbujas-nuevo .bn-check input {
+  accent-color: var(--bn-check);
+  width: 18px;
+  height: 18px;
+}
+.burbujas-nuevo .bn-visor {
+  /* (!important: el oscuro de `.prolijo` pinta el visor de WhatsApp oscuro con más peso.) */
+  background-color: var(--bn-visor) !important;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='190' height='190' viewBox='0 0 190 190'><g fill='none' stroke='%23ffffff' stroke-opacity='0.08' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 30h22a6 6 0 0 1 6 6v26a5 5 0 0 0-5-5H18zM74 30H52a6 6 0 0 0-6 6v26a5 5 0 0 1 5-5h23z'/><path d='M128 18l14 14-32 32H96V50z M120 26l14 14'/><path d='M158 96l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z'/><path d='M38 132c-8-8-20 0-12 10l12 12 12-12c8-10-4-18-12-10z'/><circle cx='104' cy='136' r='14'/><path d='M98 140c3 4 9 4 12 0M99 131h.1M109 131h.1'/><path d='M160 26a12 12 0 0 0-7 22v6h14v-6a12 12 0 0 0-7-22zM155 60h10'/><path d='M18 104l8-20 8 20M21 97h10'/><path d='M76 96h20M86 86v20'/><path d='M140 160h26M140 168h18'/><path d='M60 176l6-6 6 6 6-6'/></g></svg>");
+  background-size: 190px 190px;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 14px;
+}
+.burbujas-nuevo .bn-visor-cab {
+  background: var(--bn-visor-cab);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.burbujas-nuevo .bn-visor-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--bn-visor-texto);
+}
+.burbujas-nuevo .bn-visor-titulo .bn-svg {
+  width: 20px;
+  height: 20px;
+}
+.burbujas-nuevo .bn-activas {
+  background: transparent;
+  border: 1.5px solid var(--bn-activas);
+  color: var(--bn-activas);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 2px 10px;
+}
+.burbujas-nuevo .bn-variar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--bn-visor-cab) 70%, #ffffff 12%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--bn-visor-texto);
+  border-radius: 10px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.burbujas-nuevo .bn-burbuja {
+  background: var(--bn-burbuja) !important;
+  color: var(--bn-burbuja-texto) !important;
+  border-radius: 14px 4px 14px 14px;
+  font-size: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+.burbujas-nuevo .bn-burbuja .text-neutral-800 {
+  color: var(--bn-burbuja-texto);
+  font-size: 15px;
+}
+.burbujas-nuevo .bn-burbuja.bn-burbuja-activa {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35), 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+/* MIXTO: el marco y el visor oscuros (arriba), los cajones con los colores claros (los de por defecto). */
+:root[data-pizarra-tema="mixto"] .burbujas-nuevo .bn-cajon {
+  border-color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
