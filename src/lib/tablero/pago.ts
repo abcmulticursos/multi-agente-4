@@ -181,6 +181,19 @@ export function conElNombreDelProducto(pasos: ResponseStep[], nombre: string | u
 }
 
 /**
+ * EL PRECIO DEL TABLERO CUANDO NADIE LO DICE (02/11/2026): lo pone el motor (`precioDelTablero`: el cobro abierto, el
+ * producto de la ficha o el básico de la tienda). Sin él, el {precio} de las burbujas salía con el precio general de la
+ * venta de siempre (su «11»). Vive aquí porque el motor importa este archivo (al revés habría un círculo).
+ */
+let precioPorDefecto: (convo: ConversationRow) => number | undefined = () => undefined;
+export function ponerElPrecioPorDefecto(fn: (convo: ConversationRow) => number | undefined): void {
+  precioPorDefecto = fn;
+}
+export function precioDelTableroPara(convo: ConversationRow): number | undefined {
+  return precioPorDefecto(convo);
+}
+
+/**
  * MANDA LOS DATOS DE ESE MÉTODO con el precio de lo que eligió. Deja el método anotado en la
  * conversación: así {{NUMERO_DE_CUENTA}} sale con la cuenta de ESE método (como en la venta de
  * siempre) y la próxima vez no se le pregunta. Devuelve false si ese método no tiene datos escritos.
@@ -194,7 +207,7 @@ export async function mandarDatosDelMetodo(convo: ConversationRow, metodo: strin
   }
   const fresca = getConversationById(convo.id) ?? convo;
   console.log(`[tablero:pago] convo ${convo.id}: datos de «${metodo}» por ${precio ?? "?"}${nombre ? ` (${nombre})` : ""}`);
-  return sendConfiguredSteps(fresca, conElNombreDelProducto(pasos, nombre) as never, precio);
+  return sendConfiguredSteps(fresca, conElNombreDelProducto(pasos, nombre) as never, precio ?? precioPorDefecto(fresca));
 }
 
 /**
@@ -205,6 +218,7 @@ export async function mandarDatosDelMetodo(convo: ConversationRow, metodo: strin
 export async function preguntarElMetodo(convo: ConversationRow, pasosDeLaFicha: ResponseStep[], precio: number | undefined, nombre?: string): Promise<void> {
   const config = loadWorkflowConfig();
   const conBotones = config?.payment_method_buttons === true;
+  precio = precio ?? precioPorDefecto(convo);
   const salieron = pasosDeLaFicha.length > 0 && (await sendConfiguredSteps(convo, conElNombreDelProducto(pasosDeLaFicha, nombre) as never, precio));
   const botones = getPaymentButtons(convo.phone).map((b, i) => ({ id: `pmethod:${b.method}:${i}`, title: b.label }));
   if (conBotones && botones.length > 0) {

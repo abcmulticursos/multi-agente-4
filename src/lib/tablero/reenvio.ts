@@ -39,7 +39,7 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
   // Cada entrega con SU nombre en {{PRODUCTO_ENTREGADO}}, como la entrega de la ficha (24/10/2026:
   // el reenvío salía «Entrega de **»).
   void Promise.all([import("@/lib/workflow/engine"), import("./pago")])
-    .then(([{ sendConfiguredSteps }, { conElNombreDelProducto }]) => {
+    .then(([{ sendConfiguredSteps }, { conElNombreDelProducto, precioDelTableroPara }]) => {
       // Cada clave es una entrega: la principal de un producto o una extra suya (muestras, un nivel…).
       const pasos = productos.flatMap((clave) => {
         const e = laEntrega(config, clave);
@@ -48,7 +48,8 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
       // Enmarcado como la venta de siempre (`enmarcarElReenvio`): primero «te lo reenvío».
       // (Desde el motor de siempre no: ahí ya lo dice antes de llamar.)
       const marco = enmarcar ? [{ type: "text", body: "Claro, te lo reenvío ahora mismo 😊👇", delay_after_sec: 2 }] : [];
-      return sendConfiguredSteps(convo, [...marco, ...pasos] as never);
+      // (Con el precio del tablero, nunca el general de la venta de siempre — 02/11/2026.)
+      return sendConfiguredSteps(convo, [...marco, ...pasos] as never, precioDelTableroPara(convo));
     })
     .catch((err) => console.error(`[tablero] convo ${convo.id}: falló el reenvío`, err));
   return true;

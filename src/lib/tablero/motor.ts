@@ -75,7 +75,7 @@ import {
   extractNameFromMessage,
   messageHasPaymentConcern,
   scheduleGiftConsentWithDelay,
-  sendConfiguredSteps,
+  sendConfiguredSteps as enviarBurbujasDelMotor,
 } from "@/lib/workflow/engine";
 import {
   adjustForQuietHours,
@@ -88,7 +88,7 @@ import {
 import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
 import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
-import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, preguntarElMetodo } from "./pago";
+import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, preguntarElMetodo } from "./pago";
 import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import {
@@ -190,6 +190,52 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
   const conProductos = conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
   return conCobroEnSusFichas(conProductos, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
 }
+
+/**
+ * TODA BURBUJA DEL TABLERO SALE CON EL PRECIO DEL TABLERO (02/11/2026). Él, con su conv 239 (el seguimiento 2 de la oferta
+ * decía «Precio: S/. 11» con el cobro abierto a 15): «veo que no estás previniendo nada, solo estás haciendo cosas por
+ * encima». El {precio} de una burbuja, si quien la manda no lo dice, lo ponía la venta de siempre: SU precio general (11).
+ * En el tablero eso nunca es correcto. Ahora todas las burbujas del tablero pasan por aquí y, sin precio dicho, se toma:
+ *   1) el del cobro abierto (lo que eligió, ya con la oferta si se activó);
+ *   2) si no, el del producto de la ficha donde está (`precioDeLaFicha`, con la oferta si está activa);
+ *   3) si no, el del básico (o único) de su tienda en su país.
+ * Quien ya pasa su precio (el cobro, los datos de un método…) no cambia.
+ */
+async function sendConfiguredSteps(convo: ConversationRow, steps: unknown, precio?: number): Promise<boolean> {
+  return enviarBurbujasDelMotor(convo, steps as never, precio ?? precioDelTablero(convo));
+}
+
+function precioDelTablero(convo: ConversationRow): number | undefined {
+  const e = estadoEnElTablero(convo.id);
+  if (!e) return undefined;
+  const config = loadWorkflowConfig();
+  const t = tableroDe(config, e.tienda_id, (e.canal as CanalDelTablero) || "whatsapp");
+  // 1) El cobro abierto.
+  if (e.cobro_ficha_id) {
+    const precios = preciosDelCobro(e);
+    const fc = t?.fichas.find((x) => x.id === e.cobro_ficha_id);
+    const elegido = e.cobro_elegido ?? fc?.cobro?.producto_id ?? undefined;
+    const v = (elegido ? precios[elegido] : undefined) ?? Object.values(precios)[0];
+    if (typeof v === "number" && v > 0) return v;
+  }
+  const pais = getEffectiveCountryCode(convo.phone, config);
+  // 2) El producto de la ficha donde está (o de la que manda sus seguimientos).
+  if (t) {
+    for (const id of [e.ficha_id, e.seg_ficha]) {
+      const f = id ? t.fichas.find((x) => x.id === id) : undefined;
+      const v = f ? precioDeLaFicha(convo.id, f, t, pais) : undefined;
+      if (typeof v === "number" && v > 0) return v;
+    }
+  }
+  // 3) El básico de su tienda.
+  const alineacion = (config?.tiendas ?? []).find((x) => x.id === e.tienda_id)?.alineacion as Record<string, unknown> | undefined;
+  const basico = elDeLaTienda(BASICO_DE_LA_TIENDA, alineacion);
+  const v = basico !== BASICO_DE_LA_TIENDA ? precioDelProducto(producto(config, basico), pais, e.oferta === 1) : null;
+  return v ?? undefined;
+}
+
+// Los datos de pago y el reenvío (pago.ts, reenvio.ts) usan el mismo precio por defecto.
+ponerElPrecioPorDefecto(precioDelTablero);
 
 /** «El básico / el full de la tienda» → su producto de verdad (sin ese producto en la tienda, se queda el código). */
 function elDeLaTienda(id: string, alineacion: Record<string, unknown> | undefined | null): string {
@@ -4530,32 +4576,9 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       return;
     }
     const seg = segs[idx];
-    const v = versionQueLeToca(seg.variantes, clavesDelAnuncioDelCliente(fresca, loadWorkflowConfig()), "seguimiento");
-    if (v) {
-      apuntarVariante(convo.id, `${ficha}#${idx}`, v.id);
-      const paisSeg = getEffectiveCountryCode(fresca.phone, loadWorkflowConfig());
-      const pasosSeg = conLosComodinesDeLaFicha(
-        pasosActivos(v.steps),
-        // El que activa la oferta ya habla con el precio de oferta.
-        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f, t), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
-        paisSeg
-      );
-      // BURBUJA POR BURBUJA, mirando antes de cada una que sigan puestos (27/10/2026, HEA1 en la copia):
-      // con la tanda de corrido, si pagaba mientras salía, la entrega quedaba en medio y después llegaba
-      // el resto del seguimiento («ELIGE UN MÉTODO DE PAGO» tras «¡PAGO RECIBIDO!»).
-      // Y si ESCRIBIÓ mientras salía (B2 en la copia: el seguimiento 2 se mezcló con la respuesta de la
-      // IA), lo que falta del seguimiento ya no sale: su mensaje manda.
-      const empezo = ahora();
-      for (const paso of pasosSeg as unknown[]) {
-        const ahoraMismo = estadoEnElTablero(convo.id);
-        const escribio = (getLastUserMessageTime(convo.id) ?? 0) >= empezo;
-        if (!ahoraMismo || ahoraMismo.seg_ficha !== ficha || ahoraMismo.seg_token !== payload.token || escribio) {
-          console.log(`[tablero] convo ${convo.id}: el seguimiento se corta a medias (${escribio ? "escribió" : "pagó o se movió"})`);
-          break;
-        }
-        await sendConfiguredSteps(getConversationById(convo.id) ?? fresca, [paso] as never);
-      }
-    }
+    // LA OFERTA SE ACTIVA ANTES DE SUS BURBUJAS (02/11/2026, su conv 239): así el «Precio» de sus datos de pago ya sale con
+    // el de oferta (ver `precioDelTablero`). Antes se activaba después y salía el de antes. Se activaba igual aunque el
+    // seguimiento se cortara a medias, así que activarla primero no cambia cuándo vale.
     if (seg.activa_oferta) {
       activarOferta(convo.id);
       // EL COBRO QUE YA ESTABA ABIERTO BAJA A LA OFERTA (24/10/2026, lo cazó el recorrido de
@@ -4580,6 +4603,32 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
           ponerPreciosDelCobro(convo.id, precios);
           console.log(`[tablero] convo ${convo.id}: la oferta baja el cobro abierto a ${JSON.stringify(precios)}`);
         }
+      }
+    }
+    const v = versionQueLeToca(seg.variantes, clavesDelAnuncioDelCliente(fresca, loadWorkflowConfig()), "seguimiento");
+    if (v) {
+      apuntarVariante(convo.id, `${ficha}#${idx}`, v.id);
+      const paisSeg = getEffectiveCountryCode(fresca.phone, loadWorkflowConfig());
+      const pasosSeg = conLosComodinesDeLaFicha(
+        pasosActivos(v.steps),
+        // El que activa la oferta ya habla con el precio de oferta.
+        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f, t), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
+        paisSeg
+      );
+      // BURBUJA POR BURBUJA, mirando antes de cada una que sigan puestos (27/10/2026, HEA1 en la copia):
+      // con la tanda de corrido, si pagaba mientras salía, la entrega quedaba en medio y después llegaba
+      // el resto del seguimiento («ELIGE UN MÉTODO DE PAGO» tras «¡PAGO RECIBIDO!»).
+      // Y si ESCRIBIÓ mientras salía (B2 en la copia: el seguimiento 2 se mezcló con la respuesta de la
+      // IA), lo que falta del seguimiento ya no sale: su mensaje manda.
+      const empezo = ahora();
+      for (const paso of pasosSeg as unknown[]) {
+        const ahoraMismo = estadoEnElTablero(convo.id);
+        const escribio = (getLastUserMessageTime(convo.id) ?? 0) >= empezo;
+        if (!ahoraMismo || ahoraMismo.seg_ficha !== ficha || ahoraMismo.seg_token !== payload.token || escribio) {
+          console.log(`[tablero] convo ${convo.id}: el seguimiento se corta a medias (${escribio ? "escribió" : "pagó o se movió"})`);
+          break;
+        }
+        await sendConfiguredSteps(getConversationById(convo.id) ?? fresca, [paso] as never);
       }
     }
     // Lo que este seguimiento presenta, desde ahora la IA lo puede contar (lo marcado o, sin marcar, por sus cables).
