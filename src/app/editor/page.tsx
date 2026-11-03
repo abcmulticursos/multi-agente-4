@@ -25216,7 +25216,7 @@ function ChatPreview({
           <span className="bn-visor-titulo text-[11px] font-semibold text-neutral-500">
             <span className="bn-solo-viejo">📱 </span>
             <IconoDeBurbuja nombre="whatsapp" />
-            Vista previa (WhatsApp)
+            Vista previa ({channelLabel})
           </span>
           <span
             title="Burbujas activas visibles en esta previsualización"
@@ -32463,7 +32463,7 @@ function PantallaDelTableroCargada({
           onEditarEntrega={setEntregaEditando}
         />
       )}
-      {verCamino && <RecorridoDelTablero cfg={cfg} tablero={tablero} tienda={tienda} pais={paisVisto} onCerrar={() => setVerCamino(false)} />}
+      {verCamino && <RecorridoDelTablero cfg={cfg} tablero={tablero} tienda={tienda} pais={paisVisto} canal={esWorkflow ? undefined : canal} onCerrar={() => setVerCamino(false)} />}
       {/* EDITAR LA ENTREGA AQUÍ MISMO (03/11/2026). Él: «un botón que abra el cuadro del texto de la entrega para no tener
           que regresar a la ficha (del producto) y poder editarla ahí mismo en un pop up». Edita lo que el bot manda: la
           entrega principal del producto (`delivery`) o esa entrega extra. Encima de los ajustes (z-[90]). */}
@@ -35127,12 +35127,15 @@ function RecorridoDelTablero({
   tablero,
   tienda,
   pais,
+  canal,
   onCerrar,
 }: {
   cfg: FullConfig;
   tablero: TableroEnElEditor;
   tienda?: TiendaEditor;
   pais: string;
+  /** El canal del tablero: el visor dice «Vista previa (Messenger)» en el de Messenger. Sin él (workflow), WhatsApp. */
+  canal?: CanalDeTablero;
   onCerrar: () => void;
 }) {
   useEscapeEnPila(() => onCerrar());
@@ -35161,6 +35164,7 @@ function RecorridoDelTablero({
           {...(typeof precio === "number" ? { previewPriceOverride: precio } : {})}
           previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista, pais as CountryCode), productos)}
           highlightPlaceholders
+          channelLabel={canal === "messenger" ? "Messenger" : canal === "instagram" ? "Instagram" : "WhatsApp"}
         />
       </ProductosDeLaFichaContext.Provider>
     );
@@ -35218,7 +35222,7 @@ function RecorridoDelTablero({
       if (!f) break;
       if (vistos.has(f.id)) {
         out.push(
-          <p key={`vuelve-${f.id}-${paso}`} className="rounded-lg border border-dashed border-borde px-3 py-2 text-xs font-semibold text-tinta-suave">
+          <p key={`vuelve-${f.id}-${paso}`} className="w-[400px] rounded-lg border border-dashed border-borde px-3 py-2 text-xs font-semibold text-tinta-suave">
             ↩ Vuelve a «{nombreDe(f)}»
           </p>
         );
@@ -35227,7 +35231,7 @@ function RecorridoDelTablero({
       vistos.add(f.id);
       const conCable = salidasDeLaFicha(f as unknown as FichaDelTablero, pais, undefined, tablero as unknown as Tablero).filter((s) => cableDe(f.id, s.clave));
       out.push(
-        <div key={f.id} className={`rounded-xl border border-borde bg-tarjeta p-2 shadow-sm ${f.apagada ? "opacity-60" : ""}`}>
+        <div key={f.id} className={`w-[400px] rounded-xl border border-borde bg-tarjeta p-2 shadow-sm ${f.apagada ? "opacity-60" : ""}`}>
           <p className="mb-1 flex items-center gap-2 px-1 text-[15px] font-extrabold text-tinta">
             <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: ASPECTO[f.tipo].trazo }} />
             {nombreDe(f)}
@@ -35241,12 +35245,12 @@ function RecorridoDelTablero({
         const ops = f.reparto ?? [];
         const total = ops.reduce((s, o) => s + o.peso, 0) || 1;
         out.push(
-          <div key={`${f.id}-rutas`} className="flex gap-3 overflow-x-auto pb-2">
+          <div key={`${f.id}-rutas`} className="flex items-start justify-center gap-4 pb-2">
             {ops
               .filter((o) => cableDe(f.id, `rep:${o.id}`))
               .map((o, i) => (
-                <div key={o.id} className="w-[380px] shrink-0 space-y-2">
-                  <p className={`rounded-full px-3 py-1 text-center text-[12px] font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
+                <div key={o.id} className="flex w-max shrink-0 flex-col items-center gap-3">
+                  <p className={`w-[400px] rounded-full px-3 py-1 text-center text-[12px] font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
                     {o.peso > 0 ? `🟢 ${o.nombre || `Ruta ${i + 1}`} · vende ${Math.round((o.peso / total) * 100)}%` : `⚪ ${o.nombre || `Ruta ${i + 1}`} · apagada`}
                   </p>
                   {camino(cableDe(f.id, `rep:${o.id}`)?.a, new Set(vistos), prof + 1)}
@@ -35258,7 +35262,7 @@ function RecorridoDelTablero({
       }
       if (conCable.length === 0) {
         out.push(
-          <p key={`fin-${f.id}`} className="rounded-lg bg-relleno px-3 py-2 text-center text-xs font-semibold text-tinta-suave">
+          <p key={`fin-${f.id}`} className="w-[400px] rounded-lg bg-relleno px-3 py-2 text-center text-xs font-semibold text-tinta-suave">
             🛑 Aquí termina el camino
           </p>
         );
@@ -35267,7 +35271,7 @@ function RecorridoDelTablero({
       const sigue = conCable.find((s) => s.clave === elegidas[f.id]) ?? conCable[0];
       if (conCable.length > 1)
         out.push(
-          <div key={`${f.id}-ramas`} className="flex flex-wrap items-center gap-1 px-1">
+          <div key={`${f.id}-ramas`} className="flex w-[400px] flex-wrap items-center gap-1 px-1">
             <span className="text-[11px] font-semibold text-tinta-suave">Sigue por:</span>
             {conCable.map((s) => (
               <button
@@ -35286,9 +35290,10 @@ function RecorridoDelTablero({
     return out;
   };
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
-      <div className="burbujas-nuevo prolijo my-6 w-full max-w-6xl rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
-        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+    // La ventana crece con el camino (varias rutas lado a lado) y la pantalla se desliza en las dos direcciones.
+    <div className="fixed inset-0 z-[60] overflow-auto bg-black/40 p-4" data-ventana-del-tablero>
+      <div className="burbujas-nuevo prolijo mx-auto my-6 w-max min-w-[min(72rem,100%)] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
+        <div className="bn-cabecera sticky left-0 flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           <div className="min-w-0 flex-1">
             <h3 className="bn-titulo text-sm font-bold text-neutral-900">▶ Recorrido de {nombrePais}</h3>
             <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">
@@ -35311,7 +35316,9 @@ function RecorridoDelTablero({
                   {nombrePais} no tiene Inicio propio: sus clientes entran por 🌍 Otros países.
                 </p>
               )}
-              <div className="max-w-[420px] space-y-3">{camino(inicio.id, new Set(), 0)}</div>
+              {/* (03/11/2026, su captura «Agente WhatsApp»: la segunda ruta salía cortada.) Como el recorrido del
+                  automático: el camino al centro y, donde se abre, las rutas crecen hacia los lados. */}
+              <div className="mx-auto flex w-max flex-col items-center gap-3">{camino(inicio.id, new Set(), 0)}</div>
             </>
           )}
         </div>
