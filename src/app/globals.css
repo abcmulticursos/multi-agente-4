@@ -1207,8 +1207,8 @@ input,
 :root[data-pizarra-variante="navy"] .burbujas-nuevo {
   --bn-visor: #0f141a;
   --bn-visor-cab: #1b222b;
-  /* (02/11/2026: el verde que él pidió, #0a5141.) */
-  --bn-burbuja: #0a5141;
+  /* (02/11/2026: el verde que él pidió, #0a5141. 03/11/2026: «más claro», su muestra «VERDES»: un punto más claro.) */
+  --bn-burbuja: #0e5f4c;
   --bn-burbuja-texto: #e9edef;
 }
 :root[data-pizarra-variante="navy"] .burbujas-nuevo .bn-visor {
@@ -1307,6 +1307,73 @@ input,
   height: 40px;
   flex-shrink: 0;
   color: #1e3a8a;
+}
+
+/* EL COLOR DE CADA CAJÓN (03/11/2026, sus montajes «borde izquierdo color»): azul, morado, verde, naranja, rosado, y se
+   repite. Un borde izquierdo en degradé (fuerte arriba, suave abajo) que sigue la curva de la esquina, y el número del mismo
+   color. Abierto, el borde más delgado (él: «al expandirse el borde no debería ser tan grueso»). El cajón elegido sigue
+   marcándose con su borde de siempre. */
+.burbujas-nuevo .bn-cajon[data-color-cajon="0"] { --bn-color: #2f7cf6; }
+.burbujas-nuevo .bn-cajon[data-color-cajon="1"] { --bn-color: #8b5cf6; }
+.burbujas-nuevo .bn-cajon[data-color-cajon="2"] { --bn-color: #22c55e; }
+.burbujas-nuevo .bn-cajon[data-color-cajon="3"] { --bn-color: #f59e0b; }
+.burbujas-nuevo .bn-cajon[data-color-cajon="4"] { --bn-color: #ec4899; }
+.burbujas-nuevo .bn-cajon[data-color-cajon] {
+  position: relative;
+  /* (El brillo azul del oscuro en el borde de todos los cajones tapaba su color.) */
+  --bn-cajon-brillo: 0 0 0 0 transparent;
+}
+.burbujas-nuevo .bn-cajon[data-color-cajon]::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border-left: 6px solid transparent;
+  background: linear-gradient(180deg, var(--bn-color) 0%, color-mix(in srgb, var(--bn-color) 35%, transparent) 100%) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+.burbujas-nuevo .bn-cajon[data-color-cajon][data-abierto]::before {
+  border-left-width: 3px;
+}
+.burbujas-nuevo .bn-cajon[data-color-cajon] .bn-num {
+  background: var(--bn-color);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-color) 25%, transparent);
+}
+
+/* LOS BOTONES DEL VISOR (los de WhatsApp: Sí/No, YAPE, BCP…), SIEMPRE COMO EN WHATSAPP (03/11/2026: «en el modo oscuro los
+   botones de los visores… están oscuros, deben ser normales»): blancos con la letra azul, en todos los temas. */
+.burbujas-nuevo .bn-boton-wa {
+  background-color: #ffffff !important;
+  border-color: #bae6fd !important;
+  color: #0b84c6 !important;
+}
+
+/* EL VISOR DEL 🌙 OSCURO, COMO SU MONTAJE «TEMAS 123» (03/11/2026): el gris azulado del claro con sus burbujas verde claro y
+   letra oscura (medidos: visor #3b5174, cabecera #4b6385, burbuja #d4f8d7). El Dark Navy conserva su WhatsApp oscuro. */
+:root[data-pizarra-tema="oscuro"]:not([data-pizarra-variante="navy"]) .burbujas-nuevo,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo {
+  --bn-visor: #3b5174;
+  --bn-visor-cab: #4b6385;
+  --bn-visor-texto: #e2e8f0;
+  --bn-burbuja: #d4f8d7;
+  --bn-burbuja-texto: #111b21;
+}
+:root[data-pizarra-tema="oscuro"]:not([data-pizarra-variante="navy"]) .burbujas-nuevo .bg-\[\#d9fdd3\],
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo .bg-\[\#d9fdd3\] {
+  background-color: var(--bn-burbuja) !important;
+  color: var(--bn-burbuja-texto) !important;
+}
+:root[data-pizarra-tema="oscuro"]:not([data-pizarra-variante="navy"]) .burbujas-nuevo .bg-\[\#d9fdd3\] *,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo .bg-\[\#d9fdd3\] * {
+  color: inherit;
+}
+:root[data-pizarra-tema="oscuro"]:not([data-pizarra-variante="navy"]) .burbujas-nuevo .bn-burbuja *,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo .bn-burbuja * {
+  color: var(--bn-burbuja-texto);
 }
 
 /* EL TAMAÑO DE LAS VENTANAS, COMO A SU 90 % (02/11/2026). Él: «está un poquito grande… al 90 % se veía muy bien, al 80 % ya

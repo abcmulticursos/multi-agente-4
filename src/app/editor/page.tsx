@@ -22356,7 +22356,7 @@ function WhatsAppButtonsPreview({
           {shown.slice(0, 3).map((b, i) => (
             <div
               key={`${b.method}-${i}`}
-              className="flex items-center justify-center gap-1 border-t border-emerald-200 bg-tarjeta px-3 py-2 text-sm font-medium text-[#1ba7e0]"
+              className="bn-boton-wa flex items-center justify-center gap-1 border-t border-emerald-200 bg-tarjeta px-3 py-2 text-sm font-medium text-[#1ba7e0]"
             >
               <span className="text-base leading-none">↩</span>
               {b.label.trim() || "(sin etiqueta)"}
@@ -24697,7 +24697,7 @@ function BotonesDeLaBurbuja({ step }: { step: EditorStep }) {
       <div
         key={boton.id || i}
         title={cortada !== etiqueta ? `WhatsApp corta a 20: «${etiqueta}»` : undefined}
-        className="rounded-md border border-sky-200 bg-tarjeta px-2 py-1 text-center text-[12px] font-semibold text-sky-700"
+        className="bn-boton-wa rounded-md border border-sky-200 bg-tarjeta px-2 py-1 text-center text-[12px] font-semibold text-sky-700"
       >
         {cortada}
         {cortada !== etiqueta && <span className="text-sky-400"> …</span>}
@@ -27359,8 +27359,10 @@ function VistaPizarra({
     else delete raiz.dataset.pizarraVariante;
     // Y EL DE LOS MENÚS, EL MISMO LADO MIENTRAS LA PIZARRA ESTÁ ABIERTA (02/11/2026): antes su 🌙 oscurecía las ventanas
     // de una pizarra en claro (las cajas oscuras dentro de un marco claro). Al salir vuelve lo elegido en los menús.
-    const esOscuro = temaDeLaPizarra === "oscuro" || temaDeLaPizarra === "navy";
-    raiz.dataset.tema = esOscuro ? "oscuro" : "claro";
+    // (03/11/2026: SIEMPRE «claro» aquí. Él: «las fichas flotantes tienen que ser claras siempre». Con el 🌙 de los menús
+    // puesto, las fichas de la pizarra y del tablero y los botones del visor se oscurecían. Lo oscuro de la pizarra y de
+    // sus ventanas lo pone su propio tema —`data-pizarra-tema`—, como antes.)
+    raiz.dataset.tema = "claro";
     return () => {
       delete raiz.dataset.pizarraTema;
       delete raiz.dataset.pizarraVariante;
@@ -40356,6 +40358,10 @@ function StepCard({
     <div
       ref={setDropRef}
       onClick={onActivate}
+      // EL COLOR DE CADA CAJÓN (03/11/2026, sus montajes «borde izquierdo color»): azul, morado, verde, naranja, rosado, y se
+      // repite. Su borde izquierdo y su número; abierto, el borde más delgado. Solo pantalla (globals.css).
+      data-color-cajon={index % 5}
+      data-abierto={collapsed ? undefined : ""}
       // `bn-*`: marcas para el diseño nuevo del pop up de burbujas (02/11/2026, globals.css). Fuera de ese pop up no hacen nada.
       className={`bn-cajon ${isActive && !isDragging ? "bn-activo" : ""} rounded-lg p-3 transition ${
         isDragging
