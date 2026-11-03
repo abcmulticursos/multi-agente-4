@@ -80,8 +80,9 @@ export default function EmojiPicker({
     const medir = () => {
       const caja = wrapperRef.current?.getBoundingClientRect();
       if (!caja) return;
-      const ANCHO = 320;
-      const ALTO = 380;
+      // (03/11/2026: todo el panel al 125 %, como él lo vio con Ctrl +: «los emojis ya se ven bien, parecidos al de WhatsApp».)
+      const ANCHO = 400;
+      const ALTO = 475;
       // Se pega a la izquierda del botón, pero sin salirse por la derecha de la
       // pantalla: en un campo pegado al borde, el panel quedaba medio fuera.
       const left = Math.max(
@@ -189,9 +190,9 @@ export default function EmojiPicker({
       type="button"
       title={x.l}
       onClick={() => onPick(x.e)}
-      className="flex h-9 w-9 items-center justify-center rounded text-lg hover:bg-neutral-100"
+      className="flex h-[45px] w-[45px] items-center justify-center rounded text-2xl hover:bg-neutral-100"
     >
-      <TwemojiGlyph emoji={x.e} className="h-6 w-6" />
+      <TwemojiGlyph emoji={x.e} className="h-[30px] w-[30px]" />
     </button>
   );
 
@@ -225,15 +226,15 @@ export default function EmojiPicker({
           style={{ left: sitio.left, top: sitio.top }}
           // `fixed` y colgado del `body`: fuera del alcance de cualquier
           // contenedor que recorte. Ver `sitio`.
-          className="fixed z-[200] w-80 rounded-lg border border-neutral-200 bg-tarjeta shadow-2xl"
+          className="fixed z-[200] w-[400px] rounded-lg border border-neutral-200 bg-tarjeta shadow-2xl"
         >
-          <div className="border-b border-neutral-100 p-2">
+          <div className="border-b border-neutral-100 p-2.5">
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar: graduacion, corazon, peru..."
-              className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-xs text-neutral-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              className="w-full rounded-md border border-neutral-300 px-2.5 py-2 text-sm text-neutral-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
             />
           </div>
 
@@ -244,7 +245,7 @@ export default function EmojiPicker({
                 key={nombre}
                 type="button"
                 onClick={() => irACategoria(i)}
-                className={`flex-none px-2.5 py-1.5 text-[11px] font-medium transition ${
+                className={`flex-none px-3 py-2 text-[13px] font-medium transition ${
                   catActiva === i && !query.trim()
                     ? "border-b-2 border-emerald-500 text-emerald-600"
                     : "text-neutral-500 hover:text-neutral-700"
@@ -258,7 +259,7 @@ export default function EmojiPicker({
           <div
             ref={scrollRef}
             onScroll={onScroll}
-            className="h-56 overflow-y-auto p-2"
+            className="h-[280px] overflow-y-auto p-2.5"
           >
             {!catalogo && (
               <p className="py-6 text-center text-xs text-neutral-400">
@@ -289,7 +290,7 @@ export default function EmojiPicker({
                     seccionesRef.current[i] = el;
                   }}
                 >
-                  <p className="sticky top-0 z-10 bg-white/95 px-0.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-400 backdrop-blur">
+                  <p className="sticky top-0 z-10 bg-white/95 px-0.5 py-1 text-[12px] font-semibold uppercase tracking-wide text-neutral-400 backdrop-blur">
                     {cat.nombre}
                   </p>
                   <div className="grid grid-cols-8 content-start gap-0.5 pb-1">
