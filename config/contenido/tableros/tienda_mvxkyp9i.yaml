@@ -4500,8 +4500,8 @@ messenger:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -1188
-      y: 682
+      x: -1815
+      y: 836
       pais: PE
     - id: f-mvvfznys-u8svs
       tipo: mensaje
@@ -8565,6 +8565,17 @@ messenger:
         - pmvxom7h2
       instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
       espera_min: 2
+    - id: f-mw0hst9h-ontq
+      tipo: reparto
+      x: -1485
+      y: 1089
+      reparto:
+        - id: r1
+          peso: 1
+        - id: r2
+          peso: 1
+        - id: rmw0htfvw
+          peso: 1
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -8976,20 +8987,24 @@ messenger:
       de: f-mw0b3q4d-13qbi
       salida: sin_pago
       a: f-mw0b3q4d-uq6nl
-    - id: c-mw0b41ob-n98
-      de: inicio-mvveb83v-1
-      salida: siguiente
-      a: f-mw0b3q4c-sa0fo
     - id: c-mw0ffgzm-kv1
       de: f-mw0b3q4d-kxj73
       salida: siguiente
       a: f-mw0b3q4d-ul2yb
+    - id: c-mw0ht0bw-4lw
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: f-mw0hst9h-ontq
+    - id: c-mw0hyfdf-ie6
+      de: f-mw0hst9h-ontq
+      salida: rep:r1
+      a: f-mw0b3q4c-sa0fo
   cajas:
     - id: manta-inicio-mvveb83v-1
-      x: -805
+      x: -1883
       y: 465
-      ancho: 4164
-      alto: 914
+      ancho: 5242
+      alto: 1024
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
       inicio: inicio-mvveb83v-1
     - id: k-mw0flt0y
