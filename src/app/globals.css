@@ -809,7 +809,8 @@ input,
 }
 /* OSCURO: sus colores de «INTERFAZ OSCURA» / «OSCURO ABIERTO». (Mixto = el claro, 02/11/2026: «el estilo del pop up del
    modo mixto que sea como el del modo claro».) */
-:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo {
   --bn-fondo: linear-gradient(180deg, #12182e 0%, #0b1221 40%, #0a0f21 100%);
   --bn-cabecera: #12182e;
   --bn-titulo: #ffffff;
@@ -830,7 +831,8 @@ input,
   --bn-burbuja-texto: #0b1a10;
   --bn-check: #6571fc;
 }
-:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo {
   --bn-cajon: #1f2642;
   --bn-cajon-borde: #2a3358;
   --bn-cajon-sombra: 0 6px 18px rgba(0, 0, 0, 0.35);
@@ -1223,8 +1225,10 @@ input,
 
 /* «CLARO 2» (y las ventanas de «MIXTO 2»), 02/11/2026, su montaje «tema claro mas claro»: fondo casi blanco con un toque
    celeste, cajones blancos con sombra suave, botones blancos de borde fino y letra azul, visor gris azulado claro, más aire.
-   Es el claro (`data-pizarra-tema="claro"` o `"mixto"`) con `data-pizarra-variante="claro2"`: nada más cambia. */
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo {
+   Es el claro (`data-pizarra-tema="claro"` o `"mixto"`) con `data-pizarra-variante="claro2"`: nada más cambia.
+   (02/11/2026, más tarde: también las ventanas de los MENÚS en ☀️ Claro —fuera de la pizarra no hay `data-pizarra-tema`—.) */
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo {
   --bn-fondo: linear-gradient(180deg, #edf2f9 0%, #e3eaf4 100%);
   --bn-cabecera: rgba(240, 245, 251, 0.96);
   --bn-activas: #c6f6dc;
@@ -1274,14 +1278,17 @@ input,
   --bn-burbuja-texto: #111b21;
   --bn-separador: #ffffff;
 }
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-cajon {
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-cajon,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo .bn-cajon {
   border-radius: 22px;
   padding: 18px 22px;
 }
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-nota {
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-nota,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo .bn-nota {
   border: 1px solid var(--bn-linea);
 }
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-visor {
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-visor,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo .bn-visor {
   border-radius: 22px;
   padding: 14px 16px;
 }
@@ -1289,10 +1296,12 @@ input,
 .bn-avatar-linea {
   display: none;
 }
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar {
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo .bn-avatar {
   display: none;
 }
-:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar-linea {
+:root[data-pizarra-variante="claro2"] .burbujas-nuevo .bn-avatar-linea,
+:root:not([data-pizarra-tema]):not([data-tema="oscuro"]) .burbujas-nuevo .bn-avatar-linea {
   display: block;
   width: 40px;
   height: 40px;
@@ -1300,12 +1309,60 @@ input,
   color: #1e3a8a;
 }
 
+/* EL TAMAÑO DE LAS VENTANAS, COMO A SU 90 % (02/11/2026). Él: «está un poquito grande… al 90 % se veía muy bien, al 80 % ya
+   se ve feo». Solo las ventanas (textos, botones y burbujas a esa escala), no la página. */
+.burbujas-nuevo.burbujas-nuevo {
+  zoom: 0.9;
+}
+
+/* LAS VENTANAS EN OSCURO, AZUL MARINO TAMBIÉN POR DENTRO (02/11/2026: «que tenga coherencia»). El `.prolijo` del 🌙 de la
+   pizarra pone el negro de Sendy en sus cajas, y dentro del marco azul marino quedaba mezclado: aquí, el azul de la ventana. */
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo.prolijo,
+:root[data-tema="oscuro"] .burbujas-nuevo.prolijo {
+  --tema-fondo: #0b1221;
+  --tema-panel: #12182e;
+  --tema-tarjeta: #1a2140;
+  --tema-relleno: #222a4a;
+  --tema-borde: #2c355a;
+  --tema-tinta: #e8edf7;
+  --tema-tinta-suave: #a7b0c9;
+  --tema-acento: #4c9ffd;
+  --tema-acento-suave: #16305e;
+  --mezcla-oscura: #1a2140;
+  --color-fondo: var(--tema-fondo);
+  --color-panel: var(--tema-panel);
+  --color-tarjeta: var(--tema-tarjeta);
+  --color-relleno: var(--tema-relleno);
+  --color-borde: var(--tema-borde);
+  --color-tinta: var(--tema-tinta);
+  --color-tinta-suave: var(--tema-tinta-suave);
+  --color-acento: var(--tema-acento);
+  --color-acento-suave: var(--tema-acento-suave);
+  --color-neutral-50: #1e2646;
+  --color-neutral-100: #232c4e;
+  --color-neutral-200: #2c355a;
+  --color-neutral-300: #3a446d;
+  --color-neutral-400: #66719a;
+  --color-neutral-500: #8f99b9;
+  --color-neutral-600: #aab3cc;
+  --color-neutral-700: #c5cce0;
+  --color-neutral-800: #dde3f0;
+  --color-neutral-900: #e8edf7;
+  --color-neutral-950: #f6f8fc;
+  --color-carbon: #2f3a66;
+  --color-carbon-fuerte: #26305a;
+  --color-carbon-suave: #384473;
+  --color-carbon-claro: #44518a;
+  color-scheme: dark;
+}
+
 /* EL SEPARADOR DE LOS GESTORES (02/11/2026, la flecha de su captura): una barra entre la lista de la izquierda
    (Seguimientos, Regalo…) y el editor. Blanca en los claros; la línea del tema en los oscuros. */
 .burbujas-nuevo {
   --bn-separador: #ffffff;
 }
-:root[data-pizarra-tema="oscuro"] .burbujas-nuevo {
+:root[data-pizarra-tema="oscuro"] .burbujas-nuevo,
+:root[data-tema="oscuro"]:not([data-pizarra-tema]) .burbujas-nuevo {
   --bn-separador: #212b4d;
 }
 @media (min-width: 768px) {

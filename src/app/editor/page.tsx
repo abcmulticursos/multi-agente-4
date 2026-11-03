@@ -1383,6 +1383,17 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
  * cambia ningún texto; lo que cambia es que ya no SE PUEDE enseñar un símbolo
  * que el bot no vaya a usar.
  */
+/**
+ * EL PUNTO DEL RATÓN, SIN EL ZOOM DE LA VENTANA (02/11/2026). Las ventanas de burbujas van al 90 % (`zoom` en globals.css) y un
+ * menú `fixed` dibujado dentro se corre: su left/top también se escala. Se divide por el zoom de la ventana que lo contiene;
+ * fuera de una ventana, el punto de siempre.
+ */
+function sinElZoom(evento: { clientX: number; clientY: number; currentTarget: EventTarget | null }): { x: number; y: number } {
+  const ventana = evento.currentTarget instanceof Element ? evento.currentTarget.closest(".burbujas-nuevo") : null;
+  const z = ventana ? Number.parseFloat(getComputedStyle(ventana).zoom) || 1 : 1;
+  return { x: evento.clientX / z, y: evento.clientY / z };
+}
+
 function formatPreviewCurrencyAmount(
   amount: number,
   countryCode: CountryCode = "PE",
@@ -22480,7 +22491,7 @@ function useMenuDeCajon() {
     menu,
     abrir: (event: React.MouseEvent) => {
       event.preventDefault();
-      setMenu({ x: event.clientX, y: event.clientY });
+      setMenu(sinElZoom(event));
     },
     cerrar: () => setMenu(null),
   };
@@ -25350,7 +25361,7 @@ function ChatPreview({
                   event.stopPropagation();
                   // EL CLIC DERECHO NO BUSCA SU CAJÓN (02/11/2026). Él: «con clic derecho que no scrollee el visor»: solo
                   // abre el menú. El izquierdo sigue buscando su par, como siempre.
-                  setContextMenu({ index: originalIndex, x: event.clientX, y: event.clientY });
+                  setContextMenu({ index: originalIndex, ...sinElZoom(event) });
                 }}
                 className={`bn-burbuja max-w-[88%] rounded-lg rounded-tr-none bg-[#d9fdd3] px-2.5 py-1.5 shadow-sm transition ${
                   // UNA SOLA LÍNEA. Aquí había un borde de 2 px MÁS un aro de
@@ -27294,7 +27305,15 @@ function VistaPizarra({
   const [temaDeLaPizarra, setTemaDeLaPizarra] = useState<TemaDeLaPizarra>(() => {
     try {
       const guardado = window.localStorage.getItem("pizarra-tema");
-      return guardado === "oscuro" || guardado === "mixto" || guardado === "navy" || guardado === "claro2" || guardado === "mixto2" ? guardado : "claro";
+      const suyo: TemaDeLaPizarra =
+        guardado === "oscuro" || guardado === "mixto" || guardado === "navy" || guardado === "claro2" || guardado === "mixto2" ? guardado : "claro";
+      // LOS MENÚS Y LA PIZARRA, CON EL MISMO TEMA (02/11/2026). Él: «si los menús eligieron el modo oscuro que al ir a la
+      // ficha siga en oscuro, y si paso al modo claro, siga claro». Si en los menús se eligió el otro lado, la pizarra lo sigue.
+      const deLosMenus = window.localStorage.getItem("wf:tema");
+      const esOscuro = suyo === "oscuro" || suyo === "navy";
+      if (deLosMenus === "oscuro" && !esOscuro) return "oscuro";
+      if (deLosMenus === "claro" && esOscuro) return "claro2";
+      return suyo;
     } catch {
       return "claro";
     }
@@ -27316,15 +27335,26 @@ function VistaPizarra({
     if (temaDeLaPizarra === "navy") raiz.dataset.pizarraVariante = "navy";
     else if (temaDeLaPizarra === "claro2" || temaDeLaPizarra === "mixto2") raiz.dataset.pizarraVariante = "claro2";
     else delete raiz.dataset.pizarraVariante;
+    // Y EL DE LOS MENÚS, EL MISMO LADO MIENTRAS LA PIZARRA ESTÁ ABIERTA (02/11/2026): antes su 🌙 oscurecía las ventanas
+    // de una pizarra en claro (las cajas oscuras dentro de un marco claro). Al salir vuelve lo elegido en los menús.
+    const esOscuro = temaDeLaPizarra === "oscuro" || temaDeLaPizarra === "navy";
+    raiz.dataset.tema = esOscuro ? "oscuro" : "claro";
     return () => {
       delete raiz.dataset.pizarraTema;
       delete raiz.dataset.pizarraVariante;
+      try {
+        raiz.dataset.tema = window.localStorage.getItem("wf:tema") === "oscuro" ? "oscuro" : "claro";
+      } catch {
+        raiz.dataset.tema = "claro";
+      }
     };
   }, [temaDeLaPizarra]);
   const cambiarTemaDeLaPizarra = (siguiente: TemaDeLaPizarra) => {
     setTemaDeLaPizarra(siguiente);
     try {
       window.localStorage.setItem("pizarra-tema", siguiente);
+      // Los menús siguen al mismo lado (claro u oscuro).
+      window.localStorage.setItem("wf:tema", siguiente === "oscuro" || siguiente === "navy" ? "oscuro" : "claro");
     } catch {
       // Sin almacenamiento: dura hasta cerrar la pizarra.
     }
@@ -31089,9 +31119,9 @@ function VentanaFlotante({
   children,
   onListo,
   onCancelar,
-  clase = "",
+  clase = "burbujas-nuevo prolijo",
 }: {
-  /** Clases de más para la ventana (02/11/2026: «burbujas-nuevo prolijo», el diseño del pop up de burbujas en Seguimientos). */
+  /** Clases de más para la ventana (por defecto, desde el 02/11/2026, el diseño de las ventanas de burbujas en todas) (02/11/2026: «burbujas-nuevo prolijo», el diseño del pop up de burbujas en Seguimientos). */
   clase?: string;
   titulo: string;
   detalle?: string;
@@ -31984,7 +32014,7 @@ function PantallaDelTableroCargada({
                   {/* LA VISTA DEL TABLERO (01/11/2026): estaciones, acomodar, qué falta, cables; y el tema. */}
                   <div className="my-1 border-t border-borde" />
                   {herramientasDelLienzo}
-                  <div className="flex gap-1 px-3 py-1.5" role="group" aria-label="Tema">
+                  <div className="flex flex-wrap gap-1 px-3 py-1.5" role="group" aria-label="Tema">
                     {(
                       [
                         ["claro", "☀️ Claro"],
@@ -38683,7 +38713,7 @@ function StepList({
                   if ((evento.target as HTMLElement).closest("input, textarea, select, [contenteditable='true']")) return;
                   evento.preventDefault();
                   evento.stopPropagation();
-                  onMenuDelCajon(i, evento.clientX, evento.clientY);
+                  { const { x, y } = sinElZoom(evento); onMenuDelCajon(i, x, y); }
                 }
               : undefined
           }
@@ -48321,7 +48351,7 @@ function BotonesDeLaVentana({
         onClick={onCerrar}
         disabled={guardando}
         title="No tocaste nada en esta ventana: solo cierra"
-        className="rounded-md border border-neutral-300 bg-tarjeta px-4 py-1.5 text-xs font-bold text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="bn-cancelar rounded-md border border-neutral-300 bg-tarjeta px-4 py-1.5 text-xs font-bold text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Cerrar
       </button>
@@ -48344,7 +48374,7 @@ function BotonesDeLaVentana({
         }}
         disabled={guardando}
         title="Deshace lo escrito en esta ventana y cierra"
-        className="rounded-md border border-neutral-300 bg-tarjeta px-4 py-1.5 text-xs font-bold text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="bn-cancelar rounded-md border border-neutral-300 bg-tarjeta px-4 py-1.5 text-xs font-bold text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Cancelar
       </button>
@@ -48366,7 +48396,7 @@ function BotonesDeLaVentana({
             ? "Guardando…"
             : "Deja lo escrito en esta ventana y cierra. Para subirlo, el «Guardar» de arriba o Ctrl+S"
         }
-        className="rounded-md bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500"
+        className="bn-listo rounded-md bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500"
       >
         {guardando ? "Guardando…" : "Guardar"}
       </button>
@@ -48458,13 +48488,15 @@ function VentanaDeProducto({
           costaba seguirlos. Se estrecha en todas las ventanas de la casa a la
           vez: tenerlas de dos anchos distintos haría dudar de si son la misma
           clase de sitio. */}
+      {/* EL DISEÑO DE LAS VENTANAS DE BURBUJAS (02/11/2026). Él: «entré a la configuración de la tienda y sigue con el diseño
+          feo… necesito que el aspecto de la tienda también tenga esa mejora visual». Todas las ventanas de la casa a la vez. */}
       <div
-        className="my-8 w-full max-w-[820px] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl"
+        className="burbujas-nuevo prolijo my-8 w-full max-w-[820px] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl"
         onClick={(evento) => evento.stopPropagation()}
       >
         <div className={`h-1.5 w-full rounded-t-xl ${tono.cinta}`} />
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3">
-          <h3 className="text-base font-black uppercase tracking-wide text-neutral-900">
+        <div className="bn-cabecera flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3">
+          <h3 className="bn-titulo text-base font-black tracking-tight text-neutral-900">
             {titulo}
           </h3>
           <div className="flex items-center gap-2">
@@ -48484,7 +48516,7 @@ function VentanaDeProducto({
             <BotonesDeLaVentana onCerrar={onCerrar} onCancelar={onCancelar} />
           </div>
         </div>
-        <div className="px-5 py-4">{children}</div>
+        <div className="bn-cuerpo px-5 py-4">{children}</div>
       </div>
       </div>
     </div>
