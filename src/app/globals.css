@@ -788,7 +788,7 @@ input,
   --bn-texto-cajon: #000015;
   --bn-etiqueta: #0f172a;
   --bn-caja-texto: #fdfdfd;
-  --bn-caja-texto-borde: #cfdcec;
+  --bn-caja-texto-borde: #8aa4c1; /* (03/11/2026: «muy clarito, no se distingue si es un texto o una textarea».) */
   --bn-caja-texto-letra: #0f172a;
   --bn-botones: #5a32e8;
   --bn-botones-fondo: #f3f0ff;
@@ -858,7 +858,7 @@ input,
   --bn-texto-cajon: #e8edf7;
   --bn-etiqueta: #f1f5fb;
   --bn-caja-texto: #1f2b41;
-  --bn-caja-texto-borde: #2f3c5c;
+  --bn-caja-texto-borde: #4a5880;
   --bn-caja-texto-letra: #e8edf7;
   --bn-botones: #885bfe;
   --bn-botones-fondo: rgba(147, 102, 255, 0.1);
@@ -1263,7 +1263,7 @@ input,
   --bn-basura-texto: #e11d2e;
   --bn-texto-cajon: #0f172a;
   --bn-caja-texto: #ffffff;
-  --bn-caja-texto-borde: #d6dfeb;
+  --bn-caja-texto-borde: #8fa5c2;
   --bn-botones: #6d3df0;
   --bn-botones-fondo: #ffffff;
   --bn-decisiones: #0f2a2c;
@@ -1380,6 +1380,12 @@ input,
    se ve feo». Solo las ventanas (textos, botones y burbujas a esa escala), no la página. */
 .burbujas-nuevo.burbujas-nuevo {
   zoom: 0.9;
+}
+/* LA VENTANA DE LAS BURBUJAS DE UNA FICHA, MÁS ALTA (03/11/2026). Él: «queda espacio negro abajo… hazlo un poco más grande,
+   el mismo espacio de arriba que esté abajo». Su cuerpo crece hasta dejar abajo el mismo margen que arriba (la ventana lleva
+   `my-8`; se cuenta con el 90 %: lo de dentro de la ventana mide 1/0,9). La cabecera mide unos 96 px. */
+.burbujas-nuevo .bn-cuerpo.max-h-\[78vh\] {
+  max-height: calc((100vh - 2 * 32px * 0.9) / 0.9 - 133px);
 }
 /* Una ventana abierta DENTRO de otra («Editar esta burbuja») no se achica dos veces. */
 .burbujas-nuevo .burbujas-nuevo.burbujas-nuevo {
