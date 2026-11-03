@@ -7731,6 +7731,12 @@ export default function EditorPage() {
         // Guardar SÍ funciona desde dentro de un campo: es lo que uno espera
         // al terminar de escribir.
         event.preventDefault();
+        // SIN CAMBIOS, NO SE GUARDA (03/11/2026). Él: «cuando no hay cambios en el editor, al presionar Cmd+S igual
+        // graba, eso no está bien». Como el botón «💾 Guardar», que ya se apaga sin cambios: aquí, un aviso corto.
+        if (!isDirty) {
+          setToast({ ok: true, msg: "No hay cambios que guardar." });
+          return;
+        }
         if (!saving) void save();
         return;
       }
@@ -7752,7 +7758,7 @@ export default function EditorPage() {
     return () => window.removeEventListener("keydown", handleEditorShortcut);
   // cfg forma parte de la dependencia para que Cmd/Ctrl+S nunca conserve una
   // función save de antes de la última edición del popup.
-  }, [cfg, history.length, redoHistory.length, saving]);
+  }, [cfg, history.length, redoHistory.length, saving, isDirty]);
 
   function exportEditorConfig() {
     if (!cfg) return;
