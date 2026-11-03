@@ -31,7 +31,7 @@ import {
   leerProductoDeOrigen,
 } from "@/lib/editor/importar-segundo-producto";
 import { revisarPais } from "@/lib/editor/revisar-pais";
-import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda, idsDeComodinesDeLaFicha, sinCablesHuerfanos } from "@/lib/tablero/datos";
+import { CEREBRO_DE_FABRICA, BASICO_DE_LA_TIENDA, FULL_DE_LA_TIENDA, conProductosDeLaTienda, idsDeComodinesDeLaFicha, salidasDeLaFicha, sinCablesHuerfanos } from "@/lib/tablero/datos";
 import type { FichaDelTablero, Tablero } from "@/lib/tablero/tipos";
 import { comodinesDeLaFichaEnTexto, type ProductoConPrecio } from "@/lib/tablero/comodines";
 import {
@@ -31343,6 +31343,20 @@ function PantallaDelTableroCargada({
   const [ajustes, setAjustes] = useState<string | null>(null);
   /** La entrega (su clave, «producto» o «producto#extra») abierta en su ventana desde los ajustes de una ficha Entregar. */
   const [entregaEditando, setEntregaEditando] = useState<string | null>(null);
+  // «W» EN EL TABLERO (03/11/2026): el recorrido de ESTE tablero (ver `RecorridoDelTablero`), no el de la venta automática.
+  // Se atrapa antes que la W del editor (fase de captura) y se detiene ahí.
+  const [verCamino, setVerCamino] = useState(false);
+  useEffect(() => {
+    const alPulsar = (e: KeyboardEvent) => {
+      if (e.key !== "w" && e.key !== "W") return;
+      if (e.ctrlKey || e.metaKey || e.altKey || escribiendoEnUnCampo(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setVerCamino((v) => !v);
+    };
+    window.addEventListener("keydown", alPulsar, true);
+    return () => window.removeEventListener("keydown", alPulsar, true);
+  }, []);
   const [paisVisto, setPaisVisto] = useState<string>(paisDeLaBandera || "PE");
   useEffect(() => {
     if (paisDeLaBandera) setPaisVisto(paisDeLaBandera);
@@ -32445,6 +32459,7 @@ function PantallaDelTableroCargada({
           onEditarEntrega={setEntregaEditando}
         />
       )}
+      {verCamino && <RecorridoDelTablero cfg={cfg} tablero={tablero} tienda={tienda} pais={paisVisto} onCerrar={() => setVerCamino(false)} />}
       {/* EDITAR LA ENTREGA AQUÍ MISMO (03/11/2026). Él: «un botón que abra el cuadro del texto de la entrega para no tener
           que regresar a la ficha (del producto) y poder editarla ahí mismo en un pop up». Edita lo que el bot manda: la
           entrega principal del producto (`delivery`) o esa entrega extra. Encima de los ajustes (z-[90]). */}
@@ -33861,6 +33876,25 @@ function AjustesDeLaFicha({
                     onChange={(e) => setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, peso: Math.max(0, Number(e.target.value) || 0) } : x)) })}
                     className="w-16 rounded-md border border-borde bg-relleno px-2 py-1"
                   />
+                  {/* El mismo ON/OFF de la ficha (03/11/2026): OFF = peso 0 y recuerda el que tenía. */}
+                  <button
+                    type="button"
+                    title={o.peso > 0 ? "Vende: clic para apagarla" : "Apagada: clic para prenderla"}
+                    onClick={() => {
+                      const ops = b.reparto ?? [];
+                      const on = o.peso > 0;
+                      if (on && ops.filter((x) => x.peso > 0).length === 1 && !window.confirm("Es la última ruta prendida de este Ruteador: si la apagas, nadie entra por aquí. ¿Seguro?")) return;
+                      setB({
+                        ...b,
+                        reparto: ops.map((x) =>
+                          x.id !== o.id ? x : on ? { ...x, peso: 0, peso_antes: x.peso } : { ...x, peso: x.peso_antes && x.peso_antes > 0 ? x.peso_antes : 1, peso_antes: undefined }
+                        ),
+                      });
+                    }}
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black ${o.peso > 0 ? "bg-emerald-500 text-white" : "bg-slate-300 text-slate-600"}`}
+                  >
+                    {o.peso > 0 ? "ON" : "OFF"}
+                  </button>
                   <button type="button" className="text-rose-600" onClick={() => setB({ ...b, reparto: (b.reparto ?? []).filter((x) => x.id !== o.id) })}>
                     ✕
                   </button>
@@ -35077,6 +35111,211 @@ function VentanaDelCobro({
  * (`StepList`), con sus botones y cuadritos, sobre un BORRADOR: «Listo» lo aplica, Escape lo
  * descarta. Las apagadas SÍ salen aquí: es donde se encienden.
  */
+/**
+ * «W» EN EL TABLERO: EL CAMINO DE ESTE PAÍS, SIGUIENDO LOS CABLES (03/11/2026). Él: «en el modo tablero no respeta lo que
+ * tengo en la tienda». Como la W de la pizarra, pero con lo que el bot de verdad manda: desde el Inicio del país de la
+ * bandera (o el de «Otros países», como el bot), ficha por ficha, con sus burbujas y sus precios de ese país. En un
+ * 🔀 Ruteador, sus rutas una al lado de la otra (prendidas y apagadas); donde el camino se divide (botones, cuadritos,
+ * «si elige»), se elige la rama arriba de la ficha. Las fichas sueltas, sin cable, no salen. Solo pantalla.
+ */
+function RecorridoDelTablero({
+  cfg,
+  tablero,
+  tienda,
+  pais,
+  onCerrar,
+}: {
+  cfg: FullConfig;
+  tablero: TableroEnElEditor;
+  tienda?: TiendaEditor;
+  pais: string;
+  onCerrar: () => void;
+}) {
+  useEscapeEnPila(() => onCerrar());
+  const [elegidas, setElegidas] = useState<Record<string, string>>({});
+  const cfgVista = configComoLaVeLaTienda(cfg, tienda, "lineal");
+  const alineacion = tienda?.alineacion as Record<string, unknown> | undefined;
+  const fichaDe = (id: string) => tablero.fichas.find((f) => f.id === id && !f.guardada);
+  const cableDe = (id: string, salida: string) => tablero.cables.find((c) => c.de === id && c.salida === salida);
+  const nombrePais = COUNTRY_OPTIONS.find((o) => o.code === pais)?.label ?? pais;
+  const inicioPropio = tablero.fichas.find((f) => f.tipo === "inicio" && (f.pais ?? "") === pais);
+  const inicio = inicioPropio ?? tablero.fichas.find((f) => f.tipo === "inicio" && !f.pais);
+  const nombreDe = (f: FichaEnElEditor) => `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
+  const visor = (f: FichaEnElEditor, steps: unknown[] | undefined, clave: string) => {
+    const pasos = ((steps ?? []) as EditorStep[]).filter((s) => s.enabled !== false);
+    if (!pasos.length) return <p className="px-2 py-1 text-xs italic text-tinta-suave">(sin burbujas)</p>;
+    const productos = productosParaElVisor(cfg, f, pais, tablero, alineacion);
+    const precio = productos?.productos.find((x) => x.id === productos.idPorDefecto)?.precio ?? undefined;
+    return (
+      <ProductosDeLaFichaContext.Provider value={productos}>
+        <ChatPreview
+          key={clave}
+          steps={pasos}
+          priceSoles={previewFullPriceFromConfig(cfgVista)}
+          comboPrice={previewComboPriceFromConfig(cfgVista)}
+          basicoPrice={previewBasicoPriceFromConfig(cfgVista)}
+          {...(typeof precio === "number" ? { previewPriceOverride: precio } : {})}
+          previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista, pais as CountryCode), productos)}
+          highlightPlaceholders
+        />
+      </ProductosDeLaFichaContext.Provider>
+    );
+  };
+  const contenido = (f: FichaEnElEditor) => {
+    if (f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo") return visor(f, f.steps, f.id);
+    if (f.tipo === "intro_ob") return visor(f, f.variantes?.find((v) => (v.peso ?? 1) > 0)?.steps ?? f.variantes?.[0]?.steps, f.id);
+    if (f.tipo === "seguimientos")
+      return (
+        <div className="space-y-2">
+          {(f.seguimientos ?? []).map((s, i) => (
+            <div key={s.id}>
+              <p className="px-1 text-[12px] font-bold text-orange-700">
+                ⏳ Seguimiento {i + 1} · a los {minutosLegiblesDelTablero(s.minutos)}
+                {s.activa_oferta ? " · activa la oferta" : ""}
+              </p>
+              {visor(f, s.variantes.find((v) => (v.peso ?? 1) > 0)?.steps ?? s.variantes[0]?.steps, `${f.id}-${s.id}`)}
+            </div>
+          ))}
+        </div>
+      );
+    if (f.tipo === "entregar") {
+      const claves = f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : [];
+      return (
+        <div className="space-y-2">
+          {claves.map((clave) => {
+            const [crudo, extraId] = clave.split("#");
+            const p = (cfg.biblioteca_de_productos ?? []).find((x) => x.id === (conProductosDeLaTienda(crudo, alineacion) || crudo));
+            const extra = extraId ? (p?.entregas_extra ?? []).find((e) => e.id === extraId) : undefined;
+            return (
+              <div key={clave}>
+                <p className="px-1 text-[12px] font-bold text-emerald-700">📦 {p?.name ?? "(producto borrado)"}{extra ? ` · ${extra.nombre}` : ""}</p>
+                {visor(f, (extra ? extra.steps : p?.delivery) as unknown[] | undefined, `${f.id}-${clave}`)}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    const nota: Partial<Record<FichaEnElEditor["tipo"], string>> = {
+      esperar: `⏱ Espera ${minutosLegiblesDelTablero(f.minutos ?? 1)} antes de seguir.`,
+      condicion: "🔀 Condición: el camino sigue por «Sí» o «No».",
+      regalo: "🎁 Postventa y regalo (el de la tienda).",
+      humano: "🙋 Pasa a un asesor: el bot deja de contestar.",
+      workflow: "▶▶ Sigue en otro workflow.",
+    };
+    return nota[f.tipo] ? <p className="px-2 py-1 text-sm text-tinta">{nota[f.tipo]}</p> : null;
+  };
+  /** El camino desde una ficha: sus bloques, uno debajo del otro; en un Ruteador, sus rutas en columnas. */
+  const camino = (desde: string | undefined, vistos: Set<string>, prof: number): ReactNode[] => {
+    const out: ReactNode[] = [];
+    let id = desde;
+    for (let paso = 0; id && paso < 40 && prof < 6; paso++) {
+      const f = fichaDe(id);
+      if (!f) break;
+      if (vistos.has(f.id)) {
+        out.push(
+          <p key={`vuelve-${f.id}-${paso}`} className="rounded-lg border border-dashed border-borde px-3 py-2 text-xs font-semibold text-tinta-suave">
+            ↩ Vuelve a «{nombreDe(f)}»
+          </p>
+        );
+        break;
+      }
+      vistos.add(f.id);
+      const conCable = salidasDeLaFicha(f as unknown as FichaDelTablero, pais, undefined, tablero as unknown as Tablero).filter((s) => cableDe(f.id, s.clave));
+      out.push(
+        <div key={f.id} className={`rounded-xl border border-borde bg-tarjeta p-2 shadow-sm ${f.apagada ? "opacity-60" : ""}`}>
+          <p className="mb-1 flex items-center gap-2 px-1 text-[15px] font-extrabold text-tinta">
+            <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: ASPECTO[f.tipo].trazo }} />
+            {nombreDe(f)}
+            {f.apagada && <span className="rounded-full bg-slate-200 px-2 text-[10px] font-bold text-slate-600">apagada: no manda nada</span>}
+          </p>
+          {f.tipo !== "inicio" && contenido(f)}
+        </div>
+      );
+      if (f.tipo === "reparto") {
+        // LAS RUTAS DEL RUTEADOR, UNA AL LADO DE LA OTRA: prendidas y apagadas.
+        const ops = f.reparto ?? [];
+        const total = ops.reduce((s, o) => s + o.peso, 0) || 1;
+        out.push(
+          <div key={`${f.id}-rutas`} className="flex gap-3 overflow-x-auto pb-2">
+            {ops
+              .filter((o) => cableDe(f.id, `rep:${o.id}`))
+              .map((o, i) => (
+                <div key={o.id} className="w-[380px] shrink-0 space-y-2">
+                  <p className={`rounded-full px-3 py-1 text-center text-[12px] font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
+                    {o.peso > 0 ? `🟢 ${o.nombre || `Ruta ${i + 1}`} · vende ${Math.round((o.peso / total) * 100)}%` : `⚪ ${o.nombre || `Ruta ${i + 1}`} · apagada`}
+                  </p>
+                  {camino(cableDe(f.id, `rep:${o.id}`)?.a, new Set(vistos), prof + 1)}
+                </div>
+              ))}
+          </div>
+        );
+        break;
+      }
+      if (conCable.length === 0) {
+        out.push(
+          <p key={`fin-${f.id}`} className="rounded-lg bg-relleno px-3 py-2 text-center text-xs font-semibold text-tinta-suave">
+            🛑 Aquí termina el camino
+          </p>
+        );
+        break;
+      }
+      const sigue = conCable.find((s) => s.clave === elegidas[f.id]) ?? conCable[0];
+      if (conCable.length > 1)
+        out.push(
+          <div key={`${f.id}-ramas`} className="flex flex-wrap items-center gap-1 px-1">
+            <span className="text-[11px] font-semibold text-tinta-suave">Sigue por:</span>
+            {conCable.map((s) => (
+              <button
+                key={s.clave}
+                type="button"
+                onClick={() => setElegidas((e) => ({ ...e, [f.id]: s.clave }))}
+                className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${s.clave === sigue.clave ? "border-sky-500 bg-sky-500 text-white" : "border-borde bg-tarjeta text-tinta hover:bg-relleno"}`}
+              >
+                {s.etiqueta}
+              </button>
+            ))}
+          </div>
+        );
+      id = cableDe(f.id, sigue.clave)?.a;
+    }
+    return out;
+  };
+  return (
+    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
+      <div className="burbujas-nuevo prolijo my-6 w-full max-w-6xl rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="bn-titulo text-sm font-bold text-neutral-900">▶ Recorrido de {nombrePais}</h3>
+            <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">
+              Lo que recibe un cliente de este país, siguiendo los cables. Cambia la bandera para ver otro país. Las fichas sin cable no salen.
+            </p>
+          </div>
+          <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
+            Cerrar (W)
+          </button>
+        </div>
+        <div className="bn-cuerpo space-y-3 p-4">
+          {!inicio ? (
+            <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-3 text-sm font-semibold text-red-800">
+              {nombrePais} no tiene Inicio en este tablero: aquí no vende.
+            </p>
+          ) : (
+            <>
+              {!inicioPropio && (
+                <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+                  {nombrePais} no tiene Inicio propio: sus clientes entran por 🌍 Otros países.
+                </p>
+              )}
+              <div className="max-w-[420px] space-y-3">{camino(inicio.id, new Set(), 0)}</div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function VentanaDelCajon({
   titulo,
   nombre,

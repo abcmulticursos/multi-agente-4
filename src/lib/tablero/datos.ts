@@ -189,7 +189,9 @@ function leeReparto(v: unknown): OpcionDeReparto[] {
     const id = texto(x.id, 60).trim();
     if (!id) return [];
     const nombre = texto(x.nombre, 60).trim();
-    return [{ id, ...(nombre ? { nombre } : {}), peso: Math.max(0, numero(x.peso) ?? 1) }];
+    // (03/11/2026: el Ruteador apaga una ruta con peso 0 y recuerda el que tenía en `peso_antes`.)
+    const antes = numero(x.peso_antes);
+    return [{ id, ...(nombre ? { nombre } : {}), peso: Math.max(0, numero(x.peso) ?? 1), ...(antes && antes > 0 ? { peso_antes: antes } : {}) }];
   });
 }
 
@@ -643,7 +645,7 @@ export function salidasDeLaFicha(
       const total = opciones.reduce((s, o) => s + o.peso, 0) || 1;
       return opciones.map((o, i) => ({
         clave: `rep:${o.id}`,
-        etiqueta: `🎲 ${o.nombre || `Ruta ${i + 1}`} · ${Math.round((o.peso / total) * 100)}%`,
+        etiqueta: o.peso > 0 ? `${o.nombre || `Ruta ${i + 1}`} · ${Math.round((o.peso / total) * 100)}%` : `${o.nombre || `Ruta ${i + 1}`} · apagada`,
       }));
     }
     case "mensaje":
@@ -804,7 +806,8 @@ export function avisosDeLaFicha(t: Tablero, f: FichaDelTablero, pais: string): s
       if (pasada(f.minutos)) avisos.push("Espera más de 24 h: si el cliente no escribe, lo siguiente no llega por WhatsApp.");
       break;
     case "reparto":
-      if ((f.reparto ?? []).filter((o) => o.peso > 0).length < 2) avisos.push("Necesita al menos 2 rutas con peso.");
+      // (03/11/2026: con el Ruteador una sola ruta prendida es válida: las demás, apagadas a propósito.)
+      if ((f.reparto ?? []).filter((o) => o.peso > 0).length < 1) avisos.push("Todas sus rutas están apagadas: nadie entra por aquí.");
       break;
     case "workflow":
       if (!f.workflow_id) avisos.push("No tiene workflow elegido.");

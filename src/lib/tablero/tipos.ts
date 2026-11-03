@@ -125,11 +125,14 @@ export interface SeguimientoDeLaFicha {
   ignora_tardio?: boolean;
 }
 
-/** Una salida del reparto por peso. */
+/** Una salida del reparto por peso (el «🔀 Ruteador», 03/11/2026). */
 export interface OpcionDeReparto {
   id: string;
   nombre?: string;
+  /** 0 = apagada: no recibe clientes nuevos (el sorteo ya no la elige). */
   peso: number;
+  /** El peso que tenía al apagarla, para volver a él al prenderla. Solo editor: el bot no lo lee. */
+  peso_antes?: number;
 }
 
 export interface FichaDelTablero {

@@ -14,7 +14,7 @@ export const ASPECTO: Record<TipoDeFicha, { icono: string; nombre: string; color
   // TURQUESA (27/10/2026): «el cobro anaranjado se parece mucho a los seguimientos; el dólar es verde».
   cobro: { icono: "💰", nombre: "Cobro", color: "bg-teal-500", borde: "border-teal-400", trazo: "#14b8a6" },
   condicion: { icono: "🔀", nombre: "Condición", color: "bg-slate-600", borde: "border-slate-500", trazo: "#475569" },
-  reparto: { icono: "🎲", nombre: "Reparto por peso", color: "bg-fuchsia-600", borde: "border-fuchsia-500", trazo: "#c026d3" },
+  reparto: { icono: "🔀", nombre: "Ruteador", color: "bg-fuchsia-600", borde: "border-fuchsia-500", trazo: "#c026d3" },
   esperar: { icono: "⏱", nombre: "Esperar", color: "bg-stone-500", borde: "border-stone-400", trazo: "#78716c" },
   workflow: { icono: "▶▶", nombre: "Ir a un workflow", color: "bg-indigo-600", borde: "border-indigo-500", trazo: "#4f46e5" },
   regalo: { icono: "🎁", nombre: "Postventa y regalo", color: "bg-pink-600", borde: "border-pink-500", trazo: "#db2777" },

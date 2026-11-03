@@ -661,6 +661,34 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {(boton || cuadrito) && (
           <span className="shrink-0 text-[9px] opacity-70">{boton ? "BOTÓN" : s.clave.startsWith("elige:") ? "SI ELIGE" : "SI DICE"}</span>
         )}
+        {/* EL INTERRUPTOR DE LA RUTA (03/11/2026, el 🔀 Ruteador). ON: recibe clientes según su %. OFF: no recibe clientes
+            nuevos (peso 0, el sorteo del bot ya no la elige); los que ya estaban terminan como empezaron. */}
+        {s.clave.startsWith("rep:") &&
+          (() => {
+            const rid = s.clave.slice(4);
+            const ops = f.reparto ?? [];
+            const op = ops.find((o) => o.id === rid);
+            if (!op) return null;
+            const on = op.peso > 0;
+            return (
+              <button
+                type="button"
+                className={`nodrag nopan shrink-0 rounded-full px-1.5 py-px text-[9px] font-black leading-none ${on ? "bg-emerald-500 text-white" : "bg-slate-300 text-slate-600"}`}
+                title={on ? "Vende: recibe clientes nuevos. Clic: apagarla" : "Apagada: no recibe clientes nuevos. Clic: prenderla"}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (on && ops.filter((o) => o.peso > 0).length === 1 && !window.confirm("Es la última ruta prendida de este Ruteador: si la apagas, nadie entra por aquí. ¿Seguro?")) return;
+                  const nuevas = ops.map((o) =>
+                    o.id !== rid ? o : on ? { ...o, peso: 0, peso_antes: o.peso } : { ...o, peso: o.peso_antes && o.peso_antes > 0 ? o.peso_antes : 1, peso_antes: undefined }
+                  );
+                  ctx.cambiar({ ...ctx.tablero, fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, reparto: nuevas } : x)) });
+                }}
+              >
+                {on ? "ON" : "OFF"}
+              </button>
+            );
+          })()}
         <span
           className="truncate"
           title={`${s.etiqueta.replace(/^(🔘|💬|✍️) /, "")}${boton ? "\nTambién si lo escribe con sus palabras (la IA reconoce cuál)." : ""}`}
@@ -741,6 +769,14 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       )}
       {/* EL SELLO DE LA ENTREGA (02/11/2026, su montaje «entrega2.jpg»): en TODA ficha Entrega, arriba al centro, qué
           entrega: 📦 el full de la tienda, 📚 el básico, 🛍️ otro producto (el upsell). Solo pantalla. */}
+      {/* EL 🔀 RUTEADOR (03/11/2026, su imagen «ruteador.jpg» y debajo «Ruteador», como las estaciones). Solo dibujo. */}
+      {f.tipo === "reparto" && (
+        <span className="pointer-events-none absolute -top-[150px] left-1/2 flex -translate-x-1/2 select-none flex-col items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/tablero/ruteador.png" alt="Ruteador" draggable={false} className="h-[118px] w-[118px] rounded-2xl border-2 border-fuchsia-400 object-cover shadow-xl" />
+          <span className="-mt-3 rounded-full bg-fuchsia-600 px-4 py-1 text-[15px] font-bold leading-5 text-white shadow">Ruteador</span>
+        </span>
+      )}
       {f.tipo === "entregar" &&
         (() => {
           const ids = (f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []).map((k) => k.split("#")[0]);
@@ -2090,7 +2126,7 @@ export default function LienzoDelTablero({
               stroke: aSeguimientos ? ASPECTO.seguimientos.trazo : color,
               strokeWidth: 4,
               strokeDasharray: "10 6",
-              opacity: origen?.apagada ? 0.4 : 1,
+              opacity: origen?.apagada ? 0.4 : origen?.tipo === "reparto" && c.salida.startsWith("rep:") && (origen.reparto ?? []).find((o) => `rep:${o.id}` === c.salida)?.peso === 0 ? 0.3 : 1,
             },
           };
         }),
