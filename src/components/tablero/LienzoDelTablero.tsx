@@ -295,7 +295,7 @@ function CableQueSeTira({ fromX, fromY, toX, toY, fromPosition, toPosition, from
   const tipo = (fromNode?.data as { ficha?: FichaEnElEditor } | undefined)?.ficha?.tipo;
   const color = tipo ? ASPECTO[tipo].trazo : "#f97316";
   const [camino] = getBezierPath({ sourceX: fromX, sourceY: fromY, sourcePosition: fromPosition, targetX: toX, targetY: toY, targetPosition: toPosition });
-  return <path d={camino} fill="none" stroke={color} strokeWidth={3} strokeDasharray="6 6" />;
+  return <path d={camino} fill="none" stroke={color} strokeWidth={4} strokeDasharray="10 6" />;
 }
 
 /** ESCAPE SUELTA EL CABLE QUE SE ESTÁ TIRANDO (27/10/2026): el que ya estaba queda como estaba. */
@@ -1169,7 +1169,7 @@ function CableComoEtiqueta({
   const grosor = 3.5 / Math.max(zoom, 0.05);
   return (
     <>
-      <BaseEdge id={id} path={corto} interactionWidth={0} style={{ ...style, strokeWidth: 3, strokeDasharray: undefined, opacity: tenue ? 0.4 : 1 }} />
+      <BaseEdge id={id} path={corto} interactionWidth={0} style={{ ...style, strokeWidth: 4, strokeDasharray: undefined, opacity: tenue ? 0.4 : 1 }} />
       {verLinea && (
         <BaseEdge
           id={`${id}-completo`}
@@ -1275,7 +1275,7 @@ function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition,
     <>
       <g onMouseEnter={() => setEncima(true)} onMouseLeave={() => setEncima(false)}>
         <path ref={medidor} d={camino} fill="none" stroke="none" />
-        <BaseEdge id={id} path={camino} interactionWidth={0} style={{ ...style, strokeWidth: encima ? 5 : 3 }} />
+        <BaseEdge id={id} path={camino} interactionWidth={0} style={{ ...style, strokeWidth: encima ? 6 : 4 }} />
         <path
           d={camino}
           fill="none"
@@ -1440,14 +1440,14 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
     <div data-estacion className="flex items-center self-center" onDoubleClick={(e) => (e.stopPropagation(), ctx.abrir(f.id))}>
       {/* De la ficha a su estación: el mismo trazo punteado de los cables, del color de la ficha. */}
       <svg width={56} height={8} className="shrink-0 overflow-visible">
-        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={3} strokeDasharray="9 6" className="pointer-events-auto" />
+        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={4} strokeDasharray="10 6" className="pointer-events-auto" />
       </svg>
       <div className="relative flex flex-col items-center" title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
         {/* GRANDE Y NOTORIA, como en Sendy (él: «tiene que haber algo ahí que sea importante y notorio»). */}
         <div
           // El agente, 20 % más grande que la estación (01/11/2026: «hazlo un 20 % más»).
           className={`pointer-events-auto relative flex flex-col items-center justify-center gap-0.5 text-white shadow-xl ${
-            ctx.comoAgente ? "h-[173px] w-[173px] rounded-2xl border-2 border-emerald-500 bg-white" : "h-36 w-36 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600"
+            ctx.comoAgente ? "h-[173px] w-[173px] rounded-2xl border-2 border-emerald-400 bg-white" : "h-36 w-36 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-500"
           } ${f.apagada ? "opacity-50" : ""}`}
         >
           {/* Arriba: a sus Seguimientos. */}
@@ -1499,8 +1499,9 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
           )}
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
-        <div className="pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-600 px-4 py-1 text-[12px] font-bold leading-4 text-white shadow">
-          {ctx.comoAgente && <span className="text-[14px]">{imagenDelAgente.nombre}</span>}
+        {/* (03/11/2026: el verde más claro y «Agente IA» un poco más grande.) */}
+        <div className="pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-500 px-5 py-1.5 text-[13px] font-bold leading-5 text-white shadow">
+          {ctx.comoAgente && <span className="text-[18px]">{imagenDelAgente.nombre}</span>}
           <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f, ctx.tablero)}</span>
         </div>
       </div>
@@ -2082,11 +2083,13 @@ export default function LienzoDelTablero({
             ...(comoColita && destino
               ? { data: { etiqueta: letreroDeColita(tablero, c, numeroDe), colorDestino: ASPECTO[destino.tipo].trazo, tenue: !!destino.apagada } }
               : {}),
-            // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra; los de Seguimientos, finos.
+            // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra. (03/11/2026, él: «engrosar un poquito los cables… y el
+            // cable que parte hacia los seguimientos sea de color anaranjado y del mismo grosor que los demás, y el dash
+            // también»: todos de 4 con el mismo punteado; el que va a unos Seguimientos, naranja.)
             style: {
-              stroke: color,
-              strokeWidth: aSeguimientos ? 1.5 : 3,
-              strokeDasharray: aSeguimientos ? "3 5" : "9 6",
+              stroke: aSeguimientos ? ASPECTO.seguimientos.trazo : color,
+              strokeWidth: 4,
+              strokeDasharray: "10 6",
               opacity: origen?.apagada ? 0.4 : 1,
             },
           };

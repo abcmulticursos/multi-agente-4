@@ -6,11 +6,11 @@ import type { TipoDeFicha } from "@/lib/tablero/tipos";
  * seguimiento en naranja, intro de order bump en violeta, entrega en verde, cobro en turquesa).
  */
 export const ASPECTO: Record<TipoDeFicha, { icono: string; nombre: string; color: string; borde: string; trazo: string }> = {
-  inicio: { icono: "▶", nombre: "Inicio", color: "bg-emerald-600", borde: "border-emerald-500", trazo: "#059669" },
+  inicio: { icono: "▶", nombre: "Inicio", color: "bg-emerald-500", borde: "border-emerald-400", trazo: "#10b981" },
   mensaje: { icono: "💬", nombre: "Mensaje", color: "bg-sky-600", borde: "border-sky-500", trazo: "#0284c7" },
   seguimientos: { icono: "🔁", nombre: "Seguimientos", color: "bg-orange-500", borde: "border-orange-400", trazo: "#f97316" },
   intro_ob: { icono: "🎁", nombre: "Intro de order bump", color: "bg-violet-600", borde: "border-violet-500", trazo: "#7c3aed" },
-  entregar: { icono: "📦", nombre: "Entregar", color: "bg-emerald-600", borde: "border-emerald-500", trazo: "#059669" },
+  entregar: { icono: "📦", nombre: "Entregar", color: "bg-emerald-500", borde: "border-emerald-400", trazo: "#10b981" },
   // TURQUESA (27/10/2026): «el cobro anaranjado se parece mucho a los seguimientos; el dólar es verde».
   cobro: { icono: "💰", nombre: "Cobro", color: "bg-teal-500", borde: "border-teal-400", trazo: "#14b8a6" },
   condicion: { icono: "🔀", nombre: "Condición", color: "bg-slate-600", borde: "border-slate-500", trazo: "#475569" },
