@@ -3908,8 +3908,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mw0b3q4d-uq6nl
       tipo: seguimientos
-      x: 583
-      y: 649
+      x: 594
+      y: 638
       seguimientos:
         - id: s-mw0b3q4d-c4dcv
           minutos: 2

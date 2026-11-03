@@ -5282,7 +5282,7 @@ biblioteca_de_productos:
       - type: text
         body_variants:
           - |-
-            Excelente, muchas gracias por tu compra!
+            {🧡 *Excelente, muchas gracias por tu compra!*|🧡 *¡Genial, te agradezco un montón por tu compra!*|🧡 *¡Perfecto, muchísimas gracias por tu pedido!*|🧡 *¡Estupendo, te agradezco de corazón por tu compra!*}
 
             Aquí te mando el pack completo:
 
@@ -5290,7 +5290,7 @@ biblioteca_de_productos:
 
             🎁 *REGALOS AQUI:*  😊👇️https://drive.google.com/drive/folders/1xUgrBd9piV3eN812y3du5yiubTYjASvz?usp=sharing
 
-            Gracias la confianza y por tu preferencia! 🤩
+            {*Gracias la confianza y por tu preferencia!*|*¡Gracias por la confianza y por tu preferencia!*|*¡Mil gracias por confiar en nosotros y por elegirnos!*|*¡Te agradezco por la confianza y por tu preferencia!*} 🤩
         delay_after_sec: 6
     image_gallery: []
     course_content: |-
