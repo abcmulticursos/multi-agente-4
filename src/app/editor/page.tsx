@@ -20154,7 +20154,8 @@ function PresentacionComoUpsellDelProducto({
   // EL PRECIO DE ESTE PRODUCTO EN EL PAÍS DEL VISOR, de su ficha. Sin precio ahí, el visor
   // enseña el hueco —«[Precio del extra sin configurar]»—, que es justo lo que el bot hace:
   // en ese país lo salta.
-  const pais = activePreviewCountry ?? previewContext.countryCode ?? "PE";
+  // (02/11/2026: el país que trae su visor —el de la bandera— manda sobre el selector general.)
+  const pais = previewContext.countryCode ?? activePreviewCountry ?? "PE";
   const suyos = producto.precios_por_pais?.[pais];
   const positivo = (n: unknown) =>
     typeof n === "number" && Number.isFinite(n) && n > 0 ? n : undefined;
@@ -20517,6 +20518,35 @@ function BibliotecaDeProductos({
 }) {
   const [abierto, setAbierto] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  // EL VISOR DE LA FICHA DEL PRODUCTO, EN EL PAÍS DE LA BANDERA (02/11/2026). Él: «al cambiar de país no cambia el
+  // contenido, sigue igual el mismo precio… al cambiar la bandera también el precio se respete». Moneda, {precio} y los
+  // comodines de producto salen del país `pais`, con el precio de ESTE producto en ese país (como lo manda el bot).
+  const contextoHeredado = useContext(EditorPreviewContext);
+  const contextoDelPais = useMemo<PreviewContext>(
+    () => ({ ...contextoHeredado, ...previewContextFromConfig(cfg, pais), highlightPlaceholderValues: contextoHeredado.highlightPlaceholderValues }),
+    [contextoHeredado, cfg, pais]
+  );
+  const delProductoEnSuPais = (producto: ProductoEditor): { ctx: PreviewContext; precio: number } => {
+    const suyo = producto.precios_por_pais?.[pais] as { price_soles?: number; market_price?: number; discount_price_soles?: number } | undefined;
+    const positivo = (n: unknown) => (typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null);
+    const precio = positivo(suyo?.price_soles);
+    const ctx: PreviewContext = {
+      ...previewContext,
+      ...previewContextFromConfig(cfg, pais),
+      highlightPlaceholderValues: previewContext.highlightPlaceholderValues,
+      nombreEntregado: producto.name?.trim() || "",
+      ...(producto.name?.trim()
+        ? {
+            productosDeLaFicha: {
+              productos: [{ id: producto.id, name: producto.name.trim(), precio, antes: positivo(suyo?.market_price), oferta: positivo(suyo?.discount_price_soles) }],
+              pais,
+              idPorDefecto: producto.id,
+            },
+          }
+        : {}),
+    };
+    return { ctx, precio: precio ?? 0 };
+  };
   /** Lo que se escribe en el buscador. Solo filtra lo que se VE: la lista
    *  guardada no se toca, así que buscar nunca puede perder un producto. */
   const [busqueda, setBusqueda] = useState("");
@@ -20714,6 +20744,7 @@ function BibliotecaDeProductos({
   };
 
   return (
+    <EditorPreviewContext.Provider value={contextoDelPais}>
     <TarjetaSuave className="space-y-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -21202,16 +21233,15 @@ function BibliotecaDeProductos({
                   onSnapshot={onSnapshot}
                   onEdit={onEdit}
                   idPrefix={`bib_${producto.id}`}
-                  priceSoles={producto.price_soles || precioBase}
+                  // (02/11/2026: el precio de este producto en el país de la bandera, no el general.)
+                  priceSoles={delProductoEnSuPais(producto).precio}
+                  stagePriceSoles={delProductoEnSuPais(producto).precio}
                   comboPrice={comboPrice}
                   basicoPrice={basicoPrice}
                   // AQUÍ NO HAY DUDA NINGUNA: esta entrega es de este producto,
                   // juegue el puesto que juegue. {{PRODUCTO_ENTREGADO}} sale con
                   // su nombre.
-                  previewContext={{
-                    ...previewContext,
-                    nombreEntregado: producto.name?.trim() || "",
-                  }}
+                  previewContext={delProductoEnSuPais(producto).ctx}
                 />
               </div>
 
@@ -21259,10 +21289,11 @@ function BibliotecaDeProductos({
                         onSnapshot={onSnapshot}
                         onEdit={onEdit}
                         idPrefix={`bib_${producto.id}_ent_${e.id}`}
-                        priceSoles={producto.price_soles || precioBase}
+                        priceSoles={delProductoEnSuPais(producto).precio}
+                        stagePriceSoles={delProductoEnSuPais(producto).precio}
                         comboPrice={comboPrice}
                         basicoPrice={basicoPrice}
-                        previewContext={{ ...previewContext, nombreEntregado: producto.name?.trim() || "" }}
+                        previewContext={delProductoEnSuPais(producto).ctx}
                       />
                     </div>
                   );
@@ -21325,10 +21356,7 @@ function BibliotecaDeProductos({
                 }
                 onSnapshot={onSnapshot}
                 onEdit={onEdit}
-                previewContext={{
-                  ...previewContext,
-                  nombreEntregado: producto.name?.trim() || "",
-                }}
+                previewContext={delProductoEnSuPais(producto).ctx}
                 comboPrice={comboPrice}
                 basicoPrice={basicoPrice}
                 precio={producto.price_soles || precioBase}
@@ -21338,6 +21366,7 @@ function BibliotecaDeProductos({
         ) : null
       )}
     </TarjetaSuave>
+    </EditorPreviewContext.Provider>
   );
 }
 
@@ -24182,6 +24211,11 @@ function applyPreviewPrices(
     out = out
       .replace(/\{\{\s*ENLACES\s*\}\}/gi, "[los enlaces de lo que ya se le entregó]")
       .replace(/\{\{\s*MATERIAL\s*\}\}/gi, "[el material que ya se le entregó]");
+    // SIN PRECIO EN ESTE PAÍS (02/11/2026): el hueco, nunca «$ 0» — en ese país el bot no lo cobra.
+    const fp = context.productosDeLaFicha;
+    const porDefecto = fp.productos.find((x) => x.id === fp.idPorDefecto) ?? (fp.productos.length === 1 ? fp.productos[0] : undefined);
+    if (porDefecto && porDefecto.precio === null)
+      out = out.replace(/\{precio\}|\{price\}/gi, `[Sin precio en ${COUNTRY_OPTIONS.find((o) => o.code === fp.pais)?.label ?? fp.pais}]`);
   }
   // {{METODO_DE_PAGO_1/2/3}}: expande el texto POR PAÍS PRIMERO, para que sus
   // comodines internos ({{NOMBRE_RECEPTOR}}, {{PRECIO_SEGUN_ELECCION}}…) los
@@ -29365,6 +29399,7 @@ function VistaPizarra({
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
           onPais={onPaisDeLaVista}
+          paisDeLaBandera={herramientas?.paisDePago}
         />
       ) : (
       <>
@@ -31152,9 +31187,13 @@ function PantallaDelTableroCargada({
   onConfigChange,
   onSnapshot,
   onPais,
+  paisDeLaBandera,
 }: {
   /** Pone la bandera de abajo a la derecha en ese país (al tocar una ficha de su manta). */
   onPais?: (pais: string) => void;
+  /** LA BANDERA DE ABAJO A LA DERECHA (02/11/2026). Él: «al cambiar la bandera también el precio se respete». El
+   *  tablero tenía su propio país («Montos de») y la bandera no lo movía: ahora son el mismo, en los dos sentidos. */
+  paisDeLaBandera?: string;
   cfg: FullConfig;
   /** La tienda (su id) o un workflow (`wf:<id>`). */
   clave: string;
@@ -31196,7 +31235,10 @@ function PantallaDelTableroCargada({
   const [verCerebro, setVerCerebro] = useState(false);
   const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
-  const [paisVisto, setPaisVisto] = useState<string>("PE");
+  const [paisVisto, setPaisVisto] = useState<string>(paisDeLaBandera || "PE");
+  useEffect(() => {
+    if (paisDeLaBandera) setPaisVisto(paisDeLaBandera);
+  }, [paisDeLaBandera]);
   // EL BUSCADOR EN LA BARRA y el ☰ HERRAMIENTAS, como en la pizarra (24/10/2026).
   const [buscar, setBuscar] = useState("");
   const [eligiendoTienda, setEligiendoTienda] = useState(false);
@@ -31764,7 +31806,14 @@ function PantallaDelTableroCargada({
         {/* «Montos de», al lado del Cerebro (01/11/2026); el tema (claro/mixto/oscuro) pasó al ☰. */}
         <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
           Montos de
-          <select value={paisVisto} onChange={(e) => setPaisVisto(e.target.value)} className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta">
+          <select
+            value={paisVisto}
+            onChange={(e) => {
+              setPaisVisto(e.target.value);
+              onPais?.(e.target.value);
+            }}
+            className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta"
+          >
             {paises.map((p) => (
               <option key={p} value={p}>
                 {p}
