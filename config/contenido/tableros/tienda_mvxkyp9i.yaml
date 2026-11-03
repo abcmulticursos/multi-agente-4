@@ -5986,14 +5986,6 @@ whatsapp:
       de: f-mw0jsfij-a2nl1
       salida: sin_respuesta
       a: f-mw0jsfij-t32wg
-    - id: c-mw0jtjex-grr
-      de: f-mw0jfedf-qhjg
-      salida: rep:r2
-      a: f-mw0jibpv-r8x1r
-    - id: c-mw0jtpu9-hvx
-      de: f-mw0jfedf-qhjg
-      salida: rep:rmw0jtm38
-      a: f-mw0jsfii-3wipw
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -915
