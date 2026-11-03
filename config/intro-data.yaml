@@ -9316,6 +9316,10 @@ tiendas:
 
               🎁 *{¿Quieres recibir este Plus de manera gratuita?|¿Deseas descargar este Plus de manera gratuita?|¿Te gustaría descargar este Plus de manera gratuita?}* 😊
           delay_after_sec: 6
+        - type: text
+          body_variants:
+            - ""
+          delay_after_sec: 6
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
