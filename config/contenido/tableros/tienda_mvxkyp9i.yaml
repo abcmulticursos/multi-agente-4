@@ -3378,29 +3378,29 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              👋 *¡Hola, docente!* 😊 Somos el Equipo Oficial de Cocreando Online.
+              👋 *¡Hola, docente! *😊 Somos el equipo oficial de *AbcMulticlases*
 
-              ¿Te pasa que...?
+              *¿Te está ocurriendo con esto?*❓️
 
-              ⏰ Pasas horas preparando tus clases.
-              🔎 Buscas actividades en diferentes lugares.
-              📖 Tus estudiantes leen, pero no comprenden lo que leen.
-              😴 La gramática y la ortografía les parecen aburridas.
+              ⏰ Dedicas mucho tiempo a preparar tus clases.  😩
+              🔎 Buscas recursos en diferentes lugares. 
+              📖 *Tus alumnos leen, pero no comprenden.*  ?
+              😴 La gramática y ortografía les resultan aburridas. ?
 
-              Si te identificaste con alguno, esto es para ti 👇
+              *¡Si te sucede, esto es para ti!* 👇
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              Por eso creamos el
+              ✨ ¡Hemos preparado para ti!
               📚 *{{PRODUCTO_BASE}}*
 
-              Una colección digital con *más de 200 actividades, armables, plegables y recursos educativos* para enseñar Lengua de una manera mucho más visual, práctica y divertida. ✂️
+              Una colección digital con *más de 200 actividades y recursos educativos armables y plegables* para enseñar Lengua de forma visual, práctica y divertida. ✂️
 
-              💡Ideal para tus alumnos de primaria y secundaria.
+              💡 *Es Ideal para alumnos de primaria y secundaria.* 👍️
           delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/14eFG1JoDfFaoRBCYjQ9hV3TC0hS2RqCd/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1g_rq-JMzKvwbnZZd1FNhLecbTSbegPQ0/view?usp=sharing
           caption_variants:
             - ""
           delay_after_sec: 6
