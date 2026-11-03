@@ -3987,13 +3987,13 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw0b3q4d-ul2yb
       tipo: regalo
-      x: 2805
-      y: 1298
+      x: 1870
+      y: 1144
       titulo: Regalo
     - id: f-mw0b3q4d-jt3c4
       tipo: mensaje
-      x: 1639
-      y: 968
+      x: 1804
+      y: 649
       titulo: Upsell 1 -
       steps:
         - type: text
@@ -4479,24 +4479,14 @@ whatsapp:
       de: f-mw0b3q4d-13qbi
       salida: sin_pago
       a: f-mw0b3q4d-uq6nl
-    - id: c-mw0b3q4d-tzbbp
-      de: f-mw0b3q4d-kxj73
-      salida: siguiente
-      a: f-mw0b3q4d-jt3c4
-    - id: c-mw0b3q4d-420ti
-      de: f-mw0b3q4d-jt3c4
-      salida: sin_respuesta
-      a: f-mw0b3q4d-ul2yb
-      vista: cable
-    - id: c-mw0b3q4d-1733b
-      de: f-mw0b3q4d-jt3c4
-      salida: pagado
-      a: f-mw0b3q4d-ul2yb
-      vista: cable
     - id: c-mw0b41ob-n98
       de: inicio-mvveb83v-1
       salida: siguiente
       a: f-mw0b3q4c-sa0fo
+    - id: c-mw0ffgzm-kv1
+      de: f-mw0b3q4d-kxj73
+      salida: siguiente
+      a: f-mw0b3q4d-ul2yb
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -805
