@@ -31341,6 +31341,8 @@ function PantallaDelTableroCargada({
   const [verCerebro, setVerCerebro] = useState(false);
   const [gestor, setGestor] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<string | null>(null);
+  /** La entrega (su clave, «producto» o «producto#extra») abierta en su ventana desde los ajustes de una ficha Entregar. */
+  const [entregaEditando, setEntregaEditando] = useState<string | null>(null);
   const [paisVisto, setPaisVisto] = useState<string>(paisDeLaBandera || "PE");
   useEffect(() => {
     if (paisDeLaBandera) setPaisVisto(paisDeLaBandera);
@@ -32440,8 +32442,61 @@ function PantallaDelTableroCargada({
             setAjustes(null);
           }}
           onCerrar={() => setAjustes(null)}
+          onEditarEntrega={setEntregaEditando}
         />
       )}
+      {/* EDITAR LA ENTREGA AQUÍ MISMO (03/11/2026). Él: «un botón que abra el cuadro del texto de la entrega para no tener
+          que regresar a la ficha (del producto) y poder editarla ahí mismo en un pop up». Edita lo que el bot manda: la
+          entrega principal del producto (`delivery`) o esa entrega extra. Encima de los ajustes (z-[90]). */}
+      {entregaEditando &&
+        (() => {
+          const [pidCrudo, extraId] = entregaEditando.split("#");
+          const pid = conProductosDeLaTienda(pidCrudo, tienda?.alineacion as Record<string, unknown> | undefined) || pidCrudo;
+          const p = (cfg.biblioteca_de_productos ?? []).find((x) => x.id === pid);
+          if (!p) return null;
+          const extra = extraId ? (p.entregas_extra ?? []).find((e) => e.id === extraId) : undefined;
+          const pasos = ((extra ? extra.steps : p.delivery) ?? []) as EditorStep[];
+          const suyo = p.precios_por_pais?.[paisVisto as CountryCode] as { price_soles?: number; market_price?: number; discount_price_soles?: number } | undefined;
+          const positivo = (n: unknown) => (typeof n === "number" && n > 0 ? n : null);
+          return (
+            <div className="relative z-[90]">
+              <EnElTableroContext.Provider value={true}>
+                <ProductosDeLaFichaContext.Provider
+                  value={{
+                    productos: [{ id: p.id, name: p.name?.trim() || p.id, precio: positivo(suyo?.price_soles), antes: positivo(suyo?.market_price), oferta: positivo(suyo?.discount_price_soles) }],
+                    pais: paisVisto,
+                    idPorDefecto: p.id,
+                  }}
+                >
+                  <VentanaDelCajon
+                    key={entregaEditando}
+                    titulo={`📦 ${p.name?.trim() || "Entrega"} · ${extra ? extra.nombre || "Entrega extra" : "Lo que recibe al pagar"}`}
+                    steps={pasos}
+                    idPrefix={`tablero_entrega_${entregaEditando.replace(/[^a-z0-9]/gi, "_")}`}
+                    cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
+                    pais={paisVisto}
+                    onGuardar={(nuevos) => {
+                      onSnapshot();
+                      const c = vivoCfg.current;
+                      onConfigChange({
+                        ...c,
+                        biblioteca_de_productos: (c.biblioteca_de_productos ?? []).map((x) =>
+                          x.id !== p.id
+                            ? x
+                            : extra
+                              ? { ...x, entregas_extra: (x.entregas_extra ?? []).map((e) => (e.id === extra.id ? { ...e, steps: nuevos } : e)) }
+                              : { ...x, delivery: nuevos }
+                        ),
+                      });
+                      setEntregaEditando(null);
+                    }}
+                    onCerrar={() => setEntregaEditando(null)}
+                  />
+                </ProductosDeLaFichaContext.Provider>
+              </EnElTableroContext.Provider>
+            </div>
+          );
+        })()}
     </div>
   );
 }
@@ -33477,7 +33532,10 @@ function AjustesDeLaFicha({
   onGuardar,
   onCerrar,
   onAbrirPagos,
+  onEditarEntrega,
 }: {
+  /** «✏️ Editar»: abre el texto de esa entrega en su ventana, aquí mismo (03/11/2026). */
+  onEditarEntrega?: (clave: string) => void;
   /** La ficha va después de una Entrega: solo ahí se ofrece «⏳ Espera antes de salir». */
   despuesDeLaVenta?: boolean;
   /** Abre «Datos de pago por país» en ese país (los textos que el cobro manda por método). */
@@ -33686,6 +33744,16 @@ function AjustesDeLaFicha({
                             </optgroup>
                           ))}
                         </select>
+                        {clave && onEditarEntrega && (
+                          <button
+                            type="button"
+                            title="Abrir el texto de esta entrega para editarlo aquí mismo"
+                            onClick={() => onEditarEntrega(clave)}
+                            className="shrink-0 rounded-md border border-sky-300 bg-sky-50 px-2 py-1 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                          >
+                            ✏️ Editar
+                          </button>
+                        )}
                         {lista.length > 1 && (
                           <button
                             type="button"
