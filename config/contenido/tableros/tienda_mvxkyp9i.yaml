@@ -3475,21 +3475,21 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ✂️ Dentro del material encontrarás:
+              ✂️ *Dentro del material encontrarás:*
 
-              ⭐ Armables interactivos
-              ⭐ Plegables y minilibros educativos
-              ⭐ Crucigramas, pupiletras y sopas de letras
-              ⭐ Juegos y dinámicas para trabajar en equipo
+              ⭐ *Armables interactivos* 🧩
+              ⭐ Plegables y minilibros educativos 📘
+              ⭐ Crucigramas, pupiletras y sopas de letras 🔠
+              ⭐ Juegos y dinámicas para trabajar en equipo 🧮
               ⭐ Actividades listas para imprimir
               ⭐ Respuestas y explicación detallada de cada armable
 
               _Ideal para primaria y secundaria - bachilerato_
 
-              💡 Todo organizado para que tus estudiantes lean más, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤩
+              💡 *Todo organizado para que tus estudiantes lean má*s, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤗
           delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/1XyiZ-LT8K34JqlTc44c7iAac9bf3Olyh/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1zvAkLr-Up3d4ABZO6gHJePvXDQU6rA0m/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 6
