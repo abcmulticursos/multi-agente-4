@@ -356,7 +356,28 @@ const Contexto = createContext<{
   comoAgente: boolean;
   /** Las ofertas que vienen después de una Entrega (los upsells) y su número: 1, 2… Solo dibujo. */
   upsellDe: Record<string, number>;
+  /** EL CANAL DE ESTE TABLERO (03/11/2026, su conversación 256: conectó en Messenger y probó por WhatsApp). Su logo
+   *  va en cada estación y en el Inicio. Sin canal (un workflow, que vale para los tres), no se pone. Solo dibujo. */
+  canal?: "whatsapp" | "messenger" | "instagram";
 } | null>(null);
+
+/** El logo del canal en la esquina de abajo a la derecha (sus montajes «whatsapp.jpg», «MESSENGER.jpg», «INSTAGRAM.jpg»). */
+function LogoDelCanal({ tamano = 56 }: { tamano?: number }) {
+  const ctx = useContext(Contexto);
+  if (!ctx?.canal) return null;
+  const nombre = ctx.canal === "whatsapp" ? "WhatsApp" : ctx.canal === "messenger" ? "Messenger" : "Instagram";
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/tablero/canal-${ctx.canal}.png`}
+      alt={nombre}
+      title={`Tablero de ${nombre}`}
+      draggable={false}
+      className="pointer-events-auto absolute z-10 select-none rounded-2xl border-[3px] border-white bg-white object-cover shadow-lg"
+      style={{ width: tamano, height: tamano, right: -tamano / 3, bottom: -tamano / 3 }}
+    />
+  );
+}
 
 /** Un color fijo por persona para la etiqueta de su nombre (como en su dibujo: Melissa azul, Katty rosa…).
  *  Sin verdes ni turquesas (29/10/2026): se confundían con la franja verde del Inicio y con el Cobro. */
@@ -476,6 +497,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
       title={conectado ? undefined : "Desconectado: arrastra el punto naranja hasta la primera ficha de esta ruta."}
     >
       <QuienCobraEnElInicio pais={f.pais} />
+      <LogoDelCanal tamano={44} />
       <div className={`rounded-t-[10px] px-3 py-2 text-white ${color.banda}`}>
         <div className="text-sm font-bold">▶ Inicio</div>
         <div className="text-[11px] opacity-90">
@@ -1509,6 +1531,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaE
           } ${f.apagada ? "opacity-50" : ""} ${elegida ? "ring-4 ring-cyan-400" : ""}`}
           style={ctx.destacada === f.id ? { boxShadow: "0 0 0 5px #f59e0b, 0 0 22px 6px rgba(245,158,11,0.55)" } : undefined}
         >
+          <LogoDelCanal />
           {/* COPIAR Y TACHITO, ARRIBA A LA DERECHA (como Sendy, su captura del 03/11/2026). */}
           {soloLogo && (
             <span className="absolute -right-9 top-1 flex flex-col gap-1">
@@ -1765,7 +1788,10 @@ export default function LienzoDelTablero({
   onPlantillas,
   onGuardarPlantilla,
   enfocar,
+  canal,
 }: {
+  /** El canal de este tablero, para su logo en las estaciones y el Inicio. Sin él (workflow), no se pone. */
+  canal?: "whatsapp" | "messenger" | "instagram";
   /** Llevar la vista a estas fichas (las recién traídas de una plantilla). Cambia `vez` para repetirlo. */
   enfocar?: { ids: string[]; vez: number };
   /** «📋 Plantillas» del «+»: abre la ventana de plantillas; las fichas llegan alrededor de `centro`. */
@@ -2359,6 +2385,7 @@ export default function LienzoDelTablero({
       estaciones,
       comoAgente,
       upsellDe,
+      canal,
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -31226,9 +31226,9 @@ function tableroVacio(): TableroEnElEditor {
 
 type CanalDeTablero = "whatsapp" | "messenger" | "instagram";
 const CANALES_DE_TABLERO: Array<[CanalDeTablero, string]> = [
-  ["whatsapp", "🟢 WhatsApp"],
-  ["messenger", "🔵 Messenger"],
-  ["instagram", "🟣 Instagram"],
+  ["whatsapp", "WhatsApp"],
+  ["messenger", "Messenger"],
+  ["instagram", "Instagram"],
 ];
 
 function textoDeLaBurbuja(s: EditorStep | undefined): string {
@@ -31803,8 +31803,11 @@ function PantallaDelTableroCargada({
                 type="button"
                 aria-pressed={canal === c}
                 onClick={() => elegirCanal(c)}
-                className={`px-2.5 py-1 font-semibold ${canal === c ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-semibold ${canal === c ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
               >
+                {/* Su logo junto al nombre (03/11/2026). */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/tablero/canal-${c}.png`} alt="" className="h-[18px] w-[18px] rounded-[5px] bg-white object-cover" />
                 {nombre}
               </button>
             ))}
@@ -31947,6 +31950,7 @@ function PantallaDelTableroCargada({
       <div className="min-h-0 flex-1 overflow-hidden">
         <LienzoDelTablero
           key={`${clave}|${canal}`}
+          canal={esWorkflow ? undefined : canal}
           tablero={tablero}
           resumenDe={resumenDe}
           paisVisto={paisVisto}
