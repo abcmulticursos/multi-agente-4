@@ -7062,10 +7062,16 @@ export default function EditorPage() {
     // «/editor?vista=pizarra» (25/10/2026): el botón «🧭 Pizarra» del chat entra directo a la pizarra,
     // «sin pasar por el menú». Manda sobre lo recordado, y se recuerda.
     const pedida = new URLSearchParams(window.location.search).get("vista");
-    if (pedida === "pizarra" || pedida === "menus") {
-      setShowPizarraEstado(pedida === "pizarra");
+    if (pedida === "pizarra" || pedida === "menus" || pedida === "tablero") {
+      // «/editor?vista=tablero» (02/11/2026): el botón «🧩 Tablero» del chat entra directo al tablero de la última tienda;
+      // y «🧭 Pizarra», directo a su pizarra (antes abría la que hubiera quedado, a veces el tablero).
+      if (pedida !== "menus")
+        try {
+          localStorage.setItem("pizarra-pantalla", pedida);
+        } catch {}
+      setShowPizarraEstado(pedida !== "menus");
       try {
-        localStorage.setItem("editor-vista", pedida);
+        localStorage.setItem("editor-vista", pedida === "menus" ? "menus" : "pizarra");
       } catch {}
     } else
       try {
@@ -20939,6 +20945,22 @@ function BibliotecaDeProductos({
                     );
                   })()}
                 </span>
+                {/* EL PRECIO, GRANDE (02/11/2026, su montaje «precios»): el de este producto en el país de la bandera,
+                    y el de oferta al lado. Sin precio ahí, nada: lo dice el rótulo rojo. Solo se ve. */}
+                {(() => {
+                  const suyo = producto.precios_por_pais?.[pais] as { price_soles?: number; discount_price_soles?: number } | undefined;
+                  const normal = typeof suyo?.price_soles === "number" && suyo.price_soles > 0 ? suyo.price_soles : null;
+                  if (normal === null) return null;
+                  const oferta = typeof suyo?.discount_price_soles === "number" && suyo.discount_price_soles > 0 && suyo.discount_price_soles !== normal ? suyo.discount_price_soles : null;
+                  // Con el mismo formato que el visor («S/. 10», «$ 3,50», «$ 8.000»), sin la palabra de la moneda.
+                  const dinero = (n: number) => formatPreviewCurrencyAmount(n, pais, undefined, undefined, "off");
+                  return (
+                    <span className="flex shrink-0 items-baseline gap-2" title={`Precio en ${COUNTRY_OPTIONS.find((o) => o.code === pais)?.label ?? pais}`}>
+                      <span className="font-titulo text-2xl font-extrabold tracking-tight text-emerald-800">{dinero(normal)}</span>
+                      {oferta !== null && <span className="text-xs font-semibold text-tinta-suave">oferta {dinero(oferta)}</span>}
+                    </span>
+                  );
+                })()}
                 {/* AQUÍ IBA EL DESPLEGABLE DE LA ETIQUETA, Y SE RETIRA.
                     Repartir los puestos se hace arriba, en la alineación. Dos
                     sitios para la misma decisión acaban discrepando, y el día
@@ -29395,6 +29417,15 @@ function VistaPizarra({
             setWorkflowAbierto(null);
             irA("tiendas");
           }}
+          // DEL TABLERO A LA PIZARRA DE ESTA TIENDA (02/11/2026).
+          onPizarra={
+            workflowAbierto
+              ? undefined
+              : () => {
+                  setWorkflowAbierto(null);
+                  irA("pizarra");
+                }
+          }
           aplicar={aplicar}
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
@@ -29419,6 +29450,20 @@ function VistaPizarra({
           </select>
         ) : (
           <span className="text-xs text-tinta-suave">Sin tiendas</span>
+        )}
+        {/* DE LA PIZARRA AL TABLERO DE ESTA TIENDA (02/11/2026): «falta ese botón para cambiar de pizarra a tablero». */}
+        {tienda && (
+          <button
+            type="button"
+            onClick={() => {
+              setWorkflowAbierto(null);
+              irA("tablero");
+            }}
+            className="rounded-md border border-borde bg-relleno px-2.5 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
+            title="Abrir el tablero de esta tienda"
+          >
+            🧩 Tablero
+          </button>
         )}
         {/* LA SEMIMODALIDAD SE CAMBIA AQUÍ (16/10/2026): «dice COMO OB pero no puedo cambiarla».
             Es la misma de la tienda en menú ajustes → Tiendas, con su misma regla: pasar a
@@ -31188,7 +31233,10 @@ function PantallaDelTableroCargada({
   onSnapshot,
   onPais,
   paisDeLaBandera,
+  onPizarra,
 }: {
+  /** «🧭 Pizarra»: a la pizarra de esta tienda (02/11/2026). Sin ella (un workflow), no se ve el botón. */
+  onPizarra?: () => void;
   /** Pone la bandera de abajo a la derecha en ese país (al tocar una ficha de su manta). */
   onPais?: (pais: string) => void;
   /** LA BANDERA DE ABAJO A LA DERECHA (02/11/2026). Él: «al cambiar la bandera también el precio se respete». El
@@ -31802,6 +31850,17 @@ function PantallaDelTableroCargada({
               </span>
             </div>
           </VentanaFlotante>
+        )}
+        {/* DEL TABLERO A LA PIZARRA (02/11/2026): «falta ese botón para cambiar de pizarra a tablero». */}
+        {onPizarra && (
+          <button
+            type="button"
+            onClick={onPizarra}
+            className="rounded border border-borde bg-relleno px-2 py-1 text-[11px] font-semibold text-tinta hover:bg-tarjeta"
+            title="Abrir la pizarra de esta tienda"
+          >
+            🧭 Pizarra
+          </button>
         )}
         {/* «Montos de», al lado del Cerebro (01/11/2026); el tema (claro/mixto/oscuro) pasó al ☰. */}
         <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">

@@ -264,6 +264,12 @@ export default function DashboardHeader({
                 🧭 Pizarra
               </Link>
               <Link
+                href="/editor?vista=tablero"
+                className="block border-t border-neutral-100 px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
+              >
+                🧩 Tablero
+              </Link>
+              <Link
                 href="/meta-connect"
                 className="block border-t border-neutral-100 px-4 py-3 text-sm text-blue-700 hover:bg-neutral-50"
               >
@@ -356,6 +362,14 @@ export default function DashboardHeader({
           title="Abrir la pizarra (y desde ahí, el tablero de cada tienda)"
         >
           🧭 Pizarra
+        </Link>
+        {/* DIRECTO AL TABLERO (02/11/2026): «hay un botón que me lleva a la pizarra, pero falta para ir al tablero». */}
+        <Link
+          href="/editor?vista=tablero"
+          className="rounded-md border border-neutral-200 bg-tarjeta px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50"
+          title="Abrir el tablero de la última tienda"
+        >
+          🧩 Tablero
         </Link>
         <Link
           href="/meta-connect"
