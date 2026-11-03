@@ -10683,15 +10683,32 @@ export default function EditorPage() {
             >
               Ver recorrido <span className="opacity-60">· W</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setShowPizarra(true)}
-              disabled={!cfg}
-              title="Ver la tienda como piezas y cables: qué intro, intro de order bump y seguimiento le sale a cada país"
-              className="rounded-lg border border-acento/50 bg-acento-suave px-3 py-2 text-xs font-semibold text-acento hover:opacity-80 disabled:opacity-40"
-            >
-              Pizarra
-            </button>
+            {/* 🧭 PIZARRA · 🧩 TABLERO (02/11/2026). Él: «está muy difícil identificar si estoy en pizarra o en tablero… debería
+                ser tan simple como presionar un botón». Los mismos dos, con sus colores, en los menús, en la pizarra y en el chat. */}
+            <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Abrir la pizarra o el tablero">
+              {(
+                [
+                  ["pizarra", "🧭 Pizarra", "Ver la tienda como piezas y cables: qué intro, intro de order bump y seguimiento le sale a cada país", "text-sky-700 hover:bg-sky-50"],
+                  ["tablero", "🧩 Tablero", "La ruta que tú armas con fichas y cables, y que el bot sigue", "text-emerald-700 hover:bg-emerald-50"],
+                ] as const
+              ).map(([pantalla, nombre, ayuda, color]) => (
+                <button
+                  key={pantalla}
+                  type="button"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("pizarra-pantalla", pantalla);
+                    } catch {}
+                    setShowPizarra(true);
+                  }}
+                  disabled={!cfg}
+                  title={ayuda}
+                  className={`bg-tarjeta px-3 py-2 font-semibold disabled:opacity-40 ${color}`}
+                >
+                  {nombre}
+                </button>
+              ))}
+            </span>
             <button
               type="button"
               onClick={() => setFocusMode(true)}
@@ -29387,8 +29404,32 @@ function VistaPizarra({
           <button type="button" onClick={onClose} className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno">
             ☰ Menús
           </button>
-          <button type="button" aria-pressed className="bg-carbon-fuerte px-3 py-1.5 font-semibold text-white">
-            ◈ Pizarra
+          {/* 🧭 PIZARRA · 🧩 TABLERO (02/11/2026): el de donde estás, encendido en su color (azul / verde); un clic en el
+              otro te cambia, en la misma tienda. */}
+          <button
+            type="button"
+            aria-pressed={pantalla !== "tablero"}
+            onClick={() => {
+              setWorkflowAbierto(null);
+              if (pantalla === "tablero") irA(tiendaId ? "pizarra" : "tiendas");
+            }}
+            title="La pizarra de esta tienda"
+            className={`px-3 py-1.5 font-semibold ${pantalla !== "tablero" ? "bg-sky-600 text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+          >
+            🧭 Pizarra
+          </button>
+          <button
+            type="button"
+            aria-pressed={pantalla === "tablero"}
+            onClick={() => {
+              if (pantalla === "tablero") return;
+              setWorkflowAbierto(null);
+              irA("tablero");
+            }}
+            title="El tablero de esta tienda"
+            className={`px-3 py-1.5 font-semibold ${pantalla === "tablero" ? "bg-emerald-600 text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+          >
+            🧩 Tablero
           </button>
         </span>
         <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Modo del editor">
@@ -29452,15 +29493,6 @@ function VistaPizarra({
             setWorkflowAbierto(null);
             irA("tiendas");
           }}
-          // DEL TABLERO A LA PIZARRA DE ESTA TIENDA (02/11/2026).
-          onPizarra={
-            workflowAbierto
-              ? undefined
-              : () => {
-                  setWorkflowAbierto(null);
-                  irA("pizarra");
-                }
-          }
           aplicar={aplicar}
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
@@ -29485,20 +29517,6 @@ function VistaPizarra({
           </select>
         ) : (
           <span className="text-xs text-tinta-suave">Sin tiendas</span>
-        )}
-        {/* DE LA PIZARRA AL TABLERO DE ESTA TIENDA (02/11/2026): «falta ese botón para cambiar de pizarra a tablero». */}
-        {tienda && (
-          <button
-            type="button"
-            onClick={() => {
-              setWorkflowAbierto(null);
-              irA("tablero");
-            }}
-            className="rounded-md border border-borde bg-relleno px-2.5 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
-            title="Abrir el tablero de esta tienda"
-          >
-            🧩 Tablero
-          </button>
         )}
         {/* LA SEMIMODALIDAD SE CAMBIA AQUÍ (16/10/2026): «dice COMO OB pero no puedo cambiarla».
             Es la misma de la tienda en menú ajustes → Tiendas, con su misma regla: pasar a
@@ -31268,10 +31286,7 @@ function PantallaDelTableroCargada({
   onSnapshot,
   onPais,
   paisDeLaBandera,
-  onPizarra,
 }: {
-  /** «🧭 Pizarra»: a la pizarra de esta tienda (02/11/2026). Sin ella (un workflow), no se ve el botón. */
-  onPizarra?: () => void;
   /** Pone la bandera de abajo a la derecha en ese país (al tocar una ficha de su manta). */
   onPais?: (pais: string) => void;
   /** LA BANDERA DE ABAJO A LA DERECHA (02/11/2026). Él: «al cambiar la bandera también el precio se respete». El
@@ -31885,17 +31900,6 @@ function PantallaDelTableroCargada({
               </span>
             </div>
           </VentanaFlotante>
-        )}
-        {/* DEL TABLERO A LA PIZARRA (02/11/2026): «falta ese botón para cambiar de pizarra a tablero». */}
-        {onPizarra && (
-          <button
-            type="button"
-            onClick={onPizarra}
-            className="rounded border border-borde bg-relleno px-2 py-1 text-[11px] font-semibold text-tinta hover:bg-tarjeta"
-            title="Abrir la pizarra de esta tienda"
-          >
-            🧭 Pizarra
-          </button>
         )}
         {/* «Montos de», al lado del Cerebro (01/11/2026); el tema (claro/mixto/oscuro) pasó al ☰. */}
         <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
@@ -34213,7 +34217,7 @@ function MisTiendas({
                   onClick={() => onAbrir(t.id)}
                   className="rounded-md border border-borde bg-relleno px-3 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
                 >
-                  ◈ Abrir pizarra
+                  🧭 Pizarra
                 </button>
                 {onTablero &&
                   (() => {

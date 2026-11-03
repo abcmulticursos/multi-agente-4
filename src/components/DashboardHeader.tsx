@@ -255,7 +255,7 @@ export default function DashboardHeader({
                 href="/editor"
                 className="block px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50"
               >
-                🧩 Editor
+                ✏️ Editor
               </Link>
               <Link
                 href="/editor?vista=pizarra"
@@ -353,13 +353,14 @@ export default function DashboardHeader({
           className="rounded-md border border-neutral-200 bg-tarjeta px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50"
           title="Editor de flujo"
         >
-          🧩 Editor
+          ✏️ Editor
         </Link>
         {/* DIRECTO A LA PIZARRA (25/10/2026): «que la pizarra se abra sin pasar por el menú». */}
         <Link
           href="/editor?vista=pizarra"
           className="rounded-md border border-neutral-200 bg-tarjeta px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50"
           title="Abrir la pizarra (y desde ahí, el tablero de cada tienda)"
+          style={{ color: "#0369a1", borderColor: "#7dd3fc" }}
         >
           🧭 Pizarra
         </Link>
@@ -368,6 +369,7 @@ export default function DashboardHeader({
           href="/editor?vista=tablero"
           className="rounded-md border border-neutral-200 bg-tarjeta px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50"
           title="Abrir el tablero de la última tienda"
+          style={{ color: "#047857", borderColor: "#6ee7b7" }}
         >
           🧩 Tablero
         </Link>
