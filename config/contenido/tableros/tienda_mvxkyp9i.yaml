@@ -3378,26 +3378,26 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              👋 *¡Hola, docente! *😊 Somos el equipo oficial de *AbcMulticlases*
+              {👋 *¡Hola, docente!|👋 *¡Hola, maestro!*|👋 *¡Buen día, docente!*|👋 *¡Saludos, maestro/a!*} *😊 Somos el equipo oficial de *AbcMulticlases*
 
-              *¿Te está ocurriendo con esto?*❓️
+              {*¿Te está ocurriendo con esto?*❓️|*¿Te está pasando esto?*❓️|*¿Estás viviendo esta situación?*❓️|*¿Te identificas con esto?*❓️}
 
               ⏰ Dedicas mucho tiempo a preparar tus clases.  😩
               🔎 Buscas recursos en diferentes lugares. 
               📖 *Tus alumnos leen, pero no comprenden.*  ?
               😴 La gramática y ortografía les resultan aburridas. ?
 
-              *¡Si te sucede, esto es para ti!* 👇
+              {*¡Si te sucede, esto es para ti!*|*¡Si te pasa, esto es para ti!*|*¡Si te identificas, esto es para ti!*|*¡Si es tu caso, esto es para ti!*} 👇
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              ✨ ¡Hemos preparado para ti!
+              {✨ ¡Hemos preparado para ti!|✨ ¡Hemos creado algo especial para tí!|✨ ¡Hemos hecho algo pensado en ti!|✨ ¡Tenemos preparado algo especial para tí!}
               📚 *{{PRODUCTO_BASE}}*
 
               Una colección digital con *más de 200 actividades y recursos educativos armables y plegables* para enseñar Lengua de forma visual, práctica y divertida. ✂️
 
-              💡 *Es Ideal para alumnos de primaria y secundaria.* 👍️
+              {💡 *Es Ideal para alumnos de primaria y secundaria.*|💡 *Funciona perfecto para chicos de primaria y secundaria.*|💡 *Es perfecto para estudiantes de primaria y secundaria.*|💡 *Está pensado para alumnos de primaria y secundaria.*} 👍️
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1g_rq-JMzKvwbnZZd1FNhLecbTSbegPQ0/view?usp=sharing
@@ -3407,7 +3407,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              📚 *¿Qué incluye el Megapack?*
+              {📚 *¿Qué incluye el Megapack?*|📚 *¿Qué trae el Megapack?*|📚 *¿Qué encontrarás dentro del Megapack?*|📚 *¿Qué contiene el Megapack?*}
               _6 KITS COMPLETOS_
 
               📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
@@ -3437,12 +3437,12 @@ whatsapp:
               ✅ Subrayado, esquemas y mapas conceptuales
               ✅ Infografías, tablas y gráficos
               ✅ Hechos, opiniones y argumentos
-              ✅ Lectura crítica y fuentes confiables
+              {✅ Lectura crítica y fuentes confiables|✅ Análisis crítico de textos y fuentes fiables|✅ Lectura crítica y fuentes de confianza|✅ Pensamiento crítico al leer y fuentes seguras}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*
+              {📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*|📝 *KIT 4: PRODUCCIÓN Y ESCRITURA DE TEXTOS*}
               ✅ Párrafos con coherencia y cohesión
               ✅ Conectores
               ✅ Planificar, redactar y corregir
@@ -3469,13 +3469,13 @@ whatsapp:
               ✅ Escucha activa y diálogo
               ✅ Exposición oral
               ✅ Entrevista y debate
-              ✅ Narración y dramatización
-              ✅ Publicidad y ciudadanía digital
+              {✅ Narración y dramatización|✅ Contar historias y actuar|✅ Relato y representación dramática|✅ Narrar y dramatizar}
+              {✅ Publicidad y ciudadanía digital|✅ Publicidad y ciudadanía en el mundo digital|✅ Publicidad y participación digital responsable|✅ Publicidad y ciudadanía en entornos digitales}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              ✂️ *Dentro del material encontrarás:*
+              {✂️ *Dentro del material encontrarás:*|✂️ *Esto es lo que incluye el material:*|✂️ *El material trae consigo:*|✂️ *Lo que vas a encontrar en el material es:*}
 
               ⭐ *Armables interactivos* 🧩
               ⭐ Plegables y minilibros educativos 📘
@@ -3484,7 +3484,7 @@ whatsapp:
               ⭐ Actividades listas para imprimir
               ⭐ Respuestas y explicación detallada de cada armable
 
-              _Ideal para primaria y secundaria - bachilerato_
+              {_Ideal para primaria y secundaria - bachilerato_|_Perfecto para nivel primario y secundario - bachillerato_|_Recomendado para primaria y secundaria - bachillerato_|_Pensado para alumnos de primaria y secundaria - bachillerato_}
 
               💡 *Todo organizado para que tus estudiantes lean má*s, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤗
           delay_after_sec: 6
@@ -3496,7 +3496,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS! ⚡✨
+              {¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS!|¡Al comprar COMUNICACIÓN Y LITERATURA EN ACCIÓN hoy mismo, te llevas 2 regalos especiales GRATIS!|¡Y si adquieres hoy con COMUNICACIÓN Y LITERATURA EN ACCIÓN, recibes 2 regalos especiales GRATIS!|¡Y si compras hoy COMUNICACIÓN Y LITERATURA EN ACCIÓN, te llevas 2 obsequios especiales GRATIS!} ⚡✨
 
               🎁 *BONO 1 · BANCO DE LECTURAS CON COMPRENSIÓN*
 
@@ -3509,7 +3509,7 @@ whatsapp:
               ✅ 60 dinámicas sin materiales y 42 con recursos listos para imprimir.
               📚 Trabaja gramática, ortografía, comprensión lectora, escritura creativa, literatura y oralidad.
 
-              ⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*
+              {⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*|⚡ *Trae juegos, debates y retos creativos con instrucciones sencillas de aplicar.*|⚡ *Contiene juegos, debates y desafíos creativos con instrucciones fáciles de seguir.*|⚡ *Incluye juegos, debates y retos creativos con indicaciones simples de aplicar.*}
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1Un4DRrcsCFyZaPxfHEd2kBacSFSVkSvR/view?usp=drive_link
@@ -3519,7 +3519,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Docente*: 🙋‍♀️
+              {*Docente*: 🙋‍♀️|*Profesor/a*: 🙋‍♀️|*Maestro/a*: 🙋‍♀️}
 
               *Esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO* 📚✨
 
@@ -3534,7 +3534,7 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
 
-              quedo atento!
+              {quedo atento!|¡quedo al pendiente!|estoy atento a tu respuesta}
           delay_after_sec: 6
           decisions:
             - id: d-mw0b3q4c-5fgs3
