@@ -1389,8 +1389,13 @@ function placeholderOptionsFromConfig(cfg: FullConfig | null): PlaceholderOption
  * fuera de una ventana, el punto de siempre.
  */
 function sinElZoom(evento: { clientX: number; clientY: number; currentTarget: EventTarget | null }): { x: number; y: number } {
-  const ventana = evento.currentTarget instanceof Element ? evento.currentTarget.closest(".burbujas-nuevo") : null;
-  const z = ventana ? Number.parseFloat(getComputedStyle(ventana).zoom) || 1 : 1;
+  // El zoom de verdad es el de todas las ventanas que lo envuelven, multiplicados.
+  let z = 1;
+  let el = evento.currentTarget instanceof Element ? evento.currentTarget.closest(".burbujas-nuevo") : null;
+  while (el) {
+    z *= Number.parseFloat(getComputedStyle(el).zoom) || 1;
+    el = el.parentElement?.closest(".burbujas-nuevo") ?? null;
+  }
   return { x: evento.clientX / z, y: evento.clientY / z };
 }
 
@@ -37454,15 +37459,29 @@ function JourneyStepEditorModal({
           cajón entero. La columna de la derecha se queda en 420 px: el visor es
           un teléfono, y un teléfono ancho enseña unos renglones que al cliente
           no le van a llegar así. Lo que crece es el sitio donde se escribe. */}
-      <div className="flex max-h-[92vh] w-full max-w-[1050px] flex-col overflow-hidden rounded-lg bg-tarjeta shadow-2xl">
-        <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
-          <div><h3 className="text-sm font-bold text-neutral-900">Editar esta burbuja</h3><p className="text-xs text-neutral-500">{title}</p></div>
+      {/* EL MISMO DISEÑO QUE LA VENTANA DE LAS BURBUJAS DE LA FICHA (02/11/2026). Él: «que tenga el mismo estilo visual,
+          ancho, color, tamaño… tiene el visor muy angosto». Mismo ancho (max-w-6xl), su cabecera y dos columnas iguales. */}
+      <div className="burbujas-nuevo prolijo flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/tablero/agente.png" alt="" className="bn-avatar hidden" />
+          <svg className="bn-avatar-linea hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5A8.5 8.5 0 1 1 21 11.5z" />
+            <path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01" strokeWidth="2.4" />
+          </svg>
+          <div className="min-w-0 flex-1">
+            <h3 className="bn-titulo text-sm font-bold text-neutral-900">Editar esta burbuja</h3>
+            <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">{title}</p>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] text-neutral-500 sm:inline">
+            <span className="bn-nota hidden text-[11px] text-neutral-500 sm:inline">
               Escape o Cancelar = descartar
             </span>
-            <button type="button" onClick={onClose} className="rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Cancelar</button>
-            <button type="button" onClick={aplicarYCerrar} className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Guardar</button>
+            <button type="button" onClick={onClose} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Cancelar</button>
+            <button type="button" onClick={aplicarYCerrar} className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+              Listo
+              <IconoDeBurbuja nombre="listo" />
+            </button>
           </div>
         </div>
         {/* CADA COLUMNA CON SU PROPIO DESPLAZAMIENTO.
@@ -37470,7 +37489,7 @@ function JourneyStepEditorModal({
             editor había que arrastrar también el visor, y el visor se iba de la
             pantalla justo cuando hacía falta mirarlo.
             Ahora la izquierda tiene su barra y el visor se queda quieto. */}
-        <div className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)]">
+        <div className="bn-cuerpo grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-2">
           <div className="min-h-0 overflow-y-auto pr-2">
             {/* EL MISMO CAJÓN QUE EN LA LISTA, NO UNA COPIA.
                 Aquí había un editor hecho a mano con cuatro campos: tipo,
@@ -37565,7 +37584,7 @@ function JourneyStepEditorModal({
               mismo teléfono se veía de dos tamaños según se editara dentro o
               fuera de la ventana. Es un teléfono: mide lo que mide en todas
               partes. */}
-          <div className="min-h-0 overflow-y-auto lg:border-l lg:border-neutral-200 lg:pl-4">
+          <div className="bn-columna-visor min-h-0 overflow-y-auto lg:border-l lg:border-neutral-200 lg:pl-4">
             <ChatPreview steps={[step]} previewRolls={{ 0: tirada }} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewPriceOverride={previewPriceOverride} previewComboPriceOverride={previewComboPriceOverride} previewBasicoPriceOverride={previewBasicoPriceOverride} previewContext={previewContext} highlightPlaceholders />
           </div>
         </div>
@@ -46688,15 +46707,19 @@ function GiftTextEditorModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-3xl overflow-hidden rounded-lg bg-tarjeta shadow-2xl">
-        <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
-          <div>
-            <h3 className="text-sm font-bold text-neutral-900">Editar esta burbuja</h3>
-            <p className="text-xs text-neutral-500">{label}</p>
+      {/* (02/11/2026: el mismo diseño y ancho que la ventana de las burbujas de la ficha.) */}
+      <div className="burbujas-nuevo prolijo w-full max-w-6xl overflow-hidden rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="bn-titulo text-sm font-bold text-neutral-900">Editar esta burbuja</h3>
+            <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">{label}</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">Listo</button>
+          <button type="button" onClick={onClose} className="bn-listo rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
+            Listo
+            <IconoDeBurbuja nombre="listo" />
+          </button>
         </div>
-        <div className="grid max-h-[75vh] gap-4 overflow-y-auto p-4 lg:grid-cols-2">
+        <div className="bn-cuerpo grid max-h-[75vh] gap-4 overflow-y-auto p-4 lg:grid-cols-2">
           <EditorEmojiTextarea value={value} onChange={onChange} rows={10} className="rounded border border-neutral-300 bg-tarjeta px-3 py-2 text-sm" />
           <ChatPreview steps={[textStep(value)]} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewContext={previewContext} highlightPlaceholders />
         </div>

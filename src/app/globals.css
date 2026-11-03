@@ -1314,6 +1314,10 @@ input,
 .burbujas-nuevo.burbujas-nuevo {
   zoom: 0.9;
 }
+/* Una ventana abierta DENTRO de otra («Editar esta burbuja») no se achica dos veces. */
+.burbujas-nuevo .burbujas-nuevo.burbujas-nuevo {
+  zoom: 1;
+}
 
 /* LAS VENTANAS EN OSCURO, AZUL MARINO TAMBIÉN POR DENTRO (02/11/2026: «que tenga coherencia»). El `.prolijo` del 🌙 de la
    pizarra pone el negro de Sendy en sus cajas, y dentro del marco azul marino quedaba mezclado: aquí, el azul de la ventana. */
