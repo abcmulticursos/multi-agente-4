@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -1628
-      y: 726
+      x: -1969
+      y: 2068
       pais: PE
     - id: f-mvvfznys-u8svs
       tipo: mensaje
@@ -4070,13 +4070,1411 @@ whatsapp:
       espera_min: 2
     - id: f-mw0jfedf-qhjg
       tipo: reparto
-      x: -1177
-      y: 924
+      x: -1529
+      y: 2090
       reparto:
         - id: r1
           peso: 1
         - id: r2
           peso: 1
+        - id: rmw0jtm38
+          peso: 1
+    - id: f-mw0jibpv-r8x1r
+      tipo: mensaje
+      x: -693
+      y: 2046
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              {👋 *¡Hola, docente!|👋 *¡Hola, maestro!*|👋 *¡Buen día, docente!*|👋 *¡Saludos, maestro/a!*} *😊 Somos el equipo oficial de *AbcMulticlases*
+
+              {*¿Te está ocurriendo con esto?*❓️|*¿Te está pasando esto?*❓️|*¿Estás viviendo esta situación?*❓️|*¿Te identificas con esto?*❓️}
+
+              ⏰ Dedicas mucho tiempo a preparar tus clases.  😩
+              🔎 Buscas recursos en diferentes lugares. 
+              📖 *Tus alumnos leen, pero no comprenden.*  ?
+              😴 La gramática y ortografía les resultan aburridas. ?
+
+              {*¡Si te sucede, esto es para ti!*|*¡Si te pasa, esto es para ti!*|*¡Si te identificas, esto es para ti!*|*¡Si es tu caso, esto es para ti!*} 👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {✨ ¡Hemos preparado para ti!|✨ ¡Hemos creado algo especial para tí!|✨ ¡Hemos hecho algo pensado en ti!|✨ ¡Tenemos preparado algo especial para tí!}
+              📚 *{{PRODUCTO_BASE}}*
+
+              Una colección digital con *más de 200 actividades y recursos educativos armables y plegables* para enseñar Lengua de forma visual, práctica y divertida. ✂️
+
+              {💡 *Es Ideal para alumnos de primaria y secundaria.*|💡 *Funciona perfecto para chicos de primaria y secundaria.*|💡 *Es perfecto para estudiantes de primaria y secundaria.*|💡 *Está pensado para alumnos de primaria y secundaria.*} 👍️
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1g_rq-JMzKvwbnZZd1FNhLecbTSbegPQ0/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {📚 *¿Qué incluye el Megapack?*|📚 *¿Qué trae el Megapack?*|📚 *¿Qué encontrarás dentro del Megapack?*|📚 *¿Qué contiene el Megapack?*}
+              _6 KITS COMPLETOS_
+
+              📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
+              ✅ Adjetivos y determinantes
+              ✅ Pronombres
+              ✅ Verbos: tiempos, modos y conjugación
+              ✅ Adverbios, preposiciones y conjunciones
+              ✅ Sujeto y predicado
+              ✅ Tipos de oraciones
+              ✅ Análisis morfológico y sintáctico
+
+              ✏️ *KIT 2: ORTOGRAFÍA Y VOCABULARIO*
+              ✅ Agudas, graves y esdrújulas
+              ✅ Tilde diacrítica, diptongo e hiato
+              ✅ B/V, C/S/Z, G/J, H, LL/Y, R/RR
+              ✅ Signos de puntuación
+              ✅ Mayúsculas
+              ✅ Sinónimos, antónimos, homónimos y parónimos
+              ✅ Prefijos, sufijos y familias de palabras
+              ✅ Polisemia y sentido figurado
+
+              📖 *KIT 3: COMPRENSIÓN LECTORA*
+              ✅ Antes, durante y después de leer
+              ✅ Idea principal, tema y resumen
+              ✅ Comprensión literal e inferencial
+              ✅ Secuencia, causa y consecuencia
+              ✅ Subrayado, esquemas y mapas conceptuales
+              ✅ Infografías, tablas y gráficos
+              ✅ Hechos, opiniones y argumentos
+              {✅ Lectura crítica y fuentes confiables|✅ Análisis crítico de textos y fuentes fiables|✅ Lectura crítica y fuentes de confianza|✅ Pensamiento crítico al leer y fuentes seguras}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*|📝 *KIT 4: PRODUCCIÓN Y ESCRITURA DE TEXTOS*}
+              ✅ Párrafos con coherencia y cohesión
+              ✅ Conectores
+              ✅ Planificar, redactar y corregir
+              ✅ Cuentos y descripciones
+              ✅ Informes e instructivos
+              ✅ Ensayos, reseñas y argumentación
+              ✅ Textos periodísticos
+              ✅ Historietas, diálogos y guiones
+
+              🎭 *KIT 5: LITERATURA EN ACCIÓN*
+              ✅ Géneros literarios
+              ✅ Cuento, novela, fábula, mito y leyenda
+              ✅ Narrador, personajes, tiempo y espacio
+              ✅ Poesía: verso, estrofa y rima
+              ✅ Figuras literarias
+              ✅ Teatro: actos, escenas y acotaciones
+              ✅ Literatura latinoamericana 
+              ✅ Análisis y creación literaria
+
+              🗣️ *KIT 6: COMUNICACIÓN Y EXPRESIÓN ORAL*
+              ✅ Elementos de la comunicación
+              ✅ Comunicación verbal y no verbal
+              ✅ Registros y variedades del lenguaje
+              ✅ Escucha activa y diálogo
+              ✅ Exposición oral
+              ✅ Entrevista y debate
+              {✅ Narración y dramatización|✅ Contar historias y actuar|✅ Relato y representación dramática|✅ Narrar y dramatizar}
+              {✅ Publicidad y ciudadanía digital|✅ Publicidad y ciudadanía en el mundo digital|✅ Publicidad y participación digital responsable|✅ Publicidad y ciudadanía en entornos digitales}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {✂️ *Dentro del material encontrarás:*|✂️ *Esto es lo que incluye el material:*|✂️ *El material trae consigo:*|✂️ *Lo que vas a encontrar en el material es:*}
+
+              ⭐ *Armables interactivos* 🧩
+              ⭐ Plegables y minilibros educativos 📘
+              ⭐ Crucigramas, pupiletras y sopas de letras 🔠
+              ⭐ Juegos y dinámicas para trabajar en equipo 🧮
+              ⭐ Actividades listas para imprimir
+              ⭐ Respuestas y explicación detallada de cada armable
+
+              {_Ideal para primaria y secundaria - bachilerato_|_Perfecto para nivel primario y secundario - bachillerato_|_Recomendado para primaria y secundaria - bachillerato_|_Pensado para alumnos de primaria y secundaria - bachillerato_}
+
+              💡 *Todo organizado para que tus estudiantes lean má*s, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤗
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1zvAkLr-Up3d4ABZO6gHJePvXDQU6rA0m/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS!|¡Al comprar COMUNICACIÓN Y LITERATURA EN ACCIÓN hoy mismo, te llevas 2 regalos especiales GRATIS!|¡Y si adquieres hoy con COMUNICACIÓN Y LITERATURA EN ACCIÓN, recibes 2 regalos especiales GRATIS!|¡Y si compras hoy COMUNICACIÓN Y LITERATURA EN ACCIÓN, te llevas 2 obsequios especiales GRATIS!} ⚡✨
+
+              🎁 *BONO 1 · BANCO DE LECTURAS CON COMPRENSIÓN*
+
+              📚 40 lecturas listas para imprimir, organizadas en 4 niveles de dificultad.
+              👉 Ideal para tareas, evaluaciones y reforzar la comprensión lectora.
+
+              🎁 *BONO 2 · +100 DINÁMICAS DE LECTURA Y ESCRITURA*
+
+              🎯 102 actividades dinámicas para estudiantes de 10 a 15 años.
+              ✅ 60 dinámicas sin materiales y 42 con recursos listos para imprimir.
+              📚 Trabaja gramática, ortografía, comprensión lectora, escritura creativa, literatura y oralidad.
+
+              {⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*|⚡ *Trae juegos, debates y retos creativos con instrucciones sencillas de aplicar.*|⚡ *Contiene juegos, debates y desafíos creativos con instrucciones fáciles de seguir.*|⚡ *Incluye juegos, debates y retos creativos con indicaciones simples de aplicar.*}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1Un4DRrcsCFyZaPxfHEd2kBacSFSVkSvR/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {*Docente*: 🙋‍♀️|*Profesor/a*: 🙋‍♀️|*Maestro/a*: 🙋‍♀️}
+
+              *Esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO* 📚✨
+
+              📚 6 kits completos 😱
+              🎁 +2 regalos especiales
+
+              📥 *Todo en formato PDF*, listo para descargar e imprimir
+
+              🔥 *TODO POR SOLO {{PRECIO_BASE}}*
+
+              💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              {quedo atento!|¡quedo al pendiente!|estoy atento a tu respuesta}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mw0jibpw-vrgm3
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+                - esta bien
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-9usao
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+                - esta bien
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-8wwll
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-azcbq
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1rddsLec7-ps4O9KSfiJn6kiVT_qORokC/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE {{PRODUCTO_BASE}}*! 😍
+
+              Cada vez más docentes buscan transformar sus clases de Español con recursos visuales, prácticos y fáciles de utilizar.
+
+              💙 Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+              Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~precio original $ 15 Dólares~
+              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mw0jibpw-mccv5
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+                - esta bien
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-mleqo
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+                - esta bien
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-4rxty
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jibpw-96zzs
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+          enabled: false
+      presenta:
+        - "@tienda:basico"
+    - id: f-mw0jibpw-jybud
+      tipo: seguimientos
+      x: -429
+      y: 1705
+      seguimientos:
+        - id: s-mw0jibpw-fbs7o
+          minutos: 2
+          variantes:
+            - id: v-mw0jibpw-hoha2
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1gMo6W6896k6qhgKbJ117If0LfEm7NYf8/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡{MIRA LO QUE OPINAN|DESCUBRE LO QUE DICEN|CONOCE LAS OPINIONES} SOBRE *COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      *Cada vez más docentes buscan transformar sus clases de Español con recursos visuales*, prácticos y fáciles de utilizar.
+
+                      💙 *Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir*, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      *{Quedo atenta|Estoy pendiente|Aquí estaré} si tienes {alguna duda|cualquier consulta|alguna pregunta}*, por aquí te ayudo con {mucho gusto|confianza|todo gusto} 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mw0jibpw-n0e91
+          minutos: 5
+          variantes:
+            - id: v-mw0jibpw-r3lta
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *{{PRECIO_BASE}}*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mw0jibpw-oyhc3
+      tipo: cobro
+      x: 220
+      y: 2101
+      steps:
+        - type: text
+          body_variants:
+            - ✅ {Genial, puedes adquirir el Curso de la siguiente Manera|Perfecto, puedes llevar el curso a través de estos datos|Excelente, puedes adquirir el Curso de esta forma|Genial, puedes obtener el Curso de la siguiente manera} 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato|*Después nos mandas una foto de tu comprobante* para confirmar tu pago y darte acceso al instante|*Seguidamente nos compartes una imagen de tu comprobante* para corroborar tu pago y darte acceso ya mismo} 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+    - id: f-mw0jibpw-ltjf8
+      tipo: entregar
+      x: 1089
+      y: 2112
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mw0jibpw-rxv73
+      tipo: seguimientos
+      x: 495
+      y: 1694
+      seguimientos:
+        - id: s-mw0jibpw-rzry7
+          minutos: 2
+          variantes:
+            - id: v-mw0jibpw-8muxn
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1gMo6W6896k6qhgKbJ117If0LfEm7NYf8/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡{MIRA LO QUE OPINAN|DESCUBRE LO QUE DICEN|CONOCE LAS OPINIONES} SOBRE *COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      *Cada vez más docentes buscan transformar sus clases de Español con recursos visuales*, prácticos y fáciles de utilizar.
+
+                      💙 *Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir*, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      *{Quedo atenta|Estoy pendiente|Aquí estaré} si tienes {alguna duda|cualquier consulta|alguna pregunta}*, por aquí te ayudo con {mucho gusto|confianza|todo gusto} 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mw0jibpw-1t659
+          minutos: 5
+          variantes:
+            - id: v-mw0jibpw-ndz6v
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *{{PRECIO_BASE}}*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mw0jibpw-lk1il
+      tipo: regalo
+      x: 2486
+      y: 2112
+      titulo: Regalo
+    - id: f-mw0jibpw-razmn
+      tipo: mensaje
+      x: 1485
+      y: 1947
+      titulo: Upsell 1 -
+      steps:
+        - type: text
+          body_variants:
+            - Antes de terminar, tengo algo especial que puede ayudarte a hacer tus clases aún más didácticas y nutritivas para tus alumnos ...
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/12mIrQEjhtK7KP8XubScdAVSJLWfOQGSa/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              📘 MEGAPACK DE RAZONAMIENTO VERBAL
+
+              📚 Es un pack completo que incluye:
+
+              ✅ 12 juegos armables: dominó de analogías, bingo de conectores, carrera por equipos y más
+              ✅ 90 fichas en 3 niveles (10 a 15 años): 900 ejercicios, de lo más fácil a lo más difícil
+              ✅ 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado para corregir en minutos
+              ✅ Guía con plan de 10 semanas
+
+              Todo viene en formato PDF listo para imprimir y usar en tus clases 🤩
+
+              ✨ Resultado: alumnos que leen mejor, piensan más rápido y llegan seguros a sus exámenes… y tú recuperas tu tiempo.
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1jH-ruFDKJboPmIBXl7BNux7-dMQwD7Pq/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 Y si hoy llevas el MEGAPACK DE RAZONAMIENTO VERBAL, te llevas GRATIS el Kit “Crea tus propios juegos”:
+
+              ✏️ Plantillas editables «Crea tus propias tarjetas»: versiones en blanco y rellenables en el PDF del dominó, el bingo, las cartas reto y la memoria
+
+              🎯 4 juegos de ejemplo ya completos listos para usar en clase.
+
+              🎡 Ruleta en blanco: editable, de 8 sectores y con su flecha, para crear ruletas de cualquier tema
+
+              🏷️ Etiquetas para los sobres: para escribir el nombre del juego, la materia y el curso, y guardar cada juego ordenado
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1RVQo-J0rm5AFaFMCDmjOZo64wA_H3TE-/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 OFERTA ESPECIAL: MEGAPACK DE RAZONAMIENTO VERBAL
+
+              Llévate el PACK COMPLETO y transforma tus clases de razonamiento verbal con material creativo, listo para imprimir y usar:
+
+              🎲 12 juegos armables (dominó de analogías, bingo de conectores, carrera por equipos y más)
+              📝 90 fichas en 3 niveles - 900 ejercicios
+              📊 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado + 🗓️ Guía con plan de 10 semanas
+              🎁 + REGALO GRATIS: Kit “Crea tus propios juegos”
+
+              🔥 TODO POR SOLO {{PRECIO_UPSELL}}.
+
+              Te dejo los datos si quieres aprovecharlo ahora:
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+      presenta:
+        - pmvxom7h2
+      instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
+      espera_min: 2
+    - id: f-mw0jsfii-3wipw
+      tipo: mensaje
+      x: -715
+      y: 3124
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              {👋 *¡Hola, docente!|👋 *¡Hola, maestro!*|👋 *¡Buen día, docente!*|👋 *¡Saludos, maestro/a!*} *😊 Somos el equipo oficial de *AbcMulticlases*
+
+              {*¿Te está ocurriendo con esto?*❓️|*¿Te está pasando esto?*❓️|*¿Estás viviendo esta situación?*❓️|*¿Te identificas con esto?*❓️}
+
+              ⏰ Dedicas mucho tiempo a preparar tus clases.  😩
+              🔎 Buscas recursos en diferentes lugares. 
+              📖 *Tus alumnos leen, pero no comprenden.*  ?
+              😴 La gramática y ortografía les resultan aburridas. ?
+
+              {*¡Si te sucede, esto es para ti!*|*¡Si te pasa, esto es para ti!*|*¡Si te identificas, esto es para ti!*|*¡Si es tu caso, esto es para ti!*} 👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {✨ ¡Hemos preparado para ti!|✨ ¡Hemos creado algo especial para tí!|✨ ¡Hemos hecho algo pensado en ti!|✨ ¡Tenemos preparado algo especial para tí!}
+              📚 *{{PRODUCTO_BASE}}*
+
+              Una colección digital con *más de 200 actividades y recursos educativos armables y plegables* para enseñar Lengua de forma visual, práctica y divertida. ✂️
+
+              {💡 *Es Ideal para alumnos de primaria y secundaria.*|💡 *Funciona perfecto para chicos de primaria y secundaria.*|💡 *Es perfecto para estudiantes de primaria y secundaria.*|💡 *Está pensado para alumnos de primaria y secundaria.*} 👍️
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1g_rq-JMzKvwbnZZd1FNhLecbTSbegPQ0/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {📚 *¿Qué incluye el Megapack?*|📚 *¿Qué trae el Megapack?*|📚 *¿Qué encontrarás dentro del Megapack?*|📚 *¿Qué contiene el Megapack?*}
+              _6 KITS COMPLETOS_
+
+              📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
+              ✅ Adjetivos y determinantes
+              ✅ Pronombres
+              ✅ Verbos: tiempos, modos y conjugación
+              ✅ Adverbios, preposiciones y conjunciones
+              ✅ Sujeto y predicado
+              ✅ Tipos de oraciones
+              ✅ Análisis morfológico y sintáctico
+
+              ✏️ *KIT 2: ORTOGRAFÍA Y VOCABULARIO*
+              ✅ Agudas, graves y esdrújulas
+              ✅ Tilde diacrítica, diptongo e hiato
+              ✅ B/V, C/S/Z, G/J, H, LL/Y, R/RR
+              ✅ Signos de puntuación
+              ✅ Mayúsculas
+              ✅ Sinónimos, antónimos, homónimos y parónimos
+              ✅ Prefijos, sufijos y familias de palabras
+              ✅ Polisemia y sentido figurado
+
+              📖 *KIT 3: COMPRENSIÓN LECTORA*
+              ✅ Antes, durante y después de leer
+              ✅ Idea principal, tema y resumen
+              ✅ Comprensión literal e inferencial
+              ✅ Secuencia, causa y consecuencia
+              ✅ Subrayado, esquemas y mapas conceptuales
+              ✅ Infografías, tablas y gráficos
+              ✅ Hechos, opiniones y argumentos
+              {✅ Lectura crítica y fuentes confiables|✅ Análisis crítico de textos y fuentes fiables|✅ Lectura crítica y fuentes de confianza|✅ Pensamiento crítico al leer y fuentes seguras}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {📝 *KIT 4: ESCRITURA Y PRODUCCIÓN DE TEXTOS*|📝 *KIT 4: PRODUCCIÓN Y ESCRITURA DE TEXTOS*}
+              ✅ Párrafos con coherencia y cohesión
+              ✅ Conectores
+              ✅ Planificar, redactar y corregir
+              ✅ Cuentos y descripciones
+              ✅ Informes e instructivos
+              ✅ Ensayos, reseñas y argumentación
+              ✅ Textos periodísticos
+              ✅ Historietas, diálogos y guiones
+
+              🎭 *KIT 5: LITERATURA EN ACCIÓN*
+              ✅ Géneros literarios
+              ✅ Cuento, novela, fábula, mito y leyenda
+              ✅ Narrador, personajes, tiempo y espacio
+              ✅ Poesía: verso, estrofa y rima
+              ✅ Figuras literarias
+              ✅ Teatro: actos, escenas y acotaciones
+              ✅ Literatura latinoamericana 
+              ✅ Análisis y creación literaria
+
+              🗣️ *KIT 6: COMUNICACIÓN Y EXPRESIÓN ORAL*
+              ✅ Elementos de la comunicación
+              ✅ Comunicación verbal y no verbal
+              ✅ Registros y variedades del lenguaje
+              ✅ Escucha activa y diálogo
+              ✅ Exposición oral
+              ✅ Entrevista y debate
+              {✅ Narración y dramatización|✅ Contar historias y actuar|✅ Relato y representación dramática|✅ Narrar y dramatizar}
+              {✅ Publicidad y ciudadanía digital|✅ Publicidad y ciudadanía en el mundo digital|✅ Publicidad y participación digital responsable|✅ Publicidad y ciudadanía en entornos digitales}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {✂️ *Dentro del material encontrarás:*|✂️ *Esto es lo que incluye el material:*|✂️ *El material trae consigo:*|✂️ *Lo que vas a encontrar en el material es:*}
+
+              ⭐ *Armables interactivos* 🧩
+              ⭐ Plegables y minilibros educativos 📘
+              ⭐ Crucigramas, pupiletras y sopas de letras 🔠
+              ⭐ Juegos y dinámicas para trabajar en equipo 🧮
+              ⭐ Actividades listas para imprimir
+              ⭐ Respuestas y explicación detallada de cada armable
+
+              {_Ideal para primaria y secundaria - bachilerato_|_Perfecto para nivel primario y secundario - bachillerato_|_Recomendado para primaria y secundaria - bachillerato_|_Pensado para alumnos de primaria y secundaria - bachillerato_}
+
+              💡 *Todo organizado para que tus estudiantes lean má*s, escriban mejor y disfruten aprender Lengua Y Literatura, mientras tú ahorras horas de preparación. 🤗
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1zvAkLr-Up3d4ABZO6gHJePvXDQU6rA0m/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {¡Y si adquieres COMUNICACIÓN Y LITERATURA EN ACCIÓN el día de hoy, te llevas 2 regalos especiales GRATIS!|¡Al comprar COMUNICACIÓN Y LITERATURA EN ACCIÓN hoy mismo, te llevas 2 regalos especiales GRATIS!|¡Y si adquieres hoy con COMUNICACIÓN Y LITERATURA EN ACCIÓN, recibes 2 regalos especiales GRATIS!|¡Y si compras hoy COMUNICACIÓN Y LITERATURA EN ACCIÓN, te llevas 2 obsequios especiales GRATIS!} ⚡✨
+
+              🎁 *BONO 1 · BANCO DE LECTURAS CON COMPRENSIÓN*
+
+              📚 40 lecturas listas para imprimir, organizadas en 4 niveles de dificultad.
+              👉 Ideal para tareas, evaluaciones y reforzar la comprensión lectora.
+
+              🎁 *BONO 2 · +100 DINÁMICAS DE LECTURA Y ESCRITURA*
+
+              🎯 102 actividades dinámicas para estudiantes de 10 a 15 años.
+              ✅ 60 dinámicas sin materiales y 42 con recursos listos para imprimir.
+              📚 Trabaja gramática, ortografía, comprensión lectora, escritura creativa, literatura y oralidad.
+
+              {⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*|⚡ *Trae juegos, debates y retos creativos con instrucciones sencillas de aplicar.*|⚡ *Contiene juegos, debates y desafíos creativos con instrucciones fáciles de seguir.*|⚡ *Incluye juegos, debates y retos creativos con indicaciones simples de aplicar.*}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1Un4DRrcsCFyZaPxfHEd2kBacSFSVkSvR/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              {*Docente*: 🙋‍♀️|*Profesor/a*: 🙋‍♀️|*Maestro/a*: 🙋‍♀️}
+
+              *Esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO* 📚✨
+
+              📚 6 kits completos 😱
+              🎁 +2 regalos especiales
+
+              📥 *Todo en formato PDF*, listo para descargar e imprimir
+
+              🔥 *TODO POR SOLO {{PRECIO_BASE}}*
+
+              💳 *Responde con tu método de pago de preferencia para ayudarte con tu compra:*
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              {quedo atento!|¡quedo al pendiente!|estoy atento a tu respuesta}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mw0jsfii-p3ijs
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+                - esta bien
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-lcsw1
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+                - esta bien
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-5ti58
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-qep72
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1rddsLec7-ps4O9KSfiJn6kiVT_qORokC/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              ⚡📚 ¡*MIRA LO QUE OPINAN SOBRE {{PRODUCTO_BASE}}*! 😍
+
+              Cada vez más docentes buscan transformar sus clases de Español con recursos visuales, prácticos y fáciles de utilizar.
+
+              💙 Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+              Quedo atenta si tienes dudas por aquí y te ayudo con confianza 😊
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~precio original $ 15 Dólares~
+              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 6
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mw0jsfii-4uqm5
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - con yape
+                - yapeo
+                - a donde yapeo
+                - como yapeo
+                - esta bien
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-hzptd
+              title: PLIN
+              keywords:
+                - pli
+                - plin
+                - pln
+                - pilin
+                - con pln
+                - plinear
+                - tengo plin
+                - esta bien
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-9ok0w
+              title: BCP
+              keywords:
+                - bcp
+                - transferencia
+                - con bcp
+                - trasfencia
+                - traferencia
+                - traferir
+                - transferir
+                - trnsferencia
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mw0jsfii-chkc7
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+          enabled: false
+      presenta:
+        - "@tienda:basico"
+    - id: f-mw0jsfii-ucnxx
+      tipo: seguimientos
+      x: -451
+      y: 2783
+      seguimientos:
+        - id: s-mw0jsfij-btmzx
+          minutos: 2
+          variantes:
+            - id: v-mw0jsfij-2sj1u
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1gMo6W6896k6qhgKbJ117If0LfEm7NYf8/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡{MIRA LO QUE OPINAN|DESCUBRE LO QUE DICEN|CONOCE LAS OPINIONES} SOBRE *COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      *Cada vez más docentes buscan transformar sus clases de Español con recursos visuales*, prácticos y fáciles de utilizar.
+
+                      💙 *Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir*, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      *{Quedo atenta|Estoy pendiente|Aquí estaré} si tienes {alguna duda|cualquier consulta|alguna pregunta}*, por aquí te ayudo con {mucho gusto|confianza|todo gusto} 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mw0jsfij-4ppf5
+          minutos: 5
+          variantes:
+            - id: v-mw0jsfij-echkf
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *{{PRECIO_BASE}}*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mw0jsfij-ntb9y
+      tipo: cobro
+      x: 198
+      y: 3179
+      steps:
+        - type: text
+          body_variants:
+            - ✅ {Genial, puedes adquirir el Curso de la siguiente Manera|Perfecto, puedes llevar el curso a través de estos datos|Excelente, puedes adquirir el Curso de esta forma|Genial, puedes obtener el Curso de la siguiente manera} 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato|*Después nos mandas una foto de tu comprobante* para confirmar tu pago y darte acceso al instante|*Seguidamente nos compartes una imagen de tu comprobante* para corroborar tu pago y darte acceso ya mismo} 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+    - id: f-mw0jsfij-yelp5
+      tipo: entregar
+      x: 1067
+      y: 3190
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mw0jsfij-rajkc
+      tipo: seguimientos
+      x: 473
+      y: 2772
+      seguimientos:
+        - id: s-mw0jsfij-0bcn8
+          minutos: 2
+          variantes:
+            - id: v-mw0jsfij-7cr1s
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1gMo6W6896k6qhgKbJ117If0LfEm7NYf8/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ⚡📚 ¡{MIRA LO QUE OPINAN|DESCUBRE LO QUE DICEN|CONOCE LAS OPINIONES} SOBRE *COMUNICACIÓN Y LITERATURA EN ACCIÓN*! 😍
+
+                      *Cada vez más docentes buscan transformar sus clases de Español con recursos visuales*, prácticos y fáciles de utilizar.
+
+                      💙 *Por eso, nuestra colección incluye armables 3D, actividades recortables, fichas interactivas y materiales listos para imprimir*, que ayudan a explicar temas complejos de una manera más sencilla y dinámica.
+
+                      *{Quedo atenta|Estoy pendiente|Aquí estaré} si tienes {alguna duda|cualquier consulta|alguna pregunta}*, por aquí te ayudo con {mucho gusto|confianza|todo gusto} 😊
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mw0jsfij-e4hs5
+          minutos: 5
+          variantes:
+            - id: v-mw0jsfij-78y0b
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1p0jU14mjdogVWLK8b8W_VWZJCFBUFwZG/view?usp=drive_link
+                  caption_variants:
+                    - ""
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🚨*¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰
+
+                      Por los próximos 20 minutos puedes llevarte COMUNICACIÓN Y LITERATURA EN ACCIÓN por solo 15 soles 🤩
+
+                      📚 *6 Kits Didácticos completos*
+
+                      ✂️ Ruedas gramaticales, armables, dominós ortográficos, lapbooks y actividades interactivas
+                      ✍️ Gramática, ortografía, comprensión lectora, escritura, literatura y expresión oral
+                      🧠 Detectives de lectura, generadores de historias y juegos de roles para que tus alumnos participen
+                      📥 Todo en PDF listo para imprimir
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🎁 + *2 REGALOS ESPECIALES*:
+
+                      📖 *Banco de Lecturas*: una biblioteca de textos listos para trabajar comprensión lectora, inferencias, ideas principales y lectura crítica en clase.
+
+                      🎲 *100 Dinámicas*: actividades rápidas y divertidas para despertar el interés de tus alumnos y hacer tus clases de Lengua mucho más participativas.
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      💰 Solo por los próximos 20 minutos: *{{PRECIO_BASE}}*
+
+                      ✅ *Paso 1: Realiza el pago*
+
+                      {{METODO_DE_PAGO_1}}
+
+                      ✅ *Paso 2: *Nos envía el comprobante y tu correo electrónico* para enviarte el pack completo en menos de 2 minutos por Whatsapp🚨
+
+                      Estoy pendiente de ti! 😊
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mw0jsfij-t32wg
+      tipo: regalo
+      x: 2464
+      y: 3190
+      titulo: Regalo
+    - id: f-mw0jsfij-a2nl1
+      tipo: mensaje
+      x: 1463
+      y: 3025
+      titulo: Upsell 1 -
+      steps:
+        - type: text
+          body_variants:
+            - Antes de terminar, tengo algo especial que puede ayudarte a hacer tus clases aún más didácticas y nutritivas para tus alumnos ...
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/12mIrQEjhtK7KP8XubScdAVSJLWfOQGSa/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              📘 MEGAPACK DE RAZONAMIENTO VERBAL
+
+              📚 Es un pack completo que incluye:
+
+              ✅ 12 juegos armables: dominó de analogías, bingo de conectores, carrera por equipos y más
+              ✅ 90 fichas en 3 niveles (10 a 15 años): 900 ejercicios, de lo más fácil a lo más difícil
+              ✅ 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado para corregir en minutos
+              ✅ Guía con plan de 10 semanas
+
+              Todo viene en formato PDF listo para imprimir y usar en tus clases 🤩
+
+              ✨ Resultado: alumnos que leen mejor, piensan más rápido y llegan seguros a sus exámenes… y tú recuperas tu tiempo.
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1jH-ruFDKJboPmIBXl7BNux7-dMQwD7Pq/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 Y si hoy llevas el MEGAPACK DE RAZONAMIENTO VERBAL, te llevas GRATIS el Kit “Crea tus propios juegos”:
+
+              ✏️ Plantillas editables «Crea tus propias tarjetas»: versiones en blanco y rellenables en el PDF del dominó, el bingo, las cartas reto y la memoria
+
+              🎯 4 juegos de ejemplo ya completos listos para usar en clase.
+
+              🎡 Ruleta en blanco: editable, de 8 sectores y con su flecha, para crear ruletas de cualquier tema
+
+              🏷️ Etiquetas para los sobres: para escribir el nombre del juego, la materia y el curso, y guardar cada juego ordenado
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1RVQo-J0rm5AFaFMCDmjOZo64wA_H3TE-/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 OFERTA ESPECIAL: MEGAPACK DE RAZONAMIENTO VERBAL
+
+              Llévate el PACK COMPLETO y transforma tus clases de razonamiento verbal con material creativo, listo para imprimir y usar:
+
+              🎲 12 juegos armables (dominó de analogías, bingo de conectores, carrera por equipos y más)
+              📝 90 fichas en 3 niveles - 900 ejercicios
+              📊 6 simulacros con diagnóstico por tema
+              ✅ Solucionario explicado + 🗓️ Guía con plan de 10 semanas
+              🎁 + REGALO GRATIS: Kit “Crea tus propios juegos”
+
+              🔥 TODO POR SOLO {{PRECIO_UPSELL}}.
+
+              Te dejo los datos si quieres aprovecharlo ahora:
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+      presenta:
+        - pmvxom7h2
+      instrucciones: Si envía comprobante de pago con el precio del producto activar la ficha numero 24 de esta tienda
+      espera_min: 2
   cables:
     - id: c-mvvoeakd-9em
       de: f-mvvfznys-u8svs
@@ -4508,14 +5906,114 @@ whatsapp:
       de: f-mw0jfedf-qhjg
       salida: rep:r1
       a: f-mw0b3q4c-sa0fo
+    - id: c-mw0jibpw-3tuyy
+      de: f-mw0jibpv-r8x1r
+      salida: siguiente
+      a: f-mw0jibpw-jybud
+    - id: c-mw0jibpw-iitq6
+      de: f-mw0jibpv-r8x1r
+      salida: dec:d-mw0jibpw-vrgm3
+      a: f-mw0jibpw-oyhc3
+    - id: c-mw0jibpw-ljqew
+      de: f-mw0jibpv-r8x1r
+      salida: dec:d-mw0jibpw-9usao
+      a: f-mw0jibpw-oyhc3
+    - id: c-mw0jibpw-3e23m
+      de: f-mw0jibpv-r8x1r
+      salida: dec:d-mw0jibpw-8wwll
+      a: f-mw0jibpw-oyhc3
+    - id: c-mw0jibpw-pcvm7
+      de: f-mw0jibpv-r8x1r
+      salida: dec:d-mw0jibpw-azcbq
+      a: f-mw0jibpw-oyhc3
+    - id: c-mw0jibpw-tzfox
+      de: f-mw0jibpw-oyhc3
+      salida: pagado
+      a: f-mw0jibpw-ltjf8
+    - id: c-mw0jibpw-ppviq
+      de: f-mw0jibpw-oyhc3
+      salida: sin_pago
+      a: f-mw0jibpw-rxv73
+    - id: c-mw0jibpw-cl6j9
+      de: f-mw0jibpw-ltjf8
+      salida: siguiente
+      a: f-mw0jibpw-razmn
+    - id: c-mw0jibpw-py2nf
+      de: f-mw0jibpw-razmn
+      salida: pagado
+      a: f-mw0jibpw-lk1il
+    - id: c-mw0jibpw-9m9b2
+      de: f-mw0jibpw-razmn
+      salida: sin_respuesta
+      a: f-mw0jibpw-lk1il
+    - id: c-mw0jsfij-cshrh
+      de: f-mw0jsfii-3wipw
+      salida: siguiente
+      a: f-mw0jsfii-ucnxx
+    - id: c-mw0jsfij-qaaty
+      de: f-mw0jsfii-3wipw
+      salida: dec:d-mw0jsfii-p3ijs
+      a: f-mw0jsfij-ntb9y
+    - id: c-mw0jsfij-8hq1b
+      de: f-mw0jsfii-3wipw
+      salida: dec:d-mw0jsfii-lcsw1
+      a: f-mw0jsfij-ntb9y
+    - id: c-mw0jsfij-8f5db
+      de: f-mw0jsfii-3wipw
+      salida: dec:d-mw0jsfii-5ti58
+      a: f-mw0jsfij-ntb9y
+    - id: c-mw0jsfij-ijm7k
+      de: f-mw0jsfii-3wipw
+      salida: dec:d-mw0jsfii-qep72
+      a: f-mw0jsfij-ntb9y
+    - id: c-mw0jsfij-zw8lr
+      de: f-mw0jsfij-ntb9y
+      salida: pagado
+      a: f-mw0jsfij-yelp5
+    - id: c-mw0jsfij-zn7st
+      de: f-mw0jsfij-ntb9y
+      salida: sin_pago
+      a: f-mw0jsfij-rajkc
+    - id: c-mw0jsfij-zwkte
+      de: f-mw0jsfij-yelp5
+      salida: siguiente
+      a: f-mw0jsfij-a2nl1
+    - id: c-mw0jsfij-63i1v
+      de: f-mw0jsfij-a2nl1
+      salida: pagado
+      a: f-mw0jsfij-t32wg
+    - id: c-mw0jsfij-0xkcm
+      de: f-mw0jsfij-a2nl1
+      salida: sin_respuesta
+      a: f-mw0jsfij-t32wg
+    - id: c-mw0jtjex-grr
+      de: f-mw0jfedf-qhjg
+      salida: rep:r2
+      a: f-mw0jibpv-r8x1r
+    - id: c-mw0jtpu9-hvx
+      de: f-mw0jfedf-qhjg
+      salida: rep:rmw0jtm38
+      a: f-mw0jsfii-3wipw
   cajas:
     - id: manta-inicio-mvveb83v-1
-      x: -1245
-      y: 564
-      ancho: 4208
-      alto: 881
+      x: -915
+      y: 553
+      ancho: 3878
+      alto: 892
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
       inicio: inicio-mvveb83v-1
+    - id: k-mw0js5ze
+      x: -916
+      y: 1626
+      ancho: 3911
+      alto: 829
+      titulo: Nueva caja
+    - id: k-mw0jsoo1
+      x: -916
+      y: 2660
+      ancho: 3977
+      alto: 895
+      titulo: Nueva caja
 messenger:
   encendido: true
   fichas:
