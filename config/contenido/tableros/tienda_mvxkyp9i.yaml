@@ -3407,7 +3407,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              📚 ¿Qué incluye el Megapack?
+              📚 *¿Qué incluye el Megapack?*
               _6 KITS COMPLETOS_
 
               📘 *KIT 1 — GRAMÁTICA EN ACCIÓN* ✅Sustantivos: clases, género y número
@@ -3512,19 +3512,21 @@ whatsapp:
               ⚡ *Incluye juegos, debates y retos creativos con instrucciones fáciles de aplicar.*
           delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/18B723A_zU1tLzGRb-pBydvIKc_0aiJUt/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1Un4DRrcsCFyZaPxfHEd2kBacSFSVkSvR/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              Docente, esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO 📚✨
+              *Docente*: 🙋‍♀️
 
-              📚 6 kits completos
+              *Esta es tu oportunidad de llevarte Comunicación y Literatura en Acción COMPLETO* 📚✨
+
+              📚 6 kits completos 😱
               🎁 +2 regalos especiales
 
-              📥 Todo en formato PDF, listo para descargar e imprimir
+              📥 *Todo en formato PDF*, listo para descargar e imprimir
 
               🔥 *TODO POR SOLO {{PRECIO_BASE}}*
 
