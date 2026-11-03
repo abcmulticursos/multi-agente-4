@@ -3987,13 +3987,13 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw0b3q4d-ul2yb
       tipo: regalo
-      x: 1870
-      y: 1144
+      x: 1727
+      y: 1100
       titulo: Regalo
     - id: f-mw0b3q4d-jt3c4
       tipo: mensaje
-      x: 1804
-      y: 649
+      x: 2486
+      y: 517
       titulo: Upsell 1 -
       steps:
         - type: text
