@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getClient } from "@/lib/openrouter";
+import { COUNTRIES, type CountryCode } from "@/lib/countries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,7 +42,7 @@ function sirve(original: string, variante: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { texto?: unknown; partes?: unknown; cuantas?: unknown };
+  let body: { texto?: unknown; partes?: unknown; cuantas?: unknown; pais?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -54,6 +55,10 @@ export async function POST(req: NextRequest) {
   const cuantas = Math.min(5, Math.max(1, Math.round(Number(body.cuantas) || 3)));
   const pedidas = cuantas + 2;
   const modelo = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
+  // COMO SE HABLA EN EL PAÍS DE LA BANDERA (03/11/2026). Él: «estoy en Perú pero al aplicar spintax me da resultado en
+  // argentino, "para vos"». La misma instrucción de dialecto que usa el bot con los clientes (`COUNTRIES[pais].dialect`).
+  const pais = typeof body.pais === "string" && body.pais in COUNTRIES ? (body.pais as CountryCode) : "PE";
+  const dialecto = `El mensaje es para clientes de ${COUNTRIES[pais].label}. ${COUNTRIES[pais].dialect} `;
   try {
     const r = await getClient().chat.completions.create({
       model: modelo,
@@ -64,6 +69,7 @@ export async function POST(req: NextRequest) {
           role: "system",
           content:
             "Eres redactor de mensajes de WhatsApp para ventas, en español latino natural. Te paso el MENSAJE completo (solo de contexto) y unas FRASES de él. " +
+            dialecto +
             `Para CADA frase escribe ${pedidas} variantes DISTINTAS entre sí que digan exactamente lo mismo con otras palabras, sin perder la riqueza ni la intención del mensaje: mismo tono, ` +
             "largo parecido, el mismo formato de WhatsApp (*negrita*, _cursiva_) en UNA sola línea, y la MISMA cantidad de emojis (iguales o equivalentes; si la frase no tiene, ninguno). " +
             "NO cambies nunca: los comodines {{…}}, los números, precios y montos, los enlaces, ni las palabras en MAYÚSCULAS (son nombres de productos). " +

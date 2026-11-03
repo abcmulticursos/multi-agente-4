@@ -38170,6 +38170,8 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   const [cuantas, setCuantas] = useState(3);
   // Por frase: sus variantes (editables) y cuáles van.
   const [propuestas, setPropuestas] = useState<Record<number, Array<{ texto: string; va: boolean }>>>({});
+  // El país de la bandera (el de su visor): la IA escribe como se habla ahí (03/11/2026, «para vos» en Perú).
+  const paisDelVisor = useContext(EditorPreviewContext).countryCode ?? activePreviewCountry ?? "PE";
   useEscapeEnPila(() => onCerrar());
   const pedir = async () => {
     const indices = [...marcadas].sort((a, b) => a - b);
@@ -38180,7 +38182,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
       const r = await fetch("/api/spintax", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texto, partes: indices.map((i) => frases[i].texto), cuantas }),
+        body: JSON.stringify({ texto, partes: indices.map((i) => frases[i].texto), cuantas, pais: paisDelVisor }),
       });
       const d = (await r.json()) as { variantes?: string[][]; error?: string; costo?: number | null; tokens?: number };
       if (!r.ok) throw new Error(d.error ?? "No se pudo.");
@@ -38208,14 +38210,14 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   const hayPropuestas = Object.keys(propuestas).length > 0;
   return (
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined} data-ventana-del-tablero>
-      <div className="my-10 w-full max-w-2xl rounded-xl border border-borde bg-tarjeta p-4 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
+          <h3 className="text-base font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
           <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
             ✕
           </button>
         </div>
-        <p className="mb-3 text-[11px] text-tinta-suave">
+        <p className="mb-3 text-[13px] text-tinta-suave">
           La IA propone otras formas de decir lo mismo. No toca comodines, precios, números ni nombres en MAYÚSCULAS. Nada cambia hasta que pulses «Aplicar».
         </p>
         <div className="flex flex-col gap-2">
@@ -38224,7 +38226,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
             const suyas = propuestas[i];
             return (
               <div key={`${f.inicio}-${i}`} className={`rounded-lg border px-2 py-1.5 ${marcadas.has(i) ? "border-violet-400 bg-violet-50 oscuro:bg-violet-500/10" : "border-borde"}`}>
-                <label className={`flex items-start gap-2 text-xs ${conSpintax ? "opacity-50" : "cursor-pointer"}`} title={conSpintax ? "Esta frase ya tiene spintax" : undefined}>
+                <label className={`flex items-start gap-2 text-[15px] leading-relaxed ${conSpintax ? "opacity-50" : "cursor-pointer"}`} title={conSpintax ? "Esta frase ya tiene spintax" : undefined}>
                   <input
                     type="checkbox"
                     disabled={conSpintax || hayPropuestas}
@@ -38238,16 +38240,16 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
                     className="mt-0.5"
                   />
                   <span className="whitespace-pre-wrap text-tinta">
-                    <span className="mr-1 text-[10px] font-bold text-tinta-suave">{seleccion ? "Trozo" : `${i + 1}ª`}</span>
+                    <span className="mr-1 text-[12px] font-bold text-tinta-suave">{seleccion ? "Trozo" : `${i + 1}ª`}</span>
                     {f.texto}
                     {conSpintax && <span className="ml-1 text-[10px] text-tinta-suave">(ya tiene spintax)</span>}
                   </span>
                 </label>
                 {suyas && (
                   <div className="mt-1.5 flex flex-col gap-1 pl-6">
-                    {suyas.length === 0 && <p className="text-[11px] text-amber-700">La IA no dio variantes que respeten los candados. Prueba otra vez.</p>}
+                    {suyas.length === 0 && <p className="text-[13px] text-amber-700">La IA no dio variantes que respeten los candados. Prueba otra vez.</p>}
                     {suyas.map((v, k) => (
-                      <label key={k} className="flex items-center gap-2 text-xs">
+                      <label key={k} className="flex items-center gap-2 text-[15px]">
                         <input
                           type="checkbox"
                           checked={v.va}
@@ -38256,7 +38258,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
                         <input
                           value={v.texto}
                           onChange={(e) => setPropuestas({ ...propuestas, [i]: suyas.map((x, j) => (j === k ? { ...x, texto: e.target.value } : x)) })}
-                          className="min-w-0 flex-1 rounded border border-borde bg-tarjeta px-2 py-1 text-xs text-tinta"
+                          className="min-w-0 flex-1 rounded border border-borde bg-tarjeta px-2.5 py-1.5 text-[15px] text-tinta"
                         />
                       </label>
                     ))}
