@@ -708,6 +708,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       </div>
     );
   };
+  // EL 🔀 RUTEADOR, SOLO SU LOGO (03/11/2026). Él: «el ruteador no debería tener ficha, está de más, solo sería el
+  // logo», con el copiar y el tachito arriba a la derecha, como Sendy. No lleva burbujas: su ficha no decía nada más.
+  if (f.tipo === "reparto") return <EstacionDeLaFicha f={f} soloLogo elegida={!!selected} />;
   const burbujas =
     f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo"
       ? resumenDeBurbujas(f.steps)
@@ -1446,8 +1449,10 @@ function InterruptorDeRuta({ f, clave }: { f: FichaEnElEditor; clave: string }) 
 }
 
 /** La estación de una ficha, DENTRO de su mismo bloque (se mueve con ella). Sus salidas son las de la ficha. */
-function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
+function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaEnElEditor; soloLogo?: boolean; elegida?: boolean }) {
   const ctx = useContext(Contexto)!;
+  const leLlega = ctx.tablero.cables.some((c) => c.a === f.id);
+  const avisos = soloLogo ? avisosDeLaFicha(ctx.tablero as Tablero, f as FichaDelTablero, ctx.paisVisto) : [];
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
   const arriba = salidasDeArriba(ctx.tablero, f);
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero).filter(
@@ -1473,11 +1478,26 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         : { src: "/tablero/agente.png", nombre: "Agente IA" };
   return (
     // EL BLOQUE: una barra corta desde la ficha, la estación grande (como en Sendy) y sus caminos afuera.
-    <div data-estacion className="flex items-center self-center" onDoubleClick={(e) => (e.stopPropagation(), ctx.abrir(f.id))}>
-      {/* De la ficha a su estación: el mismo trazo punteado de los cables, del color de la ficha. */}
-      <svg width={56} height={8} className="shrink-0 overflow-visible">
-        <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={4} strokeDasharray="10 6" className="pointer-events-auto" />
-      </svg>
+    <div
+      data-estacion
+      className="pointer-events-none flex items-center self-center"
+      onDoubleClick={(e) => (e.stopPropagation(), soloLogo ? ctx.ajustes(f.id) : ctx.abrir(f.id))}
+      onContextMenu={
+        soloLogo
+          ? (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id });
+            }
+          : undefined
+      }
+    >
+      {/* De la ficha a su estación: el mismo trazo punteado de los cables, del color de la ficha. (Sin ficha, nada.) */}
+      {!soloLogo && (
+        <svg width={56} height={8} className="shrink-0 overflow-visible">
+          <line x1={0} y1={4} x2={56} y2={4} stroke={ASPECTO[f.tipo].trazo} strokeWidth={4} strokeDasharray="10 6" className="pointer-events-auto" />
+        </svg>
+      )}
       <div className="relative flex flex-col items-center" title={`Estación ${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: abrir la ficha`}>
         {/* GRANDE Y NOTORIA, como en Sendy (él: «tiene que haber algo ahí que sea importante y notorio»). */}
         <div
@@ -1486,8 +1506,54 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
             ctx.comoAgente
               ? `h-[173px] w-[173px] rounded-2xl border-2 ${rosa ? "border-fuchsia-400" : "border-emerald-400"} bg-white`
               : `h-36 w-36 rounded-full bg-gradient-to-br ${rosa ? "from-fuchsia-300 to-fuchsia-600" : "from-emerald-300 to-emerald-500"}`
-          } ${f.apagada ? "opacity-50" : ""}`}
+          } ${f.apagada ? "opacity-50" : ""} ${elegida ? "ring-4 ring-cyan-400" : ""}`}
+          style={ctx.destacada === f.id ? { boxShadow: "0 0 0 5px #f59e0b, 0 0 22px 6px rgba(245,158,11,0.55)" } : undefined}
         >
+          {/* COPIAR Y TACHITO, ARRIBA A LA DERECHA (como Sendy, su captura del 03/11/2026). */}
+          {soloLogo && (
+            <span className="absolute -right-9 top-1 flex flex-col gap-1">
+              <button
+                type="button"
+                title="Duplicar aquí al lado"
+                className="nodrag rounded-md p-1 text-[17px] leading-none text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const c = copiarFichas([f], [], { x: 40, y: 260 });
+                  ctx.cambiar({ ...ctx.tablero, fichas: [...ctx.tablero.fichas, ...c.fichas] });
+                }}
+                onDoubleClick={(e) => e.stopPropagation()}
+              >
+                ⧉
+              </button>
+              <button
+                type="button"
+                title="Eliminar"
+                className="nodrag rounded-md p-1 text-[16px] leading-none text-slate-500 hover:bg-slate-200 hover:text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!window.confirm(`¿Eliminar «${f.titulo?.trim() || ASPECTO[f.tipo].nombre}» y sus cables?`)) return;
+                  ctx.cambiar({
+                    ...ctx.tablero,
+                    fichas: ctx.tablero.fichas.filter((x) => x.id !== f.id),
+                    cables: ctx.tablero.cables.filter((c) => c.de !== f.id && c.a !== f.id),
+                  });
+                }}
+                onDoubleClick={(e) => e.stopPropagation()}
+              >
+                🗑️
+              </button>
+            </span>
+          )}
+          {soloLogo && !leLlega && (
+            <span className="absolute -top-[24px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-red-600 px-1.5 text-[10px] font-bold leading-[16px] text-white shadow" title="No le llega ningún cable: nadie entra por aquí.">
+              ⚠ nadie llega
+            </span>
+          )}
+          {avisos.length > 0 && (
+            <span title={avisos.join("\n")} className="absolute -left-2 -top-2 cursor-help rounded bg-amber-400 px-1 text-xs font-bold text-amber-950">
+              ⚠
+            </span>
+          )}
           {/* Arriba: a sus Seguimientos. */}
           {deArriba.map((s, i) => (
             <Handle
@@ -1506,7 +1572,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
           ))}
           {/* SU PUNTO DE LLEGADA, A LA IZQUIERDA (01/11/2026, «la estación no tiene punto receptor de cable a la
               izquierda»): donde llega el trazo de su ficha. Soltar un cable aquí es soltarlo en la ficha. */}
-          <Handle type="target" position={Position.Left} id="entra-estacion" className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
+          <Handle type="target" position={Position.Left} id={soloLogo ? "entra" : "entra-estacion"} className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
           {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
           {ctx.comoAgente || rosa ? (
             // SU AGENTE (01/11/2026, sus PNG cuadrados): el robot en las fichas de venta, el COBRADOR en los Cobros y
@@ -1539,8 +1605,13 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
         {/* (03/11/2026: el verde más claro y «Agente IA» un poco más grande.) */}
         <div className={`pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full ${rosa ? "bg-fuchsia-600" : "bg-emerald-500"} px-5 py-1.5 text-[13px] font-bold leading-5 text-white shadow`}>
-          {(ctx.comoAgente || rosa) && <span className="text-[18px]">{imagenDelAgente.nombre}</span>}
-          <span className={ctx.comoAgente || rosa ? "text-[10px] font-semibold opacity-90" : ""}>{rosa ? "reparte los clientes" : queEspera(f, ctx.tablero)}</span>
+          {(ctx.comoAgente || rosa) && (
+            <span className="text-[18px]" title={soloLogo ? `${n ?? ""} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}\nDoble clic: sus rutas y pesos` : undefined}>
+              {soloLogo && n !== undefined && <span className="mr-1.5 rounded-full bg-white/90 px-1.5 text-[12px] font-black text-slate-900">{n}</span>}
+              {imagenDelAgente.nombre}
+            </span>
+          )}
+          <span className={ctx.comoAgente || rosa ? "text-[10px] font-semibold opacity-90" : ""}>{rosa ? (f.apagada ? "apagado" : "reparte los clientes") : queEspera(f, ctx.tablero)}</span>
         </div>
       </div>
       {/* LOS BRAZOS (su imagen): rectas desde el centro de la estación hasta cada camino. Alto fijo por camino
@@ -1943,7 +2014,7 @@ export default function LienzoDelTablero({
         position: { x: f.x, y: f.y },
         data: { ficha: f },
         // En modo estaciones el bloque es ancho y casi todo aire: el aire deja pasar el ratón al fondo (la manito).
-        ...(estaciones && esEstacion(f, tablero) ? { style: { pointerEvents: "none" as const } } : {}),
+        ...((estaciones && esEstacion(f, tablero)) || f.tipo === "reparto" ? { style: { pointerEvents: "none" as const } } : {}),
       });
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
