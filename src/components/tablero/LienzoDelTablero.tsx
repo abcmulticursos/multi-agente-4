@@ -75,6 +75,8 @@ const TEMA = {
 };
 const PUNTO_VERDE = "!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500";
 const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-500";
+/** Los conectores del 🔀 Ruteador (03/11/2026: «sus conectores rosa»). */
+const PUNTO_ROSA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-fuchsia-600";
 /** El punto de un «💰 Si paga» que ENTREGA SOLO (02/11/2026, su montaje): más grande, blanco con borde verde y el ícono. */
 const PUNTO_DE_ENTREGA = "!flex !h-[50px] !w-[50px] !items-center !justify-center !rounded-full !border-[4px] !border-emerald-500 !bg-white !text-[27px] !leading-none shadow-md";
 /** Clave con la que el editor pasa el producto full de la tienda dentro de `nombres` (solo pantalla). */
@@ -663,32 +665,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         )}
         {/* EL INTERRUPTOR DE LA RUTA (03/11/2026, el 🔀 Ruteador). ON: recibe clientes según su %. OFF: no recibe clientes
             nuevos (peso 0, el sorteo del bot ya no la elige); los que ya estaban terminan como empezaron. */}
-        {s.clave.startsWith("rep:") &&
-          (() => {
-            const rid = s.clave.slice(4);
-            const ops = f.reparto ?? [];
-            const op = ops.find((o) => o.id === rid);
-            if (!op) return null;
-            const on = op.peso > 0;
-            return (
-              <button
-                type="button"
-                className={`nodrag nopan shrink-0 rounded-full px-1.5 py-px text-[9px] font-black leading-none ${on ? "bg-emerald-500 text-white" : "bg-slate-300 text-slate-600"}`}
-                title={on ? "Vende: recibe clientes nuevos. Clic: apagarla" : "Apagada: no recibe clientes nuevos. Clic: prenderla"}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (on && ops.filter((o) => o.peso > 0).length === 1 && !window.confirm("Es la última ruta prendida de este Ruteador: si la apagas, nadie entra por aquí. ¿Seguro?")) return;
-                  const nuevas = ops.map((o) =>
-                    o.id !== rid ? o : on ? { ...o, peso: 0, peso_antes: o.peso } : { ...o, peso: o.peso_antes && o.peso_antes > 0 ? o.peso_antes : 1, peso_antes: undefined }
-                  );
-                  ctx.cambiar({ ...ctx.tablero, fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, reparto: nuevas } : x)) });
-                }}
-              >
-                {on ? "ON" : "OFF"}
-              </button>
-            );
-          })()}
+        {s.clave.startsWith("rep:") && <InterruptorDeRuta f={f} clave={s.clave} />}
         <span
           className="truncate"
           title={`${s.etiqueta.replace(/^(🔘|💬|✍️) /, "")}${boton ? "\nTambién si lo escribe con sus palabras (la IA reconoce cuál)." : ""}`}
@@ -769,14 +746,6 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       )}
       {/* EL SELLO DE LA ENTREGA (02/11/2026, su montaje «entrega2.jpg»): en TODA ficha Entrega, arriba al centro, qué
           entrega: 📦 el full de la tienda, 📚 el básico, 🛍️ otro producto (el upsell). Solo pantalla. */}
-      {/* EL 🔀 RUTEADOR (03/11/2026, su imagen «ruteador.jpg» y debajo «Ruteador», como las estaciones). Solo dibujo. */}
-      {f.tipo === "reparto" && (
-        <span className="pointer-events-none absolute -top-[150px] left-1/2 flex -translate-x-1/2 select-none flex-col items-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/tablero/ruteador.png" alt="Ruteador" draggable={false} className="h-[118px] w-[118px] rounded-2xl border-2 border-fuchsia-400 object-cover shadow-xl" />
-          <span className="-mt-3 rounded-full bg-fuchsia-600 px-4 py-1 text-[15px] font-bold leading-5 text-white shadow">Ruteador</span>
-        </span>
-      )}
       {f.tipo === "entregar" &&
         (() => {
           const ids = (f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []).map((k) => k.split("#")[0]);
@@ -1417,7 +1386,8 @@ function CaminoDeCompra({ id, target, sourceX, sourceY, targetX, targetY, source
  */
 function esEstacion(f: FichaEnElEditor, t?: TableroEnElEditor): boolean {
   if (f.guardada) return false;
-  if (f.tipo === "cobro") return true;
+  // El 🔀 Ruteador (03/11/2026): «que se parezca a la estación… y que del logo salgan los conectores».
+  if (f.tipo === "cobro" || f.tipo === "reparto") return true;
   if (f.tipo !== "mensaje" && f.tipo !== "intro_ob") return false;
   // La que cobra sola (su upsell sin botones, 01/11/2026) también espera: tiene su estación.
   if (cobraEnLaFicha(f as FichaDelTablero, t as Tablero | undefined)) return true;
@@ -1447,6 +1417,34 @@ function queEspera(f: FichaEnElEditor, t?: TableroEnElEditor): string {
   return "¿qué responde?";
 }
 
+/** El ON/OFF de una ruta del 🔀 Ruteador (03/11/2026). OFF = peso 0 (el sorteo ya no la elige) y recuerda el que tenía. */
+function InterruptorDeRuta({ f, clave }: { f: FichaEnElEditor; clave: string }) {
+  const ctx = useContext(Contexto)!;
+  const rid = clave.slice(4);
+  const ops = f.reparto ?? [];
+  const op = ops.find((o) => o.id === rid);
+  if (!op) return null;
+  const on = op.peso > 0;
+  return (
+    <button
+      type="button"
+      className={`nodrag nopan shrink-0 rounded-full px-1.5 py-px text-[9px] font-black leading-none ${on ? "bg-emerald-500 text-white" : "bg-slate-300 text-slate-600"}`}
+      title={on ? "Vende: recibe clientes nuevos. Clic: apagarla" : "Apagada: no recibe clientes nuevos. Clic: prenderla"}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (on && ops.filter((o) => o.peso > 0).length === 1 && !window.confirm("Es la última ruta prendida de este Ruteador: si la apagas, nadie entra por aquí. ¿Seguro?")) return;
+        const nuevas = ops.map((o) =>
+          o.id !== rid ? o : on ? { ...o, peso: 0, peso_antes: o.peso } : { ...o, peso: o.peso_antes && o.peso_antes > 0 ? o.peso_antes : 1, peso_antes: undefined }
+        );
+        ctx.cambiar({ ...ctx.tablero, fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, reparto: nuevas } : x)) });
+      }}
+    >
+      {on ? "ON" : "OFF"}
+    </button>
+  );
+}
+
 /** La estación de una ficha, DENTRO de su mismo bloque (se mueve con ella). Sus salidas son las de la ficha. */
 function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const ctx = useContext(Contexto)!;
@@ -1465,8 +1463,10 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
   const n = ctx.numeroDe[f.id];
   // QUÉ AGENTE SE VE (01/11/2026): Cobro → el cobrador; una oferta después de una Entrega → upsell con su número.
   const nUpsell = f.tipo === "cobro" ? undefined : ctx.upsellDe[f.id];
-  const imagenDelAgente =
-    f.tipo === "cobro"
+  const rosa = f.tipo === "reparto";
+  const imagenDelAgente = rosa
+    ? { src: "/tablero/ruteador.png", nombre: "Ruteador" }
+    : f.tipo === "cobro"
       ? { src: "/tablero/cobrador.png", nombre: "Cobrador" }
       : nUpsell !== undefined
         ? { src: "/tablero/upsell.png", nombre: `Upsell ${nUpsell}` }
@@ -1483,7 +1483,9 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         <div
           // El agente, 20 % más grande que la estación (01/11/2026: «hazlo un 20 % más»).
           className={`pointer-events-auto relative flex flex-col items-center justify-center gap-0.5 text-white shadow-xl ${
-            ctx.comoAgente ? "h-[173px] w-[173px] rounded-2xl border-2 border-emerald-400 bg-white" : "h-36 w-36 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-500"
+            ctx.comoAgente
+              ? `h-[173px] w-[173px] rounded-2xl border-2 ${rosa ? "border-fuchsia-400" : "border-emerald-400"} bg-white`
+              : `h-36 w-36 rounded-full bg-gradient-to-br ${rosa ? "from-fuchsia-300 to-fuchsia-600" : "from-emerald-300 to-emerald-500"}`
           } ${f.apagada ? "opacity-50" : ""}`}
         >
           {/* Arriba: a sus Seguimientos. */}
@@ -1506,7 +1508,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               izquierda»): donde llega el trazo de su ficha. Soltar un cable aquí es soltarlo en la ficha. */}
           <Handle type="target" position={Position.Left} id="entra-estacion" className={PUNTO_VERDE} title="Entrada de esta etapa (la misma que la de su ficha)" />
           {/* Sin número (01/11/2026: «mejor le quitamos el número»). */}
-          {ctx.comoAgente ? (
+          {ctx.comoAgente || rosa ? (
             // SU AGENTE (01/11/2026, sus PNG cuadrados): el robot en las fichas de venta, el COBRADOR en los Cobros y
             // el logo de UPSELL —con su número en un círculo— en las ofertas que vienen después de una Entrega.
             // Las esquinas redondeadas las pone el tablero.
@@ -1516,7 +1518,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
                 src={imagenDelAgente.src}
                 alt={imagenDelAgente.nombre}
                 draggable={false}
-                className={`h-full w-full rounded-2xl ${imagenDelAgente.src === "/tablero/agente.png" ? "object-contain p-1" : "object-cover"}`}
+                className={`${ctx.comoAgente ? "h-full w-full rounded-2xl" : "h-full w-full rounded-full"} ${imagenDelAgente.src === "/tablero/agente.png" ? "object-contain p-1" : "object-cover"}`}
               />
               {nUpsell !== undefined && (
                 <span
@@ -1536,9 +1538,9 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
         </div>
         {/* Debajo, sin empujar al círculo (así los brazos salen de su centro). */}
         {/* (03/11/2026: el verde más claro y «Agente IA» un poco más grande.) */}
-        <div className="pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full bg-emerald-500 px-5 py-1.5 text-[13px] font-bold leading-5 text-white shadow">
-          {ctx.comoAgente && <span className="text-[18px]">{imagenDelAgente.nombre}</span>}
-          <span className={ctx.comoAgente ? "text-[10px] font-semibold opacity-90" : ""}>{queEspera(f, ctx.tablero)}</span>
+        <div className={`pointer-events-auto absolute left-1/2 top-[calc(100%+8px)] flex -translate-x-1/2 flex-col items-center whitespace-nowrap rounded-full ${rosa ? "bg-fuchsia-600" : "bg-emerald-500"} px-5 py-1.5 text-[13px] font-bold leading-5 text-white shadow`}>
+          {(ctx.comoAgente || rosa) && <span className="text-[18px]">{imagenDelAgente.nombre}</span>}
+          <span className={ctx.comoAgente || rosa ? "text-[10px] font-semibold opacity-90" : ""}>{rosa ? "reparte los clientes" : queEspera(f, ctx.tablero)}</span>
         </div>
       </div>
       {/* LOS BRAZOS (su imagen): rectas desde el centro de la estación hasta cada camino. Alto fijo por camino
@@ -1554,7 +1556,7 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
               {aLaDerecha.map((s, i) => {
                 const y = i * (FILA + SEP) + FILA / 2;
                 return (
-                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke="#10b981" strokeWidth={2.5} strokeDasharray="7 5" className="pointer-events-auto" />
+                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke={rosa ? "#c026d3" : "#10b981"} strokeWidth={2.5} strokeDasharray="7 5" className="pointer-events-auto" />
                 );
               })}
             </svg>
@@ -1571,14 +1573,15 @@ function EstacionDeLaFicha({ f }: { f: FichaEnElEditor }) {
             <div
               key={s.clave}
               title={falta ?? s.etiqueta}
-              className={`pointer-events-auto relative flex ${icono ? "h-9" : "h-7"} min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 ${icono ? "pr-7" : "pr-5"} text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : "border-emerald-400 text-emerald-900"}`}
+              className={`pointer-events-auto relative flex ${icono ? "h-9" : "h-7"} min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 ${icono ? "pr-7" : "pr-5"} text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : rosa ? (f.reparto ?? []).find((o) => `rep:${o.id}` === s.clave)?.peso === 0 ? "border-slate-300 text-slate-500" : "border-fuchsia-400 text-fuchsia-900" : "border-emerald-400 text-emerald-900"}`}
             >
+              {rosa && s.clave.startsWith("rep:") && <InterruptorDeRuta f={f} clave={s.clave} />}
               <span className="truncate">{s.etiqueta.replace(/^(🔘|💬|✍️) /, s.clave.startsWith("btn:") ? "botón " : s.clave.startsWith("dec:") ? "si dice " : s.clave.startsWith("elige:") ? "" : "")}</span>
               <Handle
                 type="source"
                 position={Position.Right}
                 id={s.clave}
-                className={`${icono ? PUNTO_DE_ENTREGA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+                className={`${icono ? PUNTO_DE_ENTREGA : rosa ? PUNTO_ROSA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
                 title={icono ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…)" : undefined}
                 onClick={(e) => {
                   e.stopPropagation();
