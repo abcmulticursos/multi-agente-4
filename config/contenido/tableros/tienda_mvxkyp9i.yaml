@@ -3886,7 +3886,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+            - ✅ {Genial, puedes adquirir el Curso de la siguiente Manera|Perfecto, puedes llevar el curso a través de estos datos|Excelente, puedes adquirir el Curso de esta forma|Genial, puedes obtener el Curso de la siguiente manera} 😊👇
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -3894,7 +3894,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato|*Después nos mandas una foto de tu comprobante* para confirmar tu pago y darte acceso al instante|*Seguidamente nos compartes una imagen de tu comprobante* para corroborar tu pago y darte acceso ya mismo} 🤳🏼 😊"
           delay_after_sec: 6
       cobro:
         modo: producto
