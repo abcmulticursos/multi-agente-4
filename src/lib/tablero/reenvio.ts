@@ -13,11 +13,11 @@ import { laEntrega } from "./entregas";
 
 /**
  * UN REENVÍO A LA VEZ (04/11/2026, su conversación 191 corrida otra vez): «no me llegó lo que pagué» y, mientras salía,
- * «¿a qué hora me envían?» → el material entero salió DOS veces, mezclado. Lo que pide de nuevo con el reenvío de eso
- * mismo saliendo, o recién salido (3 min), no lo repite: mientras sale, nada (le está llegando); ya salido, una línea.
+ * «¿a qué hora me envían?» → el material entero salió DOS veces, mezclado. Mientras ESE MISMO reenvío está saliendo, no se
+ * repite (le está llegando). Ya salido, si insiste en que no lo ve, se le reenvía otra vez, como siempre (él: «el cliente
+ * se choca con el regalo y el upsell y dirá no lo veo»).
  */
-const REENVIO_RECIENTE_SEG = 180;
-const ultimoReenvio = new Map<number, { claves: string; desde: number; saliendo: boolean }>();
+const ultimoReenvio = new Map<number, { claves: string; saliendo: boolean }>();
 
 export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enmarcar = false): boolean {
   if (!estadoEnElTablero(convo.id)) return false;
@@ -44,15 +44,11 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
   }
   const claves = productos.join(",");
   const antes = ultimoReenvio.get(convo.id);
-  if (antes && antes.claves === claves && Date.now() / 1000 - antes.desde < REENVIO_RECIENTE_SEG) {
-    console.log(`[tablero] convo ${convo.id}: pide otra vez lo que ${antes.saliendo ? "se le está reenviando" : "se le acaba de reenviar"} → no se repite`);
-    if (!antes.saliendo)
-      void import("@/lib/workflow/engine").then(({ sendConfiguredSteps }) =>
-        sendConfiguredSteps(convo, [{ type: "text", body: "Te lo acabo de reenviar justo aquí arriba 👆😊 ¿Lo puedes ver?" }] as never)
-      );
+  if (antes && antes.claves === claves && antes.saliendo) {
+    console.log(`[tablero] convo ${convo.id}: pide otra vez lo que se le está reenviando → no se repite`);
     return true;
   }
-  const este = { claves, desde: Date.now() / 1000, saliendo: true };
+  const este = { claves, saliendo: true };
   ultimoReenvio.set(convo.id, este);
   console.log(`[tablero] convo ${convo.id}: REENVÍO de lo que entregó el tablero (${productos.join(", ")})`);
   // Se importa al llamarse: el motor de siempre usa este archivo y al revés habría un círculo.

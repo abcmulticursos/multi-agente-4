@@ -1183,14 +1183,6 @@ async function irA(
         console.log(`[tablero] convo ${convoId}: ya está en el regalo (${convo.state}) → no se repite`);
         return;
       }
-      // SALIÓ DEL REGALO SIN RESPONDERLO PARA PAGAR ALGO, Y NO PAGÓ (04/11/2026, su 187 corrida otra vez): pidió los datos
-      // del upsell con la pregunta del regalo en pantalla, no pagó, y su «no pagó» lo traía aquí: la pregunta del regalo
-      // le salía DOS veces. Se vuelve a esa pregunta sin repetirla (si después paga, la entrega se la ofrece otra vez, una).
-      if (regaloPorVolverAOfrecer(convoId)) {
-        setConversationState(convoId, "awaiting_gift_consent");
-        console.log(`[tablero] convo ${convoId}: vuelve al regalo que ya se le preguntó → no se repite la pregunta`);
-        return;
-      }
       if (!convo.paid_at) setPaidAt(convoId, ahora());
       setConversationState(convoId, "payment_approved");
       {
