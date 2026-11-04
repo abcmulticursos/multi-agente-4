@@ -89,7 +89,8 @@ import {
   topeDeOrganicos,
 } from "@/lib/workflow/config";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
-import { ultimosMensajes } from "@/lib/tablero/lector";
+import { leerComprobante, ultimosMensajes } from "@/lib/tablero/lector";
+import { notifyAdmin } from "@/lib/notifications";
 import { estadoEnElTablero } from "@/lib/tablero/estado";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
@@ -664,6 +665,21 @@ function esUnComprobanteDeUnPagoPendiente(convo: ConversationRow): boolean {
     convo.upsell_state === "ofrecido" ||
     convo.upsell_state === "aceptado"
   );
+}
+
+/**
+ * PASADAS LAS 70 HORAS, LA FOTO QUE NO ES UN COMPROBANTE (03/11/2026, él: «si no es un comprobante, el bot no le contesta
+ * y me avisa»). Con un cobro del tablero abierto, la imagen se lee antes de dejar pasar el turno: si no es un comprobante,
+ * no se le contesta y se avisa al dueño para que lo vea a mano. (La venta de siempre no tiene este lector: ahí pasa.)
+ */
+async function fueraDeVentanaSoloSiEsComprobante(convo: ConversationRow): Promise<boolean> {
+  if (!estadoEnElTablero(convo.id)?.cobro_ficha_id) return true;
+  const lectura = await leerComprobante(convo.id);
+  if (lectura) return true;
+  console.log(`[wh] convo ${convo.id}: pasadas las ${HORAS_PARA_DEJAR_DE_RESPONDER} h mandó una imagen que no es un comprobante → no contesto y aviso al dueño`);
+  if (convo.channel !== "test")
+    void notifyAdmin(`📎 *Imagen fuera de las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas*: ${convo.client_name ?? convo.name ?? convo.phone} tenía un pago pendiente y mandó una imagen que no parece un comprobante. Revísala a mano.`).catch(() => {});
+  return false;
 }
 
 function leContestamos(convo: ConversationRow): boolean {
@@ -1627,6 +1643,7 @@ async function handleIncomingMessage(
   // leído y nada que esperar. Cortar aquí es lo que hace que no cueste ni un
   // mensaje ni un token.
   if (!testOptions && !leContestamos(fresh)) return;
+  if (pasoLaVentanaDeRespuesta(fresh) && !(await fueraDeVentanaSoloSiEsComprobante(fresh))) return;
 
   // MODERACIÓN. Va antes que nada para que un pesado no cueste ni un token:
   // si aquí se corta, el motor y el modelo no llegan a ejecutarse.

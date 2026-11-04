@@ -2185,6 +2185,25 @@ async function atenderComprobante(
         ] as never);
         console.log(`[tablero] convo ${convo.id}: pagó el precio de «${nombreMejor}» (eligió otro) → se lo digo antes de entregar`);
       }
+      // PAGÓ DE MÁS (03/11/2026, la batería: pagó S/30 por el de S/15 y a su «pagué de más» la IA contestó «ese
+      // monto es correcto, no pagaste de más»). Lo que sobra por encima del que se le entrega se le dice con los
+      // montos exactos, y el dueño recibe el aviso para devolverlo a mano. La entrega no cambia.
+      const sobra = Math.round((total - (precios[mejor] ?? total)) * 100) / 100;
+      if (sobra > 0.009) {
+        const plata = (v: number) => formatCurrencyAmount(v, pais as never);
+        const nombre = producto(config, mejor)?.name ?? "tu producto";
+        await sendConfiguredSteps(convo, [
+          {
+            type: "text",
+            body: `Recibí tu pago de *${plata(total)}* 🙏\n\n*${nombre}* cuesta *${plata(precios[mejor])}*: te sobran *${plata(sobra)}*. Un asesor te escribe por aquí para devolvértelos 😊`,
+          },
+        ] as never);
+        console.log(`[tablero] convo ${convo.id}: pagó ${total} por «${nombre}» (${precios[mejor]}) → le sobran ${sobra}, aviso al dueño`);
+        if (convo.channel !== "test")
+          void notifyAdmin(
+            `💸 *Pagó de más:* ${convo.client_name ?? convo.name ?? convo.phone} pagó ${plata(total)} por ${nombre} (${plata(precios[mejor])}). Le sobran ${plata(sobra)}: devuélveselos o acuerda con él.`
+          ).catch(() => {});
+      }
     } else if (alcanza && alcanza[0] !== elegidoId) {
       proponerProducto(convo.id, alcanza[0]);
       const nombre = producto(config, alcanza[0])?.name ?? "el otro producto";
