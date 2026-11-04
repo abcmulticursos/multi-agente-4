@@ -1392,6 +1392,26 @@ const PALABRAS_COMUNES = new Set([
  * esos Cobros con su precio del país del cliente. Si nombró un método, ya quedó anotado: al elegir le
  * llegan sus datos de frente.
  */
+/**
+ * «¿CON QUÉ MÉTODO PREFIERES PAGAR?» CON SUS FRASES (04/11/2026, su 280). Él las eligió: sutiles, sin sonar a condición, con
+ * «correctamente» variado y sin «salga» (asusta). Una al azar, para no sonar a loro, y debajo los métodos de su país, en
+ * el MISMO mensaje. Si la anterior del bot ya era una de éstas, sale otra distinta.
+ */
+const PREGUNTAS_DEL_METODO = [
+  "¡Genial! 😊 ¿Con qué método prefieres pagar? 👇 Así te paso los datos para que hagas tu pago correctamente",
+  "¡Perfecto! 🙌 ¿Qué método de pago te queda mejor? 👇 Así te envío los datos para que puedas adquirirlo de manera correcta",
+  "¡Excelente! 😊 Dime con qué método prefieres pagar 👇 y te paso los datos exactos para tu compra",
+  "¡Qué bien! 🙌 ¿Por cuál método te gustaría pagar? 👇 Así te doy los datos para que realices tu pago de forma correcta",
+];
+async function preguntarElMetodoConSusFrases(convo: ConversationRow): Promise<void> {
+  const ultimoDelBot = [...ultimosMensajes(convo.id, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+  const libres = PREGUNTAS_DEL_METODO.filter((p) => !ultimoDelBot.includes(p.slice(0, 25)));
+  const frase = libres[Math.floor(Math.random() * libres.length)] ?? PREGUNTAS_DEL_METODO[0];
+  const lista = getPaymentMethods(convo.phone).map((m) => `• *${m.label}*`).join("\n");
+  await sendConfiguredSteps(convo, [{ type: "text", body: lista ? `${frase}\n\n${lista}` : frase }] as never);
+  console.log(`[tablero] convo ${convo.id}: quiere comprar y el método es el camino → le pregunto el método (frase fija, sin la IA)`);
+}
+
 async function recordarLasOpciones(convo: ConversationRow, t: Tablero, cobros: FichaDelTablero[], metodo: string | null): Promise<void> {
   // UNA VEZ, NO EN BUCLE (B2 en la copia: diez «sí» seguidos recibieron diez veces el mismo texto). Si su
   // último mensaje del bot ya era este recordatorio, ahora contesta la IA, con sus palabras.
@@ -4172,6 +4192,31 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
     }
   };
+  // ¿Elegir el método es el paso para comprar aquí? (ver «EL MÉTODO ES EL CAMINO», abajo.)
+  const elMetodoEsElCamino = () => {
+    const metodos = getPaymentMethods(convo.phone).flatMap((m) => [m.label, m.method, ...(m.aliases ?? [])].map((x) => sinTildes(String(x ?? "")).replace(/[^a-z0-9ñ\s]/g, " ").trim()).filter((x) => x.length >= 3));
+    if (!metodos.length) return false;
+    const esMetodo = (s: string) => {
+      const n = ` ${sinTildes(s).replace(/[^a-z0-9ñ\s]/g, " ").replace(/\s+/g, " ").trim()} `;
+      return metodos.some((m) => n.includes(` ${m} `));
+    };
+    const porDestino = new Map<string, number>();
+    for (const duena of [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x)) {
+      const { botones, cuadritos } = opcionesDe(pasosQueValen(convo.id, duena));
+      const opciones = [
+        ...botones.map((b) => ({ salida: `btn:${b.id}`, nombre: String((b as { label?: string }).label ?? "") })),
+        ...cuadritos.map((d) => ({ salida: `dec:${d.id}`, nombre: String((d as { title?: string }).title ?? "") })),
+      ];
+      for (const o of opciones) {
+        const a = cableDeLaSalida(t, duena.id, o.salida)?.a;
+        if (a && esMetodo(o.nombre)) porDestino.set(a, (porDestino.get(a) ?? 0) + 1);
+      }
+    }
+    return [...porDestino.entries()].some(([id, n]) => {
+      const d = t.fichas.find((x) => x.id === id);
+      return n >= 2 && !!d && (d.tipo === "mensaje" || d.tipo === "intro_ob") && opcionesDeCompraEn(t, [d], config, pais, false).length > 0;
+    });
+  };
   // «SÍ» A LO QUE PROPUSO EL BOT (27/10/2026), como la venta de siempre (`laPropuestaDelBotQueElClienteAfirmo`
   // y la afirmación a la pregunta de pago): si su última burbuja invitó a comprar y el cliente dice «sí»,
   // «dale», «ok»…, eso ES decidir. Si el bot propuso UN producto, ése; si hay una sola forma de comprar,
@@ -4181,20 +4226,29 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // ¿te lo preparo?» → «yape» → «¿Cuál eliges? 1… 2…», con la elección ya hecha. Solo si dijo el método y poco
   // más: «yape», «con yape», «por yape porfa». Queda anotado y sus datos salen de frente.)
   const soloElMetodo = !!metodoDicho && normal.replace(/[^a-z0-9ñ\s]/g, " ").split(/\s+/).filter(Boolean).length <= 3;
-  if (
-    texto &&
-    !estado.cobro_ficha_id &&
-    (soloElMetodo || (!metodoDicho && AFIRMA.test(normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim())))
-  ) {
-    // Las últimas burbujas del bot (tras su pregunta puede venir otra sin pregunta, como las opciones).
-    // (Se saltan los mensajes del cliente del final —su propio «sí»— y se toman las burbujas del bot de antes.)
-    const alReves = [...ultimosMensajes(convo.id, 10)].reverse();
-    const desde = alReves.findIndex((m) => m.role !== "user");
-    const resto = desde < 0 ? [] : alReves.slice(desde);
-    const hasta = resto.findIndex((m) => m.role === "user");
-    const ultimaDelBot = (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
-    const pregunta = sinTildes(ultimaDelBot.split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
-    if (pregunta && INVITA_A_COMPRAR.test(pregunta) && !/\b(foto|fotos|imagen|imagenes|muestra|muestras|video)\b/.test(pregunta)) {
+  // Las últimas burbujas del bot (tras su pregunta puede venir otra sin pregunta, como las opciones).
+  // (Se saltan los mensajes del cliente del final —su propio «sí»— y se toman las burbujas del bot de antes.)
+  const alReves = [...ultimosMensajes(convo.id, 10)].reverse();
+  const desde = alReves.findIndex((m) => m.role !== "user");
+  const resto = desde < 0 ? [] : alReves.slice(desde);
+  const hasta = resto.findIndex((m) => m.role === "user");
+  const ultimaDelBot = (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
+  const pregunta = sinTildes(ultimaDelBot.split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
+  const invitaAComprar = !!pregunta && INVITA_A_COMPRAR.test(pregunta) && !/\b(foto|fotos|imagen|imagenes|muestra|muestras|video)\b/.test(pregunta);
+  // EL «SÍ» QUE NO ESTÁ EN LA LISTA LO DECIDE LA IA (04/11/2026, su 280: «si porfavor», junto, no era «sí» para la lista y
+  // la IA improvisó los pasos). Él: «el bot tiene que darse cuenta cuando se está confirmando, sin palabritas». Solo
+  // cuando el bot acaba de invitar a comprar y la respuesta es corta; la lista sigue primero (gratis), la IA desempata.
+  let afirma = !metodoDicho && AFIRMA.test(normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim());
+  if (!afirma && !metodoDicho && texto && !estado.cobro_ficha_id && invitaAComprar && !esPreguntaQueNoElige(texto) && normal.split(/\s+/).filter(Boolean).length <= 6)
+    afirma =
+      (await elegirOpcionConIA(convo.id, texto, [
+        {
+          id: "acepta",
+          etiqueta: `Acepta o dice que sí a lo que el bot le acaba de preguntar («${pregunta.slice(0, 90)}»): quiere seguir, aunque lo escriba con errores o junto. NO si pregunta algo, duda, pone una condición o dice que no`,
+        },
+      ])) === "acepta";
+  if (texto && !estado.cobro_ficha_id && (soloElMetodo || afirma)) {
+    if (invitaAComprar) {
       const { haciaPagar, destinos, soloCobros } = opcionesDeCompra();
       const nombreDelDestino = (o: (typeof haciaPagar)[number]) => {
         const d = t.fichas.find((x) => x.id === cableDeLaSalida(t, o.duena.id, o.salida)?.a);
@@ -4220,6 +4274,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       }
       if (soloCobros.length > 1) {
         await recordarLasOpciones(convo, t, soloCobros, metodoDicho);
+        return true;
+      }
+      // EL MÉTODO ES EL CAMINO (04/11/2026, su 280 de GRAFISMO): su intro dice «responde con un método» y cada método
+      // (cuadrito o botón) lleva a su intro de order bump. Con el «sí» y sin método, la IA improvisaba («Primero, elige el
+      // método…», que suena a condición). Ahora el bot pregunta con sus frases y la lista de su país, y la IA no habla en
+      // ese turno (nada de una burbuja suya antes o después). Se reconoce por la estructura: dos o más opciones de la
+      // ficha, con el nombre de un método de su país, que llevan a la MISMA ficha y desde ella se llega a cobrar.
+      if (!metodoDicho && !metodoVigente(getConversationById(convo.id) ?? convo) && elMetodoEsElCamino()) {
+        await preguntarElMetodoConSusFrases(convo);
         return true;
       }
     }
