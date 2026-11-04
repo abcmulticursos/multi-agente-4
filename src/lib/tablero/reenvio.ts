@@ -11,6 +11,14 @@ import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { entregasDelCliente, estadoEnElTablero } from "./estado";
 import { laEntrega } from "./entregas";
 
+/**
+ * UN REENVÍO A LA VEZ (04/11/2026, su conversación 191 corrida otra vez): «no me llegó lo que pagué» y, mientras salía,
+ * «¿a qué hora me envían?» → el material entero salió DOS veces, mezclado. Lo que pide de nuevo con el reenvío de eso
+ * mismo saliendo, o recién salido (3 min), no lo repite: mientras sale, nada (le está llegando); ya salido, una línea.
+ */
+const REENVIO_RECIENTE_SEG = 180;
+const ultimoReenvio = new Map<number, { claves: string; desde: number; saliendo: boolean }>();
+
 export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enmarcar = false): boolean {
   if (!estadoEnElTablero(convo.id)) return false;
   let productos = entregasDelCliente(convo.id);
@@ -34,6 +42,18 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
     if (nombrado.length === 1) productos = nombrado;
     else if (/\b(segundo|ultimo|el otro|nuevo|lo ultimo)\b/.test(dicho)) productos = [productos[productos.length - 1]];
   }
+  const claves = productos.join(",");
+  const antes = ultimoReenvio.get(convo.id);
+  if (antes && antes.claves === claves && Date.now() / 1000 - antes.desde < REENVIO_RECIENTE_SEG) {
+    console.log(`[tablero] convo ${convo.id}: pide otra vez lo que ${antes.saliendo ? "se le está reenviando" : "se le acaba de reenviar"} → no se repite`);
+    if (!antes.saliendo)
+      void import("@/lib/workflow/engine").then(({ sendConfiguredSteps }) =>
+        sendConfiguredSteps(convo, [{ type: "text", body: "Te lo acabo de reenviar justo aquí arriba 👆😊 ¿Lo puedes ver?" }] as never)
+      );
+    return true;
+  }
+  const este = { claves, desde: Date.now() / 1000, saliendo: true };
+  ultimoReenvio.set(convo.id, este);
   console.log(`[tablero] convo ${convo.id}: REENVÍO de lo que entregó el tablero (${productos.join(", ")})`);
   // Se importa al llamarse: el motor de siempre usa este archivo y al revés habría un círculo.
   // Cada entrega con SU nombre en {{PRODUCTO_ENTREGADO}}, como la entrega de la ficha (24/10/2026:
@@ -52,6 +72,9 @@ export function reenviarLoDelTablero(convo: ConversationRow, loQueDijo = "", enm
       // (Con el precio del tablero, nunca el general de la venta de siempre — 02/11/2026.)
       return sendConfiguredSteps(convo, [...marco, ...pasos] as never, precioDelTableroPara(convo));
     })
-    .catch((err) => console.error(`[tablero] convo ${convo.id}: falló el reenvío`, err));
+    .catch((err) => console.error(`[tablero] convo ${convo.id}: falló el reenvío`, err))
+    .finally(() => {
+      este.saliendo = false;
+    });
   return true;
 }

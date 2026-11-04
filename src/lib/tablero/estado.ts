@@ -112,6 +112,9 @@ for (const [col, tipo] of [
   ["segs_enviados", "TEXT NOT NULL DEFAULT '[]'"],
   // 1 = ya se le contó que ahora hay más productos (el aviso de actualización del automático): una vez.
   ["aviso_novedad", "INTEGER NOT NULL DEFAULT 0"],
+  // Los productos de la etapa en que se activó la oferta del seguimiento (04/11/2026): al comprar, la oferta sigue
+  // valiendo solo para ellos (el upgrade), no para el upsell.
+  ["oferta_de", "TEXT NOT NULL DEFAULT '[]'"],
 ] as const) {
   try {
     db.exec(`ALTER TABLE tablero_estado ADD COLUMN ${col} ${tipo}`);
@@ -149,6 +152,7 @@ export interface EstadoEnElTablero {
   espera_ficha: string | null;
   imagenes_ofrecidas: number;
   segs_enviados: string;
+  oferta_de: string;
 }
 
 /** Las huellas de los seguimientos que ya le salieron en esta etapa. */
@@ -351,6 +355,29 @@ export function cerrarCobro(conversationId: number): void {
 /** Cambia los precios congelados del cobro abierto (solo para BAJARLOS a la oferta: ver el motor). */
 export function ponerPreciosDelCobro(conversationId: number, precios: Record<string, number>): void {
   db.prepare("UPDATE tablero_estado SET cobro_precios = ? WHERE conversation_id = ?").run(JSON.stringify(precios), conversationId);
+}
+
+/** Los productos para los que sigue valiendo la oferta de una etapa ya comprada. */
+export function ofertaDe(e: EstadoEnElTablero | null | undefined): string[] {
+  try {
+    const v = JSON.parse(e?.oferta_de || "[]");
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * COMPRÓ CON LA OFERTA ACTIVADA (04/11/2026, la batería: tras la oferta del seguimiento 2 el upsell salía a S/10 en vez de
+ * S/15). La oferta era de esa etapa: sigue valiendo para lo que ya se le había presentado (completar al pack cuesta la
+ * diferencia que vio) y no para lo que venga (el upsell es otra venta, con su precio; sus propios seguimientos pueden
+ * volver a activarla).
+ */
+export function cerrarOfertaDeLaEtapa(conversationId: number): void {
+  const e = estadoEnElTablero(conversationId);
+  if (!e || e.oferta !== 1) return;
+  const de = [...new Set([...ofertaDe(e), ...presentadosDe(e)])];
+  db.prepare("UPDATE tablero_estado SET oferta = 0, oferta_de = ? WHERE conversation_id = ?").run(JSON.stringify(de), conversationId);
 }
 
 export function activarOferta(conversationId: number): void {

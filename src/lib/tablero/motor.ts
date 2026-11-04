@@ -122,6 +122,8 @@ import { laEntrega } from "./entregas";
 import {
   abrirCobro,
   activarOferta,
+  cerrarOfertaDeLaEtapa,
+  ofertaDe,
   anotarCompra,
   anotarEntrega,
   anotarMuestras,
@@ -239,7 +241,7 @@ function conLoEntregado(convo: ConversationRow, steps: unknown): unknown {
  * {{PRODUCTO}}, {{PRECIO_COMPLETO}}… son los del producto entregado, en el país del cliente (con la oferta si la tiene).
  */
 function conLosComodinesDeLaEntrega<T>(convoId: number, pasos: T, productoId: string, pais: string): T {
-  return conLosComodinesDeLaFicha(pasos, productosDeLaFicha(loadWorkflowConfig(), [productoId], pais, estadoEnElTablero(convoId)?.oferta === 1), pais);
+  return conLosComodinesDeLaFicha(pasos, productosDeLaFicha(loadWorkflowConfig(), [productoId], pais, enOferta(estadoEnElTablero(convoId), [productoId])), pais);
 }
 
 function precioDelTablero(convo: ConversationRow): number | undefined {
@@ -267,7 +269,7 @@ function precioDelTablero(convo: ConversationRow): number | undefined {
   // 3) El básico de su tienda.
   const alineacion = (config?.tiendas ?? []).find((x) => x.id === e.tienda_id)?.alineacion as Record<string, unknown> | undefined;
   const basico = elDeLaTienda(BASICO_DE_LA_TIENDA, alineacion);
-  const v = basico !== BASICO_DE_LA_TIENDA ? precioDelProducto(producto(config, basico), pais, e.oferta === 1) : null;
+  const v = basico !== BASICO_DE_LA_TIENDA ? precioDelProducto(producto(config, basico), pais, enOferta(e, [basico])) : null;
   return v ?? undefined;
 }
 
@@ -288,7 +290,7 @@ ponerPreparadorDeDatos((convo, pasos) => {
   const elegido = e.cobro_elegido ?? fc.cobro?.producto_id ?? undefined;
   const pais = getEffectiveCountryCode(convo.phone, config);
   const ids = [elegido, ...Object.keys(precios)];
-  return conLoEntregado(convo, conLosComodinesDeLaFicha(pasos, productosDeLaFicha(config, ids, pais, e.oferta === 1, precios), pais));
+  return conLoEntregado(convo, conLosComodinesDeLaFicha(pasos, productosDeLaFicha(config, ids, pais, enOferta(e, ids), precios), pais));
 });
 
 /** «El básico / el full de la tienda» → su producto de verdad (sin ese producto en la tienda, se queda el código). */
@@ -297,6 +299,20 @@ function elDeLaTienda(id: string, alineacion: Record<string, unknown> | undefine
   if (id === BASICO_DE_LA_TIENDA) return de(alineacion?.basico) || de(alineacion?.unico) || id;
   if (id === FULL_DE_LA_TIENDA) return de(alineacion?.full) || id;
   return id;
+}
+
+/**
+ * ¿VAN CON EL PRECIO DE OFERTA? Con la oferta activa, sí. Ya comprada su etapa, solo los productos que se le presentaron
+ * en ella (`cerrarOfertaDeLaEtapa`): el upgrade sí, el upsell no.
+ */
+function enOferta(e: EstadoEnElTablero | null | undefined, ids: Array<string | null | undefined>): boolean {
+  if (!e) return false;
+  if (e.oferta === 1) return true;
+  const de = ofertaDe(e);
+  if (!de.length) return false;
+  const alineacion = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === e.tienda_id)?.alineacion as Record<string, unknown> | undefined;
+  const reales = ids.filter((x): x is string => !!x).map((id) => elDeLaTienda(id, alineacion));
+  return reales.length > 0 && reales.every((id) => de.includes(id));
 }
 
 /**
@@ -309,7 +325,7 @@ function precioDeLaFicha(convoId: number, f: FichaDelTablero, t: Tablero, pais: 
   if (ids.length !== 1) return undefined;
   const e = estadoEnElTablero(convoId);
   const alineacion = (loadWorkflowConfig()?.tiendas ?? []).find((x) => x.id === e?.tienda_id)?.alineacion as Record<string, unknown> | undefined;
-  const v = precioDelProducto(producto(loadWorkflowConfig(), elDeLaTienda(ids[0], alineacion)), pais, e?.oferta === 1);
+  const v = precioDelProducto(producto(loadWorkflowConfig(), elDeLaTienda(ids[0], alineacion)), pais, enOferta(e, ids));
   return v ?? undefined;
 }
 
@@ -800,7 +816,7 @@ async function irA(
       // SU COBRO, CALLADO (02/11/2026): llegó un comprobante y encaja con un «💰 Si paga» de esta ficha. No se repiten sus
       // burbujas: se abre su cobro con sus precios y el comprobante se lee contra él (como un Cobro en silencio).
       if (enSilencio && f.cobro?.modo === "producto" && cobraPorSusCables(f, t)) {
-        const deOferta = estadoEnElTablero(convoId)?.oferta === 1;
+        const deOferta = enOferta(estadoEnElTablero(convoId), [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]);
         const precios: Record<string, number> = {};
         for (const id of [f.cobro.producto_id, ...(f.cobro.acepta ?? [])]) {
           const v = id ? precioDelProducto(producto(config, id), pais, deOferta) : null;
@@ -857,7 +873,7 @@ async function irA(
       }
       pasosAEnviar = conLosComodinesDeLaFicha(
         pasosAEnviar,
-        productosDeLaFicha(config, idsParaComodines(convoId, f, t), pais, estadoEnElTablero(convoId)?.oferta === 1),
+        productosDeLaFicha(config, idsParaComodines(convoId, f, t), pais, enOferta(estadoEnElTablero(convoId), idsParaComodines(convoId, f, t))),
         pais
       );
       await sendConfiguredSteps(convo, pasosAEnviar as never, precioDeLaFicha(convoId, f, t, pais));
@@ -870,7 +886,7 @@ async function irA(
       // su «💰 Si paga»; si no responde, «⏳ Si no responde» (abajo, como una ficha con opciones).
       if (cobraEnLaFicha(f, t) && f.cobro?.producto_id) {
         const pid = f.cobro.producto_id;
-        const v = precioDelProducto(producto(config, pid), pais, estadoEnElTablero(convoId)?.oferta === 1);
+        const v = precioDelProducto(producto(config, pid), pais, enOferta(estadoEnElTablero(convoId), [pid]));
         if (v !== null) {
           abrirCobro(convoId, f.id, { [pid]: v });
           console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» cobra sola ${pid} a ${v} (espera su comprobante)`);
@@ -994,7 +1010,7 @@ async function irA(
       // LOS PRECIOS SE CONGELAN AL ABRIR EL COBRO: si él cambia un precio mientras tanto, a este
       // cliente se le cobra lo que se le dijo (como el precio congelado de la venta de siempre).
       const estado = estadoEnElTablero(convoId);
-      const deOferta = f.cobro?.precio === "oferta" || (f.cobro?.precio !== "normal" && estado?.oferta === 1);
+      const deOferta = f.cobro?.precio === "oferta" || (f.cobro?.precio !== "normal" && enOferta(estado, [f.cobro?.producto_id, ...(f.cobro?.acepta?.length ? f.cobro.acepta : alternativasDelCobro(t, f))]));
       const precios: Record<string, number> = {};
       // SIN «ACEPTA» ESCRITO, ACEPTA SUS ALTERNATIVAS (01/11/2026, su conv 166): eligió el SUPER PACK, el
       // seguimiento le ofreció GRAFISMO a S/7, pagó 7 y el cobro (que solo conocía el PACK) contestó «te falta
@@ -1165,6 +1181,14 @@ async function irA(
       // el silencio lo llevó al regalo: se le entrega y el regalo sigue donde iba (25/10/2026).
       if (ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
         console.log(`[tablero] convo ${convoId}: ya está en el regalo (${convo.state}) → no se repite`);
+        return;
+      }
+      // SALIÓ DEL REGALO SIN RESPONDERLO PARA PAGAR ALGO, Y NO PAGÓ (04/11/2026, su 187 corrida otra vez): pidió los datos
+      // del upsell con la pregunta del regalo en pantalla, no pagó, y su «no pagó» lo traía aquí: la pregunta del regalo
+      // le salía DOS veces. Se vuelve a esa pregunta sin repetirla (si después paga, la entrega se la ofrece otra vez, una).
+      if (regaloPorVolverAOfrecer(convoId)) {
+        setConversationState(convoId, "awaiting_gift_consent");
+        console.log(`[tablero] convo ${convoId}: vuelve al regalo que ya se le preguntó → no se repite la pregunta`);
         return;
       }
       if (!convo.paid_at) setPaidAt(convoId, ahora());
@@ -1387,7 +1411,7 @@ async function recordarLasOpciones(convo: ConversationRow, t: Tablero, cobros: F
   const opciones = ids
     .map((id) => {
       const p = producto(config, id);
-      const precio = p ? precioDelProducto(p, pais, estado?.oferta === 1) : null;
+      const precio = p ? precioDelProducto(p, pais, enOferta(estado, [id])) : null;
       return p ? { nombre: p.name, precio } : null;
     })
     .filter((x): x is { nombre: string; precio: number | null } => !!x)
@@ -1756,7 +1780,7 @@ async function contestarConIA(
             reenviarDatos: async () => {
               const pasos = conLosComodinesDeLaFicha(
                 pasosActivos(cobro.steps),
-                productosDeLaFicha(config, idsParaComodines(convo.id, cobro, t), pais, estado.oferta === 1),
+                productosDeLaFicha(config, idsParaComodines(convo.id, cobro, t), pais, enOferta(estado, idsParaComodines(convo.id, cobro, t))),
                 pais
               );
               console.log(`[tablero] convo ${convo.id}: reenvío las burbujas de su cobro «${cobro.titulo || cobro.id}»`);
@@ -2012,7 +2036,7 @@ function loQueSabeLaIA(convo: ConversationRow, estado: EstadoEnElTablero | null,
   const productos = presentadosDe(estado).flatMap((id) => {
     const p = producto(config, id);
     if (!p) return [];
-    const precio = precioDelProducto(p, pais, estado?.oferta === 1);
+    const precio = precioDelProducto(p, pais, enOferta(estado, [id]));
     const antes = p.precios_por_pais?.[pais]?.market_price ?? p.market_price;
     if (precio !== null) montos.push(precio);
     if (typeof antes === "number" && antes > 0) montos.push(antes);
@@ -2055,7 +2079,7 @@ async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: Ficha
   console.log(`[tablero] convo ${convo.id}: reenvío los datos de «${f.titulo || f.id}» (${pasos.length} burbuja/s, ${precio ?? "?"})`);
   await sendConfiguredSteps(
     convo,
-    conLosComodinesDeLaFicha(pasos, productosDeLaFicha(config, idsParaComodines(convo.id, f, t), pais, estado?.oferta === 1), pais) as never,
+    conLosComodinesDeLaFicha(pasos, productosDeLaFicha(config, idsParaComodines(convo.id, f, t), pais, enOferta(estado, idsParaComodines(convo.id, f, t))), pais) as never,
     precio
   );
   return true;
@@ -2192,10 +2216,13 @@ async function atenderComprobante(
       if (sobra > 0.009) {
         const plata = (v: number) => formatCurrencyAmount(v, pais as never);
         const nombre = producto(config, mejor)?.name ?? "tu producto";
+        // (En un upgrade lo que se cobra es la diferencia: «completar X» y no «X cuesta S/3» —su 191 corrida otra vez.)
+        const entero = precioDelProducto(producto(config, mejor), pais, enOferta(estadoEnElTablero(convo.id), [mejor])) ?? precios[mejor];
+        const loQueCuesta = entero > precios[mejor] + 0.009 ? `Para completar *${nombre}* faltaban *${plata(precios[mejor])}*` : `*${nombre}* cuesta *${plata(precios[mejor])}*`;
         await sendConfiguredSteps(convo, [
           {
             type: "text",
-            body: `Recibí tu pago de *${plata(total)}* 🙏\n\n*${nombre}* cuesta *${plata(precios[mejor])}*: te sobran *${plata(sobra)}*. Un asesor te escribe por aquí para devolvértelos 😊`,
+            body: `Recibí tu pago de *${plata(total)}* 🙏\n\n${loQueCuesta}: te sobran *${plata(sobra)}*. Un asesor te escribe por aquí para devolvértelos 😊`,
           },
         ] as never);
         console.log(`[tablero] convo ${convo.id}: pagó ${total} por «${nombre}» (${precios[mejor]}) → le sobran ${sobra}, aviso al dueño`);
@@ -2369,9 +2396,9 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
   const yaIncluidos = new Set<string>();
   for (const f of t.fichas) {
     if ((f.tipo !== "cobro" && !cobraPorSusCables(f, t)) || f.cobro?.modo !== "producto" || !f.cobro.producto_id || !comprados.has(f.cobro.producto_id)) continue;
-    const suyo = precioDelProducto(producto(config, f.cobro.producto_id), pais, estado?.oferta === 1) ?? 0;
+    const suyo = precioDelProducto(producto(config, f.cobro.producto_id), pais, enOferta(estado, [f.cobro.producto_id])) ?? 0;
     for (const otro of alternativasDelCobro(t, f)) {
-      const suPrecio = precioDelProducto(producto(config, otro), pais, estado?.oferta === 1);
+      const suPrecio = precioDelProducto(producto(config, otro), pais, enOferta(estado, [otro]));
       if (suPrecio !== null && suPrecio <= suyo) yaIncluidos.add(otro);
     }
   }
@@ -2385,7 +2412,7 @@ function loQuePuedeComprar(convo: ConversationRow, t: Tablero, pais: string): Lo
       if (!pid || comprados.has(pid) || vistos.has(pid) || yaIncluidos.has(pid)) continue;
       if (!mostrados.has(pid) && !visitadas.includes(f.id)) continue;
       const p = producto(config, pid);
-      const lleno = precioDelProducto(p, pais, estado?.oferta === 1);
+      const lleno = precioDelProducto(p, pais, enOferta(estado, [pid]));
       if (!p || lleno === null) continue;
       const deLoComprado = alternativasDelCobro(t, f).filter((x) => comprados.has(x));
       const upgrade = deLoComprado.length > 0 || !!f.cobro.diferencia;
@@ -2524,14 +2551,28 @@ function propuestaApuntada(convo: ConversationRow, t: Tablero, pais: string): Lo
 async function avisarSiReclamaOtroProducto(convo: ConversationRow, contenido: string): Promise<boolean> {
   if (!contenido.trim() || contenido.startsWith("bubble:")) return false;
   if (entregasDelCliente(convo.id).length === 0 || (getConversationById(convo.id) ?? convo).had_emergency) return false;
+  // Ni en medio de los pasos del regalo (04/11/2026, su 191 corrida otra vez: «eso no es arteterapia», del enlace para
+  // comentar, salió como reclamo): ahí habla del regalo, y eso lo explica la IA.
+  if ((getConversationById(convo.id) ?? convo).state === "awaiting_facebook_comment") return false;
   // (Un «sí», «ok», «dale» o un mensaje de menos de 3 palabras no es un reclamo: en la batería «si dale» se tomó como uno.)
   const normal = sinTildes(contenido).replace(/[^a-zñ0-9\s]/g, " ").replace(/\s+/g, " ").trim();
   if (AFIRMA.test(normal) || normal.split(" ").length < 3) return false;
+  // Ni uno que EMPIEZA aceptando (04/11/2026, la batería: «si quiero completar», al «¿completas al PACK?», se tomó como
+  // reclamo: aviso al dueño, y el upgrade se perdió). Quien empieza con «sí» contesta a lo que se le ofreció.
+  // (Solo los «sí» claros: «ya», «bueno» o «listo» también abren un reclamo —«ya no quiero esto»—, y con «pero» se reclama.)
+  if (/^(si+|sip|claro|dale|ok|okey|okay|oki|de una|por supuesto|perfecto)\b/.test(normal) && !/\bpero\b/.test(normal)) return false;
   const reclamo = await elegirOpcionConIA(convo.id, contenido, [
     {
       id: "otro_producto",
       etiqueta:
-        "Reclama que lo que recibió NO es lo que pidió o compró: le llegó otro producto, otro material o algo equivocado. NO si solo pregunta qué es algo, dice que no le llegó, pide que le reenvíen, contesta que no quiere una oferta, o pregunta por otro producto para comprarlo",
+        "Reclama que lo que le ENTREGARON no es lo que pidió o compró: le llegó otro producto, otro material o algo equivocado. NO si solo pregunta qué es algo, dice que no le llegó, pide que le reenvíen, contesta que no quiere una oferta, pregunta por otro producto para comprarlo, o insiste en que le den otro producto con lo que ya pagó",
+    },
+    // (04/11/2026, su 191 corrida otra vez: «pero ya pagué el otro, ¿no me pueden entregar con lo que pagué?» —pedía el
+    // upsell con su pago— se tomó como reclamo y salió el aviso. Con la otra salida a la vista, la IA las separa.)
+    {
+      id: "pide_o_pregunta",
+      etiqueta:
+        "Pregunta o pide algo sobre una oferta o un producto: si con lo que ya pagó le dan otro, si puede cambiar o completar, cuánto cuesta, qué es; o dice que no le llegó, pide el reenvío, o no quiere la oferta",
     },
   ]);
   if (reclamo !== "otro_producto") return false;
@@ -2814,8 +2855,9 @@ async function cerrarLaVenta(
 ): Promise<void> {
   cerrarCobro(convo.id);
   anotarCompra({ conversationId: convo.id, fichaId: f.id, productoId, salida, monto: total, moneda });
-  // COMPRÓ: lo que venga (el upsell) es otra venta, con sus seguimientos desde el 1.
+  // COMPRÓ: lo que venga (el upsell) es otra venta, con sus seguimientos desde el 1 y sin la oferta de esta etapa.
   reiniciarSeguimientosHechos(convo.id);
+  cerrarOfertaDeLaEtapa(convo.id);
   // LO PAGADO, EN LA CONVERSACIÓN (25/10/2026), como la venta de siempre (`addToPaidTotal`): de ahí
   // lo leen el kanban (comprador y su dinero), los resultados y la autopurga (que NUNCA borra a quien
   // pagó). Sin esto, quien compraba por el tablero se veía como si no hubiera comprado.
@@ -3508,7 +3550,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         const texto = (config?.order_bump?.aviso_actualizacion ?? "").trim() || AVISO_DE_ACTUALIZACION_POR_DEFECTO;
         const pasos = conLosComodinesDeLaFicha(
           [{ type: "text", body: texto }] as never,
-          productosDeLaFicha(config, vieja.presentacion.presenta ?? [], pais, estado.oferta === 1),
+          productosDeLaFicha(config, vieja.presentacion.presenta ?? [], pais, enOferta(estado, vieja.presentacion.presenta ?? [])),
           pais
         );
         await sendConfiguredSteps(convo, pasos as never);
@@ -3590,7 +3632,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         const f = t.fichas.find((x) => x.id === id);
         return !!f && (f.tipo === "cobro" || cobraPorSusCables(f, t)) && !f.apagada && f.cobro?.modo === "producto" && [f.cobro.producto_id, ...(f.cobro.acepta ?? [])].some((p) => !!p && !comprados.has(p));
       });
-      if (quedaPorComprar) {
+      // (04/11/2026, su 134 corrida otra vez: sin nada por comprar, un comprobante NUEVO de S/5 recibía el «Tu pago ya está
+      // confirmado» del motor de siempre sin mirarlo. Sin nada pendiente solo se salta la lectura esperando la captura del
+      // comentario; en lo demás se lee: repetido → «ya está registrado», nuevo → un asesor lo revisa y te llega el aviso.)
+      if (quedaPorComprar || (getConversationById(convo.id) ?? convo).state !== "awaiting_facebook_comment") {
         marcarComprobanteLeido(convo.id, idDelComprobantePendiente(convo.id));
         const lectura = await leerComprobante(convo.id);
         if (!lectura) return false; // no es un comprobante (la captura del comentario): del regalo
@@ -4355,7 +4400,12 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
               .filter((w) => w.length >= 4 && !PALABRAS_COMUNES.has(w))
               .some((w) => dicho.includes(` ${w} `));
           });
-        const decide = porNumero ?? porOtro ?? (esPreguntaQueNoElige(contenido) || !nombraUno ? null : await elegirOpcionConIA(
+        // O NOMBRA SU PRECIO (04/11/2026, su 187 corrida otra vez: con el SUPER PACK a 14 elegido, «el de 10 nomas quiero» no
+        // nombraba el producto, la IA no se consultaba y los datos seguían a 14). El precio sale del cobro, no de palabras.
+        const nombraSuPrecio = (sinTildes(contenido).match(/\d+(?:[.,]\d+)?/g) ?? [])
+          .map((x) => Number(x.replace(",", ".")))
+          .some((v) => opciones.some((id) => precios[id] !== undefined && Math.abs(precios[id] - v) < 0.01));
+        const decide = porNumero ?? porOtro ?? (esPreguntaQueNoElige(contenido) || !(nombraUno || nombraSuPrecio) ? null : await elegirOpcionConIA(
           convo.id,
           contenido,
           opciones.map((id) => ({
@@ -4597,7 +4647,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           const destino = t.fichas.find((f) => f.id === d);
           const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x?.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
           if (p && nombraLoComprado.length && !nombraLoComprado.every((w) => palabrasParaReconocerUnNombre(p.name ?? "").has(w))) return false;
-          return !!p && precioDelProducto(p, pais, estado?.oferta === 1) === monto;
+          return !!p && precioDelProducto(p, pais, enOferta(estado, [p.id])) === monto;
         });
         return conEse.length === 1 ? lista.filter((x) => destinoDe(x) === conEse[0]).slice(0, 1) : [];
       })();
@@ -4625,7 +4675,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         if (destino?.tipo === "cobro" && preguntoPrecio && !cual.d) {
           const p = producto(config, destino.cobro?.producto_id);
           const pais = getEffectiveCountryCode(convo.phone, config);
-          const precio = p ? precioDelProducto(p, pais, estado.oferta === 1) : null;
+          const precio = p ? precioDelProducto(p, pais, enOferta(estado, [p.id])) : null;
           if (p) {
             await sendConfiguredSteps(convo, [
               { type: "text", body: `¡Perfecto! 😊 *${p.name}* queda en *${precio ? formatCurrencyAmount(precio, pais as never) : "su precio"}*.\n\n¿Te lo preparo?` },
@@ -4898,7 +4948,7 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       const pasosSeg = conLosComodinesDeLaFicha(
         pasosActivos(v.steps),
         // El que activa la oferta ya habla con el precio de oferta.
-        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f, t), paisSeg, estado.oferta === 1 || !!seg.activa_oferta),
+        productosDeLaFicha(loadWorkflowConfig(), idsParaComodines(convo.id, f, t), paisSeg, enOferta(estado, idsParaComodines(convo.id, f, t)) || !!seg.activa_oferta),
         paisSeg
       );
       // BURBUJA POR BURBUJA, mirando antes de cada una que sigan puestos (27/10/2026, HEA1 en la copia):
