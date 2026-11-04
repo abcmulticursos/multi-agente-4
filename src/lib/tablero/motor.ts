@@ -91,6 +91,7 @@ import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, ponerPreparadorDeDatos, ponerPreparadorDeEntrega, preguntarElMetodo } from "./pago";
 import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
+import { executeNotifyEmergency } from "@/lib/workflow/emergency";
 import {
   VENTANA_DE_META_MIN,
   cableDeLaSalida,
@@ -1512,14 +1513,41 @@ async function contestarConIA(
   // en la conversación (después, solo texto); solo de lo ya presentado (el oculto del order bump, no).
   const quiereVerPorDentro =
     /\b(que|q|ke)\s+(contiene|contienen|trae|traen|incluye|incluyen|viene|vienen|lleva|llevan)\b|\bcontenido\b|\bpor dentro\b|\bque hay (adentro|dentro)\b/.test(ultimo);
+  // LA MUESTRA DEL PRODUCTO POR EL QUE PREGUNTA (03/11/2026, él: «cuando haya 2 productos y pregunte qué contiene el
+  // básico, solo mande lo del básico; si pregunta el complementario, solo lo del complementario»). Si nombra UNO de lo
+  // presentado (por una palabra que solo tiene ése), salen solo sus muestras que aún no vio, con el cierre, aunque la
+  // galería general ya haya salido. Cada muestra, una sola vez; si ya la vio, se le explica con texto.
+  // (El COMPLEMENTARIO de la tienda cuenta si su pack ya se presentó: «¿y la ropa qué trae?» con el PACK COMIDA + ROPA
+  // delante es su muestra, aunque la ropa no se venda sola.)
+  const alineacionDeLaTienda = (config?.tiendas ?? []).find((x) => x.id === estado?.tienda_id)?.alineacion as Record<string, unknown> | undefined;
+  const complementario = typeof alineacionDeLaTienda?.complementario === "string" ? (alineacionDeLaTienda.complementario as string) : "";
+  const fullDeLaTienda = typeof alineacionDeLaTienda?.full === "string" ? (alineacionDeLaTienda.full as string) : "";
+  const conElComplementario = complementario && fullDeLaTienda && presentadosDe(estado).includes(fullDeLaTienda) ? [complementario] : [];
+  const delQuePregunta = (() => {
+    const presentados = [...new Set([...presentadosDe(estado), ...conElComplementario])];
+    if (presentados.length < 2) return null;
+    const conjuntos = presentados.map((pid) => palabrasParaReconocerUnNombre(producto(config, pid)?.name ?? ""));
+    const dichas = palabrasParaReconocerUnNombre(ultimo);
+    let nombrados = presentados.filter((_, i) => [...conjuntos[i]].some((w) => w.length >= 4 && dichas.has(w) && conjuntos.every((o, j) => j === i || !o.has(w))));
+    // (Una palabra que está en el PACK y en otro —«la ropa», «la comida»— es del otro: el pack la lleva porque los junta.
+    // Solo es el pack si dice algo que únicamente tiene el pack, y eso ya lo resolvió la línea de arriba.)
+    if (nombrados.length !== 1 && fullDeLaTienda) {
+      const conSuPalabra = presentados.filter((_, i) => [...conjuntos[i]].some((w) => w.length >= 4 && dichas.has(w)));
+      const sinElPack = conSuPalabra.filter((pid) => pid !== fullDeLaTienda);
+      if (conSuPalabra.length > 1 && sinElPack.length === 1) nombrados = sinElPack;
+    }
+    return nombrados.length === 1 ? nombrados[0] : null;
+  })();
+  const deEseProducto = delQuePregunta ? muestrasDisponibles(estado, conElComplementario).filter((m) => m.pid === delQuePregunta) : [];
+  const puedeMandarFotos = !nota && quiereVerPorDentro && !comparaOPrecio && !hablaDeUnProblema && !yaCompro;
+  // (Ya compró: tiene el material, no se le mandan fotos —salía en «¿hasta cuándo tengo acceso?»—.)
+  if (puedeMandarFotos && deEseProducto.length > 0 && !muestrasEnviadas(estado).some((m) => m.startsWith("oferta:"))) {
+    if (await mandarLaGaleria(convo, t, pais, delQuePregunta, conElComplementario)) return;
+  }
   const mostrarLaGaleria =
-    !nota &&
+    puedeMandarFotos &&
+    !delQuePregunta &&
     muestras.length > 0 &&
-    quiereVerPorDentro &&
-    !comparaOPrecio &&
-    !hablaDeUnProblema &&
-    // Ya compró: tiene el material, no se le mandan fotos (salía en «¿hasta cuándo tengo acceso?»).
-    !yaCompro &&
     !muestrasEnviadas(estado).some((m) => m === GALERIA_HECHA || m.startsWith("oferta:"));
   if (mostrarLaGaleria && (await mandarLaGaleria(convo, t, pais))) return;
   // LAS OPCIONES DE COMPRA DONDE ESTÁ (27/10/2026), como la venta de siempre: con dos o más, la IA las
@@ -1904,8 +1932,8 @@ function delanteParaElCierre(convo: ConversationRow, t: Tablero, pais: string): 
  * (la misma de la venta de siempre, `getSamplesAfterSequence`). Un solo camino: ya no manda una suelta.
  * Sin muestras por ver (o con «📷 Ofrecer imágenes» apagado), false y no manda nada.
  */
-async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string): Promise<boolean> {
-  const muestras = muestrasDisponibles(estadoEnElTablero(convo.id));
+async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string, soloDe?: string | null, ademas: string[] = []): Promise<boolean> {
+  const muestras = muestrasDisponibles(estadoEnElTablero(convo.id), ademas).filter((m) => !soloDe || m.pid === soloDe);
   if (muestras.length === 0) return false;
   // Antes de mandar: cuántos productos tiene delante AHORA (para el cierre).
   const delante = delanteParaElCierre(convo, t, pais);
@@ -1921,11 +1949,12 @@ async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string)
     }
   }
   if (salieron.length === 0) return false;
-  // GALERIA_HECHA: la galería sale UNA vez en toda la conversación (28/10/2026, él lo pidió).
-  anotarMuestras(convo.id, [...salieron, GALERIA_HECHA]);
+  // GALERIA_HECHA: la galería sale UNA vez en toda la conversación (28/10/2026, él lo pidió). La de UN producto
+  // (`soloDe`) solo marca sus muestras: la general aún puede mandar las de los otros.
+  anotarMuestras(convo.id, soloDe ? salieron : [...salieron, GALERIA_HECHA]);
   // Y después de las fotos, SOLO la pregunta de cierre: nada más en esa fila.
   await sendConfiguredSteps(convo, cierreDeLaGaleria(delante.cuantas, delante.deOrderBump) as never);
-  console.log(`[tablero] convo ${convo.id}: galería enviada (${salieron.join(", ")}) · cierre de ${delante.cuantas >= 2 ? "elegir" : "un producto"}`);
+  console.log(`[tablero] convo ${convo.id}: galería enviada${soloDe ? ` (solo de ${soloDe})` : ""} (${salieron.join(", ")}) · cierre de ${delante.cuantas >= 2 ? "elegir" : "un producto"}`);
   return true;
 }
 
@@ -1934,8 +1963,9 @@ async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string)
  * siempre solo enseña la galería del producto que se vende), encendidas, con archivo, y que no se le
  * enviaron antes (cada una, una sola vez). En el orden en que se le presentaron los productos.
  */
-function muestrasDisponibles(estado: EstadoEnElTablero | null): Array<{
+function muestrasDisponibles(estado: EstadoEnElTablero | null, ademas: string[] = []): Array<{
   id: string;
+  pid: string;
   producto: string;
   tema: string;
   cuando?: string;
@@ -1946,7 +1976,7 @@ function muestrasDisponibles(estado: EstadoEnElTablero | null): Array<{
 }> {
   const config = loadWorkflowConfig();
   const ya = new Set(muestrasEnviadas(estado));
-  return presentadosDe(estado).flatMap((pid) => {
+  return [...new Set([...presentadosDe(estado), ...ademas])].flatMap((pid) => {
     const p = producto(config, pid);
     return (p?.image_gallery ?? []).flatMap((g, i) => {
       const id = `${pid}#${i}`;
@@ -1956,6 +1986,7 @@ function muestrasDisponibles(estado: EstadoEnElTablero | null): Array<{
       return [
         {
           id,
+          pid,
           producto: p?.name ?? pid,
           tema: (g.topic || (g.keywords ?? []).join(", ") || `muestra ${i + 1}`).slice(0, 120),
           cuando: g.when,
@@ -2464,6 +2495,42 @@ function propuestaApuntada(convo: ConversationRow, t: Tablero, pais: string): Lo
   return loQuePuedeComprar(convo, t, pais).find((o) => o.productoId === a.pid) ?? null;
 }
 
+/**
+ * «YO NO PEDÍ ESTO» (03/11/2026, pedido por él: «a veces habrá clientes que paguen luego cuando yo ya cambié de producto en
+ * la tienda; para ellos mejor que me llegue un aviso si hay una queja: yo no pedí esto, yo compré otra cosa»). Ya recibió
+ * algo y reclama que no es lo que pidió: aviso al dueño de inmediato (la misma alerta de emergencia de siempre) y al cliente
+ * una línea fija; la IA no discute el reclamo. Va PRIMERO en el turno (la batería: con el upsell delante, su «no pedí
+ * esto» lo tomó el «no» del upsell). Una sola vez por conversación (`had_emergency`). Devuelve true si atendió el turno.
+ */
+async function avisarSiReclamaOtroProducto(convo: ConversationRow, contenido: string): Promise<boolean> {
+  if (!contenido.trim() || contenido.startsWith("bubble:")) return false;
+  if (entregasDelCliente(convo.id).length === 0 || (getConversationById(convo.id) ?? convo).had_emergency) return false;
+  // (Un «sí», «ok», «dale» o un mensaje de menos de 3 palabras no es un reclamo: en la batería «si dale» se tomó como uno.)
+  const normal = sinTildes(contenido).replace(/[^a-zñ0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (AFIRMA.test(normal) || normal.split(" ").length < 3) return false;
+  const reclamo = await elegirOpcionConIA(convo.id, contenido, [
+    {
+      id: "otro_producto",
+      etiqueta:
+        "Reclama que lo que recibió NO es lo que pidió o compró: le llegó otro producto, otro material o algo equivocado. NO si solo pregunta qué es algo, dice que no le llegó, pide que le reenvíen, contesta que no quiere una oferta, o pregunta por otro producto para comprarlo",
+    },
+  ]);
+  if (reclamo !== "otro_producto") return false;
+  await executeNotifyEmergency(convo.id, { reason: `Dice que recibió algo que no pidió: «${contenido.slice(0, 160)}»` });
+  await sendBotText(convo, "Entiendo 🙏 Un asesor revisa tu caso ahora mismo y te escribe por aquí en un momento 😊");
+  console.log(`[tablero] convo ${convo.id}: reclama que recibió otra cosa → aviso al dueño`);
+  return true;
+}
+
+/** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */
+function palabrasDeLoComprado(convo: ConversationRow): Set<string> {
+  const config = loadWorkflowConfig();
+  const ids = new Set<string>([...comprasDelCliente(convo.id).map((c) => c.producto_id ?? ""), ...entregasDelCliente(convo.id).map((k) => k.split("#")[0])].filter(Boolean));
+  const fuera = new Set<string>();
+  for (const id of ids) for (const w of palabrasParaReconocerUnNombre(producto(config, id)?.name ?? "")) fuera.add(w);
+  return fuera;
+}
+
 function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string): LoQuePuedeComprar | null {
   const opciones = loQuePuedeComprar(convo, t, pais);
   if (opciones.length === 0) return null;
@@ -2476,7 +2543,8 @@ function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string):
   if (!turno.some((b) => b.includes("?"))) return null;
   const palabras = palabrasParaReconocerUnNombre;
   const conjuntos = opciones.map((o) => palabras(o.nombre));
-  const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
+  const deLoComprado = palabrasDeLoComprado(convo);
+  const unicas = conjuntos.map((s, i) => [...s].filter((w) => !deLoComprado.has(w) && conjuntos.every((o, j) => j === i || !o.has(w))));
   const conSuPrecio = (o: LoQuePuedeComprar, texto: string) => {
     const n = String(Math.round(o.precio * 100) / 100);
     const variantes = [n, n.replace(".", ","), Number.isInteger(o.precio) ? `${n}.00` : ""].filter(Boolean);
@@ -2554,7 +2622,11 @@ async function comprarDespuesDeComprar(
   const palabras = palabrasParaReconocerUnNombre;
   const conjuntos = opciones.map((o) => palabras(o.nombre));
   const dichas = palabras(contenido);
-  const unicas = conjuntos.map((s, i) => [...s].filter((w) => conjuntos.every((o, j) => j === i || !o.has(w))));
+  // (03/11/2026, batería: compró COMIDA CASERA y dijo «quiero cambiarme a la comida por 3» → se lo tomó como el PACK
+  // COMIDA + ROPA: «comida» solo quedaba en el pack porque la comida ya no está entre lo que puede comprar. Una palabra
+  // del nombre de algo que YA COMPRÓ no elige otro producto.)
+  const deLoComprado = palabrasDeLoComprado(convo);
+  const unicas = conjuntos.map((s, i) => [...s].filter((w) => !deLoComprado.has(w) && conjuntos.every((o, j) => j === i || !o.has(w))));
   let acertadas = opciones.filter((_, i) => unicas[i].some((w) => dichas.has(w)));
   // «SÍ» A LO QUE EL BOT ACABA DE OFRECER (HEA1, 27/10/2026): la IA describió 100 CITAS y cerró con
   // «¿te gustaría agregarlo?»; el «sí» volvía a la IA, que preguntaba «¿te indico cómo pagar?». Si el
@@ -3163,6 +3235,7 @@ async function contestarEnElRegaloDentro(convo: ConversationRow): Promise<boolea
     // «NO ME LLEGÓ» DENTRO DEL REGALO (H4, 27/10/2026): antes iba a la IA, que no podía reenviar y
     // ofrecía un asesor. Ahora, como la venta de siempre en ese mismo paso: reenvío directo.
     const ultimoTexto = ultimosMensajes(convo.id, 2).filter((m) => m.role === "user").pop()?.content ?? "";
+    if (await avisarSiReclamaOtroProducto(convo, ultimoTexto)) return true;
     // (Antes que el «no me llegó»: «mándamelo» con el regalo recién ofrecido es el regalo, no un reenvío.)
     if (await aceptaElRegalo(convo, ultimoTexto)) return true;
     if (reenviarSiLoPide(convo, ultimoTexto)) {
@@ -3315,6 +3388,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   }
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+
+  // «YO NO PEDÍ ESTO», ANTES QUE TODO (03/11/2026): ver `avisarSiReclamaOtroProducto`.
+  if (t && (await avisarSiReclamaOtroProducto(convo, contenido))) return true;
 
   // «AQUÍ LE PREGUNTO SU NOMBRE» (01/11/2026). Está en una ficha que pidió el nombre y esto es lo PRIMERO que
   // contesta: se guarda como su nombre (el mismo lector de la venta de siempre) y sigue por «👤 Al dar su
@@ -3584,6 +3660,20 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       if (propuesto) {
         console.log(`[tablero] convo ${convo.id}: «sí» en el regalo a lo que la IA ofreció («${propuesto.nombre}») → su cobro`);
         await abrirLoQuePuedeComprar(convo, t, propuesto);
+        return true;
+      }
+      // DOS PREGUNTAS ABIERTAS A LA VEZ (03/11/2026, batería): el regalo esperando su respuesta y, lo último del bot, una
+      // invitación a comprar lo de su cobro abierto (el upsell). Un «sí» suelto no se sabe a cuál va: se le pregunta, con
+      // la misma pregunta de siempre («¿aceptaste el regalo? ¿o quieres llevar X?»), en vez de darle el regalo.
+      const fresca = getConversationById(convo.id) ?? convo;
+      const ultimaPregunta = sinTildes(
+        ([...ultimosMensajes(convo.id, 8)].reverse().find((m) => m.role !== "user" && (m.content ?? "").includes("?"))?.content ?? "").split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? ""
+      );
+      const idDelCobro = estado?.cobro_ficha_id;
+      const delCobro = idDelCobro ? loQuePuedeComprar(convo, t, pais).find((o) => o.ficha.id === idDelCobro) : undefined;
+      if (fresca.state === "awaiting_gift_consent" && delCobro && INVITA_A_COMPRAR.test(ultimaPregunta)) {
+        console.log(`[tablero] convo ${convo.id}: «sí» con el regalo y «${delCobro.nombre}» abiertos → le pregunto a cuál`);
+        await preguntarRegaloOProducto(convo, delCobro, pais);
         return true;
       }
     }
@@ -4479,10 +4569,15 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           n.match(/\b(\d+(?:[.,]\d+)?)\s*(?:dolar|dolares|soles|sol|pesos|usd)\b/);
         if (!m) return [];
         const monto = Number(m[1].replace(",", "."));
+        // (03/11/2026, batería: ya tenía COMIDA CASERA y dijo «quiero cambiarme a la comida por 3» → el «3» era también el
+        // precio del upsell y le llegaron sus datos. Si nombra algo que YA compró, el monto no elige OTRO producto.)
+        const deLoComprado = palabrasDeLoComprado(convo);
+        const nombraLoComprado = [...palabrasParaReconocerUnNombre(contenido)].filter((w) => w.length >= 4 && deLoComprado.has(w));
         const conEse = destinos.filter((d) => {
           const x = lista.find((y) => destinoDe(y) === d);
           const destino = t.fichas.find((f) => f.id === d);
           const p = destino?.tipo === "cobro" ? producto(config, destino.cobro?.producto_id) : x?.op.id.startsWith("elige:") ? producto(config, x.op.id.slice(6)) : null;
+          if (p && nombraLoComprado.length && !nombraLoComprado.every((w) => palabrasParaReconocerUnNombre(p.name ?? "").has(w))) return false;
           return !!p && precioDelProducto(p, pais, estado?.oferta === 1) === monto;
         });
         return conEse.length === 1 ? lista.filter((x) => destinoDe(x) === conEse[0]).slice(0, 1) : [];

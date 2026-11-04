@@ -8,7 +8,7 @@
  * de eso. Si las recibiera, mandaría al cliente a una venta que el tablero no está haciendo.
  */
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import type { ConversationRow } from "@/lib/db";
+import { getConversationById, type ConversationRow } from "@/lib/db";
 import { getClient } from "@/lib/openrouter";
 import { sendChunkedBotText } from "@/lib/workflow/engine";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
@@ -622,6 +622,14 @@ const HERRAMIENTA_DE_DATOS = {
   },
 };
 
+/** ¿El bot acaba de mandar los datos de pago (una cuenta de 7+ dígitos en sus últimas 6 burbujas)? (03/11/2026) */
+function datosRecienEnviados(conversationId: number): boolean {
+  return ultimosMensajes(conversationId, 8)
+    .filter((m) => m.role !== "user")
+    .slice(-6)
+    .some((m) => /\d{7,}/.test((m.content ?? "").replace(/https?:\/\/\S+/g, "").replace(/(?<=\d)[ \t-](?=\d)/g, "")));
+}
+
 /**
  * Contesta con la IA y lo envía en burbujas. Si la IA nombra un monto que no está permitido, se le
  * pide otra vez; si insiste, se quitan las frases con ese monto. Nunca sale un precio inventado.
@@ -786,9 +794,15 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       if (desde >= 0) {
         const quedan = partes.slice(0, desde);
         if (quedan.length && /:\s*$/.test(quedan[quedan.length - 1])) quedan[quedan.length - 1] = quedan[quedan.length - 1].replace(/(^|\n)[^\n]*:\s*$/, "").trim();
-        console.log(`[tablero:ia] convo ${convo.id}: escribió datos de cuenta → se quitan (los manda solo el sistema)${c.reenviarDatos ? "; reenvío los de su cobro" : ""}`);
+        // (03/11/2026, batería: «y si pago con yape» / «tengo banca móvil» / «se puede» → los mismos datos TRES veces
+        // seguidas. Si acaban de salir, no se repiten: una línea que los señala.)
+        const recien = datosRecienEnviados(convo.id);
+        console.log(`[tablero:ia] convo ${convo.id}: escribió datos de cuenta → se quitan (los manda solo el sistema)${c.reenviarDatos ? (recien ? "; acaban de salir, no se repiten" : "; reenvío los de su cobro") : ""}`);
         texto = quedan.filter(Boolean).join("\n\n");
-        if (c.reenviarDatos) {
+        if (c.reenviarDatos && recien) {
+          texto = [texto, "Te dejé los datos justo aquí arriba 👆😊"].filter(Boolean).join("\n\n");
+          reenvioPorCuenta = true;
+        } else if (c.reenviarDatos) {
           await c.reenviarDatos();
           reenvioPorCuenta = true;
         }
@@ -820,8 +834,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     // adquirirlo?» era absurdo): ahí la IA ya habla de su problema o del asesor.
     // («No entiendo» con las opciones delante —`preguntaVaga`— no es un problema: no entiende qué elegir, y
     // su cierre es la pregunta de elegir, sola. Sin esto quedaba metida al final del párrafo, su HHH3.)
+    // (03/11/2026, batería: tras su reclamo «yo no pedí esto» —ya avisado al dueño—, a «me estafaron» se le agregó
+    // «¿te indico cómo adquirirlo?». Con un reclamo abierto, `had_emergency`, no va pregunta de venta.)
     const conProblema =
-      !c.preguntaVaga && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente);
+      !!getConversationById(convo.id)?.had_emergency ||
+      (!c.preguntaVaga && /\b(no (funciona|puedo|me deja|me llega|llega|abre|carga|sale|entiendo)|error|falla|problema|reclamo|molest|cansad|harto)\b/.test(delCliente));
     // LO POSPUSO (28/10/2026, ronda 5: «después» → «quedo pendiente… ¿te indico cómo adquirirlo?»). Ahí no se le
     // agrega la pregunta de venta: sonaba insistente. (La que escriba la IA se queda, como siempre.)
     const loPospusoElCliente = /^(despues|luego|mas tarde|otro dia|otra vez sera|ahorita no|ahora no|por ahora no|mejor no|mejor despues|no gracias|no por ahora|lo pienso|lo voy a pensar|dejame pensarlo)\b/.test(delCliente.trim());
@@ -1122,6 +1139,21 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       console.log(`[tablero:ia] convo ${convo.id}: le pedía el comprobante sin que dijera que pagó → «Quedo pendiente…»`);
     }
   }
+  // «QUEDO PENDIENTE DE TU COMPROBANTE», UNA SOLA VEZ (03/11/2026, batería de sus trampas: con los datos enviados salió en
+  // CUATRO respuestas seguidas, también a «¿qué es esto?» y «¿cuántas veces se paga?»: él ya dijo que eso suena a
+  // presionarlo, su conv 244). Si el bot ya se lo dijo en sus últimos mensajes, esa frase no se repite; el resto sí sale.
+  if (burbujas.length > 0) {
+    const yaLoDijo = ultimosMensajes(convo.id, 8).some((m) => m.role !== "user" && /quedo pendiente/.test(plano(m.content ?? "")));
+    if (yaLoDijo) {
+      const sinLaFrase = burbujas
+        .map((b) => b.split(/(?<=[.!?…])\s+/).filter((f) => !/quedo pendiente/.test(plano(f))).join(" ").trim())
+        .filter((b) => /[\p{L}\p{N}]/u.test(b));
+      if (sinLaFrase.length > 0 && sinLaFrase.join("\n") !== burbujas.join("\n")) {
+        burbujas.splice(0, burbujas.length, ...sinLaFrase);
+        console.log(`[tablero:ia] convo ${convo.id}: «Quedo pendiente…» ya se lo dijo → no se repite`);
+      }
+    }
+  }
   // LA PREGUNTA FINAL, EN SU PROPIA BURBUJA (28/10/2026, su hay2: el saludo y «¿ya te decidiste…?» iban en un
   // solo bloque y la pregunta no se veía). Como el automático: si la última burbuja termina en una pregunta
   // con texto antes, la pregunta sale aparte. Solo la última frase, solo si va al final, y sin pasar su tope.
@@ -1165,5 +1197,17 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // CON LAS PAUSAS DE TUS AJUSTES (25/10/2026, punto 17), como la venta de siempre: la primera enseguida
   // y las demás separadas por «Delay entre mensajes» (Menús → Ajustes → Tiempos generales).
   if (burbujas.length > 0) await sendChunkedBotText(convo, burbujas.join("\n\n"), alFinal);
+  // PROMETIÓ LOS DATOS Y NO SALIERON (03/11/2026, batería: «tengo banca móvil… se puede» → «Te envío los datos para que
+  // realices el depósito» y no llegó nada). Lo que la IA promete enviar lo envía el sistema: sus datos verdaderos.
+  if (
+    burbujas.length > 0 &&
+    c.reenviarDatos &&
+    !reenvioPorCuenta &&
+    !datosRecienEnviados(convo.id) &&
+    /(te (paso|env[ií]o|mando|comparto|dejo) (los|tus) datos|(enseguida|ahora|ya) te (paso|env[ií]o|mando) (los|tus) datos|aqu[ií] (van|tienes|te dejo) (los|tus) datos|te llega(n|r[aá]n)? (los|tus) datos)/i.test(burbujas.join(" "))
+  ) {
+    console.log(`[tablero:ia] convo ${convo.id}: prometió los datos → salen sus datos verdaderos`);
+    await c.reenviarDatos();
+  }
   return burbujas.length > 0;
 }

@@ -89,6 +89,8 @@ import {
   topeDeOrganicos,
 } from "@/lib/workflow/config";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { ultimosMensajes } from "@/lib/tablero/lector";
+import { estadoEnElTablero } from "@/lib/tablero/estado";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
 import { marcaDeAdjunto } from "@/lib/marca-de-adjunto";
@@ -645,9 +647,32 @@ export function pasoLaVentanaDeRespuesta(
   return ahoraSeg - nacio >= HORAS_PARA_DEJAR_DE_RESPONDER * 3600;
 }
 
+/**
+ * LA ÚNICA EXCEPCIÓN A LAS 70 HORAS: EL COMPROBANTE DE UN PAGO PENDIENTE (03/11/2026, decidido por él). «Si cliente
+ * escribe luego de las 72 ya no se responde, pero si hubiere enviado un ticket de pago, sí debería entregar.» Si lo
+ * último que mandó es una IMAGEN o un documento y le quedaba algo por pagar (un cobro abierto del tablero, o la venta de
+ * siempre esperando su pago o con el upsell en pie), se le atiende para leerla y entregar. Su mensaje abre una ventana
+ * nueva de 24 h en Meta, así que la entrega sale. Un texto sigue sin respuesta, como siempre.
+ */
+function esUnComprobanteDeUnPagoPendiente(convo: ConversationRow): boolean {
+  const suUltimo = [...ultimosMensajes(convo.id, 4)].reverse().find((m) => m.role === "user");
+  if (!suUltimo || (suUltimo.media_type !== "image" && suUltimo.media_type !== "document")) return false;
+  const e = estadoEnElTablero(convo.id);
+  if (e?.cobro_ficha_id) return true;
+  return (
+    ["intro_done", "payment_done", "awaiting_order_bump_choice", "awaiting_bioferta_choice"].includes(convo.state ?? "") ||
+    convo.upsell_state === "ofrecido" ||
+    convo.upsell_state === "aceptado"
+  );
+}
+
 function leContestamos(convo: ConversationRow): boolean {
   // LA VENTANA VA PRIMERO: manda sobre todo lo demás, incluido quien ya pagó. Ver arriba.
   if (pasoLaVentanaDeRespuesta(convo)) {
+    if (esUnComprobanteDeUnPagoPendiente(convo)) {
+      console.log(`[wh] convo ${convo.id}: pasaron las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas, pero mandó una imagen con un pago pendiente → la leo (puede ser su comprobante)`);
+      return true;
+    }
     console.log(
       `[wh] convo ${convo.id}: pasaron las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas desde que entró — no contesto (su mensaje queda guardado)`
     );
