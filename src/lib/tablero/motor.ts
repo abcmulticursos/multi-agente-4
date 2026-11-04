@@ -958,6 +958,7 @@ async function irA(
       // cuando el silencio lleva al regalo, la fila ya no ofrece más. Sigue en el regalo (25/10/2026).
       if (ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
         if (antes?.ficha_id && t.fichas.find((x) => x.id === antes.ficha_id)?.tipo === "regalo") moverA(convoId, antes.ficha_id);
+        if (await volverAOfrecerElRegaloSiCompro(convoId, t, pasos)) return;
         console.log(`[tablero] convo ${convoId}: entregado durante el regalo → la ruta no sigue`);
         return;
       }
@@ -966,12 +967,7 @@ async function irA(
       const regaloVisto = fichasVisitadas(convoId).find((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
       if (regaloVisto) {
         // …pero si su regalo quedó sin responder, se le ofrece otra vez, UNA sola (H2, 27/10/2026).
-        if (regaloPorVolverAOfrecer(convoId)) {
-          anotarMuestras(convoId, [REGALO_HECHO]);
-          console.log(`[tablero] convo ${convoId}: entregado después del regalo, que quedó sin responder → se le vuelve a ofrecer`);
-          await irA(convoId, t, regaloVisto, pasos);
-          return;
-        }
+        if (await volverAOfrecerElRegaloSiCompro(convoId, t, pasos)) return;
         console.log(`[tablero] convo ${convoId}: entregado después del regalo → la ruta no sigue`);
         return;
       }
@@ -1181,6 +1177,14 @@ async function irA(
       // el silencio lo llevó al regalo: se le entrega y el regalo sigue donde iba (25/10/2026).
       if (ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
         console.log(`[tablero] convo ${convoId}: ya está en el regalo (${convo.state}) → no se repite`);
+        return;
+      }
+      // SALIÓ DEL REGALO SIN RESPONDERLO PARA PAGAR ALGO Y NO PAGÓ (04/11/2026, su 264): su «no pagó» lo traía aquí y la
+      // pregunta del regalo salía otra vez tras una consulta. Vuelve a esa pregunta sin repetirla; si después compra,
+      // `volverAOfrecerElRegaloSiCompro` se la ofrece otra vez.
+      if (regaloPorVolverAOfrecer(convoId)) {
+        setConversationState(convoId, "awaiting_gift_consent");
+        console.log(`[tablero] convo ${convoId}: no pagó y vuelve al regalo que ya se le preguntó → no se repite`);
         return;
       }
       if (!convo.paid_at) setPaidAt(convoId, ahora());
@@ -2439,6 +2443,25 @@ function regaloPorVolverAOfrecer(conversationId: number): boolean {
 }
 
 /**
+ * EL REGALO SALE OTRA VEZ SOLO SI COMPRÓ (04/11/2026). Él: «si compra el upsell venga el reofrecimiento, no luego de una
+ * consulta breve». Tras ENTREGAR algo con su regalo sin responder (lo dejó para pagar, o pagó estando en él), se le
+ * ofrece otra vez, UNA. Vale arme como arme el upsell: con su Cobro aparte (GRAFISMO) o en la ficha que cobra sola
+ * (LENGUA, su 278: pagó desde el regalo y no salió). Devuelve true si lo ofreció.
+ */
+async function volverAOfrecerElRegaloSiCompro(convoId: number, t: Tablero, pasos: number): Promise<boolean> {
+  const sinResponder = regaloPorVolverAOfrecer(convoId) || (getConversationById(convoId)?.state === "awaiting_gift_consent" && !muestrasEnviadas(estadoEnElTablero(convoId)).includes(REGALO_HECHO));
+  if (!sinResponder) return false;
+  const regalo = fichasVisitadas(convoId).find((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
+  if (!regalo) return false;
+  anotarMuestras(convoId, [REGALO_HECHO]);
+  // Sale del estado del regalo para que la ficha Regalo lo vuelva a preguntar (si no, «ya está en el regalo»).
+  setConversationState(convoId, "tablero");
+  console.log(`[tablero] convo ${convoId}: compró con su regalo sin responder → se le vuelve a ofrecer (una vez)`);
+  await irA(convoId, t, regalo, pasos);
+  return true;
+}
+
+/**
  * EL RECORDATORIO DEL REGALO, UNA SOLA VEZ (29/10/2026, su conversación 117): se le ofreció el regalo, se
  * quejó de que no le llegó lo que pagó, se le reenvió y el regalo quedó enterrado arriba. Con la pregunta del
  * regalo sin contestar, se le vuelve a hacer tras el silencio de siempre. Solo una vez («para no embotarlo»).
@@ -2896,6 +2919,7 @@ async function cerrarLaVenta(
         ESTADOS_DEL_REGALO.has(fresca?.state ?? "") ||
         fichasVisitadas(convo.id).some((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
       if (yaEnElRegalo) {
+        if (await volverAOfrecerElRegaloSiCompro(convo.id, t, 0)) return;
         console.log(`[tablero] convo ${convo.id}: entregado con el regalo ya visto → la ruta no sigue`);
         return;
       }
