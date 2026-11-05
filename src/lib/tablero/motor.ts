@@ -2597,6 +2597,27 @@ async function avisarSiReclamaOtroProducto(convo: ConversationRow, contenido: st
   return true;
 }
 
+/**
+ * LAS FRASES DE CIERRE QUE ÉL ESCRIBIÓ EN LAS INSTRUCCIONES DE UNA FICHA (las líneas con «?»), como patrones para reconocerlas
+ * en lo que mandó el bot (sin tildes; su spintax «{a|b}» vale cualquiera de las dos; los emojis no cuentan).
+ */
+function frasesDeCierreDe(instrucciones: string | null | undefined): RegExp[] {
+  return (instrucciones ?? "")
+    .split(/\n/)
+    .map((l) => l.trim().replace(/^[-•*>\s]+/, "").replace(/^[«"“]|[»"”]$/g, "").trim())
+    .filter((l) => /\?/.test(l) && l.length >= 8)
+    .map((l) => {
+      const pregunta = sinTildes(l.split("?")[0]).replace(/[^a-z0-9ñ{}|\s]/g, " ").replace(/\s+/g, " ").trim();
+      const patron = pregunta
+        .split(/(\{[^}]*\})/)
+        .map((trozo) => (trozo.startsWith("{") ? `(?:${trozo.slice(1, -1).split("|").map((x) => x.trim().replace(/[.*+?^$()[\]\\]/g, "\\/** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */")).join("|")})` : trozo.replace(/[.*+?^$()[\]\\]/g, "\\/** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */")))
+        .join("")
+        .replace(/ /g, "[^a-z0-9ñ]+");
+      return new RegExp(patron);
+    })
+    .filter((re) => re.source.length >= 8);
+}
+
 /** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */
 function palabrasDeLoComprado(convo: ConversationRow): Set<string> {
   const config = loadWorkflowConfig();
@@ -4216,7 +4237,12 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   const hasta = resto.findIndex((m) => m.role === "user");
   const ultimaDelBot = (hasta < 0 ? resto : resto.slice(0, hasta)).reverse().map((m) => m.content ?? "").join("\n");
   const pregunta = sinTildes(ultimaDelBot.split(/(?<=[.!])\s+|\n/).filter((x) => x.includes("?")).pop() ?? "");
-  const invitaAComprar = !!pregunta && INVITA_A_COMPRAR.test(pregunta) && !/\b(foto|fotos|imagen|imagenes|muestra|muestras|video)\b/.test(pregunta);
+  // (05/11/2026, su 305: «¿Deseas que te brinde los datos de pago? ✨» —una de SUS frases de cierre— no se reconocía como
+  // invitación y el «ok» se fue a la IA. Sus propias frases de la ficha cuentan siempre como invitación; no se agregan
+  // palabras sueltas, para no volverlo rígido.)
+  const esUnaDeSusFrases = [fichaAqui, segAqui].some((f) => !!f && frasesDeCierreDe(f.instrucciones).some((re) => re.test(sinTildes(ultimaDelBot))));
+  const invitaAComprar =
+    esUnaDeSusFrases || (!!pregunta && INVITA_A_COMPRAR.test(pregunta) && !/\b(foto|fotos|imagen|imagenes|muestra|muestras|video)\b/.test(pregunta));
   // EL «SÍ» QUE NO ESTÁ EN LA LISTA LO DECIDE LA IA (04/11/2026, su 280: «si porfavor», junto, no era «sí» para la lista y
   // la IA improvisó los pasos). Él: «el bot tiene que darse cuenta cuando se está confirmando, sin palabritas». Solo
   // cuando el bot acaba de invitar a comprar y la respuesta es corta; la lista sigue primero (gratis), la IA desempata.

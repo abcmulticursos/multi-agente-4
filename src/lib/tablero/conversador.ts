@@ -922,7 +922,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         }
       }
     }
-    if (!cerroConLaSuya && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+    // YA PREGUNTÓ ANTES DE UNA LISTA (05/11/2026, su 305): «¿cuál de estos métodos prefieres?» + «YAPE» — la última burbuja era
+    // la lista, sin «?», y se le agregaba otra pregunta encima. Si la burbuja de antes pregunta y la última es corta, ya cerró.
+    const burbujasFinales = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+    const yaPreguntoAntesDeLaLista = burbujasFinales.length >= 2 && /[?¿]/.test(burbujasFinales[burbujasFinales.length - 2]) && ultimaBurbuja.length <= 160;
+    if (!cerroConLaSuya && !yaPreguntoAntesDeLaLista && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
       const lista = propias.length ? propias : PREGUNTAS_DE_CIERRE;
       const pregunta = lista.find((p) => !recientes.includes(p.slice(0, 20))) ?? lista[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
