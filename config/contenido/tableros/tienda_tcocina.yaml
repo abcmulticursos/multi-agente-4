@@ -1739,7 +1739,6 @@ whatsapp:
       x: -396
       y: -66
       titulo: Entrega · RECETARIO DIETAS FIT
-      por_correo: true
       producto_id: ptcocina_dietas
     - id: f-mvuo5fvd-jrjam
       tipo: mensaje
