@@ -5169,6 +5169,10 @@ whatsapp:
       de: pla_pe_dou_ent_b
       salida: siguiente
       a: pla_pe_dou_upsell1
+    - id: c-mw3gdcvk-mai
+      de: pla_pe_dou_upsell1
+      salida: pagado
+      a: pla_pe_dou_regalo
   cajas:
     - id: caja-pla_pe-lineal
       x: 680
