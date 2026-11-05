@@ -1001,7 +1001,6 @@ whatsapp:
         producto_id: ptpla_pack
         acepta:
           - ptpla_basico
-        metodos: true
     - id: pla_pe_dou_ent_b
       tipo: entregar
       x: 4345
