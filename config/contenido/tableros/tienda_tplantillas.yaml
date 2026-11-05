@@ -975,8 +975,8 @@ whatsapp:
         metodos: true
     - id: pla_pe_dou_ent_b
       tipo: entregar
-      x: 4356
-      y: 2981
+      x: 4224
+      y: 2948
       titulo: Entrega · GUÍA PLANTILLA
       producto_id: ptpla_basico
     - id: pla_pe_dou_ent_p
