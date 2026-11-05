@@ -415,6 +415,19 @@ function excepcionesDelTablero(c: ContextoDeLaIA): string {
     .join("\n");
 }
 
+/**
+ * LAS FRASES DE CIERRE DE ESA FICHA (04/11/2026, sus 288–291): él pegó en «Instrucciones para la IA aquí» de su intro tres
+ * frases («¿Te gustaría obtenerlo? 📚✨ Así te envío los datos…») y salían a veces: competían con las de la venta de
+ * siempre. Las líneas de sus instrucciones que EMPIEZAN con «¿» son sus cierres: en esa ficha mandan sobre las de
+ * siempre (en el prompt, al agregar una si la IA no cerró, y en lugar de la invitación genérica que escriba la IA).
+ */
+function cierresDeLaFicha(c: ContextoDeLaIA): string[] {
+  return (c.instrucciones ?? "")
+    .split(/\n/)
+    .map((l) => l.trim().replace(/^[-•*>\s]+/, "").replace(/^[«"“]|[»"”]$/g, "").trim())
+    .filter((l) => /^¿[^?]{3,}\?/.test(l));
+}
+
 /** Las preguntas de cierre de la venta de siempre (`system-prompt.ts`), para cuando la IA no cerró. */
 const PREGUNTAS_DE_CIERRE = [
   "¿Te gustaría que te indique cómo adquirirlo?",
@@ -437,7 +450,15 @@ function cierre(c: ContextoDeLaIA): string {
   // Si ya realizaste el pago, envíame la foto…» sonaba a desesperado por cobrar.
   if (c.etapa === "datos")
     return "CIERRE: ya tiene los datos de pago y esperamos su comprobante. Contesta breve lo que escribió. NO le preguntes si ya pagó ni le pidas la foto con una pregunta; si cierras, que sea con una línea natural como «Quedo pendiente de tu comprobante para darte acceso 😊». No repitas los datos ni el precio.";
-  // VENDIENDO: el cierre es el de la venta de siempre (sus reglas van arriba, con sus variantes).
+  // VENDIENDO: el cierre es el de la venta de siempre (sus reglas van arriba, con sus variantes)… o el de SU ficha.
+  const propias = cierresDeLaFicha(c);
+  if (propias.length)
+    return [
+      `CIERRE DE ESTA ETAPA (manda sobre las preguntas de cierre de la venta de siempre): si cierras invitando a comprar, usa UNA de estas frases TAL CUAL, en su propia línea, rotando: ${propias.map((p) => `«${p}»`).join(" · ")}. Si el cliente tiene un problema o está molesto, no cierres con venta.`,
+      c.preguntaPendiente ? `Lo que quedó pendiente en la conversación es esto (NO copies este texto ni el de sus botones): «${c.preguntaPendiente.slice(0, 300)}».` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
   return [
     "CIERRE: el de las reglas de la venta de siempre de arriba (una pregunta suave en su propia línea, rotando). Si el cliente tiene un problema o está molesto, tu pregunta final es sobre su problema (o el asesor), nunca de venta. Nada de «solo dime…» ni «¿lo quieres ya?».",
     c.preguntaPendiente
@@ -878,8 +899,32 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     }
     // Ni cuando el bot cierra con la oferta de las imágenes (ésa ES la pregunta), ni con el cobro ya
     // abierto: ahí ya decidió y «¿te indico cómo adquirirlo?» no tiene sentido (H3, 27/10/2026).
-    if (!preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
-      const pregunta = PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0];
+    // SUS FRASES EN LUGAR DE LA INVITACIÓN GENÉRICA (04/11/2026): si en esa ficha tiene las suyas y la IA cerró con una
+    // invitación que no es suya («¿Te gustaría que te indique cómo adquirirlo?»), esa pregunta se quita y va una de las suyas.
+    const propias = cierresDeLaFicha(c);
+    let cerroConLaSuya = false;
+    // (Aunque haya un «problema» o lo posponga: aquí no se AGREGA una pregunta, se cambia la que la IA ya escribió.)
+    if (propias.length && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto) {
+      const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+      const invita = /(adquir|obten|tenerlo|llevarlo|metodos? de pago|los pasos|como pagar|asegur|te indico|te gustaria|deseas|quieres que)/;
+      const burbujas = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+      const ultimaB = burbujas[burbujas.length - 1] ?? "";
+      if (propias.some((p) => ultimaB.includes(p.slice(0, 20)))) cerroConLaSuya = true;
+      else {
+        const frases = ultimaB.split(/(?<=[.!?])(?<![Ss]\/\.)[ \t]+/);
+        const ultimaF = frases[frases.length - 1] ?? "";
+        if (/[?¿]/.test(ultimaF) && invita.test(plano(ultimaF))) {
+          const resto = frases.slice(0, -1).join(" ").trim();
+          const suya = propias.find((p) => !recientes.includes(p.slice(0, 20))) ?? propias[0];
+          texto = [...burbujas.slice(0, -1), ...(resto ? [resto] : []), suya].join("\n\n");
+          cerroConLaSuya = true;
+          console.log(`[tablero:ia] convo ${convo.id}: cerró con una invitación genérica → va la de su ficha «${suya.slice(0, 40)}»`);
+        }
+      }
+    }
+    if (!cerroConLaSuya && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
+      const lista = propias.length ? propias : PREGUNTAS_DE_CIERRE;
+      const pregunta = lista.find((p) => !recientes.includes(p.slice(0, 20))) ?? lista[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
       // La pregunta va en su propia burbuja; con tope, las de antes se juntan para que quepa.
       const partes = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
@@ -1038,7 +1083,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const recientes = ultimosMensajes(convo.id, 8).filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     texto =
       c.etapa === "venta" && !c.nota
-        ? PREGUNTAS_DE_CIERRE.find((p) => !recientes.includes(p)) ?? PREGUNTAS_DE_CIERRE[0]
+        ? (cierresDeLaFicha(c).length ? cierresDeLaFicha(c) : PREGUNTAS_DE_CIERRE).find((p) => !recientes.includes(p.slice(0, 20))) ?? (cierresDeLaFicha(c)[0] ?? PREGUNTAS_DE_CIERRE[0])
         : "¿En qué más te puedo ayudar? 😊";
     console.log(`[tablero:ia] convo ${convo.id}: la respuesta quedó vacía → sale «${texto}» (nunca mudo)`);
   }
