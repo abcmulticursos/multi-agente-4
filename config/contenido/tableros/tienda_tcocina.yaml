@@ -213,8 +213,8 @@ whatsapp:
   fichas:
     - id: coc_pe_inicio
       tipo: inicio
-      x: -2915
-      y: -110
+      x: -3168
+      y: -231
       titulo: Tubería doble oferta
       pais: PE
     - id: coc_pe_intro
@@ -1919,6 +1919,15 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mw35xbos-25xa
+      tipo: reparto
+      x: -2717
+      y: 121
+      reparto:
+        - id: r1
+          peso: 1
+        - id: r2
+          peso: 1
   cables:
     - id: c2
       de: coc_pe_intro
@@ -2229,10 +2238,6 @@ whatsapp:
       de: f-mvuo5fvc-y8ape
       salida: siguiente
       a: f-mvuo5fvc-vhhf8
-    - id: c-mvup328t-vbl
-      de: coc_pe_inicio
-      salida: siguiente
-      a: f-mvuo5fvc-y8ape
     - id: c-mw358bz5-oye
       de: f-mvuo5fvc-uppvm
       salida: sin_pago
@@ -2245,6 +2250,14 @@ whatsapp:
       de: f-mvuo5fvd-jrjam
       salida: pagado
       a: f-mvuo5fvd-clvu8
+    - id: c-mw35xgr1-qaw
+      de: coc_pe_inicio
+      salida: siguiente
+      a: f-mw35xbos-25xa
+    - id: c-mw35xkuk-ued
+      de: f-mw35xbos-25xa
+      salida: rep:r1
+      a: f-mvuo5fvc-y8ape
   cajas:
     - id: manta-coc_pe_inicio
       x: 4774

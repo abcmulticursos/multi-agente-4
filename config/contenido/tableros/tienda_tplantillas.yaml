@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: pla_pe_inicio
       tipo: inicio
-      x: 60
-      y: 1875
+      x: -605
+      y: 1848
       titulo: Inicio · PE
       pais: PE
     - id: pla_pe_reparto
       tipo: reparto
-      x: 390
-      y: 1875
+      x: -341
+      y: 1892
       titulo: Reparto · 4 tuberías por sorteo
       reparto:
         - id: lineal
@@ -228,13 +228,16 @@ whatsapp:
           peso: 1
         - id: ob
           nombre: Order bump
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: dou
           nombre: Doble oferta
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: contrib
           nombre: Contribución
-          peso: 1
+          peso: 0
+          peso_antes: 1
     - id: pla_pe_lin_intro
       tipo: mensaje
       x: 720
