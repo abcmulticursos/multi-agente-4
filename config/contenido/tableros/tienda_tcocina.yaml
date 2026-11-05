@@ -2238,6 +2238,14 @@ whatsapp:
       de: f-mvuo5fvc-uppvm
       salida: sin_pago
       a: f-mw3588bd-hmns2
+    - id: c-mw35dne7-yc2
+      de: f-mvuo5fvc-y8ape
+      salida: pagado
+      a: f-mvuo5fvd-jrjam
+    - id: c-mw35exzj-8ud
+      de: f-mvuo5fvd-jrjam
+      salida: pagado
+      a: f-mvuo5fvd-clvu8
   cajas:
     - id: manta-coc_pe_inicio
       x: 4774
