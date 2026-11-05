@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: pla_pe_inicio
       tipo: inicio
-      x: -605
-      y: 1848
+      x: 528
+      y: 2926
       titulo: Inicio · PE
       pais: PE
     - id: pla_pe_reparto
       tipo: reparto
-      x: -341
-      y: 1892
+      x: 1309
+      y: 2981
       titulo: Reparto · 4 tuberías por sorteo
       reparto:
         - id: lineal
@@ -801,8 +801,8 @@ whatsapp:
       titulo: Regalo
     - id: pla_pe_dou_intro
       tipo: mensaje
-      x: 720
-      y: 2500
+      x: 1826
+      y: 3102
       titulo: Intro · doble oferta
       steps:
         - type: text
@@ -861,8 +861,8 @@ whatsapp:
         - ptpla_pack
     - id: pla_pe_dou_seg
       tipo: seguimientos
-      x: 720
-      y: 2930
+      x: 2090
+      y: 2409
       titulo: Seguimientos · si no elige o no paga
       presenta:
         - ptpla_basico
@@ -874,6 +874,9 @@ whatsapp:
             - id: pla_pe_dou_seg_1a
               nombre: Versión A
               peso: 1
+              anuncios:
+                - meta_120255300748590226
+                - meta_120255300748530226
               steps:
                 - type: text
                   body_variants:
@@ -918,8 +921,8 @@ whatsapp:
                       steps: []
     - id: pla_pe_dou_cobro_b
       tipo: cobro
-      x: 1050
-      y: 2500
+      x: 2992
+      y: 2970
       titulo: Cobro · GUÍA PLANTILLA
       steps:
         - type: text
@@ -945,8 +948,8 @@ whatsapp:
         metodos: true
     - id: pla_pe_dou_cobro_p
       tipo: cobro
-      x: 1050
-      y: 2930
+      x: 2992
+      y: 3817
       titulo: Cobro · PACK PLANTILLA COMPLETO
       steps:
         - type: text
@@ -972,20 +975,20 @@ whatsapp:
         metodos: true
     - id: pla_pe_dou_ent_b
       tipo: entregar
-      x: 1380
-      y: 2500
+      x: 4334
+      y: 3025
       titulo: Entrega · GUÍA PLANTILLA
       producto_id: ptpla_basico
     - id: pla_pe_dou_ent_p
       tipo: entregar
-      x: 1380
-      y: 2930
+      x: 4334
+      y: 3828
       titulo: Entrega · PACK PLANTILLA COMPLETO
       producto_id: ptpla_pack
     - id: pla_pe_dou_upgrade
       tipo: mensaje
-      x: 1710
-      y: 2500
+      x: 4796
+      y: 2937
       titulo: Upgrade al pack
       steps:
         - type: text
@@ -1007,8 +1010,8 @@ whatsapp:
       instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
     - id: pla_pe_dou_cobro_up
       tipo: cobro
-      x: 1710
-      y: 2930
+      x: 5621
+      y: 2475
       titulo: Cobro · PACK PLANTILLA COMPLETO
       steps:
         - type: text
@@ -1035,8 +1038,8 @@ whatsapp:
         diferencia: true
     - id: pla_pe_dou_upsell1
       tipo: mensaje
-      x: 2040
-      y: 2500
+      x: 5841
+      y: 2959
       titulo: Upsell · PLANTILLAS PREMIUM
       steps:
         - type: text
@@ -1063,8 +1066,8 @@ whatsapp:
       espera_min: 2
     - id: pla_pe_dou_cobro_u1
       tipo: cobro
-      x: 2370
-      y: 2500
+      x: 6754
+      y: 2871
       titulo: Cobro · PLANTILLAS PREMIUM
       steps:
         - type: text
@@ -1088,14 +1091,14 @@ whatsapp:
         metodos: true
     - id: pla_pe_dou_ent_u1
       tipo: entregar
-      x: 2700
-      y: 2500
+      x: 7766
+      y: 3080
       titulo: Entrega · PLANTILLAS PREMIUM
       producto_id: ptpla_upsell
     - id: pla_pe_dou_no_u1
       tipo: mensaje
-      x: 2370
-      y: 2930
+      x: 6512
+      y: 3201
       titulo: Si dice que no
       steps:
         - type: text
@@ -1104,8 +1107,8 @@ whatsapp:
           delay_after_sec: 4
     - id: pla_pe_dou_regalo
       tipo: regalo
-      x: 3030
-      y: 2500
+      x: 8349
+      y: 3135
       titulo: Regalo
     - id: pla_pe_con_promesa
       tipo: mensaje
@@ -4137,6 +4140,126 @@ whatsapp:
               📁 Aquí tienes tu acceso:
               https://example.com/plantillas/nivel-ar-8000
           delay_after_sec: 4
+    - id: f-mw3awysb-9e6yc
+      tipo: seguimientos
+      x: 3245
+      y: 2409
+      titulo: Seguimientos · si no elige o no paga
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: s-mw3awysb-xc26e
+          minutos: 120
+          variantes:
+            - id: v-mw3awysb-bzgsh
+              nombre: Versión A
+              peso: 1
+              anuncios:
+                - meta_120255300748590226
+                - meta_120255300748530226
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mw3awysb-da1nr
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mw3awysb-0s1al
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: s-mw3awysb-fpv9l
+          minutos: 600
+          variantes:
+            - id: v-mw3awysb-ktd8y
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mw3awysb-da1nr
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mw3awysb-0s1al
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+    - id: f-mw3axl0k-45tq2
+      tipo: seguimientos
+      x: 3267
+      y: 3333
+      titulo: Seguimientos · si no elige o no paga
+      presenta:
+        - ptpla_basico
+        - ptpla_pack
+      seguimientos:
+        - id: s-mw3axl0k-nuz32
+          minutos: 120
+          variantes:
+            - id: v-mw3axl0k-qf0g4
+              nombre: Versión A
+              peso: 1
+              anuncios:
+                - meta_120255300748590226
+                - meta_120255300748530226
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¿Ya elegiste? 😊
+
+                      1️⃣ Solo *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mw3axl0k-miv17
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mw3axl0k-797fu
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
+        - id: s-mw3axl0k-4zyl6
+          minutos: 600
+          variantes:
+            - id: v-mw3axl0k-mu3lm
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Te guardé los dos precios un ratito más ⏳
+
+                      1️⃣ *{{PRODUCTO_BASE}}* · *{{PRECIO_BASE}}*
+                      2️⃣ *{{PRODUCTO_FULL}}* · *{{PRECIO_FULL}}*
+                  delay_after_sec: 4
+                  buttons:
+                    - id: b-mw3axl0k-miv17
+                      label: Solo el básico
+                      action: send_steps
+                      steps: []
+                    - id: b-mw3axl0k-797fu
+                      label: Quiero el pack
+                      action: send_steps
+                      steps: []
   cables:
     - id: cpl1
       de: pla_pe_inicio
@@ -4323,10 +4446,6 @@ whatsapp:
       de: pla_pe_dou_cobro_b
       salida: prod:ptpla_pack
       a: pla_pe_dou_ent_p
-    - id: cpl47
-      de: pla_pe_dou_cobro_b
-      salida: sin_pago
-      a: pla_pe_dou_seg
     - id: cpl48
       de: pla_pe_dou_cobro_p
       salida: pagado
@@ -4335,10 +4454,6 @@ whatsapp:
       de: pla_pe_dou_cobro_p
       salida: prod:ptpla_basico
       a: pla_pe_dou_ent_b
-    - id: cpl50
-      de: pla_pe_dou_cobro_p
-      salida: sin_pago
-      a: pla_pe_dou_seg
     - id: cpl51
       de: pla_pe_dou_upsell1
       salida: btn:pla_pe_dou_u1_si
@@ -5056,6 +5171,14 @@ whatsapp:
       salida: pagado
       a: pla_pe_lin_upsell1
       vista: colita
+    - id: c-mw3ax4wb-v6a
+      de: pla_pe_dou_cobro_b
+      salida: sin_pago
+      a: f-mw3awysb-9e6yc
+    - id: c-mw3axo43-ji2
+      de: pla_pe_dou_cobro_p
+      salida: sin_pago
+      a: f-mw3axl0k-45tq2
   cajas:
     - id: caja-pla_pe-lineal
       x: 680
@@ -5071,9 +5194,9 @@ whatsapp:
       titulo: ORDER BUMP · con BOTONES
     - id: caja-pla_pe-dou
       x: 680
-      y: 2430
-      ancho: 2680
-      alto: 1170
+      y: 2364
+      ancho: 8191
+      alto: 1291
       titulo: DOBLE OFERTA · con BOTONES
     - id: caja-pla_pe-contrib
       x: 680
