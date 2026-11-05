@@ -869,7 +869,7 @@ whatsapp:
         - ptpla_pack
       seguimientos:
         - id: pla_pe_dou_seg_1
-          minutos: 120
+          minutos: 2
           variantes:
             - id: pla_pe_dou_seg_1a
               nombre: Versión A
@@ -896,7 +896,7 @@ whatsapp:
                       action: send_steps
                       steps: []
         - id: pla_pe_dou_seg_2
-          minutos: 600
+          minutos: 5
           variantes:
             - id: pla_pe_dou_seg_2a
               nombre: Versión A
@@ -4142,7 +4142,7 @@ whatsapp:
         - ptpla_pack
       seguimientos:
         - id: s-mw3awysb-xc26e
-          minutos: 120
+          minutos: 2
           variantes:
             - id: v-mw3awysb-bzgsh
               nombre: Versión A
@@ -4166,7 +4166,7 @@ whatsapp:
                       action: send_steps
                       steps: []
         - id: s-mw3awysb-fpv9l
-          minutos: 600
+          minutos: 5
           variantes:
             - id: v-mw3awysb-ktd8y
               nombre: Versión A
