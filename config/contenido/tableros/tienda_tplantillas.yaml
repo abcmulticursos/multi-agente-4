@@ -1112,8 +1112,8 @@ whatsapp:
       titulo: Regalo
     - id: pla_pe_con_promesa
       tipo: mensaje
-      x: 720
-      y: 3750
+      x: 682
+      y: 4246
       titulo: Intro · contribución
       steps:
         - type: text
@@ -1152,8 +1152,8 @@ whatsapp:
         - ptpla_aporte
     - id: pla_pe_con_segP
       tipo: seguimientos
-      x: 720
-      y: 4180
+      x: 682
+      y: 4675
       titulo: Seguimientos · si no contesta
       presenta:
         - ptpla_aporte
@@ -1200,8 +1200,8 @@ whatsapp:
                       steps: []
     - id: pla_pe_con_no
       tipo: mensaje
-      x: 1050
-      y: 4180
+      x: 1012
+      y: 4675
       titulo: Dijo que no
       steps:
         - type: text
@@ -1210,14 +1210,14 @@ whatsapp:
           delay_after_sec: 4
     - id: pla_pe_con_entrega
       tipo: entregar
-      x: 1050
-      y: 3750
+      x: 1012
+      y: 4246
       titulo: Entrega · MATERIAL POR CONTRIBUCIÓN
       producto_id: ptpla_aporte
     - id: pla_pe_con_cobro
       tipo: cobro
-      x: 1380
-      y: 3750
+      x: 1342
+      y: 4246
       titulo: Contribución
       steps:
         - type: text
@@ -1258,8 +1258,8 @@ whatsapp:
               desde: 15
     - id: pla_pe_con_rec
       tipo: seguimientos
-      x: 1380
-      y: 4180
+      x: 1342
+      y: 4675
       titulo: Recordatorios · si no aporta
       presenta:
         - ptpla_aporte
@@ -1288,8 +1288,8 @@ whatsapp:
                   delay_after_sec: 4
     - id: pla_pe_con_nivel5
       tipo: mensaje
-      x: 1710
-      y: 3750
+      x: 1672
+      y: 4246
       titulo: Nivel S/ 5
       steps:
         - type: text
@@ -1304,8 +1304,8 @@ whatsapp:
           delay_after_sec: 4
     - id: pla_pe_con_nivel10
       tipo: mensaje
-      x: 1710
-      y: 4180
+      x: 1672
+      y: 4675
       titulo: Nivel S/ 10
       steps:
         - type: text
@@ -1320,8 +1320,8 @@ whatsapp:
           delay_after_sec: 4
     - id: pla_pe_con_nivel15
       tipo: mensaje
-      x: 1710
-      y: 4610
+      x: 1672
+      y: 5104
       titulo: Nivel S/ 15
       steps:
         - type: text
@@ -5199,8 +5199,8 @@ whatsapp:
       alto: 1291
       titulo: DOBLE OFERTA · con BOTONES
     - id: caja-pla_pe-contrib
-      x: 680
-      y: 3680
+      x: 649
+      y: 4169
       ancho: 2680
       alto: 1170
       titulo: CONTRIBUCIÓN · con BOTONES
@@ -5208,7 +5208,7 @@ whatsapp:
       x: 20
       y: -140
       ancho: 3440
-      alto: 5120
+      alto: 5538
       titulo: ""
       inicio: pla_pe_inicio
     - id: caja-pla_ec-lineal
