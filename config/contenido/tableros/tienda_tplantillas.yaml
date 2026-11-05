@@ -987,8 +987,8 @@ whatsapp:
       producto_id: ptpla_pack
     - id: pla_pe_dou_upgrade
       tipo: mensaje
-      x: 4653
-      y: 2937
+      x: 4708
+      y: 2255
       titulo: Upgrade al pack
       steps:
         - type: text
@@ -1010,8 +1010,8 @@ whatsapp:
       instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
     - id: pla_pe_dou_cobro_up
       tipo: cobro
-      x: 5544
-      y: 2629
+      x: 5588
+      y: 2233
       titulo: Cobro · PACK PLANTILLA COMPLETO
       steps:
         - type: text
@@ -1038,8 +1038,8 @@ whatsapp:
         diferencia: true
     - id: pla_pe_dou_upsell1
       tipo: mensaje
-      x: 6347
-      y: 3102
+      x: 5368
+      y: 3168
       titulo: Upsell · PLANTILLAS PREMIUM
       steps:
         - type: text
@@ -4475,34 +4475,19 @@ whatsapp:
       de: pla_pe_dou_ent_u1
       salida: siguiente
       a: pla_pe_dou_regalo
+      vista: cable
     - id: cpl57
       de: pla_pe_dou_no_u1
       salida: siguiente
       a: pla_pe_dou_regalo
-    - id: cpl58
-      de: pla_pe_dou_ent_b
-      salida: siguiente
-      a: pla_pe_dou_upgrade
     - id: cpl59
       de: pla_pe_dou_upgrade
       salida: btn:pla_pe_dou_up_si
       a: pla_pe_dou_cobro_up
-    - id: cpl60
-      de: pla_pe_dou_upgrade
-      salida: btn:pla_pe_dou_up_no
-      a: pla_pe_dou_upsell1
-    - id: cpl61
-      de: pla_pe_dou_upgrade
-      salida: sin_respuesta
-      a: pla_pe_dou_upsell1
     - id: cpl62
       de: pla_pe_dou_cobro_up
       salida: pagado
       a: pla_pe_dou_ent_p
-    - id: cpl63
-      de: pla_pe_dou_cobro_up
-      salida: sin_pago
-      a: pla_pe_dou_upsell1
     - id: cpl64
       de: pla_pe_dou_ent_p
       salida: siguiente
@@ -5176,6 +5161,10 @@ whatsapp:
       de: pla_pe_dou_cobro_p
       salida: sin_pago
       a: f-mw3axl0k-45tq2
+    - id: c-mw3dvv34-ckv
+      de: pla_pe_dou_ent_b
+      salida: siguiente
+      a: pla_pe_dou_upsell1
   cajas:
     - id: caja-pla_pe-lineal
       x: 680
