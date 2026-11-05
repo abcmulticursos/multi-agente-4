@@ -4414,6 +4414,31 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // Solo entre los que ya se le presentaron: el que sigue oculto no se elige por aquí.
       const vistos = new Set(presentadosDe(estado));
       const opciones = Object.keys(precios).filter((id) => vistos.has(id));
+      // «¿CUÁNTO CUESTA?» CON DOS EN EL COBRO (04/11/2026, su 302): eligió el SUPER PACK, su seguimiento 2 promocionó GRAFISMO
+      // a S/7, preguntó «PRECIO» y la IA contestó 7 (el del otro): pagó 7 y «no alcanza». Con dos o más en el cobro, el
+      // precio lo dice el bot, con los precios del cobro (congelados, con la oferta si la bajó): el elegido primero y el
+      // otro después, sin obligarlo a elegir de nuevo. Si nombra al otro, sigue lo de siempre (IA / «mejor el otro»).
+      if (!metodo && estado.cobro_pagado <= 0 && opciones.length > 1 && elegidoId && opciones.includes(elegidoId)) {
+        const n = sinTildes(contenido).replace(/[^a-z0-9ñ\s]/g, " ").replace(/\s+/g, " ").trim();
+        const pidePrecio = /\b(precio|cuesta|cuestan|vale|valen|costo|valor|cuanto (es|sale|seria|esta|cobran)|a cuanto)\b/.test(n) && n.split(" ").length <= 6;
+        const nombraOtro = opciones.some(
+          (id) => id !== elegidoId && [...palabrasParaReconocerUnNombre(producto(config, id)?.name ?? "")].some((w) => w.length >= 4 && new RegExp(`\\b${w}`).test(n))
+        );
+        if (pidePrecio && !nombraOtro) {
+          const plata = (v: number) => formatCurrencyAmount(v, pais as never);
+          const nom = (id: string) => producto(config, id)?.name ?? id;
+          const otros = opciones.filter((id) => id !== elegidoId).map((id) => `*${nom(id)}*, está en *${plata(precios[id])}*`);
+          respondio(convo, t);
+          await sendConfiguredSteps(convo, [
+            {
+              type: "text",
+              body: `Tu *${nom(elegidoId)}* queda en *${plata(precios[elegidoId])}* 😊\n\nSi prefieres ${otros.join(" o ")}.\n\n¿Seguimos con *${nom(elegidoId)}*? 😊`,
+            },
+          ] as never);
+          console.log(`[tablero] convo ${convo.id}: pregunta el precio con ${opciones.length} en el cobro → el elegido y el otro, con sus precios (texto fijo)`);
+          return true;
+        }
+      }
       if (!metodo && estado.ficha_id === cobro.id && estado.cobro_pagado <= 0 && opciones.length > 1) {
         // Con su precio y cuál es el más barato / el más caro: «me quedo con el básico» no nombra el
         // producto (24/10/2026, la IA contestaba «ninguna» y le volvía a mandar los datos del caro).
