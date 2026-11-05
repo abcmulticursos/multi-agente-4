@@ -1278,6 +1278,9 @@ whatsapp:
               action: send_steps
               steps: []
           enabled: false
+      presenta:
+        - "@tienda:basico"
+        - "@tienda:full"
     - id: f-mvw3fadn-4b4pu
       tipo: seguimientos
       x: 1012
