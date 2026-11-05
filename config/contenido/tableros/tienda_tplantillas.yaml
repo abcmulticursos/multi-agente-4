@@ -225,15 +225,15 @@ whatsapp:
       reparto:
         - id: lineal
           nombre: Lineal
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: ob
           nombre: Order bump
           peso: 0
           peso_antes: 1
         - id: dou
           nombre: Doble oferta
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: contrib
           nombre: Contribución
           peso: 0
