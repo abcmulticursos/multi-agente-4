@@ -1722,7 +1722,11 @@ function numerarUpsells(t: TableroEnElEditor): Record<string, number> {
     if (!f) continue;
     if (n > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && !f.guardada) fuera[id] = Math.min(fuera[id] ?? Infinity, n);
     const siguiente = f.tipo === "entregar" ? n + 1 : n;
-    for (const c of t.cables) if (c.de === id) cola.push([c.a, siguiente]);
+    // LA COLITA DEL LIBRITO TAMBIÉN ENTREGA (05/11/2026, COCINA PE): el «💰 Si paga» de una ficha que no es Cobro, si no va
+    // a una Entregar, entrega ahí mismo (el motor, `entregadoConSuCable`). Lo que sigue por esa colita ya es upsell.
+    const entregaEnLaColita = (salida: string, a: string) =>
+      f.tipo !== "cobro" && f.tipo !== "entregar" && (salida === "pagado" || salida.startsWith("prod:")) && t.fichas.find((x) => x.id === a)?.tipo !== "entregar";
+    for (const c of t.cables) if (c.de === id) cola.push([c.a, entregaEnLaColita(c.salida, c.a) ? n + 1 : siguiente]);
   }
   return fuera;
 }
