@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: coc_pe_inicio
       tipo: inicio
-      x: 60
-      y: 0
+      x: -2915
+      y: -110
       titulo: Tubería doble oferta
       pais: PE
     - id: coc_pe_intro
       tipo: mensaje
-      x: 390
-      y: 0
+      x: 5148
+      y: 880
       titulo: Intro
       steps:
         - type: text
@@ -289,8 +289,8 @@ whatsapp:
         - ptcocina_pack
     - id: coc_pe_cobro_b
       tipo: cobro
-      x: 720
-      y: 0
+      x: 5478
+      y: 880
       titulo: Cobro · RECETARIO DIETAS FIT
       steps:
         - type: text
@@ -316,8 +316,8 @@ whatsapp:
         metodos: true
     - id: coc_pe_seg_b
       tipo: seguimientos
-      x: 720
-      y: 330
+      x: 5478
+      y: 1210
       titulo: Seguimientos · RECETARIO DIETAS FIT
       presenta:
         - ptcocina_dietas
@@ -370,8 +370,8 @@ whatsapp:
           ignora_tardio: true
     - id: coc_pe_cobro_p
       tipo: cobro
-      x: 720
-      y: 660
+      x: 5478
+      y: 1540
       titulo: Cobro · PACK DIETAS FIT + POSTRES
       steps:
         - type: text
@@ -397,8 +397,8 @@ whatsapp:
         metodos: true
     - id: coc_pe_seg_p
       tipo: seguimientos
-      x: 720
-      y: 990
+      x: 5478
+      y: 1870
       titulo: Seguimientos · PACK DIETAS FIT + POSTRES
       presenta:
         - ptcocina_pack
@@ -451,20 +451,20 @@ whatsapp:
           ignora_tardio: true
     - id: coc_pe_ent_b
       tipo: entregar
-      x: 1050
-      y: 0
+      x: 5808
+      y: 880
       titulo: Entrega · RECETARIO DIETAS FIT
       producto_id: ptcocina_dietas
     - id: coc_pe_ent_p
       tipo: entregar
-      x: 1050
-      y: 660
+      x: 5808
+      y: 1540
       titulo: Entrega · PACK DIETAS FIT + POSTRES
       producto_id: ptcocina_pack
     - id: coc_pe_upgrade
       tipo: mensaje
-      x: 3905
-      y: -913
+      x: -1628
+      y: -1430
       titulo: Upgrade al pack
       steps:
         - type: text
@@ -486,8 +486,8 @@ whatsapp:
       instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS el otro producto, y solo paga la diferencia.
     - id: coc_pe_cobro_up
       tipo: cobro
-      x: 4224
-      y: -946
+      x: 5808
+      y: 1892
       titulo: Cobro · upgrade (diferencia)
       steps:
         - type: text
@@ -507,8 +507,8 @@ whatsapp:
         diferencia: true
     - id: coc_pe_upsell1
       tipo: mensaje
-      x: 1710
-      y: 0
+      x: 6468
+      y: 880
       titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -540,8 +540,8 @@ whatsapp:
       espera_min: 2
     - id: coc_pe_cobro_u1
       tipo: cobro
-      x: 1705
-      y: 418
+      x: 6457
+      y: 1298
       titulo: Cobro · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -565,8 +565,8 @@ whatsapp:
         metodos: true
     - id: coc_pe_seg_u1
       tipo: seguimientos
-      x: 1936
-      y: 792
+      x: 6688
+      y: 1672
       titulo: Seguimientos · COMIDAS PERUANAS CASERAS
       presenta:
         - ptcocina_peruanas
@@ -632,25 +632,25 @@ whatsapp:
           ignora_tardio: true
     - id: coc_pe_ent_u1
       tipo: entregar
-      x: 2079
-      y: 319
+      x: 6831
+      y: 1199
       titulo: Entrega · COMIDAS PERUANAS CASERAS
       producto_id: ptcocina_peruanas
     - id: coc_pe_regalo
       tipo: regalo
-      x: 2370
-      y: 0
+      x: 7128
+      y: 880
       titulo: Regalo
     - id: coc_ec_inicio
       tipo: inicio
-      x: 60
-      y: 1600
+      x: -33
+      y: 1639
       titulo: Tubería order bump
       pais: EC
     - id: coc_ec_intro
       tipo: mensaje
-      x: 390
-      y: 1600
+      x: 297
+      y: 1639
       titulo: Intro
       steps:
         - type: text
@@ -709,8 +709,8 @@ whatsapp:
         - ptcocina_dietas
     - id: coc_ec_ob
       tipo: intro_ob
-      x: 720
-      y: 1600
+      x: 627
+      y: 1639
       titulo: Order bump
       presenta:
         - ptcocina_dietas
@@ -750,8 +750,8 @@ whatsapp:
                   steps: []
     - id: coc_ec_cobro_b
       tipo: cobro
-      x: 1050
-      y: 1600
+      x: 957
+      y: 1639
       titulo: Cobro · RECETARIO DIETAS FIT
       steps:
         - type: text
@@ -777,8 +777,8 @@ whatsapp:
         metodos: true
     - id: coc_ec_seg_b
       tipo: seguimientos
-      x: 1050
-      y: 1930
+      x: 957
+      y: 1969
       titulo: Seguimientos · RECETARIO DIETAS FIT
       presenta:
         - ptcocina_dietas
@@ -826,8 +826,8 @@ whatsapp:
                   delay_after_sec: 4
     - id: coc_ec_cobro_p
       tipo: cobro
-      x: 1050
-      y: 2260
+      x: 957
+      y: 2299
       titulo: Cobro · PACK DIETAS FIT + POSTRES
       steps:
         - type: text
@@ -853,8 +853,8 @@ whatsapp:
         metodos: true
     - id: coc_ec_seg_p
       tipo: seguimientos
-      x: 1050
-      y: 2590
+      x: 957
+      y: 2629
       titulo: Seguimientos · PACK DIETAS FIT + POSTRES
       presenta:
         - ptcocina_pack
@@ -902,20 +902,20 @@ whatsapp:
                   delay_after_sec: 4
     - id: coc_ec_ent_b
       tipo: entregar
-      x: 1380
-      y: 1600
+      x: 1287
+      y: 1639
       titulo: Entrega · RECETARIO DIETAS FIT
       producto_id: ptcocina_dietas
     - id: coc_ec_ent_p
       tipo: entregar
-      x: 1380
-      y: 2260
+      x: 1287
+      y: 2299
       titulo: Entrega · PACK DIETAS FIT + POSTRES
       producto_id: ptcocina_pack
     - id: coc_ec_upsell1
       tipo: mensaje
-      x: 1710
-      y: 1600
+      x: 1617
+      y: 1639
       titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -947,8 +947,8 @@ whatsapp:
       espera_min: 2
     - id: coc_ec_cobro_u1
       tipo: cobro
-      x: 1710
-      y: 1930
+      x: 1617
+      y: 1969
       titulo: Cobro · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -972,8 +972,8 @@ whatsapp:
         metodos: true
     - id: coc_ec_seg_u1
       tipo: seguimientos
-      x: 1710
-      y: 2260
+      x: 1617
+      y: 2299
       titulo: Seguimientos · COMIDAS PERUANAS CASERAS
       presenta:
         - ptcocina_peruanas
@@ -1021,14 +1021,14 @@ whatsapp:
                   delay_after_sec: 4
     - id: coc_ec_ent_u1
       tipo: entregar
-      x: 2040
-      y: 1930
+      x: 1947
+      y: 1969
       titulo: Entrega · COMIDAS PERUANAS CASERAS
       producto_id: ptcocina_peruanas
     - id: coc_ec_regalo
       tipo: regalo
-      x: 2370
-      y: 1600
+      x: 2277
+      y: 1639
       titulo: Regalo
     - id: coc_ar_inicio
       tipo: inicio
@@ -1597,8 +1597,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mvuo5fvc-y8ape
       tipo: mensaje
-      x: 3993
-      y: -1595
+      x: -2178
+      y: 110
       titulo: Intro
       steps:
         - type: text
@@ -1657,8 +1657,8 @@ whatsapp:
         - ptcocina_dietas
     - id: f-mvuo5fvc-uppvm
       tipo: cobro
-      x: 4323
-      y: -1595
+      x: -1265
+      y: 66
       titulo: Cobro · RECETARIO DIETAS FIT
       steps:
         - type: text
@@ -1682,8 +1682,8 @@ whatsapp:
         producto_id: ptcocina_dietas
     - id: f-mvuo5fvc-vhhf8
       tipo: seguimientos
-      x: 4620
-      y: -1166
+      x: -1903
+      y: -264
       titulo: Seguimientos · RECETARIO DIETAS FIT
       presenta:
         - ptcocina_dietas
@@ -1736,15 +1736,15 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvuo5fvd-g5qsa
       tipo: entregar
-      x: 4653
-      y: -1595
+      x: -374
+      y: -132
       titulo: Entrega · RECETARIO DIETAS FIT
       por_correo: true
       producto_id: ptcocina_dietas
     - id: f-mvuo5fvd-jrjam
       tipo: mensaje
-      x: 4983
-      y: -1595
+      x: -44
+      y: 121
       titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -1776,8 +1776,8 @@ whatsapp:
       espera_min: 2
     - id: f-mvuo5fvd-o7kn6
       tipo: cobro
-      x: 5390
-      y: -1507
+      x: 1023
+      y: 33
       titulo: Cobro · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -1802,8 +1802,8 @@ whatsapp:
         metodos: true
     - id: f-mvuo5fvd-sdvm4
       tipo: seguimientos
-      x: 5775
-      y: -1122
+      x: 1298
+      y: -341
       titulo: Seguimientos · COMIDAS PERUANAS CASERAS
       presenta:
         - ptcocina_peruanas
@@ -1856,16 +1856,70 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvuo5fvd-4bbz1
       tipo: entregar
-      x: 5852
-      y: -1342
+      x: 2035
+      y: 154
       titulo: Entrega · COMIDAS PERUANAS CASERAS
       por_correo: true
       producto_id: ptcocina_peruanas
     - id: f-mvuo5fvd-clvu8
       tipo: regalo
-      x: 6281
-      y: -1485
+      x: 2761
+      y: 176
       titulo: Regalo
+    - id: f-mw3588bd-hmns2
+      tipo: seguimientos
+      x: -1001
+      y: -286
+      titulo: Seguimientos · RECETARIO DIETAS FIT
+      presenta:
+        - ptcocina_dietas
+      seguimientos:
+        - id: s-mw3588bd-irhr9
+          minutos: 2
+          variantes:
+            - id: v-mw3588bd-upy20
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Hola {{NOMBRE}} 😊 {¿Pudiste revisar|¿Alcanzaste a ver|¿Lograste ver} lo de *{{PRODUCTO}}*?
+
+                      Sigue a *{{PRECIO_COMPLETO}}* (antes ~{{PRECIO_MERCADO}}~). Cuando hagas el pago, me envías la fotito del comprobante por aquí 📸
+                  delay_after_sec: 4
+            - id: v-mw3588bd-l57p1
+              nombre: Versión B
+              peso: 0
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      ¡Hola de nuevo! 👋 Te guardé el precio de *{{PRODUCTO}}*: *{{PRECIO_COMPLETO}}*.
+
+                      ¿Te quedó alguna duda? Escríbeme y te ayudo 😊
+                  delay_after_sec: 4
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mw3588bd-6hu7a
+          minutos: 5
+          variantes:
+            - id: v-mw3588bd-ann8k
+              nombre: Versión A
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - |-
+                      Paso rapidito por aquí ✨
+
+                      Muchas personas ya están usando *{{PRODUCTO}}* y me cuentan que les cambió la rutina 🙌
+
+                      Si quieres llevarlo hoy, es un único pago de *{{PRECIO_COMPLETO}}* y te llega en segundos ⚡
+                  delay_after_sec: 4
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
   cables:
     - id: c2
       de: coc_pe_intro
@@ -2135,10 +2189,6 @@ whatsapp:
       de: f-mvuo5fvc-y8ape
       salida: btn:b-mvuo5fvc-zksc9
       a: f-mvuo5fvc-uppvm
-    - id: c-mvuo5fvd-a3zky
-      de: f-mvuo5fvc-uppvm
-      salida: sin_pago
-      a: f-mvuo5fvc-vhhf8
     - id: c-mvuo5fvd-zdxmi
       de: f-mvuo5fvc-uppvm
       salida: pagado
@@ -2167,6 +2217,7 @@ whatsapp:
       de: f-mvuo5fvd-4bbz1
       salida: siguiente
       a: f-mvuo5fvd-clvu8
+      vista: cable
     - id: c-mvuo5fvd-x3osi
       de: f-mvuo5fvd-jrjam
       salida: sin_respuesta
@@ -2183,17 +2234,21 @@ whatsapp:
       de: coc_pe_inicio
       salida: siguiente
       a: f-mvuo5fvc-y8ape
+    - id: c-mw358bz5-oye
+      de: f-mvuo5fvc-uppvm
+      salida: sin_pago
+      a: f-mw3588bd-hmns2
   cajas:
     - id: manta-coc_pe_inicio
-      x: 20
-      y: -70
+      x: 4774
+      y: 803
       ancho: 2640
       alto: 1350
       titulo: ""
       inicio: coc_pe_inicio
     - id: manta-coc_ec_inicio
-      x: 20
-      y: 1530
+      x: -77
+      y: 1573
       ancho: 2640
       alto: 1350
       titulo: ""
@@ -2213,8 +2268,8 @@ whatsapp:
       titulo: ""
       inicio: coc_otros
     - id: caja-pe-datos-de-frente-mvuo5fvd
-      x: 3960
-      y: -1661
-      ancho: 2618
-      alto: 833
+      x: -2981
+      y: -484
+      ancho: 6083
+      alto: 1295
       titulo: "🇵🇪 PERÚ · lineal con los datos de frente (SIN CONECTAR: conéctala tú al Inicio"
