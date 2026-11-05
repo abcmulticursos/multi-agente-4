@@ -4302,6 +4302,20 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       const unoPropuesto = new Set(propuestos.map((o) => cableDeLaSalida(t, o.duena.id, o.salida)?.a)).size === 1;
       console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 20)}» a la invitación «${pregunta.slice(0, 60)}» → decide`);
       if (metodoDicho) setSelectedPaymentMethod(convo.id, metodoDicho);
+      // SI EN SU «SÍ» NOMBRA UNO DE LOS PRODUCTOS, ES ÉSE (05/11/2026, sus 324/328/330 de PLANTILLAS: «el completo», «la guia»
+      // a «¿Por cuál de las dos te animas?» → la IA lo tomó como «sí» y el bot preguntaba «¿Cuál eliges?»). Se compara con
+      // los NOMBRES de los productos de la ficha (una palabra que solo tiene ése), no con palabras fijas.
+      const destinoDe = (o: (typeof haciaPagar)[number]) => cableDeLaSalida(t, o.duena.id, o.salida)?.a;
+      const nombres = haciaPagar.map((o) => palabrasParaReconocerUnNombre(nombreDelDestino(o)));
+      const dichas = palabrasParaReconocerUnNombre(texto);
+      const nombraUno = haciaPagar.filter((o, i) =>
+        [...nombres[i]].some((w) => dichas.has(w) && haciaPagar.every((x, j) => destinoDe(x) === destinoDe(o) || !nombres[j].has(w)))
+      );
+      if (new Set(nombraUno.map(destinoDe)).size === 1) {
+        console.log(`[tablero] convo ${convo.id}: «${texto.slice(0, 30)}» nombra «${nombreDelDestino(nombraUno[0])}» → ése`);
+        await seguirLaOpcion(nombraUno[0]);
+        return true;
+      }
       if (unoPropuesto) {
         await seguirLaOpcion(propuestos[0]);
         return true;
