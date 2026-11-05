@@ -86,7 +86,7 @@ import {
   nextLocalTime,
 } from "@/lib/workflow/quiet-hours";
 import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
-import { deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
+import { datosRecienEnviados, deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
 import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, ponerPreparadorDeDatos, ponerPreparadorDeEntrega, preguntarElMetodo } from "./pago";
 import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
@@ -4590,6 +4590,28 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
             pais
           );
           // Sin «preguntar el método»: sus burbujas del cobro otra vez, ya con el producto nuevo y su precio.
+          if (!conMetodos) await sendConfiguredSteps(convo, pasos as never);
+          else if (!yaElegido || !(await mandarDatosDelMetodo(convo, yaElegido, precios[decide], nombre)))
+            await preguntarElMetodo(convo, pasos as never, precios[decide], nombre);
+          return true;
+        }
+        // VUELVE A ELEGIR EL MISMO, CON LOS DATOS YA LEJOS (05/11/2026, su 340: datos de la GUÍA, dos seguimientos, «precio»,
+        // y 9 min después «quiero la guia por favor» → la IA le preguntaba «¿te indico cómo adquirirlo?»). Lo decidido no se
+        // repregunta: le llegan otra vez SUS burbujas del cobro (o los datos de su método). Si salieron hace menos de 5 min,
+        // no se repiten (eso lo sigue contestando la IA, como hasta hoy).
+        // («ya pagué la guía» no es volver a elegir: eso sigue como siempre.)
+        const diceQuePago = /\b(pague|pagado|pagando|deposite|transferi|yapee|plinee|envie|mande)\b/.test(sinTildes(contenido));
+        if (decide && decide === elegidoId && !porNumero && !porOtro && !diceQuePago && !esPreguntaQueNoElige(contenido) && !datosRecienEnviados(convo.id)) {
+          respondio(convo, t);
+          const nombre = producto(config, decide)?.name;
+          const yaElegido = metodoVigente(getConversationById(convo.id) ?? convo);
+          console.log(`[tablero] convo ${convo.id}: vuelve a elegir «${nombre ?? decide}» en el cobro → sus datos otra vez`);
+          const pais = getEffectiveCountryCode(convo.phone, config);
+          const pasos = conLosComodinesDeLaFicha(
+            pasosActivos(cobro.steps),
+            productosDeLaFicha(config, [decide, ...Object.keys(precios)], pais, false, precios),
+            pais
+          );
           if (!conMetodos) await sendConfiguredSteps(convo, pasos as never);
           else if (!yaElegido || !(await mandarDatosDelMetodo(convo, yaElegido, precios[decide], nombre)))
             await preguntarElMetodo(convo, pasos as never, precios[decide], nombre);

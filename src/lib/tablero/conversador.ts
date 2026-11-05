@@ -644,11 +644,19 @@ const HERRAMIENTA_DE_DATOS = {
 };
 
 /** ¿El bot acaba de mandar los datos de pago (una cuenta de 7+ dígitos en sus últimas 6 burbujas)? (03/11/2026) */
-function datosRecienEnviados(conversationId: number): boolean {
+export function datosRecienEnviados(conversationId: number): boolean {
+  // «RECIÉN» = HACE MENOS DE 5 MINUTOS (05/11/2026, su 340: los datos salieron, luego dos seguimientos y «precio», y 9 min
+  // después «quiero la guia por favor» → «Te dejé los datos justo aquí arriba 👆»; ya no estaban a la vista). Los tres
+  // mensajes seguidos del 03/11 («y si pago con yape» / «tengo banca móvil» / «se puede») caen dentro: no se repiten.
+  const ahora = Math.floor(Date.now() / 1000);
   return ultimosMensajes(conversationId, 8)
     .filter((m) => m.role !== "user")
     .slice(-6)
-    .some((m) => /\d{7,}/.test((m.content ?? "").replace(/https?:\/\/\S+/g, "").replace(/(?<=\d)[ \t-](?=\d)/g, "")));
+    .some(
+      (m) =>
+        ahora - Number(m.created_at ?? 0) < 5 * 60 &&
+        /\d{7,}/.test((m.content ?? "").replace(/https?:\/\/\S+/g, "").replace(/(?<=\d)[ \t-](?=\d)/g, ""))
+    );
 }
 
 /**
