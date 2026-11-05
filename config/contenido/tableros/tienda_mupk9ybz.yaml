@@ -1149,6 +1149,11 @@ whatsapp:
                   enabled: false
       presenta:
         - "@tienda:basico"
+      instrucciones: |-
+        Cuando invites a comprar, cierra con una de estas frases, sin cambiarlas:
+        ¿Te gustaría obtenerlo? 📚✨ Así te envío los datos de pago para que puedas hacer tu compra correctamente 😊
+        ¿Te gustaría llevarlo? 📚✨ Así te envío los datos de pago para que puedas hacer tu compra correctamente 😊
+        ¿Te gustaría adquirirlo? 📚✨ Así podré ayudarte con los datos de pago para que puedas obtenerlo correctamente 😊
     - id: f-mvvo0a7c-uyvc
       tipo: cobro
       x: 1958
