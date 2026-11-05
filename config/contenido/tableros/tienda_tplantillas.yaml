@@ -895,6 +895,8 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          ignora_silencio: true
+          ignora_tardio: true
         - id: pla_pe_dou_seg_2
           minutos: 5
           variantes:
@@ -919,6 +921,9 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: pla_pe_dou_cobro_b
       tipo: cobro
       x: 2992
@@ -4165,6 +4170,8 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mw3awysb-fpv9l
           minutos: 5
           variantes:
@@ -4189,6 +4196,9 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mw3axl0k-45tq2
       tipo: seguimientos
       x: 3256
