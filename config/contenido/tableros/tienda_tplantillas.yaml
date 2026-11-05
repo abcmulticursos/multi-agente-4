@@ -929,6 +929,7 @@ whatsapp:
           body_variants:
             - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - |-
@@ -936,10 +937,24 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - Así te paso los datos exactos para tu pago 😊
           delay_after_sec: 4
+          enabled: false
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
       cobro:
         modo: producto
         producto_id: ptpla_basico
@@ -955,6 +970,7 @@ whatsapp:
           body_variants:
             - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - |-
@@ -962,10 +978,24 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - Así te paso los datos exactos para tu pago 😊
           delay_after_sec: 4
+          enabled: false
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
       cobro:
         modo: producto
         producto_id: ptpla_pack
@@ -984,57 +1014,6 @@ whatsapp:
       y: 3828
       titulo: Entrega · PACK PLANTILLA COMPLETO
       producto_id: ptpla_pack
-    - id: pla_pe_dou_upgrade
-      tipo: mensaje
-      x: 4708
-      y: 2255
-      titulo: Upgrade al pack
-      steps:
-        - type: text
-          body_variants:
-            - "🔥 Ya que tienes *{{PRODUCTO_BASE}}*… ¿quieres completar a *{{PRODUCTO_FULL}}* pagando *solo la diferencia: {{PRECIO_COMPLEMENTARIO}}*?"
-          delay_after_sec: 4
-          buttons:
-            - id: pla_pe_dou_up_si
-              label: Sí, completar
-              action: send_steps
-              steps: []
-            - id: pla_pe_dou_up_no
-              label: No, gracias
-              action: send_steps
-              steps: []
-      presenta:
-        - ptpla_basico
-        - ptpla_pack
-      instrucciones: Aquí el cliente ya tiene el básico. Si pregunta, el pack trae lo que ya tiene MÁS los extras, y solo paga la diferencia.
-    - id: pla_pe_dou_cobro_up
-      tipo: cobro
-      x: 5588
-      y: 2233
-      titulo: Cobro · PACK PLANTILLA COMPLETO
-      steps:
-        - type: text
-          body_variants:
-            - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
-          delay_after_sec: 3
-        - type: text
-          body_variants:
-            - |-
-              ¿Con qué método prefieres pagar? 👇
-
-              {{LISTA_METODOS_POR_PAIS}}
-          delay_after_sec: 3
-        - type: text
-          body_variants:
-            - Así te paso los datos exactos para tu pago 😊
-          delay_after_sec: 4
-      cobro:
-        modo: producto
-        producto_id: ptpla_pack
-        acepta:
-          - ptpla_basico
-        metodos: true
-        diferencia: true
     - id: pla_pe_dou_upsell1
       tipo: mensaje
       x: 5203
@@ -4256,6 +4235,26 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+    - id: f-mw3ep5kt-wedsp
+      tipo: cobro
+      x: 3795
+      y: 2563
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
   cables:
     - id: cpl1
       de: pla_pe_inicio
@@ -4479,14 +4478,6 @@ whatsapp:
       de: pla_pe_dou_no_u1
       salida: siguiente
       a: pla_pe_dou_regalo
-    - id: cpl59
-      de: pla_pe_dou_upgrade
-      salida: btn:pla_pe_dou_up_si
-      a: pla_pe_dou_cobro_up
-    - id: cpl62
-      de: pla_pe_dou_cobro_up
-      salida: pagado
-      a: pla_pe_dou_ent_p
     - id: cpl64
       de: pla_pe_dou_ent_p
       salida: siguiente
