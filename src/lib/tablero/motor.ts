@@ -1151,7 +1151,14 @@ async function irA(
       // por ésa, aunque esté en OFF; los demás se sortean entre las rutas SIN anuncios (si todas tienen, entre todas).
       const suAnuncio = String(convo.ad_source_id ?? "").trim();
       const limpio = (a: string) => a.trim().replace(/^meta_/i, "");
-      const porSuAnuncio = suAnuncio ? conectadas.find((r) => (r.anuncios ?? []).some((a) => limpio(a) === suAnuncio)) : undefined;
+      // (05/11/2026, él: «yo quiero poder escribir AD1, AD2… y que aparezca para seleccionar», como en los menús.) Una
+      // etiqueta del registro vale por sus ids de Meta, como en la Condición por anuncio; un ID escrito suelto, por sí mismo.
+      const idsDe = (a: string) => {
+        const ad = (config?.ad_registry ?? []).find((x) => x.key === a);
+        if (!ad || ad.enabled === false) return [limpio(a)];
+        return [limpio(a), ...(ad.ids ?? []).flatMap((x) => String(x).split(/[\s,;]+/)).map((x) => x.trim()).filter(Boolean)];
+      };
+      const porSuAnuncio = suAnuncio ? conectadas.find((r) => (r.anuncios ?? []).some((a) => idsDe(a).includes(suAnuncio))) : undefined;
       if (porSuAnuncio) {
         console.log(`[tablero] convo ${convoId}: vino del anuncio ${suAnuncio} → ruta «${porSuAnuncio.nombre || porSuAnuncio.id}» del Ruteador`);
         await seguir(`rep:${porSuAnuncio.id}`);

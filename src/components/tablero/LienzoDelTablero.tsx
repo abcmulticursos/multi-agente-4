@@ -388,6 +388,8 @@ const Contexto = createContext<{
   comoAgente: boolean;
   /** Las ofertas que vienen después de una Entrega (los upsells) y su número: 1, 2… Solo dibujo. */
   upsellDe: Record<string, number>;
+  /** Las ofertas que solo completan al full de lo ya vendido (el upgrade): llevan el cohete y no cuentan como upsell. */
+  upgradeDe: Set<string>;
   /** EL CANAL DE ESTE TABLERO (03/11/2026, su conversación 256: conectó en Messenger y probó por WhatsApp). Su logo
    *  va en cada estación y en el Inicio. Sin canal (un workflow, que vale para los tres), no se pone. Solo dibujo. */
   canal?: "whatsapp" | "messenger" | "instagram";
@@ -817,12 +819,27 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       )}
       {/* EL SELLO DE LA ENTREGA (02/11/2026, su montaje «entrega2.jpg»): en TODA ficha Entrega, arriba al centro, qué
           entrega: 📦 el full de la tienda, 📚 el básico, 🛍️ otro producto (el upsell). Solo pantalla. */}
-      {f.tipo === "entregar" &&
+      {(f.tipo === "entregar" || (f.tipo === "cobro" && f.cobro?.modo !== "abierto" && !!f.cobro?.producto_id)) &&
         (() => {
-          const ids = (f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []).map((k) => k.split("#")[0]);
+          const ids = (
+            f.tipo === "cobro" ? [f.cobro?.producto_id ?? ""] : f.entregas?.length ? f.entregas : f.producto_id ? [f.producto_id] : []
+          ).map((k) => k.split("#")[0]);
           const esFull = ids.some((id) => id === FULL_DE_LA_TIENDA || (!!ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA] && id === ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA]));
           const esOtro = ids.length > 0 && ids.every((id) => id !== BASICO_DE_LA_TIENDA && id !== ctx.nombres[ID_DEL_BASICO_DE_LA_TIENDA]);
-          const sello = esFull ? "📦" : esOtro ? "🛍️" : "📚";
+          // SUS IMÁGENES (05/11/2026): la bolsa del básico, la caja VIP del full y el carrito del upsell, en la Entrega y en el Cobro.
+          const sello = esFull ? "/tablero/cobro-full.png" : esOtro ? "/tablero/cobro-upsell.png" : "/tablero/cobro-basico.png";
+          const queEs = esFull ? "el full de la tienda" : esOtro ? "otro producto (upsell)" : "el básico de la tienda";
+          if (f.tipo === "cobro")
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={sello}
+                alt=""
+                draggable={false}
+                title={`Cobra ${queEs}`}
+                className="pointer-events-none absolute -top-[62px] left-1/2 h-[60px] w-[60px] -translate-x-1/2 select-none rounded-full border-[5px] border-teal-500 bg-white object-cover shadow-md"
+              />
+            );
           return (
             <>
               {/* LA FLECHITA CELESTE QUE APUNTA AL SELLO (02/11/2026, su montaje «ENTREGA con flecha»). Solo pantalla. */}
@@ -839,12 +856,14 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
                 </defs>
                 <path d="M2 13h46V2l30 18-30 18V27H2z" fill="url(#flecha-entrega)" stroke="#2f86d6" strokeWidth="1.5" strokeLinejoin="round" />
               </svg>
-              <span
-                className="pointer-events-none absolute -top-[62px] left-1/2 flex h-[60px] w-[60px] -translate-x-1/2 select-none items-center justify-center rounded-full border-[5px] border-emerald-500 bg-white text-[32px] leading-none shadow-md"
-                title={esFull ? "Entrega el full de la tienda" : esOtro ? "Entrega otro producto (upsell)" : "Entrega el básico de la tienda"}
-              >
-                {sello}
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={sello}
+                alt=""
+                draggable={false}
+                title={`Entrega ${queEs}`}
+                className="pointer-events-none absolute -top-[62px] left-1/2 h-[60px] w-[60px] -translate-x-1/2 select-none rounded-full border-[5px] border-emerald-500 bg-white object-cover shadow-md"
+              />
             </>
           );
         })()}
@@ -1543,7 +1562,9 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaE
       ? { src: "/tablero/cobrador.png", nombre: "Cobrador" }
       : nUpsell !== undefined
         ? { src: "/tablero/upsell.png", nombre: `Upsell ${nUpsell}` }
-        : { src: "/tablero/agente.png", nombre: "Agente IA" };
+        : ctx.upgradeDe.has(f.id)
+          ? { src: "/tablero/upgrade.png", nombre: "Upgrade" }
+          : { src: "/tablero/agente.png", nombre: "Agente IA" };
   return (
     // EL BLOQUE: una barra corta desde la ficha, la estación grande (como en Sendy) y sus caminos afuera.
     <div
@@ -1756,7 +1777,7 @@ function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
  * oferta (Mensaje o Intro de order bump) a la que se llega pasando por N Entregas desde un Inicio es el upsell N
  * (el menor N si hay varios caminos). Solo dibujo.
  */
-function numerarUpsells(t: TableroEnElEditor): Record<string, number> {
+function ofertasDespuesDeUnaEntrega(t: TableroEnElEditor): Record<string, number> {
   const fuera: Record<string, number> = {};
   const mejor = new Map<string, number>();
   const cola: Array<[string, number]> = t.fichas.filter((f) => f.tipo === "inicio").map((f) => [f.id, 0]);
@@ -1775,6 +1796,64 @@ function numerarUpsells(t: TableroEnElEditor): Record<string, number> {
     for (const c of t.cables) if (c.de === id) cola.push([c.a, entregaEnLaColita(c.salida, c.a) ? n + 1 : siguiente]);
   }
   return fuera;
+}
+
+/**
+ * UPSELL = PRODUCTO NUEVO, UPGRADE = COMPLETAR (05/11/2026, él: «le digo upsell a un producto nuevo, no a un upgrade;
+ * upgrade le digo a completar el pago y pasa de básico a full»). De las ofertas que vienen después de una Entrega:
+ * - lo que ofrece = los productos de los Cobros a los que va por cable, y los suyos si cobra ella misma;
+ * - no ofrece nada (un «Si dice que no», un aviso) → sin logo;
+ * - ofrece solo productos que ya se vendían antes de la primera Entrega → upgrade, el cohete;
+ * - si no → upsell, numerado en orden por el camino (1, 2, 3…): el número cuenta los upsells que hay antes, no las Entregas.
+ * Solo dibujo.
+ */
+function numerarUpsells(t: TableroEnElEditor): { upsell: Record<string, number>; upgrade: Set<string> } {
+  const despues = ofertasDespuesDeUnaEntrega(t);
+  const ficha = (id: string) => t.fichas.find((x) => x.id === id);
+  const deLaFicha = (f: FichaEnElEditor) =>
+    [f.cobro?.producto_id, ...(f.cobro?.acepta ?? []), ...(f.tipo === "entregar" ? (f.entregas ?? []).map((k) => k.split("#")[0]) : []), f.producto_id, ...(f.presenta ?? [])].filter(
+      (x): x is string => !!x
+    );
+  // Lo que ya se vendía antes de la primera Entrega (las fichas de cada Inicio hasta una Entrega).
+  const antes = new Set<string>();
+  {
+    const cola = t.fichas.filter((f) => f.tipo === "inicio").map((f) => f.id);
+    const vistas = new Set(cola);
+    for (let i = 0; i < cola.length; i++) {
+      const f = ficha(cola[i]);
+      if (!f || f.tipo === "entregar") continue;
+      if (f.tipo === "cobro" || f.tipo === "mensaje" || f.tipo === "intro_ob") for (const p of deLaFicha(f)) antes.add(p);
+      // (Por un «💰 Si paga» ya se vendió: lo que sigue es después de la entrega, también la colita del librito.)
+      for (const c of t.cables)
+        if (c.de === f.id && c.salida !== "pagado" && !c.salida.startsWith("prod:") && !vistas.has(c.a)) (vistas.add(c.a), cola.push(c.a));
+    }
+  }
+  const upgrade = new Set<string>();
+  const esUpsell = new Set<string>();
+  for (const id of Object.keys(despues)) {
+    const f = ficha(id);
+    if (!f) continue;
+    const cobros = t.cables.filter((c) => c.de === id).map((c) => ficha(c.a)).filter((x): x is FichaEnElEditor => x?.tipo === "cobro");
+    const cobraElla = t.cables.some((c) => c.de === id && (c.salida === "pagado" || c.salida.startsWith("prod:")));
+    const ofrece = [...cobros.flatMap((c) => (c.cobro?.producto_id ? [c.cobro.producto_id] : [])), ...(cobraElla ? f.presenta ?? [] : [])];
+    if (!ofrece.length) continue;
+    // (La casilla «⬆️ Upgrade» del Cobro no sirve de señal: sus Cobros de upsell también la traen encendida.)
+    if (ofrece.every((p) => antes.has(p))) upgrade.add(id);
+    else esUpsell.add(id);
+  }
+  // El número: cuántos upsells hay antes en el camino, + 1 (el menor si hay varios caminos).
+  const upsell: Record<string, number> = {};
+  const mejor = new Map<string, number>();
+  const cola: Array<[string, number]> = t.fichas.filter((f) => f.tipo === "inicio").map((f) => [f.id, 0]);
+  for (let i = 0; i < cola.length && i < 5000; i++) {
+    const [id, k] = cola[i];
+    if ((mejor.get(id) ?? Infinity) <= k) continue;
+    mejor.set(id, k);
+    const sigue = esUpsell.has(id) ? k + 1 : k;
+    if (esUpsell.has(id)) upsell[id] = Math.min(upsell[id] ?? Infinity, sigue);
+    for (const c of t.cables) if (c.de === id) cola.push([c.a, sigue]);
+  }
+  return { upsell, upgrade };
 }
 
 /** Los números de las fichas: el camino desde cada Inicio (en orden de cables), luego las sueltas. */
@@ -2160,7 +2239,7 @@ export default function LienzoDelTablero({
   // LOS NÚMEROS DE LAS FICHAS (26/10/2026, tipo Kommo): en el orden del camino, desde cada Inicio
   // siguiendo sus cables; las sueltas, al final, de izquierda a derecha. Para ubicarlas y nombrarlas.
   const numeroDe = useMemo(() => numerarFichas(tablero), [tablero]);
-  const upsellDe = useMemo(() => numerarUpsells(tablero), [tablero]);
+  const { upsell: upsellDe, upgrade: upgradeDe } = useMemo(() => numerarUpsells(tablero), [tablero]);
 
   // EL MODO INALÁMBRICO (27/10/2026): cada conexión, cable o colita, como él la eligió.
   const [todoCable, setTodoCable] = useState(false);
@@ -2435,11 +2514,12 @@ export default function LienzoDelTablero({
       estaciones,
       comoAgente,
       upsellDe,
+      upgradeDe,
       canal,
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe]
+    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe, upgradeDe]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));

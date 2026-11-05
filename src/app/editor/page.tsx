@@ -17716,6 +17716,18 @@ export default function EditorPage() {
           onUndo={undo}
           onRedo={redo}
           onSave={() => void save()}
+          onGuardar={save}
+          onDescartar={() => {
+            // Lo último guardado (la misma foto con la que se compara «sin guardar»). El Ctrl+Z se vacía:
+            // si no, traería de vuelta lo descartado.
+            try {
+              setCfg(JSON.parse(baseline) as FullConfig);
+              setHistory([]);
+              setRedoHistory([]);
+            } catch {
+              // Sin foto legible no se toca nada.
+            }
+          }}
           onTiendaEnPantalla={(id) => {
             tiendaEnLaPizarra.current = id;
           }}
@@ -27168,6 +27180,8 @@ function VistaPizarra({
   onUndo,
   onRedo,
   onSave,
+  onGuardar,
+  onDescartar,
   onTiendaEnPantalla,
   herramientas,
   hayCambios,
@@ -27201,6 +27215,10 @@ function VistaPizarra({
   onUndo: () => void;
   onRedo: () => void;
   onSave: () => void;
+  /** Guardar al cambiar de tienda: dice si se guardó, para pasar a la otra solo entonces. */
+  onGuardar: () => Promise<boolean>;
+  /** Descartar lo no guardado: el borrador vuelve a lo último guardado. */
+  onDescartar: () => void;
   hayCambios: boolean;
   saving: boolean;
   modoEsencial: boolean;
@@ -27249,6 +27267,22 @@ function VistaPizarra({
   }, [pantalla, tiendaId]);
   /** El workflow abierto en el tablero (null = el de la tienda). Solo pantalla. */
   const [workflowAbierto, setWorkflowAbierto] = useState<string | null>(null);
+  /**
+   * CADA TIENDA SE GUARDA SOLA (05/11/2026, él: «si cada tienda es independiente no debería pasar eso»).
+   * El borrador es uno para todo el editor: lo no guardado de una tienda se guardaba al guardar otra.
+   * Ahora, al pasar a otra tienda (o workflow) con algo sin guardar, se pregunta: Guardar, Descartar o
+   * Volver. Como se pregunta en CADA cambio, lo que está sin guardar siempre es de la que se deja.
+   */
+  const [salidaPendiente, setSalidaPendiente] = useState<{ nombre: string; seguir: () => void } | null>(null);
+  const [guardandoAlSalir, setGuardandoAlSalir] = useState(false);
+  const cambiarDeTienda = (destino: string, seguir: () => void) => {
+    const ahora = workflowAbierto ? `wf:${workflowAbierto}` : tiendaId;
+    if (!hayCambios || destino === ahora) return seguir();
+    const nombre = workflowAbierto
+      ? cfg.workflows?.[workflowAbierto]?.nombre?.trim() || "este workflow"
+      : tiendas.find((t) => t.id === tiendaId)?.nombre?.trim() || "esta tienda";
+    setSalidaPendiente({ nombre, seguir });
+  };
   const irA = (p: "tiendas" | "pizarra" | "tablero") => {
     setPantalla(p);
     try {
@@ -29467,22 +29501,79 @@ function VistaPizarra({
           {saving ? "Guardando…" : "💾 Guardar"}
         </button>
       </div>
+      {salidaPendiente && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4" onClick={() => !guardandoAlSalir && setSalidaPendiente(null)}>
+          <div className="w-full max-w-md rounded-xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-base font-bold">Tienes cambios sin guardar en {salidaPendiente.nombre}</div>
+            <div className="mt-2 text-sm text-tinta-suave">
+              Guárdalos o descártalos antes de pasar a otra. Descartar la deja como estaba la última vez que la guardaste, y no se puede
+              recuperar.
+            </div>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                disabled={guardandoAlSalir}
+                onClick={() => setSalidaPendiente(null)}
+                className="rounded-md border border-borde px-3 py-1.5 text-sm font-semibold hover:bg-relleno disabled:opacity-40"
+              >
+                Volver
+              </button>
+              <button
+                type="button"
+                disabled={guardandoAlSalir}
+                onClick={() => {
+                  const { seguir } = salidaPendiente;
+                  onDescartar();
+                  setSalidaPendiente(null);
+                  seguir();
+                }}
+                className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-40"
+              >
+                Descartar
+              </button>
+              <button
+                type="button"
+                disabled={guardandoAlSalir}
+                onClick={async () => {
+                  const { seguir } = salidaPendiente;
+                  setGuardandoAlSalir(true);
+                  const ok = await onGuardar().catch(() => false);
+                  setGuardandoAlSalir(false);
+                  // Si no se pudo guardar, se queda donde está (el aviso del guardado ya dice por qué).
+                  setSalidaPendiente(null);
+                  if (ok) seguir();
+                }}
+                className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-40"
+              >
+                {guardandoAlSalir ? "Guardando…" : "💾 Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {pantalla === "tiendas" ? (
         <MisTiendas
           cfg={cfg}
-          onAbrir={(id) => {
-            setTiendaId(id);
-            irA("pizarra");
-          }}
-          onTablero={(id) => {
-            setTiendaId(id);
-            setWorkflowAbierto(null);
-            irA("tablero");
-          }}
-          onWorkflow={(id) => {
-            setWorkflowAbierto(id);
-            irA("tablero");
-          }}
+          onAbrir={(id) =>
+            cambiarDeTienda(id, () => {
+              setTiendaId(id);
+              setWorkflowAbierto(null);
+              irA("pizarra");
+            })
+          }
+          onTablero={(id) =>
+            cambiarDeTienda(id, () => {
+              setTiendaId(id);
+              setWorkflowAbierto(null);
+              irA("tablero");
+            })
+          }
+          onWorkflow={(id) =>
+            cambiarDeTienda(`wf:${id}`, () => {
+              setWorkflowAbierto(id);
+              irA("tablero");
+            })
+          }
           onCambiar={aplicar}
           onConfigChange={onConfigChange}
           onSnapshot={onSnapshot}
@@ -29493,10 +29584,12 @@ function VistaPizarra({
           clave={workflowAbierto ? `wf:${workflowAbierto}` : tiendaId}
           tema={temaDeLaPizarra}
           onTema={cambiarTemaDeLaPizarra}
-          onTienda={(id) => {
-            setWorkflowAbierto(null);
-            setTiendaId(id);
-          }}
+          onTienda={(id) =>
+            cambiarDeTienda(id, () => {
+              setWorkflowAbierto(null);
+              setTiendaId(id);
+            })
+          }
           onVolver={() => {
             setWorkflowAbierto(null);
             irA("tiendas");
@@ -29513,7 +29606,10 @@ function VistaPizarra({
         {tiendas.length > 0 ? (
           <select
             value={tiendaId}
-            onChange={(e) => setTiendaId(e.target.value)}
+            onChange={(e) => {
+              const id = e.target.value;
+              cambiarDeTienda(id, () => setTiendaId(id));
+            }}
             className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta"
             title="Tienda"
           >
@@ -32426,6 +32522,8 @@ function PantallaDelTableroCargada({
           ]}
           entregasPorProducto={entregasPorProducto}
           anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
+          registroDeAnuncios={cfg.ad_registry ?? []}
+          onRegistroDeAnuncios={(ad_registry) => aplicar({ ...vivoCfg.current, ad_registry })}
           workflows={workflows.filter((w) => w.id !== wfId)}
           paises={paises}
           paisInicial={paisDeSuManta(tablero, fichaDeAjustes, paisVisto)}
@@ -33552,7 +33650,12 @@ function AjustesDeLaFicha({
   onCerrar,
   onAbrirPagos,
   onEditarEntrega,
+  registroDeAnuncios,
+  onRegistroDeAnuncios,
 }: {
+  /** El registro de anuncios (para las etiquetas AD de las rutas del Ruteador, como en los menús). */
+  registroDeAnuncios?: AdRegistryEntry[];
+  onRegistroDeAnuncios?: (r: AdRegistryEntry[]) => void;
   /** «✏️ Editar»: abre el texto de esa entrega en su ventana, aquí mismo (03/11/2026). */
   onEditarEntrega?: (clave: string) => void;
   /** La ficha va después de una Entrega: solo ahí se ofrece «⏳ Espera antes de salir». */
@@ -33597,7 +33700,13 @@ function AjustesDeLaFicha({
   );
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" data-ventana-del-tablero onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
-      <div className="prolijo max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div
+        // EL RUTEADOR, AL 115 % (05/11/2026, él: «pop up del ruteador al 115%»): todo un poco más grande; el alto se
+        // compensa para que no se salga de la pantalla.
+        className={`prolijo ${ficha.tipo === "reparto" ? "max-h-[78vh]" : "max-h-[90vh]"} w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl`}
+        style={ficha.tipo === "reparto" ? { zoom: 1.15 } : undefined}
+        onClick={(e) => e.stopPropagation()}
+      >
         <p className="text-sm font-black">
           {a.icono} {a.nombre}
         </p>
@@ -33626,7 +33735,14 @@ function AjustesDeLaFicha({
           )}
           {(ficha.tipo === "mensaje" || ficha.tipo === "cobro" || ficha.tipo === "seguimientos" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
             <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
-              ✏️ {ficha.tipo === "seguimientos" ? "Abrir sus seguimientos" : ficha.tipo === "intro_ob" ? "Abrir sus versiones" : "Escribir sus burbujas"}
+              {/* (05/11/2026, en el Cobro: «esa vaina está escondida»; dice lo que es.) */}
+              {ficha.tipo === "seguimientos"
+                ? "✏️ Abrir sus seguimientos"
+                : ficha.tipo === "intro_ob"
+                  ? "✏️ Abrir sus versiones"
+                  : ficha.tipo === "cobro"
+                    ? "💬 Lo que le dice al cobrar"
+                    : "✏️ Escribir sus burbujas"}
             </button>
           )}
           {/* QUÉ PRODUCTO PRESENTA (23/10/2026): la IA solo habla de lo que ya se le presentó. */}
@@ -33906,33 +34022,17 @@ function AjustesDeLaFicha({
                 </div>
                 {/* LOS ANUNCIOS DE ESTA RUTA (05/11/2026). Él: «debajo de cada ruta su textarea para las etiquetas de los ads».
                     Quien vino de uno de estos anuncios va por esta ruta; el sorteo por peso ya no la usa para los demás. */}
-                <label className="block text-[11px] font-semibold text-tinta-suave">
-                  📣 Anuncios de esta ruta (ID de Meta, uno por línea)
-                  <textarea
-                    key={`${o.id}-${(o.anuncios ?? []).join("|")}`}
-                    defaultValue={(o.anuncios ?? []).join("\n")}
-                    rows={Math.min(4, Math.max(1, (o.anuncios ?? []).length))}
-                    placeholder="Ej.: 120255300748590226"
-                    onBlur={(e) => {
-                      const lista = [...new Set(e.target.value.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean))];
-                      setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, anuncios: lista.length ? lista : undefined } : x)) });
-                    }}
-                    className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 font-mono text-xs font-normal"
+                {/* (05/11/2026, él: «yo quiero poder escribir AD1, AD2… y que aparezca para seleccionar», como en los menús.)
+                    El mismo selector de etiquetas de anuncio de las intros y seguimientos. */}
+                <div className="text-[11px] font-semibold text-tinta-suave">📣 Anuncios de esta ruta</div>
+                {registroDeAnuncios && onRegistroDeAnuncios ? (
+                  <AdTagPicker
+                    registry={registroDeAnuncios}
+                    selectedKeys={o.anuncios ?? []}
+                    onChange={(lista) => setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, anuncios: lista.length ? lista : undefined } : x)) })}
+                    onRegistryChange={onRegistroDeAnuncios}
                   />
-                </label>
-                {(o.anuncios ?? []).length > 0 && (
-                  <ul className="space-y-0.5 text-[11px] text-tinta-suave">
-                    {(o.anuncios ?? []).map((ad) => {
-                      const limpio = ad.replace(/^meta_/i, "");
-                      const suyo = anuncios.find((x) => x.id === ad || x.id === `meta_${limpio}` || x.id.replace(/^meta_/i, "") === limpio);
-                      return (
-                        <li key={ad}>
-                          <span className="font-mono">{limpio}</span> · {suyo ? <b className="text-tinta">{suyo.nombre}</b> : <span>no está en tu registro (igual funciona)</span>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                ) : null}
                 </div>
               ))}
               <button
@@ -34008,11 +34108,13 @@ function AjustesDeLaFicha({
                   <label className="flex items-start gap-2 text-xs font-semibold">
                     <input type="checkbox" checked={cobro.metodos === true} onChange={(e) => ponCobro({ ...cobro, metodos: e.target.checked || undefined })} className="mt-0.5" />
                     <span>
-                      💳 Preguntar el método y mandar sus datos solo
+                      {/* (05/11/2026, él: «cambia ese título que me confunde».) */}
+                      💳 Preguntar el método y enviar solo los datos de ese método
                       <span className={ayuda}>
-                        Como la venta de siempre. Tus burbujas de aquí preguntan el método (y, si usas botones de métodos, salen los botones). Si ya lo eligió antes,
-                        no se le pregunta: le llegan los datos de ese método. Los datos son los tuyos de «Métodos de pago» de su país, con el precio de lo que
-                        eligió. Si dice otro método o «mejor el otro», le llegan los nuevos.
+                        Encendida: las burbujas de este Cobro preguntan el método, y al responder le llegan los datos de ese método desde «Datos de pago
+                        por país» (con el precio de lo que eligió). Si ya lo dijo antes, no se le pregunta.
+                        <br />
+                        Apagada: este Cobro envía sus burbujas tal cual las escribiste (ahí van tus datos de pago).
                       </span>
                     </span>
                   </label>
