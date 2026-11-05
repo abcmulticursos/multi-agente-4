@@ -1146,7 +1146,19 @@ async function irA(
       // EL SORTEO SOLO ENTRE LAS RUTAS CONECTADAS (27/10/2026): una ruta sin cable dejaba al cliente sin
       // nada (le tocó a la mitad de sus clientes de prueba en MASCOTAS). Si ninguna tiene cable, se avisa.
       const conectadas = (f.reparto ?? []).filter((r) => cableDeLaSalida(t, f.id, `rep:${r.id}`));
-      const o = sortear(conectadas);
+      // POR ANUNCIO PRIMERO (05/11/2026). Él: «en el ruteador exista una textarea para colocar el ad, y que active toda la
+      // ruta para ese AD». Quien vino de un anuncio de una ruta (su ID de Meta, o la clave «meta_<id>» del registro) va
+      // por ésa, aunque esté en OFF; los demás se sortean entre las rutas SIN anuncios (si todas tienen, entre todas).
+      const suAnuncio = String(convo.ad_source_id ?? "").trim();
+      const limpio = (a: string) => a.trim().replace(/^meta_/i, "");
+      const porSuAnuncio = suAnuncio ? conectadas.find((r) => (r.anuncios ?? []).some((a) => limpio(a) === suAnuncio)) : undefined;
+      if (porSuAnuncio) {
+        console.log(`[tablero] convo ${convoId}: vino del anuncio ${suAnuncio} → ruta «${porSuAnuncio.nombre || porSuAnuncio.id}» del Ruteador`);
+        await seguir(`rep:${porSuAnuncio.id}`);
+        return;
+      }
+      const sinAnuncios = conectadas.filter((r) => !(r.anuncios ?? []).length);
+      const o = sortear(sinAnuncios.length ? sinAnuncios : conectadas);
       if (o) await seguir(`rep:${o.id}`);
       else console.warn(`[tablero] convo ${convoId}: el Reparto «${f.titulo || f.id}» no tiene ninguna ruta conectada`);
       return;

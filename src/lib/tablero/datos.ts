@@ -191,7 +191,20 @@ function leeReparto(v: unknown): OpcionDeReparto[] {
     const nombre = texto(x.nombre, 60).trim();
     // (03/11/2026: el Ruteador apaga una ruta con peso 0 y recuerda el que tenía en `peso_antes`.)
     const antes = numero(x.peso_antes);
-    return [{ id, ...(nombre ? { nombre } : {}), peso: Math.max(0, numero(x.peso) ?? 1), ...(antes && antes > 0 ? { peso_antes: antes } : {}) }];
+    // (05/11/2026: los anuncios de la ruta, IDs de Meta o claves del registro.)
+    const anuncios = (Array.isArray(x.anuncios) ? x.anuncios : [])
+      .map((a: unknown) => texto(a, 60).trim())
+      .filter(Boolean)
+      .slice(0, 50);
+    return [
+      {
+        id,
+        ...(nombre ? { nombre } : {}),
+        peso: Math.max(0, numero(x.peso) ?? 1),
+        ...(antes && antes > 0 ? { peso_antes: antes } : {}),
+        ...(anuncios.length ? { anuncios } : {}),
+      },
+    ];
   });
 }
 
@@ -642,10 +655,13 @@ export function salidasDeLaFicha(
       ];
     case "reparto": {
       const opciones = f.reparto ?? [];
-      const total = opciones.reduce((s, o) => s + o.peso, 0) || 1;
+      // (05/11/2026: el % se reparte entre las rutas SIN anuncios: las que tienen van solo para su anuncio.)
+      const total = opciones.filter((o) => !(o.anuncios ?? []).length).reduce((s, o) => s + o.peso, 0) || 1;
       return opciones.map((o, i) => ({
         clave: `rep:${o.id}`,
-        etiqueta: o.peso > 0 ? `${o.nombre || `Ruta ${i + 1}`} · ${Math.round((o.peso / total) * 100)}%` : `${o.nombre || `Ruta ${i + 1}`} · apagada`,
+        etiqueta: (o.anuncios ?? []).length
+          ? `${o.nombre || `Ruta ${i + 1}`} · 📣 ${(o.anuncios ?? []).length} anuncio${(o.anuncios ?? []).length === 1 ? "" : "s"}`
+          : o.peso > 0 ? `${o.nombre || `Ruta ${i + 1}`} · ${Math.round((o.peso / total) * 100)}%` : `${o.nombre || `Ruta ${i + 1}`} · apagada`,
       }));
     }
     case "mensaje":

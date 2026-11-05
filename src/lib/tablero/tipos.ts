@@ -133,6 +133,11 @@ export interface OpcionDeReparto {
   peso: number;
   /** El peso que tenía al apagarla, para volver a él al prenderla. Solo editor: el bot no lo lee. */
   peso_antes?: number;
+  /**
+   * LOS ANUNCIOS DE ESTA RUTA (05/11/2026): IDs de anuncio de Meta (o su clave del registro, «meta_<id>»). Quien vino de uno
+   * de ellos va por esta ruta; el sorteo por peso ya no la usa para los demás.
+   */
+  anuncios?: string[];
 }
 
 export interface FichaDelTablero {

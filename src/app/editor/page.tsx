@@ -33865,7 +33865,8 @@ function AjustesDeLaFicha({
             <div className="space-y-2">
               <span className={etiqueta}>Rutas y su peso</span>
               {(b.reparto ?? []).map((o, i) => (
-                <div key={o.id} className="flex items-center gap-2 text-xs">
+                <div key={o.id} className="space-y-1 rounded-lg border border-borde p-2">
+                <div className="flex items-center gap-2 text-xs">
                   <input
                     value={o.nombre ?? ""}
                     placeholder={`Ruta ${i + 1}`}
@@ -33903,6 +33904,36 @@ function AjustesDeLaFicha({
                     ✕
                   </button>
                 </div>
+                {/* LOS ANUNCIOS DE ESTA RUTA (05/11/2026). Él: «debajo de cada ruta su textarea para las etiquetas de los ads».
+                    Quien vino de uno de estos anuncios va por esta ruta; el sorteo por peso ya no la usa para los demás. */}
+                <label className="block text-[11px] font-semibold text-tinta-suave">
+                  📣 Anuncios de esta ruta (ID de Meta, uno por línea)
+                  <textarea
+                    key={`${o.id}-${(o.anuncios ?? []).join("|")}`}
+                    defaultValue={(o.anuncios ?? []).join("\n")}
+                    rows={Math.min(4, Math.max(1, (o.anuncios ?? []).length))}
+                    placeholder="Ej.: 120255300748590226"
+                    onBlur={(e) => {
+                      const lista = [...new Set(e.target.value.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean))];
+                      setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, anuncios: lista.length ? lista : undefined } : x)) });
+                    }}
+                    className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 font-mono text-xs font-normal"
+                  />
+                </label>
+                {(o.anuncios ?? []).length > 0 && (
+                  <ul className="space-y-0.5 text-[11px] text-tinta-suave">
+                    {(o.anuncios ?? []).map((ad) => {
+                      const limpio = ad.replace(/^meta_/i, "");
+                      const suyo = anuncios.find((x) => x.id === ad || x.id === `meta_${limpio}` || x.id.replace(/^meta_/i, "") === limpio);
+                      return (
+                        <li key={ad}>
+                          <span className="font-mono">{limpio}</span> · {suyo ? <b className="text-tinta">{suyo.nombre}</b> : <span>no está en tu registro (igual funciona)</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                </div>
               ))}
               <button
                 type="button"
@@ -33911,7 +33942,7 @@ function AjustesDeLaFicha({
               >
                 + Ruta
               </button>
-              <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Sirve para probar dos intros o dos ofertas.</span>
+              <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Si una ruta tiene anuncios, quien vino de ellos va por ella (aunque esté en OFF) y el sorteo ya no la usa para los demás.</span>
             </div>
           )}
           {ficha.tipo === "condicion" && (
