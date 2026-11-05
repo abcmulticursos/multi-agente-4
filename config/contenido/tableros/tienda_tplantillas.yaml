@@ -987,8 +987,8 @@ whatsapp:
       producto_id: ptpla_pack
     - id: pla_pe_dou_upgrade
       tipo: mensaje
-      x: 4763
-      y: 2959
+      x: 4653
+      y: 2937
       titulo: Upgrade al pack
       steps:
         - type: text
@@ -1011,7 +1011,7 @@ whatsapp:
     - id: pla_pe_dou_cobro_up
       tipo: cobro
       x: 5544
-      y: 2475
+      y: 2629
       titulo: Cobro · PACK PLANTILLA COMPLETO
       steps:
         - type: text
@@ -4155,9 +4155,6 @@ whatsapp:
             - id: v-mw3awysb-bzgsh
               nombre: Versión A
               peso: 1
-              anuncios:
-                - meta_120255300748590226
-                - meta_120255300748530226
               steps:
                 - type: text
                   body_variants:
