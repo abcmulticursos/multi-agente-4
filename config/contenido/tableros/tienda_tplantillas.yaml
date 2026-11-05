@@ -1051,6 +1051,7 @@ whatsapp:
           body_variants:
             - "{¡Excelente elección!|¡Perfecto!|¡Genial!} 🙌 *{{PRODUCTO}}* queda en *{{PRECIO_COMPLETO}}*."
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - |-
@@ -1058,10 +1059,24 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 3
+          enabled: false
         - type: text
           body_variants:
             - Así te paso los datos exactos para tu pago 😊
           delay_after_sec: 4
+          enabled: false
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
       cobro:
         modo: producto
         producto_id: ptpla_upsell
