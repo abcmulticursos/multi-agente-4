@@ -85,6 +85,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   // ninguna clienta real puede entrar por este camino.
   //
   // Sin modalidad elegida no se envuelve nada y el bot usa la de siempre.
+  // El latido (05/11/2026): si contestar tarda tanto que el navegador puede rendirse («not valid JSON»), queda anotado.
+  const desde = Date.now();
   await withModalidadDePrueba(convo.test_modality, () =>
     processTestIncomingMessage({
       phone: convo.phone,
@@ -98,5 +100,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       button,
     })
   );
+  if (Date.now() - desde > 20_000) console.log(`[latido] el simulador tardó ${Math.round((Date.now() - desde) / 1000)} s en atender un mensaje de la conversación ${id}`);
   return NextResponse.json({ ok: true });
 }

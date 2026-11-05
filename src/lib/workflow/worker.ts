@@ -18,6 +18,11 @@ const G = globalThis as unknown as { __wfWorkerStarted?: boolean };
 
 let intervalHandle: ReturnType<typeof setInterval> | null = null;
 let inFlight = false;
+// EL LATIDO (05/11/2026, su «se traba al guardar o tras el deploy y no salen los seguimientos»): solo anota, no
+// cambia nada. Deja escrito en el log si el servidor se quedó trabado y si el obrero lleva mucho esperando una
+// acción, para que la próxima vez la causa quede en el registro de EasyPanel.
+let enCurso: { id: number; tipo: string; convo: number; desde: number } | null = null;
+let latidoHandle: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Procesa todas las acciones cuyo run_at ya venció. Idempotente y
@@ -82,9 +87,11 @@ export async function tick(): Promise<void> {
           );
           continue;
         }
+        enCurso = { id: action.id, tipo: action.action_type, convo: action.conversation_id, desde: Date.now() };
         // Lo programado del tablero va a su motor; lo demás, al de siempre, como antes.
         if (action.action_type.startsWith("tablero_")) await ejecutarAccionDelTablero(action);
         else await executeAction(action);
+        if (Date.now() - enCurso.desde > 30_000) console.log(`[latido] la acción ${action.id} (${action.action_type}) tardó ${Math.round((Date.now() - enCurso.desde) / 1000)} s`);
         markActionCompleted(action.id);
       } catch (err) {
         console.error(
@@ -98,7 +105,33 @@ export async function tick(): Promise<void> {
     console.error("[wf:worker] error en tick:", err);
   } finally {
     inFlight = false;
+    enCurso = null;
   }
+}
+
+function arrancarLatido(): void {
+  if (latidoHandle) return;
+  const CADA_MS = 5_000;
+  let esperado = Date.now() + CADA_MS;
+  let ultimoAvisoObrero = 0;
+  let ultimaMemoria = Date.now();
+  latidoHandle = setInterval(() => {
+    const ahora = Date.now();
+    const atraso = ahora - esperado;
+    esperado = ahora + CADA_MS;
+    if (atraso > 3_000) console.log(`[latido] el servidor estuvo trabado ${(atraso / 1000).toFixed(1)} s (no atendía a nadie)`);
+    if (enCurso && ahora - enCurso.desde > 30_000 && ahora - ultimoAvisoObrero > 30_000) {
+      ultimoAvisoObrero = ahora;
+      let vencidas = 0;
+      try { vencidas = getDueActions(Math.floor(ahora / 1000), BATCH_SIZE).length; } catch {}
+      console.log(`[latido] el obrero lleva ${Math.round((ahora - enCurso.desde) / 1000)} s esperando la acción ${enCurso.id} (${enCurso.tipo}) de la conversación ${enCurso.convo}; ${vencidas} acción(es) esperando detrás`);
+    }
+    if (ahora - ultimaMemoria > 5 * 60_000) {
+      ultimaMemoria = ahora;
+      const m = process.memoryUsage();
+      console.log(`[latido] vivo · memoria ${Math.round(m.rss / 1048576)} MB (montón ${Math.round(m.heapUsed / 1048576)} MB)`);
+    }
+  }, CADA_MS);
 }
 
 export function startWorkflowWorker(): void {
@@ -110,6 +143,7 @@ export function startWorkflowWorker(): void {
   console.log(`[wf:worker] arrancando, poll cada ${POLL_INTERVAL_MS}ms`);
   // Primer tick inmediato — recoge acciones acumuladas durante el restart.
   void tick();
+  arrancarLatido();
   intervalHandle = setInterval(() => {
     void tick();
   }, POLL_INTERVAL_MS);
@@ -119,6 +153,10 @@ export function stopWorkflowWorker(): void {
   if (intervalHandle) {
     clearInterval(intervalHandle);
     intervalHandle = null;
+  }
+  if (latidoHandle) {
+    clearInterval(latidoHandle);
+    latidoHandle = null;
   }
   G.__wfWorkerStarted = false;
 }
