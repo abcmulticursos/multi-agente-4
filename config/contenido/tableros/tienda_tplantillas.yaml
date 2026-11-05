@@ -240,8 +240,8 @@ whatsapp:
           peso_antes: 1
     - id: pla_pe_lin_intro
       tipo: mensaje
-      x: 720
-      y: 0
+      x: 1199
+      y: -385
       titulo: Intro · lineal
       steps:
         - type: text
@@ -290,8 +290,8 @@ whatsapp:
         - ptpla_basico
     - id: pla_pe_lin_segA
       tipo: seguimientos
-      x: 720
-      y: 430
+      x: 1463
+      y: -913
       titulo: Seguimientos · si no responde a la Intro
       presenta:
         - ptpla_basico
@@ -336,8 +336,8 @@ whatsapp:
                       steps: []
     - id: pla_pe_lin_cobro
       tipo: cobro
-      x: 1050
-      y: 0
+      x: 2937
+      y: -418
       titulo: Cobro · GUÍA PLANTILLA
       steps:
         - type: text
@@ -361,8 +361,8 @@ whatsapp:
         metodos: true
     - id: pla_pe_lin_segB
       tipo: seguimientos
-      x: 1050
-      y: 430
+      x: 3190
+      y: -946
       titulo: Seguimientos · si no paga
       presenta:
         - ptpla_basico
@@ -391,14 +391,14 @@ whatsapp:
                   delay_after_sec: 4
     - id: pla_pe_lin_ent_b
       tipo: entregar
-      x: 1380
-      y: 0
+      x: 3861
+      y: -396
       titulo: Entrega · GUÍA PLANTILLA
       producto_id: ptpla_basico
     - id: pla_pe_lin_upsell1
       tipo: mensaje
-      x: 1710
-      y: 0
+      x: 4334
+      y: -330
       titulo: Upsell · PLANTILLAS PREMIUM
       steps:
         - type: text
@@ -425,8 +425,8 @@ whatsapp:
       espera_min: 2
     - id: pla_pe_lin_cobro_u1
       tipo: cobro
-      x: 2040
-      y: 0
+      x: 5324
+      y: -165
       titulo: Cobro · PLANTILLAS PREMIUM
       steps:
         - type: text
@@ -450,14 +450,14 @@ whatsapp:
         metodos: true
     - id: pla_pe_lin_ent_u1
       tipo: entregar
-      x: 2370
-      y: 0
+      x: 6303
+      y: -165
       titulo: Entrega · PLANTILLAS PREMIUM
       producto_id: ptpla_upsell
     - id: pla_pe_lin_no_u1
       tipo: mensaje
-      x: 2040
-      y: 430
+      x: 5324
+      y: 77
       titulo: Si dice que no
       steps:
         - type: text
@@ -466,8 +466,8 @@ whatsapp:
           delay_after_sec: 4
     - id: pla_pe_lin_regalo
       tipo: regalo
-      x: 2700
-      y: 0
+      x: 6941
+      y: -22
       titulo: Regalo
     - id: pla_pe_ob_intro
       tipo: mensaje
@@ -4186,6 +4186,7 @@ whatsapp:
       de: pla_pe_lin_ent_u1
       salida: siguiente
       a: pla_pe_lin_regalo
+      vista: cable
     - id: cpl13
       de: pla_pe_lin_no_u1
       salida: siguiente
@@ -5050,6 +5051,11 @@ whatsapp:
       de: pla_ar_reparto
       salida: rep:contrib
       a: pla_ar_con_promesa
+    - id: c-mw36vg9a-w15
+      de: pla_pe_lin_intro
+      salida: pagado
+      a: pla_pe_lin_upsell1
+      vista: colita
   cajas:
     - id: caja-pla_pe-lineal
       x: 680
