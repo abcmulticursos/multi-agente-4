@@ -2610,7 +2610,7 @@ function frasesDeCierreDe(instrucciones: string | null | undefined): RegExp[] {
       const pregunta = sinTildes(l.split("?")[0]).replace(/[^a-z0-9ñ{}|\s]/g, " ").replace(/\s+/g, " ").trim();
       const patron = pregunta
         .split(/(\{[^}]*\})/)
-        .map((trozo) => (trozo.startsWith("{") ? `(?:${trozo.slice(1, -1).split("|").map((x) => x.trim().replace(/[.*+?^$()[\]\\]/g, "\\/** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */")).join("|")})` : trozo.replace(/[.*+?^$()[\]\\]/g, "\\/** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */")))
+        .map((trozo) => (trozo.startsWith("{") ? `(?:${trozo.slice(1, -1).split("|").map((x) => x.trim().replace(/[.*+?^$()[\]\\]/g, "\\$&")).join("|")})` : trozo.replace(/[.*+?^$()[\]\\]/g, "\\$&")))
         .join("")
         .replace(/ /g, "[^a-z0-9ñ]+");
       return new RegExp(patron);
@@ -2619,6 +2619,24 @@ function frasesDeCierreDe(instrucciones: string | null | undefined): RegExp[] {
 }
 
 /** Las palabras de los nombres de lo que el cliente YA compró (03/11/2026): no sirven para elegir otro producto. */
+/**
+ * SUS FRASES DE CIERRE PARA LOS TEXTOS FIJOS DEL BOT (05/11/2026). Él: «debería ser lo mismo para todo». Las de la última ficha
+ * por la que pasó el cliente que las tenga (las líneas con «?» de sus instrucciones), sin repetir la del último mensaje
+ * del bot. Su spintax se resuelve al enviar.
+ */
+function susFrasesDeCierre(convoId: number, t: Tablero): string[] {
+  const visitadas = [...fichasVisitadas(convoId)].reverse();
+  const ultimoDelBot = [...ultimosMensajes(convoId, 6)].reverse().find((m) => m.role !== "user")?.content ?? "";
+  for (const id of visitadas) {
+    const lineas = (t.fichas.find((x) => x.id === id)?.instrucciones ?? "")
+      .split(/\n/)
+      .map((l) => l.trim().replace(/^[-•*>\s]+/, "").replace(/^[«"“]|[»"”]$/g, "").trim())
+      .filter((l) => /\?/.test(l) && l.length >= 8);
+    if (lineas.length) return [...lineas.filter((l) => !ultimoDelBot.includes(l.slice(0, 15))), ...lineas];
+  }
+  return [];
+}
+
 function palabrasDeLoComprado(convo: ConversationRow): Set<string> {
   const config = loadWorkflowConfig();
   const ids = new Set<string>([...comprasDelCliente(convo.id).map((c) => c.producto_id ?? ""), ...entregasDelCliente(convo.id).map((k) => k.split("#")[0])].filter(Boolean));
@@ -4458,7 +4476,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           await sendConfiguredSteps(convo, [
             {
               type: "text",
-              body: `Tu *${nom(elegidoId)}* queda en *${plata(precios[elegidoId])}* 😊\n\nSi prefieres ${otros.join(" o ")}.\n\n¿Seguimos con *${nom(elegidoId)}*? 😊`,
+              body: `Tu *${nom(elegidoId)}* queda en *${plata(precios[elegidoId])}* 😊\n\nSi prefieres ${otros.join(" o ")}.\n\n${susFrasesDeCierre(convo.id, t)[0] ?? `¿Seguimos con *${nom(elegidoId)}*? 😊`}`,
             },
           ] as never);
           console.log(`[tablero] convo ${convo.id}: pregunta el precio con ${opciones.length} en el cobro → el elegido y el otro, con sus precios (texto fijo)`);
@@ -4779,28 +4797,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
             : await elegirOpcionConIA(convo.id, contenido, lista.map((x) => x.op));
       if (porPalabra.length === 1) console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» → ${elegida} (por su palabra)`);
       const cual = lista.find((x) => x.op.id === elegida);
-      // ELIGIÓ JUSTO DESPUÉS DE PREGUNTAR EL PRECIO (27/10/2026), como la venta de siempre
-      // (`askOrderBumpPurchaseConfirm`): primero se le confirma el precio y se le pregunta si lo quiere;
-      // su «sí» lo lleva (lo atiende «sí a lo que propuso el bot»). Solo si lo escribió (no un botón).
-      if (cual) {
-        const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, cual.duena.id, cual.op.id)?.a);
-        const delCliente = ultimosMensajes(convo.id, 6).filter((m) => m.role === "user");
-        const anterior = sinTildes(delCliente[delCliente.length - 2]?.content ?? "");
-        const preguntoPrecio = /\b(precio|cuesta|vale|costo|valor|cuanto (es|sale|seria)|a cuanto)\b/.test(anterior);
-        if (destino?.tipo === "cobro" && preguntoPrecio && !cual.d) {
-          const p = producto(config, destino.cobro?.producto_id);
-          const pais = getEffectiveCountryCode(convo.phone, config);
-          const precio = p ? precioDelProducto(p, pais, enOferta(estado, [p.id])) : null;
-          if (p) {
-            await sendConfiguredSteps(convo, [
-              { type: "text", body: `¡Perfecto! 😊 *${p.name}* queda en *${precio ? formatCurrencyAmount(precio, pais as never) : "su precio"}*.\n\n¿Te lo preparo?` },
-            ] as never);
-            respondio(convo, t);
-            console.log(`[tablero] convo ${convo.id}: eligió «${p.name}» tras preguntar el precio → le confirmo y pregunto`);
-            return true;
-          }
-        }
-      }
+      // (05/11/2026, su 317 de PLANTILLAS: preguntó el precio, eligió «el básico» y el bot le preguntaba «¿Te lo preparo?»
+      // antes de los datos — solo con botones; con cuadritos no. Él: «si ya elegí 15, ¿por qué tiene que preguntar? Debe
+      // entregarle de una vez los datos». Se quitó esa confirmación: elige → su Cobro → sus datos, como con un cuadrito.)
       if (cual?.d) {
         await actuarCuadrito(convo, t, cual.duena, cual.d);
         return true;

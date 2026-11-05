@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -95,6 +95,38 @@ function iconoDeEntrega(f: FichaEnElEditor, clave: string, t: TableroEnElEditor,
   if (pid === FULL_DE_LA_TIENDA || (!!nombres[ID_DEL_FULL_DE_LA_TIENDA] && pid === nombres[ID_DEL_FULL_DE_LA_TIENDA])) return "📦";
   return esUpsell ? "🛍️" : "📚";
 }
+/**
+ * A DÓNDE VA SOLO (05/11/2026). Él: «yo no soy adivino… en el workflow debe indicar claramente qué va a pasar luego de cada
+ * paso». El «Pagó» / «💰 Si paga» SIN CABLE no deja al cliente parado: el motor lo lleva a la Entrega de ese producto en su
+ * misma ruta (`entregaDelProductoEnSuRuta`). Aquí, la misma búsqueda, para dibujarla como colita «↺ → N» con el color de
+ * esa ficha (no un cable largo: «me descuadran»). Solo dibujo.
+ */
+function aDondeVaSolo(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): FichaEnElEditor | null {
+  if (f.tipo === "entregar" || (clave !== "pagado" && !clave.startsWith("prod:"))) return null;
+  const pid = clave.startsWith("prod:") ? clave.slice(5) : f.tipo === "cobro" ? f.cobro?.producto_id : productosQueCobraLaFicha(f as FichaDelTablero, t as Tablero)[0];
+  if (!pid) return null;
+  const alcanzables = (desde: string[]) => {
+    const vistas = new Set(desde);
+    const cola = [...desde];
+    for (let i = 0; i < cola.length; i++) for (const c of t.cables) if (c.de === cola[i] && !vistas.has(c.a)) (vistas.add(c.a), cola.push(c.a));
+    return cola;
+  };
+  const esLaSuya = (id: string) => {
+    const x = t.fichas.find((y) => y.id === id);
+    return x?.tipo === "entregar" && !x.apagada && entregasDeLaFicha(x as FichaDelTablero).includes(pid) ? x : null;
+  };
+  for (const id of alcanzables([f.id])) {
+    const x = esLaSuya(id);
+    if (x) return x;
+  }
+  const inicios = t.fichas.filter((x) => x.tipo === "inicio" && alcanzables([x.id]).includes(f.id)).map((x) => x.id);
+  for (const id of alcanzables(inicios)) {
+    const x = esLaSuya(id);
+    if (x) return x;
+  }
+  return null;
+}
+
 const ICONO: Record<string, string> = { text: "💬", image: "🖼️", video: "🎬", audio: "🎤", document: "📄" };
 const ESQUINAS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 const BURBUJAS_A_LA_VISTA = 5;
@@ -696,6 +728,20 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           {/* Tocarlo o escribirlo lleva por el mismo cable (27/10/2026). */}
           {boton && <span className="ml-1 text-[9px] font-normal opacity-60">· o escrito</span>}
         </span>
+        {conPunto && !destino && (() => {
+          // SIN CABLE PERO SABE A DÓNDE IR (05/11/2026): su colita automática, con el número y el color de esa ficha.
+          const solo = aDondeVaSolo(f, s.clave, ctx.tablero);
+          if (!solo) return null;
+          return (
+            <span
+              className="ml-auto shrink-0 rounded-full border-2 border-dashed bg-white px-1.5 text-[10px] font-bold text-slate-800"
+              style={{ borderColor: ASPECTO[solo.tipo].trazo }}
+              title={`Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
+            >
+              ↺ → {ctx.numeroDe[solo.id] ?? ""}
+            </span>
+          );
+        })()}
         {!conPunto && destino && (
           // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.
           <span
