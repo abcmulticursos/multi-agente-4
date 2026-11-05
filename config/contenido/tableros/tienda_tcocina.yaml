@@ -1657,8 +1657,8 @@ whatsapp:
         - ptcocina_dietas
     - id: f-mvuo5fvc-uppvm
       tipo: cobro
-      x: -1265
-      y: 66
+      x: -1309
+      y: -55
       titulo: Cobro · RECETARIO DIETAS FIT
       steps:
         - type: text
@@ -1736,15 +1736,15 @@ whatsapp:
           ignora_tardio: true
     - id: f-mvuo5fvd-g5qsa
       tipo: entregar
-      x: -374
-      y: -132
+      x: -396
+      y: -66
       titulo: Entrega · RECETARIO DIETAS FIT
       por_correo: true
       producto_id: ptcocina_dietas
     - id: f-mvuo5fvd-jrjam
       tipo: mensaje
       x: -44
-      y: 121
+      y: 209
       titulo: Upsell 1 · COMIDAS PERUANAS CASERAS
       steps:
         - type: text
@@ -1868,8 +1868,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mw3588bd-hmns2
       tipo: seguimientos
-      x: -1001
-      y: -286
+      x: -1045
+      y: -495
       titulo: Seguimientos · RECETARIO DIETAS FIT
       presenta:
         - ptcocina_dietas
