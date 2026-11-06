@@ -2080,10 +2080,8 @@ function loQueSabeLaIA(convo: ConversationRow, estado: EstadoEnElTablero | null,
  * datos de pago (un comodín de pago o una cuenta), con su precio; si ninguna los lleva, su última burbuja de texto.
  * Nunca la ficha entera (fotos y presentación otra vez).
  */
-async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: FichaDelTablero, precio: number | undefined): Promise<boolean> {
-  const config = loadWorkflowConfig();
-  const pais = getEffectiveCountryCode(convo.phone, config);
-  const estado = estadoEnElTablero(convo.id);
+/** Las burbujas de una ficha que llevan datos de pago (un comodín de método/cuenta o un número de 7+ cifras). */
+function burbujasConDatosDePago(f: FichaDelTablero, estado: ReturnType<typeof estadoEnElTablero>): { vistos: SequenceStep[]; conDatos: SequenceStep[] } {
   const vistos = pasosActivos(pasosVistos(f, estado));
   const textoDe = (p: SequenceStep) => {
     const x = p as { type: string; body?: string; body_variants?: string[]; caption?: string };
@@ -2093,7 +2091,14 @@ async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: Ficha
     const tx = textoDe(p);
     return /\{\{[^}]*(METODO|CUENTA|PAGO)[^}]*\}\}/i.test(tx) || /\d{7,}/.test(tx.replace(/https?:\/\/\S+/g, "").replace(/(?<=\d)[ \t-](?=\d)/g, ""));
   };
-  const conDatos = vistos.filter(llevaDatos);
+  return { vistos, conDatos: vistos.filter(llevaDatos) };
+}
+
+async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: FichaDelTablero, precio: number | undefined): Promise<boolean> {
+  const config = loadWorkflowConfig();
+  const pais = getEffectiveCountryCode(convo.phone, config);
+  const estado = estadoEnElTablero(convo.id);
+  const { vistos, conDatos } = burbujasConDatosDePago(f, estado);
   const ultimoTexto = [...vistos].reverse().find((p) => (p as { type: string }).type === "text");
   const pasos = conDatos.length ? conDatos : ultimoTexto ? [ultimoTexto] : [];
   if (!pasos.length) return false;
@@ -2509,6 +2514,19 @@ async function abrirLoQuePuedeComprar(convo: ConversationRow, t: Tablero, x: LoQ
   // LA FICHA QUE COBRA SOLA (03/11/2026, sus conversaciones 260 y 262): ir a ella era volver a mandarle el upsell entero.
   // Su cobro se abre (si no lo estaba) y salen SOLO sus burbujas de datos; el cliente sigue donde está (en el regalo,
   // como el pago durante el regalo: el comprobante lo atiende el tablero y la ruta no se repite).
+  // …SALVO QUE NO TRAIGA DATOS DE PAGO (06/11/2026, su conv 354 corrida en la copia): su Upsell es una oferta con «Sí» →
+  // Cobro y además un «💰 Si paga» → Regalo, así que «cobra sola»; al elegir las Premium en el regalo se le reenviaba la
+  // OFERTA («¿Lo agregas?») en vez de los datos. Sin datos en la ficha, se usa el Cobro de ese producto al que llevan sus
+  // cables (el del «Sí»). Con datos en la ficha (LENGUA, su 278), lo de siempre.
+  if (x.ficha.tipo !== "cobro" && burbujasConDatosDePago(x.ficha, estadoEnElTablero(convo.id)).conDatos.length === 0) {
+    const suCobro = alcanzables(t, [x.ficha.id])
+      .map((id) => t.fichas.find((f) => f.id === id))
+      .find((f) => f && f.tipo === "cobro" && !f.apagada && !f.guardada && f.cobro?.modo === "producto" && f.cobro.producto_id === x.productoId);
+    if (suCobro) {
+      console.log(`[tablero] convo ${convo.id}: «${x.ficha.titulo || x.ficha.id}» no trae datos de pago → uso su Cobro «${suCobro.titulo || suCobro.id}»`);
+      return abrirLoQuePuedeComprar(convo, t, { ...x, ficha: suCobro }, enSilencio);
+    }
+  }
   if (x.ficha.tipo !== "cobro") {
     const e = estadoEnElTablero(convo.id);
     if (e?.cobro_ficha_id !== x.ficha.id) abrirCobro(convo.id, x.ficha.id, { [x.productoId]: x.precio });
@@ -2613,6 +2631,14 @@ async function avisarSiReclamaOtroProducto(convo: ConversationRow, contenido: st
       id: "pide_o_pregunta",
       etiqueta:
         "Pregunta o pide algo sobre una oferta o un producto: si con lo que ya pagó le dan otro, si puede cambiar o completar, cuánto cuesta, qué es; o dice que no le llegó, pide el reenvío, o no quiere la oferta",
+    },
+    // (06/11/2026, su conv 354: el bot preguntó «¿agregas las Premium o prefieres solo el regalo?» y «las plantillas
+    // quiero» se tomó como reclamo → aviso al dueño y la venta del upsell perdida. Faltaba la salida de quien ACEPTA:
+    // con solo dos, la IA metía el «quiero» en la de reclamo. Se añade; las otras dos siguen igual.)
+    {
+      id: "acepta",
+      etiqueta:
+        "Acepta, elige o pide algo de lo que el bot le acaba de ofrecer o preguntar (un producto, una oferta, el regalo): dice que lo quiere, cuál prefiere o que se lo manden",
     },
   ]);
   if (reclamo !== "otro_producto") return false;
