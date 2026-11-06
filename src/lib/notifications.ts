@@ -1,5 +1,6 @@
 import { sendTextMessage } from "@/lib/meta/client";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 export type NotificationSendResult = {
   attempted: number;
@@ -23,7 +24,7 @@ async function notifyTelegram(
   }
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -43,6 +44,40 @@ async function notifyTelegram(
     console.error(`[notify] fallo enviando Telegram a ${chatId}:`, err);
     return err instanceof Error ? err.message : "Error enviando Telegram";
   }
+}
+
+/**
+ * LA IA NO LE CONTESTÓ A UN CLIENTE (05/11/2026): «¿muchas conversaciones se quedarán sin respuesta?». Si la IA
+ * falla aun después de sus reintentos, al dueño le llega un aviso con el número para que le escriba él.
+ * Un aviso por cliente cada 30 min, y si fallan varios a la vez (la IA caída para todos) van JUNTOS en un solo
+ * mensaje cada 2 min, para no llenarle el WhatsApp. El simulador no avisa.
+ */
+const avisadosSinIA = new Map<number, number>();
+let pendientesSinIA: string[] = [];
+let ultimoAvisoSinIA = 0;
+let avisoSinIAProgramado = false;
+function mandarAvisosSinIA(): void {
+  avisoSinIAProgramado = false;
+  if (!pendientesSinIA.length) return;
+  const lista = pendientesSinIA;
+  pendientesSinIA = [];
+  ultimoAvisoSinIA = Date.now();
+  const texto =
+    lista.length === 1
+      ? `⚠️ La IA no respondió a ${lista[0]}. Escríbele tú, por favor.`
+      : `⚠️ La IA no respondió a ${lista.length} clientes:\n${lista.map((x) => `• ${x}`).join("\n")}\nEscríbeles tú, por favor.`;
+  void notifyAdmin(texto).catch((err) => console.error("[notify] no se pudo avisar que la IA no respondió:", err));
+}
+export function avisarQueLaIANoRespondio(convo: { id: number; phone: string; name?: string | null; channel?: string | null }): void {
+  if (convo.channel === "test") return;
+  const ahora = Date.now();
+  if (ahora - (avisadosSinIA.get(convo.id) ?? 0) < 30 * 60_000) return;
+  avisadosSinIA.set(convo.id, ahora);
+  if (avisadosSinIA.size > 1000) avisadosSinIA.clear();
+  pendientesSinIA.push(`${convo.name ? `${convo.name} ` : ""}(${convo.phone.replace(/^(messenger|instagram):/, "$1 ")})`);
+  if (avisoSinIAProgramado) return;
+  avisoSinIAProgramado = true;
+  setTimeout(mandarAvisosSinIA, Math.max(0, ultimoAvisoSinIA + 2 * 60_000 - ahora));
 }
 
 /**

@@ -1,4 +1,5 @@
 import { graphVersion } from "@/lib/meta/connect";
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 /**
  * De qué negocio es una cuenta publicitaria.
@@ -39,7 +40,7 @@ async function pedir(
     const url = new URL(`https://graph.facebook.com/${graphVersion()}/${ruta}`);
     url.searchParams.set("fields", campos);
     url.searchParams.set("access_token", token);
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json().catch(() => null)) as Record<
       string,

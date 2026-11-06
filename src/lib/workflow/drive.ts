@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { convertToOggOpus, convertToMp4, convertToJpeg } from "@/lib/meta/media";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const CACHE_DIR = path.join(DATA_DIR, "cache", "drive");
@@ -45,7 +46,7 @@ async function huellaDeDrive(fileId: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://drive.google.com/uc?export=download&id=${fileId}`,
-      { method: "HEAD", redirect: "follow" }
+      { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), method: "HEAD", redirect: "follow" }
     );
     if (!res.ok) return null;
     const peso = res.headers.get("content-length");
@@ -114,7 +115,7 @@ async function downloadDriveFileRaw(
   destPath: string
 ): Promise<void> {
   const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
-  const res = await fetch(url, { redirect: "follow" });
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS), redirect: "follow" });
   if (!res.ok) {
     throw new Error(`Drive ${res.status} para ${fileId}`);
   }

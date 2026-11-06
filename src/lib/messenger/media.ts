@@ -14,6 +14,7 @@ import {
   imageExtFromMime,
   videoExtFromMime,
 } from "@/lib/meta/media";
+import { LIMITE_ARCHIVO_MS } from "@/lib/limites";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 
@@ -47,7 +48,7 @@ export async function downloadMessengerAttachment(
     process.env.MESSENGER_PAGE_ACCESS_TOKEN;
   if (!token) throw new Error("MESSENGER_PAGE_ACCESS_TOKEN no configurado");
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });

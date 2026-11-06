@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { LIMITE_ARCHIVO_MS } from "@/lib/limites";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
 const DEFAULT_MODEL = "whisper-large-v3-turbo";
@@ -46,7 +47,7 @@ export async function transcribeAudio(
   form.append("response_format", "verbose_json");
   form.append("temperature", "0");
 
-  const res = await fetch(GROQ_URL, {
+  const res = await fetch(GROQ_URL, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
     body: form,

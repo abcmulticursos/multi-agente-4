@@ -3,6 +3,7 @@ import path from "node:path";
 import { getWhatsAppRuntimeConfig } from "@/lib/meta/runtime-config";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const MEDIA_DIR = path.join(DATA_DIR, "media");
@@ -50,7 +51,7 @@ async function getMediaInfo(
   mediaId: string,
   token: string
 ): Promise<MetaMediaInfo> {
-  const res = await fetch(`${graphBase()}/${mediaId}`, {
+  const res = await fetch(`${graphBase()}/${mediaId}`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
@@ -82,7 +83,7 @@ export async function downloadMediaFromMeta(
 
   const info = await getMediaInfo(mediaId, token);
 
-  const fileRes = await fetch(info.url, {
+  const fileRes = await fetch(info.url, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!fileRes.ok) {

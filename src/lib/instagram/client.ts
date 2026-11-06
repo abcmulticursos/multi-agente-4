@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getActiveInstagramMetaConnection } from "@/lib/db";
 import { sinFormatoDeWhatsApp } from "@/lib/messenger/client";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 function graphBase(): string {
   const version = process.env.META_GRAPH_VERSION ?? "v21.0";
@@ -23,7 +24,7 @@ export async function sendInstagramText(
   const url = new URL(`${graphBase()}/me/messages`);
   url.searchParams.set("access_token", getToken());
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -70,7 +71,7 @@ async function uploadInstagramAttachment(
   const buffer = fs.readFileSync(absPath);
   form.append("filedata", new Blob([buffer], { type: mime }), path.basename(absPath));
 
-  const res = await fetch(url, { method: "POST", body: form });
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS), method: "POST", body: form });
   const body = await res.text();
   if (!res.ok) {
     throw new Error(`Instagram attachment upload failed ${res.status}: ${body}`);
@@ -98,7 +99,7 @@ export async function sendInstagramMedia(
   const url = new URL(`${graphBase()}/me/messages`);
   url.searchParams.set("access_token", getToken());
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -15,6 +15,7 @@ import {
 } from "@/lib/db";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { notifyAdmin } from "@/lib/notifications";
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 /**
  * RESPUESTA A COMENTARIOS DE FACEBOOK.
@@ -199,7 +200,7 @@ async function responderEnPrivado(
   try {
     const url = new URL(`https://graph.facebook.com/${version}/${pageId}/messages`);
     url.searchParams.set("access_token", pageAccessToken);
-    const res = await fetch(url, {
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

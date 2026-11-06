@@ -7,6 +7,7 @@ import {
   getMetaAppId as getStoredMetaAppId,
   getMetaOAuthAppSecret,
 } from "@/lib/meta/runtime-config";
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 export const META_CONNECT_COOKIE = "meta_oauth_state";
 export const META_CONNECT_INSTAGRAM_COOKIE = "meta_oauth_instagram";
@@ -123,7 +124,7 @@ export async function fetchMetaAppName(): Promise<string | null> {
     url.searchParams.set("fields", "name");
     url.searchParams.set("access_token", `${appId}|${appSecret}`);
     try {
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
       const body = (await res.json()) as { name?: string };
       return res.ok && body.name ? body.name : null;
     } catch {
@@ -204,7 +205,7 @@ export async function exchangeCodeForUserToken(
   shortUrl.searchParams.set("redirect_uri", redirectUri);
   shortUrl.searchParams.set("code", code);
 
-  const shortRes = await fetch(shortUrl, { cache: "no-store" });
+  const shortRes = await fetch(shortUrl, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
   const shortBody = (await shortRes.json()) as TokenResponse;
   if (!shortRes.ok || !shortBody.access_token) {
     throw new Error(
@@ -220,7 +221,7 @@ export async function exchangeCodeForUserToken(
   longUrl.searchParams.set("client_secret", appSecret);
   longUrl.searchParams.set("fb_exchange_token", shortBody.access_token);
 
-  const longRes = await fetch(longUrl, { cache: "no-store" });
+  const longRes = await fetch(longUrl, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
   const longBody = (await longRes.json()) as TokenResponse;
   if (!longRes.ok || !longBody.access_token) {
     throw new Error(
@@ -243,7 +244,7 @@ export async function fetchConnectedPages(
   );
   url.searchParams.set("access_token", userAccessToken);
 
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
   const body = (await res.json()) as AccountsResponse;
   if (!res.ok) {
     throw new Error(body.error?.message ?? "No se pudieron leer las paginas");
@@ -821,7 +822,7 @@ export async function subscribePageToCommentWebhooks(input: {
       `https://graph.facebook.com/${graphVersion()}/${input.pageId}/subscribed_apps`
     );
     url.searchParams.set("access_token", input.pageAccessToken);
-    const res = await fetch(url, {
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subscribed_fields: union }),
@@ -879,7 +880,7 @@ export async function camposSuscritosDeLaPagina(input: {
       `https://graph.facebook.com/${graphVersion()}/${input.pageId}/subscribed_apps`
     );
     url.searchParams.set("access_token", input.pageAccessToken);
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
     if (!res.ok) return null;
     const data = (await res.json()) as {
       data?: Array<{ subscribed_fields?: string[] }>;
@@ -906,7 +907,7 @@ export async function subscribePageToMessagingWebhooks(input: {
     );
     url.searchParams.set("access_token", input.pageAccessToken);
 
-    const res = await fetch(url, {
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subscribed_fields: fields }),
@@ -987,7 +988,7 @@ export async function subscribeWhatsAppToWebhooks(input: {
     `https://graph.facebook.com/${graphVersion()}/${input.wabaId}/subscribed_apps`
   );
   url.searchParams.set("access_token", input.accessToken);
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",

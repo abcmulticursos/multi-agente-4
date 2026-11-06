@@ -2920,6 +2920,27 @@ export function markActionFailed(id: number): void {
   stmtMarkActionStatus.run("failed", id);
 }
 
+// UNA ACCIÓN QUE FALLÓ SIN MANDAR NADA SE REINTENTA (05/11/2026, ver worker.ts). Estas tres piezas solo las usa
+// el obrero: el último mensaje antes de correrla, si salió algo del bot después, y devolverla a la cola.
+const stmtUltimoMensajeDe = db.prepare<[number], { id: number | null }>(
+  "SELECT MAX(id) AS id FROM messages WHERE conversation_id = ?"
+);
+const stmtSalioAlgoDesde = db.prepare<[number, number], { n: number }>(
+  "SELECT COUNT(*) AS n FROM messages WHERE conversation_id = ? AND id > ? AND role <> 'user'"
+);
+const stmtReprogramarAccion = db.prepare<[number, number]>(
+  "UPDATE scheduled_actions SET claimed_at = NULL, run_at = ? WHERE id = ? AND status = 'pending'"
+);
+export function ultimoMensajeDe(conversationId: number): number {
+  return Number(stmtUltimoMensajeDe.get(conversationId)?.id ?? 0);
+}
+export function salioAlgoDelBotDesde(conversationId: number, mensajeId: number): boolean {
+  return (stmtSalioAlgoDesde.get(conversationId, mensajeId)?.n ?? 0) > 0;
+}
+export function reprogramarAccion(id: number, runAtUnix: number): void {
+  stmtReprogramarAccion.run(runAtUnix, id);
+}
+
 export function cancelPendingActionsForConvo(conversationId: number): void {
   stmtCancelPendingForConvo.run(conversationId);
 }

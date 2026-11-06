@@ -18,6 +18,7 @@ import {
 } from "@/lib/db";
 import { esComprobantePdf, resolveMediaAbsPath } from "@/lib/meta/media";
 import { imagenDentroDelPdf } from "@/lib/meta/pdf-a-imagen";
+import { LIMITE_IA_MS } from "@/lib/limites";
 import { formatCurrencyAmount, getCountryInfo } from "@/lib/countries";
 import {
   sendBotMediaFromDrive,
@@ -215,6 +216,9 @@ export function getClient(): OpenAI {
   cached = new OpenAI({
     apiKey,
     baseURL: "https://openrouter.ai/api/v1",
+    // Ninguna espera es eterna (05/11/2026, ver limites.ts): sin esto el SDK esperaba hasta 10 min por intento.
+    // Los reintentos del SDK siguen como siempre (2).
+    timeout: LIMITE_IA_MS,
     defaultHeaders: {
       "HTTP-Referer": "http://localhost:3000",
       "X-Title": "Agente WhatsApp",

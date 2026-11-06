@@ -1,3 +1,5 @@
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
+
 /**
  * De quién es un token de lectura de Ads.
  *
@@ -18,7 +20,7 @@ async function preguntar(
   try {
     const url = new URL(`https://graph.facebook.com/${VERSION}/${ruta}`);
     url.searchParams.set("access_token", token);
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json().catch(() => null)) as Record<
       string,

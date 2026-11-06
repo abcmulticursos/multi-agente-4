@@ -12,6 +12,8 @@
  * Solo lo usan las consultas de Meta Connect. Los mensajes del bot NO pasan por aquí: tienen su
  * propio límite en Meta y no se frenan desde el CRM.
  */
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
+
 const AVISO_PORCENTAJE = 80;
 let frenadoHasta = 0;
 let ultimoUso = 0;
@@ -54,7 +56,7 @@ export function frenar(minutos: number): void {
  */
 export async function fetchMeta(url: URL | string, init?: RequestInit): Promise<Response> {
   if (metaFrenada()) throw new MetaFrenada();
-  const res = await fetch(url, { cache: "no-store", ...init });
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), ...init });
   try {
     const uso = res.headers.get("x-app-usage");
     if (uso) {

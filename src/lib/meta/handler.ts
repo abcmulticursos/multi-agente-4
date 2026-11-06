@@ -90,7 +90,7 @@ import {
 } from "@/lib/workflow/config";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
 import { leerComprobante, ultimosMensajes } from "@/lib/tablero/lector";
-import { notifyAdmin } from "@/lib/notifications";
+import { avisarQueLaIANoRespondio, notifyAdmin } from "@/lib/notifications";
 import { estadoEnElTablero } from "@/lib/tablero/estado";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
@@ -1894,6 +1894,7 @@ async function handleIncomingMessage(
     });
   } catch (err) {
     console.error("[wh] error generando respuesta LLM:", err);
+    avisarQueLaIANoRespondio(convo);
     return;
   }
   console.log(`[wh] LLM en ${Date.now() - startedAt}ms`);

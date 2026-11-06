@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getActiveMetaConnection, getMetaConnectionByPageId } from "@/lib/db";
 import { getOutboundMessengerPage } from "@/lib/meta/runtime-config";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 function graphBase(): string {
   const version = process.env.META_GRAPH_VERSION ?? "v21.0";
@@ -62,7 +63,7 @@ export async function sendMessengerText(
   const url = new URL(`${graphBase()}/me/messages`);
   url.searchParams.set("access_token", token);
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -126,7 +127,7 @@ async function uploadMessengerAttachment(
   const buffer = fs.readFileSync(absPath);
   form.append("filedata", new Blob([buffer], { type: mime }), path.basename(absPath));
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
     method: "POST",
     body: form,
   });
@@ -160,7 +161,7 @@ export async function sendMessengerMedia(
   const url = new URL(`${graphBase()}/me/messages`);
   url.searchParams.set("access_token", token);
 
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       "Content-Type": "application/json",

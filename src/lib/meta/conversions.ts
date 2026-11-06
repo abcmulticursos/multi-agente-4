@@ -12,6 +12,7 @@ import {
 // y ese dato dejó de mandarse el 3 de octubre de 2026. Ver el porqué más abajo.
 import { getCapiAccessToken, getCapiPixelId } from "@/lib/meta/runtime-config";
 import { laTiendaDeLaConversacion } from "@/lib/workflow/config";
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 const META_API_VERSION = process.env.META_GRAPH_VERSION ?? "v21.0";
 
@@ -345,7 +346,7 @@ async function postEvent(
   if (testCode) body.test_event_code = testCode;
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

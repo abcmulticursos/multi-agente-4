@@ -10,6 +10,7 @@
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { getConversationById, type ConversationRow } from "@/lib/db";
 import { getClient } from "@/lib/openrouter";
+import { avisarQueLaIANoRespondio } from "@/lib/notifications";
 import { sendChunkedBotText } from "@/lib/workflow/engine";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { ultimosMensajes } from "./lector";
@@ -787,6 +788,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       texto = (r.choices[0]?.message?.content ?? "").trim();
     } catch (err) {
       console.error(`[tablero:ia] convo ${convo.id}: la IA no respondió`, err);
+      avisarQueLaIANoRespondio(convo);
       return false;
     }
     const malos = prohibidos(texto);

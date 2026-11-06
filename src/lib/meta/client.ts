@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { getWhatsAppRuntimeConfig } from "@/lib/meta/runtime-config";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 function graphBase(): string {
   const version = process.env.META_GRAPH_VERSION ?? "v21.0";
@@ -65,7 +66,7 @@ export async function sendTextMessage(
       "META_PHONE_NUMBER_ID o META_ACCESS_TOKEN no configurados"
     );
   }
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -126,7 +127,7 @@ export async function sendInteractiveButtons(
   } else if (header?.text && header.text.trim()) {
     interactive.header = { type: "text", text: header.text.slice(0, 60) };
   }
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -174,7 +175,7 @@ export async function uploadMediaToMeta(
     `[media] subiendo a Meta: nombre="${filename}" tipo="${mime}" ${buffer.length} bytes`
   );
 
-  const res = await fetch(`${graphBase()}/${phoneId}/media`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/media`, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: form,
@@ -198,7 +199,7 @@ export async function uploadMediaToMeta(
     const shaLocal = crypto.createHash("sha256").update(buffer).digest("hex");
     const infoRes = await fetch(
       `${graphBase()}/${json.id}?fields=file_size,mime_type,sha256`,
-      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+      { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
     );
     if (infoRes.ok) {
       const info = (await infoRes.json()) as {
@@ -238,7 +239,7 @@ export async function sendAudioMessage(
       "META_PHONE_NUMBER_ID o META_ACCESS_TOKEN no configurados"
     );
   }
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -277,7 +278,7 @@ export async function sendImageMessage(
   const imagePayload: { id: string; caption?: string } = { id: mediaId };
   if (caption && caption.trim()) imagePayload.caption = caption.trim();
 
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -320,7 +321,7 @@ export async function sendDocumentMessage(
   if (filename && filename.trim()) docPayload.filename = filename.trim();
   if (caption && caption.trim()) docPayload.caption = caption.trim();
 
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -359,7 +360,7 @@ export async function sendVideoMessage(
   const videoPayload: { id: string; caption?: string } = { id: mediaId };
   if (caption && caption.trim()) videoPayload.caption = caption.trim();
 
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -411,7 +412,7 @@ export async function markMessageRead(
     message_id: waMessageId,
   };
   if (withTyping) body.typing_indicator = { type: "text" };
-  const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+  const res = await fetch(`${graphBase()}/${phoneId}/messages`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -437,7 +438,7 @@ export async function getPhoneNumberInfo(): Promise<PhoneNumberInfo> {
     );
   }
   const url = `${graphBase()}/${phoneId}?fields=display_phone_number,verified_name,quality_rating`;
-  const res = await fetch(url, {
+  const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
@@ -445,7 +446,7 @@ export async function getPhoneNumberInfo(): Promise<PhoneNumberInfo> {
   const info = (await res.json()) as Omit<PhoneNumberInfo, "profile_picture_url">;
   const profileUrl = `${graphBase()}/${phoneId}/whatsapp_business_profile?fields=profile_picture_url`;
   try {
-    const profileRes = await fetch(profileUrl, {
+    const profileRes = await fetch(profileUrl, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });

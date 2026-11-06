@@ -14,6 +14,10 @@ function getTransporter(): Transporter {
   cachedTransporter = nodemailer.createTransport({
     service: "gmail",
     auth: { user, pass },
+    // Ninguna espera es eterna (05/11/2026, ver limites.ts): por defecto, hasta 10 min sin respuesta de Gmail.
+    connectionTimeout: 30_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 60_000,
   });
   return cachedTransporter;
 }

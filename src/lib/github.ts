@@ -7,6 +7,7 @@
 // - GITHUB_BRANCH: rama destino. Opcional, default main.
 
 import { execSync } from "node:child_process";
+import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
 
 const DEFAULT_BRANCH = "main";
 const PROJECT_IDENTITY_PATH = "config/project-identity.json";
@@ -104,7 +105,7 @@ async function verifyRepoIdentity(
 
   try {
     const url = `https://api.github.com/repos/${repo}/contents/${PROJECT_IDENTITY_PATH}?ref=${encodeURIComponent(branch)}`;
-    const res = await fetch(url, { headers, cache: "no-store" });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), headers, cache: "no-store" });
     if (res.status === 404) {
       return {
         ok: false,
@@ -218,14 +219,14 @@ export async function publishFilesToGithub(
   try {
     const refRes = await fetch(
       `${api}/ref/heads/${encodeURIComponent(branch)}`,
-      { headers, cache: "no-store" }
+      { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), headers, cache: "no-store" }
     );
     if (!refRes.ok) return { ok: false, error: `GitHub ref GET ${refRes.status}` };
     const ref = (await refRes.json()) as { object?: { sha?: string } };
     const parentSha = ref.object?.sha;
     if (!parentSha) return { ok: false, error: "GitHub no devolvio la rama destino." };
 
-    const commitRes = await fetch(`${api}/commits/${parentSha}`, {
+    const commitRes = await fetch(`${api}/commits/${parentSha}`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       headers,
       cache: "no-store",
     });
@@ -233,7 +234,7 @@ export async function publishFilesToGithub(
     const commit = (await commitRes.json()) as { tree?: { sha?: string } };
     if (!commit.tree?.sha) return { ok: false, error: "GitHub no devolvio el arbol actual." };
 
-    const treeRes = await fetch(`${api}/trees`, {
+    const treeRes = await fetch(`${api}/trees`, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -250,7 +251,7 @@ export async function publishFilesToGithub(
     const tree = (await treeRes.json()) as { sha?: string };
     if (!tree.sha) return { ok: false, error: "GitHub no creo el arbol nuevo." };
 
-    const newCommitRes = await fetch(`${api}/commits`, {
+    const newCommitRes = await fetch(`${api}/commits`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ message: commitMessage, tree: tree.sha, parents: [parentSha] }),
@@ -261,7 +262,7 @@ export async function publishFilesToGithub(
 
     const updateRefRes = await fetch(
       `${api}/refs/heads/${encodeURIComponent(branch)}`,
-      {
+      { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
         method: "PATCH",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({ sha: newCommit.sha, force: false }),
@@ -331,7 +332,7 @@ export async function publishProjectIdentityToGithub(
 
   let sha: string | undefined;
   try {
-    const getRes = await fetch(`${base}?ref=${encodeURIComponent(branch)}`, {
+    const getRes = await fetch(`${base}?ref=${encodeURIComponent(branch)}`, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       headers,
       cache: "no-store",
     });
@@ -355,7 +356,7 @@ export async function publishProjectIdentityToGithub(
   if (sha) body.sha = sha;
 
   try {
-    const putRes = await fetch(base, {
+    const putRes = await fetch(base, { signal: AbortSignal.timeout(LIMITE_ARCHIVO_MS),
       method: "PUT",
       headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify(body),

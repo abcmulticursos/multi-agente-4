@@ -1,3 +1,5 @@
+import { LIMITE_CONSULTA_MS } from "@/lib/limites";
+
 /**
  * Cliente REST para NocoDB v2.
  *
@@ -65,7 +67,7 @@ export async function createLead(data: LeadRowData): Promise<string | null> {
     return null;
   }
   try {
-    const res = await fetch(recordsEndpoint(), {
+    const res = await fetch(recordsEndpoint(), { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(data),
@@ -103,7 +105,7 @@ export async function updateLead(
   if (Object.keys(data).length === 0) return true;
   try {
     const body = { Id: rowId, ...data };
-    const res = await fetch(recordsEndpoint(), {
+    const res = await fetch(recordsEndpoint(), { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "PATCH",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -130,7 +132,7 @@ export async function deleteLead(rowId: string): Promise<boolean> {
   if (!isConfigured()) return false;
   try {
     const body = { Id: rowId };
-    const res = await fetch(recordsEndpoint(), {
+    const res = await fetch(recordsEndpoint(), { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS),
       method: "DELETE",
       headers: authHeaders(),
       body: JSON.stringify(body),
