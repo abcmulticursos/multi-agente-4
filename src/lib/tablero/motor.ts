@@ -480,6 +480,11 @@ function clavesDelAnuncioDelCliente(convo: ConversationRow, config: WorkflowConf
  * (ver «Ojo con los anuncios» en CLAUDE.md): quien llega por un anuncio recibe la versión de ese
  * anuncio. Si no, en la intro de order bump se sortea entre TODAS; en un seguimiento, solo entre las
  * que no tienen anuncio (y si no hay ninguna, no se manda). Sin etiquetas, el sorteo de siempre.
+ *
+ * LOS SEGUIMIENTOS YA NO MIRAN ANUNCIOS (05/11/2026). Su seguimiento 1 llevaba dos anuncios puestos y a
+ * nadie del simulador le salía (conv. 348 y 349). Él: «yo por algo creé las rutas… la etiqueta los deriva,
+ * yo no necesito cosas que compliquen». El anuncio dirige por el Ruteador; en un seguimiento sale su
+ * versión, a todos, por peso. Las etiquetas viejas que queden escritas no hacen nada.
  */
 function versionQueLeToca(
   lista: VarianteDeFicha[],
@@ -488,6 +493,7 @@ function versionQueLeToca(
 ): VarianteDeFicha | null {
   const dirige = (v: VarianteDeFicha) => v.dirigir !== false && (v.anuncios ?? []).length > 0;
   const vivas = lista.filter((v) => (v.peso ?? 1) > 0);
+  if (regla === "seguimiento") return sortear(vivas);
   const delSuAnuncio = vivas.filter((v) => dirige(v) && (v.anuncios ?? []).some((k) => claves.has(k)));
   if (delSuAnuncio.length) return sortear(delSuAnuncio);
   if (regla === "intro") return sortear(vivas);

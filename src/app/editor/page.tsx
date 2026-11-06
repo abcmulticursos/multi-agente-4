@@ -32313,8 +32313,7 @@ function PantallaDelTableroCargada({
                     dirige: v.dirigir !== false,
                   }));
               if (f.tipo === "intro_ob") return deVersiones(f.variantes ?? [], "Intro de order bump");
-              if (f.tipo === "seguimientos")
-                return (f.seguimientos ?? []).flatMap((s) => deVersiones(s.variantes, `Seguimiento · ${minutosLegiblesDelTablero(s.minutos)}`));
+              // Los seguimientos ya no llevan anuncios (05/11/2026): no salen en la guía.
               if (f.tipo === "condicion" && f.condicion?.tipo === "anuncio" && (f.condicion.anuncios ?? []).length > 0)
                 return [{ piezaId: f.id, titulo: nombre, tipo: "Condición «¿vino de un anuncio?»", paises: paisesDeLaFicha, apagada: !!f.apagada, claves: f.condicion.anuncios ?? [], dirige: true }];
               return [];
@@ -32685,7 +32684,7 @@ function GestorDeVersiones({
   const pesoTotal = lista.reduce((t, v) => t + (v.peso ?? 1), 0) || 1;
   const porcentaje = (v: Version) => Math.round((100 * (v.peso ?? 1)) / pesoTotal);
   const bandera = pais ? `${banderaDe(pais)} ${pais}` : "🌍 Otros países";
-  const conAnuncio = (v: Version) => v.dirigir !== false && (v.anuncios ?? []).length > 0;
+  const conAnuncio = (v: Version) => !esSeg && v.dirigir !== false && (v.anuncios ?? []).length > 0;
   // EL PRECIO DE OFERTA EN SU VISTA PREVIA (25/10/2026): desde el seguimiento que «activa el precio de
   // oferta» (ese mismo y los siguientes), el bot cobra el de oferta; la vista previa enseña ése.
   const productosDeLaFicha = useContext(ProductosDeLaFichaContext);
@@ -32883,7 +32882,8 @@ function GestorDeVersiones({
               idPrefix={`tablero_${ficha.id.replace(/[^a-z0-9]/gi, "_")}_${version.id.replace(/[^a-z0-9]/gi, "_")}`}
               cfgVista={cfgVista}
               pais={pais}
-              anuncios={{
+              /* Los seguimientos ya no llevan anuncios (05/11/2026, ver versionQueLeToca): solo la intro de order bump. */
+              anuncios={esSeg ? undefined : {
                 claves: version.anuncios ?? [],
                 dirigir: version.dirigir !== false,
                 registro: cfgVista.ad_registry ?? [],
