@@ -541,6 +541,29 @@ export function entregasDeLaFicha(f: FichaDelTablero): string[] {
 }
 
 /**
+ * ¿UNA ENTREGAR DE ESTE PRODUCTO LO ESPERA desde esta ficha? (06/11/2026, «el Cobro entrega solo»). Se mira la ficha y lo
+ * que sigue SOLO, sin esperar al cliente: Esperar, Condición, Reparto y el «→» de un Mensaje. Si la hay, el Cobro no
+ * entrega: lo hace esa Entregar (y no sale dos veces). La usan el motor y el dibujo del tablero: dicen lo mismo.
+ */
+export function unaEntregaLoEspera(t: Pick<Tablero, "fichas" | "cables">, desde: string, productoId: string): boolean {
+  const PASAN_SOLAS = new Set<string>(["esperar", "condicion", "reparto"]);
+  const vistas = new Set([desde]);
+  const cola = [desde];
+  for (let i = 0; i < cola.length; i++) {
+    const x = t.fichas.find((y) => y.id === cola[i]);
+    if (!x) continue;
+    if (x.tipo === "entregar") {
+      if (!x.apagada && entregasDeLaFicha(x).includes(productoId)) return true;
+      continue;
+    }
+    if (x.tipo !== "mensaje" && !PASAN_SOLAS.has(x.tipo)) continue;
+    for (const c of t.cables)
+      if (c.de === x.id && (x.tipo !== "mensaje" || c.salida === "siguiente") && !vistas.has(c.a)) (vistas.add(c.a), cola.push(c.a));
+  }
+  return false;
+}
+
+/**
  * LA FICHA QUE COBRA SOLA (01/11/2026, su upsell de LENGUA Y LITERATURA, ficha 6). Él: «la ficha tiene un producto
  * seleccionado y tiene un precio; si el cliente envía el comprobante se entrega, ya que la ficha tiene esa
  * información, ¿por qué darle tanta vuelta?». Un Mensaje sin botones ni cuadritos que presenta UN producto ya no

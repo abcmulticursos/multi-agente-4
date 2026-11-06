@@ -39,7 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -91,7 +91,18 @@ export const ID_DEL_BASICO_DE_LA_TIENDA = "@tienda:basico:id";
  * tienda; 🛍️ si la ficha es un upsell; 📚 los demás. En las demás salidas, nada (el punto naranja de siempre).
  */
 function iconoDeEntrega(f: FichaEnElEditor, clave: string, t: TableroEnElEditor, nombres: Record<string, string>, esUpsell: boolean): string | null {
-  if (f.tipo === "cobro" || (clave !== "pagado" && !clave.startsWith("prod:"))) return null;
+  if (clave !== "pagado" && !clave.startsWith("prod:")) return null;
+  // EL COBRO ENTREGA SOLO (06/11/2026): su «Pagó» lleva el ícono cuando entrega él, es decir, cuando ninguna Entregar de ese
+  // producto lo espera (por su cable, o sin cable en su ruta: ahí se dibuja «↺ → N»). La contribución, no (entrega por tramos).
+  if (f.tipo === "cobro") {
+    if (f.cobro?.modo !== "producto") return null;
+    const pidDelCobro = clave === "pagado" ? f.cobro?.producto_id : clave.slice(5);
+    if (!pidDelCobro) return null;
+    const cable = t.cables.find((c) => c.de === f.id && c.salida === clave);
+    if (cable ? unaEntregaLoEspera(t as Tablero, cable.a, pidDelCobro) : aDondeVaSolo(f, clave, t)) return null;
+    if (pidDelCobro === FULL_DE_LA_TIENDA || (!!nombres[ID_DEL_FULL_DE_LA_TIENDA] && pidDelCobro === nombres[ID_DEL_FULL_DE_LA_TIENDA])) return "📦";
+    return esUpsell ? "🛍️" : "📚";
+  }
   const pid = clave === "pagado" ? productosQueCobraLaFicha(f as FichaDelTablero, t as Tablero)[0] : clave.slice(5);
   if (!pid) return null;
   if (pid === FULL_DE_LA_TIENDA || (!!nombres[ID_DEL_FULL_DE_LA_TIENDA] && pid === nombres[ID_DEL_FULL_DE_LA_TIENDA])) return "📦";
@@ -306,14 +317,10 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
         faltas.push({ ficha: f.id, salida: s.clave, motivo: `«${s.etiqueta}» no lleva a ningún lado.` });
       else if (f.tipo === "cobro" && s.clave.startsWith("tramo:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `El tramo «${s.etiqueta}» no entrega nada.` });
       else if (f.tipo === "cobro" && f.cobro?.modo !== "abierto" && (s.clave === "pagado" || s.clave.startsWith("prod:"))) {
-        // Sin cable, el bot busca la Entrega de ese producto en su ruta (`entregaDelProductoEnSuRuta`):
-        // solo falta si no la hay.
+        // Sin cable, el bot busca la Entrega de ese producto en su ruta (`entregaDelProductoEnSuRuta`), y si no la hay,
+        // EL COBRO ENTREGA SOLO (06/11/2026): con su producto elegido no le falta nada. Solo falta si no tiene producto.
         const producto = s.clave === "pagado" ? f.cobro?.producto_id : s.clave.slice(5);
-        const entrega = [...enVenta].some((id) => {
-          const x = t.fichas.find((y) => y.id === id);
-          return x?.tipo === "entregar" && !x.apagada && (x.producto_id === producto || (x.entregas ?? []).includes(producto ?? ""));
-        });
-        if (!entrega) faltas.push({ ficha: f.id, salida: s.clave, motivo: `${s.etiqueta}: no hay ninguna Entrega de ese producto en su camino.` });
+        if (!producto) faltas.push({ ficha: f.id, salida: s.clave, motivo: `${s.etiqueta}: este Cobro no tiene producto elegido, así que no hay nada que entregar.` });
       } else if (
         s.clave === "sin_respuesta" &&
         (f.tipo === "mensaje" || f.tipo === "intro_ob") &&

@@ -107,6 +107,7 @@ import {
   opcionesDe,
   pasosDeLaFicha,
   entregasDeLaFicha,
+  unaEntregaLoEspera,
   eligeDeLaFicha,
   cobraEnLaFicha,
   cobraPorSusCables,
@@ -3048,6 +3049,52 @@ async function cerrarLaVenta(
   // el regalo (o está en él), la ruta no sigue: como la ficha Entregar.
   const destinoDelPago = cableDeLaSalida(t, f.id, salida);
   const aDonde = destinoDelPago ? t.fichas.find((x) => x.id === destinoDelPago.a) : undefined;
+  // EL COBRO ENTREGA SOLO (06/11/2026). Él: «¿por qué debe existir la ficha de entrega si la misma ficha de cobro tiene el
+  // producto y ese producto su entrega?». Un Cobro de producto (no la contribución, que entrega por tramos) cuyo pago no
+  // lleva a una Entregar de ESE producto le manda aquí la entrega principal de lo que pagó, como «💰 Si paga». Con cable
+  // a una Entregar (también cruzado, o pasando antes por un Mensaje / Esperar / Condición / Reparto), manda el cable: nada
+  // cambia y no sale dos veces.
+  const cobroQueEntregaSolo = f.tipo === "cobro" && f.cobro?.modo === "producto" && !!productoId;
+  /** La entrega principal de lo que pagó, de frente. `true` si salió; con el regalo ya visto, `"regalo"` (la ruta no sigue). */
+  const entregarDeFrente = async (): Promise<boolean | "regalo"> => {
+    const e = laEntrega(loadWorkflowConfig(), productoId!);
+    const pasos = pasosActivos(e?.pasos);
+    if (!e || !pasos.length) {
+      console.warn(`[tablero] convo ${convo.id}: el producto ${productoId} no tiene entrega con burbujas`);
+      return false;
+    }
+    await sendConfiguredSteps(
+      convo,
+      conLosComodinesDeLaEntrega(convo.id, conElNombreDelProducto(pasos as never, e.producto.name), e.producto.id, getEffectiveCountryCode(convo.phone, loadWorkflowConfig())) as never
+    );
+    anotarEntrega(convo.id, productoId!);
+    anotarPresentados(convo.id, [e.producto.id]);
+    console.log(`[tablero] convo ${convo.id}: «${salida}» de «${f.titulo || f.id}» sin Entregar → el Cobro entregó ${productoId} de frente`);
+    const fresca = getConversationById(convo.id);
+    const yaEnElRegalo =
+      ESTADOS_DEL_REGALO.has(fresca?.state ?? "") || fichasVisitadas(convo.id).some((id) => t.fichas.find((x) => x.id === id)?.tipo === "regalo");
+    if (yaEnElRegalo) {
+      if (!(await volverAOfrecerElRegaloSiCompro(convo.id, t, 0))) console.log(`[tablero] convo ${convo.id}: entregado con el regalo ya visto → la ruta no sigue`);
+      return "regalo";
+    }
+    return true;
+  };
+  if (cobroQueEntregaSolo && aDonde && !unaEntregaLoEspera(t, aDonde.id, productoId!)) {
+    const r = await entregarDeFrente();
+    if (r === "regalo") return;
+    // LA OFERTA QUE YA SE LE HIZO NO SE REPITE, como tras la ficha Entregar: si el cable lleva a una ficha que ya vio
+    // (el upsell), sigue al regalo de esa ruta que aún no vio; si no hay, la ruta no sigue.
+    if (r && aDonde.tipo !== "regalo" && yaVisito(convo.id, aDonde.id)) {
+      const regalo = alcanzables(t, [aDonde.id])
+        .map((id) => t.fichas.find((x) => x.id === id))
+        .find((x) => x?.tipo === "regalo" && !yaVisito(convo.id, x.id));
+      if (regalo) {
+        console.log(`[tablero] convo ${convo.id}: «${aDonde.titulo || aDonde.id}» ya se le ofreció → sigue al regalo`);
+        await irA(convo.id, t, regalo.id, 1);
+      } else console.log(`[tablero] convo ${convo.id}: «${aDonde.titulo || aDonde.id}» ya se le ofreció → la ruta no sigue`);
+      return;
+    }
+  }
   if (f.tipo !== "cobro" && productoId && aDonde && aDonde.tipo !== "entregar") {
     const config = loadWorkflowConfig();
     const e = laEntrega(config, productoId);
@@ -3080,6 +3127,9 @@ async function cerrarLaVenta(
       await irA(convo.id, t, entrega.id, 1);
       return;
     }
+    // EL COBRO ENTREGA SOLO (06/11/2026): sin cable y sin Entregar de ese producto en su ruta, le llega lo que pagó.
+    // La ruta termina aquí (no hay cable). Sin entrega escrita en el producto, sigue el aviso de siempre.
+    if (cobroQueEntregaSolo && (await entregarDeFrente())) return;
     // PAGÓ Y SU RUTA NO SIGUE (24/10/2026): esa salida no tiene cable —se cortó o nunca se tiró—.
     // El pago queda registrado, pero nadie le entrega nada: se te avisa para que lo hagas a mano, y al
     // cliente se le dice que un asesor le escribe (no un «gracias» a secas, que parece que ya terminó).
