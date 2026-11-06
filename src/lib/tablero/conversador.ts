@@ -676,6 +676,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   const permitidos = new Set(c.montosPermitidos.map((n) => Math.round(n * 100)));
   const prohibidos = (t: string) => importesDelTexto(t).filter((n) => !permitidos.has(Math.round(n * 100)));
   let texto = "";
+  // Lo que la IA escribió de verdad, antes de los frenos: si al final queda vacía, el registro dice qué se quitó (06/11/2026).
+  let crudo = "";
   let aviso = "";
   let conMuestras = !!(c.enviarMuestras && c.muestras?.length);
   let salieronMuestras = false;
@@ -797,6 +799,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         continue;
       }
       texto = (r.choices[0]?.message?.content ?? "").trim();
+      crudo = texto || `(sin texto${r.choices[0]?.message?.tool_calls?.length ? `; pidió ${r.choices[0].message.tool_calls.map((x) => (x.type === "function" ? x.function.name : x.type)).join(", ")}` : ""})`;
     } catch (err) {
       console.error(`[tablero:ia] convo ${convo.id}: la IA no respondió`, err);
       avisarQueLaIANoRespondio(convo);
@@ -1110,7 +1113,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       c.etapa === "venta" && !c.nota
         ? (cierresDeLaFicha(c).length ? cierresDeLaFicha(c) : PREGUNTAS_DE_CIERRE).find((p) => !recientes.includes(p.slice(0, 20))) ?? (cierresDeLaFicha(c)[0] ?? PREGUNTAS_DE_CIERRE[0])
         : "¿En qué más te puedo ayudar? 😊";
-    console.log(`[tablero:ia] convo ${convo.id}: la respuesta quedó vacía → sale «${texto}» (nunca mudo)`);
+    console.log(`[tablero:ia] convo ${convo.id}: la respuesta quedó vacía → sale «${texto}» (nunca mudo) · la IA había escrito: «${crudo.replace(/\s+/g, " ").slice(0, 300)}»`);
   }
   if (!texto) return salieronMuestras || reenvioPorCuenta;
   // **ASÍ** (markdown) no es negrita en WhatsApp: se ve con asteriscos de más. Se deja *así*.

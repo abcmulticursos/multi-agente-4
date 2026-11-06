@@ -1314,6 +1314,40 @@ const AFIRMA = {
   },
 };
 
+/**
+ * EL BLOQUE DEL CLIENTE (06/11/2026, su conv 359). Escribió «si» y «dime como» seguidos: se contestan juntos, pero aquí se
+ * buscaba el turno del bot antes de su ÚLTIMO mensaje —y antes de «dime como» está su «si», no la pregunta del bot—, y el
+ * «sí» se miraba sobre el bloque entero («si dime como» no es un sí pelado). Sin turno ni sí, lo decidía la IA del
+ * regalo, a cara o cruz: le llegó el regalo en vez de las Premium. La misma familia que «ya pague» + «envieme» (05/11).
+ * `antes`: los mensajes de antes del bloque (ahí está el turno del bot). `mensajes`: los del bloque, en orden.
+ */
+type Mensajes = ReturnType<typeof ultimosMensajes>;
+function bloqueDelCliente(recientes: Mensajes): { antes: Mensajes; mensajes: Mensajes } {
+  let i = recientes.length;
+  while (i > 0 && recientes[i - 1].role === "user") i--;
+  return { antes: recientes.slice(0, i), mensajes: recientes.slice(i) };
+}
+/** El bloque es un «sí»: su primer mensaje lo es, y lo que sigue no lo desdice («pero…») ni pregunta otra cosa. */
+function elBloqueAfirma(mensajes: Mensajes): boolean {
+  const limpio = (m: Mensajes[number]) => sinTildes(m.content ?? "").replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (mensajes.length < 2 || !AFIRMA.test(limpio(mensajes[0]))) return false;
+  return mensajes.slice(1).every((m) => AFIRMA.test(limpio(m)) || (!/\bpero\b/.test(limpio(m)) && !esPreguntaQueNoElige(m.content ?? "")));
+}
+
+/**
+ * DOS NOMBRADOS: GANA EL DE NOMBRE COMPLETO (06/11/2026, su 359 en la copia, 2 de 6). La IA describió las Premium como «un
+ * pack adicional… a S/. 5»: «pack» es palabra del PACK PLANTILLA COMPLETO, y completar el PACK también cuesta 5 → salían
+ * los dos, no se sabía cuál y su «si» se lo llevaba el regalo. El nombre entero de un producto (de su configuración) escrito
+ * en el turno del bot desempata; si no desempata, lo de antes.
+ */
+function porNombreCompleto<T extends { nombre: string }>(nombrados: T[], texto: string): T[] {
+  if (nombrados.length < 2) return nombrados;
+  const plano = (s: string) => sinTildes(s).replace(/[^a-zñ0-9]+/g, " ").trim();
+  const t = ` ${plano(texto)} `;
+  const enteros = nombrados.filter((o) => plano(o.nombre) && t.includes(` ${plano(o.nombre)} `));
+  return enteros.length === 1 ? enteros : nombrados;
+}
+
 /** La pregunta del bot que invita a comprar («¿te indico cómo adquirirlo?», «¿te lo preparo?»…). */
 /**
  * UNA PREGUNTA NO ELIGE, TAMPOCO POR LA IA (29/10/2026, su conversación 129). Con «¿Cuál eliges? 1️⃣… 2️⃣…» en
@@ -2699,9 +2733,8 @@ function palabrasDeLoComprado(convo: ConversationRow): Set<string> {
 function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string): LoQuePuedeComprar | null {
   const opciones = loQuePuedeComprar(convo, t, pais);
   if (opciones.length === 0) return null;
-  const recientes = ultimosMensajes(convo.id, 10);
-  const ultimoDelCliente = recientes.map((m) => m.role).lastIndexOf("user");
-  const antes = recientes.slice(0, ultimoDelCliente < 0 ? recientes.length : ultimoDelCliente);
+  // Antes del PRIMER mensaje de su bloque (su conv 359). Ver `bloqueDelCliente`.
+  const antes = bloqueDelCliente(ultimosMensajes(convo.id, 10)).antes;
   const turno: string[] = [];
   const corte = inicioDelTurnoEnElRegalo(convo, t);
   for (let i = antes.length - 1; i >= 0 && antes[i].role !== "user" && antes[i].created_at >= corte; i--) turno.unshift(antes[i].content ?? "");
@@ -2723,10 +2756,11 @@ function loQueAcabaDeProponer(convo: ConversationRow, t: Tablero, pais: string):
     // (Sin precio: si su pregunta invita a comprar y nombra UNO solo — la misma regla de `comprarDespuesDeComprar`.)
     const pregunta = sinTildes(turno.filter((b) => b.includes("?")).pop() ?? "");
     if (nombrados.length === 0 && INVITA_A_COMPRAR.test(pregunta)) {
-      const soloNombrados = opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w)));
+      const soloNombrados = porNombreCompleto(opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w))), todo);
       if (soloNombrados.length === 1) nombrados = soloNombrados;
     }
   }
+  nombrados = porNombreCompleto(nombrados, turno.join("\n"));
   return nombrados.length === 1 ? nombrados[0] : null;
 }
 
@@ -2798,8 +2832,9 @@ async function comprarDespuesDeComprar(
   // último turno del bot (todas sus burbujas) nombra UNO de lo que puede comprar y termina preguntando,
   // el «sí» es para ése: su cobro, con los datos de frente si ya tiene método.
   const recientes = ultimosMensajes(convo.id, 10);
-  const ultimoDelCliente = recientes.map((m) => m.role).lastIndexOf("user");
-  const antesDeSuMensaje = recientes.slice(0, ultimoDelCliente < 0 ? recientes.length : ultimoDelCliente);
+  // Antes del PRIMER mensaje de su bloque, no del último (su conv 359: «si» + «dime como»). Ver `bloqueDelCliente`.
+  const bloque = bloqueDelCliente(recientes);
+  const antesDeSuMensaje = bloque.antes;
   const turno: string[] = [];
   const corte = inicioDelTurnoEnElRegalo(convo, t);
   for (let i = antesDeSuMensaje.length - 1; i >= 0 && antesDeSuMensaje[i].role !== "user" && antesDeSuMensaje[i].created_at >= corte; i--)
@@ -2829,7 +2864,7 @@ async function comprarDespuesDeComprar(
       return true;
     }
   }
-  const afirma = AFIRMA.test(normal.trim());
+  const afirma = AFIRMA.test(normal.trim()) || elBloqueAfirma(bloque.mensajes);
   let siALoOfrecido = false;
   // (La pregunta puede no estar al final: «¿Lo agregas? Escríbeme «si» o «no» 😊» — D2 en la copia.)
   // (En cualquier burbuja de su turno: tras la oferta puede venir otra sin pregunta, como «Elige una opción:».)
@@ -2854,7 +2889,7 @@ async function comprarDespuesDeComprar(
       // UNO solo de lo que puede comprar, ése.
       const pregunta = sinTildes(turno.filter((b) => b.includes("?")).pop() ?? "");
       if (nombrados.length === 0 && INVITA_A_COMPRAR.test(pregunta)) {
-        const soloNombrados = opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w)));
+        const soloNombrados = porNombreCompleto(opciones.filter((o, i) => unicas[i].some((w) => palabras(todo).has(w))), todo);
         if (soloNombrados.length === 1) nombrados = soloNombrados;
       }
       // SIN NOMBRE, CON SU PRECIO (31/10/2026, su conversación 157): en el regalo la IA cerró «te paso la información
@@ -2867,6 +2902,7 @@ async function comprarDespuesDeComprar(
         if (porPrecio.length === 1) nombrados = porPrecio;
       }
     }
+    nombrados = porNombreCompleto(nombrados, turnoDelBot);
     // LO QUE EL BOT ACABA DE PEDIR OFRECER EN EL REGALO (03/11/2026, R262): ése, aunque su texto nombre «regalo».
     if (nombrados.length === 0 && enElRegalo) {
       const apuntado = propuestaApuntada(convo, t, pais);
@@ -2890,8 +2926,18 @@ async function comprarDespuesDeComprar(
   const esPregunta = /\?|¿/.test(contenido) || /^(que|cual|cuanto|como|donde|cuando|por que|tiene|trae|incluye)\b/.test(normal.trim());
   const completar = /\b(completar|completo|la diferencia|el resto|lo que falta|pasarme al|cambiarme al)\b/.test(normal);
   // En el regalo, «sí quiero» / «lo quiero» es aceptar el REGALO: ahí solo cuenta pagar o comprar dicho.
+  // «SÍ» + EL NOMBRE DE UNO (06/11/2026, la batería de su 354: «si las premium» a «¿agregas las Premium o prefieres solo
+  // el regalo?» → la IA preguntaba «¿deseas adquirirlas?» otra vez). Empieza aceptando, nombra UNO solo de lo que puede
+  // comprar y el bot le acababa de preguntar: es comprar ése. Con «pero» no (la misma regla de los reclamos).
+  const limpio = normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim();
+  const siConSuNombre =
+    /^(si+|sip|claro|dale|ok|okey|okay|oki|de una|por supuesto|perfecto)\b/.test(limpio) &&
+    !/\bpero\b/.test(limpio) &&
+    acertadas.length === 1 &&
+    turno.some((b) => b.includes("?"));
   const quiereComprar =
     siALoOfrecido ||
+    siConSuNombre ||
     (!esPregunta &&
     ((enElRegalo ? /\b(pagar|pago|comprar|adquirir|depositar|transferir|yapear)\b/.test(normal) : QUIERE_PAGAR.test(normal)) ||
       completar ||
@@ -2918,6 +2964,16 @@ async function comprarDespuesDeComprar(
       return true;
     }
     if (upgrades.length === 1) elegida = upgrades[0];
+  }
+  // QUIERE PAGAR Y EL BOT ACABA DE HABLARLE DE UNO SOLO (06/11/2026, su 359 en la copia: la IA le contó de las Premium
+  // —nombrando también el regalo, que es gratis— y «si quiero» + «como pago» preguntaba «¿a cuál te refieres?» entre las
+  // Premium y completar el PACK, que nadie le había ofrecido). Sin completar, el que nombró el último turno del bot.
+  if (!elegida && !completar && !respondeAMiPregunta && quiereComprar && turnoDelBot) {
+    const enElTurno = opciones.filter((o, i) => !o.upgrade && unicas[i].some((w) => palabras(turnoDelBot).has(w)));
+    if (enElTurno.length === 1) {
+      elegida = enElTurno[0];
+      console.log(`[tablero] convo ${convo.id}: quiere pagar y el bot acaba de hablarle de «${elegida.nombre}» → ése`);
+    }
   }
   // Contesta a «¿a cuál te refieres?» con otras palabras («el último que me enseñaste»): decide la IA.
   if (!elegida && respondeAMiPregunta) {
@@ -3824,7 +3880,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       contenido.trim() &&
       !contenido.startsWith("bubble:") &&
       !hayComprobantePendiente(convo.id, estado.comprobante_leido) &&
-      AFIRMA.test(sinTildes(contenido).replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim())
+      (AFIRMA.test(sinTildes(contenido).replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim()) ||
+        elBloqueAfirma(bloqueDelCliente(ultimosMensajes(convo.id, 10)).mensajes))
     ) {
       const propuesto = loQueAcabaDeProponer(convo, t, pais) ?? propuestaApuntada(convo, t, pais);
       if (propuesto) {
@@ -3851,7 +3908,20 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (t && !estado.cobro_ficha_id && contenido.trim() && !contenido.startsWith("bubble:") && !hayComprobantePendiente(convo.id, estado.comprobante_leido)) {
       if (await comprarDespuesDeComprar(convo, t, contenido, pais, true)) return true;
     }
+    // LO ÚLTIMO QUE SE LE OFRECIÓ ES UN PRODUCTO, NO EL REGALO (06/11/2026, su 359 en la copia: la IA le habló de las
+    // Premium y cerró «¿te gustaría agregarlo?»; «si» + «pero que trae» a veces se lo llevaba el regalo, a cara o cruz de
+    // la IA de abajo). Si el último turno del bot propuso UN producto y el cliente no nombra el regalo, habla de ése: lo
+    // contesta la IA del tablero, sin pasar por la pregunta del regalo.
+    const hablaDeLoPropuesto =
+      !!t &&
+      !!contenido.trim() &&
+      !contenido.startsWith("bubble:") &&
+      !hayComprobantePendiente(convo.id, estado.comprobante_leido) &&
+      !/\b(regal\w*|gratis|obsequio)\b/.test(sinTildes(contenido)) &&
+      !!loQueAcabaDeProponer(convo, t, pais);
+    if (hablaDeLoPropuesto) console.log(`[tablero] convo ${convo.id}: en el regalo, el bot acababa de ofrecer un producto → habla de ése, no del regalo`);
     const delRegalo =
+      !hablaDeLoPropuesto && (
       !t ||
       !contenido.trim() ||
       contenido.startsWith("bubble:") ||
@@ -3867,7 +3937,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
           etiqueta:
             "Habla CLARAMENTE de OTRA cosa: nombra un producto que se le ofreció o que compró, completar o pagar la diferencia, recibirlo por correo, que no le llegó algo",
         },
-      ])) !== "otra";
+      ])) !== "otra");
     // Del regalo y lo acepta con sus palabras («ya pues mándamelo»): lo acepta aquí; el motor de siempre lo leía
     // como «no me llegó» y le reenviaba lo comprado (01/11/2026).
     if (delRegalo && t && !hayComprobantePendiente(convo.id, estado.comprobante_leido) && (await aceptaElRegalo(convo, contenido))) return true;
