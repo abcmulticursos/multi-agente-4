@@ -276,6 +276,19 @@ whatsapp:
         - type: text
           body_variants:
             - |-
+              ❌*(antes)* ~precio original $ 15 Dólares~
+              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
               🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
 
               📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
