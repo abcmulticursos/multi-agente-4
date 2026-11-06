@@ -226,7 +226,14 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ¡Hola! Rubén aquí, tu asesor de la página Impulso 360 Digital 👋 hoy te presento ARTEFIGURA 🎨✨.
+              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  🙋‍♀️✨.
+
+              ¿Quieres alejar a tus peques de la pantalla? Quieres que salga de la rutina
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
+              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  🙋‍♀️✨.
 
               🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️
           delay_after_sec: 4
