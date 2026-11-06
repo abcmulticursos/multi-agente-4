@@ -4045,8 +4045,12 @@ async function generateReplyConSuFila(
         usage.prompt_tokens_details?.cached_tokens ??
         0;
       const pct = promptTk > 0 ? Math.round((cached / promptTk) * 100) : 0;
+      // Con el número de la conversación (06/11/2026): sin él, la línea no salía en su texto descargable. Y el caché
+      // dicho en palabras, como en el tablero («pon en los logs cuando cachea y cuánto»).
       console.log(
-        `[llm:usage] model=${model} modo=${compactReceiptPrompt ? "comprobante_liviano" : "normal"} prompt=${promptTk} (cacheado=${cached}/${pct}%) salida=${usage.completion_tokens ?? 0} total=${usage.total_tokens ?? 0}`
+        `[llm:usage] convo ${ctx.conversationId ?? "?"}: model=${model} modo=${compactReceiptPrompt ? "comprobante_liviano" : "normal"} prompt=${promptTk} (cacheado=${cached}/${pct}%) salida=${usage.completion_tokens ?? 0} total=${usage.total_tokens ?? 0} · ${
+          !promptTk ? "💰 caché: sin datos" : cached ? `💰 cacheó ${pct}% (${cached} de ${promptTk} salieron baratas)` : `💰 sin caché (pagó completas las ${promptTk})`
+        }`
       );
     }
     const message = completion.choices[0]?.message;

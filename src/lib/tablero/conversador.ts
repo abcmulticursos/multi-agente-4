@@ -624,6 +624,13 @@ const HERRAMIENTA_DE_CORREO = {
  */
 const SIN_PENSAR_DE_MAS = { reasoning: { enabled: false } } as object;
 
+/** EL CACHÉ, EN SUS PALABRAS (06/11/2026, él: «pon en los logs cuando cachea y cuánto»). Solo el registro. */
+function frasedelCache(cacheados: number, entrada: number): string {
+  if (!entrada) return "💰 caché: sin datos";
+  if (!cacheados) return `💰 sin caché (pagó completas las ${entrada})`;
+  return `💰 cacheó ${Math.round((cacheados / entrada) * 100)}% (${cacheados} de ${entrada} salieron baratas)`;
+}
+
 const HERRAMIENTA_DE_COMPLETAR = {
   type: "function" as const,
   function: {
@@ -715,7 +722,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       const quien = (r as { provider?: string }).provider ?? "?";
       const pensadas = (r.usage as { completion_tokens_details?: { reasoning_tokens?: number } }).completion_tokens_details?.reasoning_tokens ?? 0;
       console.log(
-        `[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens} (pensadas ${pensadas}) · ${quien}`
+        `[tablero:ia:tokens] convo ${convo.id}: entrada ${r.usage.prompt_tokens} (cacheados ${cacheados}) · salida ${r.usage.completion_tokens} (pensadas ${pensadas}) · ${quien} · ${frasedelCache(cacheados, r.usage.prompt_tokens)}`
       );
     }
       const pidio = (nombre: string) =>
