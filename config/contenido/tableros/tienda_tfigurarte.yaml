@@ -643,8 +643,8 @@ whatsapp:
       titulo: Pasa a un asesor
     - id: f-mw4wyf34-4mlta
       tipo: mensaje
-      x: 1562
-      y: 143
+      x: 1650
+      y: 132
       titulo: Dijo que sí
       steps:
         - type: text
