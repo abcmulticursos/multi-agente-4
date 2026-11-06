@@ -289,6 +289,15 @@ whatsapp:
         - type: text
           body_variants:
             - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
               🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
 
               📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
@@ -302,6 +311,7 @@ whatsapp:
               label: SÍ
               action: send_steps
               steps: []
+          enabled: false
       presenta:
         - ptfig_figurarte
       instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
