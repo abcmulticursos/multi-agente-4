@@ -17706,6 +17706,26 @@ export default function EditorPage() {
         </div>
       )}
       {showPizarra && cfg && (
+        // CANCELAR / ✓ LISTO TAMBIÉN EN LA PIZARRA Y EL TABLERO (06/11/2026). Él: «en los pop ups de
+        // productos no existe los botones de Listo/Cancelar, solo dice Cerrar». Las ventanas de producto
+        // miran este contexto para saber si se tocó algo y para deshacerlo; la pizarra estaba fuera de él,
+        // así que solo enseñaban «Cerrar». Es el mismo de los menús; aquí el verde dice «✓ Listo».
+        <GuardadoDelEditor.Provider
+          value={{
+            sucio: isDirty,
+            guardando: saving,
+            guardar: save,
+            huella: huellaDelBorrador,
+            restaurar: (huella) => {
+              try {
+                setCfg(JSON.parse(huella) as FullConfig);
+              } catch {
+                /* Una huella ilegible no puede tirar la pantalla. */
+              }
+            },
+            textoDeListo: "✓ Listo",
+          }}
+        >
         <VistaPizarra
           cfg={cfg}
           onClose={() => setShowPizarra(false)}
@@ -17770,6 +17790,7 @@ export default function EditorPage() {
             setShowJourneyPreview(true);
           }}
         />
+        </GuardadoDelEditor.Provider>
       )}
       {pendingImport && (
         <div
@@ -30116,7 +30137,7 @@ function VistaPizarra({
         />
       )}
       {ventanaDeHerramienta === "productos" && (
-        <VentanaFlotante titulo="📦 Productos y precios" detalle="Busca un producto y ábrelo: precio por país, entrega y contenido. Ctrl+Z deshace." onCerrar={() => setVentanaDeHerramienta(null)}>
+        <VentanaDeProductosYPrecios onCerrar={() => setVentanaDeHerramienta(null)}>
           <BibliotecaDeProductos
             cfg={cfg}
             productos={cfg.biblioteca_de_productos ?? []}
@@ -30139,7 +30160,7 @@ function VistaPizarra({
             onMarcarPunto={() => herramientas?.marcarPunto()}
             onCancelarVentana={() => herramientas?.volverAlPunto()}
           />
-        </VentanaFlotante>
+        </VentanaDeProductosYPrecios>
       )}
       {ventanaDeHerramienta === "anuncios" && completo && (
         <VentanaFlotante
@@ -32230,7 +32251,7 @@ function PantallaDelTableroCargada({
         />
       )}
       {ventanaDeHerramienta === "productos" && (
-        <VentanaFlotante titulo="📦 Productos y precios" detalle="Busca un producto y ábrelo: precio por país, entrega y contenido. Ctrl+Z deshace." onCerrar={() => setVentanaDeHerramienta(null)}>
+        <VentanaDeProductosYPrecios onCerrar={() => setVentanaDeHerramienta(null)}>
           <BibliotecaDeProductos
             cfg={cfg}
             productos={cfg.biblioteca_de_productos ?? []}
@@ -32252,7 +32273,7 @@ function PantallaDelTableroCargada({
             onCancelarVentana={() => {}}
             deLaTienda={tienda ? { nombre: tienda.nombre?.trim() || "esta tienda", ids: enEsteTablero } : undefined}
           />
-        </VentanaFlotante>
+        </VentanaDeProductosYPrecios>
       )}
       {/* LOS DATOS DE PAGO POR PAÍS (24/10/2026): la MISMA ventana de «Precios y pagos» de los menús,
           aquí sin salir del tablero. Son los textos que el cobro manda al elegir cada método. */}
@@ -48639,6 +48660,8 @@ const GuardadoDelEditor = createContext<{
    *  quedaba en el borrador — así que al guardar más tarde subía igual, que es
    *  lo contrario de lo que significa cancelar. */
   restaurar: (huella: string) => void;
+  /** El texto del botón verde. Sin esto, «Guardar» (los menús); en la pizarra, «✓ Listo». Hace lo mismo: deja lo escrito y cierra. */
+  textoDeListo?: string;
 } | null>(null);
 
 /**
@@ -48891,9 +48914,34 @@ function BotonesDeLaVentana({
         }
         className="bn-listo rounded-md bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500"
       >
-        {guardando ? "Guardando…" : "Guardar"}
+        {guardando ? "Guardando…" : guardado?.textoDeListo ?? "Guardar"}
       </button>
     </>
+  );
+}
+
+/**
+ * «📦 PRODUCTOS Y PRECIOS» CON CANCELAR / ✓ LISTO (06/11/2026), como los Seguimientos. Él: «no puedo manejar
+ * el botón "cerrar" como el botón "listo"». Se queda con la huella del borrador al abrir: Cancelar (y Escape)
+ * la devuelve si se tocó algo; ✓ Listo deja lo hecho. Ninguno sube nada: eso sigue siendo Guardar o Ctrl+S.
+ */
+function VentanaDeProductosYPrecios({ onCerrar, children }: { onCerrar: () => void; children: ReactNode }) {
+  const guardado = useContext(GuardadoDelEditor);
+  const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
+  const cancelar = () => {
+    if (guardado && huellaAlAbrir && guardado.sucio && guardado.huella !== huellaAlAbrir) guardado.restaurar(huellaAlAbrir);
+    onCerrar();
+  };
+  return (
+    <VentanaFlotante
+      titulo="📦 Productos y precios"
+      detalle="Busca un producto y ábrelo: precio por país, entrega y contenido. Ctrl+Z deshace."
+      onCerrar={cancelar}
+      onListo={onCerrar}
+      onCancelar={cancelar}
+    >
+      {children}
+    </VentanaFlotante>
   );
 }
 
