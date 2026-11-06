@@ -8295,8 +8295,8 @@ biblioteca_de_productos:
     market_price: 0
     precios_por_pais:
       PE:
-        price_soles: 15
-        discount_price_soles: 15
+        price_soles: 10
+        discount_price_soles: 8
         market_price: 45
       EC:
         price_soles: 3
@@ -8386,8 +8386,8 @@ biblioteca_de_productos:
     market_price: 0
     precios_por_pais:
       PE:
-        price_soles: 20
-        discount_price_soles: 15
+        price_soles: 15
+        discount_price_soles: 12
         market_price: 60
       EC:
         price_soles: 4
