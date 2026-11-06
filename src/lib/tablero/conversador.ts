@@ -700,7 +700,11 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         // las tres cachean; Cloudflare 1,7–2,7 s y sin errores, Relace 2,0 s con 1 error, GMICloud una de
         // 90 s. Cloudflare primero; si falla, las demás en ese orden (no se queda mudo). Es un campo del
         // pedido, no un cambio de la conexión.
-        ...({ provider: { order: ["cloudflare", "relace", "gmicloud"], allow_fallbacks: true } } as object),
+        // GMICLOUD PRIMERO (06/11/2026): Cloudflare ya no atendía y todo caía en Relace, que cacheaba 0–3% (sus logs
+        // del 05/11 y la copia: 12 respuestas, 3%). Medido en la copia, 4 clientes × 3 turnos: sin orden fijo 39%
+        // (saltaba entre empresas); GMICloud primero 79%, 11 de 12 entre 82 y 90%, todas por debajo de 20 s. El
+        // corte de 60 s de la IA (limites.ts) y las otras dos detrás siguen cuidando que no se quede mudo.
+        ...({ provider: { order: ["gmicloud", "relace", "cloudflare"], allow_fallbacks: true } } as object),
         ...SIN_PENSAR_DE_MAS,
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
