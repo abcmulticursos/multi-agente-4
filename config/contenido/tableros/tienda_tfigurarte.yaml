@@ -652,8 +652,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
-      x: 924
-      y: -110
+      x: 935
+      y: -121
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
