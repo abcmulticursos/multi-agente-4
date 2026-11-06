@@ -1951,7 +1951,10 @@ export default function LienzoDelTablero({
   onGuardarPlantilla,
   enfocar,
   canal,
+  claveDeLaVista,
 }: {
+  /** De quién es esta vista (tienda o workflow + canal): con ella, la vista del momento de guardar vuelve al regresar. */
+  claveDeLaVista?: string;
   /** El canal de este tablero, para su logo en las estaciones y el Inicio. Sin él (workflow), no se pone. */
   canal?: "whatsapp" | "messenger" | "instagram";
   /** Llevar la vista a estas fichas (las recién traídas de una plantilla). Cambia `vez` para repetirlo. */
@@ -1997,6 +2000,32 @@ export default function LienzoDelTablero({
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
   const [menuMas, setMenuMas] = useState(false);
+  // LA VISTA DE CUANDO GUARDÓ (06/11/2026). Él: «el "guardar" también guarda la zona visible donde me quedé…
+  // si no guardé no debería quedar». Al guardar (el editor avisa con «contenido-guardado») se apunta el zoom y
+  // la posición de ESTE tablero; al volver a entrar se abre ahí. Moverse sin guardar no cambia lo apuntado.
+  // Solo pantalla y solo en este navegador (no va al contenido ni al bot). Sin nada apuntado, encuadra como antes.
+  const vistaGuardada = useMemo(() => {
+    if (!claveDeLaVista) return undefined;
+    try {
+      const v = JSON.parse(window.localStorage.getItem(`tablero-mirada:${claveDeLaVista}`) ?? "null") as { x: number; y: number; zoom: number } | null;
+      return v && [v.x, v.y, v.zoom].every((n) => Number.isFinite(n)) && v.zoom > 0 ? v : undefined;
+    } catch {
+      return undefined;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!claveDeLaVista) return;
+    const alGuardar = () => {
+      const v = instancia.current?.getViewport();
+      if (!v || ![v.x, v.y, v.zoom].every((n) => Number.isFinite(n))) return;
+      try {
+        window.localStorage.setItem(`tablero-mirada:${claveDeLaVista}`, JSON.stringify({ x: v.x, y: v.y, zoom: v.zoom }));
+      } catch {}
+    };
+    window.addEventListener("contenido-guardado", alGuardar);
+    return () => window.removeEventListener("contenido-guardado", alGuardar);
+  }, [claveDeLaVista]);
   // LA VISTA VA A LO RECIÉN TRAÍDO (una plantilla llega a la derecha de lo suyo, 01/11/2026).
   useEffect(() => {
     if (!enfocar?.ids.length) return;
@@ -2455,6 +2484,43 @@ export default function LienzoDelTablero({
 
   const elegidas = () => nodos.filter((n) => n.selected && (n.type === "ficha" || n.type === "inicio")).map((n) => n.id);
 
+  // COPIAR Y PEGAR, los mismos para Ctrl+C / Ctrl+V y para el clic derecho (06/11/2026: «que las fichas, a la hora
+  // de darle click derecho, también tengan la opción de copiar»).
+  const copiarLas = (ids: Set<string>) => {
+    if (ids.size === 0) return false;
+    const actual = vivo.current;
+    portapapeles = {
+      fichas: JSON.parse(JSON.stringify(actual.fichas.filter((f) => ids.has(f.id)))),
+      cables: actual.cables.filter((c) => ids.has(c.de) && ids.has(c.a)),
+    };
+    setAviso(`${ids.size} ficha(s) copiada(s). Ctrl+V, o clic derecho en un espacio vacío → «📋 Pegar aquí».`);
+    return true;
+  };
+  /** Sin `donde`, a la derecha de todo (Ctrl+V, como siempre); con `donde`, donde se hizo el clic derecho. */
+  const pegarLoCopiado = (donde?: Punto) => {
+    if (!portapapeles) return false;
+    const actual = vivo.current;
+    const minX = Math.min(...portapapeles.fichas.map((f) => f.x));
+    const minY = Math.min(...portapapeles.fichas.map((f) => f.y));
+    // A LA DERECHA DE TODO, SIN CAER ENCIMA (25/10/2026): «se están superponiendo sobre elementos
+    // existentes, debería estar fuera del área, a la derecha… que mantenga su estructura y
+    // cableado». La copia conserva su forma (cada ficha en su sitio relativo) y sus cables de dentro.
+    const enElLienzo = actual.fichas.filter((f) => !f.guardada);
+    const derecha = donde ? donde.x : enElLienzo.length ? Math.max(...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250))) + 200 : centroDeLaVista().x;
+    const arriba = donde ? donde.y : enElLienzo.length ? Math.min(...enElLienzo.map((f) => f.y)) : centroDeLaVista().y;
+    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, { x: derecha - minX, y: arriba - minY });
+    cambiar({ ...actual, fichas: [...actual.fichas, ...copia.fichas], cables: [...actual.cables, ...copia.cables] });
+    setAviso(`${copia.fichas.length} ficha(s) pegada(s)${donde ? "" : " a la derecha"}, con su forma y sus cables de dentro. Quedan sin conectar.`);
+    // La vista va hasta ellas.
+    const ids = copia.fichas.map((f) => ({ id: f.id }));
+    if (!donde) window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
+    // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
+    // sale el grupo pegado entero, listo para moverlo junto.
+    const pegadas = new Set(copia.fichas.map((f) => f.id));
+    window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: pegadas.has(n.id) }))), 120);
+    return true;
+  };
+
   // COPIAR, PEGAR Y BORRAR CON EL TECLADO, como en la pizarra.
   useEffect(() => {
     const alTeclear = (e: KeyboardEvent) => {
@@ -2478,34 +2544,10 @@ export default function LienzoDelTablero({
       }
       if ((e.ctrlKey || e.metaKey) && tecla === "c") {
         // Un 🪞 espejo elegido copia su ficha (la copia es una ficha nueva, sin espejos).
-        const ids = new Set(elegidas().map(fichaDelNodo));
-        if (ids.size === 0) return;
-        portapapeles = {
-          fichas: JSON.parse(JSON.stringify(actual.fichas.filter((f) => ids.has(f.id)))),
-          cables: actual.cables.filter((c) => ids.has(c.de) && ids.has(c.a)),
-        };
-        setAviso(`${ids.size} ficha(s) copiada(s). Ctrl+V para pegar.`);
+        if (!copiarLas(new Set(elegidas().map(fichaDelNodo)))) return;
         e.preventDefault();
       } else if ((e.ctrlKey || e.metaKey) && tecla === "v") {
-        if (!portapapeles) return;
-        const minX = Math.min(...portapapeles.fichas.map((f) => f.x));
-        const minY = Math.min(...portapapeles.fichas.map((f) => f.y));
-        // A LA DERECHA DE TODO, SIN CAER ENCIMA (25/10/2026): «se están superponiendo sobre elementos
-        // existentes, debería estar fuera del área, a la derecha… que mantenga su estructura y
-        // cableado». La copia conserva su forma (cada ficha en su sitio relativo) y sus cables de dentro.
-        const enElLienzo = actual.fichas.filter((f) => !f.guardada);
-        const derecha = enElLienzo.length ? Math.max(...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250))) + 200 : centroDeLaVista().x;
-        const arriba = enElLienzo.length ? Math.min(...enElLienzo.map((f) => f.y)) : centroDeLaVista().y;
-        const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, { x: derecha - minX, y: arriba - minY });
-        cambiar({ ...actual, fichas: [...actual.fichas, ...copia.fichas], cables: [...actual.cables, ...copia.cables] });
-        setAviso(`${copia.fichas.length} ficha(s) pegada(s) a la derecha, con su forma y sus cables de dentro. Quedan sin conectar.`);
-        // La vista va hasta ellas.
-        const ids = copia.fichas.map((f) => ({ id: f.id }));
-        window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
-        // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
-        // sale el grupo pegado entero, listo para moverlo junto.
-        const pegadas = new Set(copia.fichas.map((f) => f.id));
-        window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: pegadas.has(n.id) }))), 120);
+        if (!pegarLoCopiado()) return;
         e.preventDefault();
       } else if (tecla === "delete" || tecla === "backspace") {
         if (cajaElegida) {
@@ -2750,7 +2792,8 @@ export default function LienzoDelTablero({
           selectionKeyCode="Shift"
           multiSelectionKeyCode={["Shift", "Control", "Meta"]}
           selectionMode={SelectionMode.Full}
-          fitView
+          {...(vistaGuardada ? { defaultViewport: vistaGuardada } : {})}
+          fitView={!vistaGuardada}
           fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
           minZoom={0.1}
           // MÁS ACERCAMIENTO CON LA RUEDITA (28/10/2026: «mira el tamaño que ofrece Sendy»): hasta 4×.
@@ -2999,6 +3042,20 @@ export default function LienzoDelTablero({
           >
             {menu.m.tipo === "crear" && (
               <>
+                {/* 📋 PEGAR AQUÍ (06/11/2026): lo copiado (de esta tienda o de otra), donde se hizo el clic derecho. */}
+                {!menu.m.desde && portapapeles && (
+                  <button
+                    type="button"
+                    className={`${opcionDeMenu} border-b border-slate-200 font-semibold`}
+                    onClick={() => {
+                      const m = menu.m as Extract<Menu, { tipo: "crear" }>;
+                      pegarLoCopiado(m.donde);
+                      setMenu(null);
+                    }}
+                  >
+                    📋 Pegar aquí ({portapapeles.fichas.length} ficha{portapapeles.fichas.length === 1 ? "" : "s"})
+                  </button>
+                )}
                 <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
                   {menu.m.desde ? "Crear conectada" : "Crear aquí"}
                 </div>
@@ -3074,6 +3131,17 @@ export default function LienzoDelTablero({
                 <button type="button" className={opcionDeMenu} onClick={() => (onAjustes(fichaDelMenu.id), setMenu(null))}>
                   ⚙ Ajustes de la ficha
                 </button>
+                {/* 📋 COPIAR (06/11/2026), lo mismo que Ctrl+C: si esta ficha está entre las elegidas, copia todas las
+                    elegidas; si no, solo ésta. Se pega con Ctrl+V o con «📋 Pegar aquí» en un espacio vacío. */}
+                {(() => {
+                  const delGrupo = new Set(elegidas().map(fichaDelNodo));
+                  const ids = delGrupo.has(fichaDelMenu.id) && delGrupo.size > 1 ? delGrupo : new Set([fichaDelMenu.id]);
+                  return (
+                    <button type="button" className={opcionDeMenu} onClick={() => (copiarLas(ids), setMenu(null))}>
+                      📋 {ids.size > 1 ? `Copiar las ${ids.size} fichas elegidas` : "Copiar"}
+                    </button>
+                  );
+                })()}
                 {fichaDelMenu.tipo !== "inicio" && (
                   <>
                     <button

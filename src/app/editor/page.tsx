@@ -32068,6 +32068,7 @@ function PantallaDelTableroCargada({
       <div className="min-h-0 flex-1 overflow-hidden">
         <LienzoDelTablero
           key={`${clave}|${canal}`}
+          claveDeLaVista={`${clave}|${canal}`}
           canal={esWorkflow ? undefined : canal}
           tablero={tablero}
           resumenDe={resumenDe}
