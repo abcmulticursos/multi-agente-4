@@ -214,13 +214,13 @@ whatsapp:
     - id: fig_inicio
       tipo: inicio
       x: -264
-      y: 0
+      y: 44
       titulo: Venta por contribución
       pais: PE
     - id: fig_presenta
       tipo: mensaje
-      x: 583
-      y: -33
+      x: 572
+      y: -11
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
