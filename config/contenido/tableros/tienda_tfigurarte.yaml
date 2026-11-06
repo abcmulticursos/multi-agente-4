@@ -652,8 +652,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
-      x: 1947
-      y: -253
+      x: 924
+      y: -110
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -675,9 +675,9 @@ whatsapp:
                       📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
 
                       🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
-                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
 
-                      💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
+                      💰 EL COSTO DE TODO EL MATERIAL DESCARGABLE ES DE TAN SOLO  *{{precio_base}}*
                   delay_after_sec: 6
                 - type: video
                   drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
@@ -899,10 +899,15 @@ whatsapp:
       de: fig_presenta
       salida: dec:f58ceb41-2160-4547-b696-c6f4237df286
       a: f-mw4xdzzq-jx245
-    - id: c-mw4xhqkd-770
+    - id: c-mw4xjusl-vwc
+      de: fig_presenta
+      salida: siguiente
+      a: f-mw4xhgdb-dozb0
+    - id: c-mw4xjz6u-xeo
       de: f-mw4xdzzq-jx245
       salida: sin_pago
       a: f-mw4xhgdb-dozb0
+      a_espejo: e-mw4xjp2d-zjbz
   cajas:
     - id: manta-fig_inicio
       x: 20
@@ -918,3 +923,8 @@ whatsapp:
       alto: 620
       titulo: ""
       inicio: fig_otros
+  espejos:
+    - id: e-mw4xjp2d-zjbz
+      ficha: f-mw4xhgdb-dozb0
+      x: 1892
+      y: -231
