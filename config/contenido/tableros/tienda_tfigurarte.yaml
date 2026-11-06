@@ -651,6 +651,26 @@ whatsapp:
           body_variants:
             - ¡Perfecto! 😊 Te enviaré parte del material para que puedas revisarlos y comprobar la calidad del contenido. ✨
           delay_after_sec: 3
+    - id: f-mw4xdzzq-jx245
+      tipo: cobro
+      x: 1683
+      y: 110
+      steps:
+        - type: text
+          body_variants:
+            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
   cables:
     - id: figc1
       de: fig_inicio
@@ -704,6 +724,22 @@ whatsapp:
       de: fig_otros_msg
       salida: siguiente
       a: fig_otros_humano
+    - id: c-mw4xecum-dlm
+      de: fig_presenta
+      salida: dec:91b940a0-f105-4f78-846f-6382307dd10c
+      a: f-mw4xdzzq-jx245
+    - id: c-mw4xel3a-q6t
+      de: fig_presenta
+      salida: dec:9ebb45f0-be41-4c2e-95f3-dcc85591dc34
+      a: f-mw4xdzzq-jx245
+    - id: c-mw4xem0t-29y
+      de: fig_presenta
+      salida: dec:572f521c-bf5f-4c6c-bf9a-654528001d62
+      a: f-mw4xdzzq-jx245
+    - id: c-mw4xenx1-gkw
+      de: fig_presenta
+      salida: dec:f58ceb41-2160-4547-b696-c6f4237df286
+      a: f-mw4xdzzq-jx245
   cajas:
     - id: manta-fig_inicio
       x: 20
