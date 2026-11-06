@@ -228,41 +228,44 @@ whatsapp:
             - |-
               *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  🙋‍♀️✨.
 
-              ¿Quieres alejar a tus peques de la pantalla? Quieres que salga de la rutina
+              📱 *¿Te preocupa que tu peque pase demasiado tiempo frente al celular o la tablet? *
+
+              😟 ¿Te gustaría que aproveche mejor su tiempo, estimule su creatividad y se divierta aprendiendo, en lugar de estar siempre frente a una pantalla?
+
+              💡 ¡Quiero presentarte algo que le gustará! ❤️
           delay_after_sec: 4
         - type: text
           body_variants:
             - |-
-              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  🙋‍♀️✨.
+              🎨✨ *¡TE PRESENTO EL LIBRO PARA COLOREAR FIGURARTE!:* 📚️🔺🟢✨
 
-              🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - |-
-              🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
+              *Una nueva forma de colorear* donde las *figuras geométricas* se convierten en increíbles animales y personajes. 🐯🎨📚
 
-              Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
+              *¡Este bonito Material Incluye lo siguiente* 😊👇️
 
-              ¡Incluye todo lo siguiente
-
-              🐯 Más de 80 animales para descubrir y colorear.
-              🦸 Más de 30 personajes formados por figuras geométricas.
+              🐯 *Más de 80 animales* para descubrir y colorear.
+              🦸 *Más de 30 personajes* formados por figuras geométricas.
               🔵 Círculos, cuadrados, triángulos y rectángulos.
               🎨 Una forma diferente de colorear, ¡sin utilizar números!
-              🟨 Figuras que se transforman en increíbles dibujos.
+
+              🟨 *Figuras* que se transforman en increíbles dibujos.
               🧠 Actividades que estimulan la creatividad y la atención.
-              ✏️ Una experiencia divertida para aprender mientras coloreas.
+              ✏️ *Una experiencia divertida para aprender mientras colorea.*
               🌈 Diseños originales para dar vida con tus colores.
           delay_after_sec: 4
         - type: image
-          drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1RfjTBRsQX8YyvxUNcek2LsjYy5UCnxjQ/view?usp=drive_link
           caption_variants: []
           delay_after_sec: 4
         - type: text
           body_variants:
             - |-
-              🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
+              🎁 Además, al adquirir FIGURARTE, recibes *4 BONOS SORPRESA GRATIS* 🎁🎨
+
+              1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
+              2 - *Práctica *Recortables* ✂️
+              3 - *Videocuentos* Infantiles 🎬️
+              4 - Fichas de *Grafomotricidad* 🚂✏️
 
               🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
 
