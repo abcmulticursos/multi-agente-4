@@ -21008,7 +21008,8 @@ function BibliotecaDeProductos({
                   return (
                     <span className="flex shrink-0 items-baseline gap-2" title={`Precio en ${COUNTRY_OPTIONS.find((o) => o.code === pais)?.label ?? pais}`}>
                       <span className="font-titulo text-2xl font-extrabold tracking-tight text-emerald-800">{dinero(normal)}</span>
-                      {oferta !== null && <span className="text-xs font-semibold text-tinta-suave">oferta {dinero(oferta)}</span>}
+                      {/* La oferta en naranja y a medio tamaño (05/11/2026): en gris y chiquita no se veía. */}
+                      {oferta !== null && <span className="font-titulo text-lg font-extrabold tracking-tight text-orange-700"><span className="text-xs font-bold">oferta</span> {dinero(oferta)}</span>}
                     </span>
                   );
                 })()}

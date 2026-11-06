@@ -1014,7 +1014,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         )}
       </div>
       {ctx.estaciones && f.tipo === "seguimientos" && (
-        <Handle type="target" position={Position.Bottom} id="abajo" className={PUNTO_VERDE} />
+        // Naranja como los cables de Seguimientos, y por encima de las filas: la de «Terminaron» lo tapaba a medias (05/11/2026).
+        <Handle type="target" position={Position.Bottom} id="abajo" className={`${PUNTO_NARANJA} !z-20`} />
       )}
       {visibles.length > 0 && f.tipo !== "seguimientos" && !(ctx.estaciones && esEstacion(f, ctx.tablero)) && (
         <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
