@@ -9173,7 +9173,7 @@ tiendas:
       unico: ptfig_figurarte
     color: "#f97316"
   - id: tienda_tfigurarte3
-    nombre: TIENDA FIGURARTE 3
+    nombre: TIENDA FIGURARTE 3 PLANTILLA
     numero: "1345130172015574"
     pagina: ""
     frases_de_entrada:
