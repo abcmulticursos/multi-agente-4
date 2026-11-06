@@ -1178,7 +1178,18 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   // pregunta final pide el comprobante o pregunta si ya pagó, se cambia por la línea suave del automático.
   // Salvo que él diga que ya pagó: ahí pedirle la foto es lo correcto.
   if (c.etapa === "datos" && burbujas.length > 0) {
-    const delCliente = plano([...ultimosMensajes(convo.id, 4)].reverse().find((m) => m.role === "user")?.content ?? "");
+    // TODO LO QUE ESCRIBIÓ DESDE LA ÚLTIMA RESPUESTA DEL BOT, no solo su último mensaje (05/11/2026, su conv 353): mandó
+    // «ya pague» y «envieme» seguidos, se contestaron juntos, y este filtro solo leyó «envieme» → le quitó el pedido
+    // del comprobante. No se añadió ninguna palabra: es el mismo filtro leyendo el bloque entero.
+    const recientes = ultimosMensajes(convo.id, 12);
+    const desde = recientes.map((m) => m.role !== "user").lastIndexOf(true); // bot o asesor
+    const delCliente = plano(
+      recientes
+        .slice(desde + 1)
+        .filter((m) => m.role === "user")
+        .map((m) => m.content ?? "")
+        .join("\n")
+    );
     const dijoQuePago = /\b(pague|pagado|deposite|transferi|yapee|plinee|ya esta|listo|hice el pago|realice el pago)\b/.test(delCliente);
     const ult = burbujas[burbujas.length - 1];
     const i = ult.lastIndexOf("¿");
