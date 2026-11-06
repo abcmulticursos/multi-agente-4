@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: fig_inicio
       tipo: inicio
-      x: 60
+      x: -264
       y: 0
       titulo: Venta por contribución
       pais: PE
     - id: fig_presenta
       tipo: mensaje
-      x: 390
-      y: 0
+      x: 583
+      y: -33
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
@@ -285,8 +285,8 @@ whatsapp:
       sin_respuesta_min: 120
     - id: fig_insiste
       tipo: mensaje
-      x: 392
-      y: 463
+      x: 1551
+      y: 231
       titulo: Si no contesta
       steps:
         - type: text
@@ -295,8 +295,8 @@ whatsapp:
           delay_after_sec: 4
     - id: fig_si_msg
       tipo: mensaje
-      x: 720
-      y: 0
+      x: 1551
+      y: -110
       titulo: Dijo que sí
       steps:
         - type: text
@@ -305,16 +305,16 @@ whatsapp:
           delay_after_sec: 3
     - id: fig_muestras
       tipo: entregar
-      x: 1050
-      y: 0
+      x: 2948
+      y: -99
       titulo: Muestras gratuitas
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#muestras
     - id: fig_cobro
       tipo: cobro
-      x: 1380
-      y: 0
+      x: 3509
+      y: -66
       titulo: Contribución
       steps:
         - type: text
@@ -376,8 +376,8 @@ whatsapp:
               desde: 30
     - id: fig_recordatorios
       tipo: seguimientos
-      x: 1380
-      y: 330
+      x: 3773
+      y: -572
       titulo: Recordatorios (si no aporta)
       presenta:
         - ptfig_figurarte
@@ -440,40 +440,40 @@ whatsapp:
                   delay_after_sec: 4
     - id: fig_ent10
       tipo: entregar
-      x: 1710
-      y: -660
+      x: 4928
+      y: -605
       titulo: Entrega S/10 · Semilla
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte
     - id: fig_ent15
       tipo: entregar
-      x: 1710
-      y: -330
+      x: 5082
+      y: -187
       titulo: Entrega S/15 · Apoyo
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel15
     - id: fig_ent20
       tipo: entregar
-      x: 1710
-      y: 0
+      x: 5126
+      y: -33
       titulo: Entrega S/20 · Especial
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel20
     - id: fig_ent25
       tipo: entregar
-      x: 1710
-      y: 330
+      x: 5093
+      y: 110
       titulo: Entrega S/25 · Bendición
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel25
     - id: fig_ent30
       tipo: entregar
-      x: 1710
-      y: 660
+      x: 5016
+      y: 473
       titulo: Entrega S/30 · Generosa
       producto_id: ptfig_figurarte
       entregas:
@@ -555,8 +555,8 @@ whatsapp:
     - id: manta-fig_inicio
       x: 20
       y: -760
-      ancho: 2000
-      alto: 1960
+      ancho: 5586
+      alto: 1696
       titulo: ""
       inicio: fig_inicio
     - id: manta-fig_otros
