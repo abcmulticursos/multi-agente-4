@@ -292,6 +292,18 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       return [ficha];
     });
   const idsDeFichas = new Set(fichas.map((f) => f.id));
+  // 🪞 LOS ESPEJOS (05/11/2026): solo los de una ficha que existe (un Inicio no lleva espejo).
+  const espejoDe = new Map<string, string>();
+  const espejos = (Array.isArray(crudo.espejos) ? crudo.espejos : []).slice(0, 500).flatMap((e) => {
+    if (!esObjeto(e)) return [];
+    const id = texto(e.id, 80).trim();
+    const ficha = texto(e.ficha, 80).trim();
+    const x = numero(e.x), y = numero(e.y);
+    if (!id || espejoDe.has(id) || !idsDeFichas.has(ficha) || x === undefined || y === undefined) return [];
+    if (fichas.find((f) => f.id === ficha)?.tipo === "inicio") return [];
+    espejoDe.set(id, ficha);
+    return [{ id, ficha, x: Math.round(x), y: Math.round(y) }];
+  });
   const vistos = new Set<string>();
   const cables: CableDelTablero[] = (Array.isArray(crudo.cables) ? crudo.cables : [])
     .slice(0, 2000)
@@ -307,7 +319,19 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
       if (vistos.has(llave)) return [];
       vistos.add(llave);
       const vista = c.vista === "colita" || c.vista === "cable" ? c.vista : undefined;
-      return [{ id: texto(c.id, 120).trim() || `c-${llave}`, de, salida, a, ...(vista ? { vista } : {}) }];
+      const deEspejo = texto(c.de_espejo, 80).trim();
+      const aEspejo = texto(c.a_espejo, 80).trim();
+      return [
+        {
+          id: texto(c.id, 120).trim() || `c-${llave}`,
+          de,
+          salida,
+          a,
+          ...(vista ? { vista } : {}),
+          ...(deEspejo && espejoDe.get(deEspejo) === de ? { de_espejo: deEspejo } : {}),
+          ...(aEspejo && espejoDe.get(aEspejo) === a ? { a_espejo: aEspejo } : {}),
+        },
+      ];
     });
   const curvas: Record<string, { x: number; y: number }> = {};
   if (esObjeto(crudo.curvas))
@@ -340,6 +364,7 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
     cables,
     ...(Object.keys(curvas).length ? { curvas } : {}),
     ...(cajas.length ? { cajas } : {}),
+    ...(espejos.length ? { espejos } : {}),
   };
 }
 

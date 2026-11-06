@@ -73,7 +73,9 @@ const TEMA = {
   claro: { fondo: "#f4f6fa", puntos: "#c3cad6", caja: "rgba(15,23,42,0.08)", tituloCaja: "#334155" },
   oscuro: { fondo: "#15161a", puntos: "#34373f", caja: "rgba(255,255,255,0.13)", tituloCaja: "#f1f5f9" },
 };
-const PUNTO_VERDE = "!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500";
+/** El brillo del 🪞 espejo: dos halos, cian y fucsia, como un letrero de neón. */
+const ESPEJO_NEON = "0 0 0 1px #a5f3fc, 0 0 10px 2px rgba(34,211,238,0.85), 0 0 26px 6px rgba(217,70,239,0.35)";
+const PUNTO_VERDE ="!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500";
 const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-500";
 /** Los conectores del 🔀 Ruteador (03/11/2026: «sus conectores rosa»). */
 const PUNTO_ROSA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-fuchsia-600";
@@ -148,10 +150,10 @@ function resumenDeBurbujas(pasos: unknown[] | undefined): Array<{ icono: string;
 // ── EL CONTEXTO: lo que los nodos y cables le piden al lienzo ─────────────────
 
 type Menu =
-  | { tipo: "ficha"; fichaId: string }
+  | { tipo: "ficha"; fichaId: string; espejo?: string }
   | { tipo: "cable"; cableId: string }
   | { tipo: "crear"; donde: Punto; desde?: { ficha: string; salida: string } }
-  | { tipo: "conectar"; ficha: string; salida: string }
+  | { tipo: "conectar"; ficha: string; salida: string; espejo?: string }
   | { tipo: "caja"; cajaId: string };
 
 /**
@@ -635,9 +637,11 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
 
 // ── UNA FICHA ─────────────────────────────────────────────────────────────────
 
-function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
+function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor; espejo?: string }>>) {
   const ctx = useContext(Contexto);
   const f = data.ficha;
+  // 🪞 EL ESPEJO (05/11/2026): la misma ficha en otro sitio. Se dibuja igual, con un borde de neón y su marca.
+  const espejo = data.espejo;
   if (!ctx) return null;
   const a = ASPECTO[f.tipo];
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero);
@@ -769,7 +773,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             }
             onClick={(e) => {
               e.stopPropagation();
-              ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
+              ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave, ...(espejo ? { espejo } : {}) });
             }}
           >
             {icono && <span className="pointer-events-none select-none">{icono}</span>}
@@ -780,7 +784,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   };
   // EL 🔀 RUTEADOR, SOLO SU LOGO (03/11/2026). Él: «el ruteador no debería tener ficha, está de más, solo sería el
   // logo», con el copiar y el tachito arriba a la derecha, como Sendy. No lleva burbujas: su ficha no decía nada más.
-  if (f.tipo === "reparto") return <EstacionDeLaFicha f={f} soloLogo elegida={!!selected} />;
+  if (f.tipo === "reparto") return <EstacionDeLaFicha f={f} soloLogo elegida={!!selected} espejo={espejo} />;
   const burbujas =
     f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo"
       ? resumenDeBurbujas(f.steps)
@@ -793,7 +797,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id });
+        ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id, ...(espejo ? { espejo } : {}) });
       }}
       className={`relative w-[250px] rounded-lg border-2 bg-white text-slate-800 shadow-md ${a.borde} ${tenue ? "ficha-tenue border-dashed" : ""} ${
         selected ? "ring-4 ring-cyan-400" : ""
@@ -802,9 +806,20 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         // LA FICHA A LA QUE LLEGA LA COLITA TOCADA: solo su borde se ilumina (27/10/2026).
         ...(destacada ? { boxShadow: "0 0 0 5px #f59e0b, 0 0 22px 6px rgba(245,158,11,0.55)" } : {}),
         // Marca sutil: esta ficha tiene alguna conexión inalámbrica.
-        ...(conColitas && !destacada ? { outline: "2px dotted rgba(100,116,139,0.55)", outlineOffset: 4 } : {}),
+        ...(conColitas && !destacada && !espejo ? { outline: "2px dotted rgba(100,116,139,0.55)", outlineOffset: 4 } : {}),
+        // EL ESPEJO, «ANEONADO» (05/11/2026): líneas que brillan como neón, sin oscurecer la ficha.
+        ...(espejo && !destacada ? { boxShadow: ESPEJO_NEON, outline: "2px solid #22d3ee", outlineOffset: 3 } : {}),
       }}
     >
+      {espejo && (
+        <span
+          className="pointer-events-auto absolute -top-[24px] right-1 rounded-full border-2 border-cyan-400 bg-white px-2 text-[10px] font-bold leading-[16px] text-cyan-700"
+          style={{ boxShadow: "0 0 8px rgba(34,211,238,0.8)" }}
+          title={`Espejo de la ficha ${ctx.numeroDe[f.id] ?? ""}: es la MISMA ficha. Lo que cambies aquí cambia en la original, y los cables que llegan aquí llegan a ella.`}
+        >
+          🪞 espejo de {ctx.numeroDe[f.id] ?? "la original"}
+        </span>
+      )}
       {/* El punto de entrada: en modo estaciones, en el CENTRO del costado (como Sendy). */}
       <Handle type="target" position={Position.Left} id="entra" className={PUNTO_VERDE} style={ctx.estaciones ? undefined : { top: 18 }} />
       {/* «NADIE LLEGA», ARRIBA DE LA FICHA (27/10/2026): el punto rojo junto al conector estorbaba al
@@ -1092,7 +1107,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   return (
     <div className="pointer-events-none flex items-center">
       <div className="pointer-events-auto">{tarjeta}</div>
-      <EstacionDeLaFicha f={f} />
+      <EstacionDeLaFicha f={f} espejo={espejo} />
     </div>
   );
 }
@@ -1536,7 +1551,7 @@ function InterruptorDeRuta({ f, clave }: { f: FichaEnElEditor; clave: string }) 
 }
 
 /** La estación de una ficha, DENTRO de su mismo bloque (se mueve con ella). Sus salidas son las de la ficha. */
-function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaEnElEditor; soloLogo?: boolean; elegida?: boolean }) {
+function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f: FichaEnElEditor; soloLogo?: boolean; elegida?: boolean; espejo?: string }) {
   const ctx = useContext(Contexto)!;
   const leLlega = ctx.tablero.cables.some((c) => c.a === f.id);
   const avisos = soloLogo ? avisosDeLaFicha(ctx.tablero as Tablero, f as FichaDelTablero, ctx.paisVisto) : [];
@@ -1576,7 +1591,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaE
           ? (e) => {
               e.preventDefault();
               e.stopPropagation();
-              ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id });
+              ctx.menu(e.clientX, e.clientY, { tipo: "ficha", fichaId: f.id, ...(espejo ? { espejo } : {}) });
             }
           : undefined
       }
@@ -1656,7 +1671,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaE
               style={{ left: `calc(50% + ${(i - (deArriba.length - 1) / 2) * 22}px)` }}
               onClick={(e) => {
                 e.stopPropagation();
-                ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
+                ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave, ...(espejo ? { espejo } : {}) });
               }}
             />
           ))}
@@ -1746,7 +1761,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false }: { f: FichaE
                 title={icono ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…)" : undefined}
                 onClick={(e) => {
                   e.stopPropagation();
-                  ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave });
+                  ctx.menu(e.clientX, e.clientY, { tipo: "conectar", ficha: f.id, salida: s.clave, ...(espejo ? { espejo } : {}) });
                 }}
               >
                 {icono && <span className="pointer-events-none select-none">{icono}</span>}
@@ -1769,6 +1784,23 @@ function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
     fichas: t.fichas.filter((f) => !ids.has(f.id)),
     cables: t.cables.filter((c) => !ids.has(c.de) && !ids.has(c.a)),
     cajas: (t.cajas ?? []).filter((c) => !c.inicio || !ids.has(c.inicio)),
+    // Con la ficha se van sus 🪞 espejos (05/11/2026).
+    espejos: (t.espejos ?? []).filter((e) => !ids.has(e.ficha)),
+  };
+}
+
+/** Quitar solo unos 🪞 espejos: la ficha y sus cables se quedan (los cables vuelven a dibujarse desde la original). */
+function sinEspejos(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
+  return {
+    ...t,
+    espejos: (t.espejos ?? []).filter((e) => !ids.has(e.id)),
+    cables: t.cables.map((c) => {
+      if (!(c.de_espejo && ids.has(c.de_espejo)) && !(c.a_espejo && ids.has(c.a_espejo))) return c;
+      const n = { ...c };
+      if (n.de_espejo && ids.has(n.de_espejo)) delete n.de_espejo;
+      if (n.a_espejo && ids.has(n.a_espejo)) delete n.a_espejo;
+      return n;
+    }),
   };
 }
 
@@ -2033,8 +2065,13 @@ export default function LienzoDelTablero({
       window.localStorage.setItem("tablero-estacion-aspecto", v ? "agente" : "estacion");
     } catch {}
   };
-  /** La ficha de verdad detrás de un nodo (la bolita «est:<id>» es su ficha). */
-  const fichaDelNodo = (id: string) => (id.startsWith("est:") ? id.slice(4) : id);
+  /** La ficha de verdad detrás de un nodo (la bolita «est:<id>» es su ficha; el 🪞 espejo «esp:<id>», la suya). */
+  const fichaDelNodo = (id: string) =>
+    id.startsWith("est:")
+      ? id.slice(4)
+      : id.startsWith("esp:")
+        ? (vivo.current.espejos ?? []).find((e) => e.id === id.slice(4))?.ficha ?? id
+        : id;
 
   /**
    * «📐 ACOMODAR COMO CAMINO» (01/11/2026): solo cuando él lo toca (nada se mueve solo) y con Ctrl+Z. Desde cada
@@ -2171,6 +2208,22 @@ export default function LienzoDelTablero({
         // En modo estaciones el bloque es ancho y casi todo aire: el aire deja pasar el ratón al fondo (la manito).
         ...((estaciones && esEstacion(f, tablero)) || f.tipo === "reparto" ? { style: { pointerEvents: "none" as const } } : {}),
       });
+    // 🪞 LOS ESPEJOS (05/11/2026): la misma ficha, otra vez, donde él la puso. Un Inicio no lleva espejo.
+    for (const e of tablero.espejos ?? []) {
+      const f = visibles.find((x) => x.id === e.ficha);
+      if (!f || f.tipo === "inicio") continue;
+      const sinRaton = (estaciones && esEstacion(f, tablero)) || f.tipo === "reparto";
+      nodos.push({
+        id: `esp:${e.id}`,
+        type: "ficha",
+        position: { x: e.x, y: e.y },
+        data: { ficha: f, espejo: e.id },
+        // El Ruteador es solo su logo: el neón va alrededor del bloque.
+        ...(sinRaton || f.tipo === "reparto"
+          ? { style: { ...(sinRaton ? { pointerEvents: "none" as const } : {}), ...(f.tipo === "reparto" ? { borderRadius: 999, boxShadow: ESPEJO_NEON } : {}) } }
+          : {}),
+      });
+    }
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tablero, tema, cajaElegida, paisVisto, mirando, estaciones]);
@@ -2337,11 +2390,13 @@ export default function LienzoDelTablero({
           // estación de su ficha (mismo bloque) y, hacia sus Seguimientos, entra por abajo de ellos.
           const deEstacion = estaciones && !!origen && esEstacion(origen, tablero);
           const comoColita = esColita(tablero, c, todoCable) && !(deEstacion && aSeguimientos);
+          // 🪞 Desde / hacia el espejo donde él lo conectó (si ese espejo sigue ahí); si no, la original.
+          const hayEspejo = (id: string | undefined, ficha: string) => !!id && (tablero.espejos ?? []).some((e) => e.id === id && e.ficha === ficha);
           return {
             id: c.id,
-            source: c.de,
+            source: hayEspejo(c.de_espejo, c.de) ? `esp:${c.de_espejo}` : c.de,
             sourceHandle: c.salida,
-            target: c.a,
+            target: hayEspejo(c.a_espejo, c.a) ? `esp:${c.a_espejo}` : c.a,
             targetHandle: estaciones && aSeguimientos && deEstacion ? "abajo" : "entra",
             type: "cable",
             deletable: false,
@@ -2421,7 +2476,8 @@ export default function LienzoDelTablero({
         return;
       }
       if ((e.ctrlKey || e.metaKey) && tecla === "c") {
-        const ids = new Set(elegidas());
+        // Un 🪞 espejo elegido copia su ficha (la copia es una ficha nueva, sin espejos).
+        const ids = new Set(elegidas().map(fichaDelNodo));
         if (ids.size === 0) return;
         portapapeles = {
           fichas: JSON.parse(JSON.stringify(actual.fichas.filter((f) => ids.has(f.id)))),
@@ -2457,10 +2513,20 @@ export default function LienzoDelTablero({
           e.preventDefault();
           return;
         }
-        const ids = new Set(elegidas());
+        // 🪞 Un espejo elegido se quita solo él (la ficha se queda); una ficha elegida se lleva sus espejos.
+        const espejosElegidos = new Set(elegidas().filter((id) => id.startsWith("esp:")).map((id) => id.slice(4)));
+        const ids = new Set(elegidas().filter((id) => !id.startsWith("esp:")));
         // Las cajas y mantas elegidas con el recuadro también se borran (las fichas de encima, no).
         const cajasElegidas = new Set(nodos.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
-        if (ids.size === 0 && cajasElegidas.size === 0) return;
+        if (ids.size === 0 && cajasElegidas.size === 0 && espejosElegidos.size === 0) return;
+        if (ids.size === 0 && cajasElegidas.size === 0) {
+          // Solo espejos: sin pregunta (la ficha y sus cables siguen; Ctrl+Z lo devuelve).
+          cambiar(sinEspejos(actual, espejosElegidos));
+          setAviso(`${espejosElegidos.size} espejo(s) quitado(s). La ficha y sus cables siguen en su sitio.`);
+          e.preventDefault();
+          return;
+        }
+        const suyos = (actual.espejos ?? []).filter((x) => ids.has(x.ficha)).length;
         // CON CLIENTES DENTRO (27/10/2026): borrar una tubería con gente en sus fichas los deja sin ruta. Para
         // cambiar de tubería (el reenganche), lo correcto es desconectar el cable del Inicio: los que ya
         // estaban terminan su compra y los nuevos entran por la otra.
@@ -2468,8 +2534,8 @@ export default function LienzoDelTablero({
         const aviso = dentro
           ? `\n\n⚠ Hay ${dentro} cliente(s) ahora mismo en esas fichas: si las borras se quedan sin ruta (solo les contestará la IA). Para pasar a otra tubería, mejor desconecta el cable del Inicio y deja estas fichas hasta que terminen.`
           : "";
-        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) con sus cables${cajasElegidas.size ? ` y ${cajasElegidas.size} caja(s)` : ""}?${aviso}`)) return;
-        const sinEllas = sinFichas(actual, ids);
+        if (!window.confirm(`¿Eliminar ${ids.size} ficha(s) con sus cables${suyos ? ` y sus ${suyos} espejo(s) 🪞` : ""}${cajasElegidas.size ? ` y ${cajasElegidas.size} caja(s)` : ""}?${aviso}`)) return;
+        const sinEllas = sinFichas(sinEspejos(actual, espejosElegidos), ids);
         cambiar({ ...sinEllas, cajas: (sinEllas.cajas ?? []).filter((c) => !cajasElegidas.has(c.id)) });
         e.preventDefault();
       }
@@ -2525,6 +2591,7 @@ export default function LienzoDelTablero({
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));
   const guardadas = tablero.fichas.filter((f) => f.guardada);
   const fichaDelMenu = menu?.m.tipo === "ficha" ? tablero.fichas.find((f) => f.id === (menu.m as { fichaId: string }).fichaId) : undefined;
+  const espejoDelMenu = menu?.m.tipo === "ficha" ? (menu.m as { espejo?: string }).espejo : undefined;
 
   const opcionDeMenu = "block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-100";
 
@@ -2587,10 +2654,19 @@ export default function LienzoDelTablero({
           }}
           onNodeDragStop={(_, __, movidos) => {
             const actual = vivo.current;
-            const donde = new Map(movidos.filter((n) => !n.id.startsWith("caja:") && !n.id.startsWith("est:") && n.draggable !== false).map((n) => [n.id, n.position]));
+            const donde = new Map(movidos.filter((n) => !n.id.startsWith("caja:") && !n.id.startsWith("est:") && !n.id.startsWith("esp:") && n.draggable !== false).map((n) => [n.id, n.position]));
             const cajas = new Map(movidos.filter((n) => n.id.startsWith("caja:")).map((n) => [n.id.slice(5), n.position]));
+            const espejosMovidos = new Map(movidos.filter((n) => n.id.startsWith("esp:")).map((n) => [n.id.slice(4), n.position]));
             cambiar({
               ...actual,
+              ...(espejosMovidos.size
+                ? {
+                    espejos: (actual.espejos ?? []).map((e) => {
+                      const p = espejosMovidos.get(e.id);
+                      return p ? { ...e, x: Math.round(p.x), y: Math.round(p.y) } : e;
+                    }),
+                  }
+                : {}),
               fichas: actual.fichas.map((f) => {
                 const p = donde.get(f.id);
                 return p ? { ...f, x: Math.round(p.x), y: Math.round(p.y) } : f;
@@ -2616,7 +2692,15 @@ export default function LienzoDelTablero({
             }
             // UNA SALIDA, UN CABLE: tirar otro desde el mismo puntito reemplaza al anterior.
             const lista = actual.cables.filter((x) => !(x.de === de && x.salida === c.sourceHandle));
-            lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de, salida: c.sourceHandle, a });
+            // 🪞 Conectado desde o hacia un espejo: el cable es de la ficha; solo se dibuja desde ahí.
+            lista.push({
+              id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
+              de,
+              salida: c.sourceHandle,
+              a,
+              ...(c.source.startsWith("esp:") ? { de_espejo: c.source.slice(4) } : {}),
+              ...(c.target.startsWith("esp:") ? { a_espejo: c.target.slice(4) } : {}),
+            });
             cambiar({ ...actual, cables: lista });
           }}
           onConnectStart={(e, p) => {
@@ -2939,8 +3023,35 @@ export default function LienzoDelTablero({
                 <div className="truncate border-b border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
                   {fichaDelMenu.tipo === "inicio"
                     ? `▶ Inicio · ${fichaDelMenu.pais ? `${banderaDe(fichaDelMenu.pais)} ${fichaDelMenu.pais}` : "🌍 Otros países"}`
-                    : `${ASPECTO[fichaDelMenu.tipo].icono} ${fichaDelMenu.titulo?.trim() || ASPECTO[fichaDelMenu.tipo].nombre}`}
+                    : `${espejoDelMenu ? "🪞 Espejo de · " : ""}${ASPECTO[fichaDelMenu.tipo].icono} ${fichaDelMenu.titulo?.trim() || ASPECTO[fichaDelMenu.tipo].nombre}`}
                 </div>
+                {/* 🪞 EL ESPEJO (05/11/2026): desde un espejo, ir a la original o quitar solo este espejo. */}
+                {espejoDelMenu && (
+                  <>
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      onClick={() => {
+                        setMenu(null);
+                        instancia.current?.fitView({ nodes: [{ id: fichaDelMenu.id }], padding: 1.2, maxZoom: 1, duration: 500 });
+                        setDestacada(fichaDelMenu.id);
+                      }}
+                    >
+                      🎯 Ir a la original
+                    </button>
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      onClick={() => {
+                        cambiar(sinEspejos(vivo.current, new Set([espejoDelMenu])));
+                        setMenu(null);
+                        setAviso("Espejo quitado. La ficha y sus cables siguen en su sitio.");
+                      }}
+                    >
+                      🪞 Quitar este espejo (la ficha se queda)
+                    </button>
+                  </>
+                )}
                 {/* Un Inicio sin manta (de antes del 24/10, o porque se borró): se le pone una. */}
                 {fichaDelMenu.tipo === "inicio" && !(tablero.cajas ?? []).some((c) => c.inicio === fichaDelMenu.id) && (
                   <button
@@ -2974,6 +3085,23 @@ export default function LienzoDelTablero({
                       }}
                     >
                       ⧉ Duplicar aquí al lado
+                    </button>
+                    {/* 🪞 CREAR ESPEJO (05/11/2026): la MISMA ficha dibujada en otro sitio, para no tirar cables largos. */}
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      onClick={() => {
+                        const actual = vivo.current;
+                        const desde = espejoDelMenu ? (actual.espejos ?? []).find((x) => x.id === espejoDelMenu) : undefined;
+                        const base = desde ?? actual.fichas.find((x) => x.id === fichaDelMenu.id)!;
+                        const nuevo = { id: `e-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, ficha: fichaDelMenu.id, x: Math.round(base.x + 320), y: Math.round(base.y + 40) };
+                        cambiar({ ...actual, espejos: [...(actual.espejos ?? []), nuevo] });
+                        setMenu(null);
+                        setAviso("🪞 Espejo creado a la derecha: es la MISMA ficha. Muévelo donde te sirva y conecta ahí los cables.");
+                        window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: n.id === `esp:${nuevo.id}` }))), 120);
+                      }}
+                    >
+                      🪞 Crear espejo (la misma ficha en otro sitio)
                     </button>
                     {/* «DUPLICAR PARA…», como en la pizarra: la copia queda en la manta de ese país,
                         sin conectar («nada se conecta solo»); él le tira el cable. */}
@@ -3030,7 +3158,7 @@ export default function LienzoDelTablero({
                         todo lo que sigue por sus cables. Se baja un archivo; se trae con «📋 Plantillas». */}
                     {onGuardarPlantilla &&
                       (() => {
-                        const varias = elegidas().filter((id) => vivo.current.fichas.find((x) => x.id === id)?.tipo !== "inicio");
+                        const varias = [...new Set(elegidas().map(fichaDelNodo))].filter((id) => vivo.current.fichas.find((x) => x.id === id)?.tipo !== "inicio");
                         const usaElegidas = varias.length > 1 && varias.includes(fichaDelMenu.id);
                         const ids = usaElegidas
                           ? varias
@@ -3055,12 +3183,20 @@ export default function LienzoDelTablero({
                   className={`${opcionDeMenu} text-rose-600`}
                   onClick={() => {
                     const esInicio = fichaDelMenu.tipo === "inicio";
-                    if (!window.confirm(esInicio ? "¿Quitar este país? Se van su Inicio y su manta; las fichas se quedan donde están." : "¿Eliminar esta ficha y sus cables?")) return;
+                    const suyos = (vivo.current.espejos ?? []).filter((x) => x.ficha === fichaDelMenu.id).length;
+                    if (
+                      !window.confirm(
+                        esInicio
+                          ? "¿Quitar este país? Se van su Inicio y su manta; las fichas se quedan donde están."
+                          : `¿Eliminar esta ficha y sus cables?${suyos ? ` También se van sus ${suyos} espejo(s) 🪞.` : ""}`
+                      )
+                    )
+                      return;
                     cambiar(sinFichas(vivo.current, new Set([fichaDelMenu.id])));
                     setMenu(null);
                   }}
                 >
-                  {fichaDelMenu.tipo === "inicio" ? "🗑 Quitar país (las fichas se quedan)" : "🗑 Eliminar"}
+                  {fichaDelMenu.tipo === "inicio" ? "🗑 Quitar país (las fichas se quedan)" : espejoDelMenu ? "🗑 Eliminar la ficha (y sus espejos)" : "🗑 Eliminar"}
                 </button>
               </>
             )}
@@ -3086,7 +3222,7 @@ export default function LienzoDelTablero({
                         className={`${opcionDeMenu} flex items-center gap-2 ${actual?.a === f.id ? "bg-amber-50 font-bold" : ""}`}
                         onClick={() => {
                           const lista = vivo.current.cables.filter((x) => !(x.de === m.ficha && x.salida === m.salida));
-                          lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de: m.ficha, salida: m.salida, a: f.id });
+                          lista.push({ id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`, de: m.ficha, salida: m.salida, a: f.id, ...(m.espejo ? { de_espejo: m.espejo } : {}) });
                           cambiar({ ...vivo.current, cables: lista });
                           setMenu(null);
                         }}

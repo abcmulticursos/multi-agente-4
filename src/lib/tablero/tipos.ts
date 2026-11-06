@@ -238,6 +238,12 @@ export interface CableDelTablero {
    * Regalo y los regresos van como colita, lo demás como cable.
    */
   vista?: "colita" | "cable";
+  /**
+   * EL ESPEJO DESDE EL QUE SE DIBUJA (05/11/2026, solo pantalla; el bot no lo mira): el cable sale de
+   * (o llega a) ese 🪞 espejo de la ficha en vez de la original. Sin él, de la original.
+   */
+  de_espejo?: string;
+  a_espejo?: string;
 }
 
 export interface Tablero {
@@ -256,6 +262,12 @@ export interface Tablero {
   cables: CableDelTablero[];
   /** Los cables que él curvó a mano (como en la pizarra): por id de cable. Solo pantalla. */
   curvas?: Record<string, { x: number; y: number }>;
+  /**
+   * 🪞 LOS ESPEJOS (05/11/2026): la MISMA ficha dibujada en otro sitio («la misma pestaña en otro lado
+   * duplicado pero es la misma, no uno nuevo»), para no tirar cables largos. Solo pantalla: editarla cambia
+   * la original (es un solo dato) y el bot no los mira.
+   */
+  espejos?: Array<{ id: string; ficha: string; x: number; y: number }>;
   /** Las cajas que él dibuja detrás de las fichas, como en la pizarra. Solo pantalla. */
   cajas?: Array<{
     id: string;
