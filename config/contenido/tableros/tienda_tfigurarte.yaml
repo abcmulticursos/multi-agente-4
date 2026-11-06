@@ -428,8 +428,8 @@ whatsapp:
       sin_respuesta_min: 120
     - id: fig_insiste
       tipo: mensaje
-      x: 1496
-      y: 594
+      x: 1606
+      y: 616
       titulo: Si no contesta
       steps:
         - type: text
@@ -438,8 +438,8 @@ whatsapp:
           delay_after_sec: 4
     - id: fig_si_msg
       tipo: mensaje
-      x: 1914
-      y: -143
+      x: 1958
+      y: -286
       titulo: Dijo que sí
       steps:
         - type: text
@@ -643,8 +643,8 @@ whatsapp:
       titulo: Pasa a un asesor
     - id: f-mw4wyf34-4mlta
       tipo: mensaje
-      x: 1650
-      y: 132
+      x: 1210
+      y: -154
       titulo: Dijo que sí
       steps:
         - type: text
