@@ -4209,7 +4209,7 @@ whatsapp:
         - ptpla_pack
       seguimientos:
         - id: s-mw3axl0k-nuz32
-          minutos: 120
+          minutos: 2
           variantes:
             - id: v-mw3axl0k-qf0g4
               nombre: Versión A
@@ -4235,8 +4235,10 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mw3axl0k-4zyl6
-          minutos: 600
+          minutos: 5
           variantes:
             - id: v-mw3axl0k-mu3lm
               nombre: Versión A
@@ -4259,6 +4261,9 @@ whatsapp:
                       label: Quiero el pack
                       action: send_steps
                       steps: []
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mw3ep5kt-wedsp
       tipo: cobro
       x: 3795
