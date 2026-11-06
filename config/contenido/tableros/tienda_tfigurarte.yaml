@@ -425,7 +425,6 @@ whatsapp:
       presenta:
         - ptfig_figurarte
       instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
-      sin_respuesta_min: 120
     - id: fig_si_msg
       tipo: mensaje
       x: 2519
@@ -633,7 +632,7 @@ whatsapp:
       titulo: Pasa a un asesor
     - id: f-mw4xdzzq-jx245
       tipo: cobro
-      x: 1683
+      x: 1628
       y: 110
       steps:
         - type: text
