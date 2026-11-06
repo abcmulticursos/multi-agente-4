@@ -171,12 +171,29 @@ type Menu =
  * LO QUE NO SE PUEDE CONECTAR (26/10/2026), con su porqué en una línea. Son conexiones que nunca
  * hacen lo que parecen: el cable no se pone.
  */
+/**
+ * «↓ PAGÓ DE MENOS» SE RESUELVE SOLO (06/11/2026). Él: «esa colita no debería ir, ya que se resuelve solo». Sin cable, el bot le
+ * dice cuánto lleva y cuánto falta y espera el resto; en un Cobro de producto no se dibuja, salvo que ya tenga cable (para
+ * no perderlo), como «Otra cosa». La contribución conserva su «↓ Menos del mínimo». Solo pantalla.
+ */
+function menosSeResuelveSolo(f: FichaEnElEditor, clave: string, conCable: Set<string>): boolean {
+  return clave === "menos" && f.tipo === "cobro" && f.cobro?.modo === "producto" && !conCable.has("menos");
+}
+
 function porQueNoSeConecta(t: TableroEnElEditor, de: string, salida: string, a: string): string | null {
   const origen = t.fichas.find((f) => f.id === de);
   const destino = t.fichas.find((f) => f.id === a);
   if (!origen || !destino) return null;
   if (destino.tipo === "inicio") return "Un cable no puede llegar a un Inicio: el Inicio es donde entra el cliente.";
-  if (origen.tipo === "cobro" && (salida === "pagado" || salida.startsWith("prod:")) && destino.tipo !== "entregar" && destino.tipo !== "condicion")
+  // EL COBRO ENTREGA SOLO (06/11/2026): en un Cobro de producto, «Pagó» va a donde siga la venta (el Regalo, el upsell…); la
+  // entrega ya la hace él. Él: «ese librito debería poder conectar al regalo, pero no se puede». La contribución, como antes.
+  if (
+    origen.tipo === "cobro" &&
+    origen.cobro?.modo !== "producto" &&
+    (salida === "pagado" || salida.startsWith("prod:")) &&
+    destino.tipo !== "entregar" &&
+    destino.tipo !== "condicion"
+  )
     return "«Pagó» va a una Entrega: es lo que recibe el cliente que pagó.";
   if ((origen.tipo === "mensaje" || origen.tipo === "intro_ob") && salida === "siguiente") {
     const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(origen as FichaDelTablero));
@@ -697,6 +714,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const visibles = salidas
     // «Otra cosa» solo en la ficha que ya la tiene conectada (26/10/2026): sin cable no hace nada.
     .filter((s) => s.clave !== "otra" || conCable.has("otra"))
+    .filter((s) => !menosSeResuelveSolo(f, s.clave, conCable))
     .filter((s) => !(s.clave === "sin_respuesta" && conSeguimientos && !conCable.has("sin_respuesta")))
     .map((s) =>
       // «Si no paga» hacia unos Seguimientos: se llama como lo que hace.
@@ -1568,6 +1586,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero).filter(
     (s) =>
       (s.clave !== "otra" || conCable.has("otra")) &&
+      !menosSeResuelveSolo(f, s.clave, conCable) &&
       !(s.clave === "sin_respuesta" && arriba.has("siguiente") && conCable.has("siguiente") && !conCable.has("sin_respuesta")) &&
       // Sus Seguimientos ya cuelgan por otra salida: la de «⏳ Seguimientos» vacía no se ofrece.
       !(s.clave === "siguiente" && !conCable.has("siguiente") && !arriba.has("siguiente") && arriba.size > 0)
