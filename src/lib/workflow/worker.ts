@@ -209,10 +209,13 @@ function arrancarLatido(): void {
       }
     }
     if (avisadas.size > 500) avisadas.clear();
+    // LA MEMORIA, SOLO SI ES UN PROBLEMA (06/11/2026). Él: «me asusta, me hace pensar que el bot está atorando el vps».
+    // La línea «vivo» de cada 5 min se quita; se mira igual cada 5 min y solo se avisa pasando de 1,5 GB (hoy usa ~0,4).
     if (ahora - ultimaMemoria > 5 * 60_000) {
       ultimaMemoria = ahora;
       const m = process.memoryUsage();
-      console.log(`[latido] vivo · memoria ${Math.round(m.rss / 1048576)} MB (montón ${Math.round(m.heapUsed / 1048576)} MB)`);
+      const mb = Math.round(m.rss / 1048576);
+      if (mb > 1536) console.log(`[latido] ⚠️ el bot está usando mucha memoria: ${mb} MB (montón ${Math.round(m.heapUsed / 1048576)} MB). Si sigue subiendo, copia este log.`);
     }
   }, CADA_MS);
 }
