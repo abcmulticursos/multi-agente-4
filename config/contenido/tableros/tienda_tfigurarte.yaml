@@ -427,8 +427,8 @@ whatsapp:
       instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: fig_si_msg
       tipo: mensaje
-      x: 2519
-      y: -363
+      x: 1694
+      y: 1529
       titulo: Dijo que sí
       steps:
         - type: text
@@ -437,16 +437,16 @@ whatsapp:
           delay_after_sec: 3
     - id: fig_muestras
       tipo: entregar
-      x: 2948
-      y: -99
+      x: 2123
+      y: 1793
       titulo: Muestras gratuitas
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#muestras
     - id: fig_cobro
       tipo: cobro
-      x: 3509
-      y: -66
+      x: 2684
+      y: 1826
       titulo: Contribución
       steps:
         - type: text
@@ -508,8 +508,8 @@ whatsapp:
               desde: 30
     - id: fig_recordatorios
       tipo: seguimientos
-      x: 3773
-      y: -572
+      x: 2948
+      y: 1320
       titulo: Recordatorios (si no aporta)
       presenta:
         - ptfig_figurarte
@@ -572,40 +572,40 @@ whatsapp:
                   delay_after_sec: 4
     - id: fig_ent10
       tipo: entregar
-      x: 4928
-      y: -605
+      x: 4103
+      y: 1287
       titulo: Entrega S/10 · Semilla
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte
     - id: fig_ent15
       tipo: entregar
-      x: 5082
-      y: -187
+      x: 4257
+      y: 1705
       titulo: Entrega S/15 · Apoyo
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel15
     - id: fig_ent20
       tipo: entregar
-      x: 5126
-      y: -33
+      x: 4301
+      y: 1859
       titulo: Entrega S/20 · Especial
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel20
     - id: fig_ent25
       tipo: entregar
-      x: 5093
-      y: 110
+      x: 4268
+      y: 2002
       titulo: Entrega S/25 · Bendición
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel25
     - id: fig_ent30
       tipo: entregar
-      x: 5016
-      y: 473
+      x: 4191
+      y: 2365
       titulo: Entrega S/30 · Generosa
       producto_id: ptfig_figurarte
       entregas:
@@ -649,7 +649,7 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: producto
-        producto_id: "@tienda:full"
+        producto_id: "@tienda:basico"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
       x: 924
@@ -834,6 +834,10 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mw4z4tlg-y38l
+      tipo: regalo
+      x: 3003
+      y: 88
   cables:
     - id: figc1
       de: fig_inicio
@@ -908,6 +912,10 @@ whatsapp:
       salida: sin_pago
       a: f-mw4xhgdb-dozb0
       a_espejo: e-mw4xjp2d-zjbz
+    - id: c-mw4z55hw-aa9
+      de: fig_presenta
+      salida: pagado
+      a: f-mw4z4tlg-y38l
   cajas:
     - id: manta-fig_inicio
       x: 20
