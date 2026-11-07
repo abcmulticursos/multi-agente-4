@@ -4635,7 +4635,11 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       // Nombrar el método para quejarse («me estafaron con el yape») no es elegirlo: la misma guarda
       // de la venta de siempre (`messageHasPaymentConcern`), y contesta la IA con empatía.
       // (El mismo `metodoDicho` de arriba: también reconoce el pedazo que llega en otro turno, ronda 51.)
-      const metodo = conMetodos ? metodoDicho : null;
+      // EL MÉTODO, EN CUALQUIER COBRO DE PRODUCTO (06/11/2026, su conv 365 en FIGURARTE): «tengo transferencia» en un Cobro sin
+      // «💳 Preguntar el método» lo contestaba la IA, que no ve sus «Métodos de pago» («por ese método también puedes pagar»), y
+      // el cliente preguntó tres veces cuál era la cuenta. Como el automático: nombrar un método (no para quejarse) manda SUS
+      // datos con el precio de lo elegido. Sin datos escritos para ese método, sigue la IA como antes.
+      const metodo = conMetodos || estado.cobro_pagado <= 0 ? metodoDicho : null;
       if (metodo) {
         respondio(convo, t);
         if (await mandarDatosDelMetodo(convo, metodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
@@ -5278,14 +5282,38 @@ async function relojDelTablero(accion: ScheduledActionRow, convo: ConversationRo
       // Y si ESCRIBIÓ mientras salía (B2 en la copia: el seguimiento 2 se mezcló con la respuesta de la
       // IA), lo que falta del seguimiento ya no sale: su mensaje manda.
       const empezo = ahora();
+      const total = (pasosSeg as unknown[]).length;
+      let salieron = 0;
       for (const paso of pasosSeg as unknown[]) {
         const ahoraMismo = estadoEnElTablero(convo.id);
         const escribio = (getLastUserMessageTime(convo.id) ?? 0) >= empezo;
         if (!ahoraMismo || ahoraMismo.seg_ficha !== ficha || ahoraMismo.seg_token !== payload.token || escribio) {
-          console.log(`[tablero] convo ${convo.id}: el seguimiento se corta a medias (${escribio ? "escribió" : "pagó o se movió"})`);
+          console.log(
+            `[tablero] convo ${convo.id}: el seguimiento ${idx + 1} se corta a medias tras ${salieron} de ${total} burbujas (${escribio ? "escribió" : "pagó o se movió"})`
+          );
           break;
         }
-        await sendConfiguredSteps(getConversationById(convo.id) ?? fresca, [paso] as never);
+        // UNA BURBUJA QUE FALLA NO CORTA EL SEGUIMIENTO (06/11/2026, su conv 362): guardó en el editor mientras salía el
+        // seguimiento 1; salió el video, la imagen no, y como el seguimiento no llegó a anotarse, volvió a salir entero
+        // cuando escribió. Ahora se reintenta una vez y, si vuelve a fallar, se anota en el registro y sigue con las demás.
+        try {
+          await sendConfiguredSteps(getConversationById(convo.id) ?? fresca, [paso] as never);
+        } catch (e) {
+          console.warn(
+            `[tablero] convo ${convo.id}: el seguimiento ${idx + 1} falló en la burbuja ${salieron + 1} de ${total} (${e instanceof Error ? e.message : String(e)}) → se reintenta`
+          );
+          await new Promise((r) => setTimeout(r, 2000));
+          try {
+            await sendConfiguredSteps(getConversationById(convo.id) ?? fresca, [paso] as never);
+          } catch (e2) {
+            console.error(
+              `[tablero] convo ${convo.id}: el seguimiento ${idx + 1} no pudo mandar la burbuja ${salieron + 1} de ${total} (${e2 instanceof Error ? e2.message : String(e2)}) → sigue con las demás`
+            );
+          }
+        }
+        salieron++;
+        // QUEDA MARCADO APENAS SALE SU PRIMERA BURBUJA (06/11/2026): si algo lo corta después, no se repite entero.
+        if (salieron === 1) marcarSeguimientoHecho(convo.id, huellaDelSeguimiento(seg));
       }
     }
     // Lo que este seguimiento presenta, desde ahora la IA lo puede contar (lo marcado o, sin marcar, por sus cables).
