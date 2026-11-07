@@ -8147,7 +8147,7 @@ biblioteca_de_productos:
     precios_por_pais:
       PE:
         price_soles: 10
-        discount_price_soles: 10
+        discount_price_soles: 7
         market_price: 0
     entregas_extra:
       - id: muestras
