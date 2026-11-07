@@ -836,8 +836,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw4z4tlg-y38l
       tipo: regalo
-      x: 3003
-      y: 88
+      x: 2794
+      y: 143
   cables:
     - id: figc1
       de: fig_inicio
@@ -914,6 +914,10 @@ whatsapp:
       a_espejo: e-mw4xjp2d-zjbz
     - id: c-mw4z55hw-aa9
       de: fig_presenta
+      salida: pagado
+      a: f-mw4z4tlg-y38l
+    - id: c-mw5pq2ve-yh7
+      de: f-mw4xdzzq-jx245
       salida: pagado
       a: f-mw4z4tlg-y38l
   cajas:
