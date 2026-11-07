@@ -652,8 +652,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
-      x: 935
-      y: -121
+      x: 924
+      y: -132
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -920,6 +920,7 @@ whatsapp:
       de: f-mw4xdzzq-jx245
       salida: pagado
       a: f-mw4z4tlg-y38l
+      vista: cable
   cajas:
     - id: manta-fig_inicio
       x: 20
