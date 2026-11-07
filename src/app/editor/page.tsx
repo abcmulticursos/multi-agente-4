@@ -31268,8 +31268,11 @@ function VentanaFlotante({
   children,
   onListo,
   onCancelar,
+  hayCambios = true,
   clase = "burbujas-nuevo prolijo",
 }: {
+  /** Con «Listo / Cancelar»: sin cambios se enseña solo «Cerrar» (06/11/2026: «cuando no se haya hecho ningún cambio debe decir cerrar»). */
+  hayCambios?: boolean;
   /** Clases de más para la ventana (por defecto, desde el 02/11/2026, el diseño de las ventanas de burbujas en todas) (02/11/2026: «burbujas-nuevo prolijo», el diseño del pop up de burbujas en Seguimientos). */
   clase?: string;
   titulo: string;
@@ -31295,7 +31298,7 @@ function VentanaFlotante({
             <h3 className="bn-titulo text-sm font-bold text-tinta">{titulo}</h3>
             {detalle && <p className="bn-subtitulo text-xs text-tinta-suave">{detalle}</p>}
           </div>
-          {onListo ? (
+          {onListo && hayCambios ? (
             <span className="flex shrink-0 items-center gap-2">
               <button type="button" onClick={onCancelar ?? onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
                 Cancelar
@@ -32681,10 +32684,17 @@ function GestorDeVersiones({
   // "cancelar"; solo dice "cerrar"». Lo de aquí se sigue viendo en la ficha al ir cambiando; Cancelar (o
   // Escape) la deja como estaba al abrir.
   const [alAbrir] = useState(() => ({ segs: JSON.parse(JSON.stringify(ficha.seguimientos ?? [])) as Seg[], versiones: JSON.parse(JSON.stringify(ficha.variantes ?? [])) as Version[] }));
+  // Lo escrito en el cajón de la derecha se aplica al cerrar; con «Cancelar» (o «Cerrar» sin cambios) se descarta (06/11/2026:
+  // antes «Cancelar» devolvía la lista pero el cajón aplicaba lo suyo al desmontarse, y el cambio quedaba sin guardar).
+  const descartarDelCajon = useRef(false);
   const cancelar = () => {
+    descartarDelCajon.current = true;
     if (JSON.stringify(vivo.current) !== JSON.stringify(alAbrir)) aplicar(alAbrir.segs, alAbrir.versiones);
     onCerrar();
   };
+  // «CERRAR» SIN CAMBIOS, «CANCELAR · ✓ LISTO» CON ELLOS (06/11/2026): lo aplicado a la lista o lo escrito en el cajón de la derecha.
+  const [cajonSucio, setCajonSucio] = useState(false);
+  const hayCambios = cajonSucio || JSON.stringify({ segs, versiones }) !== JSON.stringify(alAbrir);
   const ponerSegs = (s: Seg[]) => {
     setSegs(s);
     aplicar(s, vivo.current.versiones);
@@ -32730,6 +32740,7 @@ function GestorDeVersiones({
       onCerrar={cancelar}
       onListo={onCerrar}
       onCancelar={cancelar}
+      hayCambios={hayCambios}
       ancho={ANCHO_DEL_GESTOR}
       // EL MISMO DISEÑO QUE EL POP UP DE BURBUJAS (02/11/2026). Él: «este estilo debe aplicarse a los seguimientos».
       clase="burbujas-nuevo prolijo"
@@ -32919,6 +32930,8 @@ function GestorDeVersiones({
                 })
               }
               onCerrar={onCerrar}
+              alCambiarSucio={setCajonSucio}
+              descartarAlIrse={descartarDelCajon}
             />
             </ProductosDeLaFichaContext.Provider>
           ) : (
@@ -35483,6 +35496,11 @@ function RecorridoDelTablero({
   );
 }
 
+/** Las burbujas «por contenido», para saber si de verdad cambió algo: apagar y volver a encender no cuenta (06/11/2026). */
+function firmaDeLasBurbujas(pasos: EditorStep[]): string {
+  return JSON.stringify(pasos, (clave, valor) => (clave === "enabled" && valor === true ? undefined : valor));
+}
+
 function VentanaDelCajon({
   titulo,
   nombre,
@@ -35496,7 +35514,13 @@ function VentanaDelCajon({
   onGuardar,
   onCerrar,
   incrustado,
+  alCambiarSucio,
+  descartarAlIrse,
 }: {
+  /** Incrustado: avisa al gestor si hay cambios escritos aún sin aplicar (para su «Cerrar» / «Cancelar · Listo»). */
+  alCambiarSucio?: (sucio: boolean) => void;
+  /** Incrustado: el gestor lo pone en `true` al pulsar «Cancelar», y lo escrito aquí NO se aplica al irse. */
+  descartarAlIrse?: { current: boolean };
   /** DENTRO DE UN GESTOR (19/10/2026), como Sendy: sin ventana encima. Lo editado se aplica solo
    *  al cambiar de paso o cerrar el gestor; «Descartar» lo deja como estaba. */
   incrustado?: boolean;
@@ -35602,10 +35626,21 @@ function VentanaDelCajon({
     borrador !== original.current.steps ||
     (nombre !== undefined && nuevoNombre.trim() !== original.current.nombre) ||
     JSON.stringify(susAnuncios) !== JSON.stringify(original.current.anuncios);
+  // Para los botones de arriba, por CONTENIDO (escribir y borrar lo mismo, o Ctrl+Z, no cuenta como cambio).
+  const hayCambiosDeVerdad =
+    (borrador !== original.current.steps && firmaDeLasBurbujas(borrador) !== firmaDeLasBurbujas(original.current.steps)) ||
+    (nombre !== undefined && nuevoNombre.trim() !== original.current.nombre) ||
+    JSON.stringify(susAnuncios) !== JSON.stringify(original.current.anuncios);
+  useEffect(() => {
+    alCambiarSucio?.(hayCambiosDeVerdad);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hayCambiosDeVerdad]);
   const alIrse = useRef<() => void>(() => {});
   const [, setAplicado] = useState(0);
   alIrse.current = () => {
     if (!cambiado) return;
+    // «CANCELAR» DEL GESTOR (06/11/2026): lo escrito aquí se descarta, no se aplica al cerrar.
+    if (descartarAlIrse?.current) return;
     onGuardar(
       borrador,
       nombre !== undefined && nuevoNombre.trim() !== nombre ? nuevoNombre.trim() : undefined,
@@ -35747,6 +35782,15 @@ function VentanaDelCajon({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* SIN CAMBIOS, SOLO «CERRAR» (06/11/2026). Él: «solo debe decir "Listo" cuando haya un cambio, y Cancelar cuando
+                haya un cambio… cuando no se haya hecho ningún cambio debe decir cerrar». Por contenido: deshacer lo escrito
+                vuelve a «Cerrar». */}
+            {!hayCambiosDeVerdad ? (
+              <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
+                Cerrar
+              </button>
+            ) : (
+            <>
             <span className="bn-nota hidden text-[11px] text-neutral-500 sm:inline">Escape o Cancelar = descartar</span>
             <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
               Cancelar
@@ -35765,6 +35809,8 @@ function VentanaDelCajon({
               Listo
               <IconoDeBurbuja nombre="listo" />
             </button>
+            </>
+            )}
           </div>
         </div>
         {/* EL MISMO EDITOR CON VISOR QUE EN LOS MENÚS (16/10/2026): «en las otras yo puedo
@@ -37960,14 +38006,21 @@ function JourneyStepEditorModal({
             <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">{title}</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="bn-nota hidden text-[11px] text-neutral-500 sm:inline">
-              Escape o Cancelar = descartar
-            </span>
-            <button type="button" onClick={onClose} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Cancelar</button>
-            <button type="button" onClick={aplicarYCerrar} className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
-              Listo
-              <IconoDeBurbuja nombre="listo" />
-            </button>
+            {/* SIN CAMBIOS, SOLO «CERRAR» (06/11/2026), como la ventana de la ficha. */}
+            {firmaDeLasBurbujas(borrador) === firmaDeLasBurbujas(steps) ? (
+              <button type="button" onClick={onClose} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Cerrar</button>
+            ) : (
+              <>
+                <span className="bn-nota hidden text-[11px] text-neutral-500 sm:inline">
+                  Escape o Cancelar = descartar
+                </span>
+                <button type="button" onClick={onClose} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Cancelar</button>
+                <button type="button" onClick={aplicarYCerrar} className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+                  Listo
+                  <IconoDeBurbuja nombre="listo" />
+                </button>
+              </>
+            )}
           </div>
         </div>
         {/* CADA COLUMNA CON SU PROPIO DESPLAZAMIENTO.
@@ -48940,6 +48993,7 @@ function VentanaDeProductosYPrecios({ onCerrar, children }: { onCerrar: () => vo
       onCerrar={cancelar}
       onListo={onCerrar}
       onCancelar={cancelar}
+      hayCambios={!!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir}
     >
       {children}
     </VentanaFlotante>

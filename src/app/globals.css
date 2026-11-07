@@ -759,7 +759,8 @@ input,
   --bn-cancelar: #f0f8fc;
   --bn-cancelar-borde: #cfdcec;
   --bn-cancelar-texto: #0f172a;
-  --bn-listo: #277bfd;
+  /* «Listo» en VERDE (06/11/2026: «el botón de Listo debe ser verde por favor»). Era azul #277bfd. */
+  --bn-listo: #16a34a;
   --bn-listo-texto: #ffffff;
   --bn-linea: rgba(255, 255, 255, 0.45);
   /* el cajón */
@@ -1239,7 +1240,8 @@ input,
   --bn-cancelar: #ffffff;
   --bn-cancelar-borde: #d6dfeb;
   --bn-cancelar-texto: #0f172a;
-  --bn-listo: #2f7cf6;
+  /* «Listo» en VERDE (06/11/2026), como en el claro. Era azul #2f7cf6. */
+  --bn-listo: #16a34a;
   --bn-listo-texto: #ffffff;
   --bn-linea: #dfe6f0;
   --bn-cajon: #ffffff;
