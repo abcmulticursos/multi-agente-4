@@ -9373,6 +9373,44 @@ tiendas:
           body_variants:
             - ""
           delay_after_sec: 6
+  - id: tienda_mw91gb6s
+    nombre: TIENDA FIGURARTE - MODO CONTRIBUCION
+    numero: ""
+    pagina: ""
+    frases_de_entrada:
+      - figurarte
+    alineacion:
+      basico: ptfig_figurarte
+      unico: ptfig_figurarte
+    color: "#f97316"
+    regalo:
+      consent_sequence:
+        - type: image
+          drive_url: https://drive.google.com/file/d/1XgwYsDzn_UNNCfz9Y3xBNE4uWjjBnigS/view?usp=sharing
+          caption_variants:
+            - |-
+              🎁 *{¿Deseas recibir un Regalito Adicional extra|¿Te gustaría recibir un Regalito Adicional extra|¿Quieres recibir un Regalito Adicional extra}*
+
+              📘 Es un pequeño *LIBRO EN PDF PARA COLOREAR*🎨🖍️
+
+              *INCLUYE:*
+              - Estrellas ⭐️
+              - Árboles 🌲
+              - Vocales 🔠
+              - Personajes de películas: TOY STORY, PAW PATROL, POKEMON, MARIO BROSS, MONSTER INC Y MAS 🐕‍🦺🤠🧌🏃‍♂️‍➡️
+
+              🎁 *{¿Quieres recibir este Plus de manera gratuita?|¿Deseas descargar este Plus de manera gratuita?|¿Te gustaría descargar este Plus de manera gratuita?}* 😊
+          delay_after_sec: 6
+      reward_message: |-
+        🎉 *{¡Gracias por tu comentario!|¡Muchas gracias por tu comentario!|¡Gracias por dejarnos tu comentario!}* 😊
+
+        Aquí tienes tu *PDF de regalo* — un material extra que puedes utilizar en cualquier momento: 🖍️🎨
+
+        *ENLACE DE DESCARGA AQUI* 😊👇
+        https://drive.google.com/file/d/1Upoiyp4T8EhTrMDLLo42VjRMOJEQmnq5/view?usp=drive_link
+
+
+        Que tenga un excelente día!
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -12868,6 +12906,7 @@ tableros:
   tienda_test2: "@pieza:tableros/tienda_test2.yaml"
   tienda_mupk9ybz: "@pieza:tableros/tienda_mupk9ybz.yaml"
   tienda_mvxkyp9i: "@pieza:tableros/tienda_mvxkyp9i.yaml"
+  tienda_mw91gb6s: "@pieza:tableros/tienda_mw91gb6s.yaml"
 workflows:
   figurarte2:
     encendido: true
