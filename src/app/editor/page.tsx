@@ -27346,6 +27346,36 @@ function VistaPizarra({
   const [ventanaDeHerramienta, setVentanaDeHerramienta] = useState<null | "tienda" | "productos" | "anuncios" | "prueba" | "exportar">(null);
   /** EL GESTOR DE UN CAJÓN abierto (19/10/2026): el del regalo o el de los upsells, de ese país. */
   const [gestorAbierto, setGestorAbierto] = useState<{ cual: "regalo" | "upsells" | "cobro" | "seguimientos"; pais: string; camino?: string; soloEstas?: string[] } | null>(null);
+  // «CERRAR» SIN CAMBIOS, «CANCELAR · ✓ LISTO» CON ELLOS EN LOS GESTORES DE LA PIZARRA (09/11/2026, él: «hazlo de una
+  // vez»). Como en el Regalo del tablero: al abrir se guarda la huella; Cancelar (✕, Escape) la devuelve y lo escrito en
+  // el cajón o el texto de la derecha no se aplica al irse. La huella vive aquí y no en el gestor: el gestor se esconde
+  // (y se desmonta) mientras se edita un paso, y al volver no debe tomar otra.
+  const guardadoDeLaPizarra = useContext(GuardadoDelEditor);
+  const guardadoVivo = useRef(guardadoDeLaPizarra);
+  guardadoVivo.current = guardadoDeLaPizarra;
+  const alAbrirElGestor = useRef<{ huella: string; copias: Record<string, string> } | null>(null);
+  const descartarDelGestor = useRef(false);
+  const [derechaDelGestorSucia, setDerechaDelGestorSucia] = useState(false);
+  const abrirElGestor = (g: NonNullable<typeof gestorAbierto>) => {
+    alAbrirElGestor.current = { huella: guardadoVivo.current?.huella ?? "", copias: { ...copiaDeLaFicha.current } };
+    descartarDelGestor.current = false;
+    setDerechaDelGestorSucia(false);
+    setGestorAbierto(g);
+  };
+  const cancelarElGestor = () => {
+    descartarDelGestor.current = true;
+    const g = guardadoVivo.current;
+    const antes = alAbrirElGestor.current;
+    if (g && antes?.huella) {
+      g.restaurar(antes.huella);
+      // Las copias propias que nacieron aquí ya no existen: el editor incrustado no debe buscarlas.
+      copiaDeLaFicha.current = { ...antes.copias };
+    }
+    setGestorAbierto(null);
+  };
+  const gestorConCambios =
+    derechaDelGestorSucia ||
+    (!!guardadoDeLaPizarra && guardadoDeLaPizarra.sucio && guardadoDeLaPizarra.huella !== (alAbrirElGestor.current?.huella ?? guardadoDeLaPizarra.huella));
   const refDeHerramientas = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!menuHerramientas) return;
@@ -29178,6 +29208,8 @@ function VistaPizarra({
           aplicar(propia.id !== idAhora ? conIdsNuevos(conTodo, new Map([[idAhora, propia.id]])) : conTodo);
         }}
         onCerrar={() => {}}
+        alCambiarSucio={setDerechaDelGestorSucia}
+        descartarAlIrse={descartarDelGestor}
       />
     );
   };
@@ -29201,6 +29233,8 @@ function VistaPizarra({
           else if (c.gift) aplicar({ ...c, gift: { ...c.gift, ...cambio } });
         }}
         onCerrar={() => {}}
+        alCambiarSucio={setDerechaDelGestorSucia}
+        descartarAlIrse={descartarDelGestor}
       />
     ) : (
       <p className="text-sm text-tinta-suave">El regalo no está configurado.</p>
@@ -29297,7 +29331,7 @@ function VistaPizarra({
       },
       // LOS CAJONES (19/10/2026): su gestor se abre encima de la pizarra.
       abrirGestor: (cual: "regalo" | "upsells" | "cobro" | "seguimientos", pais: string, camino?: string, soloEstas?: string[]) =>
-        setGestorAbierto({ cual, pais, camino, soloEstas }),
+        abrirElGestor({ cual, pais, camino, soloEstas }),
       // EL CABLE DEL REGALO ES VERDADERO (19/10/2026): es el MISMO interruptor del menú Regalo
       // (`gift.has`), uno solo para todo el bot. Por eso pregunta antes.
       alternarRegalo: (encender: boolean) => {
@@ -30082,6 +30116,8 @@ function VistaPizarra({
             editor={(piezaId) => editorIncrustado(piezaId, gestorAbierto.pais || undefined)}
             cobro={() => cobroIncrustado(gestorAbierto.pais)}
             onCerrar={() => setGestorAbierto(null)}
+            onCancelar={cancelarElGestor}
+            hayCambios={gestorConCambios}
           />
         ) : gestorAbierto.cual === "seguimientos" ? (
           <GestorDeSeguimientos
@@ -30093,6 +30129,8 @@ function VistaPizarra({
             acciones={accionesVivas}
             editor={(piezaId) => editorIncrustado(piezaId, gestorAbierto.pais || undefined)}
             onCerrar={() => setGestorAbierto(null)}
+            onCancelar={cancelarElGestor}
+            hayCambios={gestorConCambios}
           />
         ) : gestorAbierto.cual === "regalo" ? (
           <GestorDelRegalo
@@ -30101,6 +30139,8 @@ function VistaPizarra({
             editor={(piezaId) => editorIncrustado(piezaId, gestorAbierto.pais || undefined)}
             texto={textoDelRegaloIncrustado}
             onCerrar={() => setGestorAbierto(null)}
+            onCancelar={cancelarElGestor}
+            hayCambios={gestorConCambios}
             selector={tienda ? <SelectorDeRegalo cfg={cfg} tiendaId={tienda.id} aplicar={aplicar} /> : undefined}
           />
         ) : (
@@ -30122,6 +30162,8 @@ function VistaPizarra({
             editor={(piezaId) => editorIncrustado(piezaId, gestorAbierto.pais || undefined)}
             cobro={() => cobroIncrustado(gestorAbierto.pais)}
             onCerrar={() => setGestorAbierto(null)}
+            onCancelar={cancelarElGestor}
+            hayCambios={gestorConCambios}
           />
         )
       )}
@@ -30428,6 +30470,8 @@ function GestorDelRegalo({
   editor,
   texto,
   onCerrar,
+  onCancelar,
+  hayCambios,
   selector,
 }: {
   pv: PostventaDeLaPizarra;
@@ -30435,14 +30479,18 @@ function GestorDelRegalo({
   /** El editor de siempre, incrustado (ver `editorIncrustado`). */
   editor: (piezaId: string) => React.ReactNode;
   texto: (cual: "regalo-premio" | "regalo-despedida") => React.ReactNode;
+  /** «✓ Listo» (o «Cerrar» sin cambios). */
   onCerrar: () => void;
+  /** «Cancelar», ✕ y Escape: deja todo como al abrir (09/11/2026). */
+  onCancelar?: () => void;
+  hayCambios?: boolean;
   /** «¿Qué regalo?» de la tienda (25/10/2026), arriba. */
   selector?: React.ReactNode;
 }) {
   const rg = pv.regalo;
   const [paso, setPaso] = useState<"ofrece" | "enlace" | "comento" | "premio" | "despedida">("ofrece");
   return (
-    <VentanaFlotante titulo="🎁 Regalo" detalle={rg?.deEstaTienda ? "El regalo de esta tienda." : "El de todas las tiendas: si lo editas aquí, esta tienda tendrá el suyo."} onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR} clase="burbujas-nuevo prolijo">
+    <VentanaFlotante titulo="🎁 Regalo" detalle={rg?.deEstaTienda ? "El regalo de esta tienda." : "El de todas las tiendas: si lo editas aquí, esta tienda tendrá el suyo."} onCerrar={onCancelar ?? onCerrar} onListo={onCancelar ? onCerrar : undefined} onCancelar={onCancelar} hayCambios={hayCambios} ancho={ANCHO_DEL_GESTOR} clase="burbujas-nuevo prolijo">
       {selector}
       <div className="mb-3 flex items-center gap-2">
         <button
@@ -30530,6 +30578,8 @@ function GestorDeUpsells({
   editor,
   cobro,
   onCerrar,
+  onCancelar,
+  hayCambios,
 }: {
   pv: PostventaDeLaPizarra;
   /** Las presentaciones del upsell 1 en este país (sus fichas, con su peso). */
@@ -30540,7 +30590,11 @@ function GestorDeUpsells({
   editor: (piezaId: string) => React.ReactNode;
   /** Quién cobra, incrustado. */
   cobro: () => React.ReactNode;
+  /** «✓ Listo» (o «Cerrar» sin cambios). */
   onCerrar: () => void;
+  /** «Cancelar», ✕ y Escape: deja todo como al abrir (09/11/2026). */
+  onCancelar?: () => void;
+  hayCambios?: boolean;
 }) {
   const tieneUno = !!(pv.upsell || pv.upsellApagado);
   const [elegido, setElegido] = useState<number>(tieneUno ? 0 : 1);
@@ -30573,7 +30627,7 @@ function GestorDeUpsells({
   const pesoTotal = piezasDelUpsell1.reduce((t, p) => t + (p.peso ?? 1), 0);
   const versionDelUno = piezasDelUpsell1.find((p) => p.id === versionId) ?? piezasDelUpsell1[0];
   return (
-    <VentanaFlotante titulo="🛒 Upsells" detalle="En el orden en que el bot los ofrece: al siguiente solo se llega si compró el anterior; al primer «No», al regalo." onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR}>
+    <VentanaFlotante titulo="🛒 Upsells" detalle="En el orden en que el bot los ofrece: al siguiente solo se llega si compró el anterior; al primer «No», al regalo." onCerrar={onCancelar ?? onCerrar} onListo={onCancelar ? onCerrar : undefined} onCancelar={onCancelar} hayCambios={hayCambios} ancho={ANCHO_DEL_GESTOR}>
       <div className="grid gap-4 md:grid-cols-[280px_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           {tieneUno ? (
@@ -30847,6 +30901,8 @@ function GestorDelCobro({
   editor,
   cobro,
   onCerrar,
+  onCancelar,
+  hayCambios,
 }: {
   pv: PostventaDeLaPizarra;
   pais: string;
@@ -30854,14 +30910,18 @@ function GestorDelCobro({
   editor: (piezaId: string) => React.ReactNode;
   /** Quién cobra, incrustado. */
   cobro: () => React.ReactNode;
+  /** «✓ Listo» (o «Cerrar» sin cambios). */
   onCerrar: () => void;
+  /** «Cancelar», ✕ y Escape: deja todo como al abrir (09/11/2026). */
+  onCancelar?: () => void;
+  hayCambios?: boolean;
 }) {
   const entregas = pv.entregas ?? [];
   const [elegido, setElegido] = useState(0);
   const [parte, setParte] = useState<"pago" | "entrega">("pago");
   const e = entregas[elegido];
   return (
-    <VentanaFlotante titulo="💳 Cobro y entrega" detalle="Cuando el cliente paga, se valida su comprobante y recibe la entrega de lo que eligió." onCerrar={onCerrar} ancho={ANCHO_DEL_GESTOR}>
+    <VentanaFlotante titulo="💳 Cobro y entrega" detalle="Cuando el cliente paga, se valida su comprobante y recibe la entrega de lo que eligió." onCerrar={onCancelar ?? onCerrar} onListo={onCancelar ? onCerrar : undefined} onCancelar={onCancelar} hayCambios={hayCambios} ancho={ANCHO_DEL_GESTOR}>
       <div className="grid gap-4 md:grid-cols-[240px_minmax(0,1fr)]">
         <div className="flex flex-col gap-1.5">
           {entregas.length === 0 && <p className="text-xs text-tinta-suave">Esta tienda no tiene producto con entrega.</p>}
@@ -30914,6 +30974,8 @@ function GestorDeSeguimientos({
   acciones,
   editor,
   onCerrar,
+  onCancelar,
+  hayCambios,
   visibles,
   soloEstas,
 }: {
@@ -30928,7 +30990,11 @@ function GestorDeSeguimientos({
   acciones: AccionesDelLienzo;
   /** El editor de siempre, incrustado (ver `editorIncrustado`). */
   editor: (piezaId: string) => React.ReactNode;
+  /** «✓ Listo» (o «Cerrar» sin cambios). */
   onCerrar: () => void;
+  /** «Cancelar», ✕ y Escape: deja todo como al abrir (09/11/2026). */
+  onCancelar?: () => void;
+  hayCambios?: boolean;
 }) {
   // LA LISTA SALE DE TODOS LOS SEGUIMIENTOS DEL CANAL y de las fichas de ESTE país y camino —
   // también las recién creadas y aún vacías, que la pizarra todavía no pone en su fila—. Así lo
@@ -30980,7 +31046,10 @@ function GestorDeSeguimientos({
           ? "Pegados y aún sin país: el bot no los manda. Puedes editarlos; para agregar o quitar versiones, conéctalos primero a un país."
           : "Salen por tiempo, desde el primer mensaje del cliente, mientras no compre. El orden define cuál sale primero."
       }
-      onCerrar={onCerrar}
+      onCerrar={onCancelar ?? onCerrar}
+      onListo={onCancelar ? onCerrar : undefined}
+      onCancelar={onCancelar}
+      hayCambios={hayCambios}
       ancho={ANCHO_DEL_GESTOR}
     >
       <div className="grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
