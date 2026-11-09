@@ -808,25 +808,27 @@ whatsapp:
               peso: 1
               steps:
                 - type: image
-                  drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                  drive_url: https://drive.google.com/file/d/1uqd9dU7UZGHZQCbHDLKAspSH3WC6GUby/view?usp=sharing
                   caption_variants:
                     - |-
-                      *--OB--* *ECUADOR *-OB-* 🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+                      🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS!!* ⏰🔥
 
-                      {{Producto_BASE}} a tan solo {{precio_BASE}}
+                      📚️ *{{Producto_BASE}}* a tan solo 💰️ *{{precio_BASE}}!!*
 
-                      por tiempo limitado
+                      Por tiempo limitado!! 😱
+
+                      🤗 Ya puedes adquirir estos bonitos libros para colorear a un super precio, apresúrate que la oferta está casi por terminar 🏃‍♀️
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+                      ✅ *{PARA ADQUIRIRLO|PARA DESCARGARLO|PARA REALIZAR TU PAGO}* 🫰🏼
 
                       🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 💫
                   delay_after_sec: 6
           activa_oferta: true
     - id: f-mw4z4tlg-y38l
