@@ -1,5 +1,26 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { getCountryInfo } from "@/lib/countries";
-import { loadWorkflowConfig } from "@/lib/workflow/config";
+import { getEffectiveCountryCode, loadWorkflowConfig } from "@/lib/workflow/config";
+
+/** LA HORA DEL PAÍS DEL CLIENTE (09/11/2026, antes de sus campañas por país: «todos los países reciben
+ *  mensajes de seguimiento de acuerdo al horario del país cierto?»). Antes TODOS usaban la hora del país
+ *  del bot (Perú): en Argentina el silencio iba de 1:00 a 9:00. Ahora, mientras se atiende a un cliente
+ *  (su mensaje o lo programado suyo), las horas se cuentan con la zona de SU país —el mismo que da la
+ *  moneda y el dialecto—. Fuera de un cliente, la del bot, como antes. */
+const clienteEnCurso = new AsyncLocalStorage<{ phone: string; zona?: string }>();
+export function conLaHoraDelCliente<T>(phone: string | null | undefined, fn: () => T): T {
+  return phone ? clienteEnCurso.run({ phone }, fn) : fn();
+}
+function zonaHoraria(): string {
+  const cliente = clienteEnCurso.getStore();
+  if (!cliente) return getCountryInfo(loadWorkflowConfig()?.country).timezone;
+  try {
+    cliente.zona ??= getCountryInfo(getEffectiveCountryCode(cliente.phone)).timezone;
+    return cliente.zona;
+  } catch {
+    return getCountryInfo(loadWorkflowConfig()?.country).timezone;
+  }
+}
 
 // Horario silencioso de seguimientos (zona horaria del país seleccionado).
 //
@@ -21,7 +42,7 @@ const QUIET_END_SEC_OF_DAY = 7 * 3600;
  *  DST correctamente (ej. Chile). Es lo que hay que SUMAR a unixSec para obtener
  *  la hora local. Perú = -18000. Si algo falla, cae a Perú. */
 function activeOffsetSec(unixSec: number): number {
-  const tz = getCountryInfo(loadWorkflowConfig()?.country).timezone;
+  const tz = zonaHoraria();
   try {
     const date = new Date(unixSec * 1000);
     const dtf = new Intl.DateTimeFormat("en-US", {

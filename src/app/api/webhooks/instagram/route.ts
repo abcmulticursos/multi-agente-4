@@ -38,6 +38,7 @@ import {
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import { tiendaDeLaPagina } from "@/lib/workflow/config";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { getWebhookAppSecret, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
@@ -213,7 +214,9 @@ async function processInstagramPayload(payload: InstagramPayload): Promise<void>
       );
 
       await withWorkflowChannel("instagram", () =>
-        handleInstagramMessage(psid, messageId, content, attachment, referral)
+        conLaHoraDelCliente(`instagram:${psid}`, () =>
+          handleInstagramMessage(psid, messageId, content, attachment, referral)
+        )
       );
     }
   }

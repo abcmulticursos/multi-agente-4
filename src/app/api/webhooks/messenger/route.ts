@@ -43,6 +43,7 @@ import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import { registrarComentario } from "@/lib/meta/comments";
 import {
   getWebhookAppSecret,
@@ -385,7 +386,9 @@ async function processMessengerPayload(payload: MessengerPayload): Promise<void>
       await withOutboundMessengerPage(entry.id, () =>
         conElTurnoDe({ messenger_page_id: entry.id ?? null }, () =>
           withWorkflowChannel("messenger", () =>
-            handleMessengerMessage(psid, messageId, content, attachment, referral, visible)
+            conLaHoraDelCliente(`messenger:${psid}`, () =>
+              handleMessengerMessage(psid, messageId, content, attachment, referral, visible)
+            )
           )
         )
       );

@@ -1,5 +1,6 @@
 import {
   claimScheduledAction,
+  getConversationById,
   getDueActions,
   markActionCompleted,
   markActionFailed,
@@ -9,6 +10,7 @@ import {
   type ScheduledActionRow,
 } from "@/lib/db";
 import { executeAction } from "@/lib/workflow/engine";
+import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import { ejecutarAccionDelTablero } from "@/lib/tablero/motor";
 import { maybePurgeStaleConversations } from "@/lib/workflow/purge";
 import { tickComentarios } from "@/lib/meta/comments";
@@ -73,8 +75,11 @@ async function correr(action: ScheduledActionRow): Promise<void> {
   }
   try {
     // Lo programado del tablero va a su motor; lo demás, al de siempre, como antes.
-    if (action.action_type.startsWith("tablero_")) await ejecutarAccionDelTablero(action);
-    else await executeAction(action);
+    // Con la hora del país de SU cliente: horas de silencio y horarios fijos (09/11/2026).
+    let phone: string | undefined;
+    try { phone = getConversationById(action.conversation_id)?.phone; } catch { phone = undefined; }
+    await conLaHoraDelCliente(phone, () =>
+      action.action_type.startsWith("tablero_") ? ejecutarAccionDelTablero(action) : executeAction(action));
     if (Date.now() - desde > 30_000) console.log(`[latido] la acción ${action.id} (${action.action_type}) tardó ${Math.round((Date.now() - desde) / 1000)} s`);
     markActionCompleted(action.id);
     reintentos.delete(action.id);

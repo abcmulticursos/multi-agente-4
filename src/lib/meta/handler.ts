@@ -31,6 +31,7 @@ import {
 } from "@/lib/db";
 import { evaluarModeracion } from "@/lib/workflow/moderation";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
+import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import {
   generateReply,
   seLePidioOfrecerImagenesEnElTurnoAnterior,
@@ -976,7 +977,9 @@ function withPhoneLock<T>(
   // Encadenamos sobre la promesa previa. Pasamos `fn` como handler de
   // ambos lados (resuelto y rechazado) para que un error previo no
   // bloquee a los siguientes.
-  const next = prev.then(fn, fn) as Promise<T>;
+  // Todo lo que se atiende de este teléfono cuenta las horas con la zona de SU país (09/11/2026).
+  const conSuHora = () => conLaHoraDelCliente(phone, fn);
+  const next = prev.then(conSuHora, conSuHora) as Promise<T>;
   // Trackeamos una version que no rechaza para no contaminar la cadena
   // siguiente con errores ajenos.
   const tracked = next.catch(() => {});
