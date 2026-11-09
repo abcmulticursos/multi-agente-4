@@ -637,7 +637,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+            - ✅ *Genial,* puedes adquirirlo de la siguiente Manera 😊👇
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -645,7 +645,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+            - 🙌 *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊
           delay_after_sec: 6
       cobro:
         modo: producto
