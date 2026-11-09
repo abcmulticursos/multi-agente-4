@@ -289,7 +289,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🔥 Además al completar tu pago hoy y *recibirás GRATIS aparte un regalito adicional* 🤗🎁
+              🔥 Al completar tu pago hoy y *recibirás GRATIS aparte un regalito adicional* 🎁
 
               🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
@@ -670,7 +670,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1vrDZq0wLV97cYfYGJShHY6RiAlOUzRm5/view?usp=sharing
                   caption_variants:
                     - |-
-                      🎯 *Hola Soy Andrea: 🙋‍♀️ Aprovecha nuestra promoción activa* realizando un único pago ahora mismo!
+                      🎯 *Hola Soy Andrea: 🙋‍♀️ Puedes aprovechar nuestra promoción activa* realizando un único pago!
 
                       *Muchos padres ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
 
