@@ -828,7 +828,9 @@ whatsapp:
 
                       🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
-                      {{METODOS_DE_PAGO_POR_PAIS}}
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ¿{Cuál prefieres?|¿Cual método prefieres?|Con cual de ellos te resulta más fácil adquirirlo}
                   delay_after_sec: 6
           activa_oferta: true
     - id: f-mw4z4tlg-y38l
