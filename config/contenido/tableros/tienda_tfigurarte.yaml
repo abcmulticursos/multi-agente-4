@@ -226,18 +226,18 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases🙋‍♀️✨.
+              {*¡Hola! mi nombre es Andrea*|*¡Hola! soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
 
               📱 *¿Te preocupa que tu peque pase demasiado tiempo frente al celular o la tablet? * 😟
 
               🌟 ¿Te gustaría que aproveche mejor su tiempo, estimule su creatividad y se divierta aprendiendo, en lugar de estar siempre frente a una pantalla? 🤗
 
-              💡 ¡Quiero presentarte algo que le gustará! ❤️
+              💡 {¡Quiero presentarte algo que le gustará!|¡Tengo algo que quiero mostrarte y que te encantará!|¡Quiero compartir contigo algo que te va a interesar!} ❤️
           delay_after_sec: 4
         - type: text
           body_variants:
             - |-
-              🎨✨ *¡TE PRESENTO EL LIBRO PARA COLOREAR FIGURARTE!:* 📚️🔺🟢✨
+              🎨✨ *{¡TE PRESENTO EL LIBRO PARA COLOREAR FIGURARTE!:|¡CONOCE EL LIBRO PARA COLOREAR FIGURARTE!:|¡MIRA LO QUE TENEMOS PARA TI: EL LIBRO PARA COLOREAR FIGURARTE!:}* 📚️🔺🟢✨
 
               *Una nueva forma de colorear* donde las *figuras geométricas* se convierten en increíbles animales y personajes. 🐯🎨📚
 
@@ -251,7 +251,7 @@ whatsapp:
               🟨 *Figuras* que se transforman en increíbles dibujos.
               🧠 Actividades que estimulan la creatividad y la atención.
               ✏️ *Una experiencia divertida para aprender mientras colorea.*
-              🌈 Diseños originales para dar vida con tus colores.
+              🌈 {Diseños originales para dar vida con tus colores.|Dibujos únicos para llenar de color y creatividad.|Hermosos diseños para colorear y dejar volar tu imaginación.}
           delay_after_sec: 4
         - type: image
           drive_url: https://drive.google.com/file/d/1CQJJIAN4ForE3O4M7q8Z6kbErUwsg-UB/view?usp=drive_link
@@ -260,7 +260,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🎁 Además, al adquirir FIGURARTE, recibes *4 BONOS SORPRESA GRATIS* 🎁🎨
+              🎁 {Además, al adquirir FIGURARTE, recibes *4 BONOS SORPRESA GRATIS*|Y eso no es todo, al comprar FIGURARTE también obtienes *4 BONOS SORPRESA GRATIS*|Al llevarte FIGURARTE, también te regalamos *4 BONOS SORPRESA GRATIS*} 🎁🎨
 
               🎁 1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
               🎁 2 - *Práctica *Recortables* ✂️
@@ -271,7 +271,7 @@ whatsapp:
 
               📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
 
-              ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨
+              ⚠️ {¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear!|¡No dejes pasar esta oferta y descubre una manera nueva, entretenida y creativa de colorear!|¡Obtén esta promoción por tiempo limitado y disfruta coloreando de una forma divertida y original!} 🎨✨
           delay_after_sec: 4
         - type: text
           body_variants:
@@ -284,12 +284,12 @@ whatsapp:
               1.- 💴 *Realiza un único pago de {{PRECIO_BASE}}*
               2.- 📲 Y envíanos tu comprobante de pago
 
-              * ! Y al instante recibes tu Material + 🎁 Bonos en segundos* 😊⚡
+              * !Y al instante recibes tu Material + 🎁 Bonos en segundos* 😊⚡
           delay_after_sec: 4
         - type: text
           body_variants:
             - |-
-              🔥 Al completar tu pago hoy y *recibirás GRATIS aparte un regalito adicional* 🎁
+              🔥 {Al completar tu pago hoy y *recibirás GRATIS aparte un regalito adicional*|Si realizas tu pago hoy, *también recibirás un regalito adicional totalmente GRATIS*|Y si lo adquieres, *te llevas GRATIS un regalo adicional sorpresa*} 🎁
 
               🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
