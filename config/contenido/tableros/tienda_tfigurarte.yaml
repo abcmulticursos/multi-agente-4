@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: fig_inicio
       tipo: inicio
-      x: -264
-      y: 44
+      x: -495
+      y: -1463
       titulo: Venta por contribución
       pais: PE
     - id: fig_presenta
       tipo: mensaje
-      x: 649
-      y: 209
+      x: 242
+      y: -1155
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
@@ -427,8 +427,8 @@ whatsapp:
       instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: fig_si_msg
       tipo: mensaje
-      x: 1694
-      y: 1529
+      x: 1672
+      y: 4026
       titulo: Dijo que sí
       steps:
         - type: text
@@ -437,16 +437,16 @@ whatsapp:
           delay_after_sec: 3
     - id: fig_muestras
       tipo: entregar
-      x: 2123
-      y: 1793
+      x: 2101
+      y: 4290
       titulo: Muestras gratuitas
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#muestras
     - id: fig_cobro
       tipo: cobro
-      x: 2684
-      y: 1826
+      x: 2662
+      y: 4323
       titulo: Contribución
       steps:
         - type: text
@@ -508,8 +508,8 @@ whatsapp:
               desde: 30
     - id: fig_recordatorios
       tipo: seguimientos
-      x: 2948
-      y: 1320
+      x: 2926
+      y: 3817
       titulo: Recordatorios (si no aporta)
       presenta:
         - ptfig_figurarte
@@ -572,53 +572,53 @@ whatsapp:
                   delay_after_sec: 4
     - id: fig_ent10
       tipo: entregar
-      x: 4103
-      y: 1287
+      x: 4081
+      y: 3784
       titulo: Entrega S/10 · Semilla
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte
     - id: fig_ent15
       tipo: entregar
-      x: 4257
-      y: 1705
+      x: 4235
+      y: 4202
       titulo: Entrega S/15 · Apoyo
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel15
     - id: fig_ent20
       tipo: entregar
-      x: 4301
-      y: 1859
+      x: 4279
+      y: 4356
       titulo: Entrega S/20 · Especial
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel20
     - id: fig_ent25
       tipo: entregar
-      x: 4268
-      y: 2002
+      x: 4246
+      y: 4499
       titulo: Entrega S/25 · Bendición
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel25
     - id: fig_ent30
       tipo: entregar
-      x: 4191
-      y: 2365
+      x: 4169
+      y: 4862
       titulo: Entrega S/30 · Generosa
       producto_id: ptfig_figurarte
       entregas:
         - ptfig_figurarte#nivel30
     - id: fig_otros
       tipo: inicio
-      x: 60
-      y: 1500
+      x: 44
+      y: 3993
       titulo: Otros países
     - id: fig_otros_msg
       tipo: mensaje
-      x: 390
-      y: 1500
+      x: 374
+      y: 3993
       titulo: No vendemos aquí
       steps:
         - type: text
@@ -627,13 +627,13 @@ whatsapp:
           delay_after_sec: 4
     - id: fig_otros_humano
       tipo: humano
-      x: 720
-      y: 1500
+      x: 704
+      y: 3993
       titulo: Pasa a un asesor
     - id: f-mw4xdzzq-jx245
       tipo: cobro
-      x: 1628
-      y: 110
+      x: 1221
+      y: -1254
       steps:
         - type: text
           body_variants:
@@ -652,8 +652,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
-      x: 924
-      y: -132
+      x: 517
+      y: -1496
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -835,8 +835,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw4z4tlg-y38l
       tipo: regalo
-      x: 2640
-      y: 143
+      x: 2233
+      y: -1221
   cables:
     - id: figc1
       de: fig_inicio
@@ -922,15 +922,15 @@ whatsapp:
       vista: cable
   cajas:
     - id: manta-fig_inicio
-      x: 20
-      y: -760
-      ancho: 5586
-      alto: 1696
+      x: 53
+      y: -1717
+      ancho: 5553
+      alto: 2653
       titulo: ""
       inicio: fig_inicio
     - id: manta-fig_otros
-      x: 20
-      y: 1430
+      x: 0
+      y: 3927
       ancho: 1000
       alto: 620
       titulo: ""
@@ -938,5 +938,5 @@ whatsapp:
   espejos:
     - id: e-mw4xjp2d-zjbz
       ficha: f-mw4xhgdb-dozb0
-      x: 1892
-      y: -231
+      x: 1485
+      y: -1595
