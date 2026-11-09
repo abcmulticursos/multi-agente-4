@@ -9195,6 +9195,17 @@ tiendas:
       basico: ptfig_figurarte
       unico: ptfig_figurarte
     color: "#f97316"
+    regalo:
+      reward_message: |-
+        🎉 *{¡Gracias por tu comentario!|¡Muchas gracias por tu comentario!|¡Gracias por dejarnos tu comentario!}* 😊
+
+        Aquí tienes tu *PDF de regalo* — un material extra que puedes utilizar en cualquier momento: 🖍️🎨
+
+        *ENLACE DE DESCARGA AQUI* 😊👇
+        https://drive.google.com/file/d/1Upoiyp4T8EhTrMDLLo42VjRMOJEQmnq5/view?usp=drive_link
+
+
+        Que tenga un excelente día!
   - id: tienda_tfigurarte3
     nombre: TIENDA FIGURARTE 3 PLANTILLA
     numero: "1345130172015574"
