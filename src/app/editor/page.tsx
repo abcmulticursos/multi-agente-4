@@ -33055,6 +33055,21 @@ function GestorDelRegaloDelTablero({
     ["no", "Si dice que no", "La respuesta cuando no lo quiere"],
   ] as const;
   const cfgVista = configComoLaVeLaTienda(cfg, tienda, "lineal");
+  // «CERRAR» SIN CAMBIOS, «CANCELAR · ✓ LISTO» CON ELLOS (09/11/2026, él: «la ficha de regalo… solo tiene opción de
+  // CERRAR»). Como «📦 Productos y precios»: Cancelar (✕, Escape) deja todo como al abrir; lo escrito en el cajón o en
+  // el texto de la derecha se descarta en vez de aplicarse al irse.
+  const guardado = useContext(GuardadoDelEditor);
+  const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
+  const descartarAlIrse = useRef(false);
+  const [derechaSucia, setDerechaSucia] = useState(false);
+  const cambioAplicado = !!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir;
+  const cancelar = () => {
+    descartarAlIrse.current = true;
+    // Siempre, no solo con `cambioAplicado`: los minutos se aplican al salir de su casilla, en el mismo clic de
+    // «Cancelar», y aquí todavía no se ven. Devolver lo mismo no ensucia nada (el editor compara por contenido).
+    if (guardado && huellaAlAbrir) guardado.restaurar(huellaAlAbrir);
+    onCerrar();
+  };
   return (
     <VentanaFlotante
       titulo={`🎁 Regalo de ${tienda?.nombre?.trim() || "esta tienda"}`}
@@ -33063,7 +33078,10 @@ function GestorDelRegaloDelTablero({
           ? "Es el regalo propio de esta tienda. Las demás tiendas no cambian."
           : "Esta tienda usa el regalo de todas. Al guardar un cambio aquí, pasa a tener el suyo; las demás no cambian."
       }
-      onCerrar={onCerrar}
+      onCerrar={cancelar}
+      onListo={onCerrar}
+      onCancelar={cancelar}
+      hayCambios={derechaSucia || cambioAplicado}
       ancho={ANCHO_DEL_GESTOR}
       // (02/11/2026: «el regalo también debe tener su respectiva apariencia»: el diseño del pop up de burbujas.)
       clase="burbujas-nuevo prolijo"
@@ -33119,6 +33137,8 @@ function GestorDelRegaloDelTablero({
                     if (p) aplicar(p.conPasos(steps));
                   }}
                   onCerrar={onCerrar}
+                  alCambiarSucio={setDerechaSucia}
+                  descartarAlIrse={descartarAlIrse}
                 />
               );
             })()}
@@ -33133,6 +33153,8 @@ function GestorDelRegaloDelTablero({
                 aplicar(conRegaloDeLaTienda(vivo.current, tiendaId, paso === "premio" ? { reward_message: texto } : { decline_message: texto }))
               }
               onCerrar={onCerrar}
+              alCambiarSucio={setDerechaSucia}
+              descartarAlIrse={descartarAlIrse}
             />
           )}
         </div>
@@ -34927,6 +34949,8 @@ function VentanaDeTexto({
   onGuardar,
   onCerrar,
   incrustado,
+  alCambiarSucio,
+  descartarAlIrse,
 }: {
   titulo: string;
   valor: string;
@@ -34935,13 +34959,21 @@ function VentanaDeTexto({
   onCerrar: () => void;
   /** Dentro de un gestor (19/10/2026): se aplica al irse, como `VentanaDelCajon`. */
   incrustado?: boolean;
+  /** Como en `VentanaDelCajon` (09/11/2026): avisa al gestor si hay texto sin aplicar, para su «Cerrar» / «Cancelar · Listo». */
+  alCambiarSucio?: (sucio: boolean) => void;
+  /** Con «Cancelar» del gestor, lo escrito NO se aplica al irse. */
+  descartarAlIrse?: { current: boolean };
 }) {
   const productosFicha = useContext(ProductosDeLaFichaContext);
   const [texto, setTexto] = useState(valor);
   useEscapeEnPila(() => onCerrar(), !incrustado);
   const original = useRef(valor);
+  useEffect(() => {
+    alCambiarSucio?.(texto !== original.current);
+  }, [texto, alCambiarSucio]);
   const alIrse = useRef<() => void>(() => {});
   alIrse.current = () => {
+    if (descartarAlIrse?.current) return;
     if (texto === original.current) return;
     onGuardar(texto);
     original.current = texto;
