@@ -802,7 +802,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mw4xhgdc-s3nh0
-          minutos: 300
+          minutos: 420
           variantes:
             - id: v-mw4xhgdc-pfm3s
               peso: 1
