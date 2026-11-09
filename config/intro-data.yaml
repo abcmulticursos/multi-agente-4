@@ -8147,7 +8147,33 @@ biblioteca_de_productos:
 
             ¡A disfrutar coloreando! 🌈
         delay_after_sec: 6
-    image_gallery: []
+    image_gallery:
+      - topic: Muestra Gratuita FIGURARTE
+        when: Cuando el cliente pregunte si tiene una muestra
+        media_type: document
+        drive_url: https://drive.google.com/file/d/1nBmVXC2sjH0sXH_rURUEKGBtE68de6ev/view?usp=sharing
+        caption: |-
+          🟢 *Te regalo una muestra gratuita *para que puedas ver parte del contenido del libro FIGURARTE 🤗
+
+          🎁 *Esta es una muestra gratuita de 15 páginas*, pero FIGURARTE tiene *Más  de 100 fichas para colorear*! ✍️
+
+          Con todos los personajes descritos anteriormente
+        keywords:
+          - Que contiene
+          - que trae
+          - cuantas paginas tiene
+          - cuantas paginas
+          - que viene.
+        enabled: true
+        caption_variants:
+          - |-
+            🟢 *Te regalo una muestra gratuita *para que puedas ver parte del contenido del libro FIGURARTE 🤗
+
+            🎁 *Esta es una muestra gratuita de 15 páginas*, pero FIGURARTE tiene *Más  de 100 fichas para colorear*! ✍️
+
+            Con todos los personajes descritos anteriormente
+        pasos_extra: []
+        info_de_contenido: true
     course_content: |-
       🎨 FIGURARTE: COLOREA POR FIGURAS. Una nueva forma de colorear donde las figuras geométricas se convierten en animales y personajes.
 
@@ -8174,116 +8200,6 @@ biblioteca_de_productos:
         price_soles: 10
         discount_price_soles: 7
         market_price: 55
-    entregas_extra:
-      - id: muestras
-        nombre: Muestras gratuitas
-        steps:
-          - type: text
-            body_variants:
-              - 🎁✨ ¡Aquí tienes tu material!
-            delay_after_sec: 3
-          - type: document
-            drive_url: https://drive.google.com/file/d/1QClNTnkb-vqW4Hf_5b-Epi9-VBAgGLSp/view?usp=sharing
-            caption_variants:
-              - 📄 Muestra 1
-            delay_after_sec: 3
-          - type: document
-            drive_url: https://drive.google.com/file/d/1_kI2R5R7z8KNtSBoMVX3WW9rpRlAKCRf/view?usp=drive_link
-            caption_variants:
-              - 📄 Muestra 2
-            delay_after_sec: 4
-      - id: nivel15
-        nombre: Nivel S/15 · material + 1 bono
-        steps:
-          - type: text
-            body_variants:
-              - |-
-                ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
-
-                Aquí tienes *FIGURARTE + 1 BONO* 🎨✨
-
-                📘 *Material completo de FIGURARTE:*
-                https://www.youtube.com/watch?v=FIGURARTE-material
-
-                🎁 *Bono 1:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono1
-
-                ¡A disfrutar coloreando! 🌈
-            delay_after_sec: 5
-      - id: nivel20
-        nombre: Nivel S/20 · material + 2 bonos
-        steps:
-          - type: text
-            body_variants:
-              - |-
-                ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
-
-                Aquí tienes *FIGURARTE + 2 BONOS* 🎨✨
-
-                📘 *Material completo de FIGURARTE:*
-                https://www.youtube.com/watch?v=FIGURARTE-material
-
-                🎁 *Bono 1:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono1
-
-                🎁 *Bono 2:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono2
-
-                ¡A disfrutar coloreando! 🌈
-            delay_after_sec: 5
-      - id: nivel25
-        nombre: Nivel S/25 · material + 3 bonos
-        steps:
-          - type: text
-            body_variants:
-              - |-
-                ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
-
-                Aquí tienes *FIGURARTE + 3 BONOS* 🎨✨
-
-                📘 *Material completo de FIGURARTE:*
-                https://www.youtube.com/watch?v=FIGURARTE-material
-
-                🎁 *Bono 1:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono1
-
-                🎁 *Bono 2:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono2
-
-                🎁 *Bono 3:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono3
-
-                ¡A disfrutar coloreando! 🌈
-            delay_after_sec: 5
-      - id: nivel30
-        nombre: Nivel S/30 · todos los bonos
-        steps:
-          - type: text
-            body_variants:
-              - |-
-                ✅ *¡Gracias de corazón por tu contribución!* 🙏💛
-
-                Aquí tienes *FIGURARTE + TODOS LOS BONOS* 🎨✨
-
-                📘 *Material completo de FIGURARTE:*
-                https://www.youtube.com/watch?v=FIGURARTE-material
-
-                🎁 *Bono 1:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono1
-
-                🎁 *Bono 2:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono2
-
-                🎁 *Bono 3:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono3
-
-                🎁 *Bono 4:*
-                https://www.youtube.com/watch?v=FIGURARTE-bono4
-
-                💖 *Y tu aporte especial al proyecto. ¡Gracias por tanta generosidad!*
-
-                ¡A disfrutar coloreando! 🌈
-            delay_after_sec: 5
   - id: ptpla_basico
     name: GUÍA PLANTILLA
     aliases:
