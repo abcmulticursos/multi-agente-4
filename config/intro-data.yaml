@@ -8123,10 +8123,28 @@ biblioteca_de_productos:
             Aquí tienes *FIGURARTE* 🎨✨
 
             📘 *Material completo de FIGURARTE:*
-            https://www.youtube.com/watch?v=FIGURARTE-material
+            https://drive.google.com/drive/folders/1i2Wklakcx6tB79RZwdO7QyQZJVn_Zedo?usp=sharing
+
+            🎁 *OBSEQUIOS ADICIONALES*
+
+            🔠 *ABCEDARIO CON ANIMALITOS:* 🐶🐱🦁
+            https://drive.google.com/drive/folders/1ClXOvhxfbsc3g2k3IBLwphfm0iiFMfx9
+
+            *PRACTICA DE TIJERAS* ✂️📄
+            https://drive.google.com/drive/folders/1l9n_bazlAmPqpVW9ooyWiXTyWDVi-toK?usp=drive_link
+        delay_after_sec: 5
+      - type: text
+        body_variants:
+          - |-
+            🎬️🏰 *VIDEO CUENTOS*
+            https://drive.google.com/drive/folders/1oJ_-XwUlz6iw3pbqbtyOob8eYgAtR_UI?usp=drive_link
+
+            ✍️ *FICHAS DE GRAFOMOTRICIDAD*
+            https://drive.google.com/drive/folders/17-48xVFVUwRBnRdIuw7LqprZfbqcfvLx?usp=drive_link
+
 
             ¡A disfrutar coloreando! 🌈
-        delay_after_sec: 5
+        delay_after_sec: 6
     image_gallery: []
     course_content: |-
       🎨 FIGURARTE: COLOREA POR FIGURAS. Una nueva forma de colorear donde las figuras geométricas se convierten en animales y personajes.
@@ -8153,7 +8171,7 @@ biblioteca_de_productos:
       PE:
         price_soles: 10
         discount_price_soles: 7
-        market_price: 0
+        market_price: 55
     entregas_extra:
       - id: muestras
         nombre: Muestras gratuitas
