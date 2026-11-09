@@ -645,7 +645,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - 🙌 *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊
+            - 🙌 *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso y puedas descargar tu material de inmediato 🤳🏼 😊
           delay_after_sec: 6
       cobro:
         modo: producto
