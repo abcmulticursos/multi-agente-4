@@ -213,14 +213,14 @@ whatsapp:
   fichas:
     - id: fig_inicio
       tipo: inicio
-      x: -495
-      y: -1463
+      x: -715
+      y: -935
       titulo: Venta por contribución
       pais: PE
     - id: fig_presenta
       tipo: mensaje
-      x: 242
-      y: -1155
+      x: 275
+      y: -1430
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
@@ -632,8 +632,8 @@ whatsapp:
       titulo: Pasa a un asesor
     - id: f-mw4xdzzq-jx245
       tipo: cobro
-      x: 1221
-      y: -1254
+      x: 1254
+      y: -1529
       steps:
         - type: text
           body_variants:
@@ -652,8 +652,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
-      x: 517
-      y: -1496
+      x: 550
+      y: -1771
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -835,13 +835,23 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw4z4tlg-y38l
       tipo: regalo
-      x: 2233
-      y: -1221
+      x: 2266
+      y: -1496
+    - id: f-mw929103-8pb4
+      tipo: reparto
+      x: -319
+      y: -913
+      reparto:
+        - id: r1
+          nombre: ALEJAR DEL CELULAR
+          peso: 1
+        - id: r2
+          nombre: PADRE - MADRE
+          peso: 1
+        - id: rmw929v1i
+          nombre: MAESTROS
+          peso: 1
   cables:
-    - id: figc1
-      de: fig_inicio
-      salida: siguiente
-      a: fig_presenta
     - id: figc2
       de: fig_presenta
       salida: btn:fig_si
@@ -920,6 +930,14 @@ whatsapp:
       salida: pagado
       a: f-mw4z4tlg-y38l
       vista: cable
+    - id: c-mw9294sj-fgd
+      de: fig_inicio
+      salida: siguiente
+      a: f-mw929103-8pb4
+    - id: c-mw929bv7-gjz
+      de: f-mw929103-8pb4
+      salida: rep:r1
+      a: fig_presenta
   cajas:
     - id: manta-fig_inicio
       x: 53
@@ -938,5 +956,5 @@ whatsapp:
   espejos:
     - id: e-mw4xjp2d-zjbz
       ficha: f-mw4xhgdb-dozb0
-      x: 1485
-      y: -1595
+      x: 1518
+      y: -1870
