@@ -661,7 +661,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mw4xhgdb-0buuj
-          minutos: 2
+          minutos: 30
           variantes:
             - id: v-mw4xhgdb-l2put
               peso: 1
@@ -801,10 +801,8 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mw4xhgdc-s3nh0
-          minutos: 5
+          minutos: 300
           variantes:
             - id: v-mw4xhgdc-pfm3s
               peso: 1
@@ -831,16 +829,14 @@ whatsapp:
                       *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mw4z4tlg-y38l
       tipo: regalo
       x: 2266
       y: -1496
     - id: f-mw929103-8pb4
       tipo: reparto
-      x: -319
-      y: -913
+      x: -330
+      y: -891
       reparto:
         - id: r1
           nombre: ALEJAR DEL CELULAR
