@@ -8158,6 +8158,8 @@ biblioteca_de_productos:
           🎁 *Esta es una muestra gratuita de 15 páginas*, pero FIGURARTE tiene *Más  de 100 fichas para colorear*! ✍️
 
           Con todos los personajes descritos anteriormente
+
+          *Estamos de Promoción a tan solo {{PRECIO_BASiCO}}* por tiempo Limitado ⏰️
         keywords:
           - Que contiene
           - que trae
@@ -8172,6 +8174,8 @@ biblioteca_de_productos:
             🎁 *Esta es una muestra gratuita de 15 páginas*, pero FIGURARTE tiene *Más  de 100 fichas para colorear*! ✍️
 
             Con todos los personajes descritos anteriormente
+
+            *Estamos de Promoción a tan solo {{PRECIO_BASiCO}}* por tiempo Limitado ⏰️
         pasos_extra: []
         info_de_contenido: true
     course_content: |-
