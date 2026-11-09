@@ -670,14 +670,13 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1vrDZq0wLV97cYfYGJShHY6RiAlOUzRm5/view?usp=sharing
                   caption_variants:
                     - |-
-                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+                      🎯 *Hola Soy Andrea: 🙋‍♀️ Aprovecha nuestra promoción activa* realizando un único pago ahora mismo!
 
-                      📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+                      *Muchos padres ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
 
-                      🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
-                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
+                      💰 *EL COSTO DE TODO EL MATERIAL DESCARGABLE ES DE TAN SOLO* *{{precio_base}}*
 
-                      💰 EL COSTO DE TODO EL MATERIAL DESCARGABLE ES DE TAN SOLO  *{{precio_base}}*
+                      📩 Recibimos diariamente pagos de compradores reales como tú *y Tu compra está 100% segura.*
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
