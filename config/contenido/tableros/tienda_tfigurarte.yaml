@@ -226,7 +226,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  🙋‍♀️✨.
+              *¡Hola! mi nombre es Andrea* y pertenezco al equipo de AbcMulticlases  
+
+              🙋‍♀️✨.
 
               📱 *¿Te preocupa que tu peque pase demasiado tiempo frente al celular o la tablet? * 😟
 
