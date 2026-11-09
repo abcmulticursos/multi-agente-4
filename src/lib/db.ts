@@ -391,6 +391,9 @@ export interface ConversationRow {
    * NULL en las conversaciones de antes de esto: ahí se lee como hasta hoy.
    */
   followup_variant_sent: number | null;
+  /** Cuándo entró por ÚLTIMA vez desde un anuncio (unix). Las 70 horas cuentan desde aquí si es
+   *  más reciente que `created_at`. NULL = nunca vino de un anuncio. Ver `pasoLaVentanaDeRespuesta`. */
+  anuncio_at?: number | null;
 }
 
 export interface QuickReplyRow {
@@ -803,6 +806,9 @@ const conversationColumns: Array<[string, string]> = [
   // La variante del seguimiento que se le envió, para poder resolver los
   // botones de SU burbuja y no los de otra variante. Ver `ConversationRow`.
   ["followup_variant_sent", "INTEGER"],
+  // LA ÚLTIMA ENTRADA POR UN ANUNCIO (09/11/2026). Meta abre 72 horas gratis cada vez que el
+  // cliente escribe desde un anuncio; las 70 horas del bot cuentan desde la más reciente.
+  ["anuncio_at", "INTEGER"],
 ];
 for (const [name, type] of conversationColumns) {
   try {
@@ -2945,6 +2951,30 @@ export function cancelPendingActionsForConvo(conversationId: number): void {
   stmtCancelPendingForConvo.run(conversationId);
 }
 
+const stmtAnotarEntradaPorAnuncio = db.prepare<[number]>(
+  "UPDATE conversations SET anuncio_at = unixepoch() WHERE id = ?"
+);
+/** Anota que el cliente acaba de entrar desde un anuncio (cada vez, no solo la primera). */
+export function anotarEntradaPorAnuncio(conversationId: number): void {
+  stmtAnotarEntradaPorAnuncio.run(conversationId);
+}
+
+const stmtArchivarConversacion = db.prepare<[string, number]>(
+  "UPDATE conversations SET phone = phone || '~' || ? WHERE id = ? AND instr(phone, '~') = 0"
+);
+/**
+ * LA CONVERSACIÓN DE OTRA TIENDA SE GUARDA APARTE (09/11/2026). La misma persona escribió a un
+ * número de OTRA tienda: su conversación vieja se queda tal cual —mensajes, pagos, entregas, el
+ * «ya pagó»— pero deja de ser la de su teléfono (se le añade «~id»), y el siguiente
+ * `getOrCreateConversation` le abre una nueva. Lo programado de la vieja se cancela: ya no le toca.
+ * El envío a mano desde la vieja sigue llegando a la persona (`numeroDeDestino` en meta/client.ts).
+ */
+export function archivarConversacion(conversationId: number): void {
+  stmtCancelPendingForConvo.run(conversationId);
+  // El id va como TEXTO: como número, SQLite lo pegaba como «1751.0».
+  stmtArchivarConversacion.run(String(conversationId), conversationId);
+}
+
 export function cancelPendingActionsByTypeForConvo(
   conversationId: number,
   actionType: string
@@ -3308,16 +3338,19 @@ export function listBlockedNumbers(): BlockedNumberRow[] {
   return stmtListBlockedNumbers.all();
 }
 
+/** El teléfono sin el «~id» de una conversación guardada aparte (`archivarConversacion`): se bloquea a la persona. */
+const sinArchivo = (phone: string): string => (phone.indexOf("~") > 0 ? phone.slice(0, phone.indexOf("~")) : phone);
+
 export function isNumberBlocked(phone: string): boolean {
-  return stmtIsBlocked.get(phone) !== undefined;
+  return stmtIsBlocked.get(sinArchivo(phone)) !== undefined;
 }
 
 export function blockNumber(phone: string, reason: string | null): void {
-  stmtBlockNumber.run(phone, reason);
+  stmtBlockNumber.run(sinArchivo(phone), reason);
 }
 
 export function unblockNumber(phone: string): boolean {
-  const info = stmtUnblockNumber.run(phone);
+  const info = stmtUnblockNumber.run(sinArchivo(phone));
   return info.changes > 0;
 }
 

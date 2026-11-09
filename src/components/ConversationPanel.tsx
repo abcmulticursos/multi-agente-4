@@ -137,6 +137,8 @@ interface ConversationDTO {
   mode: Mode;
   last_message_at: number | null;
   created_at: number;
+  /** Última entrada por un anuncio (unix); las 70 horas cuentan desde aquí si es más reciente. */
+  anuncio_at?: number | null;
   pinned: number;
   ad_source_id: string | null;
   ad_headline: string | null;
@@ -210,6 +212,8 @@ interface AdOriginInfo {
 function formatPhone(phone: string): string {
   if (phone.startsWith("messenger:")) return `Messenger ${phone.slice("messenger:".length)}`;
   if (phone.startsWith("instagram:")) return `Instagram ${phone.slice("instagram:".length)}`;
+  // Una conversación guardada aparte (la persona escribió luego al número de otra tienda) lleva «~id».
+  if (phone.indexOf("~") > 0) return `+${phone.slice(0, phone.indexOf("~")).replace(/^\+/, "")} · chat anterior`;
   return phone.startsWith("+") ? phone : `+${phone}`;
 }
 
@@ -341,7 +345,10 @@ export default function ConversationPanel({
   const pasoLasSetentaHoras = (() => {
     const nacio = state.conversation?.created_at;
     if (typeof nacio !== "number" || !(nacio > 0)) return false;
-    return Date.now() / 1000 - nacio >= 70 * 3600;
+    // O desde su última entrada por un anuncio, si es más reciente (09/11/2026), como el motor.
+    const anuncio = state.conversation?.anuncio_at;
+    const desde = Math.max(nacio, typeof anuncio === "number" ? anuncio : 0);
+    return Date.now() / 1000 - desde >= 70 * 3600;
   })();
   const [recState, setRecState] = useState<RecState>("idle");
   const [recDurationMs, setRecDurationMs] = useState(0);

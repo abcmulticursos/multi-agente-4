@@ -9,6 +9,13 @@ function graphBase(): string {
   return `https://graph.facebook.com/${version}`;
 }
 
+/** El teléfono al que se manda: una conversación guardada aparte lleva «~id» al final (`archivarConversacion`
+ *  en db.ts); Meta solo recibe el número. Sin «~», el mismo texto de siempre. */
+function numeroDeDestino(phone: string): string {
+  const corte = phone.indexOf("~");
+  return corte > 0 ? phone.slice(0, corte) : phone;
+}
+
 function getWhatsAppCredentials(): { phoneId: string | null; token: string | null } {
   const config = getWhatsAppRuntimeConfig();
   return { phoneId: config.phoneNumberId, token: config.accessToken };
@@ -75,7 +82,7 @@ export async function sendTextMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       ...(replyToWamid ? { context: { message_id: replyToWamid } } : {}),
       type: "text",
       text: { preview_url: false, body },
@@ -136,7 +143,7 @@ export async function sendInteractiveButtons(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       type: "interactive",
       interactive,
     }),
@@ -248,7 +255,7 @@ export async function sendAudioMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       type: "audio",
       audio: { id: mediaId },
     }),
@@ -287,7 +294,7 @@ export async function sendImageMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       type: "image",
       image: imagePayload,
     }),
@@ -330,7 +337,7 @@ export async function sendDocumentMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       type: "document",
       document: docPayload,
     }),
@@ -369,7 +376,7 @@ export async function sendVideoMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: phone,
+      to: numeroDeDestino(phone),
       type: "video",
       video: videoPayload,
     }),

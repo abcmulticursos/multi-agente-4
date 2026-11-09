@@ -25,6 +25,9 @@ import {
   type MediaPayload,
   type WaStatus,
   mensajesDelMesDelNumero,
+  anotarEntradaPorAnuncio,
+  archivarConversacion,
+  getConversationByPhone,
 } from "@/lib/db";
 import { evaluarModeracion } from "@/lib/workflow/moderation";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
@@ -82,6 +85,7 @@ import {
   conLaTiendaDelTurno,
   laTiendaDeLaConversacion,
   tiendaPorFraseDeEntrada,
+  tiendaDelNumero,
   conElTurnoDe,
   getActiveModalityKey,
   getPaymentMethods,
@@ -632,6 +636,11 @@ function isShortVisualConsent(text: string): boolean {
  *
  * SE CUENTA DESDE QUE NACIÓ LA CONVERSACIÓN, que es cuando Meta abre esa ventana.
  *
+ * O DESDE SU ÚLTIMA ENTRADA POR UN ANUNCIO, si es más reciente (09/11/2026). Meta abre 72 horas
+ * gratis CADA VEZ que el cliente escribe desde un anuncio y se le responde dentro de 24 h —su
+ * documentación de precios no lo limita a una vez por cliente—. Antes, el cliente que volvía días
+ * después por un anuncio nuevo no recibía nada: se perdía una venta que no costaba.
+ *
  * CALLAR NO PIERDE EL MENSAJE: el del cliente ya se guardó antes de llegar aquí, y la
  * conversación sigue en la bandeja para atenderla a mano. En el chat del panel sale un
  * aviso diciendo que pasaron las 70 horas.
@@ -640,12 +649,13 @@ const HORAS_PARA_DEJAR_DE_RESPONDER = 70;
 
 /** ¿Esta conversación ya pasó de las 70 horas? Lo usan el bot y el panel. */
 export function pasoLaVentanaDeRespuesta(
-  convo: { created_at?: number | null } | null | undefined,
+  convo: { created_at?: number | null; anuncio_at?: number | null } | null | undefined,
   ahoraSeg: number = Math.floor(Date.now() / 1000)
 ): boolean {
   const nacio = convo?.created_at;
   if (typeof nacio !== "number" || !(nacio > 0)) return false;
-  return ahoraSeg - nacio >= HORAS_PARA_DEJAR_DE_RESPONDER * 3600;
+  const desde = Math.max(nacio, typeof convo?.anuncio_at === "number" ? convo.anuncio_at : 0);
+  return ahoraSeg - desde >= HORAS_PARA_DEJAR_DE_RESPONDER * 3600;
 }
 
 /**
@@ -1443,6 +1453,31 @@ async function handleIncomingMessage(
   // después, en la FASE 2, tras el debounce.
   let convoId = 0;
   await withPhoneLock(phone, async () => {
+  // LA MISMA PERSONA EN EL NÚMERO DE OTRA TIENDA (09/11/2026, antes de sus campañas por país). Hay una
+  // conversación por teléfono: quien compró GRAFISMO y días después escribe por el anuncio de LENGUA caía
+  // en el chat de GRAFISMO (con su estado, su historial para la IA y sus 70 horas ya gastadas). Ahora, si
+  // escribe por OTRO número nuestro y ese número lo atiende OTRA tienda, la vieja se guarda aparte
+  // intacta y aquí nace una nueva en su tienda. Mismo número, o la misma tienda: nada cambia.
+  if (!testOptions) {
+    const anterior = getConversationByPhone(phone);
+    const numeroNuevo = getOutboundWhatsAppNumber();
+    if (
+      anterior &&
+      anterior.channel === "whatsapp" &&
+      numeroNuevo &&
+      anterior.wa_phone_number_id &&
+      anterior.wa_phone_number_id !== numeroNuevo
+    ) {
+      const tiendaVieja = laTiendaDeLaConversacion(anterior)?.id ?? null;
+      const tiendaNueva = (tiendaPorFraseDeEntrada(content, numeroNuevo) ?? tiendaDelNumero(numeroNuevo))?.id ?? null;
+      if (tiendaVieja !== tiendaNueva) {
+        archivarConversacion(anterior.id);
+        console.log(
+          `[wh] ${phone} escribe por el número de otra tienda (${tiendaVieja ?? "sin tienda"} → ${tiendaNueva ?? "sin tienda"}): la convo ${anterior.id} se guarda aparte y empieza una nueva`
+        );
+      }
+    }
+  }
   const convo = getOrCreateConversation(phone, pushName, testOptions?.channel);
   convoId = convo.id;
   // Deja anotado por cual de NUESTROS numeros entro, para responderle por el
@@ -1533,6 +1568,8 @@ async function handleIncomingMessage(
   // Ads Manager. setConversationAdReferral solo escribe si la convo aún
   // no tenía un ctwa_clid (preserva la primera atribución).
   if (msg.referral?.ctwa_clid) {
+    // Cada entrada por un anuncio, no solo la primera: sus 70 horas vuelven a contar desde aquí.
+    anotarEntradaPorAnuncio(convo.id);
     setConversationAdReferral(
       convo.id,
       msg.referral.ctwa_clid,

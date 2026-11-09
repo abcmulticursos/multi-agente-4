@@ -47888,7 +47888,7 @@ function GiftTab({
           enVentana
         >
           <p className="mb-3 text-xs text-neutral-600">
-            Cada AD tiene su propio bloque de regalo. El nombre, ID, estado y cuadro de color se sincronizan desde Ajustes; el texto, enlace y peso se editan aquí.
+            Cada AD tiene su propio bloque de regalo. El nombre, ID, estado y cuadro de color se sincronizan desde Ajustes; el texto, enlace y peso se editan aquí. El enlace de un AD solo le llega a quien vino de ESE anuncio; los demás reciben el «Enlace para comentar» de su tienda.
           </p>
           <div className="space-y-2">
             {Object.entries(giftHierarchy).map(([bm, accounts]) => (

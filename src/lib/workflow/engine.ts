@@ -12174,6 +12174,14 @@ function pickGiftTextByAd(
   return match ? renderGiftVariantText(match) : null;
 }
 
+/**
+ * EL SORTEO, SOLO ENTRE LAS QUE NO SON DE UN ANUNCIO (09/11/2026, antes de sus campañas por país).
+ * Las variantes con anuncio (`ad_ids` o del registro) entraban también al sorteo: un cliente de un
+ * anuncio nuevo —o de OTRA tienda, porque la lista es una para todas— recibía al azar el enlace del
+ * post de otro anuncio, quizá de otro producto. Ahora la de un anuncio es solo para ese anuncio; sin
+ * coincidencia y sin variantes libres, sale el texto de su burbuja («Enlace para comentar» de SU
+ * tienda, o el general), que es el que él escribe por tienda.
+ */
 function pickWeightedGiftText(
   variants: GiftTextVariant[] | undefined
 ): string | null {
@@ -12181,6 +12189,8 @@ function pickWeightedGiftText(
   const valid = variants.filter(
     (v) =>
       v.enabled !== false &&
+      !(Array.isArray(v.ad_ids) && v.ad_ids.some((id) => String(id).trim())) &&
+      !v.registry_ad_id &&
       renderGiftVariantText(v)
   );
   if (valid.length === 0) return null;

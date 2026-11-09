@@ -142,6 +142,8 @@ function relativeTime(unix: number | null): string {
 function formatPhone(phone: string): string {
   if (phone.startsWith("messenger:")) return `Messenger ${phone.slice("messenger:".length)}`;
   if (phone.startsWith("instagram:")) return `Instagram ${phone.slice("instagram:".length)}`;
+  // Una conversación guardada aparte (la persona escribió luego al número de otra tienda) lleva «~id».
+  if (phone.indexOf("~") > 0) return `+${phone.slice(0, phone.indexOf("~")).replace(/^\+/, "")} · chat anterior`;
   return phone.startsWith("+") ? phone : `+${phone}`;
 }
 
