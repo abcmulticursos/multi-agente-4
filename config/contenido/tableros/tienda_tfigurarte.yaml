@@ -281,10 +281,10 @@ whatsapp:
 
               🟠 *¿COMO LO ADQUIERO?*
 
-              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              1.- 💴 *Realiza un único pago de {{PRECIO_BASE}}*
+              2.- 📲 Y envíanos tu comprobante de pago
 
-              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+              * ! Y al instante recibes tu Material + 🎁 Bonos en segundos* 😊⚡
           delay_after_sec: 4
         - type: text
           body_variants:
@@ -836,7 +836,7 @@ whatsapp:
           ignora_tardio: true
     - id: f-mw4z4tlg-y38l
       tipo: regalo
-      x: 2794
+      x: 2640
       y: 143
   cables:
     - id: figc1
