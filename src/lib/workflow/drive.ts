@@ -166,7 +166,10 @@ export async function getReadyMediaFromDrive(
           ? "video/mp4"
           : "application/pdf";
 
-  const relReady = path.join("cache", "drive", `${fileId}.${targetExt}`);
+  // Los videos con otro nombre de copia (10/11/2026): las copias de antes salieron TODAS de la conversión
+  // forzada (una se quedó sin imagen y Meta la rechazó con 131053); con la ficha de Drive igual se seguirían
+  // usando. Así cada video se prepara una vez más con la regla nueva (`convertToMp4`: tal cual si ya sirve).
+  const relReady = path.join("cache", "drive", `${fileId}${kind === "video" ? ".wa" : ""}.${targetExt}`);
   const absReady = path.join(DATA_DIR, relReady);
 
   if (fs.existsSync(absReady) && fs.statSync(absReady).size > 0) {

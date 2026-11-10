@@ -386,14 +386,102 @@ export function saveTempVideo(buffer: Buffer, ext: string): string {
   return tmpPath;
 }
 
+/** Lo que ffprobe dice de un video: sus pistas y su contenedor. `null` = no se pudo leer. */
+type RadiografiaDeVideo = {
+  formato: string;
+  bytes: number;
+  pistas: Array<{ tipo: string; codec: string; perfil: string; pixeles: string }>;
+};
+function radiografiaDeVideo(ruta: string): Promise<RadiografiaDeVideo | null> {
+  return new Promise((resolve) => {
+    let salida = "";
+    let proc;
+    try {
+      proc = spawn(
+        "ffprobe",
+        ["-v", "error", "-show_entries", "stream=codec_type,codec_name,profile,pix_fmt:format=format_name,size:format_tags=major_brand", "-of", "json", ruta],
+        { stdio: ["ignore", "pipe", "ignore"] }
+      );
+    } catch {
+      resolve(null);
+      return;
+    }
+    proc.stdout?.on("data", (c: Buffer) => (salida += c.toString()));
+    proc.on("error", () => resolve(null));
+    proc.on("close", (code) => {
+      if (code !== 0) return resolve(null);
+      try {
+        const j = JSON.parse(salida) as {
+          format?: { format_name?: string; size?: string; tags?: { major_brand?: string } };
+          streams?: Array<{ codec_type?: string; codec_name?: string; profile?: string; pix_fmt?: string }>;
+        };
+        resolve({
+          // ffprobe llama igual a MP4 y a MOV («mov,mp4,…»): los separa la marca. Un .mov («qt») se convierte.
+          formato: /^qt/i.test(String(j.format?.tags?.major_brand ?? "")) ? "mov" : String(j.format?.format_name ?? ""),
+          bytes: Number(j.format?.size ?? 0),
+          pistas: (j.streams ?? []).map((s) => ({
+            tipo: String(s.codec_type ?? ""),
+            codec: String(s.codec_name ?? ""),
+            perfil: String(s.profile ?? ""),
+            pixeles: String(s.pix_fmt ?? ""),
+          })),
+        });
+      } catch {
+        resolve(null);
+      }
+    });
+  });
+}
+
+/** Lo que WhatsApp acepta sin tocarlo: MP4, UNA pista H.264 normal (8 bits, 4:2:0) y, si trae audio, UNA AAC; < 16 MB. */
+function yaSirveParaWhatsApp(r: RadiografiaDeVideo | null): boolean {
+  if (!r || !/mp4/.test(r.formato) || !(r.bytes > 0 && r.bytes < 16 * 1024 * 1024)) return false;
+  const videos = r.pistas.filter((p) => p.tipo === "video");
+  const audios = r.pistas.filter((p) => p.tipo === "audio");
+  return (
+    videos.length === 1 &&
+    videos[0].codec === "h264" &&
+    videos[0].pixeles === "yuv420p" &&
+    /^(constrained baseline|baseline|main|high)$/i.test(videos[0].perfil) &&
+    audios.length <= 1 &&
+    audios.every((a) => a.codec === "aac")
+  );
+}
+
 /**
- * Convierte un video a MP4 H.264 + AAC, formato que Meta acepta para mensajes
- * type=video. Usa preset veryfast + CRF 28 para velocidad razonable.
+ * Deja un video listo para Meta (type=video): MP4 H.264 + AAC.
+ *
+ * TAL CUAL SI YA SIRVE (10/11/2026). Antes se reconvertía SIEMPRE, también el que ya venía en
+ * H.264 + AAC. Su caso: un MP4 de 8,8 MB exportado bien (H.264 Main + AAC) salió de la conversión
+ * del servidor con 6,5 MB y Meta lo rechazó con 131053 «No video stream found in given video
+ * file»; el cliente no recibió el video. Reconvertir lo que ya sirve no lo mejora: solo añade una
+ * ocasión de romperlo (y trababa el servidor ~9 s por cada video de un minuto).
+ *
+ * Y LO CONVERTIDO SE REVISA: si sale sin pista de video, se manda el original (si tiene una) y
+ * se anota. Sin ffprobe en el servidor, lo de siempre: se convierte.
  */
 export async function convertToMp4(
   inputPath: string,
   outputPath: string
 ): Promise<void> {
+  const original = await radiografiaDeVideo(inputPath);
+  if (yaSirveParaWhatsApp(original)) {
+    fs.copyFileSync(inputPath, outputPath);
+    console.log(`[media] video ya en H.264 + AAC (${original!.bytes} bytes): se envía tal cual, sin convertir`);
+    return;
+  }
+  await convertirAMp4(inputPath, outputPath);
+  if (!original) return;
+  const convertido = await radiografiaDeVideo(outputPath);
+  const tieneVideo = (r: RadiografiaDeVideo | null) => !!r?.pistas.some((p) => p.tipo === "video");
+  if (convertido && !tieneVideo(convertido) && tieneVideo(original)) {
+    console.warn(`[media] la conversión salió SIN imagen de video (${convertido.bytes} bytes): se envía el original`);
+    fs.copyFileSync(inputPath, outputPath);
+  }
+}
+
+/** La conversión de siempre: preset veryfast + CRF 28 para velocidad razonable. */
+async function convertirAMp4(inputPath: string, outputPath: string): Promise<void> {
   await runFfmpeg([
     "-y",
     "-i",
