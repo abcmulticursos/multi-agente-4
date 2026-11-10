@@ -1191,16 +1191,7 @@ function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
   const manta = data.manta;
   return (
     <div className="h-full w-full" style={{ pointerEvents: "none" }}>
-      {ESQUINAS.map((esquina) => (
-        <NodeResizeControl
-          key={esquina}
-          position={esquina}
-          minWidth={160}
-          minHeight={100}
-          style={{ width: 18, height: 18, border: "none", borderRadius: 4, pointerEvents: "all", background: data.elegida ? t.tituloCaja : "transparent", opacity: 0.8 }}
-          onResizeEnd={(_e, r) => data.alCambiar({ ...data.caja, x: Math.round(r.x), y: Math.round(r.y), ancho: Math.round(r.width), alto: Math.round(r.height) })}
-        />
-      ))}
+      {/* Sus cuatro esquinas viven en `NodoDeEsquinas`, ENCIMA de las fichas. */}
       <div className="h-full w-full rounded-2xl" style={{ background: t.caja, outline: data.elegida ? `2px solid ${t.tituloCaja}` : "none", pointerEvents: "none" }}>
         <div
           onClick={(e) => {
@@ -1801,7 +1792,32 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
   );
 }
 
-const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja };
+/**
+ * LAS ESQUINAS DE UN VELO, ENCIMA DE LAS FICHAS (10/11/2026), como en la pizarra. Él: «a veces las esquinas
+ * quedan debajo de las fichas y no se pueden tocar… tanto en los de país como simples». El velo sigue detrás;
+ * sus esquinas van en este nodo transparente del mismo tamaño y sitio, encima de todo, y estiran AL VELO
+ * (`nodeId`). No se elige ni se mueve; se calcula en cada pintada desde el velo, así lo sigue.
+ */
+function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: string }>>) {
+  const t = TEMA[data.tema];
+  return (
+    <div className="h-full w-full" style={{ pointerEvents: "none" }}>
+      {ESQUINAS.map((esquina) => (
+        <NodeResizeControl
+          key={esquina}
+          nodeId={data.nodoDeLaCaja}
+          position={esquina}
+          minWidth={160}
+          minHeight={100}
+          style={{ width: 18, height: 18, border: "none", borderRadius: 4, pointerEvents: "all", background: data.elegida ? t.tituloCaja : "transparent", opacity: 0.8 }}
+          onResizeEnd={(_e, r) => data.alCambiar({ ...data.caja, x: Math.round(r.x), y: Math.round(r.y), ancho: Math.round(r.width), alto: Math.round(r.height) })}
+        />
+      ))}
+    </div>
+  );
+}
+
+const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, esquinas: NodoDeEsquinas };
 const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
 
 /** Quitar fichas con sus cables. Si se va un Inicio, se va también su manta (las fichas se quedan). */
@@ -1954,7 +1970,7 @@ function mantaDelPais(t: TableroEnElEditor, pais: string): NonNullable<Tablero["
 }
 
 /** El portapapeles del tablero: sirve entre tiendas, canales y workflows de esta pestaña. */
-let portapapeles: { fichas: FichaEnElEditor[]; cables: CableDelTablero[] } | null = null;
+let portapapeles: { fichas: FichaEnElEditor[]; cables: CableDelTablero[]; cajas?: NonNullable<Tablero["cajas"]> } | null = null;
 
 export default function LienzoDelTablero({
   tablero,
@@ -2387,7 +2403,28 @@ export default function LienzoDelTablero({
   const inicioDelTiro = useRef<Punto | null>(null);
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
   // sigue sin ponerse donde no encaja, con su aviso.)
-  const nodosAlTirar = nodosVistos;
+  // Las esquinas de cada velo, encima de las fichas (ver `NodoDeEsquinas`): mismo sitio y tamaño que el velo AHORA.
+  const nodosAlTirar: Node[] = [
+    ...nodosVistos,
+    ...nodosVistos
+      .filter((n) => n.type === "caja")
+      .map((n) => {
+        const s = n.style as { width?: number; height?: number } | undefined;
+        return {
+          id: `esquinas:${n.id}`,
+          type: "esquinas",
+          position: n.position,
+          style: { width: n.width ?? s?.width, height: n.height ?? s?.height, pointerEvents: "none" as const },
+          zIndex: 5000,
+          selectable: false,
+          draggable: false,
+          focusable: false,
+          deletable: false,
+          connectable: false,
+          data: { ...(n.data as DatosDeCaja), nodoDeLaCaja: n.id },
+        };
+      }),
+  ];
 
   // EL CAMINO «🛒 SI COMPRA» DE CADA CAJA DE SEGUIMIENTOS (31/10/2026): se dibuja solo; no está en
   // `tablero.cables` (no es un cable suyo ni lo lee el bot). Ver `caminosDeCompra`.
@@ -2512,37 +2549,58 @@ export default function LienzoDelTablero({
 
   // COPIAR Y PEGAR, los mismos para Ctrl+C / Ctrl+V y para el clic derecho (06/11/2026: «que las fichas, a la hora
   // de darle click derecho, también tengan la opción de copiar»).
-  const copiarLas = (ids: Set<string>) => {
-    if (ids.size === 0) return false;
+  // LOS VELOS ELEGIDOS TAMBIÉN SE COPIAN (10/11/2026, él: «selecciono todo, con shift toda la zona, fichas y
+  // velos… y no pega»). Los simples y las mantas de país; la manta se pega como velo libre (sin su Inicio:
+  // un Inicio no se copia, hay uno por país).
+  const cajasElegidas = () => new Set(nodos.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
+  const copiarLas = (ids: Set<string>, cajaIds: Set<string> = new Set()) => {
     const actual = vivo.current;
+    const cajas = (actual.cajas ?? []).filter((c) => cajaIds.has(c.id)).map(({ inicio: _inicio, ...c }) => ({ ...c }));
+    if (ids.size === 0 && cajas.length === 0) return false;
     portapapeles = {
       fichas: JSON.parse(JSON.stringify(actual.fichas.filter((f) => ids.has(f.id)))),
       cables: actual.cables.filter((c) => ids.has(c.de) && ids.has(c.a)),
+      cajas,
     };
-    setAviso(`${ids.size} ficha(s) copiada(s). Ctrl+V, o clic derecho en un espacio vacío → «📋 Pegar aquí».`);
+    const partes = [ids.size ? `${ids.size} ficha(s)` : "", cajas.length ? `${cajas.length} velo(s)` : ""].filter(Boolean).join(" y ");
+    setAviso(`${partes} copiado(s). Ctrl+V, o clic derecho en un espacio vacío → «📋 Pegar aquí».`);
     return true;
   };
   /** Sin `donde`, a la derecha de todo (Ctrl+V, como siempre); con `donde`, donde se hizo el clic derecho. */
   const pegarLoCopiado = (donde?: Punto) => {
     if (!portapapeles) return false;
     const actual = vivo.current;
-    const minX = Math.min(...portapapeles.fichas.map((f) => f.x));
-    const minY = Math.min(...portapapeles.fichas.map((f) => f.y));
+    const cajasCopiadas = portapapeles.cajas ?? [];
+    // La forma la dan las fichas Y los velos: cada cosa conserva su sitio relativo.
+    const minX = Math.min(...portapapeles.fichas.map((f) => f.x), ...cajasCopiadas.map((c) => c.x));
+    const minY = Math.min(...portapapeles.fichas.map((f) => f.y), ...cajasCopiadas.map((c) => c.y));
     // A LA DERECHA DE TODO, SIN CAER ENCIMA (25/10/2026): «se están superponiendo sobre elementos
     // existentes, debería estar fuera del área, a la derecha… que mantenga su estructura y
     // cableado». La copia conserva su forma (cada ficha en su sitio relativo) y sus cables de dentro.
     const enElLienzo = actual.fichas.filter((f) => !f.guardada);
-    const derecha = donde ? donde.x : enElLienzo.length ? Math.max(...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250))) + 200 : centroDeLaVista().x;
+    // (Con velos, también a la derecha de los velos que ya hay: una manta llega más lejos que sus fichas.)
+    const bordes = [...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250)), ...(actual.cajas ?? []).map((c) => c.x + c.ancho)];
+    const derecha = donde ? donde.x : bordes.length ? Math.max(...bordes) + 200 : centroDeLaVista().x;
     const arriba = donde ? donde.y : enElLienzo.length ? Math.min(...enElLienzo.map((f) => f.y)) : centroDeLaVista().y;
-    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, { x: derecha - minX, y: arriba - minY });
-    cambiar({ ...actual, fichas: [...actual.fichas, ...copia.fichas], cables: [...actual.cables, ...copia.cables] });
-    setAviso(`${copia.fichas.length} ficha(s) pegada(s)${donde ? "" : " a la derecha"}, con su forma y sus cables de dentro. Quedan sin conectar.`);
+    const desplazar = { x: derecha - minX, y: arriba - minY };
+    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, desplazar);
+    const sello = Date.now().toString(36);
+    const cajasNuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `velo-${sello}-${k}`, x: Math.round(c.x + desplazar.x), y: Math.round(c.y + desplazar.y) }));
+    // Fichas, cables y velos en UN solo cambio (dos seguidos se pisan).
+    cambiar({
+      ...actual,
+      fichas: [...actual.fichas, ...copia.fichas],
+      cables: [...actual.cables, ...copia.cables],
+      ...(cajasNuevas.length ? { cajas: [...(actual.cajas ?? []), ...cajasNuevas] } : {}),
+    });
+    const partes = [copia.fichas.length ? `${copia.fichas.length} ficha(s)` : "", cajasNuevas.length ? `${cajasNuevas.length} velo(s)` : ""].filter(Boolean).join(" y ");
+    setAviso(`${partes} pegado(s)${donde ? "" : " a la derecha"}, con su forma${copia.fichas.length ? " y sus cables de dentro. Quedan sin conectar" : ""}.`);
     // La vista va hasta ellas.
-    const ids = copia.fichas.map((f) => ({ id: f.id }));
+    const ids = [...copia.fichas.map((f) => ({ id: f.id })), ...cajasNuevas.map((c) => ({ id: `caja:${c.id}` }))];
     if (!donde) window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
     // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
-    // sale el grupo pegado entero, listo para moverlo junto.
-    const pegadas = new Set(copia.fichas.map((f) => f.id));
+    // sale el grupo pegado entero, velos incluidos, listo para moverlo junto.
+    const pegadas = new Set([...copia.fichas.map((f) => f.id), ...cajasNuevas.map((c) => `caja:${c.id}`)]);
     window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: pegadas.has(n.id) }))), 120);
     return true;
   };
@@ -2570,7 +2628,7 @@ export default function LienzoDelTablero({
       }
       if ((e.ctrlKey || e.metaKey) && tecla === "c") {
         // Un 🪞 espejo elegido copia su ficha (la copia es una ficha nueva, sin espejos).
-        if (!copiarLas(new Set(elegidas().map(fichaDelNodo)))) return;
+        if (!copiarLas(new Set(elegidas().map(fichaDelNodo)), cajasElegidas())) return;
         e.preventDefault();
       } else if ((e.ctrlKey || e.metaKey) && tecla === "v") {
         if (!pegarLoCopiado()) return;
@@ -2842,6 +2900,8 @@ export default function LienzoDelTablero({
             pannable
             zoomable
             nodeStrokeWidth={3}
+            // Las esquinas de los velos no se dibujan en el mapa (el velo ya está).
+            nodeColor={(n) => (n.type === "esquinas" ? "transparent" : (undefined as unknown as string))}
             onClick={(_, p) => instancia.current?.setCenter(p.x, p.y, { zoom: instancia.current.getZoom(), duration: 300 })}
             style={{ cursor: "pointer" }}
           />
@@ -3079,7 +3139,8 @@ export default function LienzoDelTablero({
                       setMenu(null);
                     }}
                   >
-                    📋 Pegar aquí ({portapapeles.fichas.length} ficha{portapapeles.fichas.length === 1 ? "" : "s"})
+                    📋 Pegar aquí ({portapapeles.fichas.length} ficha{portapapeles.fichas.length === 1 ? "" : "s"}
+                    {portapapeles.cajas?.length ? ` y ${portapapeles.cajas.length} velo${portapapeles.cajas.length === 1 ? "" : "s"}` : ""})
                   </button>
                 )}
                 <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
@@ -3163,7 +3224,7 @@ export default function LienzoDelTablero({
                   const delGrupo = new Set(elegidas().map(fichaDelNodo));
                   const ids = delGrupo.has(fichaDelMenu.id) && delGrupo.size > 1 ? delGrupo : new Set([fichaDelMenu.id]);
                   return (
-                    <button type="button" className={opcionDeMenu} onClick={() => (copiarLas(ids), setMenu(null))}>
+                    <button type="button" className={opcionDeMenu} onClick={() => (copiarLas(ids, ids.size > 1 ? cajasElegidas() : new Set()), setMenu(null))}>
                       📋 {ids.size > 1 ? `Copiar las ${ids.size} fichas elegidas` : "Copiar"}
                     </button>
                   );
