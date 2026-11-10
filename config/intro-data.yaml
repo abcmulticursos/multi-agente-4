@@ -8634,7 +8634,7 @@ tiendas:
     pixel: "1531395968272568"
   - id: tienda_tcocina
     nombre: TIENDA COCINA FÁCIL
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - tienda cocina fácil
