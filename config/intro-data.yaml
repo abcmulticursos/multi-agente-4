@@ -8583,7 +8583,7 @@ intro_tiendas: []
 tiendas:
   - id: tienda_mupk9ybz
     nombre: GRAFISMO FONETICO Y SUPER PACK 2 EN 1
-    numero: "1398675606660512"
+    numero: ""
     pagina: "1282178584987581"
     semimodalidad: dos_juntas
     alineacion:
