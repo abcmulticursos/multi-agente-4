@@ -1179,24 +1179,28 @@ type DatosDeCaja = {
   caja: NonNullable<Tablero["cajas"]>[number];
   tema: "claro" | "oscuro";
   elegida: boolean;
-  alElegir: () => void;
+  /** Con Shift/Ctrl se suma a lo elegido; sin, queda solo el velo. */
+  alElegir: (sumar?: boolean) => void;
   alCambiar: (c: NonNullable<Tablero["cajas"]>[number]) => void;
   /** Borrar la caja (las fichas de encima se quedan). */
   alBorrar: () => void;
   /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
   manta?: { titulo: string; mirando: boolean; alVer: () => void };
 };
-function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
+function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   const t = TEMA[data.tema];
   const manta = data.manta;
+  // ELEGIDO TAMBIÉN EN EL RECUADRO SE VE (10/11/2026, él: «al pegar solo pega las fichas, los velos no
+  // aparecen»): el velo que entraba en la selección no se marcaba, y el que quedaba fuera tampoco se notaba.
+  const marcada = data.elegida || !!selected;
   return (
     <div className="h-full w-full" style={{ pointerEvents: "none" }}>
       {/* Sus cuatro esquinas viven en `NodoDeEsquinas`, ENCIMA de las fichas. */}
-      <div className="h-full w-full rounded-2xl" style={{ background: t.caja, outline: data.elegida ? `2px solid ${t.tituloCaja}` : "none", pointerEvents: "none" }}>
+      <div className="h-full w-full rounded-2xl" style={{ background: t.caja, outline: marcada ? `3px solid ${t.tituloCaja}` : "none", pointerEvents: "none" }}>
         <div
           onClick={(e) => {
             e.stopPropagation();
-            data.alElegir();
+            data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
           }}
           onDoubleClick={() => {
             // La manta de un país se llama por su bandera: no se renombra.
@@ -2250,7 +2254,12 @@ export default function LienzoDelTablero({
           caja: c,
           tema,
           elegida: cajaElegida === c.id,
-          alElegir: () => setCajaElegida(c.id),
+          // EL TÍTULO TAMBIÉN LO ELIGE PARA COPIAR Y MOVER (10/11/2026), como en la pizarra: con Shift o Ctrl se
+          // suma a lo ya elegido (fichas incluidas); sin, queda solo él.
+          alElegir: (sumar?: boolean) => {
+            setCajaElegida(c.id);
+            setNodos((ns) => ns.map((n) => (n.id === `caja:${c.id}` ? { ...n, selected: true } : sumar || !n.selected ? n : { ...n, selected: false })));
+          },
           alCambiar: (n: typeof c) => cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).map((x) => (x.id === c.id ? n : x)) }),
           alBorrar: () => {
             cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).filter((x) => x.id !== c.id) });
