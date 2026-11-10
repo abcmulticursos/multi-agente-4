@@ -9109,13 +9109,14 @@ tiendas:
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
   - id: tienda_tfigurarte
     nombre: TIENDA FIGURARTE
-    numero: "1345130172015574"
-    pagina: ""
+    numero: "1398675606660512"
+    pagina: "1366771866527889"
     frases_de_entrada:
       - figurarte
     alineacion:
       basico: ptfig_figurarte
       unico: ptfig_figurarte
+    pixel: "1099242126440992"
     color: "#f97316"
     regalo:
       consent_sequence:
