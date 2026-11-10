@@ -144,6 +144,35 @@ interface RuteadorDePrueba {
   titulo: string;
   rutas: { id: string; nombre: string; apagada: boolean; conectada: boolean }[];
 }
+/**
+ * EL ADJUNTO ELEGIDO, ANTES DE ENVIARLO (10/11/2026). Él: «la palabra "quitar"… esté más grande, o que al menos indique
+ * que hay un attach como en WhatsApp», y sin pantalla completa: «taparía las demás ventanas de chat». Una tarjeta pequeña
+ * dentro de la ventana: miniatura (si es imagen), nombre y un «✕ Quitar» visible.
+ */
+function AdjuntoElegido({ file, alQuitar }: { file: File; alQuitar: () => void }) {
+  const [vista, setVista] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file.type.startsWith("image/")) { setVista(null); return; }
+    const url = URL.createObjectURL(file);
+    setVista(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  const icono = file.type.startsWith("audio/") ? "🎤" : file.type.startsWith("video/") ? "🎬" : file.type === "application/pdf" ? "📄" : "📎";
+  const peso = file.size >= 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+  return (
+    <div className="mb-2 flex items-center gap-2 rounded-md border border-emerald-300 bg-emerald-50 p-1.5">
+      {vista
+        ? <img src={vista} alt="" className="h-12 w-12 shrink-0 rounded object-cover" />
+        : <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-tarjeta text-2xl">{icono}</span>}
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] font-semibold text-emerald-800">📎 Adjunto listo para enviar</div>
+        <div className="truncate text-xs text-neutral-700" title={file.name}>{file.name} · {peso}</div>
+      </div>
+      <button type="button" onClick={alQuitar} className="shrink-0 rounded-md border border-red-300 bg-tarjeta px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50">✕ Quitar</button>
+    </div>
+  );
+}
+
 /** El desplegable de rutas: «al azar» o una ruta de un Ruteador (agrupadas si la tienda tiene varios en ese país). */
 function SelectorDeRuta({ ruteadores, valor, alElegir, className }: { ruteadores: RuteadorDePrueba[]; valor: string; alElegir: (r: string) => void; className: string }) {
   const opciones = (r: RuteadorDePrueba) => r.rutas.map((x) => (
@@ -561,10 +590,12 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
                 Esta prueba corre en otra modalidad. Tus clientas no se ven afectadas.
               </p>
             )}
-            <div className="mb-2 flex justify-between text-[11px] text-neutral-500"><span className="truncate">{file ? `Adjunto: ${file.name}` : messengerCountryUnanswered ? "Escribe el país (con o sin error)." : "Imagen, audio, video o PDF."}</span>{file && <button onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} className="shrink-0 text-red-600">Quitar</button>}</div>
+            {file
+              ? <AdjuntoElegido file={file} alQuitar={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
+              : <div className="mb-2 text-[11px] text-neutral-500">{messengerCountryUnanswered ? "Escribe el país (con o sin error)." : "Imagen, audio, video o PDF."}</div>}
             <div className="flex gap-2">
               <input ref={fileInputRef} type="file" accept="image/*,audio/*,video/*,application/pdf" className="hidden" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-md border border-neutral-300 px-2 text-sm">📎</button>
+              <button type="button" onClick={() => fileInputRef.current?.click()} title={file ? `Adjunto listo: ${file.name}` : "Adjuntar imagen, audio, video o PDF"} className={`relative rounded-md border px-2 text-sm ${file ? "border-emerald-500 bg-emerald-50" : "border-neutral-300"}`}>📎{file && <span className="absolute -right-1.5 -top-1.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold leading-4 text-white">1</span>}</button>
               <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} rows={2} placeholder="Escribe como cliente..." className="min-h-10 flex-1 resize-y rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
               <button onClick={() => void send()} disabled={deleting} className="rounded-md bg-emerald-600 px-3 text-sm font-medium text-white">➤</button>
             </div>
