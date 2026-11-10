@@ -621,7 +621,8 @@ type DatosDeCaja = {
   alCambiar: (c: CajaDePizarra) => void;
   /** Elegida con un clic en su título: Delete la borra. */
   elegida: boolean;
-  alElegir: () => void;
+  /** `sumar` = con Shift: se suma a lo ya elegido en vez de soltarlo. */
+  alElegir: (sumar?: boolean) => void;
   /** El fondo de un país: lleva su «▶ Ver recorrido». */
   pais?: string;
   alVerRecorrido?: () => void;
@@ -1826,8 +1827,10 @@ function NodoFijo({ data }: NodeProps<Node<DatosDeFijo>>) {
  * y con doble clic la renombra.
  */
 const ESQUINAS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
-function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
+function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   const t = TEMA[data.tema];
+  // Elegida por su título O dentro de la selección (recuadro, Shift + clic): se marca igual (09/11/2026).
+  const marcada = data.elegida || !!selected;
   return (
     <div
       className="h-full w-full"
@@ -1836,7 +1839,7 @@ function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
       onClick={(e) => {
         if ((e.target as HTMLElement).closest(".react-flow__resize-control")) {
           e.stopPropagation();
-          data.alElegir();
+          data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
         }
       }}
     >
@@ -1863,14 +1866,14 @@ function NodoDeCaja({ data }: NodeProps<Node<DatosDeCaja>>) {
         style={{
           background: t.caja,
           // Sin borde punteado; elegida, una línea fina para saber cuál se va a borrar.
-          outline: data.elegida ? `2px solid ${t.tituloCaja}` : "none",
+          outline: marcada ? `2px solid ${t.tituloCaja}` : "none",
           pointerEvents: "none",
         }}
       >
         <div
           onClick={(e) => {
             e.stopPropagation();
-            data.alElegir();
+            data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
           }}
           onDoubleClick={() => {
             const nuevo = window.prompt("Nombre de la caja", data.caja.titulo);
@@ -2073,6 +2076,8 @@ const PORTAPAPELES_DE_LA_PIZARRA: {
   current: {
     piezas: Array<{ piezaId: string; x: number; y: number; recuadros?: Array<Punto | null> }>;
     enlaces: Array<[number, number]>;
+    /** Los velos (cajas) elegidos, con su tamaño y su nombre (09/11/2026). */
+    cajas?: Array<Omit<CajaDePizarra, "id">>;
   } | null;
 } = { current: null };
 
@@ -3961,7 +3966,14 @@ export default function LienzoDePizarra({
           tema,
           alCambiar: cambiarCaja,
           elegida: c.id === cajaElegida,
-          alElegir: () => setCajaElegida(c.id),
+          // ELEGIDA TAMBIÉN EN LA SELECCIÓN (09/11/2026, él: «al seleccionarse con otro elemento también
+          // que se mueva»): el clic en su título la elegía solo para Delete, y al arrastrar las fichas
+          // elegidas el velo se quedaba. Ahora entra en la selección (con Shift se suma a lo elegido) y
+          // React Flow la mueve con el grupo; Ctrl+C la copia.
+          alElegir: (sumar?: boolean) => {
+            setCajaElegida(c.id);
+            setNodos((ns) => ns.map((n) => (n.id === c.id ? { ...n, selected: true } : sumar || !n.selected ? n : { ...n, selected: false })));
+          },
           pais,
           alVerRecorrido: pais && acciones.verRecorrido ? () => acciones.verRecorrido?.(pais) : undefined,
         };
@@ -4332,7 +4344,14 @@ export default function LienzoDePizarra({
         // tarjeta, así que se toman de ella. El pago, la entrega y el regalo no se copian: salen
         // solos en el camino del país en cuanto su intro está conectada.
         const elegidos = elegidasConSusCajones(["pieza", "upsell"]);
-        if (elegidos.length === 0) return;
+        // LOS VELOS ELEGIDOS TAMBIÉN SE COPIAN (09/11/2026, él: «dale la capacidad de copiar con control
+        // C»). La copia es una caja nueva con su tamaño y su nombre; el fondo de un país se copia como
+        // caja libre (sin su «▶ Ver recorrido»: ése es de su país).
+        const cajasACopiar = nodosVivos.current
+          .filter((n) => n.type === "caja" && n.selected)
+          .map((n) => (n.data as DatosDeCaja).caja)
+          .map((c) => ({ x: c.x, y: c.y, ancho: c.ancho, alto: c.alto, titulo: c.titulo }));
+        if (elegidos.length === 0 && cajasACopiar.length === 0) return;
         // LAS DE DENTRO DE UN CAJÓN SE COPIAN DONDE ESTÁ EL CAJÓN (20/10/2026): escondidas guardan
         // un sitio viejo, y la copia salía lejos de su intro. Así el pegado tiene la misma forma.
         const sitioDelCajon = new Map<string, Punto>();
@@ -4380,16 +4399,34 @@ export default function LienzoDePizarra({
         portapapeles.current = {
           piezas: lista.map(([piezaId, v]) => ({ piezaId, x: v.x, y: v.y, recuadros: recuadrosDelNodo(v.nodo) })),
           enlaces,
+          ...(cajasACopiar.length ? { cajas: cajasACopiar } : {}),
         };
         // Se anota DÓNDE se copió (la semimodalidad que se está viendo): al pegar en otra, se avisa.
-        acciones.alCopiar?.();
+        if (lista.length > 0) acciones.alCopiar?.();
         e.preventDefault();
-        setAviso(`${lista.length === 1 ? "1 ficha copiada" : `${lista.length} fichas copiadas`}. Ctrl+V para pegarlas.`);
+        const partes = [
+          lista.length ? (lista.length === 1 ? "1 ficha" : `${lista.length} fichas`) : "",
+          cajasACopiar.length ? (cajasACopiar.length === 1 ? "1 caja" : `${cajasACopiar.length} cajas`) : "",
+        ].filter(Boolean);
+        setAviso(`${partes.join(" y ")} copiada${lista.length + cajasACopiar.length === 1 ? "" : "s"}. Ctrl+V para pegar.`);
         return;
       }
-      if (tecla === "v" && portapapeles.current && acciones.pegar) {
+      const cajasCopiadas = portapapeles.current?.cajas ?? [];
+      if (tecla === "v" && portapapeles.current && (acciones.pegar || cajasCopiadas.length > 0)) {
         e.preventDefault();
         const { piezas, enlaces } = portapapeles.current;
+        if (piezas.length === 0 || !acciones.pegar) {
+          // SOLO VELOS: a la derecha de todo, con la misma forma entre ellos.
+          const alFinal = Math.max(0, ...nodosVivos.current.map((n) => n.position.x + (n.type === "caja" ? Number((n.style as { width?: number } | undefined)?.width ?? 0) : n.measured?.width ?? 270))) + 220;
+          const xMin = Math.min(...cajasCopiadas.map((c) => c.x));
+          const sello = Date.now().toString(36);
+          const nuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `caja:${sello}${k}`, x: Math.round(alFinal + (c.x - xMin)), y: Math.round(c.y) }));
+          guardar({ cajas: [...cajasVivas.current, ...nuevas] });
+          porElegir.current = new Set(nuevas.map((c) => c.id));
+          setAviso(nuevas.length === 1 ? "Caja pegada a la derecha." : `${nuevas.length} cajas pegadas a la derecha.`);
+          window.setTimeout(() => instancia.current?.setCenter(nuevas[0].x + nuevas[0].ancho / 2, nuevas[0].y + nuevas[0].alto / 2, { duration: 500, zoom: instancia.current.getZoom() }), 200);
+          return;
+        }
         // A LA DERECHA DE TODO, en la altura de las originales: nada queda tapado.
         const alFinal =
           Math.max(
@@ -4398,7 +4435,7 @@ export default function LienzoDePizarra({
               .filter((n) => n.type !== "caja")
               .map((n) => n.position.x + (n.measured?.width ?? 270))
           ) + 220;
-        const xMin = Math.min(...piezas.map((p) => p.x));
+        const xMin = Math.min(...piezas.map((p) => p.x), ...cajasCopiadas.map((c) => c.x));
         const items = piezas.map((p) => ({
           piezaId: p.piezaId,
           donde: { x: Math.round(alFinal + (p.x - xMin)), y: Math.round(p.y) },
@@ -4406,7 +4443,18 @@ export default function LienzoDePizarra({
         }));
         const nuevas = acciones.pegar(items, enlaces);
         if (nuevas.length === 0) return;
-        porElegir.current = new Set(nuevas.map((id) => `suelta:${id}`));
+        // Los velos copiados con ellas, en el mismo sitio relativo (debajo de las fichas, como siempre).
+        const sello = Date.now().toString(36);
+        const cajasNuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `caja:${sello}${k}`, x: Math.round(alFinal + (c.x - xMin)), y: Math.round(c.y) }));
+        // Después de que el pegado de las fichas llegue a la pizarra: guardar con la disposición de
+        // antes borraría las fichas recién pegadas de la vista.
+        const todoLoPegado = new Set([...nuevas.map((id) => `suelta:${id}`), ...cajasNuevas.map((c) => c.id)]);
+        if (cajasNuevas.length > 0)
+          window.setTimeout(() => {
+            guardar({ cajas: [...cajasVivas.current, ...cajasNuevas] });
+            porElegir.current = todoLoPegado; // y queda elegido el grupo entero, velos incluidos
+          }, 80);
+        porElegir.current = todoLoPegado;
         setAviso(
           nuevas.length === 1
             ? "Copia pegada a la derecha, suelta. Conéctala a un país cuando quieras."
