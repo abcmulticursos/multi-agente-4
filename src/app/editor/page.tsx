@@ -7501,6 +7501,8 @@ export default function EditorPage() {
     () => ({
       marcaDe: (url: string) => marcasDeArchivo[url.trim()],
       refrescar: async (url: string) => {
+        // ↻ también olvida qué tipo de archivo era: se vuelve a preguntar.
+        olvidarTipoDeEnlace(url);
         try {
           const res = await fetch("/api/editor/refrescar-media", {
             method: "POST",
@@ -23762,6 +23764,51 @@ function BotonDeRefrescoDeMedia({ url }: { url: string }) {
   );
 }
 
+/**
+ * EL TIPO DE CADA ENLACE, RECORDADO (10/11/2026). El visor le preguntaba al servidor qué es cada enlace
+ * (imagen, video…) CADA VEZ que se abría, y mientras tanto escondía la foto. Lo averiguado (solo las
+ * respuestas firmes: imagen, video, audio, documento) se recuerda en esta pestaña y en el navegador. Un
+ * «restringido» o un «no sé» se vuelven a preguntar siempre: cambian cuando él comparte el archivo.
+ * ↻ (`refrescar`) lo olvida.
+ */
+const CLAVE_DE_TIPOS_DE_ENLACE = "editor:tipos-de-enlace";
+let TIPOS_DE_ENLACE: Map<string, LinkMediaResolution> | null = null;
+function tiposDeEnlaceYaVistos(): Map<string, LinkMediaResolution> {
+  if (TIPOS_DE_ENLACE) return TIPOS_DE_ENLACE;
+  TIPOS_DE_ENLACE = new Map();
+  try {
+    const guardado = JSON.parse(window.localStorage.getItem(CLAVE_DE_TIPOS_DE_ENLACE) ?? "{}") as Record<string, string>;
+    for (const [url, k] of Object.entries(guardado))
+      if (k === "image" || k === "video" || k === "audio" || k === "document") TIPOS_DE_ENLACE.set(url, k);
+  } catch {
+    // sin almacenamiento: se recuerda solo en esta pestaña
+  }
+  return TIPOS_DE_ENLACE;
+}
+function recordarTipoDeEnlace(url: string, kind: LinkMediaResolution) {
+  const vistos = tiposDeEnlaceYaVistos();
+  if (kind !== "image" && kind !== "video" && kind !== "audio" && kind !== "document") {
+    vistos.delete(url);
+    return;
+  }
+  vistos.set(url, kind);
+  try {
+    // Los últimos 3000, para no crecer sin fin.
+    const ultimos = [...vistos.entries()].slice(-3000);
+    window.localStorage.setItem(CLAVE_DE_TIPOS_DE_ENLACE, JSON.stringify(Object.fromEntries(ultimos)));
+  } catch {
+    // lleno o bloqueado: queda en la pestaña
+  }
+}
+function olvidarTipoDeEnlace(url: string) {
+  tiposDeEnlaceYaVistos().delete(url.trim());
+  try {
+    window.localStorage.setItem(CLAVE_DE_TIPOS_DE_ENLACE, JSON.stringify(Object.fromEntries(tiposDeEnlaceYaVistos())));
+  } catch {
+    // nada
+  }
+}
+
 function driveThumb(url: string, marca?: number): string | null {
   if (!url) return null;
   const m = url.match(/\/d\/([-\w]{10,})/) || url.match(/[?&]id=([-\w]{10,})/);
@@ -23770,8 +23817,11 @@ function driveThumb(url: string, marca?: number): string | null {
   // enlace es el de siempre y el navegador sigue reutilizando su copia, que es
   // lo que se quiere el 99% del tiempo. Google acepta el parámetro de sobra —
   // probado contra archivos reales: devuelve la imagen igual.
-  const refresco = marca ? `&v=${marca}` : "";
-  return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w600${refresco}`;
+  if (marca) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w600&v=${marca}`;
+  // SIN EL DESVÍO (10/11/2026): «drive.google.com/thumbnail» responde siempre con un salto que el
+  // navegador no guarda (no-store) hacia esta dirección fija, que sí se guarda un día. Ir directo a
+  // ella deja la foto en la memoria del navegador: al volver a abrir el visor sale al instante.
+  return `https://lh3.googleusercontent.com/d/${m[1]}=w600`;
 }
 
 /**
@@ -24939,9 +24989,19 @@ function ChatPreview({
     placement: "before" | "after";
   } | null>(null);
   const ignorePreviewClickRef = useRef(false);
+  // Arranca con lo ya averiguado antes (ver `tiposDeEnlaceYaVistos`): la foto sale al instante.
   const [resolvedMediaKinds, setResolvedMediaKinds] = useState<
     Record<string, LinkMediaResolution>
-  >({});
+  >(() => {
+    const vistos = tiposDeEnlaceYaVistos();
+    return Object.fromEntries(
+      steps.flatMap((s) => {
+        const url = s.drive_url.trim();
+        const k = url ? vistos.get(url) : undefined;
+        return k ? [[url, k] as const] : [];
+      })
+    );
+  });
   const previewScrollRef = useRef<HTMLDivElement | null>(null);
   const inheritedPreviewContext = useContext(EditorPreviewContext);
   const bubbleClipboard = useContext(BubbleClipboardContext);
@@ -25013,7 +25073,16 @@ function ChatPreview({
   useEffect(() => {
     if (!mediaUrlsToResolveKey) return;
     let cancelled = false;
+    const vistos = tiposDeEnlaceYaVistos();
     for (const url of mediaUrlsToResolve) {
+      // YA AVERIGUADO EN OTRA VISITA: no se pregunta otra vez (10/11/2026, él: «cada que entro a editar, en
+      // los visores aparece la imagen que carga nuevamente… ralentizando la edición»). Mientras se preguntaba,
+      // la foto se escondía («Verificando tipo») y volvía a cargar.
+      const sabido = vistos.get(url);
+      if (sabido) {
+        setResolvedMediaKinds((current) => (current[url] === sabido ? current : { ...current, [url]: sabido }));
+        continue;
+      }
       setResolvedMediaKinds((current) =>
         current[url] ? current : { ...current, [url]: "loading" }
       );
@@ -25033,6 +25102,7 @@ function ChatPreview({
                 ? "restringido"
                 : "unknown";
           setResolvedMediaKinds((current) => ({ ...current, [url]: kind }));
+          recordarTipoDeEnlace(url, kind);
         })
         .catch(() => {
           if (cancelled) return;
