@@ -8929,7 +8929,7 @@ tiendas:
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
   - id: tienda_test2
     nombre: TEST 2 · LAS 4 TUBERÍAS
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - test dos
