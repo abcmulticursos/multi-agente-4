@@ -28930,7 +28930,7 @@ function VistaPizarra({
       alCopiar: () => {
         semiDelPortapapeles = SEMI_CORTA[vivo.current.semi] ?? null;
       },
-      pegar: (items: Array<{ piezaId: string; donde: { x: number; y: number }; recuadros?: Array<{ x: number; y: number } | null> }>, enlaces: Array<[number, number]>) => {
+      pegar: (items: Array<{ piezaId: string; donde: { x: number; y: number }; recuadros?: Array<{ x: number; y: number } | null> }>, enlaces: Array<[number, number]>, cajas?: DisposicionDePizarra["cajas"]) => {
         const { canal: k } = vivo.current;
         // PEGAR EN OTRA FORMA DE VENDER: se avisa antes. La tubería de COMO OB lleva la oferta de 2
         // opciones; en LINEAL eso no existe, y al revés faltaría. Si dice que sí, se pega aquí.
@@ -28981,6 +28981,8 @@ function VistaPizarra({
         if (delGrupo.length > 0) {
           c = conDisposicion(c, (d) => ({ ...d, enlaces: [...new Set([...(d.enlaces ?? []), ...delGrupo])] }));
         }
+        // Los velos copiados con las fichas, en este mismo cambio (un guardado aparte se perdía).
+        if (cajas) c = conDisposicion(c, (d) => ({ ...d, cajas }));
         aplicar(c);
         return nuevas;
       },

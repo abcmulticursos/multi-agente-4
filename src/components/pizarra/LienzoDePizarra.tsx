@@ -347,7 +347,8 @@ export interface AccionesDelLienzo {
   abrirAnuncios?: (piezaId: string) => void;
   /** COPIAR Y PEGAR (17/10/2026): copias sueltas en `donde`, con sus cables entre ellas
    *  (`enlaces`, por posición en la lista). Devuelve los ids de las copias. */
-  pegar?: (items: Array<{ piezaId: string; donde: Punto; recuadros?: Array<Punto | null> }>, enlaces: Array<[number, number]>) => string[];
+  /** `cajas`: la lista ENTERA de cajas con las pegadas, guardada en el mismo cambio que las fichas. */
+  pegar?: (items: Array<{ piezaId: string; donde: Punto; recuadros?: Array<Punto | null> }>, enlaces: Array<[number, number]>, cajas?: CajaDePizarra[]) => string[];
   /** Al copiar (Ctrl+C): el editor anota en qué semimodalidad se copió, para avisar si se pega en otra. */
   alCopiar?: () => void;
   /** Cortar el cable entre dos copias sueltas. */
@@ -4462,20 +4463,16 @@ export default function LienzoDePizarra({
           donde: { x: Math.round(alFinal + (p.x - xMin)), y: Math.round(p.y) },
           recuadros: p.recuadros,
         }));
-        const nuevas = acciones.pegar(items, enlaces);
-        if (nuevas.length === 0) return;
         // Los velos copiados con ellas, en el mismo sitio relativo (debajo de las fichas, como siempre).
         const sello = Date.now().toString(36);
         const cajasNuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `caja:${sello}${k}`, x: Math.round(alFinal + (c.x - xMin)), y: Math.round(c.y) }));
-        // Después de que el pegado de las fichas llegue a la pizarra: guardar con la disposición de
-        // antes borraría las fichas recién pegadas de la vista.
-        const todoLoPegado = new Set([...nuevas.map((id) => `suelta:${id}`), ...cajasNuevas.map((c) => c.id)]);
-        if (cajasNuevas.length > 0)
-          window.setTimeout(() => {
-            guardar({ cajas: [...cajasVivas.current, ...cajasNuevas] });
-            porElegir.current = todoLoPegado; // y queda elegido el grupo entero, velos incluidos
-          }, 80);
-        porElegir.current = todoLoPegado;
+        // EN EL MISMO CAMBIO QUE LAS FICHAS (10/11/2026, él: «copio todo, incluso con los velos
+        // seleccionados, pero no pega los velos»): guardarlos aparte, después, se perdía (un guardado
+        // pisaba al otro). Ahora el editor escribe fichas y velos juntos.
+        const nuevas = acciones.pegar(items, enlaces, cajasNuevas.length > 0 ? [...cajasVivas.current, ...cajasNuevas] : undefined);
+        if (nuevas.length === 0) return;
+        // Y queda elegido el grupo entero, velos incluidos.
+        porElegir.current = new Set([...nuevas.map((id) => `suelta:${id}`), ...cajasNuevas.map((c) => c.id)]);
         setAviso(
           nuevas.length === 1
             ? "Copia pegada a la derecha, suelta. Conéctala a un país cuando quieras."
