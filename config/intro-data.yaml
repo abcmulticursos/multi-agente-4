@@ -8857,7 +8857,7 @@ tiendas:
     color: "#eab308"
   - id: tienda_tplantillas
     nombre: TIENDA PLANTILLAS
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - tienda plantillas
