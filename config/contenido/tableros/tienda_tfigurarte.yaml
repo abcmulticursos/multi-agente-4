@@ -8770,13 +8770,12 @@ instagram:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_MERCADO}}~
               ✅ 📚 *{SOLO POR HOY A TAN SOLO|¡PROMOCIÓN VÁLIDA SOLO POR HOY A TAN SOLO|APROVECHA HOY Y ADQUIÉRELO A TAN SOLO} {{PRECIO_BASE}}* ‼️
+              ✅ Pago único, acceso de por vida.
+              📲 Apenas confirmes, te envío las 5 guías de inmediato por aquí.
 
-              🟠 *¿COMO LO ADQUIERO?*
+              {{METODO_DE_PAGO_1}}
 
-              1.- 💴 *Realiza un único pago de {{PRECIO_BASE}}*
-              2.- 📲 Y envíanos tu comprobante de pago
-
-              * {¡Y al instante recibes tu Material!|¡Recibe tu Material inmediatamente después de adquirirlo!|¡Tu Material estará disponible para ti al instante!} + 🎁 Bonos en segundos* 😊⚡
+              🟡 {Me mandas el comprobante y enseguida te llegan|Al enviar tu comprobante te llega en segundos|Luego de enviar tu comprobante recibirás el acceso al material descargable en segundos} 🤳😊
           delay_after_sec: 4
         - type: text
           body_variants:
