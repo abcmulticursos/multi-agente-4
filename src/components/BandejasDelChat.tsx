@@ -83,6 +83,32 @@ function opciones(bandejas: Bandeja[], chats: ChatDeBandeja[]): Opcion[] {
   ];
 }
 
+/**
+ * EL BUSCADOR DE TIENDAS DEL CHAT (10/11/2026, él: «necesito un buscador en la sección tiendas en el chat»).
+ * Por nombre o detalle, sin tildes ni mayúsculas. «Te necesitan», «Todas» y la elegida siempre se ven.
+ */
+const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function filtrar(lista: Opcion[], busca: string, elegida: string): Opcion[] {
+  const q = sinTildes(busca.trim());
+  if (!q) return lista;
+  return lista.filter(
+    (o) => o.clave === TODAS || o.clave === TE_NECESITAN || o.clave === elegida || sinTildes(`${o.nombre} ${o.detalle ?? ""}`).includes(q)
+  );
+}
+function CajaDeBusqueda({ valor, alCambiar, className }: { valor: string; alCambiar: (v: string) => void; className?: string }) {
+  return (
+    <input
+      value={valor}
+      onChange={(e) => alCambiar(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") alCambiar("");
+      }}
+      placeholder="🔍 Buscar tienda…"
+      className={`rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-emerald-400 focus:outline-none ${className ?? ""}`}
+    />
+  );
+}
+
 function Contador({ n, urgente }: { n: number; urgente?: boolean }) {
   if (!n) return null;
   return (
@@ -118,7 +144,9 @@ export function BarraDeBandejas({
   plegada: boolean;
   onPlegar: () => void;
 }) {
-  const lista = opciones(bandejas, chats);
+  const [busca, setBusca] = useState("");
+  const todas = opciones(bandejas, chats);
+  const lista = plegada ? todas : filtrar(todas, busca, elegida);
   return (
     <nav
       className={`hidden shrink-0 flex-col border-r border-neutral-200 bg-neutral-50 md:flex ${plegada ? "w-16" : "w-56"}`}
@@ -135,6 +163,11 @@ export function BarraDeBandejas({
           {plegada ? "»" : "«"}
         </button>
       </div>
+      {!plegada && todas.length > 3 && (
+        <div className="px-2 pb-2">
+          <CajaDeBusqueda valor={busca} alCambiar={setBusca} className="w-full" />
+        </div>
+      )}
       <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-3">
         {lista.map((o, i) => {
           const activa = o.clave === elegida;
@@ -184,6 +217,7 @@ export function BarraDeBandejas({
             </div>
           );
         })}
+        {!plegada && busca.trim() && lista.length <= 2 && <p className="px-2 py-2 text-xs text-neutral-500">Ninguna tienda se llama así.</p>}
       </div>
       <PieDelNegocio plegada={plegada} />
     </nav>
@@ -295,9 +329,12 @@ export function FilaDeBandejas({
     const b = boton.getBoundingClientRect();
     caja.scrollTo({ left: caja.scrollLeft + (b.left - c.left) - (c.width - b.width) / 2, behavior: "smooth" });
   }, [elegida]);
+  const [busca, setBusca] = useState("");
+  const todas = opciones(bandejas, chats);
   return (
     <div ref={fila} className="flex gap-2 overflow-x-auto border-b border-neutral-200 bg-neutral-50 px-3 py-2 md:hidden">
-      {opciones(bandejas, chats).map((o) => {
+      {todas.length > 3 && <CajaDeBusqueda valor={busca} alCambiar={setBusca} className="w-36 shrink-0" />}
+      {filtrar(todas, busca, elegida).map((o) => {
         const activa = o.clave === elegida;
         return (
           <button

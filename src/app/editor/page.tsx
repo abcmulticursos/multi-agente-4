@@ -36650,16 +36650,23 @@ function duplicarTienda(cfg: FullConfig, tiendaId: string, nombre?: string): { c
     nombre: nombre?.trim() || `${original.nombre?.trim() || "Tienda"} (copia)`,
     numero: "",
     pagina: "",
+    // LA COPIA NACE APAGADA DEL TODO (10/11/2026, él: «al duplicar una tienda que no aparezcan activos, para
+    // que no se duplique nada»): tienda apagada y sin frases de entrada (las mismas frases en dos tiendas del
+    // mismo número se pisan). Él la enciende y le escribe las suyas.
+    enabled: false,
+    frases_de_entrada: [],
   };
   let c: FullConfig = { ...cfg, tiendas: [...(cfg.tiendas ?? []), copia] };
   // SU TABLERO TAMBIÉN (23/10/2026), en todos sus canales. Nace apagado: la copia no tiene número
-  // todavía, y encenderlo es decisión suya.
+  // todavía, y encenderlo es decisión suya. Y cada Inicio con «Vender en este país» apagado (10/11/2026).
   const suTablero = cfg.tableros?.[tiendaId];
   if (suTablero) {
     const copiaDelTablero = JSON.parse(JSON.stringify(suTablero)) as NonNullable<FullConfig["tableros"]>[string];
     for (const k of Object.keys(copiaDelTablero) as Array<keyof typeof copiaDelTablero>) {
       const tb = copiaDelTablero[k];
-      if (tb) tb.encendido = false;
+      if (!tb) continue;
+      tb.encendido = false;
+      for (const f of tb.fichas ?? []) if (f.tipo === "inicio") f.sin_venta = true;
     }
     c = { ...c, tableros: { ...(c.tableros ?? {}), [id]: copiaDelTablero } };
   }
@@ -58166,6 +58173,27 @@ function TiendasDelProyecto({
             : `${vendiendo} de ${tiendas.length} vendiendo.`}
         </p>
       )}
+
+      {/* QUITAR «TIENDA» DE LOS NOMBRES (10/11/2026, él: «quitar el nombre de TIENDA que aparece en las tiendas…
+          TIENDA FIGURARTE, TIENDA LECTOESCRITURA»). Es parte del nombre guardado, así que se cambia aquí, como
+          cualquier edición suya (Ctrl+Z la deshace, Ctrl+S la guarda). Solo sale si alguna empieza así. */}
+      {(() => {
+        const conTienda = tiendas.filter((t) => /^\s*tienda\s+\S/i.test(t.nombre ?? ""));
+        if (conTienda.length === 0) return null;
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              onSnapshot();
+              onTiendas(tiendas.map((t) => (/^\s*tienda\s+\S/i.test(t.nombre ?? "") ? { ...t, nombre: (t.nombre ?? "").replace(/^\s*tienda\s+/i, "") } : t)));
+            }}
+            className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-tarjeta"
+            title={conTienda.map((t) => t.nombre).join(" · ")}
+          >
+            ✂ Quitar «TIENDA» del nombre ({conTienda.length} {conTienda.length === 1 ? "tienda" : "tiendas"})
+          </button>
+        );
+      })()}
 
       {tiendas.length > 1 && (
         <input
