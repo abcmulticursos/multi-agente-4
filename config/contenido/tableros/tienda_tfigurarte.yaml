@@ -276,15 +276,15 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ❌*(antes)* ~precio original $ 15 Dólares~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ❌*(antes)* ~precio original {{PRECIO_MERCADO}}~
+              ✅ 📚 *{SOLO POR HOY A TAN SOLO|¡PROMOCIÓN VÁLIDA SOLO POR HOY A TAN SOLO|APROVECHA HOY Y ADQUIÉRELO A TAN SOLO} {{PRECIO_BASE}}* ‼️
 
               🟠 *¿COMO LO ADQUIERO?*
 
               1.- 💴 *Realiza un único pago de {{PRECIO_BASE}}*
               2.- 📲 Y envíanos tu comprobante de pago
 
-              * !Y al instante recibes tu Material + 🎁 Bonos en segundos* 😊⚡
+              * {¡Y al instante recibes tu Material!|¡Recibe tu Material inmediatamente después de adquirirlo!|¡Tu Material estará disponible para ti al instante!} + 🎁 Bonos en segundos* 😊⚡
           delay_after_sec: 4
         - type: text
           body_variants:
