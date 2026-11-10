@@ -353,6 +353,11 @@ export interface ConversationRow {
     | "upsell"
     | null;
   /**
+   * LA RUTA DEL RUTEADOR ELEGIDA EN EL SIMULADOR (10/11/2026): «<id del Ruteador>|<id de la ruta>».
+   * Solo en conversaciones del simulador; en una real siempre es null y el Ruteador sortea como siempre.
+   */
+  test_ruta?: string | null;
+  /**
    * LA PRESENTACIÓN CON LA QUE ESTA CONVERSACIÓN EMPEZÓ A VENDER.
    *
    * POR QUÉ EXISTE. El dueño mueve el selector «PRESENTA:» cuando quiere, y con
@@ -780,6 +785,8 @@ const conversationColumns: Array<[string, string]> = [
   // Modalidad del simulador. NULL en toda conversación real: el modo testeador
   // no puede alcanzarlas ni por error.
   ["test_modality", "TEXT"],
+  // Ruta del Ruteador elegida en el simulador (10/11/2026). NULL en toda conversación real.
+  ["test_ruta", "TEXT"],
   // Cómo le fue al último evento que se le mandó a Meta por esta conversación.
   // Antes ese resultado solo vivía en el log, o sea que un evento que no llegó
   // no se notaba hasta mirar los números días después.
@@ -1014,6 +1021,9 @@ const stmtSetTestChannel = db.prepare<["whatsapp" | "messenger", number]>(
 // que aunque llegara un id equivocado NO puede tocar una conversacion real.
 const stmtSetTestModality = db.prepare<[string | null, number]>(
   "UPDATE conversations SET test_modality = ? WHERE id = ? AND channel = 'test'"
+);
+const stmtSetTestRuta = db.prepare<[string | null, number]>(
+  "UPDATE conversations SET test_ruta = ? WHERE id = ? AND channel = 'test'"
 );
 // SE ESCRIBE UNA SOLA VEZ, Y LO GARANTIZA LA PROPIA BASE.
 //
@@ -1272,6 +1282,11 @@ export function setTestConversationModality(
   modality: string | null
 ): void {
   stmtSetTestModality.run(modality, conversationId);
+}
+
+/** La ruta del Ruteador que fuerza una prueba del simulador («ruteador|ruta»). Exige `channel = 'test'`. */
+export function setTestConversationRuta(conversationId: number, ruta: string | null): void {
+  stmtSetTestRuta.run(ruta, conversationId);
 }
 
 const insertMessageTx = db.transaction(

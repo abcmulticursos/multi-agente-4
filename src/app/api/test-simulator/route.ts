@@ -8,9 +8,37 @@ import {
   fijarTiendaPorFraseSiFalta,
   setConversationMessengerPage,
   setTestConversationChannel,
+  setTestConversationRuta,
 } from "@/lib/db";
 import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
+import { inicioDelPais, leeTablerosPorTienda } from "@/lib/tablero/datos";
+import { rutaDe } from "@/lib/tablero/copiar";
+
+/**
+ * LAS RUTAS DE LOS RUTEADORES de una tienda en un canal y un país (10/11/2026): los Ruteadores a los que llega el Inicio
+ * de ese país, con sus rutas. Para que el simulador pueda elegir una («ruteador|ruta»).
+ */
+function rutasDelRuteador(tiendaId: string, canal: "whatsapp" | "messenger", pais: string) {
+  const crudo = loadWorkflowConfig() as { tableros?: unknown } | null;
+  const t = leeTablerosPorTienda(crudo?.tableros)[tiendaId]?.[canal];
+  if (!t) return [];
+  const inicio = inicioDelPais(t, pais);
+  if (!inicio) return [];
+  const alcanza = rutaDe(t, inicio.id);
+  return t.fichas
+    .filter((f) => f.tipo === "reparto" && alcanza.has(f.id))
+    .map((f) => ({
+      id: f.id,
+      titulo: String(f.titulo ?? "").trim() || "Ruteador",
+      rutas: (f.reparto ?? []).map((r, i) => ({
+        id: r.id,
+        nombre: String(r.nombre ?? "").trim() || `Ruta ${i + 1}`,
+        apagada: (r.peso ?? 1) <= 0,
+        conectada: t.cables.some((c) => c.de === f.id && c.salida === `rep:${r.id}`),
+      })),
+    }));
+}
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,6 +55,7 @@ export async function POST(req: NextRequest) {
     name?: unknown;
     channel?: unknown;
     tienda?: unknown;
+    ruta?: unknown;
   };
   try {
     body = await req.json();
@@ -104,6 +133,14 @@ export async function POST(req: NextRequest) {
         id: String(suya.id),
         nombre: String(suya.nombre ?? "").trim() || "Tienda sin nombre",
       };
+      // LA RUTA DEL RUTEADOR ELEGIDA (10/11/2026): solo si es de un Ruteador de esta tienda, canal y país.
+      const ruta = typeof body.ruta === "string" ? body.ruta.trim() : "";
+      if (ruta) {
+        const [ruteador, rutaId] = ruta.split("|");
+        const existe = rutasDelRuteador(String(suya.id), channel, country)
+          .some((r) => r.id === ruteador && r.rutas.some((x) => x.id === rutaId));
+        if (existe) setTestConversationRuta(convo.id, ruta);
+      }
     }
   }
   return NextResponse.json({
@@ -136,6 +173,12 @@ export async function GET(req: NextRequest) {
         apagada: t?.enabled === false,
       }));
     return NextResponse.json({ tiendas });
+  }
+  if (req.nextUrl.searchParams.get("rutas") === "1") {
+    const tienda = (req.nextUrl.searchParams.get("tienda") ?? "").trim();
+    const canal = req.nextUrl.searchParams.get("canal") === "messenger" ? "messenger" : "whatsapp";
+    const pais = (req.nextUrl.searchParams.get("pais") ?? "PE").toUpperCase();
+    return NextResponse.json({ ruteadores: tienda ? rutasDelRuteador(tienda, canal, pais) : [] });
   }
   const id = Number(req.nextUrl.searchParams.get("id"));
   const convo = Number.isFinite(id) ? getConversationById(id) : undefined;

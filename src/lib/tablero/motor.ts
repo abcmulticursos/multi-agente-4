@@ -1153,6 +1153,21 @@ async function irA(
       // EL SORTEO SOLO ENTRE LAS RUTAS CONECTADAS (27/10/2026): una ruta sin cable dejaba al cliente sin
       // nada (le tocó a la mitad de sus clientes de prueba en MASCOTAS). Si ninguna tiene cable, se avisa.
       const conectadas = (f.reparto ?? []).filter((r) => cableDeLaSalida(t, f.id, `rep:${r.id}`));
+      // LA RUTA ELEGIDA EN EL SIMULADOR (10/11/2026). Él: «en el simulador… necesito que se pueda elegir el camino del
+      // ruteador también». Solo una prueba trae `test_ruta` (la base la escribe solo con channel = 'test'); en vivo es
+      // null y todo sigue igual. Elegida aunque esté en OFF (peso 0), como la del anuncio; sin cable, el sorteo de siempre.
+      if (convo.channel === "test" && convo.test_ruta) {
+        const [ruteador, rutaId] = String(convo.test_ruta).split("|");
+        if (ruteador === f.id) {
+          const elegida = conectadas.find((r) => r.id === rutaId);
+          if (elegida) {
+            console.log(`[tablero] convo ${convoId}: (simulador) ruta elegida «${elegida.nombre || elegida.id}» del Ruteador`);
+            await seguir(`rep:${elegida.id}`);
+            return;
+          }
+          console.warn(`[tablero] convo ${convoId}: (simulador) la ruta elegida no tiene cable → sorteo de siempre`);
+        }
+      }
       // POR ANUNCIO PRIMERO (05/11/2026). Él: «en el ruteador exista una textarea para colocar el ad, y que active toda la
       // ruta para ese AD». Quien vino de un anuncio de una ruta (su ID de Meta, o la clave «meta_<id>» del registro) va
       // por ésa, aunque esté en OFF; los demás se sortean entre las rutas SIN anuncios (si todas tienen, entre todas).

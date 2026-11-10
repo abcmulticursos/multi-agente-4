@@ -131,9 +131,34 @@ type TiendaDePrueba = {
 function keyFor(
   channel: TestChannel,
   country: CountryCode | "ASK",
-  tienda: string
+  tienda: string,
+  ruta = ""
 ) {
-  return `${channel}:${country}:${tienda || "sin-tienda"}`;
+  // La ruta del Ruteador (10/11/2026) también: se fija al nacer la prueba, así que cada ruta es su propia conversación.
+  return `${channel}:${country}:${tienda || "sin-tienda"}${ruta ? `:${ruta}` : ""}`;
+}
+
+/** Un Ruteador de la tienda probada, con sus rutas (lo da `/api/test-simulator?rutas=1`). */
+interface RuteadorDePrueba {
+  id: string;
+  titulo: string;
+  rutas: { id: string; nombre: string; apagada: boolean; conectada: boolean }[];
+}
+/** El desplegable de rutas: «al azar» o una ruta de un Ruteador (agrupadas si la tienda tiene varios en ese país). */
+function SelectorDeRuta({ ruteadores, valor, alElegir, className }: { ruteadores: RuteadorDePrueba[]; valor: string; alElegir: (r: string) => void; className: string }) {
+  const opciones = (r: RuteadorDePrueba) => r.rutas.map((x) => (
+    <option key={x.id} value={`${r.id}|${x.id}`} disabled={!x.conectada}>
+      🔀 Ruta: {x.nombre}{x.apagada ? " (apagada)" : ""}{!x.conectada ? " — sin cable" : ""}
+    </option>
+  ));
+  return (
+    <select value={valor} onChange={(e) => alElegir(e.target.value)} title="Por qué ruta del Ruteador entra este cliente de prueba. Tus clientes reales no se ven afectados." className={className}>
+      <option value="">🔀 Ruta: al azar (como en vivo)</option>
+      {ruteadores.length === 1
+        ? opciones(ruteadores[0])
+        : ruteadores.map((r) => <optgroup key={r.id} label={r.titulo}>{opciones(r)}</optgroup>)}
+    </select>
+  );
 }
 function formatPhone(phone: string) { return `+${phone.replace(/^test:/, "").split("-")[0]} · número simulado`; }
 
@@ -155,6 +180,10 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
    *  igual que en vivo. */
   const [tienda, setTienda] = useState<string>("");
   const [tiendas, setTiendas] = useState<TiendaDePrueba[]>([]);
+  /** LA RUTA DEL RUTEADOR de esta prueba (10/11/2026): «ruteador|ruta». "" = al azar, como en vivo.
+   *  Él: «en el simulador solo se puede elegir tienda y país, necesito que se pueda elegir el camino del ruteador». */
+  const [ruta, setRuta] = useState<string>("");
+  const [ruteadores, setRuteadores] = useState<RuteadorDePrueba[]>([]);
   const [name, setName] = useState("Cliente de prueba");
   const [sessions, setSessions] = useState<SessionMap>({});
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -216,10 +245,28 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
       lsKey,
       JSON.stringify({
         sessions,
-        activeKey: sessionId ? keyFor(channel, country, tienda) : null,
+        activeKey: sessionId ? keyFor(channel, country, tienda, ruta) : null,
       })
     );
-  }, [channel, country, tienda, restoring, sessionId, sessions, lsKey]);
+  }, [channel, country, tienda, ruta, restoring, sessionId, sessions, lsKey]);
+
+  // LAS RUTAS DE LOS RUTEADORES de la tienda, el canal y el país elegidos (las del Inicio de ese país).
+  useEffect(() => {
+    if (!tienda) { setRuteadores([]); return; }
+    let vivo = true;
+    const pais = country === "ASK" ? "PE" : country;
+    void fetch(`/api/test-simulator?rutas=1&tienda=${encodeURIComponent(tienda)}&canal=${channel}&pais=${pais}`)
+      .then((r) => (r.ok ? r.json() : { ruteadores: [] }))
+      .then((d) => {
+        if (!vivo) return;
+        const lista: RuteadorDePrueba[] = Array.isArray(d?.ruteadores) ? d.ruteadores : [];
+        setRuteadores(lista);
+        // Una ruta que no es de estos Ruteadores (cambió la tienda, el canal o el país) vuelve a «al azar».
+        setRuta((r) => (lista.some((x) => x.rutas.some((y) => `${x.id}|${y.id}` === r)) ? r : ""));
+      })
+      .catch(() => { if (vivo) setRuteadores([]); });
+    return () => { vivo = false; };
+  }, [tienda, channel, country]);
 
   // LAS TIENDAS, para poder elegir con cual se prueba. Se piden una sola vez y solo
   // traen el id y el nombre: traerse la configuracion entera por dos campos seria
@@ -264,18 +311,19 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
   async function createSession(
     nextChannel = channel,
     nextCountry = country,
-    nextTienda = tienda
+    nextTienda = tienda,
+    nextRuta = ruta
   ): Promise<number | null> {
     setCreating(true); setError(null);
     try {
       const res = await fetch("/api/test-simulator", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ channel: nextChannel, country: nextCountry === "ASK" ? "" : nextCountry, name, tienda: nextTienda }),
+        body: JSON.stringify({ channel: nextChannel, country: nextCountry === "ASK" ? "" : nextCountry, name, tienda: nextTienda, ruta: nextRuta }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo abrir la prueba");
       const id = Number(data.id);
-      setSessions((current) => ({ ...current, [keyFor(nextChannel, nextCountry, nextTienda)]: id }));
+      setSessions((current) => ({ ...current, [keyFor(nextChannel, nextCountry, nextTienda, nextRuta)]: id }));
       setSessionId(id); setSnapshot(null); setDraft(""); setFile(null); pinnedToBottomRef.current = true;
       return id;
     } catch (err) {
@@ -291,10 +339,11 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
         : nextChannel === "whatsapp" && nextCountry === "ASK"
           ? "PE"
           : nextCountry;
-    setChannel(nextChannel); setCountry(resolvedCountry); setError(null);
+    // Otro canal u otro país = otros Ruteadores: la ruta vuelve a «al azar».
+    setChannel(nextChannel); setCountry(resolvedCountry); setRuta(""); setError(null);
     const known = sessions[keyFor(nextChannel, resolvedCountry, tienda)];
     if (known) { setSessionId(known); setSnapshot(null); pinnedToBottomRef.current = true; return; }
-    await createSession(nextChannel, resolvedCountry, tienda);
+    await createSession(nextChannel, resolvedCountry, tienda, "");
   }
 
   /**
@@ -305,10 +354,21 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
    * antes sería seguir probando la tienda anterior sin que nada lo dijera.
    */
   async function cambiarTienda(siguiente: string) {
-    setTienda(siguiente); setError(null);
+    setTienda(siguiente); setRuta(""); setError(null);
     const known = sessions[keyFor(channel, country, siguiente)];
     if (known) { setSessionId(known); setSnapshot(null); pinnedToBottomRef.current = true; return; }
-    await createSession(channel, country, siguiente);
+    await createSession(channel, country, siguiente, "");
+  }
+
+  /**
+   * CAMBIA LA RUTA DEL RUTEADOR (10/11/2026). Como la tienda, abre una conversación NUEVA: el Ruteador decide
+   * al llegar el cliente, así que en la de antes ya decidió.
+   */
+  async function cambiarRuta(siguiente: string) {
+    setRuta(siguiente); setError(null);
+    const known = sessions[keyFor(channel, country, tienda, siguiente)];
+    if (known) { setSessionId(known); setSnapshot(null); pinnedToBottomRef.current = true; return; }
+    await createSession(channel, country, tienda, siguiente);
   }
 
   /**
@@ -356,7 +416,7 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
       await fetch(`/api/test-simulator/${id}`, { method: "DELETE" });
       setSessions((current) => {
         const next = { ...current };
-        delete next[keyFor(channel, country, tienda)];
+        delete next[keyFor(channel, country, tienda, ruta)];
         return next;
       });
       setSessionId(null); setSnapshot(null);
@@ -441,6 +501,11 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
               })()}
             </label>
           )}
+          {ruteadores.length > 0 && (
+            <label className="mt-3 block text-xs font-medium text-neutral-700">Ruta del Ruteador
+              <SelectorDeRuta ruteadores={ruteadores} valor={ruta} alElegir={setRuta} className="mt-1 w-full rounded-md border border-sky-300 bg-sky-50 px-3 py-2 text-sm text-sky-900" />
+            </label>
+          )}
           <label className="mt-3 block text-xs font-medium text-neutral-700">Nombre
             <input value={name} onChange={(event) => setName(event.target.value)} className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </label>
@@ -467,6 +532,10 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
                   crearla, igual que le llega a un cliente por su número. */}
               {tiendas.length > 0 && (
                 <BuscadorDeTiendas compacto tiendas={tiendas} valor={tienda} alElegir={(id) => void cambiarTienda(id)} />
+              )}
+              {/* LA RUTA DEL RUTEADOR de esta prueba. Cambiarla abre una conversación nueva. */}
+              {ruteadores.length > 0 && (
+                <SelectorDeRuta ruteadores={ruteadores} valor={ruta} alElegir={(r) => void cambiarRuta(r)} className="rounded-md border border-sky-300 bg-sky-50 px-2 py-1 text-xs text-sky-900" />
               )}
               {/* MODO TESTEADOR: la modalidad de ESTA prueba. No toca la que
                   venden tus clientas — esa vive en la configuración. */}
