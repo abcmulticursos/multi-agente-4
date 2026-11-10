@@ -1026,9 +1026,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {(burbujas.length === 0 || (f.tipo !== "mensaje" && f.tipo !== "intro_ob" && f.tipo !== "cobro")) && (
           <div className={`whitespace-pre-line text-[11px] ${burbujas.length === 0 ? "italic" : ""} text-slate-600`}>{ctx.resumenDe(f)}</div>
         )}
+        {/* LA NOTA PARA LA IA, A LA VISTA (10/11/2026, su FIGURARTE: una nota de la ficha de ejemplo viajó en sus copias
+            como una línea violeta cortada y nadie la vio; la IA le ofreció muestras a un cliente que pedía el número).
+            Recuadro con su nombre y dos líneas: al duplicar la ficha se ve que la copia se la lleva. */}
         {f.instrucciones?.trim() && (
-          <div className="truncate text-[11px] text-violet-700" title={f.instrucciones}>
-            🧠 {f.instrucciones}
+          <div className="rounded-md border border-violet-300 bg-violet-50 px-1.5 py-1 text-[11px] text-violet-900" title={`Nota para la IA en esta ficha (⚙ para editarla):\n\n${f.instrucciones}`}>
+            <span className="font-bold">🧠 Nota para la IA: </span>
+            <span className="line-clamp-2 inline">{f.instrucciones}</span>
           </div>
         )}
         {f.tipo === "entregar" && f.por_correo && <div className="text-[11px] text-cyan-700">📧 Ofrece también por correo</div>}

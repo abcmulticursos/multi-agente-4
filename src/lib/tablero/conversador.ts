@@ -180,7 +180,15 @@ function loQueSabe(c: ContextoDeLaIA): string {
           "MUESTRAS QUE PUEDES ENVIAR con la herramienta enviar_muestras (fotos o videos reales del producto). Envíalas SOLO cuando vengan a cuento: si pide ver, si pregunta qué incluye o cómo es, o si su «cuándo» lo dice. Nunca más de dos a la vez y nunca una que no esté en esta lista:",
           ...muestras.map((m) => `- ${m.id}: ${m.producto} — ${m.tema}${m.cuando ? ` (cuándo: ${m.cuando.slice(0, 200)})` : ""}`),
         ]
-      : []),
+      : // SIN MUESTRAS POR ENVIAR (10/11/2026, su FIGURARTE: una nota de la ficha le decía «invítalo a responder SÍ
+        // para recibir las muestras» y ya no quedaba ninguna; ofreció, dijo «aquí te van» y no salió nada). Que no
+        // haya herramienta no basta: se le dice que no puede, y por qué, para que no lo prometa.
+        // (Con muestras pendientes las manda el bot solo cuando las pide o pregunta qué contiene; la IA tampoco.)
+        [
+          muestras.length
+            ? "MUESTRAS: tú NO envías muestras, fotos, imágenes ni archivos; cuando el cliente las pide, el sistema se las manda solo. Nunca las ofrezcas ni digas que las envías («aquí te van», «te las envío»), aunque otra instrucción lo pida."
+            : "MUESTRAS: no hay ninguna muestra, foto, imagen ni archivo para enviar (o ya se le enviaron todas). Nunca las ofrezcas ni digas que las envías, aunque otra instrucción lo pida. Si las pide, dile con amabilidad que las que hay ya están más arriba en el chat (si se le enviaron) o explícale el contenido por escrito.",
+        ]),
   ].join("\n");
 }
 
@@ -987,6 +995,18 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       .filter(Boolean)
       .join("\n\n");
     console.log(`[tablero:ia] convo ${convo.id}: habló de «el sistema» → se quita esa frase`);
+  }
+  // «[Imagen: Muestra FIGURARTE 1]» (10/11/2026, su FIGURARTE en la copia): sin muestras por enviar, la IA escribió
+  // las imágenes como texto entre corchetes y el cliente no recibió nada. Un archivo de verdad lo manda el sistema;
+  // escrito entre corchetes nunca es uno, así que se quita (y la burbuja, si no le queda nada).
+  const FALSO_ARCHIVO = /\[\s*(imagen|imágen|imagenes|imágenes|foto|fotos|video|vídeo|audio|documento|pdf|archivo|muestra)\b[^\]\n]*\]/gi;
+  if (texto && FALSO_ARCHIVO.test(texto)) {
+    texto = texto
+      .split(/\n\s*\n/)
+      .map((b) => b.replace(FALSO_ARCHIVO, "").replace(/[ \t]{2,}/g, " ").trim())
+      .filter((b) => b.replace(/[\s\p{P}\p{S}]/gu, "").length > 0)
+      .join("\n\n");
+    console.log(`[tablero:ia] convo ${convo.id}: escribió un archivo entre corchetes («[Imagen…]») → se quita`);
   }
   // «POR GUAYAQUIL, EN UN MOMENTO TE LLEGAN LOS DATOS» SIN MÉTODO ELEGIDO (H3, 27/10/2026): la IA no manda
   // datos, así que esa promesa es falsa. Como la venta de siempre (<<METODOS_PAGO>>), sale la lista de

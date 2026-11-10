@@ -32123,9 +32123,17 @@ function PantallaDelTableroCargada({
           type="button"
           onClick={() => setVerCerebro(true)}
           className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold text-tinta hover:bg-tarjeta"
-          title="Quién es la IA y cómo habla en todo este tablero"
+          title={`Quién es la IA y cómo habla en todo este tablero:\n\n${(tablero.cerebro?.trim() || CEREBRO_DE_FABRICA).slice(0, 600)}`}
         >
           🧠 Cerebro{tablero.cerebro?.trim() ? " · tuyo" : " · de fábrica"}
+          {/* SU PRIMERA LÍNEA A LA VISTA (10/11/2026): el de FIGURARTE empezaba con «Eres Rubén…» (de la tienda de
+              ejemplo) y no se veía sin abrirlo. */}
+          {tablero.cerebro?.trim() && (
+            <span className="ml-1 font-normal text-tinta-suave">
+              «{tablero.cerebro.trim().split("\n")[0].slice(0, 50)}
+              {tablero.cerebro.trim().split("\n")[0].length > 50 ? "…" : ""}»
+            </span>
+          )}
         </button>
         {verCerebro && (
           <VentanaFlotante

@@ -1288,6 +1288,22 @@ const QUIERE_PAGAR =
 // («lo quiero VER / saber / pensar» no es comprar: después de «quiero» un verbo que no es de comprar —28/10/2026,
 // ronda 14: «lo quiero ver» en el Order bump eligió el básico—.)
 
+/**
+ * PIDE EL NÚMERO O LA CUENTA PARA PAGAR (10/11/2026, su FIGURARTE): tras la intro («responde con un método de pago»)
+ * escribió «Cual es wl número» y lo contestó la IA, que se fue por otro lado. Pedir el número es querer pagar.
+ * Se mira la LÍNEA ENTERA: la pregunta termina en «número / cuenta / datos» (o «… de cuenta / para pagar»), con a lo
+ * sumo una palabra corta delante («el», «la», «tu», o mal escrita: «wl»). Así «cuál es el número de páginas» no cuenta.
+ * El método, si lo nombra, lo atiende antes `metodoQueNombra`.
+ */
+function pideLaCuenta(normal: string): boolean {
+  return normal
+    .split("\n")
+    .map((l) => l.replace(/[^a-z0-9ñ\s]/g, " ").replace(/\s+/g, " ").trim())
+    .some((l) =>
+      /^(?:(?:hola|ok|ya|bueno|y|entonces|ah|oye|disculpa|amiga?|senorita|joven|srta?)\s+)*(?:(?:cual|cuales|q|que)\s+(?:es|son|seria)\s+|(?:me\s+)?(?:das|da|pasas|pasa|envias|envia|mandas|manda|brindas|compartes|puedes\s+(?:dar|pasar|enviar|mandar))\s+|(?:dame|pasame|mandame|enviame)\s+|a\s+(?:que|cual)\s+)?(?:\S{1,4}\s+)?(?:numero|nro|cuenta|datos|numeros)(?:\s+(?:de|del|para)\s+(?:la\s+|el\s+)?(?:cuenta|pago|pagar|deposito|depositar|transferir|transferencia))?(?:\s+(?:por\s?fa\w*|por\s+favor|porfavor|pls|please))?$/.test(l)
+    );
+}
+
 /** Un «sí» pelado: «sí», «dale», «ok», «claro», «de una», «sí quiero», «perfecto»… (sin tildes ni signos). */
 // Un mensaje hecho SOLO de afirmaciones también lo es: «bueno ya», «ok dale», «ya bueno» (28/10/2026, ronda 14:
 // «bueno ya» a «¿te muestro cómo adquirirlo?» se fue a la IA y no salieron los datos). Y con el relleno que se
@@ -1803,6 +1819,8 @@ async function contestarConIA(
     moneda: getCountryInfo(pais).currency,
     nota,
     productos,
+    // Solo para que la IA sepa si quedan muestras (las manda el bot cuando las pide; ella no tiene herramienta).
+    muestras,
     dialecto: getCountryInfo(pais).dialect,
     ...(puedeReenviar
       ? {
@@ -4529,11 +4547,12 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   } else if (
     texto &&
     !estado.cobro_ficha_id &&
-    QUIERE_PAGAR.test(normal) &&
+    (QUIERE_PAGAR.test(normal) || pideLaCuenta(normal)) &&
     !/\bno (lo )?(quiero|voy a|puedo|deseo)\b/.test(normal) &&
     // Con UNA sola forma de comprar, lo que diga además no cambia nada: «no gracias, ya me dijiste lo
     // que incluye, quiero pagar por mercado pago» (27/10/2026, AR) se quedaba en la IA dos turnos.
-    (loDemas.length === 0 || opcionesDeCompra().destinos.size === 1)
+    // (Pedir el número tampoco nombra un producto: con varios, «¿Cuál eliges?» con sus precios.)
+    (loDemas.length === 0 || pideLaCuenta(normal) || opcionesDeCompra().destinos.size === 1)
   ) {
     // «QUIERO PAGAR» SIN DECIR CUÁL (27/10/2026), en cualquier momento (tras un seguimiento, horas
     // después…): con dos o más productos por elegir, la IA ya no adivina (podía darle el barato); se le
