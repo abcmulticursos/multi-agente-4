@@ -456,7 +456,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mw4xhgdb-0buuj
-          minutos: 2
+          minutos: 25
           variantes:
             - id: v-mw4xhgdb-l2put
               peso: 1
@@ -893,7 +893,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mw93oy8j-3wtja
-          minutos: 2
+          minutos: 25
           variantes:
             - id: v-mw93oy8j-ouzz9
               peso: 1
@@ -1308,7 +1308,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mw93uthu-vvh1v
-          minutos: 2
+          minutos: 25
           variantes:
             - id: v-mw93uthu-9g85y
               peso: 1
