@@ -694,6 +694,23 @@ async function fueraDeVentanaSoloSiEsComprobante(convo: ConversationRow): Promis
 }
 
 function leContestamos(convo: ConversationRow): boolean {
+  // UN NÚMERO SIN TIENDA NO CONTESTA (10/11/2026, él: «que no responda si el número no tiene tienda»). Antes le
+  // contestaba la venta automática con el contenido general, que no es de ninguna de sus tiendas. Solo si hay
+  // tiendas creadas: sin ninguna (una instalación nueva, la plantilla) el bot es el de siempre. Una tienda apagada
+  // no cuenta (`tiendaDelNumero` solo mira las encendidas). Su mensaje queda guardado en el chat.
+  // SOLO AL CLIENTE NUEVO (`new`: el bot aún no le habló). Una conversación empezada sigue (la misma regla de «no
+  // responder orgánicos», abajo): ese día él había quitado el número a casi todas sus tiendas, y callar a quien ya
+  // tiene los datos de pago dejaba sin leer su comprobante.
+  const config = loadWorkflowConfig();
+  if (
+    convo.channel === "whatsapp" &&
+    convo.state === "new" &&
+    (config?.tiendas ?? []).some((t) => t?.enabled !== false) &&
+    !laTiendaDeLaConversacion(convo)
+  ) {
+    console.log(`[wh] convo ${convo.id}: el número ${convo.wa_phone_number_id ?? "?"} no tiene tienda → no contesto (su mensaje queda guardado)`);
+    return false;
+  }
   // LA VENTANA VA PRIMERO: manda sobre todo lo demás, incluido quien ya pagó. Ver arriba.
   if (pasoLaVentanaDeRespuesta(convo)) {
     if (esUnComprobanteDeUnPagoPendiente(convo)) {
