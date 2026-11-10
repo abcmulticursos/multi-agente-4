@@ -58034,6 +58034,14 @@ function TiendasDelProyecto({
    *  SE GUARDA EL ID, NO LA POSICIÓN: si él borra una tienda de arriba, la posición
    *  pasaría a señalar a otra y se abriría la equivocada. */
   const [tiendaAbierta, setTiendaAbierta] = useState<string | null>(abiertaAlInicio ?? null);
+  // EL BUSCADOR (09/11/2026, él: «las tiendas salen ordenadas en lista pero no hay un buscador»).
+  // Solo esconde filas: no cambia el orden ni nada de las tiendas. Busca por nombre, sin tildes.
+  const [buscarTienda, setBuscarTienda] = useState("");
+  const sinTildesTienda = (s: string) => s.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase();
+  const coincideConLaBusqueda = (t: TiendaEditor, i: number): boolean => {
+    const q = sinTildesTienda(buscarTienda.trim());
+    return !q || sinTildesTienda(t.nombre?.trim() || `Tienda ${i + 1}`).includes(q);
+  };
   // LO QUE YA ESTÁ CONECTADO, para elegirlo de una lista. Se pide UNA vez al abrir.
   //
   // Si falla no se avisa con un error rojo: los tres selectores se quedan vacíos y
@@ -58157,7 +58165,25 @@ function TiendasDelProyecto({
         </p>
       )}
 
+      {tiendas.length > 1 && (
+        <input
+          type="search"
+          value={buscarTienda}
+          onChange={(e) => setBuscarTienda(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setBuscarTienda("");
+          }}
+          placeholder="🔍 Buscar tienda…"
+          className="block w-full rounded-md border border-borde bg-relleno px-3 py-2 text-xs text-tinta focus:outline-none"
+        />
+      )}
+      {tiendas.length > 1 && buscarTienda.trim() && !tiendas.some(coincideConLaBusqueda) && (
+        <p className="text-xs text-tinta-suave">Ninguna tienda se llama así.</p>
+      )}
+
       {tiendas.map((tienda, i) => {
+        // La que está abierta en su ventana no se esconde aunque no coincida.
+        if (!coincideConLaBusqueda(tienda, i) && tienda.id !== tiendaAbierta) return null;
         const sinNumero = !String(tienda.numero ?? "").trim();
         /**
          * EL NÚMERO FIJA LA CUENTA, y la página y el píxel solo se ofrecen de ésa.
