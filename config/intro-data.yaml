@@ -8893,7 +8893,7 @@ tiendas:
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
   - id: tienda_test1
     nombre: TEST 1 · RECONECTAR TUBERÍAS
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - test uno
