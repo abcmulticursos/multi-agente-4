@@ -3077,7 +3077,11 @@ notification_settings:
   enabled: true
   whatsapp_enabled: false
   telegram_enabled: true
-  recipients: []
+  recipients:
+    - name: Alberto
+      enabled: true
+      phone: ""
+      telegram_chat_id: "5508161687"
 intro_ad_keys: []
 ad_registry:
   - key: meta_120250714755750336
