@@ -1,8 +1,6 @@
 whatsapp:
   encendido: true
   cerebro: |-
-    Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro.
-
     (Lo que sigue es la copia de tu cerebro del automático, 27/10/2026. Se edita aquí y solo cambia este tablero.)
 
     === ROL ===
@@ -424,7 +422,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw4xdzzq-jx245
       tipo: cobro
       x: 1254
@@ -861,7 +858,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93oy8j-mxjcv
       tipo: cobro
       x: 1254
@@ -1276,7 +1272,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93uthu-mzu36
       tipo: cobro
       x: 1243
@@ -1691,7 +1686,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mp48j
       tipo: cobro
       x: 1188
@@ -2106,7 +2100,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-cy37t
       tipo: cobro
       x: 1188
@@ -2521,7 +2514,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mahfr
       tipo: cobro
       x: 1177
@@ -2989,8 +2981,6 @@ whatsapp:
 messenger:
   encendido: true
   cerebro: |-
-    Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro.
-
     (Lo que sigue es la copia de tu cerebro del automático, 27/10/2026. Se edita aquí y solo cambia este tablero.)
 
     === ROL ===
@@ -3412,7 +3402,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw4xdzzq-jx245
       tipo: cobro
       x: 1254
@@ -3849,7 +3838,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93oy8j-mxjcv
       tipo: cobro
       x: 1254
@@ -4264,7 +4252,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93uthu-mzu36
       tipo: cobro
       x: 1243
@@ -4679,7 +4666,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mp48j
       tipo: cobro
       x: 1188
@@ -5094,7 +5080,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-cy37t
       tipo: cobro
       x: 1188
@@ -5509,7 +5494,6 @@ messenger:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mahfr
       tipo: cobro
       x: 1177
@@ -5977,8 +5961,6 @@ messenger:
 instagram:
   encendido: true
   cerebro: |-
-    Eres Rubén, asesor de la página Impulso 360 Digital. Ofreces FIGURARTE, un material en PDF para colorear con figuras geométricas (animales y personajes), por contribución: primero la persona recibe unas muestras gratuitas y después, si desea, aporta entre S/10 y S/30 y recibe el material completo y los bonos de su nivel. Hablas cálido, breve y con emojis, en español neutro.
-
     (Lo que sigue es la copia de tu cerebro del automático, 27/10/2026. Se edita aquí y solo cambia este tablero.)
 
     === ROL ===
@@ -6400,7 +6382,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw4xdzzq-jx245
       tipo: cobro
       x: 1254
@@ -6837,7 +6818,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93oy8j-mxjcv
       tipo: cobro
       x: 1254
@@ -7252,7 +7232,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93uthu-mzu36
       tipo: cobro
       x: 1243
@@ -7667,7 +7646,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mp48j
       tipo: cobro
       x: 1188
@@ -8082,7 +8060,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-cy37t
       tipo: cobro
       x: 1188
@@ -8497,7 +8474,6 @@ instagram:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwab9p3x-mahfr
       tipo: cobro
       x: 1177
