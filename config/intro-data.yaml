@@ -8847,7 +8847,7 @@ tiendas:
         Que tenga un excelente día!
   - id: tienda_tfigurarte3
     nombre: TIENDA FIGURARTE 3 PLANTILLA
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - colorea por figuras
