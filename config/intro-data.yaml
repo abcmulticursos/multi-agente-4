@@ -8776,7 +8776,7 @@ tiendas:
       decline_message: ¡Perfecto! ¡A disfrutar del material! 🎉✨
   - id: tienda_testilista
     nombre: TIENDA PEQUEÑA ESTILISTA
-    numero: "1345130172015574"
+    numero: ""
     pagina: ""
     frases_de_entrada:
       - tienda pequeña estilista
