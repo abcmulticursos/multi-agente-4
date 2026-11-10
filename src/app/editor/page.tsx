@@ -54619,7 +54619,7 @@ function AjustesTab({
               </span>
             ) : (
               <span className="text-xs text-neutral-500">
-                Guarda primero si acabas de cambiar destinatarios.
+                Agrega destinatario y Guarda antes de hacer una prueba.
               </span>
             )}
           </div>
