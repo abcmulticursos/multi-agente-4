@@ -1832,35 +1832,8 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   // Elegida por su título O dentro de la selección (recuadro, Shift + clic): se marca igual (09/11/2026).
   const marcada = data.elegida || !!selected;
   return (
-    <div
-      className="h-full w-full"
-      style={{ pointerEvents: "none" }}
-      // Un clic en una esquina (sin arrastrar) la elige.
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest(".react-flow__resize-control")) {
-          e.stopPropagation();
-          data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
-        }
-      }}
-    >
-      {ESQUINAS.map((esquina) => (
-        <NodeResizeControl
-          key={esquina}
-          position={esquina}
-          minWidth={160}
-          minHeight={100}
-          style={{
-            width: 18,
-            height: 18,
-            border: "none",
-            borderRadius: 4,
-            pointerEvents: "all",
-            background: data.elegida ? t.tituloCaja : "transparent",
-            opacity: data.elegida ? 0.8 : 1,
-          }}
-          onResizeEnd={(_e, r) => data.alCambiar({ ...data.caja, x: r.x, y: r.y, ancho: r.width, alto: r.height })}
-        />
-      ))}
+    <div className="h-full w-full" style={{ pointerEvents: "none" }}>
+      {/* Sus cuatro esquinas viven en `NodoDeEsquinas`, ENCIMA de las fichas. */}
       <div
         className="h-full w-full rounded-2xl"
         style={{
@@ -2038,8 +2011,55 @@ function CableCortable({ id, sourceX, sourceY, targetX, targetY, sourcePosition,
   );
 }
 
+/**
+ * LAS ESQUINAS DE UN VELO, ENCIMA DE TODO (10/11/2026). Él: «a veces las esquinas quedan debajo de
+ * las fichas y no se pueden tocar… necesito que al poner el mouse sobre la esquina, así esté detrás
+ * de la ficha, lo pueda manipular, tanto en los de país como simples». El velo sigue detrás (es
+ * fondo); sus cuatro esquinas van en este nodo transparente del mismo tamaño y en el mismo sitio, por
+ * encima de las fichas, y estiran AL VELO (`nodeId`). No se elige, no se mueve, no recoge el ratón
+ * salvo en las esquinas; se calcula en cada pintada desde el velo, así lo sigue al moverlo o estirarlo.
+ */
+type DatosDeEsquinas = DatosDeCaja & { cajaId: string };
+function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeEsquinas>>) {
+  const t = TEMA[data.tema];
+  return (
+    <div
+      className="h-full w-full"
+      style={{ pointerEvents: "none" }}
+      // Un clic en una esquina (sin arrastrar) elige el velo.
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest(".react-flow__resize-control")) {
+          e.stopPropagation();
+          data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
+        }
+      }}
+    >
+      {ESQUINAS.map((esquina) => (
+        <NodeResizeControl
+          key={esquina}
+          nodeId={data.cajaId}
+          position={esquina}
+          minWidth={160}
+          minHeight={100}
+          style={{
+            width: 18,
+            height: 18,
+            border: "none",
+            borderRadius: 4,
+            pointerEvents: "all",
+            background: data.elegida ? t.tituloCaja : "transparent",
+            opacity: data.elegida ? 0.8 : 1,
+          }}
+          onResizeEnd={(_e, r) => data.alCambiar({ ...data.caja, x: r.x, y: r.y, ancho: r.width, alto: r.height })}
+        />
+      ))}
+    </div>
+  );
+}
+
 const TIPOS_DE_NODO = {
   inicio: NodoDeInicio,
+  esquinas: NodoDeEsquinas,
   pieza: NodoDePieza,
   prestada: NodoDePrestada,
   destino: NodoDeDestino,
@@ -4345,10 +4365,11 @@ export default function LienzoDePizarra({
         // solos en el camino del país en cuanto su intro está conectada.
         const elegidos = elegidasConSusCajones(["pieza", "upsell"]);
         // LOS VELOS ELEGIDOS TAMBIÉN SE COPIAN (09/11/2026, él: «dale la capacidad de copiar con control
-        // C»). La copia es una caja nueva con su tamaño y su nombre; el fondo de un país se copia como
-        // caja libre (sin su «▶ Ver recorrido»: ése es de su país).
+        // C»). La copia es una caja nueva con su tamaño y su nombre. SOLO LOS SIMPLES (10/11/2026, él:
+        // «hay 2 tipos de velos, los de país y los otros que son más simples, yo necesito que los velos
+        // simples se copien y peguen»): el de un país es de su país y no se copia (sí se mueve con lo elegido).
         const cajasACopiar = nodosVivos.current
-          .filter((n) => n.type === "caja" && n.selected)
+          .filter((n) => n.type === "caja" && n.selected && !n.id.startsWith("caja:carril:"))
           .map((n) => (n.data as DatosDeCaja).caja)
           .map((c) => ({ x: c.x, y: c.y, ancho: c.ancho, alto: c.alto, titulo: c.titulo }));
         if (elegidos.length === 0 && cajasACopiar.length === 0) return;
@@ -4677,6 +4698,29 @@ export default function LienzoDePizarra({
   const nodosVistos = !rutaIluminada
     ? nodosVistosSinRuta
     : nodosVistosSinRuta.map((n) => (estaEnLaRuta(n) ? n : { ...n, style: { ...n.style, opacity: 0.15 } }));
+  // Las esquinas de cada velo, encima de las fichas (ver `NodoDeEsquinas`): mismo sitio y mismo
+  // tamaño que el velo AHORA (mientras se mueve o se estira, también).
+  const nodosEnPantalla: Node[] = [
+    ...nodosVistos,
+    ...nodosVistos
+      .filter((n) => n.type === "caja")
+      .map((n) => {
+        const s = n.style as { width?: number; height?: number } | undefined;
+        return {
+          id: `esquinas:${n.id}`,
+          type: "esquinas",
+          position: n.position,
+          style: { width: n.width ?? s?.width, height: n.height ?? s?.height, pointerEvents: "none" as const },
+          zIndex: 5000,
+          selectable: false,
+          draggable: false,
+          focusable: false,
+          deletable: false,
+          connectable: false,
+          data: { ...(n.data as DatosDeCaja), cajaId: n.id },
+        };
+      }),
+  ];
   const fueraDeLaRuta = new Set(rutaIluminada ? nodosVistos.filter((n) => !estaEnLaRuta(n)).map((n) => n.id) : []);
   const cablesVistosSinRuta =
     probando === null
@@ -4742,7 +4786,7 @@ export default function LienzoDePizarra({
         }}
       >
         <ReactFlow
-          nodes={nodosVistos}
+          nodes={nodosEnPantalla}
           edges={cablesVistos}
           onInit={(i) => {
             instancia.current = i;
@@ -5091,7 +5135,14 @@ export default function LienzoDePizarra({
           <Controls showInteractive={false} />
           {/* EL MINIMAPA SOLO SE MIRA (19/10/2026): «se mueve de su sitio… se pone al centro de la
               pantalla… y ahí creo que se traba». Atrapaba el ratón: los clics caían en él. */}
-          <MiniMap pannable={false} zoomable={false} nodeStrokeWidth={3} style={{ pointerEvents: "none" }} />
+          <MiniMap
+            pannable={false}
+            zoomable={false}
+            nodeStrokeWidth={3}
+            style={{ pointerEvents: "none" }}
+            // Las esquinas de los velos no se dibujan en el mapa (el velo ya está).
+            nodeColor={(n) => (n.type === "esquinas" ? "transparent" : (undefined as unknown as string))}
+          />
           <ZonaDeLaSeleccion />
         </ReactFlow>
 
