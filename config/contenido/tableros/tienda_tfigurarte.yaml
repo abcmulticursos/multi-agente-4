@@ -15532,6 +15532,8 @@ instagram:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwc6oofm-533y8
           minutos: 480
           variantes:
@@ -15564,6 +15566,8 @@ instagram:
                       🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwc6oofm-z2zli
       tipo: regalo
       x: 1386
@@ -15943,6 +15947,8 @@ instagram:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwc6oofn-1pt9f
           minutos: 480
           variantes:
@@ -15975,6 +15981,8 @@ instagram:
                       🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwc6oofn-wpm19
       tipo: regalo
       x: 1375
@@ -16354,6 +16362,8 @@ instagram:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwc6oofn-2yso8
           minutos: 480
           variantes:
@@ -16386,6 +16396,8 @@ instagram:
                       🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwc6oofn-ieuye
       tipo: regalo
       x: 1375
