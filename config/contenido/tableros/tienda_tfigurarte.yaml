@@ -424,7 +424,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw4xdzzq-jx245
       tipo: cobro
       x: 1254
@@ -864,7 +863,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93oy8j-mxjcv
       tipo: cobro
       x: 1254
@@ -1279,7 +1277,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mw93uthu-mzu36
       tipo: cobro
       x: 1243
@@ -1587,8 +1584,8 @@ whatsapp:
         - ptfig_figurarte
     - id: f-mwbepkbd-adebx
       tipo: cobro
-      x: 1243
-      y: 1738
+      x: 1232
+      y: 1914
       steps:
         - type: text
           body_variants:
@@ -1607,8 +1604,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mwbepkbd-ckdjc
       tipo: seguimientos
-      x: 539
-      y: 1496
+      x: 1056
+      y: 1485
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1924,10 +1921,6 @@ whatsapp:
       salida: pagado
       a: f-mwbepkbd-aoswl
       vista: cable
-    - id: c-mwbepkbe-olz7h
-      de: f-mwbepkbd-adebx
-      salida: sin_pago
-      a: f-mwbepkbd-ckdjc
     - id: c-mwbeqb9n-75g
       de: f-mw929103-8pb4
       salida: rep:rmwbepyn7
