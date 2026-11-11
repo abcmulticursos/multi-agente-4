@@ -6491,6 +6491,61 @@ whatsapp:
       tipo: regalo
       x: 3421
       y: 5610
+    - id: f-mwcmp907-ks9g
+      tipo: mensaje
+      x: 3366
+      y: 3300
+      steps:
+        - type: text
+          body_variants:
+            - "*¡Perfecto! 😊 Te enviaré parte del material* para que puedas revisarlos y comprobar la calidad del contenido. ✨"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - 🎁✨ ¡Aquí tienes tu material!
+          delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1wzf3EdoZQOQ59WOqwilzucGrpBEgZXPM/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1lEV7WSmG1cCxjTdFEI5_w7_SlbCHmDAn/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎨✨ ¡Ya tienes LAS MUESTRAS GRATUITAS! 🦁🌈
+
+              🎁 *Has Recibido 2 PDF de Obsequio con 20 hojitas para que puedas ver parte del contenido.* 🤗
+
+              💖 *EL MATERIAL COMPLETO SON CERCA DE 100 PAGINAS Y 4 BONOS DE OBSEQUIO*:
+
+              TAMBIEN LOS SIGUIENTES COMPLEMENTOS:
+              - OS MINI ESCENARIOS
+              - Y EL RETO CREATIVO DE 30 DIAS
+
+              🎁 S/10 — CONTRIBUCIÓN SEMILLA
+              📘 Material completo de FIGURARTE.
+
+              🎁 S/15 — CONTRIBUCIÓN DE APOYO
+              📘 Material completo + 🎁 1 bono.
+
+              🎁 S/20 — CONTRIBUCIÓN ESPECIAL
+              📘 Material completo + 🎁 los 2 bonos.
+
+              🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
+              📘 Material completo + 🎁 3 bonos incluidos.
+
+              🎁 S/30 — CONTRIBUCIÓN GENEROSA
+              📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
+
+              🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
+
+              🥰 ¡Gracias por tu generosidad y por apoyar
+          delay_after_sec: 6
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -6738,6 +6793,10 @@ whatsapp:
       de: f-mwcj2mlo-4fb9j
       salida: sin_respuesta
       a: f-mwcj2mlo-48dau
+    - id: c-mwcmpcam-3c2
+      de: f-mwcj2mln-ur069
+      salida: dec:f606376f-136f-428a-b281-a4342e549ebc
+      a: f-mwcmp907-ks9g
   cajas:
     - id: manta-fig_inicio
       x: 108
