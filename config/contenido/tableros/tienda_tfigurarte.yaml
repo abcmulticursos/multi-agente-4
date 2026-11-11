@@ -1530,14 +1530,11 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🎁 {Además, al adquirir FIGURARTE, recibes *4 BONOS SORPRESA GRATIS*|Y eso no es todo, al comprar FIGURARTE también obtienes *4 BONOS SORPRESA GRATIS*|Al llevarte FIGURARTE, también te regalamos *4 BONOS SORPRESA GRATIS*} 🎁🎨
+              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
 
-              🎁 1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
-              🎁 2 - *Práctica *Recortables* ✂️
-              🎁 3 - *Videocuentos* Infantiles 🎬️
-              🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
+              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
 
-              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+              🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
           delay_after_sec: 4
         - type: image
           drive_url: Ahttps://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
@@ -1552,15 +1549,6 @@ whatsapp:
               🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
 
               📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - |-
-              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
-
-              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
-
-              🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
           delay_after_sec: 4
         - type: text
           body_variants:
