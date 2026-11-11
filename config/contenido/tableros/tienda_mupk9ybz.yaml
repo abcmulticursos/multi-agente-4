@@ -3860,6 +3860,16 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: pmv5xqgst
+    - id: f-mwceddd4-fz4n
+      tipo: reparto
+      x: -957
+      y: 2222
+      reparto:
+        - id: r1
+          peso: 0
+          peso_antes: 1
+        - id: r2
+          peso: 1
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
@@ -4206,10 +4216,6 @@ whatsapp:
       de: f-mwcazaok-jgoxa
       salida: sin_pago
       a: f-mwcazaok-9kg8j
-    - id: c-mwcazowp-1bj
-      de: inicio-mvveb83v-1
-      salida: siguiente
-      a: f-mwcazaoj-bn8iw
     - id: c-mwcbhbuf-84e
       de: f-mwcazaok-vbnzh
       salida: sin_pago
@@ -4230,6 +4236,14 @@ whatsapp:
       salida: siguiente
       a: f-mwcazaok-9kg8j
       vista: cable
+    - id: c-mwcedh48-8hm
+      de: inicio-mvveb83v-1
+      salida: siguiente
+      a: f-mwceddd4-fz4n
+    - id: c-mwcedl40-xa4
+      de: f-mwceddd4-fz4n
+      salida: rep:r1
+      a: f-mwcazaoj-bn8iw
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
