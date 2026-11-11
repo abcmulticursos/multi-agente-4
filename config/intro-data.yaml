@@ -2870,7 +2870,7 @@ payment_profiles_by_country:
     discount_price_soles: 0
     market_price: 0
     payment_validation:
-      yape_recipient_name_starts_with: ""
+      yape_recipient_name_starts_with: Ormidas Rodríguez
       require_receipt_date: false
     payment_text: "[Referencia Colombia] Puedes pagar por Nequi, Bancolombia o Daviplata. Cambia este texto por tus datos reales de Colombia."
     direct_payment_steps: []
@@ -2918,12 +2918,25 @@ payment_profiles_by_country:
       price_soles: 0
       discount_price_soles: 0
       market_price: 0
-    metodo_pago_1: ""
-    metodo_pago_2: ""
-    metodo_pago_3: ""
-    metodo_pago_principal: ""
-    numero_de_cuenta: ""
-    cuentas_por_metodo: {}
+    metodo_pago_1: |-
+      🔴 *Nequi : {{CUENTA_NEQUI}}*
+      👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+      💰️ Precio: {precio}
+    metodo_pago_2: |-
+      🔴 *Nequi : {{CUENTA_NEQUI}}*
+      👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+      💰️ Precio: {precio}
+    metodo_pago_3: |-
+      🔴 *Nequi : {{CUENTA_NEQUI}}*
+      👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+      💰️ Precio: {precio}
+    metodo_pago_principal: |-
+      🔴 *Nequi : {{CUENTA_NEQUI}}*
+      👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+      💰️ Precio: {precio}
+    numero_de_cuenta: "3161690372"
+    cuentas_por_metodo:
+      nequi: "3161690372"
     nombre_completo: ""
   BO:
     enabled: false
@@ -7919,7 +7932,7 @@ biblioteca_de_productos:
         market_price: 27000
       CO:
         price_soles: 10000
-        discount_price_soles: 7000
+        discount_price_soles: 6700
         market_price: 50000
   - id: ptpla_basico
     name: GUÍA PLANTILLA
