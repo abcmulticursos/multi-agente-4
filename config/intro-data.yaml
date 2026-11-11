@@ -2863,6 +2863,7 @@ payment_profiles_by_country:
     cuentas_por_metodo: {}
     nombre_completo: Franko Robles
     foto: /avatares/avatar-46.png
+    color_etiqueta: "#75ddff"
   CO:
     enabled: false
     course_price_soles: 0
@@ -3597,6 +3598,7 @@ modality_payment_profiles:
       cuentas_por_metodo: {}
       nombre_completo: Franko Robles
       foto: /avatares/avatar-46.png
+      color_etiqueta: "#75ddff"
   order_bump:
     PE:
       enabled: true
@@ -4012,6 +4014,7 @@ modality_payment_profiles:
       cuentas_por_metodo: {}
       nombre_completo: Franko Robles
       foto: /avatares/avatar-46.png
+      color_etiqueta: "#75ddff"
     PE:
       enabled: true
       course_price_soles: 10
@@ -4342,6 +4345,8 @@ ad_color_palette:
     value: "#70ffee"
   - label: "#E5EF4D"
     value: "#e5ef4d"
+  - label: "#75DDFF"
+    value: "#75ddff"
 comment_automation:
   enabled: true
   accept_any: false
@@ -4934,7 +4939,8 @@ email_template_upsell:
   from_name: ""
   subject: ""
   body: ""
-editor_colores_de_botones: {}
+editor_colores_de_botones:
+  usuario: blanco
 upsell_modalidad_enabled: false
 payment_resend_steps:
   - type: text
@@ -7907,6 +7913,10 @@ biblioteca_de_productos:
         price_soles: 7
         discount_price_soles: 5
         market_price: 55
+      AR:
+        price_soles: 4700
+        discount_price_soles: 3100
+        market_price: 27000
   - id: ptpla_basico
     name: GUÍA PLANTILLA
     aliases:
