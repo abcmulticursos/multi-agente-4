@@ -1047,7 +1047,10 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         <Handle type="target" position={Position.Bottom} id="abajo" className={`${PUNTO_NARANJA} !z-20`} />
       )}
       {visibles.length > 0 && f.tipo !== "seguimientos" && !(ctx.estaciones && esEstacion(f, ctx.tablero)) && (
-        <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-200 px-2 py-1.5">
+        // LAS SALIDAS, APARTE DEL CONTENIDO (10/11/2026). Él: «hay que poner esa parte diferente al resto, ya que eso no es
+        // parte del contenido de la ficha, es una función». Franja gris con su letrero; solo pantalla.
+        <div className="mt-1.5 flex flex-col gap-1 rounded-b-lg border-t-2 border-slate-300 bg-slate-100 px-2 pb-1.5 pt-1">
+          <div className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Qué hace después</div>
           {visibles.map((s) => pastilla(s, true, s.clave))}
           {/* LO QUE HACE SOLA ESTA FICHA, A LA VISTA (27/10/2026: «si hace algo y no se ve, es el muro»). Sin
               punto: el cliente se queda aquí. */}
