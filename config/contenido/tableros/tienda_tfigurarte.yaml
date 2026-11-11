@@ -213,8 +213,8 @@ whatsapp:
   fichas:
     - id: fig_inicio
       tipo: inicio
-      x: -825
-      y: -440
+      x: -847
+      y: 4488
       titulo: Venta por contribución
       pais: PE
     - id: fig_presenta
@@ -633,8 +633,8 @@ whatsapp:
       y: -1496
     - id: f-mw929103-8pb4
       tipo: reparto
-      x: -462
-      y: -440
+      x: -484
+      y: 4488
       reparto:
         - id: r1
           nombre: ALEJAR DEL CELULAR
@@ -2756,10 +2756,6 @@ whatsapp:
       de: fig_inicio
       salida: siguiente
       a: f-mw929103-8pb4
-    - id: c-mw929bv7-gjz
-      de: f-mw929103-8pb4
-      salida: rep:r1
-      a: fig_presenta
     - id: c-mw93oy8j-e8t7j
       de: f-mw93oy8j-p7n7n
       salida: dec:d-mw93oy8j-8h6xp
@@ -2789,10 +2785,6 @@ whatsapp:
       salida: pagado
       a: f-mw93oy8j-xx7r5
       vista: cable
-    - id: c-mw93pbrf-mnn
-      de: f-mw929103-8pb4
-      salida: rep:r2
-      a: f-mw93oy8j-p7n7n
     - id: c-mw93pu1v-zlt
       de: f-mw93oy8j-mxjcv
       salida: sin_pago
@@ -2832,18 +2824,10 @@ whatsapp:
       salida: sin_pago
       a: f-mw93uthu-md9xx
       a_espejo: e-mw93virl-54dk
-    - id: c-mw93vrrl-na8
-      de: f-mw929103-8pb4
-      salida: rep:rmw929v1i
-      a: f-mw93uthu-yyae2
     - id: c-mwbepkbe-x2m6j
       de: f-mwbepkbd-i9l2s
       salida: pagado
       a: f-mwbepkbd-aoswl
-    - id: c-mwbeqb9n-75g
-      de: f-mw929103-8pb4
-      salida: rep:rmwbepyn7
-      a: f-mwbepkbd-i9l2s
     - id: c-mwbgfzop-4ua
       de: f-mwbepkbd-i9l2s
       salida: sin_respuesta
@@ -2864,6 +2848,18 @@ whatsapp:
       de: f-mwbkfjb2-pghwg
       salida: sin_respuesta
       a: f-mwbkfjb2-rkf8z
+    - id: c-mwbl2wap-k8s
+      de: f-mw929103-8pb4
+      salida: rep:r1
+      a: f-mwbepkbd-i9l2s
+    - id: c-mwbl2y2o-6sw
+      de: f-mw929103-8pb4
+      salida: rep:r2
+      a: f-mwbkc311-u2j9s
+    - id: c-mwbl302w-c2r
+      de: f-mw929103-8pb4
+      salida: rep:rmw929v1i
+      a: f-mwbkfjb2-pghwg
   cajas:
     - id: manta-fig_inicio
       x: 53
