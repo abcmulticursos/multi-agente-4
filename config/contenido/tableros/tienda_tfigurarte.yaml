@@ -1604,8 +1604,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mwbepkbd-ckdjc
       tipo: seguimientos
-      x: 1221
-      y: 1496
+      x: 528
+      y: 1518
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1908,10 +1908,6 @@ whatsapp:
       de: f-mw929103-8pb4
       salida: rep:rmw929v1i
       a: f-mw93uthu-yyae2
-    - id: c-mwbepkbe-cpgcu
-      de: f-mwbepkbd-i9l2s
-      salida: siguiente
-      a: f-mwbepkbd-ckdjc
     - id: c-mwbepkbe-x2m6j
       de: f-mwbepkbd-i9l2s
       salida: pagado
@@ -1925,6 +1921,10 @@ whatsapp:
       de: f-mw929103-8pb4
       salida: rep:rmwbepyn7
       a: f-mwbepkbd-i9l2s
+    - id: c-mwbgde0i-usu
+      de: f-mwbepkbd-i9l2s
+      salida: sin_respuesta
+      a: f-mwbepkbd-ckdjc
   cajas:
     - id: manta-fig_inicio
       x: 53
@@ -6562,8 +6562,8 @@ instagram:
         producto_id: "@tienda:basico"
     - id: f-mwb82e1z-zu9n3
       tipo: seguimientos
-      x: 583
-      y: 1595
+      x: 968
+      y: 1606
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
