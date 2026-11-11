@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -1683
-      y: 2013
+      x: -1925
+      y: 2112
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
@@ -3862,8 +3862,8 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mwceddd4-fz4n
       tipo: reparto
-      x: -957
-      y: 2222
+      x: -1474
+      y: 2134
       reparto:
         - id: r1
           peso: 0
