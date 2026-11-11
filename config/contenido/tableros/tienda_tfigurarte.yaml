@@ -6521,30 +6521,42 @@ whatsapp:
 
               🎁 *Has Recibido 2 PDF de Obsequio con 20 hojitas para que puedas ver parte del contenido.* 🤗
 
-              💖 *EL MATERIAL COMPLETO SON CERCA DE 100 PAGINAS Y 4 BONOS DE OBSEQUIO*:
+              💖 *EL MATERIAL COMPLETO SON CERCA DE 100 PAGINAS* Y 4 BONOS DE OBSEQUIO:
 
-              TAMBIEN LOS SIGUIENTES COMPLEMENTOS:
-              - OS MINI ESCENARIOS
-              - Y EL RETO CREATIVO DE 30 DIAS
+              - *TAMBIEN INCLUYE LOS SIGUIENTES COMPLEMENTOS*: 👇️
+              - MINI ESCENARIOS 🖼️
+              - Y EL RETO CREATIVO DE 30 DIAS 🏃‍♂️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              *SI DESEAS ADQUIRIRLO COMPLETO* PUEDES HACERLO A TAN SOLO:
 
-              🎁 S/10 — CONTRIBUCIÓN SEMILLA
-              📘 Material completo de FIGURARTE.
+              💰️ *{{PRECIO_BASE}}*
+              📘 *Material completo de FIGURARTE.*
 
-              🎁 S/15 — CONTRIBUCIÓN DE APOYO
-              📘 Material completo + 🎁 1 bono.
+              A los siguientes datos:
 
-              🎁 S/20 — CONTRIBUCIÓN ESPECIAL
-              📘 Material completo + 🎁 los 2 bonos.
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              *SI DESEAS ADQUIRIRLO COMPLETO* PUEDES HACERLO A TAN SOLO:
 
-              🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
-              📘 Material completo + 🎁 3 bonos incluidos.
-
-              🎁 S/30 — CONTRIBUCIÓN GENEROSA
-              📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
+              💰️ *{{PRECIO_BASE}}*
+              📘 *Material completo de FIGURARTE.*
 
               🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
 
               🥰 ¡Gracias por tu generosidad y por apoyar
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              En cuanto realices tu aporte, envía tu comprobante por aquí, por WhatsApp. 📲
+
+              🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
           delay_after_sec: 6
   cables:
     - id: c-mw4xecum-dlm
