@@ -1584,8 +1584,8 @@ whatsapp:
         - ptfig_figurarte
     - id: f-mwbepkbd-adebx
       tipo: cobro
-      x: 1232
-      y: 1914
+      x: 1441
+      y: 1496
       steps:
         - type: text
           body_variants:
@@ -1787,8 +1787,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwbepkbd-aoswl
       tipo: regalo
-      x: 2255
-      y: 1771
+      x: 1320
+      y: 2002
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -1912,16 +1912,11 @@ whatsapp:
       de: f-mwbepkbd-i9l2s
       salida: pagado
       a: f-mwbepkbd-aoswl
-    - id: c-mwbepkbe-fg1wd
-      de: f-mwbepkbd-adebx
-      salida: pagado
-      a: f-mwbepkbd-aoswl
-      vista: cable
     - id: c-mwbeqb9n-75g
       de: f-mw929103-8pb4
       salida: rep:rmwbepyn7
       a: f-mwbepkbd-i9l2s
-    - id: c-mwbgde0i-usu
+    - id: c-mwbgfzop-4ua
       de: f-mwbepkbd-i9l2s
       salida: sin_respuesta
       a: f-mwbepkbd-ckdjc
