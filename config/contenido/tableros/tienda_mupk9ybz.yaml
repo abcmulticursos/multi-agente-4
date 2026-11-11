@@ -3,7 +3,7 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -1342
+      x: -1683
       y: 2013
       pais: PE
     - id: intro-mvveb83v-2
@@ -2996,19 +2996,6 @@ whatsapp:
 
                       ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
                   delay_after_sec: 6
-                  buttons:
-                    - id: b-mwcazaok-nebws
-                      label: YAPE
-                      action: send_steps
-                      steps: []
-                    - id: b-mwcazaok-ubmpn
-                      label: PLIN
-                      action: send_steps
-                      steps: []
-                    - id: b-mwcazaok-xhm6l
-                      label: BCP
-                      action: send_steps
-                      steps: []
                   decisions:
                     - id: d-mwcazaok-o2yay
                       enabled: false
@@ -4208,16 +4195,6 @@ whatsapp:
       de: f-mwcazaoj-bn8iw
       salida: siguiente
       a: f-mwcazaok-thtxr
-    - id: c-mwcazaol-6qvig
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-nebws
-      a: f-mwcazaok-830v5
-      vista: colita
-    - id: c-mwcazaol-4yl6g
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-ubmpn
-      a: f-mwcazaok-830v5
-      vista: colita
     - id: c-mwcazaol-73rpb
       de: f-mwcazaok-thtxr
       salida: btn:b-mwcazaok-1nbao
@@ -4231,11 +4208,6 @@ whatsapp:
     - id: c-mwcazaol-80nbj
       de: f-mwcazaok-thtxr
       salida: btn:b-mwcazaok-5493m
-      a: f-mwcazaok-830v5
-      vista: colita
-    - id: c-mwcazaol-8n1pw
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-xhm6l
       a: f-mwcazaok-830v5
       vista: colita
     - id: c-mwcazaol-f3elr
