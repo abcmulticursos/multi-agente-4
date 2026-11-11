@@ -24982,6 +24982,11 @@ function ChatPreview({
     startX: number;
     startY: number;
     active: boolean;
+    /** La burbuja que se arrastra: de ella sale la caja que se desplaza (ver «el visor se desplaza solo»). */
+    el?: HTMLElement;
+    /** Dónde está el ratón ahora (el desplazamiento vuelve a buscar el sitio de soltar con él). */
+    x?: number;
+    y?: number;
   } | null>(null);
   const previewDropRef = useRef<{
     index: number;
@@ -25135,6 +25140,50 @@ function ChatPreview({
 
   useEffect(() => {
     if (!onMoveStep) return;
+    // EL VISOR SE DESPLAZA SOLO AL ARRASTRAR (10/11/2026). Él: «cuando arrastre, el scroll del visor se mueva… yo
+    // arrastro la burbuja y el scroll no sube ni baja». Este arrastre es hecho a mano (no el de los cajones, que ya lo
+    // hacía): con el ratón cerca del borde de arriba o de abajo de la caja que se desplaza, ésta sube o baja, más rápido
+    // cuanto más cerca, y el sitio de soltar se vuelve a buscar donde quedó el ratón.
+    let cuadro = 0;
+    const cajaQueSeDesplaza = (el: HTMLElement | undefined): HTMLElement | null => {
+      for (let e = el?.parentElement ?? null; e; e = e.parentElement) {
+        const oy = getComputedStyle(e).overflowY;
+        if ((oy === "auto" || oy === "scroll") && e.scrollHeight > e.clientHeight + 2) return e;
+      }
+      return (document.scrollingElement as HTMLElement | null) ?? null;
+    };
+    const buscarDondeSoltar = (drag: NonNullable<typeof previewDragRef.current>, x: number, y: number) => {
+      const target = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-preview-step]");
+      const targetIndex = Number(target?.dataset.previewStep);
+      if (!Number.isFinite(targetIndex)) return;
+      const rect = target!.getBoundingClientRect();
+      const nextDrop = {
+        index: drag.index,
+        target: targetIndex,
+        placement: y < rect.top + rect.height / 2 ? "before" : "after",
+      } as const;
+      previewDropRef.current = nextDrop;
+      setPreviewDrag(nextDrop);
+    };
+    const desplazar = () => {
+      cuadro = 0;
+      const drag = previewDragRef.current;
+      if (!drag?.active || drag.x == null || drag.y == null) return;
+      const caja = cajaQueSeDesplaza(drag.el);
+      if (!caja) return;
+      const esLaPagina = caja === document.scrollingElement;
+      const arriba = esLaPagina ? 0 : caja.getBoundingClientRect().top;
+      const abajo = esLaPagina ? window.innerHeight : caja.getBoundingClientRect().bottom;
+      const BORDE = 70;
+      let paso = 0;
+      if (drag.y < arriba + BORDE) paso = -Math.ceil(((arriba + BORDE - drag.y) / BORDE) * 18);
+      else if (drag.y > abajo - BORDE) paso = Math.ceil(((drag.y - (abajo - BORDE)) / BORDE) * 18);
+      if (!paso) return;
+      const antes = caja.scrollTop;
+      caja.scrollTop = antes + paso;
+      if (caja.scrollTop !== antes) buscarDondeSoltar(drag, drag.x, drag.y);
+      cuadro = window.requestAnimationFrame(desplazar);
+    };
     const onPointerMove = (event: PointerEvent) => {
       const drag = previewDragRef.current;
       if (!drag) return;
@@ -25143,21 +25192,14 @@ function ChatPreview({
         if (distance < 6) return;
         drag.active = true;
       }
-      const target = document
-        .elementFromPoint(event.clientX, event.clientY)
-        ?.closest<HTMLElement>("[data-preview-step]");
-      const targetIndex = Number(target?.dataset.previewStep);
-      if (!Number.isFinite(targetIndex)) return;
-      const rect = target!.getBoundingClientRect();
-      const nextDrop = {
-        index: drag.index,
-        target: targetIndex,
-        placement: event.clientY < rect.top + rect.height / 2 ? "before" : "after",
-      } as const;
-      previewDropRef.current = nextDrop;
-      setPreviewDrag(nextDrop);
+      drag.x = event.clientX;
+      drag.y = event.clientY;
+      if (!cuadro) cuadro = window.requestAnimationFrame(desplazar);
+      buscarDondeSoltar(drag, event.clientX, event.clientY);
     };
     const onPointerUp = () => {
+      if (cuadro) window.cancelAnimationFrame(cuadro);
+      cuadro = 0;
       const drag = previewDragRef.current;
       const target = previewDropRef.current;
       previewDragRef.current = null;
@@ -25174,6 +25216,7 @@ function ChatPreview({
     document.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerup", onPointerUp);
     return () => {
+      if (cuadro) window.cancelAnimationFrame(cuadro);
       document.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerup", onPointerUp);
     };
@@ -25473,6 +25516,7 @@ function ChatPreview({
                     startX: event.clientX,
                     startY: event.clientY,
                     active: false,
+                    el: event.currentTarget,
                   };
                 }}
                 onClick={() => {
@@ -33490,9 +33534,10 @@ function ListaDeEleccion({
             key={x.id}
             type="button"
             onClick={() => onCambio(puesto ? elegidos.filter((y) => y !== x.id) : [...elegidos, x.id])}
-            className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-emerald-500 bg-emerald-50 font-bold" : "border-borde"}`}
+            // (10/11/2026, él: «el verde del producto elegido… a duras penas se logra distinguir, que sea azul».)
+            className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-blue-700 bg-blue-600 font-bold text-white" : "border-borde"}`}
           >
-            {x.nombre}
+            {puesto ? "✓ " : ""}{x.nombre}
           </button>
         );
       })}
