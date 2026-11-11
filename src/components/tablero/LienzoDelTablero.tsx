@@ -2074,8 +2074,9 @@ export default function LienzoDelTablero({
   nombres: Record<string, string>;
   paisesDisponibles: string[];
   onCambiar: (t: TableroEnElEditor) => void;
-  /** `burbuja`: la que se quiere ver al abrir (doble clic sobre ella en la ficha). */
-  onAbrir: (id: string, burbuja?: number) => void;
+  /** `burbuja`: la que se quiere ver al abrir (doble clic sobre ella en la ficha). `grupo`: las OTRAS fichas de
+   *  Seguimientos elegidas junto con ella (doble clic en una de varias elegidas), para editarlas a la vez. */
+  onAbrir: (id: string, burbuja?: number, grupo?: string[]) => void;
   onAjustes: (id: string) => void;
   /** EL BUSCADOR VIVE ARRIBA, EN LA BARRA, como en la pizarra (24/10/2026). */
   buscar?: string;
@@ -2745,6 +2746,23 @@ export default function LienzoDelTablero({
     return () => window.clearTimeout(r);
   }, [aviso]);
 
+  // VARIAS FICHAS DE SEGUIMIENTOS A LA VEZ (11/11/2026). Él: «agarrar varios seguimientos con Shift… al dar doble clic
+  // a uno de los seleccionados se abra uno de ellos, pero haciendo una edición global a los seleccionados». Al abrir una
+  // ficha de Seguimientos que está elegida junto con otras de Seguimientos, se le pasan esas otras (el pop up decide
+  // qué cambios viajan a ellas). Las de otro tipo elegidas no cuentan.
+  const abrirConSuGrupo = useCallback(
+    (id: string, burbuja?: number) => {
+      const f = vivo.current.fichas.find((x) => x.id === id);
+      const elegidas = new Set(nodosVivos.current.filter((n) => n.selected).map((n) => n.id));
+      const grupo =
+        f?.tipo === "seguimientos" && elegidas.has(id)
+          ? vivo.current.fichas.filter((x) => x.tipo === "seguimientos" && x.id !== id && !x.guardada && elegidas.has(x.id)).map((x) => x.id)
+          : [];
+      onAbrir(id, burbuja, grupo.length ? grupo : undefined);
+    },
+    [onAbrir]
+  );
+
   // EL CONTEXTO, ESTABLE (27/10/2026): antes era un objeto nuevo en cada redibujo y, al arrastrar una
   // ficha, se redibujaban TODAS las fichas en cada movimiento. Ahora solo cambia cuando cambia algo suyo.
   const contexto = useMemo(
@@ -2754,7 +2772,7 @@ export default function LienzoDelTablero({
       paisVisto,
       nombres,
       resumenDe,
-      abrir: onAbrir,
+      abrir: abrirConSuGrupo,
       ajustes: onAjustes,
       menu: abrirMenu,
       cambiar,
@@ -2779,7 +2797,7 @@ export default function LienzoDelTablero({
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, onAbrir, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe, upgradeDe]
+    [tablero, tema, paisVisto, nombres, resumenDe, abrirConSuGrupo, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe, upgradeDe]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));

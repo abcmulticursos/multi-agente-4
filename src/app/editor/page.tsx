@@ -31685,6 +31685,8 @@ function PantallaDelTableroCargada({
   const [burbujaDelCajon, setBurbujaDelCajon] = useState<number | null>(null);
   const [verCerebro, setVerCerebro] = useState(false);
   const [gestor, setGestor] = useState<string | null>(null);
+  /** Las OTRAS fichas de Seguimientos elegidas junto con la del gestor (11/11/2026): se editan a la vez. */
+  const [grupoDelGestor, setGrupoDelGestor] = useState<string[]>([]);
   const [ajustes, setAjustes] = useState<string | null>(null);
   /** La entrega (su clave, «producto» o «producto#extra») abierta en su ventana desde los ajustes de una ficha Entregar. */
   const [entregaEditando, setEntregaEditando] = useState<string | null>(null);
@@ -32317,9 +32319,10 @@ function PantallaDelTableroCargada({
           onPlantillas={() => setVentanaDePlantillas(true)}
           onGuardarPlantilla={guardarComoPlantilla}
           enfocar={enfocarFichas}
-          onAbrir={(fid, burbuja) => {
+          onAbrir={(fid, burbuja, grupo) => {
             const f = tablero.fichas.find((x) => x.id === fid);
             setBurbujaDelCajon(burbuja ?? null);
+            setGrupoDelGestor(f?.tipo === "seguimientos" ? grupo ?? [] : []);
             if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
             else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
             else if (f?.tipo === "regalo" && tienda) setRegaloAbierto(fid);
@@ -32748,8 +32751,22 @@ function PantallaDelTableroCargada({
             cfgVista={configComoLaVeLaTienda(cfg, tienda, "lineal")}
             pais={paisVisto}
             onCambiar={(cambio) => cambiarFicha(fichaDeGestor.id, cambio)}
-            onCerrar={() => setGestor(null)}
+            onCerrar={() => {
+              setGestor(null);
+              setGrupoDelGestor([]);
+            }}
             onRegistroDeAnuncios={(ad_registry) => aplicar({ ...vivoCfg.current, ad_registry })}
+            grupo={grupoDelGestor
+              .map((id) => tablero.fichas.find((f) => f.id === id && f.tipo === "seguimientos"))
+              .filter((f): f is FichaEnElEditor => !!f)
+              .map((f) => {
+                const p = paisDeSuManta(tablero, f, "");
+                return { ficha: f, etiqueta: `${p ? `${banderaDe(p)} ${p}` : "🌍"} · ${f.titulo?.trim() || "Seguimientos"}` };
+              })}
+            // UN SOLO GUARDADO PARA TODAS: un Ctrl+Z deshace el cambio en todas a la vez.
+            onCambiarGrupo={(porFicha) =>
+              guardar({ ...tablero, fichas: tablero.fichas.map((f) => (porFicha[f.id] ? { ...f, ...porFicha[f.id] } : f)) })
+            }
           />
           </ProductosDeLaFichaContext.Provider>
         </EnElTableroContext.Provider>
@@ -32866,6 +32883,37 @@ function PantallaDelTableroCargada({
 }
 
 /**
+ * LAS BURBUJAS QUE ÉL AGREGÓ (11/11/2026, editar varias fichas de Seguimientos a la vez). Compara lo que había con lo
+ * que quedó y devuelve SOLO las nuevas: las que van antes de todas las que ya estaban (al principio) y el resto (al final).
+ * Si las que ya estaban no siguen todas, en su orden y sin cambios (las editó, las movió o borró alguna), solo cuentan
+ * las del final que no estaban antes; si ni eso, ninguna: a las otras fichas no se les toca nada.
+ */
+function burbujasAgregadas(antes: EditorStep[], despues: EditorStep[]): { alInicio: EditorStep[]; alFinal: EditorStep[] } {
+  const firma = (p: EditorStep) => JSON.stringify(p);
+  const viejas = antes.map(firma);
+  const nuevas = despues.map(firma);
+  // ¿Las de antes siguen todas, en su orden? Entonces lo que sobra es lo agregado.
+  const sobran: number[] = [];
+  let k = 0;
+  for (let n = 0; n < nuevas.length; n++) {
+    if (k < viejas.length && nuevas[n] === viejas[k]) k++;
+    else sobran.push(n);
+  }
+  if (k === viejas.length) {
+    const primeraVieja = viejas.length ? nuevas.indexOf(viejas[0]) : nuevas.length;
+    return {
+      alInicio: sobran.filter((n) => n < primeraVieja).map((n) => despues[n]),
+      alFinal: sobran.filter((n) => n > primeraVieja || !viejas.length).map((n) => despues[n]),
+    };
+  }
+  // Cambió algo de lo que ya había: solo las del final que antes no existían.
+  const extra = despues.length - antes.length;
+  if (extra <= 0) return { alInicio: [], alFinal: [] };
+  const cola = despues.slice(-extra);
+  return cola.every((p) => !viejas.includes(firma(p))) ? { alInicio: [], alFinal: cola } : { alInicio: [], alFinal: [] };
+}
+
+/**
  * EL GESTOR FLOTANTE de la caja «Seguimientos» y de la «Intro de order bump», como los gestores
  * de la pizarra: a la izquierda la lista (seguimientos y sus versiones con peso), a la derecha el
  * cajón de burbujas de siempre, incrustado.
@@ -32877,6 +32925,8 @@ function GestorDeVersiones({
   onCambiar,
   onCerrar,
   onRegistroDeAnuncios,
+  grupo,
+  onCambiarGrupo,
 }: {
   ficha: FichaEnElEditor;
   cfgVista: FullConfig;
@@ -32886,6 +32936,10 @@ function GestorDeVersiones({
   onCerrar: () => void;
   /** Al crear un anuncio desde las etiquetas, como en la pizarra. */
   onRegistroDeAnuncios: (r: AdRegistryEntry[]) => void;
+  /** VARIAS FICHAS DE SEGUIMIENTOS A LA VEZ (11/11/2026): las OTRAS elegidas, tal como están ahora. */
+  grupo?: Array<{ ficha: FichaEnElEditor; etiqueta: string }>;
+  /** Aplica en UN solo guardado los cambios de esta ficha y de las del grupo (un Ctrl+Z los deshace todos). */
+  onCambiarGrupo?: (porFicha: Record<string, Partial<FichaEnElEditor>>) => void;
 }) {
   // COMO EL GESTOR DE SEGUIMIENTOS DE LA PIZARRA (24/10/2026): «el cuadro es un desastre, no se
   // entiende… me gusta mucho como está hecho en modo pizarra». A la izquierda solo la lista; a la
@@ -32909,14 +32963,67 @@ function GestorDeVersiones({
   // Lo escrito en el cajón de la derecha se aplica al cerrar; con «Cancelar» (o «Cerrar» sin cambios) se descarta (06/11/2026:
   // antes «Cancelar» devolvía la lista pero el cajón aplicaba lo suyo al desmontarse, y el cambio quedaba sin guardar).
   const descartarDelCajon = useRef(false);
+  // ── VARIAS FICHAS A LA VEZ (11/11/2026) ──────────────────────────────────────────────────────────────
+  // Él: «si no se hace otro cambio no debe afectar el contenido… no sea que haga una activación de check y todo el texto
+  // cambie como está la ficha en edición, mucho cuidado». Por eso a las otras NO se les copia la ficha abierta: se les
+  // aplica SOLO la operación que él hizo, una por una, sobre lo que cada una ya tiene:
+  //   · el tiempo de un seguimiento (el mismo número de seguimiento; si una no lo tiene, no se toca),
+  //   · una casilla de un seguimiento,
+  //   · las burbujas AGREGADAS (al final, o al principio si las puso antes de todas), con botones de código nuevo.
+  // Todo lo demás (textos de burbujas que ya existían, versiones, pesos, agregar o quitar seguimientos) cambia solo en
+  // la ficha abierta. Cancelar devuelve TODAS a como estaban al abrir.
+  const enGrupo = esSeg && !!onCambiarGrupo && (grupo?.length ?? 0) > 0;
+  const grupoVivo = useRef(grupo ?? []);
+  grupoVivo.current = grupo ?? [];
+  const [grupoAlAbrir] = useState(() =>
+    Object.fromEntries((grupo ?? []).map((g) => [g.ficha.id, JSON.parse(JSON.stringify(g.ficha.seguimientos ?? [])) as Seg[]]))
+  );
+  /** Esta ficha queda en `s`; a cada una del grupo se le aplica `enLaOtra` sobre una COPIA de sus seguimientos (null = no se toca). */
+  const aplicarEnTodas = (s: Seg[], enLaOtra: (suyos: Seg[]) => Seg[] | null) => {
+    setSegs(s);
+    if (!enGrupo || !onCambiarGrupo) return aplicar(s, vivo.current.versiones);
+    const cambios: Record<string, Partial<FichaEnElEditor>> = { [ficha.id]: { seguimientos: s } };
+    for (const g of grupoVivo.current) {
+      const nuevos = enLaOtra(JSON.parse(JSON.stringify(g.ficha.seguimientos ?? [])) as Seg[]);
+      if (nuevos) cambios[g.ficha.id] = { seguimientos: nuevos };
+    }
+    onCambiarGrupo(cambios);
+  };
+  /** El tiempo o una casilla del seguimiento elegido: en esta ficha y en el MISMO seguimiento de las demás. */
+  const ponerSegEnTodas = (cambio: Partial<Seg>) => {
+    const i = elegida.seg;
+    aplicarEnTodas(
+      vivo.current.segs.map((x, k) => (k === i ? { ...x, ...cambio } : x)),
+      (suyos) => (suyos[i] ? suyos.map((x, k) => (k === i ? { ...x, ...cambio } : x)) : null)
+    );
+  };
+  /** Qué tienen las fichas en ese seguimiento: un valor si coinciden todas las que lo tienen, «mixto» si no. */
+  const valorDelGrupo = <K extends keyof Seg>(clave: K): { mixto: boolean; valores: Seg[K][] } => {
+    const i = elegida.seg;
+    const valores = [segs[i], ...grupoVivo.current.map((g) => g.ficha.seguimientos?.[i])]
+      .filter((x): x is Seg => !!x)
+      .map((x) => x[clave]);
+    const norm = (v: unknown) => (v === undefined || v === false ? "" : JSON.stringify(v));
+    return { mixto: new Set(valores.map(norm)).size > 1, valores };
+  };
   const cancelar = () => {
     descartarDelCajon.current = true;
-    if (JSON.stringify(vivo.current) !== JSON.stringify(alAbrir)) aplicar(alAbrir.segs, alAbrir.versiones);
+    if (enGrupo && onCambiarGrupo) {
+      // Solo las que cambiaron (sin cambios no se guarda nada: no deja un paso vacío en el Ctrl+Z).
+      const cambios: Record<string, Partial<FichaEnElEditor>> = {};
+      if (JSON.stringify(vivo.current.segs) !== JSON.stringify(alAbrir.segs)) cambios[ficha.id] = { seguimientos: alAbrir.segs };
+      for (const g of grupoVivo.current) {
+        const suyos = grupoAlAbrir[g.ficha.id];
+        if (suyos && JSON.stringify(g.ficha.seguimientos ?? []) !== JSON.stringify(suyos)) cambios[g.ficha.id] = { seguimientos: suyos };
+      }
+      if (Object.keys(cambios).length) onCambiarGrupo(cambios);
+    } else if (JSON.stringify(vivo.current) !== JSON.stringify(alAbrir)) aplicar(alAbrir.segs, alAbrir.versiones);
     onCerrar();
   };
   // «CERRAR» SIN CAMBIOS, «CANCELAR · ✓ LISTO» CON ELLOS (06/11/2026): lo aplicado a la lista o lo escrito en el cajón de la derecha.
   const [cajonSucio, setCajonSucio] = useState(false);
-  const hayCambios = cajonSucio || JSON.stringify({ segs, versiones }) !== JSON.stringify(alAbrir);
+  const grupoCambiado = enGrupo && grupoVivo.current.some((g) => JSON.stringify(g.ficha.seguimientos ?? []) !== JSON.stringify(grupoAlAbrir[g.ficha.id] ?? []));
+  const hayCambios = cajonSucio || grupoCambiado || JSON.stringify({ segs, versiones }) !== JSON.stringify(alAbrir);
   const ponerSegs = (s: Seg[]) => {
     setSegs(s);
     aplicar(s, vivo.current.versiones);
@@ -33028,41 +33135,89 @@ function GestorDeVersiones({
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-3">
+          {enGrupo && (
+            <div className="rounded-lg border-2 border-sky-400 bg-sky-50 px-3 py-2 text-sm text-sky-950">
+              <div className="font-black">✏️ Editando {(grupo?.length ?? 0) + 1} fichas de Seguimientos a la vez</div>
+              <div className="mt-0.5 text-xs">
+                Esta ({bandera}) y: {(grupo ?? []).map((g) => g.etiqueta).join(" · ")}
+              </div>
+              <div className="mt-1 text-xs">
+                A todas se les copia <strong>solo lo que cambies</strong> aquí: el <strong>tiempo</strong> y las <strong>casillas</strong> del
+                seguimiento elegido, y las <strong>burbujas que agregues</strong>. Lo que no toques se queda como está en cada una. Los textos
+                de las burbujas que ya existen cambian <strong>solo en esta</strong>. «?» = no es igual en todas.
+              </div>
+            </div>
+          )}
           {esSeg && s && (
             <>
               <div className="flex flex-wrap items-center gap-2 text-xs text-tinta">
                 <h4 className="text-sm font-bold">
                   {elegida.seg + 1}. Seguimiento {elegida.seg + 1}
                 </h4>
-                {elegida.seg === 0 ? (
-                  <>
-                    · sale a los
-                    <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
-                    del último mensaje del cliente (si escribe, vuelve a contar)
-                    {s.minutos >= 24 * 60 - 7 && <span className="font-semibold text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
-                  </>
-                ) : (
-                  // DEL 2 EN ADELANTE, A TUS HORARIOS FIJOS (25/10/2026, punto 4). Los minutos valen solo en el
-                  // simulador, para poder probarlo sin esperar a la franja.
-                  <>
-                    · sale en tu <strong>horario fijo</strong> (Menús → Ajustes) · en el simulador, a los
-                    <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => ponerSeg({ minutos: m ?? 60 })} />
-                  </>
-                )}
+                {(() => {
+                  // En grupo: el tiempo se pone en el mismo seguimiento de todas; si no coinciden, «❓ varios».
+                  const t = enGrupo ? valorDelGrupo("minutos") : null;
+                  const campo = (
+                    <>
+                      <CampoDeTiempoDelTablero valor={s.minutos} onCambio={(m) => (enGrupo ? ponerSegEnTodas : ponerSeg)({ minutos: m ?? 60 })} />
+                      {t?.mixto && (
+                        <span
+                          className="rounded-md border border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-bold text-amber-800"
+                          title={`No es igual en todas: ${[...new Set(t.valores.map((v) => minutosLegiblesDelTablero(v as number)))].join(" · ")}. Si escribes un tiempo, queda ese en todas.`}
+                        >
+                          ❓ varios: {[...new Set(t.valores.map((v) => minutosLegiblesDelTablero(v as number)))].join(" · ")}
+                        </span>
+                      )}
+                    </>
+                  );
+                  return elegida.seg === 0 ? (
+                    <>
+                      · sale a los
+                      {campo}
+                      del último mensaje del cliente (si escribe, vuelve a contar)
+                      {s.minutos >= 24 * 60 - 7 && <span className="font-semibold text-rose-600">⚠ Pasa las 24 h: por WhatsApp no llegaría.</span>}
+                    </>
+                  ) : (
+                    // DEL 2 EN ADELANTE, A TUS HORARIOS FIJOS (25/10/2026, punto 4). Los minutos valen solo en el
+                    // simulador, para poder probarlo sin esperar a la franja.
+                    <>
+                      · sale en tu <strong>horario fijo</strong> (Menús → Ajustes) · en el simulador, a los
+                      {campo}
+                    </>
+                  );
+                })()}
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-tinta">
-                <label className="flex items-center gap-1">
-                  <input type="checkbox" checked={s.activa_oferta === true} onChange={(e) => ponerSeg({ activa_oferta: e.target.checked || undefined })} />
-                  Activa el precio de oferta
-                </label>
-                <label className="flex items-center gap-1" title="Sale aunque caiga en las horas de silencio de Ajustes">
-                  <input type="checkbox" checked={s.ignora_silencio === true} onChange={(e) => ponerSeg({ ignora_silencio: e.target.checked || undefined })} />
-                  Ignora las horas de silencio
-                </label>
-                <label className="flex items-center gap-1" title="No se aplaza a la mañana aunque el cliente llegue tarde (Ajustes → lead tardío)">
-                  <input type="checkbox" checked={s.ignora_tardio === true} onChange={(e) => ponerSeg({ ignora_tardio: e.target.checked || undefined })} />
-                  Ignora el aplazamiento del lead tardío
-                </label>
+              {/* LAS CASILLAS, UN POCO MÁS GRANDES (11/11/2026, él: «agrandar un poquito los cuadritos para check y los
+                  textitos también»). En grupo, la que no coincide en todas sale con «?»; tocarla la deja igual en todas. */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-tinta">
+                {(
+                  [
+                    ["activa_oferta", "Activa el precio de oferta", undefined],
+                    ["ignora_silencio", "Ignora las horas de silencio", "Sale aunque caiga en las horas de silencio de Ajustes"],
+                    ["ignora_tardio", "Ignora el aplazamiento del lead tardío", "No se aplaza a la mañana aunque el cliente llegue tarde (Ajustes → lead tardío)"],
+                  ] as const
+                ).map(([clave, texto, ayuda]) => {
+                  const mixto = enGrupo && valorDelGrupo(clave).mixto;
+                  const marcada = s[clave] === true;
+                  const poner = (si: boolean) => (enGrupo ? ponerSegEnTodas : ponerSeg)({ [clave]: si || undefined } as Partial<Seg>);
+                  return (
+                    <label key={clave} className="flex cursor-pointer items-center gap-2" title={mixto ? "No es igual en todas las fichas elegidas. Un clic la enciende en todas." : ayuda}>
+                      {mixto ? (
+                        <button
+                          type="button"
+                          onClick={() => poner(true)}
+                          className="flex h-5 w-5 items-center justify-center rounded border-2 border-amber-500 bg-amber-50 text-xs font-black text-amber-700"
+                          aria-label={`${texto}: no es igual en todas`}
+                        >
+                          ?
+                        </button>
+                      ) : (
+                        <input type="checkbox" className="h-5 w-5 cursor-pointer" checked={marcada} onChange={(e) => poner(e.target.checked)} />
+                      )}
+                      {texto}
+                    </label>
+                  );
+                })}
               </div>
             </>
           )}
@@ -33145,12 +33300,34 @@ function GestorDeVersiones({
                 registro: cfgVista.ad_registry ?? [],
                 alCambiarRegistro: onRegistroDeAnuncios,
               }}
-              onGuardar={(steps, _nombre, anunciosNuevos) =>
+              onGuardar={(steps, _nombre, anunciosNuevos) => {
+                // EN GRUPO, LAS BURBUJAS AGREGADAS VAN TAMBIÉN A LAS DEMÁS (11/11/2026): al mismo seguimiento y versión de
+                // cada una, al final (o al principio si las puso antes de todas). Lo demás de este cajón, solo aquí.
+                const agregadas = enGrupo && esSeg ? burbujasAgregadas((version.steps ?? []) as EditorStep[], steps) : null;
+                if (agregadas && (agregadas.alInicio.length || agregadas.alFinal.length)) {
+                  const i = elegida.seg;
+                  const j = elegida.ver;
+                  aplicarEnTodas(
+                    vivo.current.segs.map((x, k) => (k !== i ? x : { ...x, variantes: x.variantes.map((v, m) => (m === j ? { ...v, steps } : v)) })),
+                    (suyos) => {
+                      const v = suyos[i]?.variantes?.[j];
+                      if (!v) return null;
+                      // Botones con código propio en cada ficha: el bot busca el botón por código (ver `conBotonesNuevos`).
+                      v.steps = [
+                        ...conBotonesNuevos(JSON.parse(JSON.stringify(agregadas.alInicio)) as EditorStep[]),
+                        ...((v.steps ?? []) as EditorStep[]),
+                        ...conBotonesNuevos(JSON.parse(JSON.stringify(agregadas.alFinal)) as EditorStep[]),
+                      ] as typeof v.steps;
+                      return suyos;
+                    }
+                  );
+                  return;
+                }
                 cambiarVersion({
                   steps,
                   ...(anunciosNuevos ? { anuncios: anunciosNuevos.claves, dirigir: anunciosNuevos.dirigir === false ? false : undefined } : {}),
-                })
-              }
+                });
+              }}
               onCerrar={onCerrar}
               alCambiarSucio={setCajonSucio}
               descartarAlIrse={descartarDelCajon}
