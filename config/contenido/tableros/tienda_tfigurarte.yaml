@@ -1081,7 +1081,7 @@ whatsapp:
             - |-
               ⭐️*MAESTRO/MAESTRA* {*¡Hola! mi nombre es Andrea*|*¡Hola! soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
 
-              🙇 *¿Busca una actividad divertida para tu aula para que tus alumnos desarrollen nuevas capacidades? * 😟
+              🙇 *¿Busca una actividad divertida para tu aula para que tus alumnos desarrollen nuevas capacidades?* 😟
 
               🌟 *¿Te gustaría que aproveche mejor su tiempo,* estimule su creatividad y se divierta aprendiendo algo nuevo, en lugar de los mismos ejercicios de siempre y salir de la rutina? 🤗
 
@@ -2315,7 +2315,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {*¡Hola! {{NOMBRE}} mi nombre es Andrea*|*¡Hola! {{NOMBRE}} soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
+              *HOLA MAESTRO/MAESTRA!*  🎓️
+
+              {*Mi nombre es Andrea*|*Me llamo Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
 
               📱 *¿Tu pequeño se aburre en casa y buscas una nueva actividad para que pueda divertirse y a la vez desarrollar su potencial?* 😟
 
