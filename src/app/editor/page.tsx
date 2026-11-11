@@ -184,6 +184,33 @@ const CLASE_DE_COLOR = (color?: string) =>
   "border-neutral-300 bg-tarjeta text-neutral-700";
 
 /**
+ * EL COLOR DEL USUARIO, UNO SOLO (11/11/2026). Él: «el selector de debajo del avatar no hace nada…
+ * mejor eliminarlo y donde están los colores seleccionables, ahí agregar para personalizar, y que los
+ * personalizados se puedan eliminar». La fila «Color» del menú Usuarios guarda en
+ * `editor_colores_de_botones.usuario` un nombre de la lista de arriba o un «#rrggbb» suyo, y pinta
+ * dos cosas: el cuadro «Datos para pago» y la etiqueta de quien cobra por defecto en el Inicio del
+ * tablero. Sus colores propios van en `usuario_paleta` («#aaa111,#bbb222»): aparte de «mi paleta» de
+ * los anuncios, para que borrar uno aquí no lo quite allá. Solo pantalla: el cliente no lo ve.
+ */
+const HEX_DE_COLOR: Record<string, string> = {
+  esmeralda: "#10b981",
+  rojo: "#ef4444",
+  azul: "#0ea5e9",
+  violeta: "#8b5cf6",
+  ambar: "#f59e0b",
+  gris: "#737373",
+};
+const esHexDeColor = (v?: string) => /^#[0-9a-f]{6}$/i.test(String(v ?? "").trim());
+/** El color de la fila en «#rrggbb»; sin elegir o «blanco» (el original) = ninguno. */
+const hexDelColorDeUsuario = (color?: string) =>
+  esHexDeColor(color) ? String(color).trim().toLowerCase() : HEX_DE_COLOR[String(color ?? "")];
+const paletaDelUsuario = (cfg: { editor_colores_de_botones?: Record<string, string> }) =>
+  String(cfg.editor_colores_de_botones?.usuario_paleta ?? "")
+    .split(",")
+    .map((c) => c.trim().toLowerCase())
+    .filter((c, i, todas) => esHexDeColor(c) && todas.indexOf(c) === i);
+
+/**
  * LOS COLORES DE LOS BOTONES DE «PRECIOS Y PAGOS».
  *
  * Los mismos SEIS de los cuadritos de decisión, para no aprenderse dos paletas.
@@ -11299,13 +11326,15 @@ export default function EditorPage() {
               guardarDatosDelUsuario(selectedPaymentCountry, parche)
             }
             onCfg={setCfg}
-            onColor={(color) => {
+            onColor={(color, paleta) => {
               snapshot();
               setCfg({
                 ...cfg,
                 editor_colores_de_botones: {
                   ...(cfg.editor_colores_de_botones ?? {}),
                   usuario: color,
+                  // Sus colores propios: solo cuando se agrega o se borra uno.
+                  ...(paleta ? { usuario_paleta: paleta.join(",") } : {}),
                 },
               });
             }}
@@ -31846,10 +31875,16 @@ function PantallaDelTableroCargada({
       const perfil = (cfg.modality_payment_profiles?.[activeModality(cfg)]?.[f.pais as CountryCode] ??
         cfg.payment_profiles_by_country?.[f.pais as CountryCode]) as { foto?: string; color_etiqueta?: string } | undefined;
       // El color de su etiqueta (30/10/2026): el que él eligió en menú usuarios; sin elegir, el automático.
+      // Desde el 11/11 manda la fila «Color» del menú Usuarios; el `color_etiqueta` de antes queda de respaldo.
       quienCobraPorPais[f.pais] =
         q.deQuien && q.cobrador
           ? { foto: q.cobrador.foto, color: q.cobrador.color, nombre: q.cobrador.nombre?.trim() || q.nombre, porDefecto: false }
-          : { foto: perfil?.foto, color: perfil?.color_etiqueta, nombre: q.nombre || q.titular || "Cuenta del país", porDefecto: true };
+          : {
+              foto: perfil?.foto,
+              color: hexDelColorDeUsuario(cfg.editor_colores_de_botones?.usuario) ?? perfil?.color_etiqueta,
+              nombre: q.nombre || q.titular || "Cuenta del país",
+              porDefecto: true,
+            };
     }
 
   const guardar = (sucio: TableroEnElEditor) => {
@@ -51967,7 +52002,8 @@ function PestanaDeUsuario({
   /** El contenido entero: las «otras cuentas» y la herramienta de los números a mano tocan
    *  varios sitios a la vez (el país, sus modalidades, el usuario que es él mismo, los textos). */
   onCfg: (siguiente: FullConfig) => void;
-  onColor: (color: string) => void;
+  /** Elige el color; con `paleta`, además deja así la lista de sus colores propios. */
+  onColor: (color: string, paleta?: string[]) => void;
   onBotones: (encendido: boolean) => void;
   onTextoDeBotones: (texto: string) => void;
   /** Guarda una de las dos opciones de la oferta. Solo se toca su mensaje. */
@@ -52020,6 +52056,9 @@ function PestanaDeUsuario({
       cfg.payment_profiles_by_country?.[pais]
   );
   const color = cfg.editor_colores_de_botones?.usuario;
+  const misColores = paletaDelUsuario(cfg);
+  const colorPropio = esHexDeColor(color) ? String(color).trim().toLowerCase() : "";
+  const [mezclando, setMezclando] = useState<string | null>(null);
   // EL CAMPO GUARDA LO QUE SE ESCRIBE, TAL CUAL.
   //
   // Antes este mismo valor salia recortado y VOLVIA AL INPUT recortado. Como es
@@ -52183,18 +52222,8 @@ function PestanaDeUsuario({
             }}
           />
           <span className="text-[10px] font-semibold text-tinta-suave">Avatar</span>
-          {/* Y EL COLOR DE SU ETIQUETA en ese Inicio (30/10/2026). Solo pantalla. */}
-          <span title="El color de la etiqueta de su nombre en el Inicio del tablero. El cliente no lo ve.">
-            <SelectorDeColorDePersona
-              cfg={cfg}
-              valor={(perfil as { color_etiqueta?: string }).color_etiqueta}
-              onColor={(color) => {
-                onSnapshot();
-                onDatos({ color_etiqueta: color || undefined } as never);
-              }}
-              onPaleta={(ad_color_palette) => onCfg({ ...cfg, ad_color_palette })}
-            />
-          </span>
+          {/* El color de su etiqueta en el Inicio ya no se elige aquí (11/11/2026): lo pinta la fila
+              «Color» de abajo, la misma del cuadro «Datos para pago». Ver `hexDelColorDeUsuario`. */}
         </span>
         <button
           type="button"
@@ -52202,6 +52231,8 @@ function PestanaDeUsuario({
           className={`inline-flex items-center gap-3 rounded-2xl border px-5 py-4 text-left shadow-sm transition-all hover:-translate-y-px hover:shadow ${CLASE_DE_COLOR(
             color
           )}`}
+          // Un color suyo («#rrggbb») no tiene clase: borde de ese color y fondo suave del mismo.
+          style={colorPropio ? { borderColor: colorPropio, borderWidth: 2, backgroundColor: `${colorPropio}33` } : undefined}
         >
           <span className="text-2xl" aria-hidden>
             💳
@@ -52299,7 +52330,10 @@ function PestanaDeUsuario({
 
         <div className="text-[11px] font-bold uppercase tracking-wide text-neutral-500">
           Color
-          <div className="mt-1.5 flex gap-1.5">
+          <span className="ml-1 font-semibold normal-case tracking-normal text-neutral-400">
+            · «Datos para pago» y tu etiqueta en el Inicio del tablero
+          </span>
+          <div className="relative mt-1.5 flex flex-wrap items-center gap-1.5">
             {COLORES_DE_DECISION.map((opcion) => (
               <button
                 key={opcion.valor}
@@ -52314,6 +52348,72 @@ function PestanaDeUsuario({
                 }`}
               />
             ))}
+            {/* SUS COLORES PROPIOS, cada uno con su ✕ para borrarlo. */}
+            {misColores.map((hex) => (
+              <span key={hex} className="group relative">
+                <button
+                  type="button"
+                  onClick={() => onColor(hex)}
+                  title={hex.toUpperCase()}
+                  aria-label={`Color ${hex}`}
+                  style={{ backgroundColor: hex }}
+                  className={`h-8 w-8 rounded-lg border-2 border-black/20 transition-transform hover:scale-110 ${
+                    colorPropio === hex ? "ring-2 ring-neutral-900 ring-offset-2" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!confirm(`¿Borrar el color ${hex.toUpperCase()} de tus colores?`)) return;
+                    // Si era el elegido, vuelve al original (blanco).
+                    onColor(colorPropio === hex ? "blanco" : color ?? "blanco", misColores.filter((c) => c !== hex));
+                  }}
+                  title="Borrar este color"
+                  aria-label={`Borrar el color ${hex}`}
+                  className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-red-300 bg-white text-[10px] font-black leading-none text-red-600 shadow hover:bg-red-50"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={() => setMezclando(mezclando === null ? colorPropio || "#ff7a00" : null)}
+              title="Agregar un color tuyo"
+              aria-label="Agregar un color tuyo"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-dashed border-neutral-400 bg-tarjeta text-lg font-black text-neutral-600 hover:bg-neutral-50"
+            >
+              +
+            </button>
+            {mezclando !== null && (
+              <div className="absolute left-0 top-full z-30 mt-2 flex items-center gap-2 rounded-lg border border-neutral-300 bg-tarjeta p-2 normal-case tracking-normal shadow-xl">
+                <input
+                  type="color"
+                  value={mezclando}
+                  onChange={(e) => setMezclando(e.target.value.toLowerCase())}
+                  aria-label="Elegir el color nuevo"
+                  className="h-9 w-12 cursor-pointer rounded border border-neutral-300 bg-tarjeta"
+                />
+                <span className="font-mono text-xs text-neutral-600">{mezclando.toUpperCase()}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onColor(mezclando, misColores.includes(mezclando) ? misColores : [...misColores, mezclando]);
+                    setMezclando(null);
+                  }}
+                  className="rounded-md border border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-900 hover:bg-emerald-100"
+                >
+                  Agregar y usar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMezclando(null)}
+                  className="rounded-md border border-neutral-300 px-2 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
