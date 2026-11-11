@@ -2427,6 +2427,11 @@ export default function LienzoDelTablero({
           id: `esquinas:${n.id}`,
           type: "esquinas",
           position: n.position,
+          // EL TAMAÑO TAMBIÉN EN EL NODO, NO SOLO EN SU ESTILO (10/11/2026, él: «los velos ya no los puedo editar desde
+          // las esquinas»). Este nodo se arma de nuevo en cada dibujo; sin `width`/`height` propios, React Flow lo da por
+          // «sin medir» y lo deja oculto (visibility: hidden): sus esquinas no se podían agarrar.
+          width: n.width ?? s?.width,
+          height: n.height ?? s?.height,
           style: { width: n.width ?? s?.width, height: n.height ?? s?.height, pointerEvents: "none" as const },
           zIndex: 5000,
           selectable: false,

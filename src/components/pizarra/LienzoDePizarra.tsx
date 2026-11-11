@@ -4707,6 +4707,10 @@ export default function LienzoDePizarra({
           id: `esquinas:${n.id}`,
           type: "esquinas",
           position: n.position,
+          // EL TAMAÑO TAMBIÉN EN EL NODO (10/11/2026): sin `width`/`height` propios, React Flow lo deja oculto tras cada
+          // dibujo y sus esquinas no se podían agarrar. Ver el mismo arreglo en el tablero.
+          width: n.width ?? s?.width,
+          height: n.height ?? s?.height,
           style: { width: n.width ?? s?.width, height: n.height ?? s?.height, pointerEvents: "none" as const },
           zIndex: 5000,
           selectable: false,
