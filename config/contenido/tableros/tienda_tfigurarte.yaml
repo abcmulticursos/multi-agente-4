@@ -1486,8 +1486,8 @@ whatsapp:
       y: 363
     - id: f-mwbepkbd-i9l2s
       tipo: mensaje
-      x: 264
-      y: 1881
+      x: 330
+      y: 3597
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
@@ -1582,30 +1582,10 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-    - id: f-mwbepkbd-adebx
-      tipo: cobro
-      x: 1441
-      y: 1496
-      steps:
-        - type: text
-          body_variants:
-            - ✅ *Genial,* puedes adquirirlo de la siguiente Manera 😊👇
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - "{{METODO_DE_PAGO_1}}"
-          delay_after_sec: 6
-        - type: text
-          body_variants:
-            - 🙌 *Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso y puedas descargar tu material de inmediato 🤳🏼 😊
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        producto_id: "@tienda:basico"
     - id: f-mwbepkbd-ckdjc
       tipo: seguimientos
-      x: 528
-      y: 1518
+      x: 594
+      y: 3234
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -1913,8 +1893,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwbepkbd-aoswl
       tipo: regalo
-      x: 1320
-      y: 2002
+      x: 1386
+      y: 3718
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -2073,11 +2053,11 @@ whatsapp:
       alto: 884
       titulo: PARA MAESTROS 📚
     - id: velo-mwbepkbe-0
-      x: 176
-      y: 1331
+      x: 242
+      y: 3047
       ancho: 2437
       alto: 939
-      titulo: ALEJADOS DEL CELULAR 🤳🏼📲
+      titulo: PAPA/MAMA 👪
   espejos:
     - id: e-mw4xjp2d-zjbz
       ficha: f-mw4xhgdb-dozb0
