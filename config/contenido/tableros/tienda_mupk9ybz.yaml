@@ -2834,7 +2834,7 @@ whatsapp:
                       🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
                       *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
 
-                      💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
+                      💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
