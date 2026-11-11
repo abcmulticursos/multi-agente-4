@@ -3290,13 +3290,13 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwcazaok-9kg8j
       tipo: regalo
-      x: 5280
-      y: 2629
+      x: 3476
+      y: 2277
       titulo: Regalo
     - id: f-mwcazaok-861el
       tipo: seguimientos
-      x: 2200
-      y: 1199
+      x: 2926
+      y: 1155
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -3616,8 +3616,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwcazaok-ir237
       tipo: seguimientos
-      x: 2464
-      y: 1177
+      x: 3201
+      y: 1155
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -3800,8 +3800,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwcazaok-siv9j
       tipo: mensaje
-      x: 3223
-      y: 2299
+      x: 4939
+      y: 1870
       titulo: Upsell 1 · 100 MIS PRIMEROS TRAZOS
       steps:
         - type: text
@@ -3860,16 +3860,16 @@ whatsapp:
       espera_min: 2
     - id: f-mwcazaok-b9rwp
       tipo: entregar
-      x: 5027
-      y: 1870
+      x: 6743
+      y: 1441
       titulo: Entrega · MIS PRIMEROS TRAZOS
       producto_id: pmv5xqgst
       entregas:
         - pmv5xqgst
     - id: f-mwcazaok-qvb5y
       tipo: mensaje
-      x: 4279
-      y: 2299
+      x: 5995
+      y: 1870
       steps:
         - type: text
           body_variants:
@@ -3877,8 +3877,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwcazaok-jgoxa
       tipo: cobro
-      x: 4125
-      y: 1925
+      x: 5841
+      y: 1496
       steps:
         - type: text
           body_variants:
@@ -4239,19 +4239,6 @@ whatsapp:
       salida: btn:b-mwcazaok-xhm6l
       a: f-mwcazaok-830v5
       vista: colita
-    - id: c-mwcazaol-4nmk1
-      de: f-mwcazaok-bjfc6
-      salida: siguiente
-      a: f-mwcazaok-siv9j
-    - id: c-mwcazaol-q1skb
-      de: f-mwcazaok-hdevf
-      salida: siguiente
-      a: f-mwcazaok-siv9j
-    - id: c-mwcazaol-mah0s
-      de: f-mwcazaok-siv9j
-      salida: sin_respuesta
-      a: f-mwcazaok-9kg8j
-      vista: cable
     - id: c-mwcazaol-f3elr
       de: f-mwcazaok-siv9j
       salida: dec:d-mwcazaok-zqf9e
@@ -4298,6 +4285,16 @@ whatsapp:
       salida: sin_pago
       a: f-mwcazaok-en2px
       a_espejo: e-mwcbhd13-fu9s
+    - id: c-mwcbkemu-gdj
+      de: f-mwcazaok-bjfc6
+      salida: siguiente
+      a: f-mwcazaok-9kg8j
+      vista: cable
+    - id: c-mwcbkgpi-f6b
+      de: f-mwcazaok-hdevf
+      salida: siguiente
+      a: f-mwcazaok-9kg8j
+      vista: cable
   cajas:
     - id: manta-inicio-mvveb83v-1
       x: -948
