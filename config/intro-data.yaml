@@ -7904,8 +7904,8 @@ biblioteca_de_productos:
     market_price: 0
     precios_por_pais:
       PE:
-        price_soles: 10
-        discount_price_soles: 7
+        price_soles: 7
+        discount_price_soles: 5
         market_price: 55
   - id: ptpla_basico
     name: GUÍA PLANTILLA
