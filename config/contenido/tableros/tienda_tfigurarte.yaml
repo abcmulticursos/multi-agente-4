@@ -1538,7 +1538,7 @@ whatsapp:
             - "{{NOMBRE}}  ahora te explicarè cómo llevarte el pack completo 💛"
           delay_after_sec: 4
         - type: image
-          drive_url: Ahttps://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
           caption_variants:
             - |-
               Solo por *HOY* tenemos una oferta especial 🔥
@@ -1604,8 +1604,8 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mwbepkbd-ckdjc
       tipo: seguimientos
-      x: 1430
-      y: 1463
+      x: 1221
+      y: 1496
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
