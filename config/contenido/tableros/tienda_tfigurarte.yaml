@@ -5275,75 +5275,54 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {*¡Hola! {{NOMBRE}} mi nombre es Andrea*|*¡Hola! {{NOMBRE}} soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
+              ¡Hola! *Rubén aquí, tu asesor de la página Impulso 360 Digital* 👋 hoy te presento *ARTEFIGURA* 🎨✨. 
 
-              📱 *¿Te preocupa que tu peque pase demasiado tiempo frente al celular o la tablet?* 😟
-
-              🌟 *¿Te gustaría que aproveche mejor su tiempo*, estimule su creatividad y se divierta aprendiendo, en lugar de estar siempre frente a una pantalla? 🤗
-
-              💡 {¡Quiero presentarte algo que le gustará!|¡Tengo algo que quiero mostrarte y que te encantará!|¡Quiero compartir contigo algo que te va a interesar!} ❤️
-          delay_after_sec: 4
-        - type: image
-          drive_url: https://drive.google.com/file/d/1O3X6DxCGWwjiSfCmMEGU7NxmwQpWpmjz/view?usp=sharing
-          caption_variants:
-            - |-
-              🎨✨ *{¡TE PRESENTO EL LIBRO PARA COLOREAR FIGURARTE!:|¡CONOCE EL LIBRO PARA COLOREAR FIGURARTE!:|¡MIRA LO QUE TENEMOS PARA TI: EL LIBRO PARA COLOREAR FIGURARTE!:}* 📚️🔺🟢✨
-
-              *Una nueva forma de colorear* donde las *figuras geométricas* se convierten en increíbles animales y personajes. 🐯🎨📚
-          delay_after_sec: 4
+              🤩 Un material único que transforma tu creatividad en arte. ¡Descúbrelo y diviértete! ❤️
+          delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              *{¡Este bonito Material Incluye lo siguiente|¡Este hermoso Material contiene lo siguiente|¡Mira todo lo que incluye este bonito Material!}* 😊👇️
+              🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
 
-              🐯 *Más de 80 animales* para descubrir y colorear.
-              🦸 *Más de 30 personajes* formados por figuras geométricas.
+              Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
+
+              ¡Incluye todo lo siguiente
+
+              🐯 Más de 80 animales para descubrir y colorear.
+              🦸 Más de 30 personajes formados por figuras geométricas.
               🔵 Círculos, cuadrados, triángulos y rectángulos.
               🎨 Una forma diferente de colorear, ¡sin utilizar números!
-
-              🟨 *Figuras* que se transforman en increíbles dibujos.
+              🟨 Figuras que se transforman en increíbles dibujos.
               🧠 Actividades que estimulan la creatividad y la atención.
-              ✏️ *Una experiencia divertida para aprender mientras colorea.*
-              🌈 {Diseños originales para dar vida con tus colores.|Dibujos únicos para llenar de color y creatividad.|Hermosos diseños para colorear y dejar volar tu imaginación.}
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - |-
-              {*Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis|*Para que puedas conocerlo por ti mismo* antes de decidir, te obsequio una muestra gratis|*Antes de que tomes una decisión, quiero que lo veas personalmente*, por eso te regalo una muestra gratis} 🎁👇️
-
-              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
-
-              🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - "{{NOMBRE}}  {ahora te explicarè cómo llevarte el pack completo|ahora te mostraré cómo puedes adquirir el pack completo|a continuación te explicaré cómo obtener el pack completo} 💛"
-          delay_after_sec: 4
+              ✏️ Una experiencia divertida para aprender mientras coloreas.
+              🌈 Diseños originales para dar vida con tus colores.
+          delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1yknViBdiupCforYttdQcZFsVGhv0y3eU/view?usp=sharing
           caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
             - |-
-              Solo por *HOY* tenemos una oferta especial 🔥
-              Si realizas tu pago *AHORA MISMO*, además de aprovechar el precio especial, recibirás *SIN COSTO ADICIONAL 4 REGALITOS UN SUPER COMPLEMENTO.* 🎁💙
+              🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
 
-              🎁 1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
-              🎁 2 - *Práctica *Recortables* ✂️
-              🎁 3 - *Videocuentos* Infantiles 🎬️
-              🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
+              🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
 
-              📚🌎 {Todo digital, en PDF y listo para recibir e imprimir.|Material completamente digital en PDF, listo para recibir e imprimir.|Recibe todo en formato PDF, preparado para descargar e imprimir fácilmente.}
+              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+
+              ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨
           delay_after_sec: 4
         - type: text
           body_variants:
             - |-
-              ❌*(antes)* ~precio original {{PRECIO_MERCADO}}~
-              ✅ 📚 *{SOLO POR HOY A TAN SOLO|¡PROMOCIÓN VÁLIDA SOLO POR HOY A TAN SOLO|APROVECHA HOY Y ADQUIÉRELO A TAN SOLO} {{PRECIO_BASE}}* ‼️
-              ✅ Pago único, acceso de por vida.
-              📲 Apenas confirmes, te envío el enlace con sus 4 bonos de inmediato por aquí.
+              🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
 
-              {{METODO_DE_PAGO_1}}
+              📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
 
-              🟡 {Me mandas el comprobante y enseguida te llegan|Al enviar tu comprobante te llega en segundos|Luego de enviar tu comprobante recibirás el acceso al material descargable en segundos} 🤳😊
+              ❤️ ¡Lo recibes primero y pagas después!
+
+              Solo responde SÍ y te explico cómo recibirlo. 🥰
           delay_after_sec: 4
         - type: text
           body_variants:
