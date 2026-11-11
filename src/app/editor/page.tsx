@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEscapeEnPila } from "@/lib/escape-en-pila";
+import { encajarEnLaPantalla } from "@/lib/encajar-en-pantalla";
 import EmojiPicker from "@/components/EmojiPicker";
 import InterruptorDeTema from "@/components/InterruptorDeTema";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
@@ -22609,6 +22610,7 @@ function MenuDeCajon({
   return (
     <div
       className="fixed z-[70] w-64 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-sm shadow-xl"
+      ref={(el) => encajarEnLaPantalla(el)}
       style={{ left: estado.menu.x, top: estado.menu.y }}
       onMouseDown={(event) => event.stopPropagation()}
     >
@@ -25712,6 +25714,7 @@ function ChatPreview({
           />
           <div
             role="menu"
+            ref={(el) => encajarEnLaPantalla(el)}
             style={{ left: contextMenu.x, top: contextMenu.y }}
             className="fixed z-30 min-w-52 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-xs font-semibold text-neutral-800 shadow-lg"
           >
@@ -56141,7 +56144,7 @@ function AdRegistryManager({
       <div className="flex justify-end"><button type="button" onClick={add} className="rounded border border-emerald-400 px-3 py-1.5 text-xs font-semibold text-emerald-700">Agregar nuevo AD</button></div>
       {entries.length === 0 && <p className="text-sm text-neutral-500">Crea aquí tus Ads. Luego podrás seleccionarlos desde Intros y Seguimientos.</p>}
       {adDelMenu && menuDeAds.menu && (
-        <div className="fixed z-[70] w-60 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-sm shadow-xl" style={{ left: menuDeAds.menu.x, top: menuDeAds.menu.y }} onMouseDown={(event) => event.stopPropagation()}>
+        <div className="fixed z-[70] w-60 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-sm shadow-xl" ref={(el) => encajarEnLaPantalla(el)} style={{ left: menuDeAds.menu.x, top: menuDeAds.menu.y }} onMouseDown={(event) => event.stopPropagation()}>
           <p className="border-b border-neutral-200 px-3 py-1.5 text-[11px] text-neutral-500">{adDelMenu.name}</p>
           <button type="button" onClick={() => { const entry = adDelMenu; menuDeAds.cerrar(); setAdDelMenu(null); quitarAd(entry); }} className="block w-full px-3 py-2 text-left text-red-600 hover:bg-red-50">🗑️ Quitar este AD</button>
         </div>

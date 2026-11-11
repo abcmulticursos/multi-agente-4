@@ -46,6 +46,7 @@ import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
 import { copiarFichas, mantaPara, rutaDe } from "@/lib/tablero/copiar";
 import { hayVentanaAbierta } from "@/lib/escape-en-pila";
+import { encajarEnLaPantalla } from "@/lib/encajar-en-pantalla";
 export { copiarFichas, mantaPara };
 
 /** El tablero tal como lo tiene el editor: igual que el del bot, con las burbujas del editor. */
@@ -3214,6 +3215,7 @@ export default function LienzoDelTablero({
         {menu && (
           <div
             className="fixed z-50 max-h-[85vh] w-64 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-slate-800 shadow-2xl"
+            ref={(el) => encajarEnLaPantalla(el)}
             style={{ left: Math.min(menu.x, window.innerWidth - 270), top: Math.max(8, Math.min(menu.y, window.innerHeight - 480)) }}
             onClick={(e) => e.stopPropagation()}
           >
