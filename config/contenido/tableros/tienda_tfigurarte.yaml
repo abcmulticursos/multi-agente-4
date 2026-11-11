@@ -1496,7 +1496,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {*¡Hola! mi nombre es Andrea*|*¡Hola! soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
+              {*¡Hola! {{NOMBRE}} mi nombre es Andrea*|*¡Hola! {{NOMBRE}} soy Andrea*} y {pertenezco al equipo de AbcMulticlases|formo parte del equipo de AbcMulticlases} 🙋‍♀️✨.
 
               📱 *¿Te preocupa que tu peque pase demasiado tiempo frente al celular o la tablet?* 😟
 
@@ -1535,6 +1535,10 @@ whatsapp:
               https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
 
               🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - "{{NOMBRE}}  ahora te explicarè cómo llevarte el pack completo 💛"
           delay_after_sec: 4
         - type: image
           drive_url: Ahttps://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
