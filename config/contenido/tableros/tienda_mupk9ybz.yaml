@@ -3139,19 +3139,6 @@ whatsapp:
 
                       *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                   delay_after_sec: 6
-                  buttons:
-                    - id: b-mwcazaok-1nbao
-                      label: YAPE
-                      action: send_steps
-                      steps: []
-                    - id: b-mwcazaok-n5nxs
-                      label: PLIN
-                      action: send_steps
-                      steps: []
-                    - id: b-mwcazaok-5493m
-                      label: BCP
-                      action: send_steps
-                      steps: []
                   decisions:
                     - id: d-mwcazaok-78ocd
                       enabled: false
@@ -4195,21 +4182,6 @@ whatsapp:
       de: f-mwcazaoj-bn8iw
       salida: siguiente
       a: f-mwcazaok-thtxr
-    - id: c-mwcazaol-73rpb
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-1nbao
-      a: f-mwcazaok-830v5
-      vista: colita
-    - id: c-mwcazaol-6lsiu
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-n5nxs
-      a: f-mwcazaok-830v5
-      vista: colita
-    - id: c-mwcazaol-80nbj
-      de: f-mwcazaok-thtxr
-      salida: btn:b-mwcazaok-5493m
-      a: f-mwcazaok-830v5
-      vista: colita
     - id: c-mwcazaol-f3elr
       de: f-mwcazaok-siv9j
       salida: dec:d-mwcazaok-zqf9e
