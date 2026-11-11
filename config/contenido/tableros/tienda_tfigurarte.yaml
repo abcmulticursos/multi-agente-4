@@ -1527,11 +1527,12 @@ whatsapp:
               ✏️ *Una experiencia divertida para aprender mientras colorea.*
               🌈 {Diseños originales para dar vida con tus colores.|Dibujos únicos para llenar de color y creatividad.|Hermosos diseños para colorear y dejar volar tu imaginación.}
           delay_after_sec: 4
-        - type: document
-          drive_url: https://drive.google.com/file/d/1nBmVXC2sjH0sXH_rURUEKGBtE68de6ev/view?usp=drive_link
-          caption_variants:
+        - type: text
+          body_variants:
             - |-
-              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👆️
+              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
+
+              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
 
               🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
           delay_after_sec: 4
@@ -1578,7 +1579,6 @@ whatsapp:
           enabled: false
       presenta:
         - ptfig_figurarte
-      instrucciones: "Aquí se presenta FIGURARTE. Si pregunta cómo funciona: primero le envías unas muestras gratuitas y después, si le gusta, hace una contribución voluntaria (S/10 a S/30) y recibe el material completo con bonos. Invítalo a responder SÍ para recibir las muestras."
     - id: f-mwbepkbd-adebx
       tipo: cobro
       x: 1243
