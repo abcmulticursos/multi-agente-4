@@ -3270,7 +3270,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc4w6bv-o2v7u
-          minutos: 2
+          minutos: 3
           variantes:
             - id: v-mwc4w6bv-ew9d2
               peso: 1
