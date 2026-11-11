@@ -640,18 +640,18 @@ whatsapp:
           nombre: ALEJAR DEL CELULAR
           peso: 1
           anuncios:
-            - meta_120250705731660336
-            - meta_120250705883260336
+            - meta_120250734143120336
+            - meta_120250734143030336
         - id: r2
           nombre: PADRE - MADRE
-          peso: 1
-          anuncios:
-            - meta_120250714720030336
-            - meta_120250714755750336
+          peso: 0
+          peso_antes: 1
         - id: rmw929v1i
           nombre: MAESTROS
           peso: 1
           anuncios:
+            - meta_120250734143140336
+            - meta_120250734143040336
             - meta_120250706066540336
         - id: rmwbepyn7
           peso: 0
