@@ -1904,11 +1904,11 @@ whatsapp:
 
                       ✅ *{PARA ADQUIRIRLO|PARA DESCARGARLO|PARA REALIZAR TU PAGO}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *Realiza una inversión mínima de tan solo* {{PRECIO_BASE}}* 👇🏼
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      {{METODO_DE_PAGO_1}}
 
-                      ¿{Cuál prefieres?|¿Cual método prefieres?|Con cual de ellos te resulta más fácil adquirirlo}
+                      🕑️ La promo termina a las 12 de la noche 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
     - id: f-mwbepkbd-aoswl
