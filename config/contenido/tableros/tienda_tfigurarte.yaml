@@ -1621,14 +1621,10 @@ whatsapp:
                 - type: video
                   drive_url: https://drive.google.com/file/d/15w2Au5pYcCwAVJ6wt7rOt1tlAxiN6MWU/view?usp=drive_link
                   caption_variants:
-                    - |-
-                      🎯 *Hola Soy Andrea:* 🙋‍♀️ {*Puedes aprovechar nuestra promoción activa* realizando un único pago!|*Aprovecha esta oferta especial* con un solo pago!|*Accede a nuestra promoción vigente* realizando un único pago!}
+                    - |
+                      🎯 *Hola {{NOMBRE}} Soy Andrea:* 🙋‍♀️ {*Puedes aprovechar nuestra promoción activa* realizando un único pago!|*Aprovecha esta oferta especial* con un solo pago!|*Accede a nuestra promoción vigente* realizando un único pago!}
 
                       *Muchos padres ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
-
-                      💰 *EL COSTO DE TODO EL MATERIAL DESCARGABLE ES DE TAN SOLO* *{{precio_base}}*
-
-                      📩 {Recibimos diariamente pagos de compradores reales como tú *y Tu compra está 100% segura.*|Cada día recibimos pagos de clientes reales *y puedes comprar con total seguridad.*|Muchas personas compran con nosotros diariamente *y tu compra cuenta con nuestra garantía de seguridad.*}
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
@@ -1754,12 +1750,9 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-                - type: image
-                  drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
-                  caption_variants:
+                - type: text
+                  body_variants:
                     - |-
-                      👋 ¡Hola {{NOMBRE}}! ¡Buenas tardes! 🌤️  😊
-
                       📈 *MUCHAS MAMITAS Y TUTORAS CONFÍAN EN NOSOTROS.*
 
                       RECUERDA: Nuestra oferta es de *{{PRECIO_BASE}}*
@@ -1773,8 +1766,6 @@ whatsapp:
                       {{METODO_DE_PAGO_1}}
 
                       Me mandas el comprobante y enseguida te llegan 💛
-
-                      ⚠️ {*Si lo llevas en los próximos 10 minutos*|*Si decides adquirirlo durante los próximos 10 minutos*|*Aprovecha y llévatelo dentro de los próximos 10 minutos*} 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwbepkbd-zrz5v
