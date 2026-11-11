@@ -1613,7 +1613,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwbepkbd-9oum6
-          minutos: 25
+          minutos: 2
           variantes:
             - id: v-mwbepkbd-b56ww
               peso: 1
@@ -1754,7 +1754,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwbepkbd-3kqku
-          minutos: 420
+          minutos: 5
           variantes:
             - id: v-mwbepkbd-rd420
               peso: 1
