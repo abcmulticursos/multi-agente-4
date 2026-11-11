@@ -176,12 +176,14 @@ function AdjuntoElegido({ file, alQuitar }: { file: File; alQuitar: () => void }
 /** El desplegable de rutas: «al azar» o una ruta de un Ruteador (agrupadas si la tienda tiene varios en ese país). */
 function SelectorDeRuta({ ruteadores, valor, alElegir, className }: { ruteadores: RuteadorDePrueba[]; valor: string; alElegir: (r: string) => void; className: string }) {
   const opciones = (r: RuteadorDePrueba) => r.rutas.map((x) => (
-    <option key={x.id} value={`${r.id}|${x.id}`} disabled={!x.conectada}>
-      🔀 Ruta: {x.nombre}{x.apagada ? " (apagada)" : ""}{!x.conectada ? " — sin cable" : ""}
+    <option key={x.id} value={`${r.id}|${x.id}`} disabled={!x.conectada} style={x.apagada && x.conectada ? { color: "#dc2626", fontWeight: 600 } : undefined}>
+      🔀 Ruta: {x.nombre}{x.apagada ? " 🔴 (apagada)" : ""}{!x.conectada ? " — sin cable" : ""}
     </option>
   ));
+  // Él (10/11/2026): «no veo la ruta que está apagada, ponle en rojo». Elegida una apagada, el selector entero va en rojo.
+  const elegidaApagada = ruteadores.some((r) => r.rutas.some((x) => x.apagada && `${r.id}|${x.id}` === valor));
   return (
-    <select value={valor} onChange={(e) => alElegir(e.target.value)} title="Por qué ruta del Ruteador entra este cliente de prueba. Tus clientes reales no se ven afectados." className={className}>
+    <select value={valor} onChange={(e) => alElegir(e.target.value)} title="Por qué ruta del Ruteador entra este cliente de prueba. Tus clientes reales no se ven afectados." className={`${className}${elegidaApagada ? " !border-red-400 !bg-red-50 !text-red-700 font-semibold" : ""}`}>
       <option value="">🔀 Ruta: al azar (como en vivo)</option>
       {ruteadores.length === 1
         ? opciones(ruteadores[0])
