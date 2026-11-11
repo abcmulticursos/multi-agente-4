@@ -3686,10 +3686,10 @@ whatsapp:
                 - type: video
                   drive_url: https://drive.google.com/file/d/15w2Au5pYcCwAVJ6wt7rOt1tlAxiN6MWU/view?usp=drive_link
                   caption_variants:
-                    - |
-                      🎯 *Hola {{NOMBRE}} Soy Andrea:* 🙋‍♀️ {*Puedes aprovechar nuestra promoción activa* realizando un único pago!|*Aprovecha esta oferta especial* con un solo pago!|*Accede a nuestra promoción vigente* realizando un único pago!}
+                    - |-
+                      🎯 Hola {{NOMBRE}}, soy Andrea: 🙋‍♀️ {*Podés aprovechar nuestra promoción vigente* realizando un único pago.|*Aprovechá esta oferta especial* con un solo pago.|*Accedé a nuestra promoción actual* realizando un único pago.}
 
-                      *Muchos padres ya lo hicieron*... y ahora *sus hijos ya están disfrutando de esta nueva alternativa coloreando con {{PRODUCTO_BASE}}* 🤗
+                      *Muchos docentes ya aprovecharon esta oportunidad*... y ahora sus alumnos están disfrutando de esta nueva propuesta, coloreando con {{PRODUCTO_BASE}}* 🤗
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
@@ -3818,19 +3818,19 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      📈 *{MUCHAS MAMITAS Y MAESTROS CONFÍAN EN NOSOTROS|CADA VEZ MÁS MAMITAS Y MAESTROS ELIGEN CONFIAR EN NOSOTROS|SOMOS LA ELECCIÓN DE MUCHAS MAMITAS Y MAESTROS}*
+                      📈 *{MUCHAS FAMILIAS Y DOCENTES CONFÍAN EN NOSOTROS|CADA VEZ MÁS FAMILIAS Y DOCENTES NOS ELIGEN|SOMOS LA ELECCIÓN DE MUCHAS FAMILIAS Y DOCENTES}*
 
-                      RECUERDA: Nuestra oferta es de *{{PRECIO_BASE}}*
+                      RECORDÁ: Nuestra oferta es de *{{PRECIO_BASE}}*
 
-                      *{NO DEJES PASAR ESTA OPORTUNIDAD|¡APROVECHA ESTA GRAN OPORTUNIDAD!|¡NO TE QUEDES SIN APROVECHAR ESTA OFERTA!}*
+                      *{NO DEJES PASAR ESTA OPORTUNIDAD|¡APROVECHÁ ESTA GRAN OPORTUNIDAD!|¡NO TE QUEDES SIN APROVECHAR ESTA OFERTA!}*
 
-                      💰 *Hoy puedes obtener todo por solo {{PRECIO_BASE}}*
+                      💰 *Hoy podés llevarte todo por solo {{PRECIO_BASE}}*
                       ✅ Pago único, acceso de por vida.
-                      📲 Apenas confirmes, te envío el material completo y sus bonos de inmediato por aquí.
+                      📲 Apenas confirmes, te envío el material completo y sus bonos de inmediato por acá.
 
                       {{METODO_DE_PAGO_1}}
 
-                      Me mandas el comprobante y enseguida te llegan 💛
+                      Me mandás el comprobante y enseguida te llega todo 💛
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwc4zq7e-wxxpr
