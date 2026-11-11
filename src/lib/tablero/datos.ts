@@ -577,7 +577,17 @@ export function cobraEnLaFicha(f: FichaDelTablero, t?: Pick<Tablero, "fichas" | 
   const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
   if (botones.length + cuadritos.length > 0) return false;
   // (02/11/2026: decide su cable. Con su «→» conectado sigue de largo, como siempre; sin él, espera y cobra.)
-  return !t.cables.some((c) => c.de === f.id && c.salida === "siguiente");
+  const siguiente = t.cables.find((c) => c.de === f.id && c.salida === "siguiente");
+  if (!siguiente) return true;
+  // «→» A UNOS SEGUIMIENTOS: EL MASTER Y SU ANEXO (10/11/2026). Él: «el master es la intro mensaje y los seguimientos es su
+  // anexo». Con el «→» a unos Seguimientos el cliente pasaba a ellos y salía de la ficha que cobra: si pagaba durante sus
+  // seguimientos, nadie le entregaba (te llegaba «entrégale a mano»). Le pasó a FIGURARTE. Ahora se queda en esta ficha,
+  // que cobra, y los Seguimientos salen colgados de ella (lo mismo que su «⏳ Si no responde»).
+  // Un «→» a otra ficha sigue de largo, como siempre; y a unos Seguimientos apagados o vacíos, también. La que elige de
+  // palabra («✍️ Si elige X») ya esperaba con sus Seguimientos colgados: no cambia (perdería esas salidas).
+  if (eligeDeLaFicha(f).length > 0) return false;
+  const destino = t.fichas.find((x) => x.id === siguiente.a);
+  return destino?.tipo === "seguimientos" && !destino.apagada && (destino.seguimientos ?? []).length > 0;
 }
 
 /**
@@ -667,10 +677,20 @@ export function salidasDeLaFicha(
     const conCable = (s: string) => !!t?.cables.some((c) => c.de === f.id && c.salida === s);
     const pagos = salidasDePago(f, t, nombres);
     const usaLaEspera = conCable("sin_respuesta") || pagos.some((p) => conCable(p.clave));
+    // Su «→» con cable solo puede ir a unos Seguimientos (si no, la ficha no cobraría sola): ahí se llama como lo que
+    // es, y su «Si no responde» se esconde (con Seguimientos colgados, mandan ellos), salvo que ya tenga cable.
+    const aSeguimientos = conCable("siguiente");
     return [
       ...pagos,
-      { clave: "sin_respuesta", etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde" },
-      ...(usaLaEspera ? [] : [{ clave: "siguiente", etiqueta: "→ Después de enviar" }]),
+      ...(aSeguimientos && !conCable("sin_respuesta")
+        ? []
+        : [{ clave: "sin_respuesta", etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde" }]),
+      // (10/11/2026, él: «después de enviar no está bien»: dice lo que pasa: sigue en el acto, sin esperar respuesta.)
+      ...(aSeguimientos
+        ? [{ clave: "siguiente", etiqueta: "⏳ Seguimientos" }]
+        : usaLaEspera
+          ? []
+          : [{ clave: "siguiente", etiqueta: "→ Sigue sin esperar" }]),
     ];
   }
   switch (f.tipo) {
@@ -745,7 +765,7 @@ export function salidasDeLaFicha(
         }
         // Con su «→» conectado (sigue de largo): sus «💰 Si paga» también, por si paga antes de seguir.
         salidas.push(...salidasDePago(f, t, nombres));
-        salidas.push({ clave: "siguiente", etiqueta: "→ Después de enviar" });
+        salidas.push({ clave: "siguiente", etiqueta: "→ Sigue sin esperar" });
         return salidas;
       }
       // «💰 SI PAGA» TAMBIÉN CON OPCIONES (02/11/2026): su intro con cuadritos o la del order bump.
