@@ -6,7 +6,6 @@ whatsapp:
       x: -1342
       y: 2013
       pais: PE
-      sin_venta: true
     - id: intro-mvveb83v-2
       tipo: mensaje
       x: 1859
