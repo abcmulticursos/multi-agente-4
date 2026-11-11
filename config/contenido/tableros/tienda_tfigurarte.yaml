@@ -1512,7 +1512,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *¡Este bonito Material Incluye lo siguiente* 😊👇️
+              *{¡Este bonito Material Incluye lo siguiente|¡Este hermoso Material contiene lo siguiente|¡Mira todo lo que incluye este bonito Material!}* 😊👇️
 
               🐯 *Más de 80 animales* para descubrir y colorear.
               🦸 *Más de 30 personajes* formados por figuras geométricas.
@@ -1527,7 +1527,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
+              {*Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis|*Para que puedas conocerlo por ti mismo* antes de decidir, te obsequio una muestra gratis|*Antes de que tomes una decisión, quiero que lo veas personalmente*, por eso te regalo una muestra gratis} 🎁👇️
 
               https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
 
@@ -1535,7 +1535,7 @@ whatsapp:
           delay_after_sec: 4
         - type: text
           body_variants:
-            - "{{NOMBRE}}  ahora te explicarè cómo llevarte el pack completo 💛"
+            - "{{NOMBRE}}  {ahora te explicarè cómo llevarte el pack completo|ahora te mostraré cómo puedes adquirir el pack completo|a continuación te explicaré cómo obtener el pack completo} 💛"
           delay_after_sec: 4
         - type: image
           drive_url: https://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
@@ -1549,7 +1549,7 @@ whatsapp:
               🎁 3 - *Videocuentos* Infantiles 🎬️
               🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
 
-              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+              📚🌎 {Todo digital, en PDF y listo para recibir e imprimir.|Material completamente digital en PDF, listo para recibir e imprimir.|Recibe todo en formato PDF, preparado para descargar e imprimir fácilmente.}
           delay_after_sec: 4
         - type: text
           body_variants:
@@ -1753,11 +1753,11 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      📈 *MUCHAS MAMITAS Y TUTORAS CONFÍAN EN NOSOTROS.*
+                      📈 *{MUCHAS MAMITAS Y MAESTROS CONFÍAN EN NOSOTROS|CADA VEZ MÁS MAMITAS Y MAESTROS ELIGEN CONFIAR EN NOSOTROS|SOMOS LA ELECCIÓN DE MUCHAS MAMITAS Y MAESTROS}*
 
                       RECUERDA: Nuestra oferta es de *{{PRECIO_BASE}}*
 
-                      *NO DEJES PASAR ESTA OPORTUNIDAD*
+                      *{NO DEJES PASAR ESTA OPORTUNIDAD|¡APROVECHA ESTA GRAN OPORTUNIDAD!|¡NO TE QUEDES SIN APROVECHAR ESTA OFERTA!}*
 
                       💰 *Hoy puedes obtener todo por solo {{PRECIO_BASE}}*
                       ✅ Pago único, acceso de por vida.
@@ -1908,7 +1908,7 @@ whatsapp:
 
                       {{METODO_DE_PAGO_1}}
 
-                      🕑️ La promo termina a las 12 de la noche 🏃‍♀️
+                      🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
     - id: f-mwbepkbd-aoswl
