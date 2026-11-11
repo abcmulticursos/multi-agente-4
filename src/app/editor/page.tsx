@@ -29642,7 +29642,9 @@ function VistaPizarra({
       )}
       {/* LA BARRA DE LA PIZARRA: lo de siempre del editor arriba —vista, modo, deshacer,
           guardar— y lo de la pizarra debajo. */}
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
+      {/* AL 110 % (11/11/2026). Él: «que los textos de chat, kanban, o sea lo de arriba estén un poco más grande, yo
+          subí a 110% y se ve mejor». Solo las barras de arriba; el lienzo queda igual. */}
+      <div style={{ zoom: 1.1 }} className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Vista del editor">
           <button type="button" onClick={onClose} className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno">
             ☰ Menús
@@ -29842,7 +29844,9 @@ function VistaPizarra({
         />
       ) : (
       <>
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
+      {/* AL 110 % (11/11/2026). Él: «que los textos de chat, kanban, o sea lo de arriba estén un poco más grande, yo
+          subí a 110% y se ve mejor». Solo las barras de arriba; el lienzo queda igual. */}
+      <div style={{ zoom: 1.1 }} className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         {tiendas.length > 0 ? (
           <select
             value={tiendaId}
@@ -32056,7 +32060,9 @@ function PantallaDelTableroCargada({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
+      {/* AL 110 % (11/11/2026). Él: «que los textos de chat, kanban, o sea lo de arriba estén un poco más grande, yo
+          subí a 110% y se ve mejor». Solo las barras de arriba; el lienzo queda igual. */}
+      <div style={{ zoom: 1.1 }} className={`flex flex-wrap items-center gap-2 border-b border-borde bg-tarjeta px-4 py-2 text-tinta ${fondoOscuro ? "tema-oscuro-local" : ""}`}>
         {esWorkflow ? (
           <input
             value={cfg.workflows?.[wfId]?.nombre ?? ""}
@@ -32185,11 +32191,16 @@ function PantallaDelTableroCargada({
                 type="button"
                 aria-pressed={canal === c}
                 onClick={() => elegirCanal(c)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-semibold ${canal === c ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 ${canal === c ? "bg-carbon-fuerte text-sm font-black text-white" : "bg-tarjeta font-semibold text-tinta-suave opacity-70 hover:bg-relleno hover:opacity-100"}`}
               >
-                {/* Su logo junto al nombre (03/11/2026). */}
+                {/* Su logo junto al nombre (03/11/2026). EL ELEGIDO, GRANDE (11/11/2026). Él: «no logro detectar cuál está
+                    seleccionado… que al elegir el canal crezcan los logos, así me doy cuenta en qué canal estoy». */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/tablero/canal-${c}.png`} alt="" className="h-[18px] w-[18px] rounded-[5px] bg-white object-cover" />
+                <img
+                  src={`/tablero/canal-${c}.png`}
+                  alt=""
+                  className={`rounded-[6px] bg-white object-cover transition-all ${canal === c ? "h-8 w-8 ring-2 ring-white" : "h-[18px] w-[18px] grayscale"}`}
+                />
                 {nombre}
               </button>
             ))}
