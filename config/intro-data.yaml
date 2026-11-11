@@ -7930,6 +7930,10 @@ biblioteca_de_productos:
         price_soles: 4700
         discount_price_soles: 3100
         market_price: 27000
+      CO:
+        price_soles: 10000
+        discount_price_soles: 6700
+        market_price: 50000
   - id: ptpla_basico
     name: GUÍA PLANTILLA
     aliases:
