@@ -27343,7 +27343,7 @@ function VistaPizarra({
   /** Cambia el país de la vista previa (el botón de abajo a la derecha). */
   onPaisDeLaVista?: (pais: string) => void;
   /** Vuelve a los menús, abierto en ése: los botones nativos (upsell, regalo) se editan allí. */
-  onIrAlMenu?: (menu: "upsell" | "regalo") => void;
+  onIrAlMenu?: (menu: "upsell" | "regalo" | "usuario") => void;
   /** Volver a la vista de menús. */
   onClose: () => void;
   onConfigChange: (config: FullConfig) => void;
@@ -29675,6 +29675,29 @@ function VistaPizarra({
               {nombre}
             </button>
           ))}
+          {/* USUARIOS Y SIMULADOR AQUÍ ARRIBA (11/11/2026, él: «que los usuarios aparezcan también desde el mismo
+              editor, al lado de Chat y Kanban… y al lado de Usuarios el botón del simulador, que ya no esté al lado del
+              menú hamburguesa»). Usuarios abre su menú en el editor (lo no guardado se queda en el borrador, como al
+              ir a cualquier menú); el Simulador, en otra pestaña, como siempre. */}
+          {onIrAlMenu && (
+            <button
+              type="button"
+              onClick={() => onIrAlMenu("usuario")}
+              title="Tus datos, tus cuentas y los usuarios que cobran"
+              className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno"
+            >
+              🧑‍💻 USUARIOS
+            </button>
+          )}
+          <a
+            href="/simulador"
+            target="_blank"
+            rel="noopener"
+            title="Abre el simulador en otra pestaña: chatea con el bot como un cliente, sin enviar nada a Meta"
+            className="bg-emerald-600 px-3 py-1.5 font-semibold text-white hover:bg-emerald-700"
+          >
+            💬 Simulador ↗
+          </a>
         </span>
         <button type="button" onClick={onUndo} title="Deshacer (Ctrl+Z)" className={botonDeBarra}>↶ Deshacer</button>
         <button type="button" onClick={onRedo} title="Rehacer (Ctrl+Shift+Z)" className={botonDeBarra}>↷ Rehacer</button>
@@ -32326,18 +32349,8 @@ function PantallaDelTableroCargada({
           }
           despuesDelMas={(herramientasDelLienzo: React.ReactNode) => (
             <div className="relative flex items-center gap-2" ref={refDeHerramientasDelTablero}>
-              {/* EL SIMULADOR, A LA VISTA (27/10/2026): un botón propio, no escondido en el ☰.
-                  EN SU PROPIA PESTAÑA (31/10/2026). Él: «mi intención no era que el simulador se abra en la misma
-                  pizarra, sino que haya un hipervínculo… que me lleve al simulador». */}
-              <a
-                href="/simulador"
-                target="_blank"
-                rel="noopener"
-                title="Abre el simulador en otra pestaña: chatea con el bot como un cliente, sin enviar nada a Meta"
-                className="order-2 flex h-9 items-center gap-1 rounded-full bg-emerald-600 px-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700"
-              >
-                💬 Simulador ↗
-              </a>
+              {/* (11/11/2026: el botón «💬 Simulador ↗» pasó a la barra de arriba, junto a Chat, Kanban y Usuarios. Él:
+                  «que ya no esté al lado del menú hamburguesa del tablero».) */}
               {/* SE ABRE AL PASAR EL PUNTERO Y SE CIERRA AL INSTANTE AL SALIR, como el «+» (01/11/2026). Él: «ese
                   menú hamburguesa que tenga la misma característica del menú "+"». El menú va pegado (pt-2, sin hueco). */}
               <div className="relative" onMouseEnter={() => setMenuHerramientas(true)} onMouseLeave={() => setMenuHerramientas(false)}>

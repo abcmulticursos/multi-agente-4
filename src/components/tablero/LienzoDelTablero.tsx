@@ -542,7 +542,8 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
   // que en pantalla no bajen de un tamaño legible. Solo pantalla.
   const zoom = useStore((s) => s.transform[2]);
   const deLejos = Math.max(1, 0.55 / Math.max(zoom, 0.05));
-  const nombreDelPais = f.pais ? COUNTRIES[f.pais as CountryCode]?.label ?? f.pais : "Otros países";
+  // En mayúsculas (11/11/2026, él: «ARGENTINA, PERÚ, COLOMBIA»).
+  const nombreDelPais = (f.pais ? COUNTRIES[f.pais as CountryCode]?.label ?? f.pais : "Otros países").toUpperCase();
   const encendido = conectado && estado === "venta";
   return (
     <div
