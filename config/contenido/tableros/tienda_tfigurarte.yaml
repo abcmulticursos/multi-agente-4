@@ -2850,7 +2850,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc3uh6i-mmjnv
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc3uh6i-t47jw
               peso: 1
@@ -3117,7 +3117,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc3uh6i-3qlcp
-          minutos: 480
+          minutos: 30
           variantes:
             - id: v-mwc3uh6i-yanc5
               peso: 1
@@ -3266,7 +3266,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc4w6bv-o2v7u
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc4w6bv-ew9d2
               peso: 1
@@ -3533,7 +3533,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc4w6bv-gqivg
-          minutos: 480
+          minutos: 30
           variantes:
             - id: v-mwc4w6bv-tpx7n
               peso: 1
@@ -3677,7 +3677,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc4zq7e-qv3x4
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc4zq7e-4140v
               peso: 1
@@ -3944,7 +3944,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc4zq7e-hxost
-          minutos: 480
+          minutos: 30
           variantes:
             - id: v-mwc4zq7e-einc2
               peso: 1
