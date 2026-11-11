@@ -14265,7 +14265,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc3uh6i-3qlcp
-          minutos: 30
+          minutos: 5
           variantes:
             - id: v-mwc3uh6i-yanc5
               peso: 1
@@ -14681,7 +14681,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc4w6bv-gqivg
-          minutos: 30
+          minutos: 5
           variantes:
             - id: v-mwc4w6bv-tpx7n
               peso: 1
@@ -15092,7 +15092,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc4zq7e-hxost
-          minutos: 30
+          minutos: 5
           variantes:
             - id: v-mwc4zq7e-einc2
               peso: 1
@@ -15266,7 +15266,7 @@ instagram:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc6oofm-6urza
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc6oofm-zpv9y
               peso: 1
@@ -15533,7 +15533,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc6oofm-533y8
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwc6oofm-86fou
               peso: 1
@@ -15677,7 +15677,7 @@ instagram:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc6oofn-rhmoq
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc6oofn-mrs28
               peso: 1
@@ -15944,7 +15944,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc6oofn-1pt9f
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwc6oofn-hq393
               peso: 1
@@ -16088,7 +16088,7 @@ instagram:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwc6oofn-z98ay
-          minutos: 30
+          minutos: 2
           variantes:
             - id: v-mwc6oofn-373mt
               peso: 1
@@ -16355,7 +16355,7 @@ instagram:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwc6oofn-2yso8
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwc6oofn-wi5he
               peso: 1
