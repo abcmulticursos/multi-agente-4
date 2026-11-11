@@ -5324,6 +5324,19 @@ whatsapp:
 
               Solo responde SÍ y te explico cómo recibirlo. 🥰
           delay_after_sec: 4
+          decisions:
+            - id: f606376f-136f-428a-b281-a4342e549ebc
+              title: SI
+              keywords:
+                - sí
+                - sí
+                - ok
+                - ssi
+                - síi
+                - ssii
+                - ssíí
+              color: esmeralda
+              steps: []
         - type: text
           body_variants:
             - |-
