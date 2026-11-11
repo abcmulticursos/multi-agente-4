@@ -1505,7 +1505,7 @@ whatsapp:
               💡 {¡Quiero presentarte algo que le gustará!|¡Tengo algo que quiero mostrarte y que te encantará!|¡Quiero compartir contigo algo que te va a interesar!} ❤️
           delay_after_sec: 4
         - type: image
-          drive_url: https://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1O3X6DxCGWwjiSfCmMEGU7NxmwQpWpmjz/view?usp=sharing
           caption_variants:
             - |-
               🎨✨ *{¡TE PRESENTO EL LIBRO PARA COLOREAR FIGURARTE!:|¡CONOCE EL LIBRO PARA COLOREAR FIGURARTE!:|¡MIRA LO QUE TENEMOS PARA TI: EL LIBRO PARA COLOREAR FIGURARTE!:}* 📚️🔺🟢✨
@@ -1530,15 +1530,6 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
-
-              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
-
-              🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - |-
               🎁 {Además, al adquirir FIGURARTE, recibes *4 BONOS SORPRESA GRATIS*|Y eso no es todo, al comprar FIGURARTE también obtienes *4 BONOS SORPRESA GRATIS*|Al llevarte FIGURARTE, también te regalamos *4 BONOS SORPRESA GRATIS*} 🎁🎨
 
               🎁 1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
@@ -1547,6 +1538,29 @@ whatsapp:
               🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
 
               📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+          delay_after_sec: 4
+        - type: image
+          drive_url: Ahttps://drive.google.com/file/d/1hbx_G0UfR_wXL-_gBtbjabVKrylxwMuU/view?usp=drive_link
+          caption_variants:
+            - |-
+              Solo por *HOY* tenemos una oferta especial 🔥
+              Si realizas tu pago *AHORA MISMO*, además de aprovechar el precio especial, recibirás *SIN COSTO ADICIONAL 4 REGALITOS ADICIONALES PARA COMPLEMENTAR SU APRENDIZAJE.* 🎁💙
+
+              🎁 1 - *Abecedario con Animalitos* 🐶🐱🐴🫎
+              🎁 2 - *Práctica *Recortables* ✂️
+              🎁 3 - *Videocuentos* Infantiles 🎬️
+              🎁 4 - Fichas de *Grafomotricidad* 🚂✏️
+
+              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
+              *Y para que lo veas con tus propios ojos* antes de decidir, te regalo una muestra gratis 🎁👇️
+
+              https://drive.google.com/drive/folders/13l_bK0qmom92EDIP1lfyolQaHdchJ-Ue?usp=sharing
+
+              🥹 *Más de 2.000 mamitas* ya las están usando con sus peques
           delay_after_sec: 4
         - type: text
           body_variants:
