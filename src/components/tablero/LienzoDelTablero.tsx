@@ -42,6 +42,7 @@ import "@xyflow/react/dist/style.css";
 import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
+import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
 import { copiarFichas, mantaPara, rutaDe } from "@/lib/tablero/copiar";
 import { hayVentanaAbierta } from "@/lib/escape-en-pila";
@@ -79,6 +80,8 @@ const PUNTO_VERDE ="!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500"
 const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-500";
 /** Los conectores del 🔀 Ruteador (03/11/2026: «sus conectores rosa»). */
 const PUNTO_ROSA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-fuchsia-600";
+/** El de una ruta apagada del Ruteador (11/11/2026): rojo, como su cable. */
+const PUNTO_ROJO = "!h-[21px] !w-[21px] !border-2 !border-white !bg-red-600";
 /** El punto de un «💰 Si paga» que ENTREGA SOLO (02/11/2026, su montaje): más grande, blanco con borde verde y el ícono. */
 const PUNTO_DE_ENTREGA = "!flex !h-[50px] !w-[50px] !items-center !justify-center !rounded-full !border-[4px] !border-emerald-500 !bg-white !text-[27px] !leading-none shadow-md";
 /** Clave con la que el editor pasa el producto full de la tienda dentro de `nombres` (solo pantalla). */
@@ -506,20 +509,8 @@ function QuienCobraEnElInicio({ pais }: { pais?: string }) {
   );
 }
 
-/** «👥 12 · 💰 3»: los números de una ficha, como los de las rutas de la pizarra. Nada si no hay. */
-function NumerosDeLaFicha({ id }: { id: string }) {
-  const ctx = useContext(Contexto);
-  const n = ctx?.numeros?.[id];
-  if (!n || n.clientes === 0) return null;
-  return (
-    <div
-      className="mt-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700"
-      title={`${n.clientes} cliente(s) llegaron a esta ficha y ${n.ventas} de ellos pagaron algo en el tablero. No cuenta las pruebas del simulador.`}
-    >
-      👥 {n.clientes} · 💰 {n.ventas} pagaron ({Math.round((n.ventas / n.clientes) * 100)}%)
-    </div>
-  );
-}
+// (11/11/2026: los números «👥 12 · 💰 3 pagaron» ya no se dibujan en las fichas. Él: «eso que no vaya, si no me voy a
+// confundir; en el tablero que no hayan esos datos». Se siguen leyendo para el aviso de borrar fichas con clientes dentro.)
 
 // ── EL INICIO DE UN PAÍS ──────────────────────────────────────────────────────
 
@@ -546,6 +537,13 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
     ctx.cambiar({ ...ctx.tablero, fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, ...cambio } : x)) });
   };
   const etiqueta = f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países";
+  // LA BANDERA Y EL PAÍS SE VEN DE LEJOS (11/11/2026, él: «no distingo qué país estamos a menos que me acerque… al
+  // alejarme seguir viendo la bandera, y debajo del inicio diga el país, solo nombre»). Crecen al alejar la vista, para
+  // que en pantalla no bajen de un tamaño legible. Solo pantalla.
+  const zoom = useStore((s) => s.transform[2]);
+  const deLejos = Math.max(1, 0.55 / Math.max(zoom, 0.05));
+  const nombreDelPais = f.pais ? COUNTRIES[f.pais as CountryCode]?.label ?? f.pais : "Otros países";
+  const encendido = conectado && estado === "venta";
   return (
     <div
       className={`relative w-[200px] rounded-xl border-2 bg-white text-slate-800 shadow-lg ${color.borde}`}
@@ -558,6 +556,21 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
     >
       <QuienCobraEnElInicio pais={f.pais} />
       <LogoDelCanal tamano={44} />
+      {/* La bandera, grande, encima del Inicio (crece al alejar). */}
+      <div
+        className="pointer-events-none absolute bottom-full left-0 mb-1 leading-none"
+        style={{ fontSize: 46, transform: `scale(${deLejos})`, transformOrigin: "bottom left" }}
+        aria-hidden="true"
+      >
+        {f.pais ? banderaDe(f.pais) : "🌍"}
+      </div>
+      {/* Su país, solo el nombre, debajo del Inicio (crece al alejar). */}
+      <div
+        className="pointer-events-none absolute left-0 top-full mt-1 whitespace-nowrap text-xl font-black leading-none text-slate-700"
+        style={{ transform: `scale(${deLejos})`, transformOrigin: "top left" }}
+      >
+        {nombreDelPais}
+      </div>
       <div className={`rounded-t-[10px] px-3 py-2 text-white ${color.banda}`}>
         <div className="text-sm font-bold">▶ Inicio</div>
         <div className="text-[11px] opacity-90">
@@ -565,6 +578,24 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5 p-2">
+        {/* ENCENDER Y APAGAR EL PAÍS, COMO UN INTERRUPTOR (11/11/2026, él: «el inicio no tiene cómo apagarse, solo cortando
+            el cable»). Es el mismo dato de siempre (`sin_venta`): apagado, el bot no les contesta a los clientes nuevos
+            de este país; los que ya están en la ruta siguen. El cable no se toca. */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!f.sin_venta}
+          className={`nodrag flex items-center gap-2 rounded-md border px-2 py-1.5 text-left text-xs font-bold ${
+            !f.sin_venta ? "border-emerald-400 bg-emerald-50 text-emerald-800" : "border-slate-300 bg-slate-100 text-slate-600"
+          }`}
+          title={"Encendido: el bot atiende a los clientes nuevos de este país con este tablero.\nApagado: no les contesta. Los que ya están en la ruta siguen."}
+          onClick={() => cambiar({ sin_venta: !f.sin_venta, en_revision: false })}
+        >
+          <span className={`relative inline-block h-5 w-9 shrink-0 rounded-full transition ${!f.sin_venta ? "bg-emerald-500" : "bg-slate-400"}`}>
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${!f.sin_venta ? "left-[18px]" : "left-0.5"}`} />
+          </span>
+          {!f.sin_venta ? (encendido ? "Encendido · vende" : "Encendido · sin cable") : estado === "revision" ? "Apagado · en revisión" : "Apagado · no contesta"}
+        </button>
         <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800">{etiqueta}</div>
         {suyos.map((k) => (
           <div
@@ -633,16 +664,6 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
             ))}
           </div>
         )}
-        <button
-          type="button"
-          className={`nodrag rounded-md border px-2 py-1 text-left text-[11px] font-bold ${
-            estado === "venta" ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-slate-300 bg-slate-100 text-slate-700"
-          }`}
-          title={"Vender en este país con el tablero.\nApagado: el bot no les contesta a los clientes nuevos de este país."}
-          onClick={() => cambiar({ sin_venta: !f.sin_venta, en_revision: false })}
-        >
-          {estado === "venta" ? "🟢 Vende con el tablero" : estado === "revision" ? "🔵 En revisión · no recibe" : "⚪ Apagado · no contesta"}
-        </button>
         {estado !== "venta" && (
           <button
             type="button"
@@ -653,7 +674,6 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
             {estado === "revision" ? "⚪ Pasar a apagado" : "🔵 Pasar a revisión"}
           </button>
         )}
-        <NumerosDeLaFicha id={f.id} />
       </div>
     </div>
   );
@@ -1036,7 +1056,6 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           </div>
         )}
         {f.tipo === "entregar" && f.por_correo && <div className="text-[11px] text-cyan-700">📧 Ofrece también por correo</div>}
-        <NumerosDeLaFicha id={f.id} />
         {/* Con burbujas a la vista, el resumen no sale; lo que presenta sí (la IA solo sabe eso). */}
         {burbujas.length > 0 && (f.tipo === "mensaje" || f.tipo === "intro_ob") && (f.presenta ?? []).length > 0 && (
           <div className="truncate text-[11px] text-slate-600">🏷 Presenta: {(f.presenta ?? []).map((id) => ctx.nombres[id] ?? id).join(", ")}</div>
@@ -1761,7 +1780,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
               {aLaDerecha.map((s, i) => {
                 const y = i * (FILA + SEP) + FILA / 2;
                 return (
-                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke={rosa ? "#c026d3" : "#10b981"} strokeWidth={2.5} strokeDasharray="7 5" className="pointer-events-auto" />
+                  <path key={s.clave} d={`M 0 ${alto / 2} C 30 ${alto / 2}, 22 ${y}, 52 ${y}`} fill="none" stroke={rosa ? ((f.reparto ?? []).find((o) => `rep:${o.id}` === s.clave)?.peso === 0 ? "#dc2626" : "#c026d3") : "#10b981"} strokeWidth={2.5} strokeDasharray="7 5" className="pointer-events-auto" />
                 );
               })}
             </svg>
@@ -1774,11 +1793,13 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
           const pide = !!falta || ((s.clave.startsWith("btn:") || s.clave.startsWith("dec:") || s.clave.startsWith("elige:") || s.clave === "sin_pago") && !conCable.has(s.clave));
           // La entrega automática, con su ícono (ver `iconoDeEntrega`): el cable sale de él.
           const icono = iconoDeEntrega(f, s.clave, ctx.tablero, ctx.nombres, nUpsell !== undefined);
+          // La ruta apagada del Ruteador: su punto en rojo, como su cable (11/11/2026).
+          const rutaApagada = rosa && (f.reparto ?? []).find((o) => `rep:${o.id}` === s.clave)?.peso === 0;
           return (
             <div
               key={s.clave}
               title={falta ?? s.etiqueta}
-              className={`pointer-events-auto relative flex ${icono ? "h-9" : "h-7"} min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 ${icono ? "pr-7" : "pr-5"} text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : rosa ? (f.reparto ?? []).find((o) => `rep:${o.id}` === s.clave)?.peso === 0 ? "border-slate-300 text-slate-500" : "border-fuchsia-400 text-fuchsia-900" : "border-emerald-400 text-emerald-900"}`}
+              className={`pointer-events-auto relative flex ${icono ? "h-9" : "h-7"} min-w-[140px] max-w-[230px] items-center gap-1 whitespace-nowrap rounded-full border-2 bg-white px-3 ${icono ? "pr-7" : "pr-5"} text-[12px] font-bold shadow-sm ${falta ? "border-red-500 text-red-800" : rosa ? rutaApagada ? "border-red-400 text-red-700" : "border-fuchsia-400 text-fuchsia-900" : "border-emerald-400 text-emerald-900"}`}
             >
               {rosa && s.clave.startsWith("rep:") && <InterruptorDeRuta f={f} clave={s.clave} />}
               <span className="truncate">{s.etiqueta.replace(/^(🔘|💬|✍️) /, s.clave.startsWith("btn:") ? "botón " : s.clave.startsWith("dec:") ? "si dice " : s.clave.startsWith("elige:") ? "" : "")}</span>
@@ -1786,7 +1807,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
                 type="source"
                 position={Position.Right}
                 id={s.clave}
-                className={`${icono ? PUNTO_DE_ENTREGA : rosa ? PUNTO_ROSA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+                className={`${icono ? PUNTO_DE_ENTREGA : rutaApagada ? PUNTO_ROJO : rosa ? PUNTO_ROSA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
                 title={icono ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…)" : undefined}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1830,6 +1851,27 @@ function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: s
 
 const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, esquinas: NodoDeEsquinas };
 const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
+
+/**
+ * DÓNDE PONER EL ÁREA DE UN PAÍS NUEVO (11/11/2026): la esquina de arriba a la izquierda de su manta. La pedida (el
+ * centro de la vista) si ahí no hay nada; si choca con una ficha o un velo, debajo de todo, alineada a la izquierda.
+ * El tamaño es el de la manta de un Inicio solo (`mantaPara`: 1280 × 620).
+ */
+function sitioLibreParaUnArea(t: TableroEnElEditor, pedido: { x: number; y: number }): { x: number; y: number } {
+  const ANCHO = 1280, ALTO = 620, AIRE = 60;
+  const ocupado = [
+    ...t.fichas.filter((f) => !f.guardada).map((f) => ({ x: f.x, y: f.y, w: f.tipo === "inicio" ? 200 : 250, h: 260 })),
+    ...(t.cajas ?? []).map((c) => ({ x: c.x, y: c.y, w: c.ancho, h: c.alto })),
+  ];
+  if (!ocupado.length) return pedido;
+  const choca = (x: number, y: number) =>
+    ocupado.some((r) => x < r.x + r.w + AIRE && x + ANCHO + AIRE > r.x && y < r.y + r.h + AIRE && y + ALTO + AIRE > r.y);
+  if (!choca(pedido.x, pedido.y)) return pedido;
+  return {
+    x: Math.round(Math.min(...ocupado.map((r) => r.x))),
+    y: Math.round(Math.max(...ocupado.map((r) => r.y + r.h)) + 150),
+  };
+}
 
 /** Quitar fichas con sus cables. Si se va un Inicio, se va también su manta (las fichas se quedan). */
 function sinFichas(t: TableroEnElEditor, ids: Set<string>): TableroEnElEditor {
@@ -2500,6 +2542,7 @@ export default function LienzoDelTablero({
           // EL CABLE, SIEMPRE DEL COLOR DE LA SOLAPA DE LA FICHA DE DONDE SALE (27/10/2026).
           const color = origen ? ASPECTO[origen.tipo].trazo : "#6366f1";
           const aSeguimientos = destino?.tipo === "seguimientos";
+          const rutaApagada = origen?.tipo === "reparto" && c.salida.startsWith("rep:") && (origen.reparto ?? []).find((o) => `rep:${o.id}` === c.salida)?.peso === 0;
           // MODO ESTACIONES: el MISMO cable de siempre (mismo estilo); solo cambia dónde se engancha: sale de la
           // estación de su ficha (mismo bloque) y, hacia sus Seguimientos, entra por abajo de ellos.
           const deEstacion = estaciones && !!origen && esEstacion(origen, tablero);
@@ -2520,11 +2563,13 @@ export default function LienzoDelTablero({
             // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra. (03/11/2026, él: «engrosar un poquito los cables… y el
             // cable que parte hacia los seguimientos sea de color anaranjado y del mismo grosor que los demás, y el dash
             // también»: todos de 4 con el mismo punteado; el que va a unos Seguimientos, naranja.)
+            // LA RUTA APAGADA DEL RUTEADOR, EN ROJO (11/11/2026). Él: «el cable apagado sale atenuado, no me gusta, me
+            // gustaría que siga pero en color rojo». Entero, rojo, sin atenuar. Solo pantalla.
             style: {
-              stroke: aSeguimientos ? ASPECTO.seguimientos.trazo : color,
+              stroke: rutaApagada ? "#dc2626" : aSeguimientos ? ASPECTO.seguimientos.trazo : color,
               strokeWidth: 4,
               strokeDasharray: "10 6",
-              opacity: origen?.apagada ? 0.4 : origen?.tipo === "reparto" && c.salida.startsWith("rep:") && (origen.reparto ?? []).find((o) => `rep:${o.id}` === c.salida)?.peso === 0 ? 0.3 : 1,
+              opacity: origen?.apagada ? 0.4 : 1,
             },
           };
         }),
@@ -2996,9 +3041,15 @@ export default function LienzoDelTablero({
                       onClick={() => {
                         setMenuMas(false);
                         const c = centroDeLaVista();
-                        const inicio: FichaEnElEditor = { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: Math.round(c.x - 500), y: Math.round(c.y - 150) };
+                        // EN UN SITIO LIBRE (11/11/2026, él: «al agregar Argentina el velo cae sobre los elementos»): el área
+                        // nueva iba al centro de la vista, encima de lo que hubiera. Si ahí choca con una ficha o un velo,
+                        // va debajo de todo, alineada a la izquierda, y la vista la encuadra.
+                        const libre = sitioLibreParaUnArea(vivo.current, { x: Math.round(c.x - 540), y: Math.round(c.y - 220) });
+                        const inicio: FichaEnElEditor = { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: libre.x + 40, y: libre.y + 70 };
                         const conInicio = { ...vivo.current, fichas: [...vivo.current.fichas, inicio] };
-                        cambiar({ ...conInicio, cajas: [...(conInicio.cajas ?? []), mantaPara(conInicio, inicio)] });
+                        const manta = mantaPara(conInicio, inicio);
+                        cambiar({ ...conInicio, cajas: [...(conInicio.cajas ?? []), manta] });
+                        window.setTimeout(() => instancia.current?.fitBounds({ x: manta.x, y: manta.y, width: manta.ancho, height: manta.alto }, { padding: 0.15, duration: 400 }), 50);
                         setAviso(`${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: su Inicio y su manta. Conecta el Inicio a la primera ficha de su ruta.`);
                       }}
                     >

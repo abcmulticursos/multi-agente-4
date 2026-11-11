@@ -949,12 +949,14 @@ input,
 :root:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo .bn-cajon {
   box-shadow: var(--bn-cajon-sombra);
 }
+/* EL CAJÓN ELEGIDO, MÁS NOTORIO (11/11/2026). Él: «para ver cuál es el cajón editor necesito forzar la vista… haz el
+   borde del cajón editor más notorio; el del visor está bien, no tocar». Borde de 4 px y halo más fuerte. */
 .burbujas-nuevo .bn-cajon.bn-activo {
-  border: 2px solid var(--bn-activo);
-  box-shadow: var(--bn-cajon-brillo), 0 0 0 4px color-mix(in srgb, var(--bn-activo) 22%, transparent), var(--bn-cajon-sombra);
+  border: 4px solid var(--bn-activo);
+  box-shadow: var(--bn-cajon-brillo), 0 0 0 6px color-mix(in srgb, var(--bn-activo) 40%, transparent), var(--bn-cajon-sombra);
 }
 :root:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo .bn-cajon.bn-activo {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bn-activo) 22%, transparent), var(--bn-cajon-sombra);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--bn-activo) 40%, transparent), var(--bn-cajon-sombra);
 }
 .burbujas-nuevo .bn-num {
   width: 32px;

@@ -29660,6 +29660,22 @@ function VistaPizarra({
           ))}
         </span>
         <span className="ml-auto" />
+        {/* CHAT Y KANBAN DESDE AQUÍ (11/11/2026, él: «en el tablero haya el botón de Kanban, para que me lleve al Kanban y
+            al Chat… arriba, a la derecha antes de rehacer y deshacer»). Con algo sin guardar, pregunta antes (Guardar,
+            Descartar o Volver), como al cambiar de tienda. */}
+        <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Ir a">
+          {([["/", "💬 Chat"], ["/kanban", "📋 Kanban"]] as const).map(([destino, nombre]) => (
+            <button
+              key={destino}
+              type="button"
+              onClick={() => cambiarDeTienda("__fuera__", () => window.location.assign(destino))}
+              title={`Ir al ${nombre.slice(3)}`}
+              className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno"
+            >
+              {nombre}
+            </button>
+          ))}
+        </span>
         <button type="button" onClick={onUndo} title="Deshacer (Ctrl+Z)" className={botonDeBarra}>↶ Deshacer</button>
         <button type="button" onClick={onRedo} title="Rehacer (Ctrl+Shift+Z)" className={botonDeBarra}>↷ Rehacer</button>
         {hayCambios && <span className="text-[11px] font-semibold text-amber-700">● Sin guardar</span>}
