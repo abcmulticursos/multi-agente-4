@@ -2730,8 +2730,7 @@ whatsapp:
             - meta_120250734143030336
         - id: r2
           nombre: PADRE - MADRE
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: rmw929v1i
           nombre: MAESTROS
           peso: 1
@@ -4155,6 +4154,14 @@ whatsapp:
       de: f-mwc4zq7d-9lgzu
       salida: sin_respuesta
       a: f-mwc4zq7d-hmciy
+    - id: c-mwc5n4f3-r41
+      de: f-mwc3uh6i-1rbyn
+      salida: rep:r2
+      a: f-mwc4w6bu-i6jo2
+    - id: c-mwc5ne91-52r
+      de: f-mwc3uh6i-1rbyn
+      salida: rep:rmw929v1i
+      a: f-mwc4zq7d-9lgzu
   cajas:
     - id: manta-fig_inicio
       x: 108
