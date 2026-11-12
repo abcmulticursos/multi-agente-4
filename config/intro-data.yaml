@@ -2894,17 +2894,26 @@ payment_profiles_by_country:
       nequi:
         - type: text
           body_variants:
-            - "[Referencia 🇨🇴 Colombia] Escribe aqui los datos reales para Nequi. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+            - |-
+              🔴 *Nequi : {{CUENTA_NEQUI}}*
+              👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+              💰️ Precio: {precio}
           delay_after_sec: 0
       bancolombia:
         - type: text
           body_variants:
-            - "[Referencia 🇨🇴 Colombia] Escribe aqui los datos reales para Bancolombia. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+            - |-
+              🔴 *Nequi : {{CUENTA_NEQUI}}*
+              👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+              💰️ Precio: {precio}
           delay_after_sec: 0
       daviplata:
         - type: text
           body_variants:
-            - "[Referencia 🇨🇴 Colombia] Escribe aqui los datos reales para Daviplata. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+            - |-
+              🔴 *Nequi : {{CUENTA_NEQUI}}*
+              👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
+              💰️ Precio: {precio}
           delay_after_sec: 0
     order_bump:
       combo_price_soles: 0
