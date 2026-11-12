@@ -2594,7 +2594,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -3186,7 +3186,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -3746,7 +3746,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -4338,7 +4338,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -4896,7 +4896,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -5493,7 +5493,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -6075,7 +6075,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
@@ -6667,7 +6667,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
