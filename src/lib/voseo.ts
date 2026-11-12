@@ -2,10 +2,15 @@
  * «🇦🇷 VOSEO» DESDE EL NAVEGADOR (12/11/2026). Él: «me gustaría que le cambie a todo lo que yo seleccione, por ejemplo
  * 20 fichas». Los textos van a `/api/voseo` (que esconde comodines y enlaces de la IA y descarta lo que vuelva tocado)
  * en tandas de 20, tres a la vez; un texto repetido se pide una sola vez y sale igual en todos sus sitios.
+ * «✏️ Corregir ortografía» (12/11/2026, él: «me gustaría que haya una opción de corrección automática también») usa lo
+ * mismo con `modo: "ortografia"`: solo tildes y erratas, sin tocar el tuteo.
  */
 export type ResultadoDeVoseo = { texto: string | null; motivo?: string };
 
-export async function pasarAVoseo(textos: string[]): Promise<{ porTexto: Map<string, ResultadoDeVoseo>; costo: number }> {
+export async function pasarAVoseo(
+  textos: string[],
+  modo: "voseo" | "ortografia" = "voseo"
+): Promise<{ porTexto: Map<string, ResultadoDeVoseo>; costo: number }> {
   const unicos = [...new Set(textos.filter((t) => t.trim()))];
   const porTexto = new Map<string, ResultadoDeVoseo>();
   let costo = 0;
@@ -16,7 +21,7 @@ export async function pasarAVoseo(textos: string[]): Promise<{ porTexto: Map<str
     while (siguiente < tandas.length) {
       const tanda = tandas[siguiente++];
       try {
-        const r = await fetch("/api/voseo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ textos: tanda }) });
+        const r = await fetch("/api/voseo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ textos: tanda, modo }) });
         const d = (await r.json()) as { resultados?: ResultadoDeVoseo[]; error?: string; costo?: number | null };
         if (!r.ok || !d.resultados) throw new Error(d.error ?? "la IA no respondió");
         tanda.forEach((t, k) => porTexto.set(t, d.resultados![k] ?? { texto: null, motivo: "la IA no devolvió esta burbuja" }));

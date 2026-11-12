@@ -39554,7 +39554,18 @@ function palabrasCambiadas(antes: string, despues: string): Array<{ t: string; n
  * `/api/voseo`, que esconde los comodines y enlaces de la IA y descarta lo que vuelva tocado. Aquí se ve cada una
  * antes y después, con lo cambiado resaltado; nada cambia hasta «Aplicar» (Ctrl+Z lo deshace).
  */
-function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; onAplicar: (nuevos: EditorStep[]) => void; onCerrar: () => void }) {
+function VentanaDeVoseo({
+  steps,
+  modo = "voseo",
+  onAplicar,
+  onCerrar,
+}: {
+  steps: EditorStep[];
+  modo?: "voseo" | "ortografia";
+  onAplicar: (nuevos: EditorStep[]) => void;
+  onCerrar: () => void;
+}) {
+  const voseo = modo === "voseo";
   useEscapeEnPila(() => onCerrar());
   // Cada texto de cada burbuja, y los grupos del spintax de la IA (para que «↩ Quitar spintax de la IA» los siga encontrando).
   // Se toma UNA vez al abrir: al aplicar, las burbujas cambian y el resumen sigue comparando con lo de antes.
@@ -39576,7 +39587,10 @@ function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; o
     let vivo = true;
     void (async () => {
       try {
-        const { porTexto, costo } = await pasarAVoseo(lista.map((x) => x.texto));
+        const { porTexto, costo } = await pasarAVoseo(
+          lista.map((x) => x.texto),
+          modo
+        );
         if (!vivo || aplicado.current) return;
         const res = lista.map((x) => porTexto.get(x.texto) ?? { texto: x.texto });
         if (res.every((r) => r.texto === null)) throw new Error(res[0]?.motivo ?? "No se pudo.");
@@ -39616,22 +39630,24 @@ function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; o
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
       <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: 1.25 }}>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-base font-bold text-tinta">🇦🇷 Pasar a voseo · todas las burbujas</h3>
+          <h3 className="text-base font-bold text-tinta">{voseo ? "🇦🇷 Pasar a voseo" : "✏️ Corregir ortografía"} · todas las burbujas</h3>
           <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
             ✕
           </button>
         </div>
         <p className="mb-3 text-[13px] text-tinta-suave">
-          Pasa el tuteo al voseo (tienes → tenés, escribe → escribí) y algunas palabras a las de Argentina (niños → chicos, aquí → acá).
-          Los comodines, enlaces, precios y números no llegan a la IA. Se aplica solo; Ctrl+Z lo deshace.
+          {voseo
+            ? "Pasa el tuteo al voseo (tienes → tenés, escribe → escribí), algunas palabras a las de Argentina (niños → chicos, aquí → acá) y corrige la ortografía. "
+            : "Corrige tildes y palabras mal escritas, sin cambiar el trato (tú, vos o usted) ni las palabras. "}
+          Los comodines, enlaces, precios y nombres no cambian. Se aplica solo; Ctrl+Z lo deshace.
         </p>
-        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">Pasando a voseo…</p>}
+        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">{voseo ? "Pasando a voseo…" : "Corrigiendo…"}</p>}
         {resultados && (
           <div className="flex flex-col gap-2">
-            {cambiadas.length === 0 && descartadas.length === 0 && <p className="text-sm text-tinta-suave">No hay nada que pasar a voseo en estas burbujas.</p>}
+            {cambiadas.length === 0 && descartadas.length === 0 && <p className="text-sm text-tinta-suave">No hay nada que cambiar en estas burbujas.</p>}
             {cambiadas.length > 0 && (
               <p className="text-sm font-bold text-emerald-700">
-                ✅ {cambiadas.length} {cambiadas.length === 1 ? "burbuja pasada" : "burbujas pasadas"} a voseo. En verde, lo que cambió.
+                ✅ {cambiadas.length} {cambiadas.length === 1 ? "burbuja cambiada" : "burbujas cambiadas"}. En verde, lo que cambió.
               </p>
             )}
             {descartadas.map(({ x, i }) => (
@@ -40272,7 +40288,8 @@ function StepList({
   const [variando, setVariando] = useState(false);
   // «🇦🇷 Voseo» (12/11/2026, ver `VentanaDeVoseo`). Siempre a la vista: el país del visor sale de los cables desde el Inicio,
   // y una ficha sin conectar o compartida se ve como Perú; el botón se escondía justo en las fichas que él está armando.
-  const [voseando, setVoseando] = useState(false);
+  // «✏️ Ortografía» (12/11/2026): lo mismo, solo tildes y erratas, sin tocar el trato.
+  const [voseando, setVoseando] = useState<false | "voseo" | "ortografia">(false);
   const conSpintaxIA = steps.some((s) => (s.spintax_ia ?? []).some((g) => (s.texts[0] ?? "").includes(g)));
   const conTexto = steps.some((s) => s.enabled !== false && (s.texts[0] ?? "").trim());
 
@@ -40297,6 +40314,7 @@ function StepList({
     {voseando && (
       <VentanaDeVoseo
         steps={steps}
+        modo={voseando}
         onCerrar={() => setVoseando(false)}
         onAplicar={(nuevos) => {
           onSnapshot();
@@ -40309,11 +40327,21 @@ function StepList({
         {conTexto && (
           <button
             type="button"
-            onClick={() => setVoseando(true)}
-            title="Pasa estas burbujas al voseo argentino (tienes → tenés, niños → chicos). No toca comodines, precios ni enlaces. Se aplica solo; Ctrl+Z lo deshace."
+            onClick={() => setVoseando("voseo")}
+            title="Pasa estas burbujas al voseo argentino (tienes → tenés, niños → chicos) y corrige la ortografía. No toca comodines, precios, nombres ni enlaces. Se aplica solo; Ctrl+Z lo deshace."
             className="rounded-md border border-sky-300 bg-sky-50 px-3 py-1.5 text-sm font-bold text-sky-800 hover:bg-sky-100"
           >
             🇦🇷 Voseo
+          </button>
+        )}
+        {conTexto && (
+          <button
+            type="button"
+            onClick={() => setVoseando("ortografia")}
+            title="Corrige tildes y palabras mal escritas, sin cambiar el trato ni las palabras. No toca comodines, precios, nombres ni enlaces. Se aplica solo; Ctrl+Z lo deshace."
+            className="rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-100"
+          >
+            ✏️ Ortografía
           </button>
         )}
         {conTexto && (

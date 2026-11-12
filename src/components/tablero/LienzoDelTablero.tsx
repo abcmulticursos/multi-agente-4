@@ -2331,8 +2331,8 @@ export default function LienzoDelTablero({
   const [aviso, setAviso] = useState<string | null>(null);
   // «🇦🇷 Pasar a voseo» de las fichas elegidas: mientras pide, y el resumen al terminar.
   const [voseo, setVoseo] = useState<
-    | { fase: "pidiendo"; fichas: number }
-    | { fase: "listo"; fichas: number; cambiadas: number; descartadas: Array<{ ficha: string; texto: string; motivo: string }>; costo: number }
+    | { fase: "pidiendo"; modo: "voseo" | "ortografia"; fichas: number }
+    | { fase: "listo"; modo: "voseo" | "ortografia"; fichas: number; cambiadas: number; descartadas: Array<{ ficha: string; texto: string; motivo: string }>; costo: number }
     | null
   >(null);
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
@@ -2932,10 +2932,10 @@ export default function LienzoDelTablero({
     ...(f.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps)),
     ...(f.seguimientos ?? []).flatMap((s) => (s.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps))),
   ];
-  const vosear = async (ids: string[]) => {
+  const vosear = async (ids: string[], modo: "voseo" | "ortografia") => {
     const fichas = vivo.current.fichas.filter((f) => ids.includes(f.id));
-    setVoseo({ fase: "pidiendo", fichas: fichas.length });
-    const { porTexto, costo } = await pasarAVoseo(fichas.flatMap(textosDeLaFicha));
+    setVoseo({ fase: "pidiendo", modo, fichas: fichas.length });
+    const { porTexto, costo } = await pasarAVoseo(fichas.flatMap(textosDeLaFicha), modo);
     // Sobre el tablero de AHORA (pudo cambiar mientras pedía): cada texto que sigue igual se cambia por su voseo.
     const actual = vivo.current;
     const conVoseo = (f: FichaEnElEditor): FichaEnElEditor => ({
@@ -2957,7 +2957,7 @@ export default function LienzoDelTablero({
       }
     }
     if (cambiadas > 0) cambiar({ ...actual, fichas: actual.fichas.map((f) => (ids.includes(f.id) ? conVoseo(f) : f)) });
-    setVoseo({ fase: "listo", fichas: fichas.length, cambiadas, descartadas, costo });
+    setVoseo({ fase: "listo", modo, fichas: fichas.length, cambiadas, descartadas, costo });
   };
   const copiarLas = (ids: Set<string>, cajaIds: Set<string> = new Set(), espejoIds: Set<string> = new Set()) => {
     const actual = vivo.current;
@@ -3576,10 +3576,11 @@ export default function LienzoDelTablero({
         {voseo && (
           <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={() => voseo.fase === "listo" && setVoseo(null)}>
             <div className="my-16 w-full max-w-xl rounded-xl border border-slate-200 bg-white p-5 text-slate-800 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <h3 className="mb-2 text-base font-bold">🇦🇷 Pasar a voseo</h3>
+              <h3 className="mb-2 text-base font-bold">{voseo.modo === "voseo" ? "🇦🇷 Pasar a voseo" : "✏️ Corregir ortografía"}</h3>
               {voseo.fase === "pidiendo" ? (
                 <p className="py-4 text-sm text-slate-600">
-                  Pasando {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`} a voseo… (unos segundos; los comodines no llegan a la IA)
+                  {voseo.modo === "voseo" ? "Pasando a voseo" : "Corrigiendo"} {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`}… (unos segundos; los
+                  comodines no llegan a la IA)
                 </p>
               ) : (
                 <>
@@ -3588,7 +3589,9 @@ export default function LienzoDelTablero({
                     {voseo.descartadas.length > 0 ? ` · ${voseo.descartadas.length} quedaron igual` : ""}
                   </p>
                   <p className="mt-1 text-[12px] text-slate-500">
-                    Ya está puesto en las fichas. Revísalas y guarda con Ctrl+S; Ctrl+Z lo deshace todo de una vez.
+                    {voseo.cambiadas > 0
+                      ? "Ya está puesto en las fichas. Revísalas y guarda con Ctrl+S; Ctrl+Z lo deshace todo de una vez."
+                      : "No había nada que cambiar: las fichas quedaron como estaban."}
                     {voseo.costo > 0 ? ` Costó $${voseo.costo.toFixed(4)}.` : ""}
                   </p>
                   {voseo.descartadas.length > 0 && (
@@ -3738,18 +3741,32 @@ export default function LienzoDelTablero({
                     return !!f && textosDeLaFicha(f).some((t) => t.trim());
                   });
                   if (ids.length === 0) return null;
+                  const cuantas = ids.length > 1 ? ` (las ${ids.length} fichas elegidas)` : "";
                   return (
-                    <button
-                      type="button"
-                      className={opcionDeMenu}
-                      disabled={voseo?.fase === "pidiendo"}
-                      onClick={() => {
-                        setMenu(null);
-                        void vosear(ids);
-                      }}
-                    >
-                      🇦🇷 Pasar a voseo{ids.length > 1 ? ` (las ${ids.length} fichas elegidas)` : ""}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className={opcionDeMenu}
+                        disabled={voseo?.fase === "pidiendo"}
+                        onClick={() => {
+                          setMenu(null);
+                          void vosear(ids, "voseo");
+                        }}
+                      >
+                        🇦🇷 Pasar a voseo{cuantas}
+                      </button>
+                      <button
+                        type="button"
+                        className={opcionDeMenu}
+                        disabled={voseo?.fase === "pidiendo"}
+                        onClick={() => {
+                          setMenu(null);
+                          void vosear(ids, "ortografia");
+                        }}
+                      >
+                        ✏️ Corregir ortografía{cuantas}
+                      </button>
+                    </>
                   );
                 })()}
                 {fichaDelMenu.tipo !== "inicio" && (
