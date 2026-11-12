@@ -216,6 +216,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwcazaok-830v5
       tipo: mensaje
       x: 726
@@ -794,6 +795,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwcazaok-bjfc6
       tipo: entregar
       x: 2849
@@ -1208,6 +1210,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: pmv5xqgst
+        metodos: true
     - id: f-mwceddd4-fz4n
       tipo: reparto
       x: -1452
@@ -1442,6 +1445,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwcyp14g-qgu09
       tipo: mensaje
       x: 550
@@ -2020,6 +2024,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwcyp14h-gwlbx
       tipo: entregar
       x: 2673
@@ -2587,26 +2592,27 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso pudes hacerlo a través de estos datos 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso pudes hacerlo a través de estos datos 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos compartes una imagen o foto de tu recibo* para validar tu pago y darte acceso enseguida 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos compartes una imagen o foto de tu recibo* para validar tu pago y darte acceso enseguida 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwczmr06-4se41
       tipo: mensaje
       x: 517
@@ -3189,16 +3195,17 @@ whatsapp:
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o imagen de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos envías una foto o imagen de tu comprobante* para verificar el pago y brindarte acceso rápido 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o imagen de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos envías una foto o imagen de tu comprobante* para verificar el pago y brindarte acceso rápido 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwczmr07-m7dga
       tipo: entregar
       x: 2640
@@ -3751,16 +3758,17 @@ whatsapp:
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwd56hap-9n5su
       tipo: mensaje
       x: 693
@@ -4333,26 +4341,27 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso de esta forma 😊👇|✅ Excelente, puedes obtener el Curso de la siguiente manera 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso de esta forma 😊👇|✅ Excelente, puedes obtener el Curso de la siguiente manera 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Cuando termines, nos compartes una imagen de tu comprobante* para revisar tu pago y darte acceso instantaneo 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Cuando termines, nos compartes una imagen de tu comprobante* para revisar tu pago y darte acceso instantaneo 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwd56hap-6c8pb
       tipo: entregar
       x: 2816
@@ -4374,7 +4383,7 @@ whatsapp:
       titulo: Regalo
     - id: f-mwd56hap-wi8xi
       tipo: seguimientos
-      x: -198
+      x: -121
       y: 8976
       presenta:
         - "@tienda:basico"
@@ -4903,16 +4912,17 @@ whatsapp:
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdatl63-96azn
       tipo: mensaje
       x: 682
@@ -5490,26 +5500,27 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso de esta forma 😊👇|✅ Excelente, puedes obtener el Curso de la siguiente manera 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, puedes adquirir el Curso de esta forma 😊👇|✅ Excelente, puedes obtener el Curso de la siguiente manera 😊👇}"
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Cuando termines, nos compartes una imagen de tu comprobante* para revisar tu pago y darte acceso instantaneo 🤳🏼 😊}"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
-          spintax_ia:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte el acceso al instante 🤳🏼 😊|*Cuando termines, nos compartes una imagen de tu comprobante* para revisar tu pago y darte acceso instantaneo 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdatl64-i3lny
       tipo: entregar
       x: 2805
@@ -6090,6 +6101,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdbe0qi-kojx7
       tipo: mensaje
       x: 572
@@ -6682,6 +6694,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdbe0qi-5sdh4
       tipo: entregar
       x: 2695
@@ -7264,6 +7277,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdbn0ci-o7oyc
       tipo: mensaje
       x: 506
@@ -7860,6 +7874,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdbn0cj-ko6m7
       tipo: entregar
       x: 2629
@@ -8424,6 +8439,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdbn0cj-jfpj4
       tipo: mensaje
       x: 682
@@ -9020,6 +9036,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdbn0cj-nghoh
       tipo: entregar
       x: 2805
@@ -9582,6 +9599,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdbn0ck-yf8mo
       tipo: mensaje
       x: 671
@@ -10183,6 +10201,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdbn0ck-xoad7
       tipo: entregar
       x: 2794
@@ -10769,6 +10788,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:full"
+        metodos: true
     - id: f-mwdbn0ck-x4n7g
       tipo: mensaje
       x: 561
@@ -11365,6 +11385,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mwdbn0cl-4d3d0
       tipo: entregar
       x: 2684
