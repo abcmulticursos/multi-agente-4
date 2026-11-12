@@ -2923,6 +2923,8 @@ payment_profiles_by_country:
               🔴 *Nequi : {{CUENTA_NEQUI}}*
               👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
               💰️ Precio: {precio}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 0
         - type: text
           body_variants:
@@ -2939,6 +2941,8 @@ payment_profiles_by_country:
               ⚡💳 *A través de Nequi o Daviplata *
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
