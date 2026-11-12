@@ -22,12 +22,12 @@ import {
   getBezierPath,
   Handle,
   MiniMap,
-  NodeResizeControl,
   Position,
   ReactFlow,
   SelectionMode,
   useNodes,
   useNodesState,
+  useReactFlow,
   useStore,
   useStoreApi,
   ViewportPortal,
@@ -1832,19 +1832,68 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
  * sus esquinas van en este nodo transparente del mismo tamaño y sitio, encima de todo, y estiran AL VELO
  * (`nodeId`). No se elige ni se mueve; se calcula en cada pintada desde el velo, así lo sigue.
  */
+//
+// ESQUINAS PROPIAS (12/11/2026), en vez de las de React Flow. Él: «el punto para que aparezca es demasiado pequeño» y
+// «necesito que la esquina pueda pasar de largo la esquina opuesta, que no tenga límite». Dos cambios:
+// - El área para agarrarla mide lo mismo EN PANTALLA a cualquier zoom (~28 px); antes eran 18 del lienzo, que al
+//   alejarse quedaban en un puntito.
+// - La esquina sigue al ratón a donde vaya: la esquina OPUESTA queda fija y el velo es el rectángulo entre las dos, así
+//   que al cruzarla el velo se da vuelta y sigue creciendo hacia el otro lado (mínimo 40 × 40).
+// Mientras arrastra solo cambia la pantalla; al soltar se guarda una vez (un solo Ctrl+Z), como antes.
 function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: string }>>) {
   const t = TEMA[data.tema];
+  const zoom = useStore((s) => s.transform[2]);
+  const { screenToFlowPosition, updateNode } = useReactFlow();
+  const lado = 28 / (zoom || 1);
+  const empezar = (esquina: (typeof ESQUINAS)[number], e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const c = data.caja;
+    const fijo = { x: esquina.endsWith("left") ? c.x + c.ancho : c.x, y: esquina.startsWith("top") ? c.y + c.alto : c.y };
+    let ultimo = { x: c.x, y: c.y, ancho: c.ancho, alto: c.alto };
+    const mover = (ev: PointerEvent) => {
+      const p = screenToFlowPosition({ x: ev.clientX, y: ev.clientY });
+      ultimo = {
+        x: Math.round(Math.min(p.x, fijo.x)),
+        y: Math.round(Math.min(p.y, fijo.y)),
+        ancho: Math.round(Math.max(40, Math.abs(p.x - fijo.x))),
+        alto: Math.round(Math.max(40, Math.abs(p.y - fijo.y))),
+      };
+      updateNode(data.nodoDeLaCaja, {
+        position: { x: ultimo.x, y: ultimo.y },
+        width: ultimo.ancho,
+        height: ultimo.alto,
+        style: { width: ultimo.ancho, height: ultimo.alto, pointerEvents: "none" },
+      });
+    };
+    const soltar = () => {
+      window.removeEventListener("pointermove", mover);
+      window.removeEventListener("pointerup", soltar);
+      if (ultimo.x !== c.x || ultimo.y !== c.y || ultimo.ancho !== c.ancho || ultimo.alto !== c.alto) data.alCambiar({ ...c, ...ultimo });
+    };
+    window.addEventListener("pointermove", mover);
+    window.addEventListener("pointerup", soltar);
+  };
   return (
-    <div className="h-full w-full" style={{ pointerEvents: "none" }}>
+    <div className="relative h-full w-full" style={{ pointerEvents: "none" }}>
       {ESQUINAS.map((esquina) => (
-        <NodeResizeControl
+        <div
           key={esquina}
-          nodeId={data.nodoDeLaCaja}
-          position={esquina}
-          minWidth={160}
-          minHeight={100}
-          style={{ width: 18, height: 18, border: "none", borderRadius: 4, pointerEvents: "all", background: data.elegida ? t.tituloCaja : "transparent", opacity: 0.8 }}
-          onResizeEnd={(_e, r) => data.alCambiar({ ...data.caja, x: Math.round(r.x), y: Math.round(r.y), ancho: Math.round(r.width), alto: Math.round(r.height) })}
+          data-esquina-del-velo={esquina}
+          className="nodrag nopan absolute"
+          onPointerDown={(e) => empezar(esquina, e)}
+          style={{
+            width: lado,
+            height: lado,
+            [esquina.startsWith("top") ? "top" : "bottom"]: -lado / 2,
+            [esquina.endsWith("left") ? "left" : "right"]: -lado / 2,
+            borderRadius: 4 / (zoom || 1),
+            pointerEvents: "all",
+            cursor: esquina === "top-left" || esquina === "bottom-right" ? "nwse-resize" : "nesw-resize",
+            background: data.elegida ? t.tituloCaja : "transparent",
+            opacity: 0.8,
+          }}
         />
       ))}
     </div>
@@ -2025,7 +2074,15 @@ function mantaDelPais(t: TableroEnElEditor, pais: string): NonNullable<Tablero["
 }
 
 /** El portapapeles del tablero: sirve entre tiendas, canales y workflows de esta pestaña. */
-let portapapeles: { fichas: FichaEnElEditor[]; cables: CableDelTablero[]; cajas?: NonNullable<Tablero["cajas"]> } | null = null;
+let portapapeles: {
+  fichas: FichaEnElEditor[];
+  cables: CableDelTablero[];
+  cajas?: NonNullable<Tablero["cajas"]>;
+  /** 🪞 Los espejos elegidos (12/11/2026): se pegan con lo demás (ver `copiarFichas`). */
+  espejos?: NonNullable<Tablero["espejos"]>;
+  /** Cuántas veces se pegó: cada Ctrl+V cae un paso más abajo a la derecha, como en Illustrator. */
+  pegadas?: number;
+} | null = null;
 
 export default function LienzoDelTablero({
   tablero,
@@ -2462,6 +2519,7 @@ export default function LienzoDelTablero({
   const abrirMenu = useCallback((x: number, y: number, m: Menu) => setMenu({ x, y, m }), []);
   const soltarElCable = useCallback(() => setTirando(null), []);
   const inicioDelTiro = useRef<Punto | null>(null);
+  const apagarBrillo = useRef<number | undefined>(undefined);
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
   // sigue sin ponerse donde no encaja, con su aviso.)
   // Las esquinas de cada velo, encima de las fichas (ver `NodoDeEsquinas`): mismo sitio y tamaño que el velo AHORA.
@@ -2622,54 +2680,70 @@ export default function LienzoDelTablero({
   // velos… y no pega»). Los simples y las mantas de país; la manta se pega como velo libre (sin su Inicio:
   // un Inicio no se copia, hay uno por país).
   const cajasElegidas = () => new Set(nodos.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
-  const copiarLas = (ids: Set<string>, cajaIds: Set<string> = new Set()) => {
+  /** Lo elegido, separado: las fichas (la bolita de estación cuenta como su ficha) y los 🪞 espejos. */
+  const loElegido = () => {
+    const ns = elegidas();
+    return {
+      fichas: new Set(ns.filter((id) => !id.startsWith("esp:")).map(fichaDelNodo)),
+      espejos: new Set(ns.filter((id) => id.startsWith("esp:")).map((id) => id.slice(4))),
+    };
+  };
+  const copiarLas = (ids: Set<string>, cajaIds: Set<string> = new Set(), espejoIds: Set<string> = new Set()) => {
     const actual = vivo.current;
     const cajas = (actual.cajas ?? []).filter((c) => cajaIds.has(c.id)).map(({ inicio: _inicio, ...c }) => ({ ...c }));
-    if (ids.size === 0 && cajas.length === 0) return false;
+    const espejos = (actual.espejos ?? []).filter((e) => espejoIds.has(e.id)).map((e) => ({ ...e }));
+    if (ids.size === 0 && cajas.length === 0 && espejos.length === 0) return false;
     portapapeles = {
       fichas: JSON.parse(JSON.stringify(actual.fichas.filter((f) => ids.has(f.id)))),
       cables: actual.cables.filter((c) => ids.has(c.de) && ids.has(c.a)),
       cajas,
+      espejos,
+      pegadas: 0,
     };
-    const partes = [ids.size ? `${ids.size} ficha(s)` : "", cajas.length ? `${cajas.length} velo(s)` : ""].filter(Boolean).join(" y ");
+    const partes = [ids.size ? `${ids.size} ficha(s)` : "", espejos.length ? `${espejos.length} espejo(s)` : "", cajas.length ? `${cajas.length} velo(s)` : ""]
+      .filter(Boolean)
+      .join(" y ");
     setAviso(`${partes} copiado(s). Ctrl+V, o clic derecho en un espacio vacío → «📋 Pegar aquí».`);
     return true;
   };
-  /** Sin `donde`, a la derecha de todo (Ctrl+V, como siempre); con `donde`, donde se hizo el clic derecho. */
+  /** Sin `donde`, encima del original, un paso abajo a la derecha (Ctrl+V); con `donde`, donde se hizo el clic derecho. */
   const pegarLoCopiado = (donde?: Punto) => {
     if (!portapapeles) return false;
     const actual = vivo.current;
     const cajasCopiadas = portapapeles.cajas ?? [];
-    // La forma la dan las fichas Y los velos: cada cosa conserva su sitio relativo.
-    const minX = Math.min(...portapapeles.fichas.map((f) => f.x), ...cajasCopiadas.map((c) => c.x));
-    const minY = Math.min(...portapapeles.fichas.map((f) => f.y), ...cajasCopiadas.map((c) => c.y));
-    // A LA DERECHA DE TODO, SIN CAER ENCIMA (25/10/2026): «se están superponiendo sobre elementos
-    // existentes, debería estar fuera del área, a la derecha… que mantenga su estructura y
-    // cableado». La copia conserva su forma (cada ficha en su sitio relativo) y sus cables de dentro.
-    const enElLienzo = actual.fichas.filter((f) => !f.guardada);
-    // (Con velos, también a la derecha de los velos que ya hay: una manta llega más lejos que sus fichas.)
-    const bordes = [...enElLienzo.map((f) => f.x + (f.tipo === "inicio" ? 200 : 250)), ...(actual.cajas ?? []).map((c) => c.x + c.ancho)];
-    const derecha = donde ? donde.x : bordes.length ? Math.max(...bordes) + 200 : centroDeLaVista().x;
-    const arriba = donde ? donde.y : enElLienzo.length ? Math.min(...enElLienzo.map((f) => f.y)) : centroDeLaVista().y;
-    const desplazar = { x: derecha - minX, y: arriba - minY };
-    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, desplazar);
+    const espejosCopiados = portapapeles.espejos ?? [];
+    // La forma la dan las fichas, los espejos Y los velos: cada cosa conserva su sitio relativo.
+    const minX = Math.min(...portapapeles.fichas.map((f) => f.x), ...espejosCopiados.map((e) => e.x), ...cajasCopiadas.map((c) => c.x));
+    const minY = Math.min(...portapapeles.fichas.map((f) => f.y), ...espejosCopiados.map((e) => e.y), ...cajasCopiadas.map((c) => c.y));
+    // ENCIMA DEL ORIGINAL, UN PASO ABAJO A LA DERECHA (12/11/2026), como en Illustrator. Él: «me incomoda lo lejos que
+    // se pega… lo pega bien arriba a la izquierda». (Antes, desde el 25/10, iba a la derecha de TODO el tablero, lejos.)
+    // Cada Ctrl+V seguido baja un paso más, para que no queden una exactamente encima de otra.
+    const paso = 40 * ((portapapeles.pegadas ?? 0) + 1);
+    const desplazar = donde ? { x: donde.x - minX, y: donde.y - minY } : { x: paso, y: paso };
+    if (!donde) portapapeles.pegadas = (portapapeles.pegadas ?? 0) + 1;
+    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, desplazar, espejosCopiados);
     const sello = Date.now().toString(36);
     const cajasNuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `velo-${sello}-${k}`, x: Math.round(c.x + desplazar.x), y: Math.round(c.y + desplazar.y) }));
-    // Fichas, cables y velos en UN solo cambio (dos seguidos se pisan).
+    // Fichas, cables, espejos y velos en UN solo cambio (dos seguidos se pisan).
     cambiar({
       ...actual,
       fichas: [...actual.fichas, ...copia.fichas],
       cables: [...actual.cables, ...copia.cables],
+      ...(copia.espejos.length ? { espejos: [...(actual.espejos ?? []), ...copia.espejos] } : {}),
       ...(cajasNuevas.length ? { cajas: [...(actual.cajas ?? []), ...cajasNuevas] } : {}),
     });
-    const partes = [copia.fichas.length ? `${copia.fichas.length} ficha(s)` : "", cajasNuevas.length ? `${cajasNuevas.length} velo(s)` : ""].filter(Boolean).join(" y ");
-    setAviso(`${partes} pegado(s)${donde ? "" : " a la derecha"}, con su forma${copia.fichas.length ? " y sus cables de dentro. Quedan sin conectar" : ""}.`);
-    // La vista va hasta ellas.
-    const ids = [...copia.fichas.map((f) => ({ id: f.id })), ...cajasNuevas.map((c) => ({ id: `caja:${c.id}` }))];
-    if (!donde) window.setTimeout(() => instancia.current?.fitView({ nodes: ids, padding: 0.25, maxZoom: 1, duration: 500 }), 80);
+    const partes = [
+      copia.fichas.length ? `${copia.fichas.length} ficha(s)` : "",
+      copia.espejos.length ? `${copia.espejos.length} espejo(s)` : "",
+      cajasNuevas.length ? `${cajasNuevas.length} velo(s)` : "",
+    ]
+      .filter(Boolean)
+      .join(" y ");
+    setAviso(`${partes} pegado(s)${donde ? "" : " junto al original"}, con su forma${copia.fichas.length ? " y sus cables de dentro. Quedan sin conectar" : ""}.`);
+    // (La vista ya no viaja: lo pegado cae junto al original, que es donde él está mirando.)
     // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
-    // sale el grupo pegado entero, velos incluidos, listo para moverlo junto.
-    const pegadas = new Set([...copia.fichas.map((f) => f.id), ...cajasNuevas.map((c) => `caja:${c.id}`)]);
+    // sale el grupo pegado entero, velos y espejos incluidos, listo para moverlo junto.
+    const pegadas = new Set([...copia.fichas.map((f) => f.id), ...copia.espejos.map((e) => `esp:${e.id}`), ...cajasNuevas.map((c) => `caja:${c.id}`)]);
     window.setTimeout(() => setNodos((ns) => ns.map((n) => ({ ...n, selected: pegadas.has(n.id) }))), 120);
     return true;
   };
@@ -2697,7 +2771,9 @@ export default function LienzoDelTablero({
       }
       if ((e.ctrlKey || e.metaKey) && tecla === "c") {
         // Un 🪞 espejo elegido copia su ficha (la copia es una ficha nueva, sin espejos).
-        if (!copiarLas(new Set(elegidas().map(fichaDelNodo)), cajasElegidas())) return;
+        // (12/11/2026: los 🪞 espejos elegidos van como espejos; antes cada uno se volvía una copia de su ficha.)
+        const g = loElegido();
+        if (!copiarLas(g.fichas, cajasElegidas(), g.espejos)) return;
         e.preventDefault();
       } else if ((e.ctrlKey || e.metaKey) && tecla === "v") {
         if (!pegarLoCopiado()) return;
@@ -2947,6 +3023,20 @@ export default function LienzoDelTablero({
           // TOCAR UNA FICHA DE UN PAÍS CAMBIA LA BANDERA a ese país (27/10/2026).
           onNodeClick={(_, n) => {
             if (n.type === "ficha" || n.type === "inicio") onFichaTocada?.(n.id);
+            // 🪞 LA FAMILIA DE ESPEJOS SE ILUMINA (12/11/2026). Él: «cuando clickee la ficha original los espejos se
+            // resalten unos segundos… y al tocar el espejo, todos los vinculados». La original y todos sus espejos
+            // laten ~2,5 s (clase `tablero-brillo`, globals.css). Solo pantalla.
+            const ficha = fichaDelNodo(n.id);
+            const suyos = (vivo.current.espejos ?? []).filter((e) => e.ficha === ficha);
+            if (suyos.length) {
+              const familia = new Set([ficha, `est:${ficha}`, ...suyos.map((e) => `esp:${e.id}`)]);
+              setNodos((ns) => ns.map((x) => (familia.has(x.id) ? { ...x, className: "tablero-brillo" } : x.className === "tablero-brillo" ? { ...x, className: undefined } : x)));
+              window.clearTimeout(apagarBrillo.current);
+              apagarBrillo.current = window.setTimeout(
+                () => setNodos((ns) => ns.map((x) => (x.className === "tablero-brillo" ? { ...x, className: undefined } : x))),
+                2600
+              );
+            }
           }}
           connectionLineComponent={CableQueSeTira}
           // El clic en un puntito abre la lista «Conectar a…» (no el modo de conectar con dos clics).
@@ -3314,10 +3404,16 @@ export default function LienzoDelTablero({
                 {/* 📋 COPIAR (06/11/2026), lo mismo que Ctrl+C: si esta ficha está entre las elegidas, copia todas las
                     elegidas; si no, solo ésta. Se pega con Ctrl+V o con «📋 Pegar aquí» en un espacio vacío. */}
                 {(() => {
+                  const g = loElegido();
                   const delGrupo = new Set(elegidas().map(fichaDelNodo));
-                  const ids = delGrupo.has(fichaDelMenu.id) && delGrupo.size > 1 ? delGrupo : new Set([fichaDelMenu.id]);
+                  const enGrupo = delGrupo.has(fichaDelMenu.id) && delGrupo.size + g.espejos.size > 1;
+                  const ids = enGrupo ? g.fichas : new Set([fichaDelMenu.id]);
                   return (
-                    <button type="button" className={opcionDeMenu} onClick={() => (copiarLas(ids, ids.size > 1 ? cajasElegidas() : new Set()), setMenu(null))}>
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      onClick={() => (copiarLas(ids, enGrupo ? cajasElegidas() : new Set(), enGrupo ? g.espejos : new Set()), setMenu(null))}
+                    >
                       📋 {ids.size > 1 ? `Copiar las ${ids.size} fichas elegidas` : "Copiar"}
                     </button>
                   );

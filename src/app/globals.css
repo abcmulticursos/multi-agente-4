@@ -1473,3 +1473,17 @@ input,
 .burbujas-nuevo .bn-cuerpo {
   padding: 18px 20px;
 }
+
+/* 🪞 LA FAMILIA DE ESPEJOS LATE (12/11/2026): al tocar la original o un espejo, todos se iluminan ~2,5 s. */
+.react-flow__node.tablero-brillo {
+  border-radius: 14px;
+  animation: tablero-brillo 0.6s ease-in-out 4 alternate;
+}
+@keyframes tablero-brillo {
+  from {
+    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0);
+  }
+  to {
+    box-shadow: 0 0 0 6px rgba(217, 70, 239, 0.9), 0 0 34px 12px rgba(34, 211, 238, 0.85);
+  }
+}

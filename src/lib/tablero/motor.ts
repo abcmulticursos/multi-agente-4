@@ -2230,9 +2230,17 @@ async function atenderComprobante(
     await contestarConIA(convo, t, SIN_PISTAS);
     return;
   }
-  if (lectura.metodo === "yape" || lectura.metodo === "plin") {
+  // EL TITULAR, EN TODOS LOS MÉTODOS (12/11/2026). Él: «el cobrador es Ormidas, pero en el ticket dice Franko» — en
+  // Colombia (Nequi) se entregó solo por el monto, porque el nombre se revisaba SOLO en Yape/Plin. Ahora: en Yape/Plin,
+  // lo de siempre (sin nombre visible no vale); en los demás, si se ve OTRO nombre no vale, y sin nombre visible vale
+  // como antes (muchos bancos no lo muestran). Basta el primer nombre (`titularCoincide`).
+  {
+    const esYapeOPlin = lectura.metodo === "yape" || lectura.metodo === "plin";
     const esperado = elCobroDelPais(pais as never, config).titular;
-    if (esperado && (!lectura.titular || !titularCoincide(esperado, lectura.titular))) {
+    const falla = esYapeOPlin
+      ? !lectura.titular || !titularCoincide(esperado, lectura.titular)
+      : !!lectura.titular && !titularCoincide(esperado, lectura.titular);
+    if (esperado && falla) {
       console.warn(`[tablero] convo ${convo.id}: comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}» → no se cuenta`);
       fallo(`comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}»`);
       // CON TEXTO FIJO (28/10/2026, ronda 3 en la copia: con esta nota la IA contestó «¿me compartes la foto de

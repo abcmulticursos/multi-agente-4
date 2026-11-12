@@ -8,7 +8,15 @@ type Punto = { x: number; y: number };
 type FichaCopiable = { id: string; tipo: string; x: number; y: number; guardada?: boolean; steps?: unknown[]; variantes?: Array<{ id: string; steps?: unknown[] }>; seguimientos?: Array<{ id: string; variantes: Array<{ id: string; steps?: unknown[] }> }> };
 
 /** Copia de fichas con códigos NUEVOS (fichas, botones y cuadritos), y sus cables de dentro. */
-export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: CableDelTablero[], desplazar: Punto): { fichas: F[]; cables: CableDelTablero[] } {
+export function copiarFichas<F extends FichaCopiable>(
+  fichas: F[],
+  cables: CableDelTablero[],
+  desplazar: Punto,
+  /** 🪞 LOS ESPEJOS DE LO COPIADO (12/11/2026). Él: «al copiar el grupo los espejos desaparecen y el cableado se va al
+   *  original». El espejo de una ficha copiada refleja a la COPIA; el de una ficha que no se copió sigue reflejando a la
+   *  suya. Los cables copiados conservan su punta en el espejo. Sin esta lista, lo de siempre. */
+  espejos: NonNullable<Tablero["espejos"]> = []
+): { fichas: F[]; cables: CableDelTablero[]; espejos: NonNullable<Tablero["espejos"]> } {
   const nuevo = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
   const idDe = new Map<string, string>();
   // LAS SALIDAS SE RENOMBRAN POR FICHA (26/10/2026). Antes: un código nuevo por cada aparición, así
@@ -48,6 +56,12 @@ export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: Cable
     });
   // Los cables de dentro: la salida de un botón se renombra con su botón, y la de un reparto u
   // otra salida fija queda igual.
+  const espejoDe = new Map<string, string>();
+  const copiasDeEspejos = espejos.map((e) => {
+    const id = nuevo("esp");
+    espejoDe.set(e.id, id);
+    return { id, ficha: idDe.get(e.ficha) ?? e.ficha, x: Math.round(e.x + desplazar.x), y: Math.round(e.y + desplazar.y) };
+  });
   const copiasDeCables = cables
     .filter((c) => idDe.has(c.de) && idDe.has(c.a))
     .map((c) => ({
@@ -57,8 +71,10 @@ export function copiarFichas<F extends FichaCopiable>(fichas: F[], cables: Cable
       salida: salidaDe.get(`${c.de}|${c.salida}`) ?? c.salida,
       // Cable o colita, como estaba el original (27/10/2026).
       ...(c.vista ? { vista: c.vista } : {}),
+      ...(c.de_espejo && espejoDe.has(c.de_espejo) ? { de_espejo: espejoDe.get(c.de_espejo)! } : {}),
+      ...(c.a_espejo && espejoDe.has(c.a_espejo) ? { a_espejo: espejoDe.get(c.a_espejo)! } : {}),
     }));
-  return { fichas: copias, cables: copiasDeCables };
+  return { fichas: copias, cables: copiasDeCables, espejos: copiasDeEspejos };
 }
 
 /** Las fichas a las que llega un Inicio siguiendo sus cables: su ruta. */

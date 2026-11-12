@@ -56,7 +56,12 @@ const HERRAMIENTA = {
         },
         fecha: { type: "string", description: "Date and time visible on the receipt, exactly as printed. Empty if none." },
         operacion: { type: "string", description: "Operation/transaction number if visible. Empty if none." },
-        titular: { type: "string", description: "Recipient name exactly as printed (may be masked). Empty if none." },
+        titular: {
+          type: "string",
+          // (12/11/2026) Quien RECIBE el dinero, nunca quien paga: desde ese día el nombre se revisa en todos los métodos.
+          description:
+            "Name of who RECEIVED the money (the destination: «Para», «Destinatario», «Enviado a», «Beneficiario»), exactly as printed (may be masked). NEVER the payer/sender («De», «Origen», «Desde»). Empty if no recipient name is visible.",
+        },
         metodo: {
           type: "string",
           description: "Payment app or bank as printed on the receipt, in lowercase (e.g. yape, plin, bcp, interbank, transferencia, nequi, mercadopago). Empty if unknown.",
@@ -157,7 +162,7 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
       metodo: limpio(args.metodo)?.toLowerCase(),
     };
     console.log(
-      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"}`
+      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"} titular=${lectura.titular ?? "-"} método=${lectura.metodo ?? "-"}`
     );
     return lectura;
   } catch (err) {
