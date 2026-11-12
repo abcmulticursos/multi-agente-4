@@ -21838,17 +21838,19 @@ function GalleryCaptionBubbleEditor({ item, onChange, onSnapshot, onEdit, id, on
               ...pasos.slice(indice + 1),
             ]);
           }}
-          onToggleStep={(indice) =>
+          onToggleStep={(indice) => {
+            const cuales = new Set(Array.isArray(indice) ? indice : [indice]);
             aplicarPasos(
               pasos.map((paso, j) =>
-                j === indice ? { ...paso, enabled: paso.enabled === false } : paso
+                cuales.has(j) ? { ...paso, enabled: paso.enabled === false } : paso
               )
-            )
-          }
+            );
+          }}
           onRemoveStep={(indice, opciones) => {
+            const cuales = new Set(Array.isArray(indice) ? indice : [indice]);
             // LA PRIMERA BURBUJA ES LA MUESTRA. Quitarla se lleva el archivo, su
             // tema y sus palabras, así que se pregunta aunque venga de cortar.
-            const esLaMuestra = indice === 0;
+            const esLaMuestra = cuales.has(0);
             if (
               (opciones?.sinPreguntar !== true || esLaMuestra) &&
               !confirm(
@@ -21860,7 +21862,7 @@ function GalleryCaptionBubbleEditor({ item, onChange, onSnapshot, onEdit, id, on
               return;
             }
             onSnapshot();
-            const quedan = pasos.filter((_, j) => j !== indice);
+            const quedan = pasos.filter((_, j) => !cuales.has(j));
             if (quedan.length === 0) {
               onRemove();
               return;
@@ -24994,11 +24996,13 @@ function ChatPreview({
   onVaryAll?: () => void;
   onEditStep?: (index: number) => void;
   onDuplicateStep?: (index: number) => void;
-  onToggleStep?: (index: number) => void;
+  /** Con una lista, TODAS de una vez (12/11/2026: una por una, cada una partía de la lista original y solo quedaba 1). */
+  onToggleStep?: (index: number | number[]) => void;
   /** `sinPreguntar` lo usa CORTAR: ahí el operador no está borrando, está
    *  moviendo, y la burbuja ya quedó a salvo en el portapapeles. Preguntarle
-   *  «¿eliminar?» en mitad de un cortar y pegar asusta sin motivo. */
-  onRemoveStep?: (index: number, opciones?: { sinPreguntar?: boolean }) => void;
+   *  «¿eliminar?» en mitad de un cortar y pegar asusta sin motivo.
+   *  Con una lista, todas de una vez (12/11/2026, «selecciono 3 y le doy borrar, solo se borra una»). */
+  onRemoveStep?: (index: number | number[], opciones?: { sinPreguntar?: boolean }) => void;
   /** Pega TODAS de una vez, en su orden (02/11/2026: una por una, cada una pisaba a la anterior y solo quedaba 1). */
   onPasteStep?: (index: number, steps: EditorStep[]) => void;
   onMoveStep?: (from: number, target: number, placement: "before" | "after") => void;
@@ -25362,9 +25366,7 @@ function ChatPreview({
   const borrarSeleccionadas = () => {
     if (!onRemoveStep || seleccionadas.length === 0) return;
     const cuantas = seleccionadas.length;
-    [...seleccionadas]
-      .sort((a, b) => b - a)
-      .forEach((i) => onRemoveStep(i, { sinPreguntar: true }));
+    onRemoveStep([...seleccionadas], { sinPreguntar: true });
     setSeleccion(null);
     setAvisoDelMenu(`${cuantas} burbuja(s) eliminadas.`);
   };
@@ -25427,9 +25429,7 @@ function ChatPreview({
       .map((paso) => ({ ...paso, texts: [...paso.texts] }));
     if (copia.length === 0 || !onRemoveStep) return;
     bubbleClipboard.setSteps(copia);
-    [...seleccionadas]
-      .sort((a, b) => b - a)
-      .forEach((i) => onRemoveStep(i, { sinPreguntar: true }));
+    onRemoveStep([...seleccionadas], { sinPreguntar: true });
     setSeleccion(null);
     setAvisoDelMenu(
       `${copia.length} burbuja(s) cortadas. Están en el portapapeles: abre el menú donde las quieras y elige «Pegar debajo de esta burbuja».`
@@ -25524,7 +25524,7 @@ function ChatPreview({
               type="button"
               disabled={seleccionadas.length === 0}
               onClick={() => {
-                seleccionadas.forEach((i) => onToggleStep(i));
+                onToggleStep([...seleccionadas]);
                 setAvisoDelMenu(
                   `${seleccionadas.length} burbuja(s) cambiadas de encendido.`
                 );
@@ -25820,7 +25820,7 @@ function ChatPreview({
                   <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); pegarDebajo(index); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Pegar {bubbleClipboard.steps.length === 1 ? "la burbuja" : `las ${bubbleClipboard.steps.length}`} debajo de esta</button>
                 )}
                 {onToggleStep && (
-                  <button type="button" onClick={() => { const marcadas = seleccionadas; setContextMenu(null); marcadas.forEach((i) => onToggleStep(i)); setSeleccion(null); setAvisoDelMenu(`${marcadas.length} burbuja(s) cambiadas de encendido.`); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Apagar / encender las {seleccionadas.length}</button>
+                  <button type="button" onClick={() => { const marcadas = seleccionadas; setContextMenu(null); onToggleStep([...marcadas]); setSeleccion(null); setAvisoDelMenu(`${marcadas.length} burbuja(s) cambiadas de encendido.`); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Apagar / encender las {seleccionadas.length}</button>
                 )}
                 {onRemoveStep && (
                   <button type="button" onClick={() => { setContextMenu(null); borrarSeleccionadas(); }} className="block w-full px-3 py-2 text-left text-red-600 hover:bg-red-50">Eliminar las {seleccionadas.length}</button>
@@ -25860,7 +25860,7 @@ function ChatPreview({
             {/* LA PUERTA DE ENTRADA AL MODO SELECCIÓN, tal y como la pidió: la
                 burbuja del click derecho entra YA marcada, y las demás
                 aparecen con su check vacío al lado. */}
-            <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); setSeleccion(new Set([index])); setAvisoDelMenu("Marca las burbujas que quieras y usa la barra de arriba o el click derecho. Escape sale de la selección."); }} className="block w-full border-t border-neutral-200 px-3 py-2 text-left hover:bg-neutral-50">☑️ Seleccionar varias burbujas</button>
+            <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); setSeleccion(new Set([index])); }} className="block w-full border-t border-neutral-200 px-3 py-2 text-left hover:bg-neutral-50">☑️ Seleccionar varias burbujas</button>
             </>
             )}
           </div>
@@ -38789,20 +38789,22 @@ function JourneyPreviewBlock({
     marcarSinDesplazar();
     setActiveStepIndex(index + 1);
   };
-  const toggleStep = (index: number) => {
-    if (!steps[index] || !onStepsChange) return;
+  const toggleStep = (index: number | number[]) => {
+    const cuales = new Set(Array.isArray(index) ? index : [index]);
+    if (!steps.some((_, i) => cuales.has(i)) || !onStepsChange) return;
     onSnapshot?.();
-    onStepsChange(steps.map((step, currentIndex) => currentIndex === index ? { ...step, enabled: step.enabled === false } : step));
+    onStepsChange(steps.map((step, currentIndex) => cuales.has(currentIndex) ? { ...step, enabled: step.enabled === false } : step));
   };
-  const removeStep = (index: number, opciones?: { sinPreguntar?: boolean }) => {
-    if (!steps[index] || !onStepsChange) return;
+  const removeStep = (index: number | number[], opciones?: { sinPreguntar?: boolean }) => {
+    const cuales = new Set(Array.isArray(index) ? index : [index]);
+    if (!steps.some((_, i) => cuales.has(i)) || !onStepsChange) return;
     if (
       !opciones?.sinPreguntar &&
       !window.confirm("¿Eliminar esta burbuja y su cajón? Puedes deshacerlo.")
     )
       return;
     onSnapshot?.();
-    onStepsChange(steps.filter((_, currentIndex) => currentIndex !== index));
+    onStepsChange(steps.filter((_, currentIndex) => !cuales.has(currentIndex)));
     setActiveStepIndex(null);
   };
   const moveStep = (from: number, target: number, placement: "before" | "after") => {
@@ -38945,24 +38947,25 @@ function StepEditorPreviewPair({
     marcarSinDesplazar();
     setActiveStepIndex(index + 1);
   };
-  const togglePreviewStep = (index: number) => {
-    const step = steps[index];
-    if (!step) return;
+  const togglePreviewStep = (index: number | number[]) => {
+    const cuales = new Set(Array.isArray(index) ? index : [index]);
+    if (!steps.some((_, i) => cuales.has(i))) return;
     onSnapshot();
-    onChange(steps.map((item, itemIndex) => itemIndex === index ? { ...item, enabled: item.enabled === false } : item));
+    onChange(steps.map((item, itemIndex) => cuales.has(itemIndex) ? { ...item, enabled: item.enabled === false } : item));
   };
   const removePreviewStep = (
-    index: number,
+    index: number | number[],
     opciones?: { sinPreguntar?: boolean }
   ) => {
-    if (!steps[index]) return;
+    const cuales = new Set(Array.isArray(index) ? index : [index]);
+    if (!steps.some((_, i) => cuales.has(i))) return;
     if (
       !opciones?.sinPreguntar &&
       !window.confirm("¿Eliminar esta burbuja y su cajón? Puedes deshacerlo.")
     )
       return;
     onSnapshot();
-    onChange(steps.filter((_, itemIndex) => itemIndex !== index));
+    onChange(steps.filter((_, itemIndex) => !cuales.has(itemIndex)));
     setActiveStepIndex(null);
   };
   const movePreviewStep = (from: number, target: number, placement: "before" | "after") => {
