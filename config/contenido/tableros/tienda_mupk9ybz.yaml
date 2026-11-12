@@ -2632,7 +2632,7 @@ whatsapp:
               {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Puedes elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si quieres te llevas 1 solo, o si te animas los 2 juntos*  😊}
               __________
 
-              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
 
               💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
 
@@ -3784,7 +3784,7 @@ whatsapp:
               {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si prefieres, puedes comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Puedes escoger entre comprar 1 solo o los 2 juntos*  😊}
               __________
 
-              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
 
               💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
 
@@ -4934,7 +4934,7 @@ whatsapp:
               {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si prefieres, puedes comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Puedes escoger entre comprar 1 solo o los 2 juntos*  😊}
               __________
 
-              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
 
               💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
 
@@ -6113,7 +6113,7 @@ whatsapp:
               {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Puedes elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si quieres te llevas 1 solo, o si te animas los 2 juntos*  😊}
               __________
 
-              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
 
               💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
 
