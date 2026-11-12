@@ -2698,6 +2698,11 @@ whatsapp:
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
+                - type: document
+                  drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
+                  caption_variants:
+                    - "*Te envío una muestra gratuita para que puedas ver una minima parte del material* 😊👆️"
+                  delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
@@ -4333,6 +4338,11 @@ whatsapp:
                       *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
+                  delay_after_sec: 6
+                - type: document
+                  drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
+                  caption_variants:
+                    - "*Te envío una muestra gratuita para que puedas ver una minima parte del material* 😊👆️"
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
