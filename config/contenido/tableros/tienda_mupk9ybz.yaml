@@ -4636,8 +4636,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwd4ohba-anmwl
       tipo: mensaje
-      x: -572
-      y: 14762
+      x: -550
+      y: 14553
       steps:
         - type: text
           body_variants:
@@ -4845,8 +4845,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwd4ohbb-55ray
       tipo: cobro
-      x: 1727
-      y: 14432
+      x: 1749
+      y: 14223
       steps:
         - type: text
           body_variants:
@@ -4868,8 +4868,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mwd4ohbb-n0dec
       tipo: mensaje
-      x: 517
-      y: 14861
+      x: 539
+      y: 14652
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -4970,8 +4970,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwd4ohbb-durm4
       tipo: seguimientos
-      x: 781
-      y: 14421
+      x: 803
+      y: 14212
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -5426,8 +5426,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwd4ohbb-7js7y
       tipo: cobro
-      x: 1716
-      y: 15213
+      x: 1738
+      y: 15004
       steps:
         - type: text
           body_variants:
@@ -5449,15 +5449,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mwd4ohbb-igi3b
       tipo: entregar
-      x: 2640
-      y: 14443
+      x: 2662
+      y: 14234
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mwd4ohbb-6edxa
       tipo: seguimientos
-      x: -297
-      y: 14245
+      x: -275
+      y: 14036
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -5768,15 +5768,15 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwd4ohbb-0dpvg
       tipo: entregar
-      x: 2651
-      y: 15169
+      x: 2673
+      y: 14960
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mwd4ohbb-itwgz
       tipo: regalo
-      x: 3267
-      y: 14861
+      x: 3289
+      y: 14652
       titulo: Regalo
     - id: f-mwd56hao-5kx9i
       tipo: mensaje
@@ -7459,9 +7459,9 @@ whatsapp:
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
     - id: manta-inicio-CO-mwczj2jz
       x: -814
-      y: 7865
-      ancho: 6186
-      alto: 5922
+      y: 8580
+      ancho: 4708
+      alto: 7139
       titulo: ""
       inicio: inicio-CO-mwczj2jz
     - id: k-mwczlmua
@@ -7489,10 +7489,10 @@ whatsapp:
       alto: 1489
       titulo: Nueva caja
     - id: velo-mwd4ohbb-0
-      x: -847
-      y: 13959
-      ancho: 4593
-      alto: 1804
+      x: -649
+      y: 13772
+      ancho: 4400
+      alto: 1749
       titulo: Nueva caja
     - id: velo-mwd56hap-0
       x: -583
@@ -7519,12 +7519,12 @@ whatsapp:
       y: 3949
     - id: e-mwcznd5e-g80w
       ficha: f-mwczmr06-1hduv
-      x: 2156
-      y: 10373
+      x: 2178
+      y: 10395
     - id: e-mwcznfua-tf95
       ficha: f-mwczmr06-1hduv
-      x: 2101
-      y: 11088
+      x: 2156
+      y: 11154
     - id: e-mwcznupe-z4h4
       ficha: f-mwczmr06-vi0mc
       x: 1969
@@ -7535,12 +7535,12 @@ whatsapp:
       y: 12100
     - id: e-mwd4ue4k-zoji
       ficha: f-mwd4ohbb-durm4
-      x: 1991
-      y: 14795
+      x: 2013
+      y: 14586
     - id: e-mwd4ufw4-pimc
       ficha: f-mwd4ohbb-durm4
-      x: 2013
-      y: 14080
+      x: 2035
+      y: 13871
     - id: e-mwd6wtu8-p9wf
       ficha: f-mwd56hap-vlmus
       x: 2167
