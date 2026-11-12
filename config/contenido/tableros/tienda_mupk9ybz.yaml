@@ -5559,6 +5559,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd4ohbb-xblyl
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -5704,6 +5705,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd4ohbb-2yc4u
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
