@@ -4078,15 +4078,14 @@ function previewContextFromConfig(
     (!isPeru ? selectedProfile?.payment_buttons : undefined) ??
     c.payment_buttons ??
     [];
+  // LA MISMA LISTA QUE MANDA EL BOT (12/11/2026, `getPaymentMethodsOfCountry`). Él: «apagué Bre-B pero igualmente lo
+  // muestra con {{LISTA_METODOS_POR_PAIS}}»: al cliente no le llegaba, pero el visor no miraba el apagado y, sin
+  // métodos, inventaba «Yape, Plin, BCP» que el bot no nombra. (Lo que no atiende el usuario que cobra depende de la
+  // tienda de cada conversación: eso el visor no lo sabe.)
   const paymentMethodLabels = configuredPaymentButtons
-    .filter((button) => button?.label?.trim() && button.method)
+    .filter((button) => button?.label?.trim() && button.method && button.enabled !== false)
     .map((button) => button.label.trim());
-  const paymentMethodsList = (paymentMethodLabels.length
-    ? paymentMethodLabels
-    : ["Yape", "Plin", "BCP"]
-  )
-    .map((label) => `• *${label}*`)
-    .join("\n");
+  const paymentMethodsList = paymentMethodLabels.map((label) => `• *${label}*`).join("\n");
   // ESPEJO de `nombresDeLosProductos` (config.ts). Si una cambia y la otra no,
   // el visor enseña un nombre y al cliente le llega otro — que es peor que
   // enseñar la llave cruda, porque nadie lo nota.
@@ -39779,6 +39778,8 @@ function StepList({
             onMenuDelCajon
               ? (evento) => {
                   if ((evento.target as HTMLElement).closest("input, textarea, select, [contenteditable='true']")) return;
+                  // Los cuadritos y su barra tienen su propio clic derecho (elegir → Apagar / Borrar), 12/11/2026.
+                  if ((evento.target as HTMLElement).closest("[data-cuadrito], [data-barra-de-elegidos]")) return;
                   evento.preventDefault();
                   evento.stopPropagation();
                   { const { x, y } = sinElZoom(evento); onMenuDelCajon(i, x, y); }
@@ -40537,6 +40538,8 @@ function BubbleDecisionsEditor({
               onContextMenu={(evento) => {
                 // Clic derecho elige este (si ya estaba elegido, la selección se queda como está).
                 evento.preventDefault();
+                // (12/11/2026) Que no suba al cajón: abría el menú de la burbuja encima y tapaba «Apagar / Borrar».
+                evento.stopPropagation();
                 if (!elegidos.has(decision.id)) setElegidos(new Set([decision.id]));
               }}
               title="Clic para editar · clic derecho para elegir · Shift+clic suma otro · clic afuera suelta"
