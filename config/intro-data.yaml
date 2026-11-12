@@ -2881,12 +2881,12 @@ payment_profiles_by_country:
         method: nequi
         aliases:
           - nequi
-      - label: Bancolombia
+      - label: Daviplata
         method: bancolombia
         aliases:
           - bancolombia
           - transferencia
-      - label: Daviplata
+      - label: Bre-B
         method: daviplata
         aliases:
           - daviplata
