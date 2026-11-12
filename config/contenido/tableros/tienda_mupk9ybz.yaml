@@ -3208,13 +3208,16 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+                      *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
                       🎯 *Puedes aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
-                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+                      *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y ahora *los niños ya están aprendiendo* 🤗|y ahora *sus hijos ya están estudiando* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
+                  spintax_ia:
+                    - "{y ahora *sus hijos ya están aprendiendo* 🤗|y ahora *los niños ya están aprendiendo* 🤗|y ahora *sus hijos ya están estudiando* 🤗}"
+                    - "{Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.}"
                 - type: image
                   drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
                   caption_variants:
@@ -3232,7 +3235,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo dime cuál método de pago prefieres* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
@@ -3354,6 +3357,8 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+                  spintax_ia:
+                    - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo dime cuál método de pago prefieres* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}"
           ignora_silencio: true
           ignora_tardio: true
         - id: s-mwczmr07-4zv3g
