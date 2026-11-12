@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getWhatsAppRuntimeConfig } from "@/lib/meta/runtime-config";
 import { LIMITE_ARCHIVO_MS, LIMITE_CONSULTA_MS } from "@/lib/limites";
+import { esBSUID } from "@/lib/meta/bsuid";
 
 function graphBase(): string {
   const version = process.env.META_GRAPH_VERSION ?? "v21.0";
@@ -14,6 +15,12 @@ function graphBase(): string {
 function numeroDeDestino(phone: string): string {
   const corte = phone.indexOf("~");
   return corte > 0 ? phone.slice(0, corte) : phone;
+}
+
+/** A quién va: un teléfono por `to`; un cliente con alias (BSUID, ver bsuid.ts) por `recipient`, sin `to` (doc de Meta). */
+function destinoDe(phone: string): { to: string } | { recipient: string } {
+  const n = numeroDeDestino(phone);
+  return esBSUID(n) ? { recipient: n } : { to: n };
 }
 
 function getWhatsAppCredentials(): { phoneId: string | null; token: string | null } {
@@ -82,7 +89,7 @@ export async function sendTextMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       ...(replyToWamid ? { context: { message_id: replyToWamid } } : {}),
       type: "text",
       text: { preview_url: false, body },
@@ -143,7 +150,7 @@ export async function sendInteractiveButtons(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       type: "interactive",
       interactive,
     }),
@@ -255,7 +262,7 @@ export async function sendAudioMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       type: "audio",
       audio: { id: mediaId },
     }),
@@ -294,7 +301,7 @@ export async function sendImageMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       type: "image",
       image: imagePayload,
     }),
@@ -337,7 +344,7 @@ export async function sendDocumentMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       type: "document",
       document: docPayload,
     }),
@@ -376,7 +383,7 @@ export async function sendVideoMessage(
     body: JSON.stringify({
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to: numeroDeDestino(phone),
+      ...destinoDe(phone),
       type: "video",
       video: videoPayload,
     }),

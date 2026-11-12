@@ -28,6 +28,8 @@ import {
   anotarEntradaPorAnuncio,
   archivarConversacion,
   getConversationByPhone,
+  anotarAlias,
+  telefonoDelAlias,
 } from "@/lib/db";
 import { evaluarModeracion } from "@/lib/workflow/moderation";
 import { vinoDeAnuncio } from "@/lib/origen-de-lead";
@@ -1010,7 +1012,9 @@ function withPhoneLock<T>(
 
 interface IncomingContact {
   wa_id?: string;
-  profile?: { name?: string | null };
+  /** El BSUID de un cliente (12/11/2026): ver `@/lib/meta/bsuid`. */
+  user_id?: string;
+  profile?: { name?: string | null; username?: string | null };
 }
 
 interface IncomingAudio {
@@ -1052,6 +1056,8 @@ interface IncomingReferral {
 
 interface IncomingMessage {
   from?: string;
+  /** El BSUID del que escribe (siempre viene); `from` (su número) puede faltar si usa alias. Ver `@/lib/meta/bsuid`. */
+  from_user_id?: string;
   id?: string;
   timestamp?: string;
   type?: string;
@@ -1208,19 +1214,43 @@ export async function processWebhookPayload(payload: unknown): Promise<void> {
       const contacts = value.contacts ?? [];
       const nameByPhone = new Map<string, string | null>();
       for (const c of contacts) {
-        if (c.wa_id) nameByPhone.set(c.wa_id, c.profile?.name ?? null);
+        // (Con alias, el nombre también por su BSUID; si no tiene nombre, su alias. 12/11/2026.)
+        const nombre = c.profile?.name ?? (c.profile?.username ? `@${c.profile.username}` : null);
+        if (c.wa_id) nameByPhone.set(c.wa_id, nombre);
+        if (c.user_id) nameByPhone.set(c.user_id, nombre);
       }
 
       for (const msg of value.messages ?? []) {
         try {
+          // EL CLIENTE CON ALIAS (12/11/2026, ver `@/lib/meta/bsuid`): sin número, se le guarda por su BSUID. Y si ya
+          // se le atendía por su BSUID y ahora llega también su número, sigue siendo la MISMA conversación.
+          const bsuid = typeof msg.from_user_id === "string" && msg.from_user_id.trim() ? msg.from_user_id.trim() : "";
+          // Con los dos datos, se anota el par (para cuando vuelva solo con su BSUID).
+          if (bsuid && msg.from) {
+            try {
+              anotarAlias(bsuid, msg.from);
+            } catch {}
+          }
+          const yaConAlias = !!bsuid && !!msg.from && !!getConversationByPhone(bsuid);
+          // Solo con su BSUID, pero ya lo conocíamos con número y su conversación existe: sigue en ésa.
+          const suTelefono = !msg.from && bsuid ? telefonoDelAlias(bsuid) : null;
+          const porSuTelefono = suTelefono && getConversationByPhone(suTelefono) ? suTelefono : null;
+          const identidad = yaConAlias ? bsuid : msg.from || porSuTelefono || bsuid || undefined;
+          if (!msg.from && bsuid)
+            console.log(
+              porSuTelefono
+                ? `[wh] cliente con alias (sin número): es ${porSuTelefono}, ya conocido → sigue en su conversación`
+                : `[wh] cliente con alias (sin número): se le atiende por su BSUID ${bsuid}`
+            );
+          const elMensaje = identidad && identidad !== msg.from ? { ...msg, from: identidad } : msg;
           // Todo el procesamiento de ESTE mensaje corre "dentro" del numero por
           // el que entro, para que las respuestas salgan por el mismo. Con un
           // solo numero conectado no cambia nada: el contexto apunta al unico
           // que hay, que es tambien el activo.
           await withOutboundWhatsAppNumber(incomingPhoneId, () =>
             handleIncomingMessage(
-              msg,
-              (msg.from && nameByPhone.get(msg.from)) ?? null
+              elMensaje,
+              (elMensaje.from && nameByPhone.get(elMensaje.from)) ?? (msg.from ? nameByPhone.get(msg.from) : null) ?? (bsuid ? nameByPhone.get(bsuid) : null) ?? null
             )
           );
         } catch (err) {
@@ -1266,7 +1296,8 @@ async function handleIncomingMessage(
   const waMsgId = msg.id;
   const phone = msg.from;
   if (!waMsgId || !phone) {
-    console.warn("[wh] mensaje sin id o from, ignorando");
+    // (12/11/2026) Con los campos que traía, para saber qué fue sin adivinar (sin el contenido del cliente).
+    console.warn(`[wh] mensaje sin id o from, ignorando (campos: ${Object.keys(msg).join(", ")})`);
     return;
   }
 

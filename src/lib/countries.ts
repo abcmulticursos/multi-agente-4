@@ -374,6 +374,10 @@ const PHONE_PREFIX_COUNTRIES: Array<[string, CountryCode]> = [
 export function countryFromPhone(
   phone: string | null | undefined
 ): CountryCode | null {
+  // UN CLIENTE CON ALIAS (12/11/2026): su identidad es el BSUID de Meta («CO.1349…»), cuyas dos letras SON su país.
+  // Sus dígitos no son un teléfono: leerlos como prefijo daría cualquier país.
+  const bsuid = /^([A-Z]{2})\.(ENT\.)?[A-Za-z0-9]+(~.*)?$/.exec((phone ?? "").trim());
+  if (bsuid) return bsuid[1] in COUNTRIES ? (bsuid[1] as CountryCode) : null;
   const digits = (phone ?? "").replace(/\D/g, "");
   if (!digits) return null;
   return (

@@ -13,6 +13,7 @@ import {
 import { getCapiAccessToken, getCapiPixelId } from "@/lib/meta/runtime-config";
 import { laTiendaDeLaConversacion } from "@/lib/workflow/config";
 import { LIMITE_CONSULTA_MS } from "@/lib/limites";
+import { esBSUID } from "@/lib/meta/bsuid";
 
 const META_API_VERSION = process.env.META_GRAPH_VERSION ?? "v21.0";
 
@@ -41,6 +42,9 @@ function hashText(value: string | null | undefined): string | null {
  */
 function hashPhone(phone: string | null | undefined): string | null {
   if (!phone) return null;
+  // UN CLIENTE CON ALIAS (12/11/2026): su identidad es el BSUID de Meta, no un teléfono. Sus dígitos cifrados serían
+  // un `ph` falso; sin número, el evento va sin `ph` (el ctwa_clid es lo que Meta exige).
+  if (esBSUID(phone)) return null;
   const digits = phone.replace(/\D/g, "");
   if (!digits) return null;
   return sha256Hex(digits);

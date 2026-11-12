@@ -1918,6 +1918,27 @@ export function markMessageProcessed(waMessageId: string): void {
   stmtMarkProcessed.run(waMessageId);
 }
 
+// ─── Clientes con alias: su BSUID y su número (12/11/2026) ───────────────────
+// Ver `@/lib/meta/bsuid`. Cuando Meta manda las dos cosas, se anota el par: si ese cliente vuelve a escribir solo con
+// su BSUID (alias y más de 30 días sin hablar), sigue en SU conversación de siempre en vez de abrir otra.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS alias_de_whatsapp (
+    bsuid TEXT PRIMARY KEY,
+    phone TEXT NOT NULL,
+    visto_at INTEGER NOT NULL DEFAULT (unixepoch())
+  );
+`);
+const stmtAnotarAlias = db.prepare<[string, string]>(
+  "INSERT INTO alias_de_whatsapp (bsuid, phone) VALUES (?, ?) ON CONFLICT(bsuid) DO UPDATE SET phone = excluded.phone, visto_at = unixepoch()"
+);
+const stmtTelefonoDelAlias = db.prepare<[string]>("SELECT phone FROM alias_de_whatsapp WHERE bsuid = ?");
+export function anotarAlias(bsuid: string, phone: string): void {
+  stmtAnotarAlias.run(bsuid, phone);
+}
+export function telefonoDelAlias(bsuid: string): string | null {
+  return (stmtTelefonoDelAlias.get(bsuid) as { phone?: string } | undefined)?.phone ?? null;
+}
+
 // ─── Workflow / scheduled actions ────────────────────────────────────────────
 
 const stmtSetState = db.prepare<[string, number]>(
