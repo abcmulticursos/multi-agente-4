@@ -3672,7 +3672,10 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{{METODO_DE_PAGO_1}}"
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
         - type: text
           body_variants:
