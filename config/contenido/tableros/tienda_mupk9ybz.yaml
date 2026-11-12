@@ -2593,6 +2593,10 @@ whatsapp:
       salida: sin_pago
       a: f-mwcyp14h-5mnwm
       a_espejo: e-mwcz436d-2pqw
+    - id: c-mwcz4lel-g2q
+      de: f-mwceddd4-fz4n
+      salida: rep:r2
+      a: f-mwcyp14g-iy170
   cajas:
     - id: velo-mwcazaol-0
       x: -979
@@ -2611,8 +2615,8 @@ whatsapp:
       y: 2288
     - id: e-mwcz3tgl-nj7m
       ficha: f-mwcyp14h-5mnwm
-      x: 1980
-      y: 3432
+      x: 2013
+      y: 3421
     - id: e-mwcz436d-2pqw
       ficha: f-mwcyp14h-5mnwm
       x: 1969
