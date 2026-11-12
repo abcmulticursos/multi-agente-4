@@ -8649,6 +8649,16 @@ tiendas:
 
               🎁 *{¿Quieres recibir este Plus de manera gratuita?|¿Deseas descargar este Plus de manera gratuita?|¿Te gustaría descargar este Plus de manera gratuita?}* 😊
           delay_after_sec: 6
+      reward_message: |-
+        🎉 *{¡Gracias por tu comentario!|¡Muchas gracias por tu comentario!|¡Gracias por dejarnos tu comentario!}* 😊
+
+        Aquí tienes tu *PDF de regalo* — un material extra que puedes utilizar en cualquier momento: 🖍️🎨
+
+        *ENLACE DE DESCARGA AQUI* 😊👇
+        https://drive.google.com/file/d/1Upoiyp4T8EhTrMDLLo42VjRMOJEQmnq5/view?usp=drive_link
+
+
+        Que tenga un excelente día!
   - id: tienda_muq67lks
     nombre: LECTO ESCRITURA
     numero: ""
