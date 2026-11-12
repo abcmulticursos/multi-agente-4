@@ -5727,6 +5727,10 @@ biblioteca_de_productos:
         price_soles: 3
         discount_price_soles: 2
         market_price: 12
+      CO:
+        price_soles: 10000
+        discount_price_soles: 7000
+        market_price: 50000
   - id: pmuq33w4x
     name: LECTOESCRITURA
     aliases: []
