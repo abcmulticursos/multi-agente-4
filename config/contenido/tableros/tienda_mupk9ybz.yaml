@@ -5786,7 +5786,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Hola!! te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊
+              *Hola!! {te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}
 
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
@@ -5795,35 +5795,44 @@ whatsapp:
 
               ✅ Ideal para mantener su atención *sin obligarlo*
 
-              ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
+              ✅ Funciona en casa o en un aula. {Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}
           delay_after_sec: 6
+          spintax_ia:
+            - "{Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}"
+            - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}"
         - type: text
           body_variants:
             - |-
               *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
 
               📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
-              * 👨‍👩‍👦 Imágenes de personas, 
+              {* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,} 
               * 🐕 animales, 
               * 🍎 frutas y
               * 🚗 objetos, que facilitarán su aprendizaje.
               🖨️ Formato *PDF para descargar e Imprimir*
 
-              📲 *Se envía directamente a tu Whatsapp o correo* 💌
+              {📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}
           delay_after_sec: 6
+          spintax_ia:
+            - "{📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}"
+            - "{* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,}"
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
               *Además recibirás GRATIS estos complementos* ‼️👇🏼
 
-              * 🔢 Cuaderno de los Números
+              {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}
               * 🎴 Tarjetitas gráficas
               * 📕 Cuaderno de Sílabas simples
               * 🔤 Alfabeto con caritas
               * 🎁 Alfabeto con Imagen
-              * 🎁 Alfabeto con rompecabezas y más...
+              {* 🎁 Alfabeto con rompecabezas y más...|* 🎁 Alfabeto con rompecabezas y otros|* 🎁 Alfabeto con rompecabezas y adicionales}
           delay_after_sec: 6
+          spintax_ia:
+            - "{* 🎁 Alfabeto con rompecabezas y más...|* 🎁 Alfabeto con rompecabezas y otros|* 🎁 Alfabeto con rompecabezas y adicionales}"
+            - "{* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}"
         - type: text
           body_variants:
             - |-
@@ -5835,12 +5844,14 @@ whatsapp:
               * 1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
-              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+              *! {Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al toque 😊⚡}
           delay_after_sec: 6
+          spintax_ia:
+            - "{Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al toque 😊⚡}"
         - type: text
           body_variants:
             - |-
-              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+              {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
 
               🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
