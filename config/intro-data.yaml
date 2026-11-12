@@ -2909,7 +2909,6 @@ payment_profiles_by_country:
           - bree
           - vre-b
           - tengo bre
-        enabled: false
     payment_responses:
       nequi:
         - type: text
@@ -2955,7 +2954,7 @@ payment_profiles_by_country:
             - |-
               ⚡💳 *A través de Nequi, Daviplata o Bre-B *
 
-              {{METODO_DE_PAGO_1}}
+              {{METODO_DE_PAGO_2}}
           delay_after_sec: 6
         - type: text
           body_variants:
