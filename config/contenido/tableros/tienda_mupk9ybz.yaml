@@ -4102,6 +4102,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: f8f6ac77-97b1-42c8-b59c-69d27d55c10f
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -4247,6 +4248,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: 2de75d7c-ca52-4d79-be72-d1d9f4ac9c18
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -4429,6 +4431,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd3fqml-5o68o
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -4574,6 +4577,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd3fqml-gbu6v
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -6696,6 +6700,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd56hap-x4spy
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -6841,6 +6846,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd56hap-x2o74
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
