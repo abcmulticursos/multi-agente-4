@@ -1228,6 +1228,15 @@ whatsapp:
             - |-
               *Hola!! te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊
 
+              *Antes de enviarte más información, es importante que sepas:* 
+
+              ✅️ La entrega es inmediata
+              ✅️ El envío es automático
+              ✅️ El acceso es de por vida 👍️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
 
@@ -1237,8 +1246,9 @@ whatsapp:
 
               ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
           delay_after_sec: 6
-        - type: text
-          body_variants:
+        - type: video
+          drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+          caption_variants:
             - |-
               *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
 
@@ -1251,11 +1261,16 @@ whatsapp:
 
               📲 *Se envía directamente a tu Whatsapp o correo* 💌
           delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
+          caption_variants:
+            - "*Descarga la muestra gratuita* 😊👆️"
+          delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
-              *Además recibirás GRATIS estos complementos* ‼️👇🏼
+              🎁 *Además recibirás GRATIS estos regalitos* ‼️👇🏼
 
               * 🔢 Cuaderno de los Números
               * 🎴 Tarjetitas gráficas
