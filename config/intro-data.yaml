@@ -5701,12 +5701,15 @@ biblioteca_de_productos:
     aliases: []
     price_soles: 10
     delivery:
+      - type: video
+        drive_url: https://drive.google.com/file/d/1erFqw0jh7Tvp-hgS8sb6fpyLT4-58b0k/view?usp=drive_link
+        caption_variants:
+          - ""
+        delay_after_sec: 6
       - type: text
         body_variants:
           - |
             ✅ *{¡PAGO APROBADO!|¡PAGO CONFIRMADO!|¡COMPRA APROBADA!}* 🥳🎉
-
-            - PRODUCTO BASICO -
 
             👉🏼 *{Ya puedes acceder|Ahora ya puedes acceder|Ya tienes acceso}* al material de *{{PRODUCTO_BASE}}* 📚 ✨ 🙌
 
