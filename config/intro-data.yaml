@@ -2909,6 +2909,7 @@ payment_profiles_by_country:
           - bree
           - vre-b
           - tengo bre
+        enabled: false
     payment_responses:
       nequi:
         - type: text
