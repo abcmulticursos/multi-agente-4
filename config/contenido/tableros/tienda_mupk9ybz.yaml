@@ -4005,11 +4005,6 @@ whatsapp:
           peso_antes: 1
         - id: r2
           peso: 1
-    - id: f-mwcxi9z4-8lqdi
-      tipo: regalo
-      x: 3784
-      y: 2288
-      titulo: Regalo
   cables:
     - id: c-mvveb857-c
       de: seg-mvveb857-a
