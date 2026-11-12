@@ -115,8 +115,14 @@ function leeCobro(v: unknown): CobroDeLaFicha | undefined {
     ...(precio ? { precio } : {}),
     ...(Object.keys(minimo_por_pais).length ? { minimo_por_pais } : {}),
     ...(Object.keys(tramos_por_pais).length ? { tramos_por_pais } : {}),
-    ...(modo === "producto" && v.metodos === true ? { metodos: true } : {}),
-    ...(modo === "producto" && v.metodos === true && v.sin_preguntar === true ? { sin_preguntar: true } : {}),
+    // EL MÉTODO QUE ELIGIÓ EL CLIENTE MANDA SIEMPRE (12/11/2026). Él: «el cliente eligió Bre-B… ¿por qué no le entrega
+    // los datos del método que eligió?». Sus 8 Cobros de Colombia tenían apagada «💳 Preguntar el método…» y mandaban
+    // siempre sus burbujas fijas (Nequi), aunque el método estuviera anotado. Y: «si el método elegido siempre manda,
+    // ¿para qué mantener la casilla?». Todo Cobro de un producto funciona ahora como con la casilla encendida: método
+    // elegido → sus datos; sin método → sus burbujas (con los botones de métodos solo si están encendidos en Ajustes,
+    // como siempre); si ese método no tiene datos escritos, sus burbujas (no se repregunta). La contribución, igual.
+    ...(modo === "producto" ? { metodos: true } : {}),
+    ...(modo === "producto" && v.sin_preguntar === true ? { sin_preguntar: true } : {}),
     ...(modo === "producto" && v.diferencia === true ? { diferencia: true } : {}),
     ...(modo === "producto" && Object.keys(precio_por_pais).length ? { precio_por_pais } : {}),
   };

@@ -34715,20 +34715,17 @@ function AjustesDeLaFicha({
                     </select>
                     <span className={ayuda}>El precio de cada país. Se congela al abrir el cobro: si lo cambias después, a este cliente se le cobra lo que se le dijo.</span>
                   </label>
-                  <label className="flex items-start gap-2 text-xs font-semibold">
-                    <input type="checkbox" checked={cobro.metodos === true} onChange={(e) => ponCobro({ ...cobro, metodos: e.target.checked || undefined })} className="mt-0.5" />
-                    <span>
-                      {/* (05/11/2026, él: «cambia ese título que me confunde».) */}
-                      💳 Preguntar el método y enviar solo los datos de ese método
-                      <span className={ayuda}>
-                        Encendida: las burbujas de este Cobro preguntan el método, y al responder le llegan los datos de ese método desde «Datos de pago
-                        por país» (con el precio de lo que eligió). Si ya lo dijo antes, no se le pregunta.
-                        <br />
-                        Apagada: este Cobro envía sus burbujas tal cual las escribiste (ahí van tus datos de pago).
-                      </span>
+                  {/* SIN CASILLA (12/11/2026): el método que eligió el cliente manda siempre (ver `leeCobro`). Se explica, no se elige. */}
+                  <div className="rounded-md border border-borde bg-relleno px-2 py-1.5 text-xs">
+                    <strong>💳 Los datos de pago que manda este Cobro</strong>
+                    <span className={ayuda}>
+                      Si el cliente ya eligió un método (en la intro, en un botón, escribiéndolo…), le llegan los datos de ESE método desde «Datos de pago
+                      por país», con el precio de lo que eligió. Si todavía no eligió, le llegan las burbujas que escribas aquí. Si dice otro método
+                      estando aquí, le llegan los de ése.
                     </span>
-                  </label>
-                  {cobro.metodos && (
+                  </div>
+                  {(
+
                     <label className="ml-6 flex items-start gap-2 text-xs font-semibold">
                       <input type="checkbox" checked={cobro.sin_preguntar === true} onChange={(e) => ponCobro({ ...cobro, sin_preguntar: e.target.checked || undefined })} className="mt-0.5" />
                       <span>
