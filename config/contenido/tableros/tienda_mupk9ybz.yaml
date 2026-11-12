@@ -3611,17 +3611,19 @@ whatsapp:
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
           decisions:
-            - id: d-mwd56hao-3rexu
-              title: YAPE
+            - id: 1bdf5e34-c89e-44b7-9703-da490d9c8504
+              title: Nequi
               keywords:
-                - yape
-                - llape
-                - iape
-                - con yape
-                - yapeo
-                - a donde yapeo
-                - como yapeo
-                - esta bien
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
               color: esmeralda
               steps:
                 - type: text
@@ -3639,17 +3641,18 @@ whatsapp:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwd56hao-padv1
-              title: PLIN
+            - id: 0046a0a5-f073-4464-902b-7ba55b161bd5
+              title: DAVIPLATA
               keywords:
-                - pli
-                - plin
-                - pln
-                - pilin
-                - con pln
-                - plinear
-                - tengo plin
-                - esta bien
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
               color: ambar
               steps:
                 - type: text
@@ -3667,17 +3670,18 @@ whatsapp:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwd56hao-nmf6p
-              title: BCP
+            - id: 309a73e3-653b-4314-8afc-474c79b36ed5
+              title: Bre-B
               keywords:
-                - bcp
-                - transferencia
-                - con bcp
-                - trasfencia
-                - traferencia
-                - traferir
-                - transferir
-                - trnsferencia
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
               color: violeta
               steps:
                 - type: text
@@ -3695,7 +3699,7 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwd56hao-xjfvq
+            - id: 43710a39-b57f-4912-91c5-8ef6cddcfede
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -4759,17 +4763,19 @@ whatsapp:
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
           decisions:
-            - id: d-mwdatl63-r0pqc
-              title: YAPE
+            - id: 036d9d2e-3345-47aa-96b5-c71edc90e376
+              title: Nequi
               keywords:
-                - yape
-                - llape
-                - iape
-                - con yape
-                - yapeo
-                - a donde yapeo
-                - como yapeo
-                - esta bien
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
               color: esmeralda
               steps:
                 - type: text
@@ -4787,17 +4793,18 @@ whatsapp:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdatl63-c4fjm
-              title: PLIN
+            - id: 4af699eb-c36a-46b4-9dca-e67c6f2ba699
+              title: DAVIPLATA
               keywords:
-                - pli
-                - plin
-                - pln
-                - pilin
-                - con pln
-                - plinear
-                - tengo plin
-                - esta bien
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
               color: ambar
               steps:
                 - type: text
@@ -4815,17 +4822,18 @@ whatsapp:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdatl63-p71uo
-              title: BCP
+            - id: 63717b29-ddd5-44e5-930f-234bae9554a6
+              title: Bre-B
               keywords:
-                - bcp
-                - transferencia
-                - con bcp
-                - trasfencia
-                - traferencia
-                - traferir
-                - transferir
-                - trnsferencia
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
               color: violeta
               steps:
                 - type: text
@@ -4843,7 +4851,7 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdatl63-m3ezz
+            - id: 94862723-10d0-4f0c-800b-8f7ba8fbafab
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -12048,26 +12056,10 @@ whatsapp:
       de: inicio-CO-mwczj2jz
       salida: siguiente
       a: f-mwczmr06-2e3sw
-    - id: c-mwd56hap-yb4u0
-      de: f-mwd56hao-5kx9i
-      salida: dec:d-mwd56hao-3rexu
-      a: f-mwd56hap-9n5su
-    - id: c-mwd56hap-75v0r
-      de: f-mwd56hao-5kx9i
-      salida: dec:d-mwd56hao-padv1
-      a: f-mwd56hap-9n5su
-    - id: c-mwd56hap-w1vto
-      de: f-mwd56hao-5kx9i
-      salida: dec:d-mwd56hao-nmf6p
-      a: f-mwd56hap-9n5su
     - id: c-mwd56hap-8e8zz
       de: f-mwd56hap-9n5su
       salida: btn:b-mwd56hap-bf7r7
       a: f-mwd56hap-cv12m
-    - id: c-mwd56hap-2x2gq
-      de: f-mwd56hao-5kx9i
-      salida: dec:d-mwd56hao-xjfvq
-      a: f-mwd56hap-9n5su
     - id: c-mwd56hap-er7kc
       de: f-mwd56hap-cv12m
       salida: pagado
@@ -12123,26 +12115,10 @@ whatsapp:
       salida: sin_pago
       a: f-mwd56hap-vlmus
       a_espejo: e-mwd6x03c-ohcc
-    - id: c-mwdatl64-4owth
-      de: f-mwdatl63-t3ldy
-      salida: dec:d-mwdatl63-r0pqc
-      a: f-mwdatl63-96azn
-    - id: c-mwdatl64-sl0ed
-      de: f-mwdatl63-t3ldy
-      salida: dec:d-mwdatl63-c4fjm
-      a: f-mwdatl63-96azn
-    - id: c-mwdatl64-7dux6
-      de: f-mwdatl63-t3ldy
-      salida: dec:d-mwdatl63-p71uo
-      a: f-mwdatl63-96azn
     - id: c-mwdatl64-v8l7v
       de: f-mwdatl63-96azn
       salida: btn:b-mwdatl63-v5s4x
       a: f-mwdatl63-yta4b
-    - id: c-mwdatl64-bfr2t
-      de: f-mwdatl63-t3ldy
-      salida: dec:d-mwdatl63-m3ezz
-      a: f-mwdatl63-96azn
     - id: c-mwdatl64-0gx91
       de: f-mwdatl63-yta4b
       salida: pagado
@@ -12553,6 +12529,38 @@ whatsapp:
       de: inicio-AR-mwdbncsu
       salida: siguiente
       a: f-mwdbnotb-nbdmi
+    - id: c-mwdf8wuh-m7b
+      de: f-mwd56hao-5kx9i
+      salida: dec:1bdf5e34-c89e-44b7-9703-da490d9c8504
+      a: f-mwd56hap-9n5su
+    - id: c-mwdf8xug-duu
+      de: f-mwd56hao-5kx9i
+      salida: dec:0046a0a5-f073-4464-902b-7ba55b161bd5
+      a: f-mwd56hap-9n5su
+    - id: c-mwdf8yw1-j84
+      de: f-mwd56hao-5kx9i
+      salida: dec:309a73e3-653b-4314-8afc-474c79b36ed5
+      a: f-mwd56hap-9n5su
+    - id: c-mwdf901c-cyv
+      de: f-mwd56hao-5kx9i
+      salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
+      a: f-mwd56hap-9n5su
+    - id: c-mwdfbfa8-q37
+      de: f-mwdatl63-t3ldy
+      salida: dec:036d9d2e-3345-47aa-96b5-c71edc90e376
+      a: f-mwdatl63-96azn
+    - id: c-mwdfbi0h-zeo
+      de: f-mwdatl63-t3ldy
+      salida: dec:4af699eb-c36a-46b4-9dca-e67c6f2ba699
+      a: f-mwdatl63-96azn
+    - id: c-mwdfbiz4-yjm
+      de: f-mwdatl63-t3ldy
+      salida: dec:63717b29-ddd5-44e5-930f-234bae9554a6
+      a: f-mwdatl63-96azn
+    - id: c-mwdfbk2y-ide
+      de: f-mwdatl63-t3ldy
+      salida: dec:94862723-10d0-4f0c-800b-8f7ba8fbafab
+      a: f-mwdatl63-96azn
   cajas:
     - id: velo-mwcazaol-0
       x: -869
