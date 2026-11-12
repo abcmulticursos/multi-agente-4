@@ -7129,7 +7129,7 @@ whatsapp:
             - |-
               🔥 Completá tu pago hoy y *recibí GRATIS aparte un regalito adicional* 🎁
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FÁCIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -7309,7 +7309,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              {🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}
+              {🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}
               __________
 
               1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
@@ -7318,17 +7318,17 @@ whatsapp:
 
               🅰️) *EL KIT DE {{PRODUCTO_BASE}}* 📔
               🅱️) *➕ EL {{PRODUCTO_COMPLEMENTARIO}}* 📗
-              Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
+              Llevate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
               __________
 
               2️⃣ *Pero si deseás solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
           spintax_ia:
-            - "{🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}"
+            - "{🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}"
         - type: text
           body_variants:
             - |-
-              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animás a esta_ *Oferta Especial*?}  *ESCRIBÍ UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animás a esta_ *Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
               🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
@@ -7380,7 +7380,7 @@ whatsapp:
 
               {{PRODUCTO_FULL}}
 
-              Cual elegís?
+              ¿Cuál elegís?
           delay_after_sec: 6
           buttons:
             - id: b-mwdnvrom-pz12z
@@ -7431,7 +7431,7 @@ whatsapp:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|Soy Andrea* 👋🏼 Quería confirmar que te llegó correctamente la información que te mandé.|Soy Andrea* 👋🏼 Solo pasaba a ver si recibiste lo que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      🎯 *Podés aprovechá nuestra promoción activa* y realizá un único pago ahora mismo!
+                      🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y ahora *los chicos ya están avanzando en su aprendizaje* 🤗|y ahora *sus hijos ya están absorbiendo conocimiento* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
@@ -7447,7 +7447,7 @@ whatsapp:
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvrom-v8p43
@@ -7572,7 +7572,7 @@ whatsapp:
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvrom-lnu9v
@@ -7720,7 +7720,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -7906,7 +7906,7 @@ whatsapp:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      🎯 *Podés aprovechar nuestra promoción activa* y realizá un único pago ahora mismo!
+                      🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y ahora *los chicos ya están aprendiendo* 🤗|y ahora *sus hijos ya están estudiando* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
@@ -7931,12 +7931,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      {🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}
+                      {🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cuál es el método de pago de tu preferencia* 👇🏼}
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvrom-0mivz
@@ -8053,7 +8053,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   spintax_ia:
-                    - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}"
+                    - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cuál es el método de pago de tu preferencia* 👇🏼}"
         - id: s-mwdnvrom-awsfd
           minutos: 480
           variantes:
@@ -8064,7 +8064,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -8269,17 +8269,17 @@ whatsapp:
 
               🟠 *¿COMO LO ADQUIERO?*
 
-              * 1.- 💴 Realiza un único pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
-              *! {Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
+              *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
+              {🔥 Completá tu pago hoy y *recibí GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtenés de regalo un plus adicional GRATIS* 🎁|🔥 Realizá tu pago ya y *recibí un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FÁCIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -8416,10 +8416,10 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
@@ -8431,7 +8431,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -8447,19 +8447,19 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
           caption_variants:
             - |-
-              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}
+              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}
 
               *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para chicos de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
           spintax_ia:
-            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}"
+            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}"
         - type: image
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si prefieres, puedes comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Puedes escoger entre comprar 1 solo o los 2 juntos*  😊}
+              {🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}
               __________
 
               1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
@@ -8468,17 +8468,17 @@ whatsapp:
 
               🅰️) *EL KIT DE {{PRODUCTO_BASE}}* 📔
               🅱️) *➕ EL {{PRODUCTO_COMPLEMENTARIO}}* 📗
-              Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
+              Llevate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
               __________
 
-              2️⃣ *Pero si deseas solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
+              2️⃣ *Pero si deseás solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
           spintax_ia:
-            - "{🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si prefieres, puedes comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Puedes escoger entre comprar 1 solo o los 2 juntos*  😊}"
+            - "{🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}"
         - type: text
           body_variants:
             - |-
-              {🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Quieres_ *aprovechar esta Oferta Especial*?}  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
               🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
@@ -8520,7 +8520,7 @@ whatsapp:
               color: ambar
               steps: []
           spintax_ia:
-            - "{🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Quieres_ *aprovechar esta Oferta Especial*?}"
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
         - type: text
           body_variants:
             - |-
@@ -8530,7 +8530,7 @@ whatsapp:
 
               {{PRODUCTO_FULL}}
 
-              Cual elegís?
+              ¿Cuál elegís?
           delay_after_sec: 6
           buttons:
             - id: b-mwdnvron-h9te5
@@ -8581,7 +8581,7 @@ whatsapp:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|Soy Andrea* 👋🏼 Quería confirmar que te llegó la información que te mandé.|Soy Andrea* 👋🏼 Solo pasaba a ver si recibiste los datos que te envié.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      🎯 *Puedes aprovechá nuestra promoción activa* y realizá un único pago ahora mismo!
+                      🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
@@ -8592,7 +8592,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, responde con tu forma de pago favorita* 👇🏼}
+                      {🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indicanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
@@ -8712,12 +8712,12 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   spintax_ia:
-                    - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, responde con tu forma de pago favorita* 👇🏼}"
+                    - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indicanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}"
                 - type: video
                   drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
@@ -9009,10 +9009,10 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
@@ -9024,7 +9024,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mándanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envíanos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -9093,7 +9093,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
@@ -9366,7 +9366,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Hola!! {te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}
+              *Hola!! {te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por acá 😊}
 
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
@@ -9379,7 +9379,7 @@ whatsapp:
           delay_after_sec: 6
           spintax_ia:
             - "{Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}"
-            - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}"
+            - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por acá 😊}"
         - type: text
           body_variants:
             - |-
@@ -9431,7 +9431,7 @@ whatsapp:
             - |-
               {🔥 Completá tu pago hoy y *recibís GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtenés de regalo un plus adicional GRATIS* 🎁|🔥 Realizá tu pago ya y *recibís un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -9599,19 +9599,19 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
           caption_variants:
             - |-
-              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}
+              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}
 
               *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para chicos de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
           spintax_ia:
-            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}"
+            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de enviarte los datos de pago* quería contarte algo que capaz te interese: 😊|🌟 *Antes de pasarte la forma de pago* te quiero decir una cosa que tal vez te guste: 😊}"
         - type: image
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              {🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}
+              {🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}
               __________
 
               1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
@@ -9626,7 +9626,7 @@ whatsapp:
               2️⃣ *Pero si deseás solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
           spintax_ia:
-            - "{🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}"
+            - "{🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Si preferís, podés comprar 1 solo o llevarte los 2 juntos*  😊|🔴 *Podés escoger entre comprar 1 solo o los 2 juntos*  😊}"
         - type: text
           body_variants:
             - |-
@@ -9733,7 +9733,7 @@ whatsapp:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|Soy Andrea* 👋🏼 Quería confirmar que te llegó la información que te mandé.|Soy Andrea* 👋🏼 Solo pasaba a ver si recibiste los datos que te envié.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      🎯 *Podés aprovechá nuestra promoción activa* y realizá un único pago ahora mismo!
+                      🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
@@ -9749,7 +9749,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, responde con tu forma de pago favorita* 👇🏼}
+                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
@@ -9869,7 +9869,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   spintax_ia:
-                    - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, responde con tu forma de pago favorita* 👇🏼}"
+                    - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}"
                 - type: video
                   drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
@@ -10225,7 +10225,7 @@ whatsapp:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar si recibiste la información que te envié.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
 
-                      🎯 *Podés aprovechar nuestra promoción activa* y realizá un único pago ahora mismo!
+                      🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y *sus hijos ya están aprendiendo* 🤗|y ahora *los chicos ya están aprendiendo* 🤗}
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
@@ -10596,7 +10596,7 @@ whatsapp:
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
               ✅ 📚 *{{PRECIO_BASE}}* ‼️
 
-              🟠 *¿COMO LO ADQUIERO?*
+              🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envianos tu comprobante de pago
@@ -10608,7 +10608,7 @@ whatsapp:
             - |-
               🔥 Completá tu pago hoy y *recibí GRATIS aparte un regalito adicional* 🎁
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FÁCIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -10745,10 +10745,10 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, podés adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso podes hacerlo a través de estos datos 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, podés adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso podés hacerlo a través de estos datos 😊👇}"
           delay_after_sec: 6
           spintax_ia:
-            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, podés adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso podes hacerlo a través de estos datos 😊👇}"
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, podés adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso podés hacerlo a través de estos datos 😊👇}"
         - type: text
           body_variants:
             - |-
@@ -10776,19 +10776,19 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
           caption_variants:
             - |-
-              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}
+              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}
 
               *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para chicos de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
           spintax_ia:
-            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}"
+            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}"
         - type: image
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              {🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}
+              {🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}
               __________
 
               1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 {{PRECIO_FULL}}*
@@ -10803,7 +10803,7 @@ whatsapp:
               2️⃣ *Pero si deseás solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
           spintax_ia:
-            - "{🔴 *Si deseas Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}"
+            - "{🔴 *Si deseás Podés Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Podés elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si querés te llevás 1 solo, o si te animás los 2 juntos*  😊}"
         - type: text
           body_variants:
             - |-
