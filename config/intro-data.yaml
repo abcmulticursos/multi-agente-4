@@ -2952,7 +2952,7 @@ payment_profiles_by_country:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Bre-B *
 
               {{METODO_DE_PAGO_2}}
           delay_after_sec: 6
