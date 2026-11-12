@@ -1765,7 +1765,7 @@ export async function GET(req: NextRequest) {
   if (soloTablero) {
     const suyo = (config?.tableros as Record<string, unknown> | undefined)?.[soloTablero];
     const leido = suyo ? leeTablerosPorTienda({ [soloTablero]: suyo }, (pasos) => pasos.map((p) => readStep(p as Record<string, unknown>))) : {};
-    return NextResponse.json({ tienda: soloTablero, tablero: (leido as Record<string, unknown>)[soloTablero] ?? null });
+    return jsonComprimido(req, { tienda: soloTablero, tablero: (leido as Record<string, unknown>)[soloTablero] ?? null });
   }
 
   const intro_sequence: EditorStep[] = Array.isArray(config?.intro_sequence)
@@ -2950,7 +2950,8 @@ export async function GET(req: NextRequest) {
     },
   };
 
-  return NextResponse.json(
+  return jsonComprimido(
+    req,
     {
       intro_sequence,
       intro_sequence_2,
@@ -3099,9 +3100,24 @@ export async function GET(req: NextRequest) {
       gift,
       // LA HUELLA DEL ARCHIVO QUE SE ABRIÓ (18/10/2026). Ver `huellaDelArchivo`.
       version_del_archivo: huellaDelContenido(),
-    },
-    { headers: { "Cache-Control": "no-store" } }
+    }
   );
+}
+
+/**
+ * LA RESPUESTA COMPRIMIDA (11/11/2026). «Fíjate si la carga del editor está óptima»: no lo estaba. El servidor
+ * mandaba el contenido sin comprimir (medido en la copia: 5,9 MB por la red; en gzip, 0,3 MB). Es el mismo
+ * JSON de `NextResponse.json`; el navegador lo descomprime solo. Sin «gzip» en la petición (o sin petición,
+ * si alguien llama a GET a mano), lo de siempre.
+ */
+async function jsonComprimido(req: NextRequest | undefined, data: unknown): Promise<NextResponse> {
+  const texto = JSON.stringify(data);
+  const cabeceras: Record<string, string> = { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Accept-Encoding" };
+  if (texto.length < 50_000 || !/\bgzip\b/.test(req?.headers?.get("accept-encoding") ?? "")) {
+    return new NextResponse(texto, { headers: cabeceras });
+  }
+  const { gzipSync } = await import("node:zlib");
+  return new NextResponse(new Uint8Array(gzipSync(texto)), { headers: { ...cabeceras, "Content-Encoding": "gzip" } });
 }
 
 /**
