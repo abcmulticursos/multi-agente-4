@@ -2339,8 +2339,8 @@ whatsapp:
       titulo: Regalo
     - id: inicio-CO-mwczj2jz
       tipo: inicio
-      x: -3564
-      y: 10010
+      x: -1914
+      y: 11605
       pais: CO
     - id: f-mwczmr05-vk7r3
       tipo: mensaje
@@ -5057,6 +5057,10 @@ whatsapp:
       salida: sin_pago
       a: f-mwczmr06-vi0mc
       a_espejo: e-mwcznupe-z4h4
+    - id: c-mwczojxe-hq3
+      de: inicio-CO-mwczj2jz
+      salida: siguiente
+      a: f-mwczmr06-2e3sw
   cajas:
     - id: velo-mwcazaol-0
       x: -979
