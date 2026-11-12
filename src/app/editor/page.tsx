@@ -39307,7 +39307,17 @@ function esBurbujaDePago(texto: string): boolean {
 }
 /** Una frase que la IA puede variar: sin spintax, comodines, números, enlaces ni nombres en MAYÚSCULAS. */
 function fraseVariable(f: string): boolean {
-  return !yaTieneSpintax(f) && !/\{\{/.test(f) && !/\d/.test(f) && !/https?:\/\//.test(f) && !/\b[A-ZÁÉÍÓÚÑ]{4,}\b/.test(f) && f.trim().length >= 8;
+  return !tocaUnSpintax(f) && !/\{\{/.test(f) && !/\d/.test(f) && !/https?:\/\//.test(f) && !/\b[A-ZÁÉÍÓÚÑ]{4,}\b/.test(f) && f.trim().length >= 8;
+}
+/** Dónde hay spintax en el texto (sin contar los comodines {{…}}): una frase que caiga dentro no se ofrece. */
+function rangosDeSpintax(texto: string): Array<[number, number]> {
+  const tapado = texto.replace(/\{\{[^}]*\}\}/g, (m) => "_".repeat(m.length));
+  return [...tapado.matchAll(/\{[^{}]*\|[^{}]*\}/g)].map((m) => [m.index ?? 0, (m.index ?? 0) + m[0].length]);
+}
+const dentroDeUnSpintax = (rangos: Array<[number, number]>, f: FraseDelTexto) => rangos.some(([a, b]) => f.inicio < b && f.fin > a);
+/** ¿La frase tiene o CORTA un spintax («{*¡Hola!» es el principio de uno)? Variarla lo rompería (12/11/2026). */
+function tocaUnSpintax(f: string): boolean {
+  return yaTieneSpintax(f) || /[{}|]/.test(f.replace(/\{\{\s*[A-Za-z0-9_]+\s*\}\}/g, ""));
 }
 /** Deja solo el ORIGINAL en los spintax que puso la IA (el original va siempre primero); los suyos no se tocan. */
 function sinSpintaxDeLaIA(step: EditorStep): Partial<EditorStep> {
@@ -39349,7 +39359,8 @@ function VentanaDeSpintax({
   );
   // Por defecto, la primera y la última (lo que él hace casi siempre); con un trozo seleccionado, ése.
   const [marcadas, setMarcadas] = useState<Set<number>>(() => {
-    const libres = frases.map((f, i) => (yaTieneSpintax(f.texto) ? -1 : i)).filter((i) => i >= 0);
+    const rangos = rangosDeSpintax(texto);
+    const libres = frases.map((f, i) => (tocaUnSpintax(f.texto) || dentroDeUnSpintax(rangos, f) ? -1 : i)).filter((i) => i >= 0);
     return new Set(seleccion ? libres : [libres[0], libres[libres.length - 1]].filter((i) => i !== undefined));
   });
   const [pidiendo, setPidiendo] = useState(false);
@@ -39402,7 +39413,8 @@ function VentanaDeSpintax({
   const hayPropuestas = Object.keys(propuestas).length > 0;
   return (
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined} data-ventana-del-tablero>
-      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+      {/* MÁS GRANDE (12/11/2026, «bonitos pero muy pequeños»): dentro del visor todo va al 90 %, y esta ventana también. */}
+      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: 1.25 }} onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
           <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
@@ -39415,7 +39427,8 @@ function VentanaDeSpintax({
         {aviso && <p className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[12px] text-amber-900">{aviso}</p>}
         <div className="flex flex-col gap-2">
           {frases.map((f, i) => {
-            const conSpintax = yaTieneSpintax(f.texto);
+            // (12/11/2026: también la que CORTA un spintax, como «{*¡Hola!»: variarla lo rompería.)
+            const conSpintax = tocaUnSpintax(f.texto) || dentroDeUnSpintax(rangosDeSpintax(texto), f);
             const suyas = propuestas[i];
             return (
               <div key={`${f.inicio}-${i}`} className={`rounded-lg border px-2 py-1.5 ${marcadas.has(i) ? "border-violet-400 bg-violet-50 oscuro:bg-violet-500/10" : "border-borde"}`}>
@@ -39519,7 +39532,8 @@ function VentanaDeVariarFicha({ steps, onAplicar, onCerrar }: { steps: EditorSte
         const texto = s.texts[0] ?? "";
         if (s.enabled === false || !texto.trim()) return { texto, frases: [] as FraseDelTexto[], motivo: "apagada o vacía" };
         if (esBurbujaDePago(texto)) return { texto, frases: [] as FraseDelTexto[], motivo: "💳 datos de pago: no se toca" };
-        const frases = frasesDelTexto(texto).filter((f) => fraseVariable(f.texto));
+        const rangos = rangosDeSpintax(texto);
+        const frases = frasesDelTexto(texto).filter((f) => fraseVariable(f.texto) && !dentroDeUnSpintax(rangos, f));
         return { texto, frases, motivo: frases.length ? "" : "sin frases que variar" };
       }),
     [steps]
@@ -39586,7 +39600,7 @@ function VentanaDeVariarFicha({ steps, onAplicar, onCerrar }: { steps: EditorSte
   };
   return (
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
-      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl">
+      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: 1.25 }}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-tinta">✨ Variar con IA · todas las burbujas</h3>
           <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
@@ -40132,7 +40146,7 @@ function StepList({
             type="button"
             onClick={() => setVariando(true)}
             title="La IA propone 2 formas más de decir la primera y la última frase de cada burbuja. No toca datos de pago."
-            className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-800 hover:bg-violet-100"
+            className="rounded-md border border-violet-300 bg-violet-50 px-3 py-1.5 text-sm font-bold text-violet-800 hover:bg-violet-100"
           >
             ✨ Variar con IA
           </button>
@@ -40146,7 +40160,7 @@ function StepList({
               onChange(steps.map((s) => ((s.spintax_ia ?? []).length ? { ...s, ...sinSpintaxDeLaIA(s) } : s)));
             }}
             title="Deja solo el original en todo el spintax que puso la IA"
-            className="rounded border border-violet-300 bg-tarjeta px-2 py-1 text-[11px] font-semibold text-violet-800 hover:bg-violet-50"
+            className="rounded-md border border-violet-300 bg-tarjeta px-3 py-1.5 text-sm font-bold text-violet-800 hover:bg-violet-50"
           >
             ↩ Quitar spintax de la IA
           </button>
