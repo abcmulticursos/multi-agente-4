@@ -2877,16 +2877,16 @@ payment_profiles_by_country:
     direct_payment_steps: []
     direct_payment_cta: ""
     payment_buttons:
-      - label: Nequi
+      - label: Nequi 📲
         method: nequi
         aliases:
           - nequi
-      - label: Daviplata
+      - label: Daviplata 🤳🏼
         method: bancolombia
         aliases:
           - bancolombia
           - transferencia
-      - label: Bre-B
+      - label: Bre-B 😊
         method: daviplata
         aliases:
           - daviplata
