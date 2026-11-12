@@ -40753,8 +40753,21 @@ function BubbleDecisionsEditor({
   // en cualquier otra parte (o Escape) suelta. Las acciones van en la barra de los elegidos.
   const [elegidos, setElegidos] = useState<Set<string>>(() => new Set());
   useEscapeEnPila(() => setElegidos(new Set()), elegidos.size > 0);
+  // EL MENÚ DEL CLIC DERECHO, COMO EN LA PIZARRA (12/11/2026). Él: «al dar clic derecho no debería aparecer ese menú
+  // arriba, sino un menú… como en el modo pizarra; el modo de seleccionar me gusta, Shift + clic». Sobre un cuadrito
+  // elegido actúa sobre TODOS los elegidos; sobre otro, solo sobre ése.
+  const [menuCuadrito, setMenuCuadrito] = useState<{ x: number; y: number; ids: string[] } | null>(null);
+  useEscapeEnPila(() => setMenuCuadrito(null), !!menuCuadrito);
+  useEffect(() => {
+    if (!menuCuadrito) return;
+    const cerrar = (e: MouseEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.("[data-menu-de-cuadritos]")) return;
+      setMenuCuadrito(null);
+    };
+    document.addEventListener("mousedown", cerrar);
+    return () => document.removeEventListener("mousedown", cerrar);
+  }, [menuCuadrito]);
   const copiados = useCuadritosCopiados();
-  const losElegidos = decisions.filter((d) => elegidos.has(d.id));
   const enElTablero = useContext(EnElTableroContext);
   // Los cuadritos de OTRA burbuja también son «afuera»: nunca quedan dos selecciones a la vez.
   const raiz = useRef<HTMLDivElement>(null);
@@ -40762,7 +40775,7 @@ function BubbleDecisionsEditor({
     if (elegidos.size === 0) return;
     const alTocar = (e: MouseEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && raiz.current?.contains(t) && t.closest("[data-cuadrito], [data-barra-de-elegidos]")) return;
+      if (t && raiz.current?.contains(t) && t.closest("[data-cuadrito], [data-barra-de-elegidos], [data-menu-de-cuadritos]")) return;
       setElegidos(new Set());
     };
     document.addEventListener("mousedown", alTocar);
@@ -40867,51 +40880,90 @@ function BubbleDecisionsEditor({
           )}
         </div>
       </div>
-      {elegidos.size > 0 && (
-        <div data-barra-de-elegidos className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
-          <strong>{elegidos.size} elegido{elegidos.size === 1 ? "" : "s"}</strong>
-          <button
-            type="button"
-            onClick={() => copiarCuadritos(losElegidos)}
-            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
-          >
-            📋 Copiar
-          </button>
-          <button
-            type="button"
-            onClick={() => insertar(losElegidos, decisions.reduce((m, d, i) => (elegidos.has(d.id) ? i : m), -1))}
-            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
-          >
-            ⧉ Duplicar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              onSnapshot();
-              const apagar = losElegidos.some((d) => d.enabled !== false);
-              onChange(decisions.map((d) => (elegidos.has(d.id) ? { ...d, enabled: !apagar } : d)));
-            }}
-            className="rounded border border-sky-300 bg-tarjeta px-2 py-0.5 font-semibold hover:bg-sky-100"
-          >
-            {losElegidos.some((d) => d.enabled !== false) ? "⚪ Apagar" : "🟢 Encender"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              // CON CONFIRMACIÓN: lo que se pierde ahí es texto escrito a mano.
-              const cuales = losElegidos.map((d) => `«${d.title?.trim() || "sin título"}»`).join(", ");
-              if (!confirm(`¿Borrar ${cuales} y todo lo que escribiste dentro? Puedes deshacerlo con ↶ Deshacer.`)) return;
-              onSnapshot();
-              onChange(decisions.filter((d) => !elegidos.has(d.id)));
-              setElegidos(new Set());
-            }}
-            className="rounded border border-red-300 bg-tarjeta px-2 py-0.5 font-semibold text-red-700 hover:bg-red-50"
-          >
-            🗑️ Borrar
-          </button>
-          <span className="text-sky-800">Ctrl+C / Cmd+C copia · luego «📥 Pegar» en otra burbuja · clic afuera suelta</span>
+      {/* Con varios elegidos (Shift + clic), solo cuántos y cómo actuar: las acciones van en el clic derecho. */}
+      {elegidos.size > 1 && (
+        <div data-barra-de-elegidos className="mb-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
+          <strong>{elegidos.size} elegidos</strong> · clic derecho en uno de ellos para copiar, duplicar, apagar o borrar los {elegidos.size} ·
+          Ctrl+C copia · clic afuera suelta
         </div>
       )}
+      {menuCuadrito &&
+        (() => {
+          const objetivo = decisions.filter((d) => menuCuadrito.ids.includes(d.id));
+          if (objetivo.length === 0) return null;
+          const varios = objetivo.length > 1;
+          const apagar = objetivo.some((d) => d.enabled !== false);
+          const opcion = "block w-full px-3 py-2 text-left text-neutral-800 hover:bg-neutral-100";
+          const hecho = () => setMenuCuadrito(null);
+          return (
+            <div
+              data-menu-de-cuadritos
+              ref={(el) => encajarEnLaPantalla(el)}
+              className="fixed z-[70] w-60 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-sm shadow-xl"
+              style={{ left: menuCuadrito.x, top: menuCuadrito.y }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.preventDefault()}
+            >
+              <div className="truncate border-b border-neutral-200 px-3 pb-1 pt-0.5 text-[11px] font-bold text-neutral-500">
+                {varios ? `${objetivo.length} cuadritos elegidos` : `«${objetivo[0].title?.trim() || "sin título"}»`}
+              </div>
+              {!varios && (
+                <button
+                  type="button"
+                  className={opcion}
+                  onClick={() => {
+                    hecho();
+                    setElegidos(new Set());
+                    setAbierta(decisions.findIndex((d) => d.id === objetivo[0].id));
+                  }}
+                >
+                  ✏️ Editar
+                </button>
+              )}
+              <button type="button" className={opcion} onClick={() => (copiarCuadritos(objetivo), hecho())}>
+                📋 Copiar{varios ? ` los ${objetivo.length}` : ""}
+              </button>
+              <button
+                type="button"
+                className={opcion}
+                onClick={() => {
+                  insertar(objetivo, decisions.reduce((m, d, i) => (menuCuadrito.ids.includes(d.id) ? i : m), -1));
+                  hecho();
+                }}
+              >
+                ⧉ Duplicar{varios ? ` los ${objetivo.length}` : ""}
+              </button>
+              <button
+                type="button"
+                className={opcion}
+                onClick={() => {
+                  onSnapshot();
+                  onChange(decisions.map((d) => (menuCuadrito.ids.includes(d.id) ? { ...d, enabled: !apagar } : d)));
+                  hecho();
+                }}
+              >
+                {apagar ? "⚪ Apagar" : "🟢 Encender"}
+                {varios ? ` los ${objetivo.length}` : ""}
+              </button>
+              <div className="my-1 border-t border-neutral-200" />
+              <button
+                type="button"
+                className="block w-full px-3 py-2 text-left text-red-700 hover:bg-red-50"
+                onClick={() => {
+                  // CON CONFIRMACIÓN: lo que se pierde ahí es texto escrito a mano.
+                  const cuales = objetivo.map((d) => `«${d.title?.trim() || "sin título"}»`).join(", ");
+                  hecho();
+                  if (!confirm(`¿Borrar ${cuales} y todo lo que escribiste dentro? Puedes deshacerlo con ↶ Deshacer.`)) return;
+                  onSnapshot();
+                  onChange(decisions.filter((d) => !menuCuadrito.ids.includes(d.id)));
+                  setElegidos(new Set());
+                }}
+              >
+                🗑️ Borrar{varios ? ` los ${objetivo.length}` : ""}
+              </button>
+            </div>
+          );
+        })()}
       {decisions.length === 0 ? (
         <p className="text-xs text-neutral-500">
           Sin decisiones, esta burbuja funciona como siempre.
@@ -40938,13 +40990,16 @@ function BubbleDecisionsEditor({
                 setAbierta(index);
               }}
               onContextMenu={(evento) => {
-                // Clic derecho elige este (si ya estaba elegido, la selección se queda como está).
+                // CLIC DERECHO = SU MENÚ, ahí mismo (12/11/2026, como en la pizarra). Sobre uno elegido, para todos los
+                // elegidos; sobre otro, solo para él (y queda él elegido).
                 evento.preventDefault();
-                // (12/11/2026) Que no suba al cajón: abría el menú de la burbuja encima y tapaba «Apagar / Borrar».
+                // Que no suba al cajón: abriría el menú de la burbuja encima.
                 evento.stopPropagation();
+                const ids = elegidos.has(decision.id) ? [...elegidos] : [decision.id];
                 if (!elegidos.has(decision.id)) setElegidos(new Set([decision.id]));
+                setMenuCuadrito({ ...sinElZoom(evento), ids });
               }}
-              title="Clic para editar · clic derecho para elegir · Shift+clic suma otro · clic afuera suelta"
+              title="Clic para editar · clic derecho: su menú · Shift+clic suma otro · clic afuera suelta"
               className={`min-w-[92px] rounded-md border px-4 py-2 text-sm font-bold uppercase tracking-wide shadow-sm ${
                 decision.enabled === false
                   ? "border-neutral-300 bg-neutral-200 text-neutral-500 line-through"
@@ -40967,7 +41022,7 @@ function BubbleDecisionsEditor({
       {decisions.length > 0 && (
         <div className="mt-2 space-y-1 text-[11px]">
           <p className="text-neutral-500">
-            Clic para llenar · clic derecho para elegir · Shift+clic suma otro · Ctrl+C / Cmd+C copia · clic afuera suelta.
+            Clic para llenar · clic derecho: copiar, duplicar, apagar o borrar · Shift+clic elige varios · Ctrl+C / Cmd+C copia · clic afuera suelta.
           </p>
           {/* El estado se LEE de los cuadritos, no de un interruptor: así lo
               que dice aquí no puede contradecir lo que se ve arriba. */}
