@@ -11,6 +11,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 import { getConversationById, type ConversationRow } from "@/lib/db";
 import { getClient } from "@/lib/openrouter";
 import { avisarQueLaIANoRespondio } from "@/lib/notifications";
+import { empresaQueRespondio, esBasuraDeLaIA } from "@/lib/ia-basura";
 import { sendChunkedBotText } from "@/lib/workflow/engine";
 import { loadWorkflowConfig } from "@/lib/workflow/config";
 import { ultimosMensajes } from "./lector";
@@ -676,19 +677,6 @@ export function datosRecienEnviados(conversationId: number): boolean {
 }
 
 /**
- * ¿LA IA DEVOLVIÓ BASURA? (12/11/2026) Una respuesta de verdad tiene al menos 2 palabras y está en español. Lo que llegó
- * roto: `* "to * * *` (1 palabra), `*Dec 24, _ * 🎓` (1), `abandona the " " "trademarks,"` (3, dos en inglés). No mira
- * el sentido —eso no se puede—, solo lo que ninguna respuesta buena tiene: casi sin palabras, o palabras sueltas en inglés.
- */
-export function esBasuraDeLaIA(t: string): boolean {
-  const palabras = (t.replace(/https?:\/\/\S+/g, " ").match(/[a-záéíóúñü]{2,}/gi) ?? []).map((p) => p.toLowerCase());
-  // (Con 2 basta: «Ok, gracias» es una respuesta; «* "to * * *» tiene una sola palabra.)
-  if (palabras.length < 2) return true;
-  const INGLES = new Set(["the", "to", "and", "of", "is", "in", "for", "with", "that", "this", "it", "on", "are", "be", "trademarks", "abandon"]);
-  return palabras.filter((p) => INGLES.has(p)).length / palabras.length >= 0.3;
-}
-
-/**
  * Contesta con la IA y lo envía en burbujas. Si la IA nombra un monto que no está permitido, se le
  * pide otra vez; si insiste, se quitan las frases con ese monto. Nunca sale un precio inventado.
  */
@@ -836,7 +824,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       // recibieron `* "to * * *`, `abandona the " " "trademarks,"` y `*Dec 24, _ * 🎓` (7–14 tokens de GMICloud, que
       // llamada aparte respondía bien: falla por ratos). Se pide otra vez a OTRA empresa; si todas fallan, no se manda.
       if (texto && esBasuraDeLaIA(texto)) {
-        const empresa = String((r as { provider?: string }).provider ?? "").toLowerCase().replace(/\s+/g, "");
+        const empresa = empresaQueRespondio(r);
         console.warn(`[tablero:ia] convo ${convo.id}: la IA devolvió basura («${texto.slice(0, 60)}», ${empresa || "?"}) → se pide otra vez a otra empresa`);
         if (empresa && !empresasConBasura.includes(empresa)) empresasConBasura.push(empresa);
         texto = "";
@@ -851,6 +839,13 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     if (malos.length === 0) break;
     console.log(`[tablero:ia] convo ${convo.id}: nombró montos que no son suyos (${malos.join(", ")}), se le pide otra vez`);
     aviso += `\n\nIMPORTANTE: tu respuesta anterior nombró montos no permitidos (${malos.join(", ")}). No los repitas.`;
+  }
+  // TODAS DEVOLVIERON BASURA (12/11/2026): no se manda nada roto ni a medias, y se avisa al dueño como cuando la IA no
+  // responde (Telegram), para que le escriba él.
+  if (!texto && empresasConBasura.length > 0) {
+    console.warn(`[tablero:ia] convo ${convo.id}: ninguna empresa dio una respuesta sana (${empresasConBasura.join(", ")}) → no se manda nada y se avisa`);
+    avisarQueLaIANoRespondio(convo);
+    return false;
   }
   // EL CIERRE LO PONE EL BOT SI FALTA (27/10/2026): vendiendo, la respuesta termina con una pregunta
   // suave, como la venta de siempre. Antes se le pedía otra respuesta a la IA (se pagaba dos veces);

@@ -1,5 +1,7 @@
 ﻿import fs from "node:fs";
 import OpenAI from "openai";
+import { empresaQueRespondio, esBasuraDeLaIA } from "@/lib/ia-basura";
+import { avisarQueLaIANoRespondio } from "@/lib/notifications";
 import type {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionMessageParam,
@@ -3634,10 +3636,14 @@ export async function generateCountryReask(
     max_tokens: 120,
     temperature: 0.85,
   });
-  return (
-    completion.choices[0]?.message?.content?.trim() ||
-    "¡Claro! 😊 Cuéntame primero de qué país nos escribes para darte la información correcta."
-  );
+  const fijo = "¡Claro! 😊 Cuéntame primero de qué país nos escribes para darte la información correcta.";
+  const dicho = completion.choices[0]?.message?.content?.trim() ?? "";
+  // (12/11/2026) Si la IA devolvió basura, sale la frase fija (ver `@/lib/ia-basura`).
+  if (dicho && esBasuraDeLaIA(dicho)) {
+    console.warn(`[llm] pregunta del país: la IA devolvió basura («${dicho.slice(0, 60)}») → sale la frase fija`);
+    return fijo;
+  }
+  return dicho || fijo;
 }
 
 export async function generateReply(
@@ -3932,6 +3938,9 @@ async function generateReplyConSuFila(
   let paymentPressureRetries = 0;
   let minimizedBasicRetries = 0;
   let respuestaVaciaRetries = 0;
+  // LA RESPUESTA ROTA NO SALE (12/11/2026, ver `@/lib/ia-basura`): se pide otra vez sin la empresa que la mandó.
+  const empresasConBasura: string[] = [];
+  let basuraRetries = 0;
   let ofreceFotosSinTenerRetries = 0;
   let otroAlfabetoRetries = 0;
   // ¿HAY ALGUNA MUESTRA QUE MANDAR EN ESTA CONVERSACIÓN?
@@ -3977,6 +3986,8 @@ async function generateReplyConSuFila(
     const request = {
       model,
       messages,
+      // La empresa que acaba de devolver basura no atiende el reintento (12/11/2026). Sin basura, el pedido de siempre.
+      ...(empresasConBasura.length ? { provider: { ignore: empresasConBasura, allow_fallbacks: true } } : {}),
       // Solo cuando el turno trae un PDF: le pedimos a OpenRouter que le saque
       // el texto antes de dárselo al modelo. El motor "pdf-text" no tiene costo.
       // Sin PDF el cuerpo de la petición queda EXACTAMENTE igual que antes.
@@ -4089,6 +4100,20 @@ async function generateReplyConSuFila(
           `[llm] convo ${ctx.conversationId ?? "?"}: sigue devolviendo vacío; uso el respaldo`
         );
         return safeEmptyLlmReply(convo);
+      }
+      // LA RESPUESTA ROTA (12/11/2026, ver `@/lib/ia-basura`): `* "to * * *` y parecidos no salen. Se pide otra vez
+      // a otra empresa (hasta 2 veces); si sigue rota, no se manda nada y se avisa al dueño, como cuando no responde.
+      if (!compactReceiptPrompt && esBasuraDeLaIA(text)) {
+        const empresa = empresaQueRespondio(completion);
+        if (basuraRetries < 2) {
+          basuraRetries += 1;
+          if (empresa && !empresasConBasura.includes(empresa)) empresasConBasura.push(empresa);
+          console.warn(`[llm] convo ${ctx.conversationId ?? "?"}: la IA devolvió basura («${text.slice(0, 60)}», ${empresa || "?"}) → se pide otra vez a otra empresa`);
+          continue;
+        }
+        console.warn(`[llm] convo ${ctx.conversationId ?? "?"}: sigue devolviendo basura → no se manda nada y se avisa al dueño`);
+        if (convo) avisarQueLaIANoRespondio(convo);
+        return "";
       }
       if (compactReceiptPrompt) {
         // LA SEÑA INTERNA NO LLEGA AL CLIENTE, PASE LO QUE PASE.
