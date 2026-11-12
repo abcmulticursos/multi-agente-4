@@ -7420,14 +7420,6 @@ whatsapp:
       salida: siguiente
       a: f-mwd56hap-5ol7q
       vista: cable
-    - id: c-mwd56hap-i14v5
-      de: f-mwd56hap-n7sdq
-      salida: sin_pago
-      a: f-mwd56hap-vlmus
-    - id: c-mwd56hap-qoxn1
-      de: f-mwd56hap-cv12m
-      salida: sin_pago
-      a: f-mwd56hap-vlmus
     - id: c-mwd56hap-oxyuh
       de: f-mwd56hao-5kx9i
       salida: siguiente
@@ -7448,6 +7440,16 @@ whatsapp:
       de: f-mwczmr06-2e3sw
       salida: rep:rmwd56uqa
       a: f-mwd4ohba-anmwl
+    - id: c-mwd6wymg-b52
+      de: f-mwd56hap-cv12m
+      salida: sin_pago
+      a: f-mwd56hap-vlmus
+      a_espejo: e-mwd6wtu8-p9wf
+    - id: c-mwd6x1vk-4cj
+      de: f-mwd56hap-n7sdq
+      salida: sin_pago
+      a: f-mwd56hap-vlmus
+      a_espejo: e-mwd6x03c-ohcc
   cajas:
     - id: velo-mwcazaol-0
       x: -979
@@ -7539,3 +7541,11 @@ whatsapp:
       ficha: f-mwd4ohbb-durm4
       x: 2013
       y: 14080
+    - id: e-mwd6wtu8-p9wf
+      ficha: f-mwd56hap-vlmus
+      x: 2167
+      y: 8811
+    - id: e-mwd6x03c-ohcc
+      ficha: f-mwd56hap-vlmus
+      x: 2145
+      y: 9515
