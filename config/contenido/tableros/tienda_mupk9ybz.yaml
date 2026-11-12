@@ -2726,7 +2726,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwczmr06-612qt
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwczmr06-i3mej
               peso: 1
@@ -3008,7 +3008,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwczmr07-jjflu
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwczmr07-r0hcg
               peso: 1
@@ -3208,13 +3208,13 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwczmr07-pq322
       tipo: seguimientos
-      x: -297
-      y: 12309
+      x: -374
+      y: 12298
       presenta:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwczmr07-3qlp6
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwczmr07-xu1v4
               peso: 1
@@ -3375,7 +3375,7 @@ whatsapp:
                   spintax_ia:
                     - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo dime cuál método de pago prefieres* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}"
         - id: s-mwczmr07-4zv3g
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwczmr07-hle6d
               peso: 1
@@ -3869,8 +3869,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwd56hap-vlmus
       tipo: seguimientos
-      x: 957
-      y: 9119
+      x: 880
+      y: 9108
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -3878,7 +3878,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwd56hap-vcfa0
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwd56hap-us6sg
               peso: 1
@@ -4160,7 +4160,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwd56hap-rwhgo
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwd56hap-ffwyv
               peso: 1
@@ -4372,13 +4372,13 @@ whatsapp:
       titulo: Regalo
     - id: f-mwd56hap-wi8xi
       tipo: seguimientos
-      x: -121
-      y: 8987
+      x: -198
+      y: 8976
       presenta:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwd56hap-541js
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwd56hap-59vkj
               peso: 1
@@ -4537,7 +4537,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwd56hap-4oad8
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwd56hap-e7dvu
               peso: 1
@@ -5019,8 +5019,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdatl63-2tf8d
       tipo: seguimientos
-      x: 946
-      y: 10758
+      x: 869
+      y: 10747
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -5028,7 +5028,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdatl63-amvra
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwdatl63-uzxla
               peso: 1
@@ -5315,7 +5315,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdatl63-152ph
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdatl64-oijp9
               peso: 1
@@ -5527,13 +5527,13 @@ whatsapp:
       titulo: Regalo
     - id: f-mwdatl64-802k0
       tipo: seguimientos
-      x: -132
-      y: 10626
+      x: -209
+      y: 10615
       presenta:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdatl64-h0kvi
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwdatl64-2yuln
               peso: 1
@@ -5697,7 +5697,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
         - id: s-mwdatl64-huuhx
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdatl64-mkvbd
               peso: 1
@@ -6198,8 +6198,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdbe0qi-62xro
       tipo: seguimientos
-      x: 836
-      y: 14366
+      x: 759
+      y: 14355
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -6207,7 +6207,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdbe0qi-h8j5r
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwdbe0qi-5hv84
               peso: 1
@@ -6489,7 +6489,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdbe0qi-i4uxh
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdbe0qi-6b0qs
               peso: 1
@@ -6689,13 +6689,13 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdbe0qi-m18se
       tipo: seguimientos
-      x: -242
-      y: 14190
+      x: -319
+      y: 14179
       presenta:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdbe0qi-cw4ut
-          minutos: 2
+          minutos: 20
           variantes:
             - id: v-mwdbe0qi-prbek
               peso: 1
@@ -6856,7 +6856,7 @@ whatsapp:
                   spintax_ia:
                     - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseas adquirirlo, solo dime cuál método de pago prefieres* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}"
         - id: s-mwdbe0qj-387f4
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdbe0qj-yfkzw
               peso: 1
