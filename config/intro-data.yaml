@@ -2890,12 +2890,25 @@ payment_profiles_by_country:
       - label: Daviplata 🤳🏼
         method: bancolombia
         aliases:
-          - bancolombia
-          - transferencia
+          - daviplata
+          - dviplta
+          - davi
+          - con davi
+          - con davipla
+          - davplata
+          - daviplat
+          - con dav
+          - dav
       - label: Bre-B 😊
         method: daviplata
         aliases:
-          - daviplata
+          - Bre
+          - con bre
+          - bre-b
+          - con bre-b
+          - bree
+          - vre-b
+          - tengo bre
     payment_responses:
       nequi:
         - type: text
