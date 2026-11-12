@@ -3972,7 +3972,9 @@ export default function LienzoDePizarra({
       // SIN MOVERSE Y SIN QUEDARSE EL RATÓN: arrastrar dentro mueve el panorama. Solo sus
       // bordes, esquinas y título responden (ver `NodoDeCaja`).
       style: { width: c.ancho, height: c.alto, pointerEvents: "none" as const },
-      zIndex: -10,
+      // Siempre debajo de las fichas, también elegida (12/11/2026): React Flow suma 1000 a lo elegido; con -10 subía a 990
+      // y su color atenuaba las fichas. Con -2000, elegida queda en -1000.
+      zIndex: -2000,
       // ENTRA EN LA SELECCIÓN SI QUEDA ENTERA DENTRO (19/10/2026): «cuando seleccione completamente
       // el cajón transparente de país también entre en la calidad de objeto seleccionado». Y se
       // mueve con el grupo. Sigue sin atrapar el ratón (arrastrar dentro mueve el panorama): solo

@@ -2607,7 +2607,10 @@ export default function LienzoDelTablero({
               }
             : {}),
         } satisfies DatosDeCaja,
-        zIndex: -10,
+        // SIEMPRE DEBAJO DE LAS FICHAS, TAMBIÉN ELEGIDO (12/11/2026, él: «mira cómo se han atenuado las fichas»). React Flow
+        // le suma 1000 a lo elegido: con -10 un velo elegido subía a 990 y su color tapaba sus fichas (en 0). Con -2000
+        // elegido queda en -1000.
+        zIndex: -2000,
       });
     }
     // (Modo estaciones: la estación va DENTRO del mismo bloque de su ficha —ver `NodoDeFicha`—: se mueve con
