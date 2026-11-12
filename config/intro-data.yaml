@@ -5986,6 +5986,11 @@ biblioteca_de_productos:
     aliases: []
     price_soles: 0
     delivery:
+      - type: video
+        drive_url: https://drive.google.com/file/d/1erFqw0jh7Tvp-hgS8sb6fpyLT4-58b0k/view?usp=drive_link
+        caption_variants:
+          - ""
+        delay_after_sec: 6
       - type: text
         body_variants:
           - |
