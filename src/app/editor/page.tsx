@@ -40109,6 +40109,11 @@ function StepList({
 
   return (
     <DndContext onDragStart={onDragStartDnd} onDragEnd={onDragEndDnd}>
+    {/* En columna para poder colocar la barra de apagadas ENCIMA de lo que
+        esconde: el navegador respeta el orden que se le pide abajo.
+        (12/11/2026: los botones de «✨ Variar con IA» van DENTRO de esta columna. Fuera, eran otro elemento suelto en la
+        rejilla del visor y lo desarmaban: el cajón arriba a la derecha y la vista previa abajo.) */}
+    <div className="flex flex-col space-y-4">
     {variando && (
       <VentanaDeVariarFicha
         steps={steps}
@@ -40148,9 +40153,6 @@ function StepList({
         )}
       </div>
     )}
-    {/* En columna para poder colocar la barra de apagadas ENCIMA de lo que
-        esconde: el navegador respeta el orden que se le pide abajo. */}
-    <div className="flex flex-col space-y-4">
       {steps.map((step, i) =>
         step.enabled === false && !mostrarApagadas ? null : (
         <div
