@@ -2296,10 +2296,12 @@ whatsapp:
         - type: text
           body_variants:
             - |-
+              *Hola!! te saluda Andrea* 🙋‍♀️
+
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
 
-              *Con {{PRODUCTO_BASE}}* transformarás el aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
+              *Con {{PRODUCTO_BASE}}* transformarás su aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
 
               ✅ Ideal para mantener su atención *sin obligarlo*
 
@@ -2340,7 +2342,7 @@ whatsapp:
 
               🟠 *¿COMO LO ADQUIERO?*
 
-              * 1.- 💴 Realiza un único pago de *{{PRECIO_DIFERENCIA}}*
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
               *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
