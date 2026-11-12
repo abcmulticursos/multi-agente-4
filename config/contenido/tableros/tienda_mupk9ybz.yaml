@@ -11703,8 +11703,8 @@ whatsapp:
       titulo: Regalo
     - id: inicio-AR-mwdbncsu
       tipo: inicio
-      x: -2057
-      y: 20680
+      x: -1870
+      y: 20383
       pais: AR
       sin_venta: true
     - id: f-mwdbnotb-nbdmi
@@ -12551,6 +12551,10 @@ whatsapp:
       de: f-mwdbnotb-nbdmi
       salida: rep:rmwd4ovya
       a: f-mwdbn0ci-0kjza
+    - id: c-mwdcmjhk-k58
+      de: inicio-AR-mwdbncsu
+      salida: siguiente
+      a: f-mwdbnotb-nbdmi
   cajas:
     - id: velo-mwcazaol-0
       x: -869
