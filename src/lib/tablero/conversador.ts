@@ -676,6 +676,19 @@ export function datosRecienEnviados(conversationId: number): boolean {
 }
 
 /**
+ * ¿LA IA DEVOLVIÓ BASURA? (12/11/2026) Una respuesta de verdad tiene al menos 2 palabras y está en español. Lo que llegó
+ * roto: `* "to * * *` (1 palabra), `*Dec 24, _ * 🎓` (1), `abandona the " " "trademarks,"` (3, dos en inglés). No mira
+ * el sentido —eso no se puede—, solo lo que ninguna respuesta buena tiene: casi sin palabras, o palabras sueltas en inglés.
+ */
+export function esBasuraDeLaIA(t: string): boolean {
+  const palabras = (t.replace(/https?:\/\/\S+/g, " ").match(/[a-záéíóúñü]{2,}/gi) ?? []).map((p) => p.toLowerCase());
+  // (Con 2 basta: «Ok, gracias» es una respuesta; «* "to * * *» tiene una sola palabra.)
+  if (palabras.length < 2) return true;
+  const INGLES = new Set(["the", "to", "and", "of", "is", "in", "for", "with", "that", "this", "it", "on", "are", "be", "trademarks", "abandon"]);
+  return palabras.filter((p) => INGLES.has(p)).length / palabras.length >= 0.3;
+}
+
+/**
  * Contesta con la IA y lo envía en burbujas. Si la IA nombra un monto que no está permitido, se le
  * pide otra vez; si insiste, se quitan las frases con ese monto. Nunca sale un precio inventado.
  */
@@ -689,6 +702,8 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
   let aviso = "";
   let conMuestras = !!(c.enviarMuestras && c.muestras?.length);
   let salieronMuestras = false;
+  /** Las empresas que devolvieron basura en ESTE turno: no se les vuelve a pedir (ver `esBasuraDeLaIA`). */
+  const empresasConBasura: string[] = [];
   for (let intento = 0; intento < 3; intento++) {
     try {
       const herramientas =
@@ -721,7 +736,16 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
         // del 05/11 y la copia: 12 respuestas, 3%). Medido en la copia, 4 clientes × 3 turnos: sin orden fijo 39%
         // (saltaba entre empresas); GMICloud primero 79%, 11 de 12 entre 82 y 90%, todas por debajo de 20 s. El
         // corte de 60 s de la IA (limites.ts) y las otras dos detrás siguen cuidando que no se quede mudo.
-        ...({ provider: { order: ["gmicloud", "relace", "cloudflare"], allow_fallbacks: true } } as object),
+        // (12/11/2026) Una empresa que acaba de devolver basura no se vuelve a usar en este turno (ver `esBasuraDeLaIA`).
+        ...({
+          provider: {
+            // RELACE PRIMERO (12/11/2026): GMICloud devolvió basura en 3 de 3 turnos reales en la copia (con la llamada
+            // completa; una pregunta suelta sí la contestaba). Relace contestó bien los 3. Queda detrás, por si vuelve.
+            order: ["relace", "gmicloud", "cloudflare"].filter((x) => !empresasConBasura.includes(x)),
+            ...(empresasConBasura.length ? { ignore: empresasConBasura } : {}),
+            allow_fallbacks: true,
+          },
+        } as object),
         ...SIN_PENSAR_DE_MAS,
       });
       // LO QUE CUESTA CADA TURNO, para medirlo contra la venta de siempre.
@@ -808,6 +832,16 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       }
       texto = (r.choices[0]?.message?.content ?? "").trim();
       crudo = texto || `(sin texto${r.choices[0]?.message?.tool_calls?.length ? `; pidió ${r.choices[0].message.tool_calls.map((x) => (x.type === "function" ? x.function.name : x.type)).join(", ")}` : ""})`;
+      // LA RESPUESTA ROTA NO SALE (12/11/2026). Él: «el bot está empezando a soltar caracteres raros» — tres clientes
+      // recibieron `* "to * * *`, `abandona the " " "trademarks,"` y `*Dec 24, _ * 🎓` (7–14 tokens de GMICloud, que
+      // llamada aparte respondía bien: falla por ratos). Se pide otra vez a OTRA empresa; si todas fallan, no se manda.
+      if (texto && esBasuraDeLaIA(texto)) {
+        const empresa = String((r as { provider?: string }).provider ?? "").toLowerCase().replace(/\s+/g, "");
+        console.warn(`[tablero:ia] convo ${convo.id}: la IA devolvió basura («${texto.slice(0, 60)}», ${empresa || "?"}) → se pide otra vez a otra empresa`);
+        if (empresa && !empresasConBasura.includes(empresa)) empresasConBasura.push(empresa);
+        texto = "";
+        continue;
+      }
     } catch (err) {
       console.error(`[tablero:ia] convo ${convo.id}: la IA no respondió`, err);
       avisarQueLaIANoRespondio(convo);
