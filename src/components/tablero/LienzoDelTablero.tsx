@@ -522,6 +522,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
   const conectado = !!ctx?.tablero.cables.some((c) => c.de === f.id && (c.salida === "siguiente" || c.salida.startsWith("anuncio:")));
   // VARIAS TUBERÍAS EN UN PAÍS (26/10/2026): el Inicio separa por anuncio, cada uno con su salida.
   const [eligiendoAnuncios, setEligiendoAnuncios] = useState(false);
+  const [eligiendoPais, setEligiendoPais] = useState<{ x: number; y: number } | null>(null);
   const anunciosDisponibles = Object.entries(ctx?.nombres ?? {})
     .filter(([k]) => k.startsWith("anuncio:"))
     .map(([k, nombre]) => ({ clave: k.slice(8), nombre }));
@@ -559,14 +560,35 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
     >
       <QuienCobraEnElInicio pais={f.pais} />
       <LogoDelCanal tamano={44} />
-      {/* La bandera, grande, encima del Inicio (crece al alejar). */}
+      {/* La bandera, grande, encima del Inicio (crece al alejar). DOBLE CLIC: cambiar el país de esta área (12/11/2026,
+          él: «los velos tienen una bandera arriba a la izquierda… dar doble clic en su bandera y seleccionar el país»). */}
       <div
-        className="pointer-events-none absolute bottom-full left-0 mb-1 leading-none"
+        className="nodrag nopan absolute bottom-full left-0 mb-1 cursor-pointer leading-none"
         style={{ fontSize: 46, transform: `scale(${deLejos})`, transformOrigin: "bottom left" }}
-        aria-hidden="true"
+        title="Doble clic para cambiar el país de esta área"
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          const r = e.currentTarget.getBoundingClientRect();
+          setEligiendoPais({ x: r.left, y: r.bottom + 6 });
+        }}
       >
         {f.pais ? banderaDe(f.pais) : "🌍"}
       </div>
+      {eligiendoPais && ctx && (
+        <ElegirPaisDeLaManta
+          actual={f.pais ?? ""}
+          ocupados={ctx.tablero.fichas.filter((x) => x.tipo === "inicio" && x.id !== f.id).map((x) => x.pais ?? "")}
+          donde={eligiendoPais}
+          onCerrar={() => setEligiendoPais(null)}
+          onElegir={(p) => {
+            const de = f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países";
+            const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+            setEligiendoPais(null);
+            if (!window.confirm(`¿Cambiar esta área de ${de} a ${a}?\n\nDesde ahora los clientes de ${a} entran por este Inicio (los de ${de} ya no). Ctrl+Z lo deshace.`)) return;
+            cambiar({ pais: p || undefined });
+          }}
+        />
+      )}
       {/* Su país, solo el nombre, debajo del Inicio (crece al alejar). */}
       <div
         className="pointer-events-none absolute left-0 top-full mt-1 whitespace-nowrap text-xl font-black leading-none text-slate-700"
@@ -1215,6 +1237,12 @@ type DatosDeCaja = {
   alBorrar: () => void;
   /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
   manta?: { titulo: string; mirando: boolean; alVer: () => void; pais?: string; ocupados?: string[]; alCambiarPais?: (pais: string) => void };
+  /** VELO COMÚN ↔ VELO DE PAÍS (12/11/2026). Los países que ya tienen su área con velo (no se ofrecen). */
+  paisesConArea?: string[];
+  /** Un velo común pasa a ser el de ese país: se une a su Inicio, o se le crea uno sin conectar. */
+  alHacerDePais?: (pais: string) => void;
+  /** Un velo de país vuelve a ser común (su Inicio se queda donde está). */
+  alHacerComun?: () => void;
 };
 
 /** El selector de país de una manta (doble clic en su bandera), con buscador como el de las tiendas. */
@@ -1224,13 +1252,19 @@ function ElegirPaisDeLaManta({
   donde,
   onElegir,
   onCerrar,
+  titulo = "Cambiar el país de esta área",
+  extras = [],
 }: {
-  actual: string;
+  /** El país de ahora; `null` = un velo común (ningún país marcado). */
+  actual: string | null;
   ocupados: string[];
   /** Dónde está el título en la pantalla: la lista va justo debajo, ENCIMA de todo (el velo está detrás de las fichas). */
   donde: { x: number; y: number };
   onElegir: (p: string) => void;
   onCerrar: () => void;
+  titulo?: string;
+  /** Opciones arriba de la lista («✏️ Renombrar», «⬜ Sin país»). */
+  extras?: Array<{ texto: string; alElegir: () => void }>;
 }) {
   const [busca, setBusca] = useState("");
   const normal = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
@@ -1249,11 +1283,21 @@ function ElegirPaisDeLaManta({
       onMouseDown={(e) => e.stopPropagation()}
     >
       <div className="mb-1 flex items-center justify-between text-xs font-bold text-slate-600">
-        Cambiar el país de esta área
+        {titulo}
         <button type="button" onClick={onCerrar} className="rounded px-1.5 hover:bg-slate-100" title="Cerrar (Esc)">
           ✕
         </button>
       </div>
+      {extras.map((x) => (
+        <button
+          key={x.texto}
+          type="button"
+          onClick={x.alElegir}
+          className="mb-1 block w-full rounded border border-slate-200 bg-slate-50 px-2 py-1 text-left text-sm font-semibold hover:bg-slate-100"
+        >
+          {x.texto}
+        </button>
+      ))}
       <input
         autoFocus
         value={busca}
@@ -1309,14 +1353,10 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
           }}
           onDoubleClick={(e) => {
             // La manta de un país se llama por su bandera: no se renombra; con doble clic se cambia su PAÍS (12/11/2026).
-            if (manta) {
-              e.stopPropagation();
-              const r = e.currentTarget.getBoundingClientRect();
-              if (manta.alCambiarPais) setEligiendoPais({ x: r.left, y: r.bottom + 6 });
-              return;
-            }
-            const nuevo = window.prompt("Nombre de la caja", data.caja.titulo);
-            if (nuevo !== null) data.alCambiar({ ...data.caja, titulo: nuevo.slice(0, 80) });
+            // Un velo común: renombrarlo, o hacerlo velo de un país.
+            e.stopPropagation();
+            const r = e.currentTarget.getBoundingClientRect();
+            setEligiendoPais({ x: r.left, y: r.bottom + 6 });
           }}
           className={`ml-5 mt-3 inline-block cursor-pointer rounded-md px-1 text-sm font-bold uppercase tracking-wide ${data.elegida ? "underline" : ""}`}
           style={{ color: t.tituloCaja, pointerEvents: "all" }}
@@ -1334,12 +1374,51 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             ocupados={manta.ocupados ?? []}
             donde={eligiendoPais}
             onCerrar={() => setEligiendoPais(null)}
+            extras={
+              data.alHacerComun
+                ? [
+                    {
+                      texto: "⬜ Sin país (velo común)",
+                      alElegir: () => {
+                        setEligiendoPais(null);
+                        if (!window.confirm("¿Volver este velo a uno común, sin país?\n\nSu Inicio se queda donde está (si quieres quitarlo, clic derecho → «🗑 Quitar país»). Ctrl+Z lo deshace.")) return;
+                        data.alHacerComun?.();
+                      },
+                    },
+                  ]
+                : []
+            }
             onElegir={(p) => {
               const de = manta.pais ? `${banderaDe(manta.pais)} ${manta.pais}` : "🌍 Otros países";
               const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
               setEligiendoPais(null);
               if (!window.confirm(`¿Cambiar esta área de ${de} a ${a}?\n\nDesde ahora los clientes de ${a} entran por este Inicio (los de ${de} ya no). Ctrl+Z lo deshace.`)) return;
               manta.alCambiarPais?.(p);
+            }}
+          />
+        )}
+        {!manta && eligiendoPais && (
+          <ElegirPaisDeLaManta
+            actual={null}
+            ocupados={data.paisesConArea ?? []}
+            donde={eligiendoPais}
+            titulo="Este velo"
+            onCerrar={() => setEligiendoPais(null)}
+            extras={[
+              {
+                texto: "✏️ Renombrar",
+                alElegir: () => {
+                  setEligiendoPais(null);
+                  const nuevo = window.prompt("Nombre de la caja", data.caja.titulo);
+                  if (nuevo !== null) data.alCambiar({ ...data.caja, titulo: nuevo.slice(0, 80) });
+                },
+              },
+            ]}
+            onElegir={(p) => {
+              const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+              setEligiendoPais(null);
+              if (!window.confirm(`¿Hacer este velo el área de ${a}?\n\nSi ${a} no tiene Inicio, se le crea uno arriba a la izquierda SIN CONECTAR: tírale el cable a la primera ficha. Ctrl+Z lo deshace.`)) return;
+              data.alHacerDePais?.(p);
             }}
           />
         )}
@@ -2471,6 +2550,43 @@ export default function LienzoDelTablero({
             cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).filter((x) => x.id !== c.id) });
             setCajaElegida(null);
           },
+          // VELO COMÚN ↔ VELO DE PAÍS (12/11/2026). Él: «¿a un velo común se le puede convertir a velo de país… doble clic
+          // al nombre y elegir bandera?». Un país ya con su velo no se ofrece (uno por país).
+          paisesConArea: tablero.fichas
+            .filter((x) => x.tipo === "inicio" && x.id !== c.inicio && (tablero.cajas ?? []).some((k) => k.inicio === x.id))
+            .map((x) => x.pais ?? ""),
+          alHacerDePais: (p: string) => {
+            const actual = vivo.current;
+            const suyo = actual.fichas.find((x) => x.tipo === "inicio" && (x.pais ?? "") === p);
+            // Con Inicio sin velo, se une a él; sin Inicio, se le crea uno arriba a la izquierda, SIN CONECTAR
+            // («nada se conecta solo»), como «🌎 Área de un país».
+            const nuevo: FichaEnElEditor | null = suyo
+              ? null
+              : { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: c.x + 40, y: c.y + 70 };
+            cambiar({
+              ...actual,
+              fichas: nuevo ? [...actual.fichas, nuevo] : actual.fichas,
+              cajas: (actual.cajas ?? []).map((x) => (x.id === c.id ? { ...x, inicio: (suyo ?? nuevo)!.id } : x)),
+            });
+            setAviso(
+              nuevo
+                ? `${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: el velo es su área y tiene su Inicio arriba a la izquierda. Conéctalo a la primera ficha de su ruta.`
+                : `${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: el velo es ahora el área de su Inicio.`
+            );
+          },
+          ...(ini
+            ? {
+                alHacerComun: () =>
+                  cambiar({
+                    ...vivo.current,
+                    cajas: (vivo.current.cajas ?? []).map((x) => {
+                      if (x.id !== c.id) return x;
+                      const { inicio: _inicio, ...resto } = x;
+                      return { ...resto, titulo: x.titulo || (ini.pais ? COUNTRIES[ini.pais as CountryCode]?.label ?? ini.pais : "Otros países") };
+                    }),
+                  }),
+              }
+            : {}),
           ...(ini
             ? {
                 manta: {
