@@ -3,8 +3,8 @@ whatsapp:
   fichas:
     - id: inicio-mvveb83v-1
       tipo: inicio
-      x: -1925
-      y: 2112
+      x: -2024
+      y: 2618
       pais: PE
     - id: intro-mvveb83v-2
       tipo: mensaje
@@ -2296,7 +2296,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Hola!! te saluda Andrea* 🙋‍♀️
+              *Hola!! te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊
 
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
@@ -2966,8 +2966,6 @@ whatsapp:
                   caption_variants:
                     - |-
                       *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
-
-                      📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
 
                       🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
                       *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
@@ -3864,8 +3862,8 @@ whatsapp:
         producto_id: pmv5xqgst
     - id: f-mwceddd4-fz4n
       tipo: reparto
-      x: -1474
-      y: 2134
+      x: -1452
+      y: 2706
       reparto:
         - id: r1
           peso: 0
