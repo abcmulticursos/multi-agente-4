@@ -1,7 +1,8 @@
 /**
  * «🇦🇷 VOSEO» DESDE EL NAVEGADOR (12/11/2026). Él: «me gustaría que le cambie a todo lo que yo seleccione, por ejemplo
  * 20 fichas». Los textos van a `/api/voseo` (que esconde comodines y enlaces de la IA y descarta lo que vuelva tocado)
- * en tandas de 20, tres a la vez; un texto repetido se pide una sola vez y sale igual en todos sus sitios.
+ * en tandas de 6, cinco a la vez, y en dos vueltas (ver abajo); un texto repetido se pide una sola vez y sale igual en
+ * todos sus sitios.
  * «✏️ Corregir ortografía» (12/11/2026, él: «me gustaría que haya una opción de corrección automática también») usa lo
  * mismo con `modo: "ortografia"`: solo tildes y erratas, sin tocar el tuteo.
  */
@@ -12,27 +13,46 @@ export async function pasarAVoseo(
   modo: "voseo" | "ortografia" = "voseo"
 ): Promise<{ porTexto: Map<string, ResultadoDeVoseo>; costo: number }> {
   const unicos = [...new Set(textos.filter((t) => t.trim()))];
-  const porTexto = new Map<string, ResultadoDeVoseo>();
   let costo = 0;
-  const tandas: string[][] = [];
-  for (let i = 0; i < unicos.length; i += 20) tandas.push(unicos.slice(i, i + 20));
-  let siguiente = 0;
-  const obrero = async () => {
-    while (siguiente < tandas.length) {
-      const tanda = tandas[siguiente++];
-      try {
-        const r = await fetch("/api/voseo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ textos: tanda, modo }) });
-        const d = (await r.json()) as { resultados?: ResultadoDeVoseo[]; error?: string; costo?: number | null };
-        if (!r.ok || !d.resultados) throw new Error(d.error ?? "la IA no respondió");
-        tanda.forEach((t, k) => porTexto.set(t, d.resultados![k] ?? { texto: null, motivo: "la IA no devolvió esta burbuja" }));
-        if (typeof d.costo === "number") costo += d.costo;
-      } catch (e) {
-        const motivo = e instanceof Error ? e.message : "la IA no respondió";
-        tanda.forEach((t) => porTexto.set(t, { texto: null, motivo }));
+  // TANDAS DE 6 Y DOS VUELTAS (12/11/2026). Él: «¿por qué tengo que pasar 2 veces?». Con 20 burbujas juntas a la IA se le
+  // escapaban palabras sueltas (la primera de un spintax, «Responde»), y en otra pasada salían bien. Ahora van de 6 en 6
+  // y, sin que él haga nada, una segunda vuelta repasa lo que volvió: lo ya convertido no cambia; lo escapado se completa.
+  const pedir = async (lista: string[]): Promise<Map<string, ResultadoDeVoseo>> => {
+    const fuera = new Map<string, ResultadoDeVoseo>();
+    const tandas: string[][] = [];
+    for (let i = 0; i < lista.length; i += 6) tandas.push(lista.slice(i, i + 6));
+    let siguiente = 0;
+    const obrero = async () => {
+      while (siguiente < tandas.length) {
+        const tanda = tandas[siguiente++];
+        try {
+          const r = await fetch("/api/voseo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ textos: tanda, modo }) });
+          const d = (await r.json()) as { resultados?: ResultadoDeVoseo[]; error?: string; costo?: number | null };
+          if (!r.ok || !d.resultados) throw new Error(d.error ?? "la IA no respondió");
+          tanda.forEach((t, k) => fuera.set(t, d.resultados![k] ?? { texto: null, motivo: "la IA no devolvió esta burbuja" }));
+          if (typeof d.costo === "number") costo += d.costo;
+        } catch (e) {
+          const motivo = e instanceof Error ? e.message : "la IA no respondió";
+          tanda.forEach((t) => fuera.set(t, { texto: null, motivo }));
+        }
       }
-    }
+    };
+    await Promise.all([obrero(), obrero(), obrero(), obrero(), obrero()]);
+    return fuera;
   };
-  await Promise.all([obrero(), obrero(), obrero()]);
+  const primera = await pedir(unicos);
+  // Lo que vuelve a la segunda: lo que cambió (para completarlo) o, si se descartó, el original (otra oportunidad).
+  const deLaPrimera = (t: string) => primera.get(t)?.texto ?? t;
+  const segunda = await pedir([...new Set(unicos.map(deLaPrimera))]);
+  const porTexto = new Map<string, ResultadoDeVoseo>();
+  for (const t of unicos) {
+    const p = primera.get(t);
+    const s = segunda.get(deLaPrimera(t));
+    // La segunda manda si salió bien; si se descartó, se queda la primera; si las dos se descartaron, el motivo.
+    if (s?.texto) porTexto.set(t, { texto: s.texto });
+    else if (p?.texto) porTexto.set(t, { texto: p.texto });
+    else porTexto.set(t, { texto: null, motivo: s?.motivo ?? p?.motivo ?? "la IA no respondió" });
+  }
   return { porTexto, costo };
 }
 
