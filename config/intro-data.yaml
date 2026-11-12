@@ -2982,11 +2982,12 @@ payment_profiles_by_country:
       👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
       💰️ Precio: {precio}
     metodo_pago_2: |-
-      *Banco*: Bancolombia 🏦
+      🏦 *Banco*: Bancolombia
       *Tipo de cuenta*: Ahorros 
       *Número de cuenta*: 297 623618 07
-      *Titular:* Ormidas Quintero 🙎‍♂️
-      *Llave Bre-B*: @ormidas425
+      🙎‍♂️ *Titular:* Ormidas Quintero
+      🔑 *Llave Bre-B*: @ormidas425
+      💰️ *Precio* {precio}
     metodo_pago_3: |-
       🔴 *Nequi : {{CUENTA_NEQUI}}*
       👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
