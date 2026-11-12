@@ -2291,7 +2291,7 @@ whatsapp:
     - id: f-mwcazaoj-bn8iw
       tipo: mensaje
       x: -363
-      y: 2101
+      y: 2178
       steps:
         - type: text
           body_variants:
@@ -3113,7 +3113,7 @@ whatsapp:
               peso: 1
               steps:
                 - type: image
-                  drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                  drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
                       *ATENCION MAMITA* ‼️
