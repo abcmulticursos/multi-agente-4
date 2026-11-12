@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEscapeEnPila } from "@/lib/escape-en-pila";
 import { encajarEnLaPantalla } from "@/lib/encajar-en-pantalla";
+import { pasarAVoseo } from "@/lib/voseo";
 import EmojiPicker from "@/components/EmojiPicker";
 import InterruptorDeTema from "@/components/InterruptorDeTema";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
@@ -39556,29 +39557,49 @@ function palabrasCambiadas(antes: string, despues: string): Array<{ t: string; n
 function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; onAplicar: (nuevos: EditorStep[]) => void; onCerrar: () => void }) {
   useEscapeEnPila(() => onCerrar());
   // Cada texto de cada burbuja, y los grupos del spintax de la IA (para que «↩ Quitar spintax de la IA» los siga encontrando).
-  const lista = useMemo(() => {
+  // Se toma UNA vez al abrir: al aplicar, las burbujas cambian y el resumen sigue comparando con lo de antes.
+  const [lista] = useState(() => {
     const l: Array<{ paso: number; cual: number | `g${number}`; texto: string }> = [];
     steps.forEach((s, i) => {
       s.texts.forEach((t, k) => t.trim() && l.push({ paso: i, cual: k, texto: t }));
       (s.spintax_ia ?? []).forEach((g, k) => l.push({ paso: i, cual: `g${k}`, texto: g }));
     });
     return l;
-  }, [steps]);
+  });
   const [resultados, setResultados] = useState<Array<{ texto: string | null; motivo?: string }> | null>(null);
-  const [van, setVan] = useState<Set<number>>(new Set());
   const [error, setError] = useState("");
   const [costo, setCosto] = useState("");
+  // SE APLICA DE FRENTE (12/11/2026, él: «yo quiero que aplique de frente, yo leeré al final las fichas»). Una sola vez:
+  // lo que vuelve se pone en las burbujas y la ventana queda con el resumen (Ctrl+Z lo deshace).
+  const aplicado = useRef(false);
   useEffect(() => {
     let vivo = true;
     void (async () => {
       try {
-        const r = await fetch("/api/voseo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ textos: lista.map((x) => x.texto) }) });
-        const d = (await r.json()) as { resultados?: Array<{ texto: string | null; motivo?: string }>; error?: string; costo?: number | null };
-        if (!vivo) return;
-        if (!r.ok || !d.resultados) throw new Error(d.error ?? "No se pudo.");
-        setResultados(d.resultados);
-        setVan(new Set(d.resultados.map((x, i) => (x.texto && x.texto !== lista[i].texto && typeof lista[i].cual === "number" ? i : -1)).filter((i) => i >= 0)));
-        setCosto(typeof d.costo === "number" ? `Costó $${d.costo.toFixed(4)}` : "");
+        const { porTexto, costo } = await pasarAVoseo(lista.map((x) => x.texto));
+        if (!vivo || aplicado.current) return;
+        const res = lista.map((x) => porTexto.get(x.texto) ?? { texto: x.texto });
+        if (res.every((r) => r.texto === null)) throw new Error(res[0]?.motivo ?? "No se pudo.");
+        aplicado.current = true;
+        setResultados(res);
+        setCosto(costo > 0 ? `Costó $${costo.toFixed(4)}` : "");
+        const nuevos = steps.map((s) => ({ ...s, texts: [...s.texts], ...(s.spintax_ia ? { spintax_ia: [...s.spintax_ia] } : {}) }));
+        let cambio = false;
+        lista.forEach((x, i) => {
+          const nuevo = res[i]?.texto;
+          if (typeof x.cual !== "number" || !nuevo || nuevo === x.texto) return;
+          nuevos[x.paso].texts[x.cual] = nuevo;
+          cambio = true;
+        });
+        // El grupo del spintax de la IA pasado a voseo, si su burbuja ahora lo lleva así.
+        lista.forEach((x, i) => {
+          const nuevo = res[i]?.texto;
+          if (typeof x.cual === "number" || !nuevo) return;
+          const k = Number(x.cual.slice(1));
+          const s = nuevos[x.paso];
+          if (s.spintax_ia && (s.texts[0] ?? "").includes(nuevo)) s.spintax_ia[k] = nuevo;
+        });
+        if (cambio) onAplicar(nuevos);
       } catch (e) {
         if (vivo) setError(e instanceof Error ? e.message : "No se pudo.");
       }
@@ -39586,25 +39607,8 @@ function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; o
     return () => {
       vivo = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lista]);
-  const aplicar = () => {
-    if (!resultados) return;
-    const nuevos = steps.map((s) => ({ ...s, texts: [...s.texts], ...(s.spintax_ia ? { spintax_ia: [...s.spintax_ia] } : {}) }));
-    lista.forEach((x, i) => {
-      const nuevo = resultados[i]?.texto;
-      if (typeof x.cual !== "number" || !van.has(i) || !nuevo) return;
-      nuevos[x.paso].texts[x.cual] = nuevo;
-    });
-    // El grupo del spintax de la IA pasado a voseo, si su burbuja ahora lo lleva así.
-    lista.forEach((x, i) => {
-      const nuevo = resultados[i]?.texto;
-      if (typeof x.cual === "number" || !nuevo) return;
-      const k = Number(x.cual.slice(1));
-      const s = nuevos[x.paso];
-      if (s.spintax_ia && (s.texts[0] ?? "").includes(nuevo)) s.spintax_ia[k] = nuevo;
-    });
-    onAplicar(nuevos);
-  };
   const visibles = lista.map((x, i) => ({ x, i })).filter(({ x }) => typeof x.cual === "number");
   const cambiadas = resultados ? visibles.filter(({ x, i }) => resultados[i]?.texto && resultados[i].texto !== x.texto) : [];
   const descartadas = resultados ? visibles.filter(({ i }) => resultados[i]?.texto === null) : [];
@@ -39618,26 +39622,26 @@ function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; o
           </button>
         </div>
         <p className="mb-3 text-[13px] text-tinta-suave">
-          Solo cambia el tuteo por el voseo (tienes → tenés, escribe → escribí, tú → vos). Los comodines, enlaces, precios y números no
-          llegan a la IA. En verde, lo que cambia. Nada cambia hasta que pulses «Aplicar» (Ctrl+Z lo deshace).
+          Pasa el tuteo al voseo (tienes → tenés, escribe → escribí) y algunas palabras a las de Argentina (niños → chicos, aquí → acá).
+          Los comodines, enlaces, precios y números no llegan a la IA. Se aplica solo; Ctrl+Z lo deshace.
         </p>
-        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">Pidiendo a la IA…</p>}
+        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">Pasando a voseo…</p>}
         {resultados && (
           <div className="flex flex-col gap-2">
             {cambiadas.length === 0 && descartadas.length === 0 && <p className="text-sm text-tinta-suave">No hay nada que pasar a voseo en estas burbujas.</p>}
+            {cambiadas.length > 0 && (
+              <p className="text-sm font-bold text-emerald-700">
+                ✅ {cambiadas.length} {cambiadas.length === 1 ? "burbuja pasada" : "burbujas pasadas"} a voseo. En verde, lo que cambió.
+              </p>
+            )}
+            {descartadas.map(({ x, i }) => (
+              <div key={i} className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-1.5 text-[12px] text-amber-900">
+                Burbuja {x.paso + 1}
+                {Number(x.cual) > 0 ? ` · variante ${Number(x.cual) + 1}` : ""}: se queda como está ({resultados[i].motivo}). Cámbiala a mano si hace falta.
+              </div>
+            ))}
             {cambiadas.map(({ x, i }) => (
-              <label key={i} className={`flex cursor-pointer items-start gap-2 rounded-lg border border-borde px-2 py-1.5 ${van.has(i) ? "" : "opacity-50"}`}>
-                <input
-                  type="checkbox"
-                  className="mt-1"
-                  checked={van.has(i)}
-                  onChange={(e) => {
-                    const n = new Set(van);
-                    if (e.target.checked) n.add(i);
-                    else n.delete(i);
-                    setVan(n);
-                  }}
-                />
+              <div key={i} className="flex items-start gap-2 rounded-lg border border-borde px-2 py-1.5">
                 <span className="min-w-0 flex-1">
                   <span className="block text-[12px] font-bold text-tinta-suave">
                     Burbuja {x.paso + 1}
@@ -39655,29 +39659,15 @@ function VentanaDeVoseo({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; o
                     )}
                   </span>
                 </span>
-              </label>
-            ))}
-            {descartadas.map(({ x, i }) => (
-              <div key={i} className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-1.5 text-[12px] text-amber-900">
-                Burbuja {x.paso + 1}
-                {Number(x.cual) > 0 ? ` · variante ${Number(x.cual) + 1}` : ""}: se queda como está ({resultados[i].motivo}). Cámbiala a mano si hace falta.
               </div>
             ))}
           </div>
         )}
-        {error && <p className="mt-2 text-[12px] text-red-700">{error}</p>}
+        {error && <p className="mt-2 text-[12px] text-red-700">No se pudo pasar a voseo: {error}. No se cambió nada.</p>}
         <div className="mt-3 flex items-center justify-end gap-2">
           {costo && <span className="mr-auto text-[11px] text-tinta-suave">{costo}</span>}
-          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-relleno">
-            Cancelar
-          </button>
-          <button
-            type="button"
-            disabled={!resultados || van.size === 0}
-            onClick={aplicar}
-            className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
-          >
-            Aplicar ({van.size})
+          <button type="button" onClick={onCerrar} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+            {resultados || error ? "Cerrar" : "Cancelar"}
           </button>
         </div>
       </div>
@@ -40311,7 +40301,6 @@ function StepList({
         onAplicar={(nuevos) => {
           onSnapshot();
           onChange(nuevos);
-          setVoseando(false);
         }}
       />
     )}
@@ -40321,7 +40310,7 @@ function StepList({
           <button
             type="button"
             onClick={() => setVoseando(true)}
-            title="Pasa el tuteo de estas burbujas al voseo (tienes → tenés). No toca comodines, precios ni enlaces. Ves los cambios antes de aplicar."
+            title="Pasa estas burbujas al voseo argentino (tienes → tenés, niños → chicos). No toca comodines, precios ni enlaces. Se aplica solo; Ctrl+Z lo deshace."
             className="rounded-md border border-sky-300 bg-sky-50 px-3 py-1.5 text-sm font-bold text-sky-800 hover:bg-sky-100"
           >
             🇦🇷 Voseo

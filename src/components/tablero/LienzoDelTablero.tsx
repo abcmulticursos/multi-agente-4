@@ -42,6 +42,7 @@ import "@xyflow/react/dist/style.css";
 import { createPortal } from "react-dom";
 import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
+import { pasarAVoseo, pasosConVoseo, textosDeLosPasos } from "@/lib/voseo";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -2328,6 +2329,12 @@ export default function LienzoDelTablero({
   const [cajaElegida, setCajaElegida] = useState<string | null>(null);
   const [panel, setPanel] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  // «🇦🇷 Pasar a voseo» de las fichas elegidas: mientras pide, y el resumen al terminar.
+  const [voseo, setVoseo] = useState<
+    | { fase: "pidiendo"; fichas: number }
+    | { fase: "listo"; fichas: number; cambiadas: number; descartadas: Array<{ ficha: string; texto: string; motivo: string }>; costo: number }
+    | null
+  >(null);
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
   const [menuMas, setMenuMas] = useState(false);
@@ -2913,6 +2920,44 @@ export default function LienzoDelTablero({
       fichas: new Set(ns.filter((id) => !id.startsWith("esp:")).map(fichaDelNodo)),
       espejos: new Set(ns.filter((id) => id.startsWith("esp:")).map((id) => id.slice(4))),
     };
+  };
+  /**
+   * «🇦🇷 PASAR A VOSEO» VARIAS FICHAS (12/11/2026). Él: «me gustaría que le cambie a todo lo que yo seleccione, por
+   * ejemplo 20 fichas… yo quiero que aplique de frente, yo leeré al final las fichas». Todas las burbujas de las fichas
+   * (también versiones y seguimientos) van a `/api/voseo` (los comodines no llegan a la IA); lo que vuelve se pone de
+   * una vez (un solo Ctrl+Z) y queda el resumen con las que se quedaron igual y por qué.
+   */
+  const textosDeLaFicha = (f: FichaEnElEditor) => [
+    ...textosDeLosPasos(f.steps),
+    ...(f.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps)),
+    ...(f.seguimientos ?? []).flatMap((s) => (s.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps))),
+  ];
+  const vosear = async (ids: string[]) => {
+    const fichas = vivo.current.fichas.filter((f) => ids.includes(f.id));
+    setVoseo({ fase: "pidiendo", fichas: fichas.length });
+    const { porTexto, costo } = await pasarAVoseo(fichas.flatMap(textosDeLaFicha));
+    // Sobre el tablero de AHORA (pudo cambiar mientras pedía): cada texto que sigue igual se cambia por su voseo.
+    const actual = vivo.current;
+    const conVoseo = (f: FichaEnElEditor): FichaEnElEditor => ({
+      ...f,
+      ...(f.steps ? { steps: pasosConVoseo(f.steps, porTexto) } : {}),
+      ...(f.variantes ? { variantes: f.variantes.map((v) => (v.steps ? { ...v, steps: pasosConVoseo(v.steps, porTexto) } : v)) } : {}),
+      ...(f.seguimientos
+        ? { seguimientos: f.seguimientos.map((s) => ({ ...s, variantes: (s.variantes ?? []).map((v) => (v.steps ? { ...v, steps: pasosConVoseo(v.steps, porTexto) } : v)) })) }
+        : {}),
+    });
+    let cambiadas = 0;
+    const descartadas: Array<{ ficha: string; texto: string; motivo: string }> = [];
+    for (const f of fichas) {
+      const nombre = f.titulo?.trim() || ASPECTO[f.tipo].nombre;
+      for (const t of new Set(textosDeLaFicha(f).filter((x) => x.trim()))) {
+        const r = porTexto.get(t);
+        if (r?.texto === null) descartadas.push({ ficha: nombre, texto: t.replace(/\s+/g, " ").slice(0, 70), motivo: r.motivo ?? "" });
+        else if (r?.texto && r.texto !== t) cambiadas++;
+      }
+    }
+    if (cambiadas > 0) cambiar({ ...actual, fichas: actual.fichas.map((f) => (ids.includes(f.id) ? conVoseo(f) : f)) });
+    setVoseo({ fase: "listo", fichas: fichas.length, cambiadas, descartadas, costo });
   };
   const copiarLas = (ids: Set<string>, cajaIds: Set<string> = new Set(), espejoIds: Set<string> = new Set()) => {
     const actual = vivo.current;
@@ -3527,6 +3572,45 @@ export default function LienzoDelTablero({
           </div>
         )}
 
+        {/* 🇦🇷 PASAR A VOSEO: mientras pide, y el resumen. */}
+        {voseo && (
+          <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={() => voseo.fase === "listo" && setVoseo(null)}>
+            <div className="my-16 w-full max-w-xl rounded-xl border border-slate-200 bg-white p-5 text-slate-800 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <h3 className="mb-2 text-base font-bold">🇦🇷 Pasar a voseo</h3>
+              {voseo.fase === "pidiendo" ? (
+                <p className="py-4 text-sm text-slate-600">
+                  Pasando {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`} a voseo… (unos segundos; los comodines no llegan a la IA)
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-emerald-700">
+                    ✅ {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`} · {voseo.cambiadas} {voseo.cambiadas === 1 ? "texto cambiado" : "textos cambiados"}
+                    {voseo.descartadas.length > 0 ? ` · ${voseo.descartadas.length} quedaron igual` : ""}
+                  </p>
+                  <p className="mt-1 text-[12px] text-slate-500">
+                    Ya está puesto en las fichas. Revísalas y guarda con Ctrl+S; Ctrl+Z lo deshace todo de una vez.
+                    {voseo.costo > 0 ? ` Costó $${voseo.costo.toFixed(4)}.` : ""}
+                  </p>
+                  {voseo.descartadas.length > 0 && (
+                    <div className="mt-3 flex max-h-72 flex-col gap-1.5 overflow-y-auto">
+                      {voseo.descartadas.map((d, k) => (
+                        <div key={k} className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-1.5 text-[12px] text-amber-900">
+                          <b>{d.ficha}</b>: «{d.texto}…» se queda como está ({d.motivo}). Cámbiala a mano si hace falta.
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-3 flex justify-end">
+                    <button type="button" onClick={() => setVoseo(null)} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+                      Cerrar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* EL MENÚ DEL CLIC DERECHO */}
         {menu && (
           <div
@@ -3641,6 +3725,30 @@ export default function LienzoDelTablero({
                       onClick={() => (copiarLas(ids, enGrupo ? cajasElegidas() : new Set(), enGrupo ? g.espejos : new Set()), setMenu(null))}
                     >
                       📋 {ids.size > 1 ? `Copiar las ${ids.size} fichas elegidas` : "Copiar"}
+                    </button>
+                  );
+                })()}
+                {/* 🇦🇷 PASAR A VOSEO (12/11/2026, ver `vosear`): las elegidas si esta ficha está entre ellas; si no, solo ésta. */}
+                {(() => {
+                  const g = loElegido();
+                  const delGrupo = new Set([...g.fichas, ...(vivo.current.espejos ?? []).filter((e) => g.espejos.has(e.id)).map((e) => e.ficha)]);
+                  const base = delGrupo.has(fichaDelMenu.id) && delGrupo.size > 1 ? [...delGrupo] : [fichaDelMenu.id];
+                  const ids = base.filter((id) => {
+                    const f = vivo.current.fichas.find((x) => x.id === id);
+                    return !!f && textosDeLaFicha(f).some((t) => t.trim());
+                  });
+                  if (ids.length === 0) return null;
+                  return (
+                    <button
+                      type="button"
+                      className={opcionDeMenu}
+                      disabled={voseo?.fase === "pidiendo"}
+                      onClick={() => {
+                        setMenu(null);
+                        void vosear(ids);
+                      }}
+                    >
+                      🇦🇷 Pasar a voseo{ids.length > 1 ? ` (las ${ids.length} fichas elegidas)` : ""}
                     </button>
                   );
                 })()}
