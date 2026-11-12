@@ -7117,7 +7117,7 @@ whatsapp:
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
               ✅ 📚 *{{PRECIO_BASE}}* ‼️
 
-              🟠 *¿COMO LO ADQUIERO?*
+              🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
@@ -7297,14 +7297,14 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
           caption_variants:
             - |-
-              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}
+              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}
 
               *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para chicos de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
           spintax_ia:
-            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}"
+            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizás te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}"
         - type: image
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
@@ -8249,7 +8249,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
-              *Además recibirás GRATIS estos complementos* ‼️👇🏼
+              *Además recibís GRATIS estos complementos* ‼️👇🏼
 
               {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}
               * 🎴 Tarjetitas gráficas
@@ -8267,7 +8267,7 @@ whatsapp:
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
               ✅ 📚 *{{PRECIO_BASE}}* ‼️
 
-              🟠 *¿COMO LO ADQUIERO?*
+              🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
@@ -8859,7 +8859,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -8870,7 +8870,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -8883,7 +8883,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -9224,7 +9224,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -9237,7 +9237,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -9401,7 +9401,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
-              *Además recibirás GRATIS estos complementos* ‼️👇🏼
+              *Además recibís GRATIS estos complementos* ‼️👇🏼
 
               {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}
               * 🎴 Tarjetitas gráficas
@@ -9419,7 +9419,7 @@ whatsapp:
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
               ✅ 📚 *{{PRECIO_BASE}}* ‼️
 
-              🟠 *¿COMO LO ADQUIERO?*
+              🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envianos tu comprobante de pago
@@ -9431,7 +9431,7 @@ whatsapp:
             - |-
               {🔥 Completá tu pago hoy y *recibís GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtenés de regalo un plus adicional GRATIS* 🎁|🔥 Realizá tu pago ya y *recibís un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FÁCIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -9630,7 +9630,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
               🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
@@ -9682,7 +9682,7 @@ whatsapp:
 
               {{PRODUCTO_FULL}}
 
-              Cual elegís?
+              ¿Cuál elegís?
           delay_after_sec: 6
           buttons:
             - id: b-mwdnvror-ekwtq
@@ -9744,17 +9744,17 @@ whatsapp:
                 - type: document
                   drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
                   caption_variants:
-                    - "*Te envío una muestra gratuita para que puedas ver una minima parte del material* 😊👆️"
+                    - "*Te envío una muestra gratuita para que puedas ver una mínima parte del material* 😊👆️"
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}
+                      {🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indicanos qué método de pago preferís* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-wqjvu
@@ -9868,18 +9868,16 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-                  spintax_ia:
-                    - "{🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo Indícanos qué método de pago prefieras* 👇🏼|🔴 *Para obtenerlo, respondé con tu forma de pago favorita* 👇🏼}"
                 - type: video
                   drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-fe6dj
@@ -10016,7 +10014,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -10027,7 +10025,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -10040,7 +10038,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -10236,7 +10234,7 @@ whatsapp:
                 - type: document
                   drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
                   caption_variants:
-                    - "*Te envío una muestra gratuita para que puedas ver una minima parte del material* 😊👆️"
+                    - "*Te envío una muestra gratuita para que puedas ver una mínima parte del material* 😊👆️"
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
@@ -10255,12 +10253,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-94ouq
@@ -10386,7 +10384,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -10399,7 +10397,7 @@ whatsapp:
                     - |-
                       ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
 
-                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+                      🔴 *{Respondé tu método de pago Favorito|Indicá tu método de pago Favorito|Elegí tu método de pago Favorito}* y realizá una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
 
                       {{LISTA_METODOS_POR_PAIS}}
 
@@ -10570,10 +10568,10 @@ whatsapp:
         - type: document
           drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
           caption_variants:
-            - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+            - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
           delay_after_sec: 6
           spintax_ia:
-            - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+            - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
@@ -10859,7 +10857,7 @@ whatsapp:
 
               {{PRODUCTO_FULL}}
 
-              Cual elegís?
+              ¿Cuál elegís?
           delay_after_sec: 6
           buttons:
             - id: b-mwdnvros-4ltwe
@@ -11199,7 +11197,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
@@ -11543,7 +11541,7 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
                   caption_variants:
                     - |-
-                      *ATENCION MAMITA* ‼️
+                      *ATENCIÓN MAMITA* ‼️
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
