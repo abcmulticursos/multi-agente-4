@@ -2539,11 +2539,14 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{{METODO_DE_PAGO_1}}"
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -3117,15 +3120,18 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ *Para pagar a través de yape ó  BPC* puedes hacerlo a través de estos datos 😊👇
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "{{METODO_DE_PAGO_1}}"
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "*Luego de eso nos envías la imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
           delay_after_sec: 6
       cobro:
         modo: producto
