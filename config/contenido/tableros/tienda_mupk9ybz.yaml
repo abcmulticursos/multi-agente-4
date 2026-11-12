@@ -3164,6 +3164,8 @@ whatsapp:
           peso: 1
         - id: r2
           peso: 1
+        - id: rmwd4ovya
+          peso: 1
     - id: f-mwczmr06-i8lx4
       tipo: mensaje
       x: -572
@@ -4616,6 +4618,1148 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mwd4ohba-anmwl
+      tipo: mensaje
+      x: -572
+      y: 14762
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *Hola!! te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊
+
+              *Antes de enviarte más información, es importante que sepas:* 
+
+              ✅️ La entrega es inmediata
+              ✅️ El envío es automático
+              ✅️ El acceso es de por vida 👍️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
+              El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
+
+              *Con {{PRODUCTO_BASE}}* transformarás su aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
+
+              ✅ Ideal para mantener su atención *sin obligarlo*
+
+              ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
+          delay_after_sec: 6
+        - type: video
+          drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+          caption_variants:
+            - |-
+              *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
+
+              📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
+              * 👨‍👩‍👦 Imágenes de personas, 
+              * 🐕 animales, 
+              * 🍎 frutas y
+              * 🚗 objetos, que facilitarán su aprendizaje.
+              🖨️ Formato *PDF para descargar e Imprimir*
+
+              📲 *Se envía directamente a tu Whatsapp o correo* 💌
+          delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
+          caption_variants:
+            - "*Descarga la muestra gratuita* 😊👆️"
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1KyufPzHVfhrziA4M1BC-yjc7rIoi6Nzx/view?usp=drive_link
+          caption_variants:
+            - |-
+              🎁 *Además recibirás GRATIS estos regalitos* ‼️👇🏼
+
+              * 🔢 Cuaderno de los Números
+              * 🎴 Tarjetitas gráficas
+              * 📕 Cuaderno de Sílabas simples
+              * 🔤 Alfabeto con caritas
+              * 🎁 Alfabeto con Imagen
+              * 🎁 Alfabeto con rompecabezas y más...
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
+              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+
+              🟠 *¿COMO LO ADQUIERO?*
+
+              * 1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
+              * 2.- 📲 Y envíanos tu comprobante de pago
+
+              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+
+              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwd4ohbb-zdae6
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mwd4ohbb-g3cr7
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mwd4ohbb-xgc2w
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mwd4ohbb-wv53q
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+      presenta:
+        - "@tienda:basico"
+      instrucciones: |-
+        Cuando invites a comprar, cierra con una de estas frases, sin cambiarlas. 
+
+        Esta frase úsala solo una vez y ya no la vuelvas a repetir más:
+        ¿Te gustaría obtenerlo? 📚✨ Así te envío los datos de pago para que puedas hacer tu compra correctamente 😊
+
+        Después, usa las siguientes frases cortas para cerrar:
+        ¿Te animas a llevarlo? 😊
+        ¿Deseas que te ayude con los datos de pago? 📚
+        ¿Deseas que te brinde los datos de pago? ✨
+    - id: f-mwd4ohbb-55ray
+      tipo: cobro
+      x: 1727
+      y: 14432
+      steps:
+        - type: text
+          body_variants:
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
+    - id: f-mwd4ohbb-n0dec
+      tipo: mensaje
+      x: 517
+      y: 14861
+      titulo: INTRO DE ORDER BUMP PACK 2 EN 1
+      steps:
+        - type: image
+          drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
+          caption_variants:
+            - |-
+              🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊
+
+              *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para niños de 2 a 6 años*. 📚👶🏻
+
+              ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
+          caption_variants:
+            - |-
+              🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊
+              __________
+
+              1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
+
+              💡 *AGREGANDO {{PRECIO_DIFERENCIA}} MÁS* que el Grafismo Fonético te llevas en total:
+
+              🅰️) *EL KIT DE {{PRODUCTO_BASE}}* 📔
+              🅱️) *➕ EL {{PRODUCTO_COMPLEMENTARIO}}* 📗
+              Llévate *TODO*, _incluye los_ *REGALOS* antes mencionados. 🎁
+              __________
+
+              2️⃣ *Pero si deseas solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+
+              🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwd4ohbb-hjtdj
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: d-mwd4ohbb-b18p6
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
+        - type: text
+          body_variants:
+            - |-
+              Elige uno 
+
+              {{PRODUCTO_BASE}}
+
+              {{PRODUCTO_FULL}}
+
+              Cual eliges?
+          delay_after_sec: 6
+          buttons:
+            - id: b-mwd4ohbb-yzdlm
+              label: LECTOESCRITURA
+              action: send_steps
+              steps: []
+            - id: b-mwd4ohbb-teu6m
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+          enabled: false
+      presenta:
+        - "@tienda:basico"
+        - "@tienda:full"
+    - id: f-mwd4ohbb-durm4
+      tipo: seguimientos
+      x: 781
+      y: 14421
+      vista_compra:
+        f-mvw3kh4y-eknk7:2: cable
+        f-mvvo0a7c-uyvc:2: cable
+        f-mvw3kh4y-eknk7:1: cable
+        f-mvvo0a7c-uyvc:1: cable
+      seguimientos:
+        - id: s-mwd4ohbb-vclil
+          minutos: 2
+          variantes:
+            - id: v-mwd4ohbb-hce7u
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+
+                      📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                      🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
+                  delay_after_sec: 6
+                  enabled: false
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+
+                      🎯 *Puedes aprovecha nuestra promoción activa* y realizar un único pago ahora mismo!
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwd4ohbb-lgnfn
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-d03s6
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-kyqwh
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-xzawd
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwd4ohbb-9laxk
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-zza2e
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-zgl1o
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-sg8p4
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mwd4ohbb-cr89r
+          minutos: 5
+          variantes:
+            - id: v-mwd4ohbb-8mk8w
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1bRvg1Lxa_5hNlCic2R54pq7qjhyTvyGP/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *--OB--* *ECUADOR *-OB-* 🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+
+                      {{Producto_BASE}} a tan solo {{precio_BASE}}
+
+                      por tiempo limitado
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 6
+                  enabled: false
+                - type: image
+                  drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *ATENCION MAMITA* ‼️
+
+                      🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+
+                      {{Producto_BASE}} a tan solo *{{precio_BASE}}*
+
+                      por tiempo limitado
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwd4ohbb-ivyba
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-brpiq
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-4a694
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-cx30u
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mwd4ohbb-7js7y
+      tipo: cobro
+      x: 1716
+      y: 15213
+      steps:
+        - type: text
+          body_variants:
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+    - id: f-mwd4ohbb-igi3b
+      tipo: entregar
+      x: 2640
+      y: 14443
+      producto_id: "@tienda:full"
+      entregas:
+        - "@tienda:full"
+    - id: f-mwd4ohbb-6edxa
+      tipo: seguimientos
+      x: -297
+      y: 14245
+      presenta:
+        - "@tienda:basico"
+      seguimientos:
+        - id: s-mwd4ohbb-z46o5
+          minutos: 2
+          variantes:
+            - id: v-mwd4ohbb-ismp4
+              peso: 1
+              steps:
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+
+                      🎯 *Puedes aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1mo5NFYE6CRMqabWt5att9oaRYMK70q6j/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *Hola! Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié. ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
+
+                      📩 *Recibimos pagos diariamente* de compradores reales como tú. Gracias por confiar en nuestro trabajo. Tu compra también está segura.
+
+                      🎯 *Aprovecha nuestra promoción activa* y realiza un único pago ahora mismo!
+                      *Ellos ya lo hicieron*... y ahora *sus hijos ya están aprendiendo* 🤗
+
+                      💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *Para adquirirlo responde el método de pago que prefieras* 👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwd4ohbb-ei87z
+                      title: Nequi
+                      keywords:
+                        - nequi
+                        - neki
+                        - neqi
+                        - nek
+                        - nnequi
+                        - neequi
+                        - nqui
+                        - neki
+                        - neqi
+                        - con nequi
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-ygzhl
+                      title: DAVIPLATA
+                      keywords:
+                        - Daviplata
+                        - daviplta
+                        - dvipla
+                        - dviplata
+                        - daiplata
+                        - daviplaa
+                        - davi
+                        - con davipla
+                        - davipla
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-xblyl
+                      title: Bre-B
+                      keywords:
+                        - bre
+                        - bre-b
+                        - breb
+                        - bre b
+                        - brebe
+                        - reb-b
+                        - bbre
+                        - breebb
+                        - breb
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-e4chk
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mwd4ohbb-pqddc
+          minutos: 5
+          variantes:
+            - id: v-mwd4ohbb-7h284
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/13_WRJSbyCGv1XYqst6mPXisE-HUBHruV/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      *ATENCION MAMITA* ‼️
+
+                      🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
+
+                      {{Producto_BASE}} a tan solo *{{precio_BASE}}*
+
+                      por tiempo limitado
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      ✅ *{PARA COMPRA|PARA COMPRAR|PARA REALIZAR TU COMPRA}* 🫰🏼
+
+                      🔴 *{Responde tu método de pago Favorito|Indica tu método de pago Favorito|Elige tu método de pago Favorito}* y realiza una inversión mínima de *{{PRECIO_BASE}}* 👇🏼
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwd4ohbb-nkunc
+                      title: Nequi
+                      keywords:
+                        - nequi
+                        - neki
+                        - neqi
+                        - nek
+                        - nnequi
+                        - neequi
+                        - nqui
+                        - neki
+                        - neqi
+                        - con nequi
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-pxfq2
+                      title: DAVIPLATA
+                      keywords:
+                        - Daviplata
+                        - daviplta
+                        - dvipla
+                        - dviplata
+                        - daiplata
+                        - daviplaa
+                        - davi
+                        - con davipla
+                        - davipla
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-2yc4u
+                      title: Bre-B
+                      keywords:
+                        - bre
+                        - bre-b
+                        - breb
+                        - bre b
+                        - brebe
+                        - reb-b
+                        - bbre
+                        - breebb
+                        - breb
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwd4ohbb-vmd28
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mwd4ohbb-0dpvg
+      tipo: entregar
+      x: 2651
+      y: 15169
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mwd4ohbb-itwgz
+      tipo: regalo
+      x: 3267
+      y: 14861
+      titulo: Regalo
   cables:
     - id: c-mwcazaok-glm60
       de: f-mwcazaoj-bn8iw
@@ -5021,6 +6165,77 @@ whatsapp:
       de: f-mwczmr05-vk7r3
       salida: siguiente
       a: f-mwd3fqml-hiebf
+    - id: c-mwd4ohbb-sl0qe
+      de: f-mwd4ohba-anmwl
+      salida: dec:d-mwd4ohbb-zdae6
+      a: f-mwd4ohbb-n0dec
+    - id: c-mwd4ohbb-x5yir
+      de: f-mwd4ohba-anmwl
+      salida: dec:d-mwd4ohbb-g3cr7
+      a: f-mwd4ohbb-n0dec
+    - id: c-mwd4ohbb-ffoli
+      de: f-mwd4ohba-anmwl
+      salida: dec:d-mwd4ohbb-xgc2w
+      a: f-mwd4ohbb-n0dec
+    - id: c-mwd4ohbb-o189k
+      de: f-mwd4ohbb-n0dec
+      salida: btn:b-mwd4ohbb-yzdlm
+      a: f-mwd4ohbb-55ray
+    - id: c-mwd4ohbb-mojy9
+      de: f-mwd4ohba-anmwl
+      salida: dec:d-mwd4ohbb-wv53q
+      a: f-mwd4ohbb-n0dec
+    - id: c-mwd4ohbb-bpr4y
+      de: f-mwd4ohbb-55ray
+      salida: pagado
+      a: f-mwd4ohbb-igi3b
+    - id: c-mwd4ohbb-9705k
+      de: f-mwd4ohbb-n0dec
+      salida: dec:d-mwd4ohbb-hjtdj
+      a: f-mwd4ohbb-55ray
+      vista: cable
+    - id: c-mwd4ohbb-qpbbx
+      de: f-mwd4ohbb-n0dec
+      salida: dec:d-mwd4ohbb-b18p6
+      a: f-mwd4ohbb-7js7y
+      vista: cable
+    - id: c-mwd4ohbb-gzatn
+      de: f-mwd4ohbb-n0dec
+      salida: sin_respuesta
+      a: f-mwd4ohbb-durm4
+      vista: cable
+    - id: c-mwd4ohbb-smn5x
+      de: f-mwd4ohbb-7js7y
+      salida: pagado
+      a: f-mwd4ohbb-0dpvg
+    - id: c-mwd4ohbb-5w530
+      de: f-mwd4ohba-anmwl
+      salida: siguiente
+      a: f-mwd4ohbb-6edxa
+    - id: c-mwd4ohbb-n2gyd
+      de: f-mwd4ohbb-igi3b
+      salida: siguiente
+      a: f-mwd4ohbb-itwgz
+      vista: cable
+    - id: c-mwd4ohbb-qmqf8
+      de: f-mwd4ohbb-0dpvg
+      salida: siguiente
+      a: f-mwd4ohbb-itwgz
+      vista: cable
+    - id: c-mwd4p81g-q8x
+      de: f-mwczmr06-2e3sw
+      salida: rep:rmwd4ovya
+      a: f-mwd4ohba-anmwl
+    - id: c-mwd4ul5o-igs
+      de: f-mwd4ohbb-55ray
+      salida: sin_pago
+      a: f-mwd4ohbb-durm4
+      a_espejo: e-mwd4ufw4-pimc
+    - id: c-mwd4uof9-o2d
+      de: f-mwd4ohbb-7js7y
+      salida: sin_pago
+      a: f-mwd4ohbb-durm4
+      a_espejo: e-mwd4ue4k-zoji
   cajas:
     - id: velo-mwcazaol-0
       x: -979
@@ -5059,6 +6274,12 @@ whatsapp:
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+    - id: velo-mwd4ohbb-0
+      x: -649
+      y: 13959
+      ancho: 4395
+      alto: 1489
+      titulo: Nueva caja
   espejos:
     - id: e-mwcbh8tj-q1pa
       ficha: f-mwcazaok-en2px
@@ -5092,3 +6313,11 @@ whatsapp:
       ficha: f-mwczmr06-vi0mc
       x: 1991
       y: 12100
+    - id: e-mwd4ue4k-zoji
+      ficha: f-mwd4ohbb-durm4
+      x: 1991
+      y: 14795
+    - id: e-mwd4ufw4-pimc
+      ficha: f-mwd4ohbb-durm4
+      x: 2013
+      y: 14080
