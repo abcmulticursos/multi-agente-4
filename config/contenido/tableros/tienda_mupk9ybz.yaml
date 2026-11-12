@@ -3668,7 +3668,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ *Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
           delay_after_sec: 6
         - type: text
           body_variants:
