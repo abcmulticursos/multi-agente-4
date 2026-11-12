@@ -8228,20 +8228,17 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Hola!! {te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}
+              *Hola!! {te saluda Andrea* 🙋‍♀️ ¡un gusto saludarte! 😊|*soy Andrea* 🙋‍♀️ ¡encantada de saludarte! 😊|*Andrea te escribe* 🙋‍♀️ ¡qué lindo tenerte por acá! 😊}
 
               🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
-              El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
+              El problema no es la falta de capacidad, sino la manera en que se le enseña. 😰
 
-              *Con {{PRODUCTO_BASE}}* transformarás su aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
+              *Con {{PRODUCTO_BASE}}* vas a transformar su aprendizaje en diversión. *¡Jugando e interactuando sobre las hojas, va a mejorar su lectura de manera natural!* 📚🥳
 
-              ✅ Ideal para mantener su atención *sin obligarlo*
+              ✅ Ideal para mantener su atención *sin necesidad de obligarlo*.
 
-              ✅ Funciona en casa o en un aula. {Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}
+              ✅ Funciona tanto en casa como en el aula. {De manera individual o en grupo 👩‍👦‍👦|Solo o acompañado 👩‍👦‍👦|De forma individual o con otros chicos 👩‍👦‍👦}
           delay_after_sec: 6
-          spintax_ia:
-            - "{Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}"
-            - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}"
         - type: text
           body_variants:
             - |-
@@ -8252,12 +8249,11 @@ whatsapp:
               * 🐕 animales, 
               * 🍎 frutas y
               * 🚗 objetos, que facilitarán su aprendizaje.
-              🖨️ Formato *PDF para descargar e Imprimir*
+              🖨️ Formato *PDF para descargar e imprimir*
 
-              {📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}
+              {📲 *Se envía directamente a tu WhatsApp o correo* 💌|📲 *Te lo mandamos directo a tu WhatsApp o correo* 💌|📲 *Lo recibís al instante en tu WhatsApp o correo* 💌}
           delay_after_sec: 6
           spintax_ia:
-            - "{📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}"
             - "{* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,}"
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
