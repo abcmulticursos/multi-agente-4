@@ -4482,7 +4482,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd56hap-x4spy
-                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -4626,7 +4625,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwd56hap-x2o74
-                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
