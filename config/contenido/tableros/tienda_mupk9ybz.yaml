@@ -2653,6 +2653,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwcazaok-o2yay
+                      enabled: false
                       title: YAPE
                       keywords:
                         - yape
@@ -2680,6 +2681,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-ftevr
+                      enabled: false
                       title: PLIN
                       keywords:
                         - pli
@@ -2707,6 +2709,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-vdrrf
+                      enabled: false
                       title: BCP
                       keywords:
                         - bcp
@@ -2735,6 +2738,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-heqxa
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -2939,6 +2943,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwcazaok-78ocd
+                      enabled: false
                       title: YAPE
                       keywords:
                         - yape
@@ -2966,6 +2971,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-vkxqa
+                      enabled: false
                       title: PLIN
                       keywords:
                         - pli
@@ -2993,6 +2999,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-51un7
+                      enabled: false
                       title: BCP
                       keywords:
                         - bcp
@@ -3021,6 +3028,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwcazaok-2rogg
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
