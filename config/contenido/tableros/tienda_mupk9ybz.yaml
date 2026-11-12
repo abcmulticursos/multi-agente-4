@@ -2363,26 +2363,32 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Hola!! te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊
+              *Hola!! {te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|soy Andrea, encantada de saludarte 🙋‍♀️ un placer conocerte 😊|Mi nombre es Andrea 🙋‍♀️ me da mucho gusto saludarte 😊}
 
               *Antes de enviarte más información, es importante que sepas:* 
 
               ✅️ La entrega es inmediata
               ✅️ El envío es automático
-              ✅️ El acceso es de por vida 👍️
+              {✅️ El acceso es de por vida 👍️|✅️ Tienes acceso para siempre 👍️|✅️ El acceso no tiene fecha de vencimiento 👍️}
           delay_after_sec: 6
+          spintax_ia:
+            - "{✅️ El acceso es de por vida 👍️|✅️ Tienes acceso para siempre 👍️|✅️ El acceso no tiene fecha de vencimiento 👍️}"
+            - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|soy Andrea, encantada de saludarte 🙋‍♀️ un placer conocerte 😊|Mi nombre es Andrea 🙋‍♀️ me da mucho gusto saludarte 😊}"
         - type: text
           body_variants:
             - |-
-              🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
+              {🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*|🧠 *¿Tu niño tiene dificultades para leer y se desconcentra rápido?*|🧠 *¿Se le complica a tu hijo aprender a leer y se distrae con facilidad?*}
               El problema no es por falta de Capacidad, es la manera que se le enseña.  😰
 
               *Con {{PRODUCTO_BASE}}* transformarás su aprendizaje en Diversión!, *Jugando, Interactuando sobre la hoja mejorará su Lectura de manera Natural*  📚🥳
 
               ✅ Ideal para mantener su atención *sin obligarlo*
 
-              ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
+              ✅ Funciona en casa o en un aula. {Individual o en grupo 👩‍👦‍👦|De manera individual o colectiva 👩‍👦‍👦|Solo o acompañado 👩‍👦‍👦}
           delay_after_sec: 6
+          spintax_ia:
+            - "{Individual o en grupo 👩‍👦‍👦|De manera individual o colectiva 👩‍👦‍👦|Solo o acompañado 👩‍👦‍👦}"
+            - "{🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*|🧠 *¿Tu niño tiene dificultades para leer y se desconcentra rápido?*|🧠 *¿Se le complica a tu hijo aprender a leer y se distrae con facilidad?*}"
         - type: video
           drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
           caption_variants:
@@ -2390,32 +2396,40 @@ whatsapp:
               *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
 
               📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
-              * 👨‍👩‍👦 Imágenes de personas, 
+              {* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Dibujos de personas,|* 👨‍👩‍👦 Imágenes con personas,} 
               * 🐕 animales, 
               * 🍎 frutas y
               * 🚗 objetos, que facilitarán su aprendizaje.
               🖨️ Formato *PDF para descargar e Imprimir*
 
-              📲 *Se envía directamente a tu Whatsapp o correo* 💌
+              {📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te llega directo a tu WhatsApp o correo* 💌|📲 *Se manda al instante a tu WhatsApp o correo* 💌}
           delay_after_sec: 6
+          spintax_ia:
+            - "{📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te llega directo a tu WhatsApp o correo* 💌|📲 *Se manda al instante a tu WhatsApp o correo* 💌}"
+            - "{* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Dibujos de personas,|* 👨‍👩‍👦 Imágenes con personas,}"
         - type: document
           drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
           caption_variants:
-            - "*Descarga la muestra gratuita* 😊👆️"
+            - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
           delay_after_sec: 6
+          spintax_ia:
+            - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
               🎁 *Además recibirás GRATIS estos regalitos* ‼️👇🏼
 
-              * 🔢 Cuaderno de los Números
+              {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números*|* 🔢 Cuadernillo de los Números*}
               * 🎴 Tarjetitas gráficas
               * 📕 Cuaderno de Sílabas simples
               * 🔤 Alfabeto con caritas
               * 🎁 Alfabeto con Imagen
-              * 🎁 Alfabeto con rompecabezas y más...
+              {* 🎁 Alfabeto con rompecabezas y más...|* 🎁 Alfabeto con rompecabezas y mucho más...*|* 🎁 Abecedario con rompecabezas y extras...*}
           delay_after_sec: 6
+          spintax_ia:
+            - "{* 🎁 Alfabeto con rompecabezas y más...|* 🎁 Alfabeto con rompecabezas y mucho más...*|* 🎁 Abecedario con rompecabezas y extras...*}"
+            - "{* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números*|* 🔢 Cuadernillo de los Números*}"
         - type: text
           body_variants:
             - |-
@@ -2427,8 +2441,10 @@ whatsapp:
               * 1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
-              *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
+              *! {Al instante recibes tu Material + Bonos en segundos* 😊⚡|*Enseguida obtienes tu Material + Bonos al momento* 😊⚡|*De inmediato te llega tu Material + Bonos en un abrir y cerrar de ojos* 😊⚡}
           delay_after_sec: 6
+          spintax_ia:
+            - "{Al instante recibes tu Material + Bonos en segundos* 😊⚡|*Enseguida obtienes tu Material + Bonos al momento* 😊⚡|*De inmediato te llega tu Material + Bonos en un abrir y cerrar de ojos* 😊⚡}"
         - type: text
           body_variants:
             - |-
