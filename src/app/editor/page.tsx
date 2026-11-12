@@ -1452,6 +1452,8 @@ interface EditorStep {
   espera_eleccion_minutos?: number;
   /** true = lo que conteste a esta burbuja se guarda como su nombre. */
   capturar_nombre?: boolean;
+  /** Los spintax que puso la IA, tal cual («{original|v1|v2}»): «↩ Quitar spintax de la IA» deja solo el original. */
+  spintax_ia?: string[];
 }
 
 interface EditorPaymentMenu {
@@ -39193,9 +39195,74 @@ function frasesDelTexto(texto: string): FraseDelTexto[] {
 }
 const yaTieneSpintax = (s: string) => /\{[^{}|]*\|[^{}]*\}/.test(s.replace(/\{\{[^}]*\}\}/g, ""));
 
-function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: string; seleccion: [number, number] | null; onAplicar: (nuevo: string) => void; onCerrar: () => void }) {
+/**
+ * LO SELECCIONADO, EN TROZOS DE UNA LÍNEA (12/11/2026). Él: «cuando selecciono una porción del texto no spintaxea… solo
+ * la frase completa». Una selección que tocaba un salto de línea (también el del final, al arrastrar hasta el borde)
+ * se descartaba entera y salían las frases. Ahora se recorta (espacios y saltos de los bordes) y, si abarca varias
+ * líneas, cada línea da su propio trozo: el bot lee el spintax por línea (`resolveSpintax`).
+ */
+function trozosDeLaSeleccion(texto: string, a: number, b: number): Array<[number, number]> {
+  const fuera: Array<[number, number]> = [];
+  if (b <= a) return fuera;
+  let desde = a;
+  while (desde < b) {
+    const salto = texto.indexOf("\n", desde);
+    const hasta = salto === -1 || salto > b ? b : salto;
+    let i = desde;
+    let f = hasta;
+    while (i < f && /\s/.test(texto[i])) i++;
+    while (f > i && /\s/.test(texto[f - 1])) f--;
+    if (f > i && /[\p{L}\d]/u.test(texto.slice(i, f))) fuera.push([i, f]);
+    desde = hasta + 1;
+  }
+  return fuera;
+}
+
+/** Una burbuja con DATOS DE PAGO: «✨ Variar con IA» no la toca (12/11/2026, él: «temo que le meta spintax a los datos
+ *  de pago»). Comodines de pago o de cuenta, o un número largo escrito a mano (una cuenta). */
+function esBurbujaDePago(texto: string): boolean {
+  return /\{\{\s*(METODO_DE_PAGO|METODOS_DE_PAGO|CUENTA_|NUMERO_DE_CUENTA|NUMERO_CUENTA|LISTA_METODOS)/i.test(texto) || /\d[\d\s.-]{6,}\d/.test(texto);
+}
+/** Una frase que la IA puede variar: sin spintax, comodines, números, enlaces ni nombres en MAYÚSCULAS. */
+function fraseVariable(f: string): boolean {
+  return !yaTieneSpintax(f) && !/\{\{/.test(f) && !/\d/.test(f) && !/https?:\/\//.test(f) && !/\b[A-ZÁÉÍÓÚÑ]{4,}\b/.test(f) && f.trim().length >= 8;
+}
+/** Deja solo el ORIGINAL en los spintax que puso la IA (el original va siempre primero); los suyos no se tocan. */
+function sinSpintaxDeLaIA(step: EditorStep): Partial<EditorStep> {
+  let t = step.texts[0] ?? "";
+  for (const g of step.spintax_ia ?? []) if (t.includes(g)) t = t.split(g).join(g.slice(1, -1).split("|")[0]);
+  return { texts: step.texts.length ? [t, ...step.texts.slice(1)] : [t], spintax_ia: [] };
+}
+
+/** Lo seleccionado en la VISTA PREVIA (la burbuja verde), buscado en el texto: cada línea donde esté tal cual. */
+function trozosDeLaVistaPrevia(texto: string, elegido: string): Array<[number, number]> {
+  const fuera: Array<[number, number]> = [];
+  let desde = 0;
+  for (const linea of elegido.split("\n").map((l) => l.trim()).filter((l) => /[\p{L}\d]/u.test(l))) {
+    const i = texto.indexOf(linea, desde);
+    if (i < 0) return [];
+    fuera.push([i, i + linea.length]);
+    desde = i + linea.length;
+  }
+  return fuera;
+}
+
+function VentanaDeSpintax({
+  texto,
+  seleccion,
+  aviso,
+  onAplicar,
+  onCerrar,
+}: {
+  texto: string;
+  seleccion: Array<[number, number]> | null;
+  aviso?: string;
+  /** `grupos`: los «{original|v1|v2}» que se pusieron, para poder quitarlos después. */
+  onAplicar: (nuevo: string, grupos: string[]) => void;
+  onCerrar: () => void;
+}) {
   const frases = useMemo<FraseDelTexto[]>(
-    () => (seleccion ? [{ inicio: seleccion[0], fin: seleccion[1], texto: texto.slice(seleccion[0], seleccion[1]) }] : frasesDelTexto(texto)),
+    () => (seleccion?.length ? seleccion.map(([inicio, fin]) => ({ inicio, fin, texto: texto.slice(inicio, fin) })) : frasesDelTexto(texto)),
     [texto, seleccion]
   );
   // Por defecto, la primera y la última (lo que él hace casi siempre); con un trozo seleccionado, ése.
@@ -39238,14 +39305,17 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   };
   const aplicar = () => {
     let nuevo = texto;
+    const grupos: string[] = [];
     // De atrás hacia adelante: cambiar una frase no corre las posiciones de las de antes.
     for (const i of Object.keys(propuestas).map(Number).sort((a, b) => b - a)) {
       const elegidas = propuestas[i].filter((v) => v.va && v.texto.trim()).map((v) => v.texto.trim().replace(/[{}|]/g, ""));
       if (elegidas.length === 0) continue;
       const f = frases[i];
-      nuevo = nuevo.slice(0, f.inicio) + `{${[f.texto, ...elegidas].join("|")}}` + nuevo.slice(f.fin);
+      const grupo = `{${[f.texto, ...elegidas].join("|")}}`;
+      grupos.push(grupo);
+      nuevo = nuevo.slice(0, f.inicio) + grupo + nuevo.slice(f.fin);
     }
-    onAplicar(nuevo);
+    onAplicar(nuevo, grupos);
   };
   const hayPropuestas = Object.keys(propuestas).length > 0;
   return (
@@ -39260,6 +39330,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
         <p className="mb-3 text-[13px] text-tinta-suave">
           La IA propone otras formas de decir lo mismo. No toca comodines, precios, números ni nombres en MAYÚSCULAS. Nada cambia hasta que pulses «Aplicar».
         </p>
+        {aviso && <p className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[12px] text-amber-900">{aviso}</p>}
         <div className="flex flex-col gap-2">
           {frases.map((f, i) => {
             const conSpintax = yaTieneSpintax(f.texto);
@@ -39280,7 +39351,7 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
                     className="mt-0.5"
                   />
                   <span className="whitespace-pre-wrap text-tinta">
-                    <span className="mr-1 text-[12px] font-bold text-tinta-suave">{seleccion ? "Trozo" : `${i + 1}ª`}</span>
+                    <span className="mr-1 text-[12px] font-bold text-tinta-suave">{seleccion ? (frases.length > 1 ? `Trozo ${i + 1}` : "Trozo") : `${i + 1}ª`}</span>
                     {f.texto}
                     {conSpintax && <span className="ml-1 text-[10px] text-tinta-suave">(ya tiene spintax)</span>}
                   </span>
@@ -39351,6 +39422,177 @@ function VentanaDeSpintax({ texto, seleccion, onAplicar, onCerrar }: { texto: st
   );
 }
 
+/**
+ * «✨ VARIAR CON IA», TODA LA FICHA DE UNA VEZ (12/11/2026). Él: «solo 2 más, el original y 2 spintax, y solo 2 frases por
+ * burbuja… temo que le meta spintax a los datos de pago». Por burbuja, la primera y la última frase que se pueden variar
+ * (`fraseVariable`); las burbujas con datos de pago ni se mandan (`esBurbujaDePago`). La IA es la del 🔀 Spintax
+ * (`/api/spintax`, con sus candados); nada cambia hasta «Aplicar», y lo aplicado queda anotado en `spintax_ia`.
+ */
+function VentanaDeVariarFicha({ steps, onAplicar, onCerrar }: { steps: EditorStep[]; onAplicar: (nuevos: EditorStep[]) => void; onCerrar: () => void }) {
+  const paisDelVisor = useContext(EditorPreviewContext).countryCode ?? activePreviewCountry ?? "PE";
+  useEscapeEnPila(() => onCerrar());
+  const plan = useMemo(
+    () =>
+      steps.map((s) => {
+        const texto = s.texts[0] ?? "";
+        if (s.enabled === false || !texto.trim()) return { texto, frases: [] as FraseDelTexto[], motivo: "apagada o vacía" };
+        if (esBurbujaDePago(texto)) return { texto, frases: [] as FraseDelTexto[], motivo: "💳 datos de pago: no se toca" };
+        const frases = frasesDelTexto(texto).filter((f) => fraseVariable(f.texto));
+        return { texto, frases, motivo: frases.length ? "" : "sin frases que variar" };
+      }),
+    [steps]
+  );
+  const [marcadas, setMarcadas] = useState<Set<string>>(() => {
+    const m = new Set<string>();
+    plan.forEach((p, i) => {
+      if (!p.frases.length) return;
+      m.add(`${i}:0`);
+      if (p.frases.length > 1) m.add(`${i}:${p.frases.length - 1}`);
+    });
+    return m;
+  });
+  const [propuestas, setPropuestas] = useState<Record<string, Array<{ texto: string; va: boolean }>>>({});
+  const [pidiendo, setPidiendo] = useState(false);
+  const [error, setError] = useState("");
+  const [costo, setCosto] = useState("");
+  const hayPropuestas = Object.keys(propuestas).length > 0;
+  const pedir = async () => {
+    setPidiendo(true);
+    setError("");
+    try {
+      let total = 0;
+      const nuevas: Record<string, Array<{ texto: string; va: boolean }>> = {};
+      await Promise.all(
+        plan.map(async (p, i) => {
+          const ks = p.frases.map((_, k) => k).filter((k) => marcadas.has(`${i}:${k}`));
+          if (!ks.length) return;
+          const r = await fetch("/api/spintax", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ texto: p.texto, partes: ks.map((k) => p.frases[k].texto), cuantas: 2, pais: paisDelVisor }),
+          });
+          const d = (await r.json()) as { variantes?: string[][]; error?: string; costo?: number | null };
+          if (!r.ok) throw new Error(d.error ?? "No se pudo.");
+          if (typeof d.costo === "number") total += d.costo;
+          ks.forEach((k, j) => (nuevas[`${i}:${k}`] = (d.variantes?.[j] ?? []).map((v) => ({ texto: v, va: true }))));
+        })
+      );
+      setPropuestas(nuevas);
+      setCosto(total ? `Costó $${total.toFixed(4)}` : "");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo.");
+    } finally {
+      setPidiendo(false);
+    }
+  };
+  const aplicar = () => {
+    const nuevos = steps.map((s, i) => {
+      const p = plan[i];
+      let texto = p.texto;
+      const grupos: string[] = [];
+      for (let k = p.frases.length - 1; k >= 0; k--) {
+        const elegidas = (propuestas[`${i}:${k}`] ?? []).filter((v) => v.va && v.texto.trim()).map((v) => v.texto.trim().replace(/[{}|]/g, ""));
+        if (!elegidas.length) continue;
+        const f = p.frases[k];
+        const grupo = `{${[f.texto, ...elegidas].join("|")}}`;
+        grupos.push(grupo);
+        texto = texto.slice(0, f.inicio) + grupo + texto.slice(f.fin);
+      }
+      return grupos.length ? { ...s, texts: s.texts.length ? [texto, ...s.texts.slice(1)] : [texto], spintax_ia: [...(s.spintax_ia ?? []), ...grupos] } : s;
+    });
+    onAplicar(nuevos);
+  };
+  return (
+    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
+      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h3 className="text-base font-bold text-tinta">✨ Variar con IA · todas las burbujas</h3>
+          <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
+            ✕
+          </button>
+        </div>
+        <p className="mb-3 text-[13px] text-tinta-suave">
+          En cada burbuja, la primera y la última frase: el original y 2 formas más de decirlo. Las burbujas con datos de pago y las frases con
+          comodines, precios, números o nombres en MAYÚSCULAS no se tocan. Nada cambia hasta que pulses «Aplicar» (Ctrl+Z lo deshace).
+        </p>
+        <div className="flex flex-col gap-2">
+          {plan.map((p, i) => (
+            <div key={i} className="rounded-lg border border-borde px-2 py-1.5">
+              <div className="text-[12px] font-bold text-tinta-suave">
+                Burbuja {i + 1}
+                {p.motivo && <span className="ml-2 font-normal italic">· {p.motivo}</span>}
+              </div>
+              {p.frases.map((f, k) => {
+                const clave = `${i}:${k}`;
+                const suyas = propuestas[clave];
+                return (
+                  <div key={clave} className={`mt-1 rounded-md px-1.5 py-1 ${marcadas.has(clave) ? "bg-violet-50 oscuro:bg-violet-500/10" : ""}`}>
+                    <label className="flex cursor-pointer items-start gap-2 text-[14px] leading-relaxed">
+                      <input
+                        type="checkbox"
+                        disabled={hayPropuestas}
+                        checked={marcadas.has(clave)}
+                        onChange={(e) => {
+                          const n = new Set(marcadas);
+                          if (e.target.checked) n.add(clave);
+                          else n.delete(clave);
+                          setMarcadas(n);
+                        }}
+                        className="mt-1"
+                      />
+                      <span className="whitespace-pre-wrap text-tinta">{f.texto}</span>
+                    </label>
+                    {suyas && (
+                      <div className="mt-1 flex flex-col gap-1 pl-6">
+                        {suyas.length === 0 && <span className="text-[12px] italic text-tinta-suave">La IA no dio variantes que pasen los candados.</span>}
+                        {suyas.map((v, j) => (
+                          <label key={j} className="flex items-center gap-2 text-[13px]">
+                            <input
+                              type="checkbox"
+                              checked={v.va}
+                              onChange={(e) => setPropuestas({ ...propuestas, [clave]: suyas.map((x, y) => (y === j ? { ...x, va: e.target.checked } : x)) })}
+                            />
+                            <input
+                              value={v.texto}
+                              onChange={(e) => setPropuestas({ ...propuestas, [clave]: suyas.map((x, y) => (y === j ? { ...x, texto: e.target.value } : x)) })}
+                              className="w-full rounded border border-borde bg-relleno px-2 py-0.5"
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        {error && <p className="mt-2 text-[12px] text-red-700">{error}</p>}
+        <div className="mt-3 flex items-center justify-end gap-2">
+          {costo && <span className="mr-auto text-[11px] text-tinta-suave">{costo}</span>}
+          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-relleno">
+            Cancelar
+          </button>
+          {hayPropuestas ? (
+            <button type="button" onClick={aplicar} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
+              Aplicar
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={pidiendo || marcadas.size === 0}
+              onClick={pedir}
+              className="rounded-md bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-50"
+            >
+              {pidiendo ? "Pidiendo a la IA…" : `✨ Pedir variantes (${marcadas.size} frase${marcadas.size === 1 ? "" : "s"})`}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EditorEmojiTextarea({
   value,
   onChange,
@@ -39361,6 +39603,7 @@ function EditorEmojiTextarea({
   onFocus,
   onBlur,
   onContextMenu,
+  onAplicarSpintax,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -39371,12 +39614,14 @@ function EditorEmojiTextarea({
   onFocus?: () => void;
   onBlur?: () => void;
   onContextMenu?: (event: React.MouseEvent<HTMLTextAreaElement>) => void;
+  /** Una burbuja anota qué spintax puso la IA (`spintax_ia`); sin esto, solo cambia el texto. */
+  onAplicarSpintax?: (nuevo: string, grupos: string[]) => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const placeholderOptions = useContext(PlaceholderOptionsContext);
   const [placeholderQuery, setPlaceholderQuery] = useState<string | null>(null);
-  const [spintax, setSpintax] = useState<{ seleccion: [number, number] | null } | null>(null);
+  const [spintax, setSpintax] = useState<{ seleccion: Array<[number, number]> | null; aviso?: string } | null>(null);
   const hasPlaceholders = /\{\{\s*[A-Za-z0-9_]+\s*\}\}/.test(value);
   // UN NÚMERO DE CUENTA ESCRITO A MANO (23/10/2026): si cambias la cuenta o el usuario que cobra,
   // aquí no cambia. Se avisa y, si la cuenta tiene comodín, se cambia con un clic.
@@ -39455,9 +39700,23 @@ function EditorEmojiTextarea({
               const a = ta?.selectionStart ?? 0;
               const b = ta?.selectionEnd ?? 0;
               e.preventDefault();
-              // (Un trozo de varias líneas no puede ser un solo spintax —el bot lo lee por línea—: va por frases.)
-              const trozo = value.slice(a, b);
-              setSpintax({ seleccion: b > a && trozo.trim() && !trozo.includes("\n") ? [a, b] : null });
+              // (12/11/2026) Lo seleccionado en la VISTA PREVIA manda (la selección de la página no incluye la del
+              // cuadro, y el cuadro guarda su última selección aunque ya no se mire), si está tal cual en el texto. Si
+              // no hay, lo seleccionado en el cuadro, recortado y por líneas (`trozosDeLaSeleccion`). Si no, las frases.
+              // (Con el cuadro enfocado y algo marcado en él, es el cuadro: Chrome cuenta su selección en la de la página.)
+              const enElCuadro = !!ta && document.activeElement === ta && b > a;
+              const fuera = enElCuadro ? "" : ((typeof window !== "undefined" ? window.getSelection()?.toString() : "")?.trim() ?? "");
+              const delCuadro = fuera ? [] : trozosDeLaSeleccion(value, a, b);
+              if (delCuadro.length) return setSpintax({ seleccion: delCuadro });
+              if (fuera) {
+                const deLaVista = trozosDeLaVistaPrevia(value, fuera);
+                if (deLaVista.length) return setSpintax({ seleccion: deLaVista });
+                return setSpintax({
+                  seleccion: null,
+                  aviso: "Lo que seleccionaste en la vista previa no está tal cual en el texto (lleva un comodín, un precio o un spintax ya resuelto). Selecciónalo en el cuadro de texto, o marca aquí las frases.",
+                });
+              }
+              setSpintax({ seleccion: null });
             }}
             title="Spintax con IA: marca las frases (o selecciona un trozo antes) y la IA propone otras formas de decirlo"
             className="rounded border border-violet-300 bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 hover:bg-violet-100 oscuro:bg-violet-500/10 oscuro:text-violet-900"
@@ -39470,10 +39729,12 @@ function EditorEmojiTextarea({
         <VentanaDeSpintax
           texto={value}
           seleccion={spintax.seleccion}
+          aviso={spintax.aviso}
           onCerrar={() => setSpintax(null)}
-          onAplicar={(nuevo) => {
+          onAplicar={(nuevo, grupos) => {
             onFocus?.();
-            onChange(nuevo);
+            if (onAplicarSpintax) onAplicarSpintax(nuevo, grupos);
+            else onChange(nuevo);
             setSpintax(null);
           }}
         />
@@ -39759,9 +40020,52 @@ function StepList({
   // algo, y moverlas de sitio para mirarlas mentiría sobre dónde volverían.
   const [mostrarApagadas, setMostrarApagadas] = useState(false);
   const apagadas = steps.filter((step) => step.enabled === false).length;
+  // «✨ VARIAR CON IA» Y «↩ QUITAR SPINTAX DE LA IA» PARA TODAS LAS BURBUJAS (12/11/2026). Ver `VentanaDeVariarFicha`.
+  const [variando, setVariando] = useState(false);
+  const conSpintaxIA = steps.some((s) => (s.spintax_ia ?? []).some((g) => (s.texts[0] ?? "").includes(g)));
+  const conTexto = steps.some((s) => s.enabled !== false && (s.texts[0] ?? "").trim());
 
   return (
     <DndContext onDragStart={onDragStartDnd} onDragEnd={onDragEndDnd}>
+    {variando && (
+      <VentanaDeVariarFicha
+        steps={steps}
+        onCerrar={() => setVariando(false)}
+        onAplicar={(nuevos) => {
+          onSnapshot();
+          onChange(nuevos);
+          setVariando(false);
+        }}
+      />
+    )}
+    {(conTexto || conSpintaxIA) && (
+      <div className="mb-2 flex flex-wrap items-center justify-end gap-2">
+        {conTexto && (
+          <button
+            type="button"
+            onClick={() => setVariando(true)}
+            title="La IA propone 2 formas más de decir la primera y la última frase de cada burbuja. No toca datos de pago."
+            className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-800 hover:bg-violet-100"
+          >
+            ✨ Variar con IA
+          </button>
+        )}
+        {conSpintaxIA && (
+          <button
+            type="button"
+            onClick={() => {
+              if (!confirm("¿Quitar el spintax que puso la IA en todas estas burbujas? Queda solo el texto original; los spintax que escribiste tú se quedan. Ctrl+Z lo devuelve.")) return;
+              onSnapshot();
+              onChange(steps.map((s) => ((s.spintax_ia ?? []).length ? { ...s, ...sinSpintaxDeLaIA(s) } : s)));
+            }}
+            title="Deja solo el original en todo el spintax que puso la IA"
+            className="rounded border border-violet-300 bg-tarjeta px-2 py-1 text-[11px] font-semibold text-violet-800 hover:bg-violet-50"
+          >
+            ↩ Quitar spintax de la IA
+          </button>
+        )}
+      </div>
+    )}
     {/* En columna para poder colocar la barra de apagadas ENCIMA de lo que
         esconde: el navegador respeta el orden que se le pide abajo. */}
     <div className="flex flex-col space-y-4">
@@ -41509,6 +41813,19 @@ function StepCard({
             <span className="bn-solo-viejo">∞</span>
             <IconoDeBurbuja nombre="variar" />
           </button>
+          {(step.spintax_ia ?? []).some((g) => (step.texts[0] ?? "").includes(g)) && (
+            <button
+              type="button"
+              onClick={() => {
+                onSnapshot();
+                onUpdate(sinSpintaxDeLaIA(step));
+              }}
+              title="Deja solo el texto original en los spintax que puso la IA (los que escribiste tú se quedan). Ctrl+Z lo devuelve."
+              className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-800 hover:bg-violet-100"
+            >
+              ↩ Quitar spintax IA
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onUpdate({ enabled: step.enabled === false })}
@@ -41630,6 +41947,10 @@ function StepCard({
           <EditorEmojiTextarea
             value={step.texts[0] ?? ""}
             onChange={(next) => onUpdateText(0, next)}
+            // El spintax de la IA queda anotado en la burbuja (12/11/2026): «↩ Quitar spintax de la IA» lo encuentra.
+            onAplicarSpintax={(nuevo, grupos) =>
+              onUpdate({ texts: step.texts.length ? [nuevo, ...step.texts.slice(1)] : [nuevo], spintax_ia: [...(step.spintax_ia ?? []), ...grupos] })
+            }
             rows={4}
             placeholder="Escribe el mensaje tal como llegará por WhatsApp…"
             className="texto-de-burbuja bn-texto w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-800"

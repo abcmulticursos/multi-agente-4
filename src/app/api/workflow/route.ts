@@ -359,6 +359,8 @@ interface EditorStep {
   espera_eleccion_minutos?: number;
   /** true = lo que conteste a esta burbuja se guarda como su nombre. */
   capturar_nombre?: boolean;
+  /** Los spintax que puso la IA (12/11/2026), para quitarlos con un clic. El bot no lo lee. */
+  spintax_ia?: string[];
 }
 
 interface EditorPaymentMenu {
@@ -1084,6 +1086,8 @@ function readStep(s: Record<string, unknown>): EditorStep {
         ? (s.espera_eleccion_minutos as number)
         : undefined,
     capturar_nombre: s?.capturar_nombre === true,
+    // LOS SPINTAX DE LA IA (12/11/2026): solo para «↩ Quitar spintax de la IA» del editor; el bot no lo lee.
+    ...(strList(s?.spintax_ia).length ? { spintax_ia: strList(s.spintax_ia) } : {}),
   };
 }
 
@@ -1480,8 +1484,11 @@ function writeStep(s: EditorStep): Record<string, unknown> {
     plazo > 0
       ? { espera_eleccion_minutos: plazo }
       : {};
+  // LOS SPINTAX DE LA IA (12/11/2026): solo los que siguen en el texto (si él borró uno a mano, se olvida).
+  const ia = (Array.isArray(s?.spintax_ia) ? s.spintax_ia : []).filter((g): g is string => typeof g === "string" && !!g && (texts[0] ?? "").includes(g));
+  const iaField = ia.length ? { spintax_ia: [...new Set(ia)] } : {};
   if (type === "text") {
-    return { type, body_variants: texts, delay_after_sec: delay, ...buttonField, ...decisionField, ...nombreField, ...esperaField, ...off };
+    return { type, body_variants: texts, delay_after_sec: delay, ...buttonField, ...decisionField, ...nombreField, ...esperaField, ...iaField, ...off };
   }
   return {
     type,
@@ -1492,6 +1499,7 @@ function writeStep(s: EditorStep): Record<string, unknown> {
     ...decisionField,
     ...nombreField,
     ...esperaField,
+    ...iaField,
     ...off,
   };
 }
