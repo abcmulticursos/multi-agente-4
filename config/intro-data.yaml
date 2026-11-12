@@ -5012,7 +5012,8 @@ email_template_upsell:
   subject: ""
   body: ""
 editor_colores_de_botones:
-  usuario: esmeralda
+  usuario: "#eeff00"
+  usuario_paleta: "#eeff00"
 upsell_modalidad_enabled: false
 payment_resend_steps:
   - type: text
