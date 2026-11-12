@@ -4325,16 +4325,19 @@ whatsapp:
                       ⚠️ *Si lo llevas en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
-                    - id: d-mwczmr07-og05d
-                      title: YAPE
+                    - id: a3df7dcf-d0d2-404b-98c4-6d69bbf30506
+                      title: Nequi
                       keywords:
-                        - yape
-                        - llape
-                        - iape
-                        - con yape
-                        - yapeo
-                        - a donde yapeo
-                        - como yapeo
+                        - nequi
+                        - neki
+                        - neqi
+                        - nek
+                        - nnequi
+                        - neequi
+                        - nqui
+                        - neki
+                        - neqi
+                        - con nequi
                       color: esmeralda
                       steps:
                         - type: text
@@ -4352,16 +4355,18 @@ whatsapp:
                             - Luego nos envías tu comprobante y tu acceso será al instante
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-a93z5
-                      title: PLIN
+                    - id: 95a23024-255f-4629-bdc4-08672818234c
+                      title: DAVIPLATA
                       keywords:
-                        - pli
-                        - plin
-                        - pln
-                        - pilin
-                        - con pln
-                        - plinear
-                        - tengo plin
+                        - Daviplata
+                        - daviplta
+                        - dvipla
+                        - dviplata
+                        - daiplata
+                        - daviplaa
+                        - davi
+                        - con davipla
+                        - davipla
                       color: ambar
                       steps:
                         - type: text
@@ -4379,17 +4384,18 @@ whatsapp:
                             - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-8qrgo
-                      title: BCP
+                    - id: f8f6ac77-97b1-42c8-b59c-69d27d55c10f
+                      title: Bre-B
                       keywords:
-                        - bcp
-                        - transferencia
-                        - con bcp
-                        - trasfencia
-                        - traferencia
-                        - traferir
-                        - transferir
-                        - trnsferencia
+                        - bre
+                        - bre-b
+                        - breb
+                        - bre b
+                        - brebe
+                        - reb-b
+                        - bbre
+                        - breebb
+                        - breb
                       color: violeta
                       steps:
                         - type: text
@@ -4407,7 +4413,7 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-tfcnt
+                    - id: 081ab8a0-77a4-453c-9be2-9a14990f37ca
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -4464,16 +4470,19 @@ whatsapp:
                       *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 🏃🏻‍♀️💫
                   delay_after_sec: 6
                   decisions:
-                    - id: d-mwczmr07-92fl6
-                      title: YAPE
+                    - id: 26175c5b-d61e-4a0d-81cb-8ed4db5dd625
+                      title: Nequi
                       keywords:
-                        - yape
-                        - llape
-                        - iape
-                        - con yape
-                        - yapeo
-                        - a donde yapeo
-                        - como yapeo
+                        - nequi
+                        - neki
+                        - neqi
+                        - nek
+                        - nnequi
+                        - neequi
+                        - nqui
+                        - neki
+                        - neqi
+                        - con nequi
                       color: esmeralda
                       steps:
                         - type: text
@@ -4491,16 +4500,18 @@ whatsapp:
                             - Luego nos envías tu comprobante y tu acceso será al instante
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-y0gdk
-                      title: PLIN
+                    - id: 569dea85-2b79-43b5-b1f1-dd0e07c48a01
+                      title: DAVIPLATA
                       keywords:
-                        - pli
-                        - plin
-                        - pln
-                        - pilin
-                        - con pln
-                        - plinear
-                        - tengo plin
+                        - Daviplata
+                        - daviplta
+                        - dvipla
+                        - dviplata
+                        - daiplata
+                        - daviplaa
+                        - davi
+                        - con davipla
+                        - davipla
                       color: ambar
                       steps:
                         - type: text
@@ -4518,17 +4529,18 @@ whatsapp:
                             - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-h3ny3
-                      title: BCP
+                    - id: 2de75d7c-ca52-4d79-be72-d1d9f4ac9c18
+                      title: Bre-B
                       keywords:
-                        - bcp
-                        - transferencia
-                        - con bcp
-                        - trasfencia
-                        - traferencia
-                        - traferir
-                        - transferir
-                        - trnsferencia
+                        - bre
+                        - bre-b
+                        - breb
+                        - bre b
+                        - brebe
+                        - reb-b
+                        - bbre
+                        - breebb
+                        - breb
                       color: violeta
                       steps:
                         - type: text
@@ -4546,7 +4558,7 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-                    - id: d-mwczmr07-f75w6
+                    - id: a036b5c2-8b91-4868-90eb-838b5c832460
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -4970,26 +4982,6 @@ whatsapp:
       de: f-mwczmr06-q3356
       salida: pagado
       a: f-mwczmr07-m7dga
-    - id: c-mwczmr07-ueum0
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-og05d
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-ouelk
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-a93z5
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-fpdmf
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-8qrgo
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-psmwh
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-tfcnt
-      a: f-mwczmr06-4se41
-      vista: colita
     - id: c-mwczmr07-quzpc
       de: f-mwczmr06-4se41
       salida: dec:d-mwczmr06-08xfk
@@ -5005,26 +4997,6 @@ whatsapp:
       salida: sin_respuesta
       a: f-mwczmr06-vi0mc
       vista: cable
-    - id: c-mwczmr07-wpxr8
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-92fl6
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-d4iqp
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-y0gdk
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-nbzk1
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-h3ny3
-      a: f-mwczmr06-4se41
-      vista: colita
-    - id: c-mwczmr07-j27ny
-      de: f-mwczmr07-pq322
-      salida: dec:d-mwczmr07-f75w6
-      a: f-mwczmr06-4se41
-      vista: colita
     - id: c-mwczmr07-m7ewv
       de: f-mwczmr07-ydkeb
       salida: pagado
