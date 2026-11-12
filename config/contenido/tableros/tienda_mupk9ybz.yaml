@@ -3541,16 +3541,18 @@ whatsapp:
           delay_after_sec: 6
           decisions:
             - id: d-mwczmr06-bhzio
-              title: YAPE
+              title: Nequi
               keywords:
-                - yape
-                - llape
-                - iape
-                - con yape
-                - yapeo
-                - a donde yapeo
-                - como yapeo
-                - esta bien
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
               color: esmeralda
               steps:
                 - type: text
@@ -3569,16 +3571,17 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: d-mwczmr06-jwovv
-              title: PLIN
+              title: DAVIPLATA
               keywords:
-                - pli
-                - plin
-                - pln
-                - pilin
-                - con pln
-                - plinear
-                - tengo plin
-                - esta bien
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
               color: ambar
               steps:
                 - type: text
@@ -3597,16 +3600,17 @@ whatsapp:
                   delay_after_sec: 6
                   enabled: false
             - id: d-mwczmr06-4a67w
-              title: BCP
+              title: Bre-B
               keywords:
-                - bcp
-                - transferencia
-                - con bcp
-                - trasfencia
-                - traferencia
-                - traferir
-                - transferir
-                - trnsferencia
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
               color: violeta
               steps:
                 - type: text
