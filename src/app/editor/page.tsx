@@ -7645,6 +7645,64 @@ export default function EditorPage() {
     [cfg]
   );
   const isDirty = cfg !== null && huellaDelBorrador !== baseline;
+  // UNA SOLA VENTANA EDITANDO (12/11/2026), como WhatsApp Web (ver `/api/editor-activo`). Él: «abro otra ventana en
+  // otro navegador y a veces me confundo y grabo en la otra». Manda la última que se abrió; las demás quedan en gris y
+  // no guardan. «Usar aquí» le devuelve el control (y recarga si no tenía nada sin guardar, para ver lo último).
+  const idDeVentana = useRef("");
+  const [enGris, setEnGris] = useState(false);
+  const enGrisRef = useRef(false);
+  enGrisRef.current = enGris;
+  const sucioRef = useRef(false);
+  sucioRef.current = isDirty;
+  const avisarVentana = useCallback(async (accion: "tomar" | "latido") => {
+    try {
+      const r = await fetch("/api/editor-activo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: idDeVentana.current, accion }),
+      });
+      const d = (await r.json()) as { activo?: string | null };
+      if (r.ok) setEnGris(typeof d.activo === "string" && d.activo !== idDeVentana.current);
+    } catch {
+      // Sin conexión con el servidor no se pone en gris: lo protege igual la huella al guardar.
+    }
+  }, []);
+  useEffect(() => {
+    idDeVentana.current =
+      typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    void avisarVentana("tomar");
+    const latido = window.setInterval(() => void avisarVentana("latido"), 10_000);
+    const alVolver = () => {
+      if (document.visibilityState === "visible") void avisarVentana("latido");
+    };
+    const alSalir = () => {
+      try {
+        navigator.sendBeacon?.("/api/editor-activo", new Blob([JSON.stringify({ id: idDeVentana.current, accion: "soltar" })], { type: "application/json" }));
+      } catch {}
+    };
+    document.addEventListener("visibilitychange", alVolver);
+    window.addEventListener("pagehide", alSalir);
+    return () => {
+      window.clearInterval(latido);
+      document.removeEventListener("visibilitychange", alVolver);
+      window.removeEventListener("pagehide", alSalir);
+    };
+  }, [avisarVentana]);
+  const usarAqui = async () => {
+    await avisarVentana("tomar");
+    if (!sucioRef.current) window.location.reload();
+  };
+  // En gris, el teclado tampoco edita (Ctrl+Z, Supr, Ctrl+V del lienzo…); recargar (F5) sí.
+  useEffect(() => {
+    if (!enGris) return;
+    const frenar = (e: KeyboardEvent) => {
+      if (e.key === "F5" || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r")) return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", frenar, true);
+    return () => window.removeEventListener("keydown", frenar, true);
+  }, [enGris]);
   const activeEditorMode = cfg ? activeModality(cfg) : "lineal";
   const whatsappDeliveryGroups = cfg
     ? whatsappDeliveryGroupsForMode(cfg, activeEditorMode)
@@ -8688,6 +8746,11 @@ export default function EditorPage() {
    */
   async function save(): Promise<boolean> {
     if (!cfg) return false;
+    // UNA SOLA VENTANA EDITANDO (12/11/2026): la que está en gris no guarda (ver `enGris`).
+    if (enGrisRef.current) {
+      setToast({ ok: false, msg: "Esta ventana está en gris: el editor está abierto en otra. Toca «Usar aquí» para editar desde ésta." });
+      return false;
+    }
     // AVISA, PERO NO IMPIDE GUARDAR.
     //
     // Lo pidió así el 25/09/2026: «que no sea una limitante para guardarlo, que
@@ -10377,6 +10440,25 @@ export default function EditorPage() {
     <EditorPreviewContext.Provider value={editorPreviewContext}>
     <BubbleClipboardContext.Provider value={{ step: copiedBubbleStep, steps: copiedBubbleSteps, setStep: setCopiedBubbleStep, setSteps: setCopiedBubbleSteps }}>
     <SeleccionDeBurbujaContext.Provider value={seleccionDeBurbuja}>
+    {/* UNA SOLA VENTANA EDITANDO (12/11/2026): la ventana que no manda, en gris y sin poder tocar nada. */}
+    {enGris && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-neutral-700/60 p-4 backdrop-grayscale" data-ventana-en-gris>
+        <div className="max-w-md rounded-xl border border-neutral-300 bg-tarjeta p-5 text-center shadow-2xl">
+          <p className="text-base font-bold text-tinta">El editor está abierto en otra ventana</p>
+          <p className="mt-2 text-sm text-tinta-suave">
+            Solo una ventana puede editar a la vez, para que no guardes en la equivocada. Ésta quedó en pausa.
+            {isDirty ? " Tus cambios sin guardar de esta ventana siguen aquí." : ""}
+          </p>
+          <button
+            type="button"
+            onClick={() => void usarAqui()}
+            className="mt-4 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+          >
+            Usar aquí
+          </button>
+        </div>
+      </div>
+    )}
     {/* EL SUELO DE LA PÁGINA, DEL TEMA.
 
         Era gris medio fijo. En oscuro dejaba toda la página clara alrededor de
