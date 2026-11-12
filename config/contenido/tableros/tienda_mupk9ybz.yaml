@@ -1220,8 +1220,8 @@ whatsapp:
           peso: 1
     - id: f-mwcyp14g-iy170
       tipo: mensaje
-      x: -572
-      y: 4103
+      x: -539
+      y: 3938
       steps:
         - type: text
           body_variants:
@@ -1425,8 +1425,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwcyp14g-7ls48
       tipo: cobro
-      x: 1727
-      y: 3773
+      x: 1760
+      y: 3608
       steps:
         - type: text
           body_variants:
@@ -1445,8 +1445,8 @@ whatsapp:
         producto_id: "@tienda:full"
     - id: f-mwcyp14g-qgu09
       tipo: mensaje
-      x: 517
-      y: 4202
+      x: 550
+      y: 4037
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -1547,8 +1547,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwcyp14h-5mnwm
       tipo: seguimientos
-      x: 781
-      y: 3762
+      x: 814
+      y: 3597
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -2003,8 +2003,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwcyp14h-wfcvg
       tipo: cobro
-      x: 1716
-      y: 4554
+      x: 1749
+      y: 4389
       steps:
         - type: text
           body_variants:
@@ -2023,15 +2023,15 @@ whatsapp:
         producto_id: "@tienda:basico"
     - id: f-mwcyp14h-gwlbx
       tipo: entregar
-      x: 2640
-      y: 3784
+      x: 2673
+      y: 3619
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mwcyp14h-68rlo
       tipo: seguimientos
-      x: -297
-      y: 3586
+      x: -264
+      y: 3421
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -2328,15 +2328,15 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwcyp14h-97h2h
       tipo: entregar
-      x: 2651
-      y: 4510
+      x: 2684
+      y: 4345
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mwcyp14h-sg7vo
       tipo: regalo
-      x: 3267
-      y: 4202
+      x: 3300
+      y: 4037
       titulo: Regalo
   cables:
     - id: c-mwcazaok-glm60
@@ -2601,8 +2601,14 @@ whatsapp:
     - id: velo-mwcazaol-0
       x: -979
       y: 1331
-      ancho: 6804
-      alto: 1684
+      ancho: 4824
+      alto: 1662
+      titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
+    - id: velo-mwczg438-0
+      x: -979
+      y: 3102
+      ancho: 4835
+      alto: 1552
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
   espejos:
     - id: e-mwcbh8tj-q1pa
@@ -2615,9 +2621,9 @@ whatsapp:
       y: 2288
     - id: e-mwcz3tgl-nj7m
       ficha: f-mwcyp14h-5mnwm
-      x: 2013
-      y: 3421
+      x: 2046
+      y: 3256
     - id: e-mwcz436d-2pqw
       ficha: f-mwcyp14h-5mnwm
-      x: 1969
-      y: 4114
+      x: 2002
+      y: 3949
