@@ -64,7 +64,7 @@ import {
   withOutboundWhatsAppNumber,
   withOutboundMessengerPage,
 } from "@/lib/meta/runtime-config";
-import { avisarFinDelRegalo } from "@/lib/tablero/estado";
+import { avisarFinDelRegalo, estadoEnElTablero } from "@/lib/tablero/estado";
 import {
   conLaPresentacionDeLaConversacion,
   conElTurnoDe,
@@ -2168,7 +2168,12 @@ export async function tryWorkflowOnIncoming(
   }
 
   const effectiveCountry = getEffectiveCountryCode(convo.phone, config);
-  if (!isCountrySalesEnabled(effectiveCountry, config)) {
+  // UN CLIENTE DEL TABLERO NO PASA POR ESTE FRENO (12/11/2026). Él: «corrige lo del regalo». Un cliente de Colombia
+  // compró por el tablero de GRAFISMO y, al responder «Comentado» en el regalo (que atiende este motor), cayó aquí:
+  // Colombia está apagada en las ventas por país de la venta automática (él vende Colombia solo por el tablero), así
+  // que le llegó «no tenemos venta para tu país», pasó a HUMANO y no recibió su premio. Si su país vende lo decide el
+  // tablero (sus Inicios), que ya lo dejó entrar.
+  if (!isCountrySalesEnabled(effectiveCountry, config) && !estadoEnElTablero(convo.id)) {
     await sendBotText(
       convo,
       config.country_disabled_message?.trim() ||
