@@ -39,6 +39,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { createPortal } from "react-dom";
 import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { banderaDe } from "@/components/pizarra/banderas";
@@ -1213,11 +1214,87 @@ type DatosDeCaja = {
   /** Borrar la caja (las fichas de encima se quedan). */
   alBorrar: () => void;
   /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
-  manta?: { titulo: string; mirando: boolean; alVer: () => void };
+  manta?: { titulo: string; mirando: boolean; alVer: () => void; pais?: string; ocupados?: string[]; alCambiarPais?: (pais: string) => void };
 };
+
+/** El selector de país de una manta (doble clic en su bandera), con buscador como el de las tiendas. */
+function ElegirPaisDeLaManta({
+  actual,
+  ocupados,
+  donde,
+  onElegir,
+  onCerrar,
+}: {
+  actual: string;
+  ocupados: string[];
+  /** Dónde está el título en la pantalla: la lista va justo debajo, ENCIMA de todo (el velo está detrás de las fichas). */
+  donde: { x: number; y: number };
+  onElegir: (p: string) => void;
+  onCerrar: () => void;
+}) {
+  const [busca, setBusca] = useState("");
+  const normal = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+  const q = normal(busca.trim());
+  const lista = [
+    { code: "", nombre: "🌍 Otros países" },
+    ...Object.entries(COUNTRIES).map(([code, c]) => ({ code, nombre: `${banderaDe(code)} ${(c as { label?: string }).label ?? code}` })),
+  ].filter((x) => !q || normal(`${x.nombre} ${x.code}`).includes(q));
+  return createPortal(
+    <div
+      ref={(el) => encajarEnLaPantalla(el)}
+      className="nodrag nopan nowheel fixed z-[400] w-72 rounded-lg border border-slate-300 bg-white p-2 text-slate-800 shadow-2xl"
+      style={{ left: donde.x, top: donde.y }}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div className="mb-1 flex items-center justify-between text-xs font-bold text-slate-600">
+        Cambiar el país de esta área
+        <button type="button" onClick={onCerrar} className="rounded px-1.5 hover:bg-slate-100" title="Cerrar (Esc)">
+          ✕
+        </button>
+      </div>
+      <input
+        autoFocus
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onCerrar();
+          e.stopPropagation();
+        }}
+        placeholder="🔍 Buscar país…"
+        className="mb-1 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+      />
+      <div className="max-h-64 overflow-y-auto">
+        {lista.map((x) => {
+          const ocupado = x.code !== actual && ocupados.includes(x.code);
+          return (
+            <button
+              key={x.code || "otros"}
+              type="button"
+              disabled={ocupado || x.code === actual}
+              onClick={() => onElegir(x.code)}
+              title={ocupado ? "Ese país ya tiene su área (su Inicio) en este tablero" : undefined}
+              className={`block w-full rounded px-2 py-1 text-left text-sm ${
+                x.code === actual ? "bg-blue-600 font-bold text-white" : ocupado ? "cursor-not-allowed text-slate-400" : "hover:bg-slate-100"
+              }`}
+            >
+              {x.nombre}
+              {ocupado && <span className="ml-1 text-[11px]">· ya tiene su área</span>}
+            </button>
+          );
+        })}
+        {lista.length === 0 && <p className="px-2 py-1 text-xs italic text-slate-500">Ningún país se llama así.</p>}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   const t = TEMA[data.tema];
   const manta = data.manta;
+  const [eligiendoPais, setEligiendoPais] = useState<{ x: number; y: number } | null>(null);
   // ELEGIDO TAMBIÉN EN EL RECUADRO SE VE (10/11/2026, él: «al pegar solo pega las fichas, los velos no
   // aparecen»): el velo que entraba en la selección no se marcaba, y el que quedaba fuera tampoco se notaba.
   const marcada = data.elegida || !!selected;
@@ -1230,9 +1307,14 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             e.stopPropagation();
             data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
           }}
-          onDoubleClick={() => {
-            // La manta de un país se llama por su bandera: no se renombra.
-            if (manta) return;
+          onDoubleClick={(e) => {
+            // La manta de un país se llama por su bandera: no se renombra; con doble clic se cambia su PAÍS (12/11/2026).
+            if (manta) {
+              e.stopPropagation();
+              const r = e.currentTarget.getBoundingClientRect();
+              if (manta.alCambiarPais) setEligiendoPais({ x: r.left, y: r.bottom + 6 });
+              return;
+            }
             const nuevo = window.prompt("Nombre de la caja", data.caja.titulo);
             if (nuevo !== null) data.alCambiar({ ...data.caja, titulo: nuevo.slice(0, 80) });
           }}
@@ -1240,12 +1322,27 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
           style={{ color: t.tituloCaja, pointerEvents: "all" }}
           title={
             manta
-              ? "La manta de este país · clic para elegirla (Delete la borra; las fichas se quedan) · estírala desde sus esquinas"
+              ? "La manta de este país · clic para elegirla (Delete la borra; las fichas se quedan) · doble clic para cambiar su país · estírala desde sus esquinas"
               : "Clic para elegirla (Delete la borra) · doble clic para renombrarla · arrástrala desde sus esquinas"
           }
         >
           {manta ? manta.titulo : data.caja.titulo || "Caja"}
         </div>
+        {manta?.alCambiarPais && eligiendoPais && (
+          <ElegirPaisDeLaManta
+            actual={manta.pais ?? ""}
+            ocupados={manta.ocupados ?? []}
+            donde={eligiendoPais}
+            onCerrar={() => setEligiendoPais(null)}
+            onElegir={(p) => {
+              const de = manta.pais ? `${banderaDe(manta.pais)} ${manta.pais}` : "🌍 Otros países";
+              const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+              setEligiendoPais(null);
+              if (!window.confirm(`¿Cambiar esta área de ${de} a ${a}?\n\nDesde ahora los clientes de ${a} entran por este Inicio (los de ${de} ya no). Ctrl+Z lo deshace.`)) return;
+              manta.alCambiarPais?.(p);
+            }}
+          />
+        )}
         {/* BORRAR LA CAJA O LA MANTA (27/10/2026): «no se pueden borrar». Al elegirla, su botón; las fichas
             de encima se quedan donde están. */}
         {data.elegida && (
@@ -2380,6 +2477,16 @@ export default function LienzoDelTablero({
                   titulo: ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países",
                   mirando: mirando === ini.id,
                   alVer: () => setMirando((m) => (m === ini.id ? null : ini.id)),
+                  // CAMBIAR EL PAÍS DEL ÁREA (12/11/2026). Él: «doble clic al nombre en su bandera, seleccionar el país, y
+                  // que cambie el velo al otro país». Cambia el país de SU Inicio (la manta y lo de dentro lo siguen).
+                  // Un país que ya tiene su Inicio no se ofrece: hay uno por país.
+                  pais: ini.pais ?? "",
+                  ocupados: tablero.fichas.filter((x) => x.tipo === "inicio" && x.id !== ini.id).map((x) => x.pais ?? ""),
+                  alCambiarPais: (p: string) =>
+                    cambiar({
+                      ...vivo.current,
+                      fichas: vivo.current.fichas.map((x) => (x.id === ini.id ? { ...x, pais: p || undefined } : x)),
+                    }),
                 },
               }
             : {}),

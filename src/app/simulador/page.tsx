@@ -108,6 +108,83 @@ function BuscadorDeTiendas({
   );
 }
 
+/**
+ * EL BUSCADOR DE PAÍSES (12/11/2026), igual que el de tiendas. Él: «buscar con el selector se hace pesado, ponle el
+ * buscador de países así como tiene las tiendas». Busca por nombre o código (PE, CO…); Enter elige el primero.
+ */
+function BuscadorDePaises({
+  opciones,
+  valor,
+  alElegir,
+  compacto,
+}: {
+  opciones: Array<{ id: string; nombre: string }>;
+  valor: string;
+  alElegir: (id: string) => void;
+  compacto?: boolean;
+}) {
+  const [abierto, setAbierto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const elegido = opciones.find((o) => o.id === valor);
+  const lista = opciones.filter((o) => !texto.trim() || paraBuscar(`${o.nombre} ${o.id}`).includes(paraBuscar(texto.trim())));
+  const elegir = (id: string) => {
+    setAbierto(false);
+    setTexto("");
+    if (id !== valor) alElegir(id);
+  };
+  return (
+    <div className={`relative ${compacto ? "w-44" : "mt-1 w-full"}`}>
+      <input
+        value={abierto ? texto : elegido?.nombre ?? ""}
+        onFocus={() => {
+          setAbierto(true);
+          setTexto("");
+        }}
+        onChange={(e) => {
+          setTexto(e.target.value);
+          setAbierto(true);
+        }}
+        onBlur={() => window.setTimeout(() => setAbierto(false), 150)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") (e.target as HTMLInputElement).blur();
+          if (e.key === "Enter" && lista[0]) {
+            e.preventDefault();
+            elegir(lista[0].id);
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        placeholder="🔎 Escribe para buscar el país…"
+        title="Escribe parte del nombre del país (o su código, como CO) y elígelo de la lista."
+        className={compacto ? "w-full rounded-md border border-neutral-300 px-2 py-1 text-xs" : "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"}
+      />
+      {abierto && (
+        <ul
+          className={`absolute z-50 mt-1 max-h-64 w-full min-w-[14rem] overflow-y-auto rounded-md border border-neutral-300 bg-white shadow-lg ${
+            compacto ? "bottom-full mb-1 text-xs" : "text-sm"
+          }`}
+        >
+          {lista.length === 0 && <li className="px-3 py-2 text-neutral-500">Ningún país con ese nombre</li>}
+          {lista.map((o) => (
+            <li key={o.id}>
+              <button
+                type="button"
+                // onMouseDown (no onClick): elige antes de que el cuadro pierda el foco y cierre la lista.
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  elegir(o.id);
+                }}
+                className={`block w-full px-3 py-2 text-left text-neutral-800 hover:bg-sky-50 ${o.id === valor ? "bg-sky-100 font-semibold" : ""}`}
+              >
+                {o.nombre}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 type Session = { id: number; phone: string; name: string | null; state: string | null };
 type Snapshot = { conversation: Session; messages: MessageDTO[]; buttons: Record<string, { id: string; title: string }[]> };
 type SessionMap = Partial<Record<string, number>>;
@@ -502,10 +579,11 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
             </select>
           </label>
           <label className="mt-3 block text-xs font-medium text-neutral-700">País{channel === "messenger" && <span className="ml-1 font-normal text-neutral-500">(puedes dejarlo sin responder)</span>}
-            <select value={country} onChange={(event) => setCountry(event.target.value as CountryCode | "ASK")} className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm">
-              {channel === "messenger" && <option value="ASK">El cliente aún no indicó país</option>}
-              {COUNTRIES.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
-            </select>
+            <BuscadorDePaises
+              opciones={[...(channel === "messenger" ? [{ id: "ASK", nombre: "El cliente aún no indicó país" }] : []), ...COUNTRIES.map((item) => ({ id: item.code, nombre: item.label }))]}
+              valor={country}
+              alElegir={(id) => setCountry(id as CountryCode | "ASK")}
+            />
           </label>
           {/* CON QUÉ TIENDA SE PRUEBA.
               Lo pidió el dueño el 01/10/2026: «no puedo probar en celular, me van a
@@ -557,7 +635,12 @@ function TestWindow({ storageKey, onClose, closable }: { storageKey: string; onC
           <div className="border-t border-neutral-300 bg-tarjeta p-2">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <select value={channel} onChange={(event) => void switchTest(event.target.value as TestChannel, event.target.value === "whatsapp" && country === "ASK" ? "PE" : country)} className="rounded-md border border-neutral-300 px-2 py-1 text-xs"><option value="whatsapp">WhatsApp</option><option value="messenger">Messenger</option></select>
-              <select value={country} onChange={(event) => void switchTest(channel, event.target.value as CountryCode | "ASK")} className="rounded-md border border-neutral-300 px-2 py-1 text-xs">{channel === "messenger" && <option value="ASK">País: sin responder</option>}{COUNTRIES.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select>
+              <BuscadorDePaises
+                compacto
+                opciones={[...(channel === "messenger" ? [{ id: "ASK", nombre: "País: sin responder" }] : []), ...COUNTRIES.map((item) => ({ id: item.code, nombre: item.label }))]}
+                valor={country}
+                alElegir={(id) => void switchTest(channel, id as CountryCode | "ASK")}
+              />
               {/* LA TIENDA DE ESTA PRUEBA, al lado del canal y el país.
                   Cambiarla abre una conversación nueva: la tienda se escribe al
                   crearla, igual que le llega a un cliente por su número. */}
