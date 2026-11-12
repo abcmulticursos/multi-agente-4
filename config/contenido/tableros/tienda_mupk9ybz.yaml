@@ -2573,14 +2573,6 @@ whatsapp:
       de: f-mwcyp14g-iy170
       salida: siguiente
       a: f-mwcyp14h-68rlo
-    - id: c-mwcyp14h-v5hl1
-      de: f-mwcyp14g-7ls48
-      salida: sin_pago
-      a: f-mwcyp14h-5mnwm
-    - id: c-mwcyp14h-ddlp6
-      de: f-mwcyp14h-wfcvg
-      salida: sin_pago
-      a: f-mwcyp14h-5mnwm
     - id: c-mwcyp14h-qmg98
       de: f-mwcyp14h-gwlbx
       salida: siguiente
@@ -2591,6 +2583,16 @@ whatsapp:
       salida: siguiente
       a: f-mwcyp14h-sg7vo
       vista: cable
+    - id: c-mwcz3wel-3l2
+      de: f-mwcyp14g-7ls48
+      salida: sin_pago
+      a: f-mwcyp14h-5mnwm
+      a_espejo: e-mwcz3tgl-nj7m
+    - id: c-mwcz45wm-s9w
+      de: f-mwcyp14h-wfcvg
+      salida: sin_pago
+      a: f-mwcyp14h-5mnwm
+      a_espejo: e-mwcz436d-2pqw
   cajas:
     - id: velo-mwcazaol-0
       x: -979
@@ -2607,3 +2609,11 @@ whatsapp:
       ficha: f-mwcazaok-en2px
       x: 2189
       y: 2288
+    - id: e-mwcz3tgl-nj7m
+      ficha: f-mwcyp14h-5mnwm
+      x: 1980
+      y: 3432
+    - id: e-mwcz436d-2pqw
+      ficha: f-mwcyp14h-5mnwm
+      x: 1969
+      y: 4114
