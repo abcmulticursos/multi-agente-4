@@ -3183,8 +3183,10 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
           delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tienes la opción de comprar el Curso así 😊👇|✅ Excelente, puedes obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
             - |-
@@ -3194,8 +3196,10 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o imagen de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos envías una foto o imagen de tu comprobante* para verificar el pago y brindarte acceso rápido 🤳🏼 😊}"
           delay_after_sec: 6
+          spintax_ia:
+            - "{*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊|*Después de eso, nos mandas una foto o imagen de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼 😊|*Una vez hecho eso, nos envías una foto o imagen de tu comprobante* para verificar el pago y brindarte acceso rápido 🤳🏼 😊}"
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
