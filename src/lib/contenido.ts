@@ -106,11 +106,10 @@ export function escribirSeguro(abs: string, texto: string): void {
 
 // ── LO YA LEÍDO, MIENTRAS EL ARCHIVO SEA EL MISMO (fecha y tamaño) ──
 type Leido = { mtimeMs: number; size: number; texto: string; js?: Record<string, unknown>; doc?: Document };
-// En `globalThis` (11/11/2026). Next carga este archivo DOS veces: una para el bot (el obrero, que lee el contenido al
-// arrancar) y otra para la ruta del editor. Cada una tenía su propia lista y el editor volvía a leer todo desde cero
-// (~5–8 s medidos en la copia tras un deploy, y el doble de memoria). Ahora es una sola: lo que ya leyó el bot (o la
-// precarga, `calentarElContenido`) lo encuentra el editor hecho.
-const leidos: Map<string, Leido> = ((globalThis as unknown as { __contenidoLeido?: Map<string, Leido> }).__contenidoLeido ??= new Map<string, Leido>());
+// CADA COPIA DE ESTE ARCHIVO CON SU PROPIA LISTA, A PROPÓSITO (11/11/2026). Next lo carga dos veces (el bot y la ruta del
+// editor). Compartir la lista en `globalThis` hizo que el editor guardara con documentos YAML leídos por la OTRA copia de
+// la librería, y todo guardado falló con «El resultado no sería YAML válido» (91cb825, deshecho el mismo día). No juntar.
+const leidos = new Map<string, Leido>();
 function leer(abs: string): Leido {
   const st = fs.statSync(abs);
   const ya = leidos.get(abs);
@@ -159,22 +158,6 @@ export function contenidoCompleto(): Record<string, unknown> {
   const out = structuredClone(general);
   for (const m of marcas) ponerEn(out, m.ruta, structuredClone(jsDe(leer(absDePieza(m.archivo)))));
   return out;
-}
-
-/**
- * PRECARGAR AL ARRANCAR (11/11/2026). «Demoró en cargar mucho esta vez»: tras un deploy, la primera apertura del
- * editor leía todo el YAML desde cero (~8 s medidos en la copia). El arranque lo deja leído (si el bot aún no lo
- * leyó); el editor lo encuentra hecho. Solo LEE (lo mismo que `contenidoCompleto`, que también pone en su sitio lo pendiente,
- * como antes); si falla, el editor lo lee como siempre.
- */
-export function calentarElContenido(): void {
-  try {
-    const t0 = Date.now();
-    contenidoCompleto();
-    console.log(`[contenido] precargado al arrancar en ${Date.now() - t0} ms`);
-  } catch (err) {
-    console.error("[contenido] no se pudo precargar:", err);
-  }
 }
 
 /**

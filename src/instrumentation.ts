@@ -9,9 +9,5 @@ export async function register(): Promise<void> {
     guardarElLogEnDisco();
     const { startWorkflowWorker } = await import("@/lib/workflow/worker");
     startWorkflowWorker();
-    // El contenido, precargado unos segundos después de arrancar: la primera apertura del editor tras un
-    // deploy ya no lo lee desde cero (`calentarElContenido`).
-    const { calentarElContenido } = await import("@/lib/contenido");
-    setTimeout(calentarElContenido, 5000);
   }
 }
