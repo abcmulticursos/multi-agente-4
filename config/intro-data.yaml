@@ -2881,6 +2881,12 @@ payment_profiles_by_country:
         method: nequi
         aliases:
           - nequi
+          - neki
+          - connequi
+          - neqi
+          - nki
+          - nqui
+          - neqki
       - label: Daviplata 🤳🏼
         method: bancolombia
         aliases:
@@ -2894,27 +2900,53 @@ payment_profiles_by_country:
       nequi:
         - type: text
           body_variants:
+            - Excelente! puedes hacerlo de la siguiente manera 👇️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
             - |-
+              ⚡💳 *Puedes pagar por Nequi, Daviplata o Bre-B*
+
               🔴 *Nequi : {{CUENTA_NEQUI}}*
               👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
               💰️ Precio: {precio}
           delay_after_sec: 0
+        - type: text
+          body_variants:
+            - Luego de eso nos envías la imagen de tu comprobante para enviarte el acceso a instante 🤳😊
+          delay_after_sec: 6
       bancolombia:
         - type: text
           body_variants:
-            - |-
-              🔴 *Nequi : {{CUENTA_NEQUI}}*
-              👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-              💰️ Precio: {precio}
-          delay_after_sec: 0
-      daviplata:
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🔴 *Nequi : {{CUENTA_NEQUI}}*
-              👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
-              💰️ Precio: {precio}
-          delay_after_sec: 0
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso al instante 🤳🏼 😊"
+          delay_after_sec: 6
+      daviplata:
+        - type: text
+          body_variants:
+            - ✅ Genial, puedes adquirir el Curso de la siguiente Manera 😊👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+
+              {{METODO_DE_PAGO_1}}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "*Luego de eso nos envías una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼 😊"
+          delay_after_sec: 6
     order_bump:
       combo_price_soles: 0
       combo_discount_price_soles: 0
