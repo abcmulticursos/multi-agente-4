@@ -3602,10 +3602,8 @@ whatsapp:
               * 1.- 💴 Realiza un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
-              *! {Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al toque 😊⚡}
+              *! {Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
-          spintax_ia:
-            - "{Al instante recibes tu Material + Bonos en segundos* 😊⚡|De inmediato obtienes tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al toque 😊⚡}"
         - type: text
           body_variants:
             - |-
