@@ -33819,8 +33819,12 @@ function SelectorConBuscador({
   const [busca, setBusca] = useState("");
   const q = sinTildesDelEditor(busca.trim());
   const vistos = q ? lista.filter((p) => p.id === valor || sinTildesDelEditor(p.nombre).includes(q)) : lista;
+  const elegido = valor ? lista.find((p) => p.id === valor) : undefined;
   return (
     <span className="mt-1 flex flex-col gap-1">
+      {/* EL ELEGIDO EN AZUL (12/11/2026). Él: «en el selector está seleccionado pero se ve solo la palabra… imagina un
+          novato». El selector cerrado corta el nombre; arriba va entero, en el mismo azul de «Presenta estos productos». */}
+      {elegido && <ElegidoEnAzul nombre={elegido.nombre} />}
       {lista.length > 6 && (
         <input
           value={busca}
@@ -33839,6 +33843,13 @@ function SelectorConBuscador({
       </select>
       {q && vistos.filter((p) => p.id !== valor).length === 0 && <span className="text-[11px] italic text-tinta-suave">Ningún producto se llama así.</span>}
     </span>
+  );
+}
+
+/** Lo elegido en un selector, a la vista y en azul (el mismo de `ListaDeEleccion`). */
+function ElegidoEnAzul({ nombre }: { nombre: string }) {
+  return (
+    <span className="self-start rounded-md border border-blue-700 bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">✓ {nombre}</span>
   );
 }
 
@@ -34359,7 +34370,14 @@ function AjustesDeLaFicha({
                   />
                   <div className="mt-1 space-y-1">
                     {lista.map((clave, i) => (
-                      <div key={i} className="flex items-center gap-1">
+                      <Fragment key={i}>
+                      {/* EL ELEGIDO EN AZUL (12/11/2026): el selector cerrado solo dejaba ver «🏪 De esta tienda…». */}
+                      {clave && (() => {
+                        const g = entregasPorProducto.find((x) => x.opciones.some((o) => o.clave === clave));
+                        const o = g?.opciones.find((x) => x.clave === clave);
+                        return o ? <ElegidoEnAzul nombre={g?.id === "@tienda" ? o.nombre : `${g?.nombre} · ${o.nombre}`} /> : null;
+                      })()}
+                      <div className="flex items-center gap-1">
                         <select
                           value={clave}
                           onChange={(e) => poner(lista.map((x, j) => (j === i ? e.target.value : x)))}
@@ -34370,8 +34388,9 @@ function AjustesDeLaFicha({
                             <optgroup key={g.id} label={`── ${g.nombre} ──`}>
                               {g.opciones.map((o) => (
                                 <option key={o.clave} value={o.clave}>
-                                  {/* El producto delante, también con el selector cerrado (29/10/2026). */}
-                                  {`${g.nombre} · ${o.nombre}`}
+                                  {/* El producto delante, también con el selector cerrado (29/10/2026). El de la tienda, por
+                                      su nombre: «🏪 De esta tienda (sigue…) · …» se cortaba antes del producto (12/11/2026). */}
+                                  {g.id === "@tienda" ? `🏪 ${o.nombre}` : `${g.nombre} · ${o.nombre}`}
                                 </option>
                               ))}
                             </optgroup>
@@ -34407,6 +34426,7 @@ function AjustesDeLaFicha({
                           </button>
                         )}
                       </div>
+                      </Fragment>
                     ))}
                   </div>
                   {lista.some(Boolean) && (
