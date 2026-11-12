@@ -2918,7 +2918,7 @@ payment_profiles_by_country:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi, Daviplata o Bre-B*
+              ⚡💳 *Puedes pagar por Nequi o Daviplata*
 
               🔴 *Nequi : {{CUENTA_NEQUI}}*
               👨‍🏫 A nombre de: *{{NOMBRE_RECEPTOR}}*
@@ -2936,7 +2936,7 @@ payment_profiles_by_country:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *A través de Nequi, Daviplata o Bre-B *
+              ⚡💳 *A través de Nequi o Daviplata *
 
               {{METODO_DE_PAGO_1}}
           delay_after_sec: 6
