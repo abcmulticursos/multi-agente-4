@@ -5995,6 +5995,10 @@ biblioteca_de_productos:
         price_soles: 11000
         discount_price_soles: 9000
         market_price: 27000
+      CO:
+        price_soles: 14000
+        discount_price_soles: 11000
+        market_price: 55000
   - id: pmuq3doxr
     name: SUPER PACK ESPECIALES 2 EN 1
     aliases: []
