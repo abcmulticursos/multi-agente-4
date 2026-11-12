@@ -2613,17 +2613,19 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/10dt7plKuMbsh0dy4OPvBLjXo3kNtxRh3/view?usp=sharing
           caption_variants:
             - |-
-              🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊
+              {🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}
 
               *Tenemos un {{PRODUCTO_COMPLEMENTARIO}}!* con muchas actividades *para niños de 2 a 6 años*. 📚👶🏻
 
               ✅ *Super Completo* Con todo lo que ves en la Imagen! 🤗👆🏼
           delay_after_sec: 6
+          spintax_ia:
+            - "{🌟 *Antes de Compartirte tu método de pago* te quiero comentar algo que quizas te guste: 😊|🌟 *Antes de darte los detalles de pago* quería contarte algo que tal vez te interese: 😊|🌟 *Antes de pasarte la información del pago* quería mencionarte algo que quizá te llame la atención: 😊}"
         - type: image
           drive_url: https://drive.google.com/file/d/1NufsPBqVu4UUJyETlQ7UvMS-FP-Y6uY9/view?usp=drive_link
           caption_variants:
             - |-
-              🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊
+              {🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Puedes elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si quieres te llevas 1 solo, o si te animas los 2 juntos*  😊}
               __________
 
               1️⃣ *{{PRODUCTO_FULL}} - (Los 2 Kits juntos 📚+📚) 👉🏼 ${{PRECIO_FULL}}*
@@ -2637,10 +2639,12 @@ whatsapp:
 
               2️⃣ *Pero si deseas solo el KIT DE {{PRODUCTO_BASE}}*  📚 solamente por *{{PRECIO_BASE}}*. 😊💵
           delay_after_sec: 6
+          spintax_ia:
+            - "{🔴 *Si deseas Puedes Adquirir 1 solo, o los 2 juntos*  😊|🔴 *Puedes elegir entre adquirir solo 1 o los 2 completos*  😊|🔴 *Si quieres te llevas 1 solo, o si te animas los 2 juntos*  😊}"
         - type: text
           body_variants:
             - |-
-              🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              {🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animas a esta_ *Oferta Especial*?}  *ESCRIBE UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
               __________
 
               🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
@@ -2681,6 +2685,8 @@ whatsapp:
                 - el mas comodo
               color: ambar
               steps: []
+          spintax_ia:
+            - "{🎁 _¿Te animas a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animas a esta_ *Oferta Especial*?}"
         - type: text
           body_variants:
             - |-
