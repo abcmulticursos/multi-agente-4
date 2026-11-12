@@ -8634,7 +8634,7 @@ tiendas:
     regalo:
       consent_sequence:
         - type: image
-          drive_url: https://drive.google.com/file/d/1t94_pAcG_2pVj0tQ_ATKmD3XQWjRiyj1/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1XgwYsDzn_UNNCfz9Y3xBNE4uWjjBnigS/view?usp=sharing
           caption_variants:
             - |-
               🎁 *{¿Deseas recibir un Regalito Adicional extra|¿Te gustaría recibir un Regalito Adicional extra|¿Quieres recibir un Regalito Adicional extra}*
