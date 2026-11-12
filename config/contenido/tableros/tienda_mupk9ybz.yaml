@@ -12632,6 +12632,7 @@ whatsapp:
       ancho: 4708
       alto: 7139
       titulo: ""
+      inicio: inicio-AR-mwdbncsu
     - id: velo-mwdbn0cl-1
       x: -594
       y: 18128
@@ -12656,13 +12657,6 @@ whatsapp:
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
-    - id: manta-inicio-AR-mwdbncsu
-      x: -2024
-      y: 23646
-      ancho: 1280
-      alto: 620
-      titulo: ""
-      inicio: inicio-AR-mwdbncsu
   espejos:
     - id: e-mwcbh8tj-q1pa
       ficha: f-mwcazaok-en2px
