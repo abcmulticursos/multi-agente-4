@@ -2992,7 +2992,7 @@ payment_profiles_by_country:
     numero_de_cuenta: "3161690372"
     cuentas_por_metodo:
       nequi: "3161690372"
-    nombre_completo: ""
+    nombre_completo: Ormidas Rodriguez
     foto: /avatares/avatar-45.png
   BO:
     enabled: false
