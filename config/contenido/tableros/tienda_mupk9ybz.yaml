@@ -12561,9 +12561,9 @@ whatsapp:
               {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
-              🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
 
-              🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
           decisions:
             - id: d-mwelg57r-su9j9
