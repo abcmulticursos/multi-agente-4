@@ -11756,7 +11756,8 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
+              📚 *¿Qué incluye el Super Kit?*
+              6 CUADERNILLOS EDUCATIVOS 📚️
 
               📚 *Aprendizaje en 6 Niveles* para interacción *(páginas listas para imprimir)*
               {* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,} 
@@ -11773,7 +11774,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
-              *Además recibís GRATIS estos complementos* ‼️👇🏼
+              *Y si adquieres {{PRODUCTO_BASE}} el día de hoy*, te llevas estos *6 regalos GRATIS!*👇🏼
 
               {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}
               * 🎴 Tarjetitas gráficas
@@ -11788,10 +11789,14 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              *MAMÁ / PAPÁ,* esta es tu oportunidad de llevarte {{producto_base}} completo 📚️✨️
 
-              🟠 *¿CÓMO LO ADQUIERO?*
+              📚️ 6 Libros completos
+              🎁 +6 Regalos especiales
+
+              🖨️ Todo en formato PDF listo para descargar e imprimir
+
+              🔥 Todo POR SOLO {{PRECIO_BASE}}
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
