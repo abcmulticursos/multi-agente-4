@@ -3863,6 +3863,13 @@ whatsapp:
       alto: 693
       titulo: MODO CONTRIBUCION
       color: "#75ddff"
+    - id: k-mwfb6mw1
+      x: 2354
+      y: 4191
+      ancho: 2376
+      alto: 902
+      titulo: Nueva caja
+      color: "#ca8a04"
   espejos:
     - id: e-mw4xjp2d-zjbz
       ficha: f-mw4xhgdb-dozb0
