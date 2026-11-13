@@ -11748,6 +11748,11 @@ whatsapp:
 
               💡Ideal para niños que se aburren con los métodos tradicionales.
           delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1nV4dPLUK1-c7hvcKqQM-qKc1aM1s7YQH/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 6
         - type: text
           body_variants:
             - |-
