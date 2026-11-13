@@ -105,6 +105,7 @@ import {
   leeTableros,
   leeTablerosPorTienda,
   opcionesDe,
+  sinBotonesApagados,
   pasosDeLaFicha,
   entregasDeLaFicha,
   unaEntregaLoEspera,
@@ -208,7 +209,8 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
  * Quien ya pasa su precio (el cobro, los datos de un método…) no cambia.
  */
 async function sendConfiguredSteps(convo: ConversationRow, steps: unknown, precio?: number): Promise<boolean> {
-  return enviarBurbujasDelMotor(convo, conLoEntregado(convo, steps) as never, precio ?? precioDelTablero(convo));
+  // (13/11/2026: los botones apagados no salen.)
+  return enviarBurbujasDelMotor(convo, conLoEntregado(convo, sinBotonesApagados(steps)) as never, precio ?? precioDelTablero(convo));
 }
 
 /**
@@ -4880,8 +4882,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // y el cliente contesta «1» o el texto; en cualquier canal alguien puede escribir el texto del
   // botón en vez de tocarlo. Solo los botones que VIO, de la ÚLTIMA burbuja que los tenga.
   if (conRespuesta && !contenido.startsWith("bubble:")) {
-    const conBotones = vistos.filter((p) => (p.buttons ?? []).length > 0);
-    const botones = (conBotones[conBotones.length - 1]?.buttons ?? []).filter((b) => b.id && b.label?.trim()).slice(0, 3);
+    const conBotones = vistos.filter((p) => (p.buttons ?? []).some((b) => b.enabled !== false));
+    const botones = (conBotones[conBotones.length - 1]?.buttons ?? []).filter((b) => b.id && b.label?.trim() && b.enabled !== false).slice(0, 3);
     const limpio = (s: string) =>
       s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
     const dicho = limpio(contenido);

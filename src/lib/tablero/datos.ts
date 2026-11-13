@@ -442,13 +442,36 @@ export function pasosDeLaFicha(f: FichaDelTablero): SequenceStep[] {
   return encendidas(f.steps);
 }
 
+/**
+ * EL BOTÓN APAGADO (13/11/2026). Él: «apagar botón ayudaría mucho». Como el cuadrito apagado: existe (su cable se queda)
+ * pero el cliente no lo ve ni cuenta como opción. Solo el tablero lo lee. Quita los botones con `enabled: false` de unas
+ * burbujas (también de las burbujas de dentro de un botón o un cuadrito). Sin ninguno apagado devuelve LO MISMO.
+ */
+export function sinBotonesApagados<T>(pasos: T): T {
+  if (!JSON.stringify(pasos ?? null).includes('"enabled":false')) return pasos;
+  const limpiar = (lista: unknown): unknown =>
+    Array.isArray(lista)
+      ? lista.map((p) => {
+          if (!p || typeof p !== "object") return p;
+          const s = p as { buttons?: Array<{ enabled?: boolean; steps?: unknown }>; decisions?: Array<{ steps?: unknown }> };
+          return {
+            ...s,
+            ...(Array.isArray(s.buttons) ? { buttons: s.buttons.filter((b) => b?.enabled !== false).map((b) => (b?.steps ? { ...b, steps: limpiar(b.steps) } : b)) } : {}),
+            ...(Array.isArray(s.decisions) ? { decisions: s.decisions.map((d) => (d?.steps ? { ...d, steps: limpiar(d.steps) } : d)) } : {}),
+          };
+        })
+      : lista;
+  return limpiar(pasos) as T;
+}
+
 /** Los botones y cuadritos de unas burbujas (cada uno una salida). */
 export function opcionesDe(pasos: SequenceStep[]): { botones: BubbleButton[]; cuadritos: BubbleDecision[] } {
   const botones: BubbleButton[] = [];
   const cuadritos: BubbleDecision[] = [];
   const vistos = new Set<string>();
   for (const p of pasos) {
-    for (const b of p.buttons ?? []) if (b?.id && !vistos.has(`b${b.id}`)) (vistos.add(`b${b.id}`), botones.push(b));
+    // Un botón apagado no es una salida (13/11/2026), como un cuadrito apagado.
+    for (const b of p.buttons ?? []) if (b?.id && b.enabled !== false && !vistos.has(`b${b.id}`)) (vistos.add(`b${b.id}`), botones.push(b));
     for (const d of p.decisions ?? [])
       if (d?.id && d.enabled !== false && !vistos.has(`d${d.id}`)) (vistos.add(`d${d.id}`), cuadritos.push(d));
   }

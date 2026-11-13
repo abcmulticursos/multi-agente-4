@@ -2378,6 +2378,9 @@ let portapapeles: {
   espejos?: NonNullable<Tablero["espejos"]>;
   /** Cuántas veces se pegó: cada Ctrl+V cae un paso más abajo a la derecha, como en Illustrator. */
   pegadas?: number;
+  /** CORTADO CON CTRL+X (13/11/2026): el primer pegado devuelve LAS MISMAS fichas (mismos ids y cables de dentro), así
+   *  los clientes que estaban en ellas siguen su camino. Los pegados siguientes son copias, como siempre. */
+  cortado?: boolean;
 } | null = null;
 
 export default function LienzoDelTablero({
@@ -2432,7 +2435,8 @@ export default function LienzoDelTablero({
   /** `burbuja`: la que se quiere ver al abrir (doble clic sobre ella en la ficha). `grupo`: las OTRAS fichas de
    *  Seguimientos elegidas junto con ella (doble clic en una de varias elegidas), para editarlas a la vez. */
   onAbrir: (id: string, burbuja?: number, grupo?: string[]) => void;
-  onAjustes: (id: string) => void;
+  /** `grupo`: las OTRAS del mismo tipo elegidas junto con ella (13/11/2026). */
+  onAjustes: (id: string, grupo?: string[]) => void;
   /** EL BUSCADOR VIVE ARRIBA, EN LA BARRA, como en la pizarra (24/10/2026). */
   buscar?: string;
   /** LOS BOTONES REDONDOS DE ARRIBA A LA IZQUIERDA, como en la pizarra: ← antes del «+», ☰ después. */
@@ -3149,10 +3153,19 @@ export default function LienzoDelTablero({
     // ENCIMA DEL ORIGINAL, UN PASO ABAJO A LA DERECHA (12/11/2026), como en Illustrator. Él: «me incomoda lo lejos que
     // se pega… lo pega bien arriba a la izquierda». (Antes, desde el 25/10, iba a la derecha de TODO el tablero, lejos.)
     // Cada Ctrl+V seguido baja un paso más, para que no queden una exactamente encima de otra.
+    // LO CORTADO VUELVE TAL CUAL la primera vez (y en su mismo sitio con Ctrl+V), si sus fichas ya no están en el tablero.
+    const mismas =
+      !!portapapeles.cortado &&
+      !portapapeles.fichas.some((f) => actual.fichas.some((x) => x.id === f.id)) &&
+      !espejosCopiados.some((e) => (actual.espejos ?? []).some((x) => x.id === e.id));
+    portapapeles.cortado = false;
     const paso = 40 * ((portapapeles.pegadas ?? 0) + 1);
-    const desplazar = donde ? { x: donde.x - minX, y: donde.y - minY } : { x: paso, y: paso };
-    if (!donde) portapapeles.pegadas = (portapapeles.pegadas ?? 0) + 1;
-    const copia = copiarFichas(portapapeles.fichas, portapapeles.cables, desplazar, espejosCopiados);
+    const desplazar = donde ? { x: donde.x - minX, y: donde.y - minY } : mismas ? { x: 0, y: 0 } : { x: paso, y: paso };
+    if (!donde && !mismas) portapapeles.pegadas = (portapapeles.pegadas ?? 0) + 1;
+    const mover = <T extends { x: number; y: number }>(o: T): T => ({ ...o, x: Math.round(o.x + desplazar.x), y: Math.round(o.y + desplazar.y) });
+    const copia = mismas
+      ? { fichas: JSON.parse(JSON.stringify(portapapeles.fichas.map(mover))) as FichaEnElEditor[], cables: portapapeles.cables.map((c) => ({ ...c })), espejos: espejosCopiados.map(mover) }
+      : copiarFichas(portapapeles.fichas, portapapeles.cables, desplazar, espejosCopiados);
     const sello = Date.now().toString(36);
     const cajasNuevas = cajasCopiadas.map((c, k) => ({ ...c, id: `velo-${sello}-${k}`, x: Math.round(c.x + desplazar.x), y: Math.round(c.y + desplazar.y) }));
     // Fichas, cables, espejos y velos en UN solo cambio (dos seguidos se pisan).
@@ -3206,6 +3219,25 @@ export default function LienzoDelTablero({
         const g = loElegido();
         if (!copiarLas(g.fichas, cajasElegidas(), g.espejos)) return;
         e.preventDefault();
+      } else if ((e.ctrlKey || e.metaKey) && tecla === "x") {
+        // CORTAR (13/11/2026). Él: «necesito que las fichas se puedan cortar y pegar, Cmd o Ctrl X». Se copian y se
+        // quitan (con sus cables); Ctrl+V las devuelve tal cual. Ctrl+Z deshace el corte.
+        const g = loElegido();
+        const cajas = cajasElegidas();
+        const dentro = [...g.fichas].reduce((s, id) => s + (numeros?.[id]?.ahora ?? 0), 0);
+        if (
+          dentro &&
+          !window.confirm(
+            `⚠ Hay ${dentro} cliente(s) ahora mismo en esas fichas. Si las cortas y no las pegas, se quedan sin ruta. Al pegarlas con Ctrl+V vuelven a ser las mismas y siguen su camino.\n\n¿Cortar?`
+          )
+        )
+          return;
+        if (!copiarLas(g.fichas, cajas, g.espejos)) return;
+        e.preventDefault();
+        if (portapapeles) portapapeles.cortado = true;
+        const sinEllas = sinFichas(sinEspejos(actual, g.espejos), g.fichas);
+        cambiar({ ...sinEllas, cajas: (sinEllas.cajas ?? []).filter((c) => !cajas.has(c.id)) });
+        setAviso(`${g.fichas.size ? `${g.fichas.size} ficha(s)` : "Lo elegido"} cortado. Ctrl+V para pegarlo (Ctrl+Z lo devuelve a su sitio).`);
       } else if ((e.ctrlKey || e.metaKey) && tecla === "v") {
         if (!pegarLoCopiado()) return;
         e.preventDefault();
@@ -3258,17 +3290,27 @@ export default function LienzoDelTablero({
   // a uno de los seleccionados se abra uno de ellos, pero haciendo una edición global a los seleccionados». Al abrir una
   // ficha de Seguimientos que está elegida junto con otras de Seguimientos, se le pasan esas otras (el pop up decide
   // qué cambios viajan a ellas). Las de otro tipo elegidas no cuentan.
+  // (13/11/2026: de cualquier tipo menos el Inicio —cada uno es su país—: Mensajes, Cobros, Entregas… elegidos juntos, para
+  // cambiar lo común en todos.)
+  const grupoDe = (id: string): string[] | undefined => {
+    const f = vivo.current.fichas.find((x) => x.id === id);
+    const elegidas = new Set(nodosVivos.current.filter((n) => n.selected).map((n) => n.id));
+    if (!f || f.tipo === "inicio" || !elegidas.has(id)) return undefined;
+    const otras = vivo.current.fichas.filter((x) => x.tipo === f.tipo && x.id !== id && !x.guardada && elegidas.has(x.id)).map((x) => x.id);
+    return otras.length ? otras : undefined;
+  };
   const abrirConSuGrupo = useCallback(
     (id: string, burbuja?: number) => {
-      const f = vivo.current.fichas.find((x) => x.id === id);
-      const elegidas = new Set(nodosVivos.current.filter((n) => n.selected).map((n) => n.id));
-      const grupo =
-        f?.tipo === "seguimientos" && elegidas.has(id)
-          ? vivo.current.fichas.filter((x) => x.tipo === "seguimientos" && x.id !== id && !x.guardada && elegidas.has(x.id)).map((x) => x.id)
-          : [];
-      onAbrir(id, burbuja, grupo.length ? grupo : undefined);
+      onAbrir(id, burbuja, grupoDe(id));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onAbrir]
+  );
+  // LO MISMO CON EL ⚙ (13/11/2026): con varias del mismo tipo elegidas, sus ajustes son los de todas (lo distinto, con «?»).
+  const ajustesConSuGrupo = useCallback(
+    (id: string) => onAjustes(id, grupoDe(id)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onAjustes]
   );
 
   // EL CONTEXTO, ESTABLE (27/10/2026): antes era un objeto nuevo en cada redibujo y, al arrastrar una
@@ -3281,7 +3323,7 @@ export default function LienzoDelTablero({
       nombres,
       resumenDe,
       abrir: abrirConSuGrupo,
-      ajustes: onAjustes,
+      ajustes: ajustesConSuGrupo,
       menu: abrirMenu,
       cambiar,
       curvar,

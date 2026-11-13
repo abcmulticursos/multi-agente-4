@@ -188,6 +188,8 @@ export type BubbleButtonAction =
 export interface BubbleButton {
   /** Id interno estable: el cliente nunca lo ve. */
   id: string;
+  /** false = apagado (13/11/2026). SOLO lo lee el tablero (`sinBotonesApagados`); la venta de siempre no lo usa. */
+  enabled?: boolean;
   /** Texto visible en WhatsApp/Messenger. */
   label: string;
   action: BubbleButtonAction;

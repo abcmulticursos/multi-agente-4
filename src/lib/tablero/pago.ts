@@ -22,6 +22,7 @@ import {
 } from "@/lib/workflow/config";
 import { sendConfiguredSteps } from "@/lib/workflow/engine";
 import { sendBotButtons } from "@/lib/workflow/sender";
+import { sinBotonesApagados } from "./datos";
 
 /** El método que nombra el cliente: el id que trae un botón de método, o su nombre/alias escrito. */
 export function metodoQueNombra(contenido: string, phone: string | null | undefined): string | null {
@@ -233,7 +234,8 @@ export async function preguntarElMetodo(convo: ConversationRow, pasosDeLaFicha: 
   const conBotones = config?.payment_method_buttons === true;
   precio = precio ?? precioPorDefecto(convo);
   const salieron =
-    pasosDeLaFicha.length > 0 && (await sendConfiguredSteps(convo, preparadorDeDatos(convo, conElNombreDelProducto(pasosDeLaFicha, nombre)) as never, precio));
+    // (13/11/2026: los botones apagados de la ficha no salen.)
+    pasosDeLaFicha.length > 0 && (await sendConfiguredSteps(convo, preparadorDeDatos(convo, conElNombreDelProducto(sinBotonesApagados(pasosDeLaFicha), nombre)) as never, precio));
   const botones = getPaymentButtons(convo.phone).map((b, i) => ({ id: `pmethod:${b.method}:${i}`, title: b.label }));
   if (conBotones && botones.length > 0) {
     const cuerpo = (config?.payment_buttons_prompt ?? "").trim();

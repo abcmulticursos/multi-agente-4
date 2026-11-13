@@ -357,6 +357,8 @@ interface EditorBubbleButton {
   id: string;
   label: string;
   action: BubbleButtonAction;
+  /** false = apagado (13/11/2026). Solo en el tablero: el cliente no lo ve y no cuenta como opción. */
+  enabled?: boolean;
   steps?: EditorStep[];
   /** Para "send_payment_method": QUÉ método manda, no una copia de sus datos.
    *  Los datos viven en Precios y pagos, por país. */
@@ -24966,7 +24968,8 @@ function applyPreviewPrices(
  * con un texto fijo. Se dibuja igual de distinto, o la previa engañaría.
  */
 function BotonesDeLaBurbuja({ step }: { step: EditorStep }) {
-  const todos = step.buttons ?? [];
+  // (13/11/2026: un botón apagado no sale, como no le llega al cliente.)
+  const todos = (step.buttons ?? []).filter((b) => b.enabled !== false);
   const visibles = todos
     .filter((b) => (b.id ?? "").trim() && (b.label ?? "").trim())
     .slice(0, 3);
@@ -31891,6 +31894,10 @@ function PantallaDelTableroCargada({
   const [gestor, setGestor] = useState<string | null>(null);
   /** Las OTRAS fichas de Seguimientos elegidas junto con la del gestor (11/11/2026): se editan a la vez. */
   const [grupoDelGestor, setGrupoDelGestor] = useState<string[]>([]);
+  /** LO COMÚN DE VARIAS FICHAS (13/11/2026): la abierta primero y las demás elegidas (ver `OpcionesEnComun`). */
+  const [enComun, setEnComun] = useState<string[]>([]);
+  /** Los ajustes (⚙) de varias del mismo tipo a la vez: las OTRAS elegidas (13/11/2026). */
+  const [grupoDeAjustes, setGrupoDeAjustes] = useState<string[]>([]);
   const [ajustes, setAjustes] = useState<string | null>(null);
   /** La entrega (su clave, «producto» o «producto#extra») abierta en su ventana desde los ajustes de una ficha Entregar. */
   const [entregaEditando, setEntregaEditando] = useState<string | null>(null);
@@ -32540,12 +32547,20 @@ function PantallaDelTableroCargada({
             const f = tablero.fichas.find((x) => x.id === fid);
             setBurbujaDelCajon(burbuja ?? null);
             setGrupoDelGestor(f?.tipo === "seguimientos" ? grupo ?? [] : []);
-            if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
+            // Varios Mensajes (o Cobros) elegidos juntos: lo común de todos (13/11/2026).
+            if ((f?.tipo === "mensaje" || f?.tipo === "cobro") && grupo?.length) setEnComun([fid, ...grupo]);
+            else if (f?.tipo === "mensaje" || f?.tipo === "cobro" || f?.tipo === "correo") setCajon(fid);
             else if (f?.tipo === "seguimientos" || f?.tipo === "intro_ob") setGestor(fid);
             else if (f?.tipo === "regalo" && tienda) setRegaloAbierto(fid);
-            else setAjustes(fid);
+            else {
+              setGrupoDeAjustes(grupo ?? []);
+              setAjustes(fid);
+            }
           }}
-          onAjustes={setAjustes}
+          onAjustes={(fid, grupo) => {
+            setGrupoDeAjustes(grupo ?? []);
+            setAjustes(fid);
+          }}
           // TOCAR UNA FICHA LLEVA LA BANDERA A SU PAÍS (27/10/2026): el de su Inicio, si es de uno solo.
           onFichaTocada={(fid) => {
             const f = tablero.fichas.find((x) => x.id === fid);
@@ -33000,10 +33015,38 @@ function PantallaDelTableroCargada({
             onCambiarGrupo={(porFicha) =>
               guardar({ ...tablero, fichas: tablero.fichas.map((f) => (porFicha[f.id] ? { ...f, ...porFicha[f.id] } : f)) })
             }
+            onAbrirEnComun={
+              grupoDelGestor.length
+                ? () => {
+                    // Lo que hizo en el gestor se aplica al cerrarlo; lo común se abre DESPUÉS, ya con eso dentro (si se
+                    // abriera a la vez, partiría de lo de antes y al dar Listo lo pisaría).
+                    const ids = [fichaDeGestor.id, ...grupoDelGestor];
+                    setGestor(null);
+                    window.setTimeout(() => setEnComun(ids), 80);
+                  }
+                : undefined
+            }
           />
           </ProductosDeLaFichaContext.Provider>
         </EnElTableroContext.Provider>
       )}
+      {enComun.length > 1 &&
+        (() => {
+          const fichasEnComun = enComun.map((id) => tablero.fichas.find((f) => f.id === id)).filter((f): f is FichaEnElEditor => !!f);
+          if (fichasEnComun.length < 2) return null;
+          return (
+            <OpcionesEnComun
+              fichas={fichasEnComun}
+              etiquetas={fichasEnComun.map((f) => {
+                const p = paisDeSuManta(tablero, f, "");
+                return `${p ? `${banderaDe(p)} ${p}` : "🌍"} · ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
+              })}
+              // UN SOLO GUARDADO PARA TODAS: un Ctrl+Z deshace el cambio en todas a la vez.
+              onAplicar={(porFicha) => guardar({ ...tablero, fichas: tablero.fichas.map((f) => (porFicha[f.id] ? { ...f, ...porFicha[f.id] } : f)) })}
+              onCerrar={() => setEnComun([])}
+            />
+          );
+        })()}
       {fichaDeAjustes && (
         <AjustesDeLaFicha
           ficha={fichaDeAjustes}
@@ -33050,8 +33093,22 @@ function PantallaDelTableroCargada({
             setPaisDePagos(p);
             setVentanaDeHerramienta("pagos");
           }}
+          grupo={grupoDeAjustes.map((id) => tablero.fichas.find((f) => f.id === id && f.tipo === fichaDeAjustes.tipo)).filter((f): f is FichaEnElEditor => !!f)}
+          // UN SOLO GUARDADO PARA TODAS: un Ctrl+Z deshace el cambio en todas a la vez.
+          onGuardarGrupo={(porFicha) => {
+            guardar({ ...tablero, fichas: tablero.fichas.map((f) => (porFicha[f.id] ? { ...f, ...porFicha[f.id] } : f)) });
+            setAjustes(null);
+            setGrupoDeAjustes([]);
+          }}
           onAbrirBurbujas={() => {
             setAjustes(null);
+            // Con varias elegidas: lo común de sus burbujas, botones y cuadritos (13/11/2026).
+            const otras = grupoDeAjustes.filter((id) => tablero.fichas.some((f) => f.id === id && f.tipo === fichaDeAjustes.tipo));
+            setGrupoDeAjustes([]);
+            if (otras.length && (fichaDeAjustes.tipo === "mensaje" || fichaDeAjustes.tipo === "cobro" || fichaDeAjustes.tipo === "seguimientos")) {
+              setEnComun([fichaDeAjustes.id, ...otras]);
+              return;
+            }
             if (fichaDeAjustes.tipo === "seguimientos" || fichaDeAjustes.tipo === "intro_ob") setGestor(fichaDeAjustes.id);
             else if (fichaDeAjustes.tipo === "regalo") setRegaloAbierto(fichaDeAjustes.id);
             else setCajon(fichaDeAjustes.id);
@@ -33060,7 +33117,10 @@ function PantallaDelTableroCargada({
             cambiarFicha(fichaDeAjustes.id, cambio);
             setAjustes(null);
           }}
-          onCerrar={() => setAjustes(null)}
+          onCerrar={() => {
+            setAjustes(null);
+            setGrupoDeAjustes([]);
+          }}
           onEditarEntrega={setEntregaEditando}
         />
       )}
@@ -33166,7 +33226,10 @@ function GestorDeVersiones({
   onRegistroDeAnuncios,
   grupo,
   onCambiarGrupo,
+  onAbrirEnComun,
 }: {
+  /** Con varias fichas elegidas: cierra el gestor y abre lo común de botones y cuadritos (13/11/2026). */
+  onAbrirEnComun?: () => void;
   ficha: FichaEnElEditor;
   cfgVista: FullConfig;
   /** El país de su manta (el de la vista previa y el del título). "" = otros países. */
@@ -33385,6 +33448,16 @@ function GestorDeVersiones({
                 seguimiento elegido, y las <strong>burbujas que agregues</strong>. Lo que no toques se queda como está en cada una. Los textos
                 de las burbujas que ya existen cambian <strong>solo en esta</strong>. «?» = no es igual en todas.
               </div>
+              {/* (13/11/2026) Lo común de botones y cuadritos (y encender / apagar burbujas) de TODAS, en su ventana. */}
+              {onAbrirEnComun && (
+                <button
+                  type="button"
+                  onClick={onAbrirEnComun}
+                  className="mt-2 rounded-md border border-sky-400 bg-white px-3 py-1.5 text-xs font-bold text-sky-900 hover:bg-sky-100"
+                >
+                  🔘 Botones y cuadritos en común de las {(grupo?.length ?? 0) + 1}
+                </button>
+              )}
             </div>
           )}
           {esSeg && s && (
@@ -34449,6 +34522,247 @@ function VentanaDePlantillas({
   );
 }
 
+/**
+ * LO COMÚN DE VARIAS FICHAS (13/11/2026). Él: «yo elijo 3 fichas idénticas… como son idénticos, se desactivarían a los 3,
+ * pero si no son idénticos, cambia un nombre, ya no aparecería ese cuadrito, por que no es común» y «común es solo siempre y
+ * cuando tenga la misma cantidad de burbujas y mismos botones… si una ficha tiene 4 burbujas y la otra 5, entonces no hay
+ * match». Como Illustrator con varios objetos: lo igual se cambia en todas a la vez; lo distinto sale con «?» y no se toca.
+ *
+ * LAS REGLAS:
+ *   · Las fichas se comparan lista por lista (las burbujas de un Mensaje / Cobro; en Seguimientos, cada seguimiento y cada
+ *     versión). Si no tienen las mismas listas con la misma cantidad de burbujas, no hay nada común: se avisa y punto.
+ *   · Cada burbuja (por su posición) se puede encender / apagar en todas.
+ *   · Un botón o cuadrito es común si TODAS tienen uno con ese mismo nombre en esa misma burbuja. Ése se enciende / apaga,
+ *     se renombra o se elimina en todas. Los demás salen con «?», bloqueados: hay que entrar a cada ficha.
+ *   · Los textos no se escriben aquí. Se trabaja sobre una copia: «Listo» la aplica en UN solo cambio (un Ctrl+Z).
+ */
+type ListaDeBurbujasEnComun = { etiqueta: string; leer: (f: FichaEnElEditor) => EditorStep[]; poner: (f: FichaEnElEditor, pasos: EditorStep[]) => FichaEnElEditor };
+function listasDeBurbujas(f: FichaEnElEditor): ListaDeBurbujasEnComun[] {
+  if (f.tipo === "seguimientos")
+    return (f.seguimientos ?? []).flatMap((s, k) =>
+      s.variantes.map((_v, j) => ({
+        etiqueta: `⏳ Seguimiento ${k + 1}${s.variantes.length > 1 ? ` · versión ${String.fromCharCode(65 + j)}` : ""}`,
+        leer: (x: FichaEnElEditor) => ((x.seguimientos?.[k]?.variantes[j]?.steps ?? []) as EditorStep[]),
+        poner: (x: FichaEnElEditor, pasos: EditorStep[]) => ({
+          ...x,
+          seguimientos: (x.seguimientos ?? []).map((ss, kk) =>
+            kk !== k ? ss : { ...ss, variantes: ss.variantes.map((vv, jj) => (jj !== j ? vv : { ...vv, steps: pasos as unknown as typeof vv.steps })) }
+          ),
+        }),
+      }))
+    );
+  return [
+    {
+      etiqueta: "💬 Burbujas",
+      leer: (x: FichaEnElEditor) => ((x.steps ?? []) as EditorStep[]),
+      poner: (x: FichaEnElEditor, pasos: EditorStep[]) => ({ ...x, steps: pasos as unknown as typeof x.steps }),
+    },
+  ];
+}
+function OpcionesEnComun({
+  fichas,
+  etiquetas,
+  onAplicar,
+  onCerrar,
+}: {
+  /** Todas las elegidas (la primera, la que se abrió). Del mismo tipo. */
+  fichas: FichaEnElEditor[];
+  /** Cómo se llama cada una en la cabecera («🇦🇷 AR · Intro»). */
+  etiquetas: string[];
+  onAplicar: (porFicha: Record<string, Partial<FichaEnElEditor>>) => void;
+  onCerrar: () => void;
+}) {
+  useEscapeEnPila(() => onCerrar());
+  const [borrador, setBorrador] = useState<FichaEnElEditor[]>(() => JSON.parse(JSON.stringify(fichas)));
+  const alAbrir = useRef(JSON.stringify(fichas));
+  const hayCambios = JSON.stringify(borrador) !== alAbrir.current;
+  const listas = listasDeBurbujas(borrador[0]);
+  // ¿Coinciden? Mismas listas y, en cada una, la misma cantidad de burbujas.
+  const forma = (f: FichaEnElEditor) => listasDeBurbujas(f).map((l) => `${l.etiqueta}:${l.leer(f).length}`).join("|");
+  const coinciden = borrador.every((f) => forma(f) === forma(borrador[0]));
+  const nombre = (s?: string) => (s ?? "").trim();
+  /** Cambia la burbuja `i` de la lista `l` en TODAS las fichas. */
+  const enTodas = (l: ListaDeBurbujasEnComun, i: number, cambio: (p: EditorStep) => EditorStep) =>
+    setBorrador((bs) => bs.map((f) => l.poner(f, l.leer(f).map((p, k) => (k === i ? cambio(p) : p)))));
+  const estado = (valores: boolean[]) => (valores.every(Boolean) ? "on" : valores.every((v) => !v) ? "off" : "mixto");
+  const Interruptor = ({ valores, alCambiar, titulo }: { valores: boolean[]; alCambiar: (encender: boolean) => void; titulo: string }) => {
+    const e = estado(valores);
+    return (
+      <button
+        type="button"
+        title={e === "mixto" ? `${titulo}: encendido en unas y apagado en otras. Clic: apagar en todas.` : `${titulo}: clic para ${e === "on" ? "apagar" : "encender"} en todas.`}
+        onClick={() => alCambiar(e === "off")}
+        className={`min-w-[48px] rounded-md px-2 py-1 text-xs font-black ${
+          e === "on" ? "bg-emerald-600 text-white" : e === "off" ? "border border-neutral-300 bg-neutral-100 text-neutral-500" : "border border-amber-400 bg-amber-100 text-amber-900"
+        }`}
+      >
+        {e === "on" ? "ON" : e === "off" ? "OFF" : "?"}
+      </button>
+    );
+  };
+  /** Los botones (o cuadritos) de la burbuja `i`: los comunes y los que no. */
+  const opciones = (l: ListaDeBurbujasEnComun, i: number, cual: "buttons" | "decisions") => {
+    const deCada = borrador.map((f) => ((l.leer(f)[i]?.[cual] ?? []) as Array<EditorBubbleButton | EditorBubbleDecision>));
+    const nombreDe = (o: EditorBubbleButton | EditorBubbleDecision) => nombre("label" in o ? o.label : o.title);
+    const todos = [...new Set(deCada.flat().map(nombreDe))];
+    return todos.map((n) => ({
+      nombre: n,
+      // Común: en TODAS hay exactamente uno con ese nombre (y tiene nombre).
+      comun: !!n && deCada.every((lista) => lista.filter((o) => nombreDe(o) === n).length === 1),
+      encendidos: deCada.flatMap((lista) => lista.filter((o) => nombreDe(o) === n).map((o) => o.enabled !== false)),
+    }));
+  };
+  const cambiarOpcion = (l: ListaDeBurbujasEnComun, i: number, cual: "buttons" | "decisions", n: string, cambio: "quitar" | ((o: Record<string, unknown>) => Record<string, unknown>)) =>
+    enTodas(l, i, (p) => {
+      const lista = (p[cual] ?? []) as unknown as Array<Record<string, unknown>>;
+      const es = (o: Record<string, unknown>) => nombre(String((cual === "buttons" ? o.label : o.title) ?? "")) === n;
+      return { ...p, [cual]: cambio === "quitar" ? lista.filter((o) => !es(o)) : lista.map((o) => (es(o) ? cambio(o) : o)) };
+    });
+  const aplicar = () => {
+    const porFicha: Record<string, Partial<FichaEnElEditor>> = {};
+    borrador.forEach((f, k) => {
+      if (JSON.stringify(f) === JSON.stringify(fichas[k])) return;
+      porFicha[f.id] = f.tipo === "seguimientos" ? { seguimientos: f.seguimientos } : { steps: f.steps };
+    });
+    if (Object.keys(porFicha).length) onAplicar(porFicha);
+    onCerrar();
+  };
+  const chip = (l: ListaDeBurbujasEnComun, i: number, cual: "buttons" | "decisions", o: { nombre: string; comun: boolean; encendidos: boolean[] }) => {
+    const cosa = cual === "buttons" ? "botón" : "cuadrito";
+    if (!o.comun)
+      return (
+        <span
+          key={`${cual}-${o.nombre}`}
+          title={`«${o.nombre || "sin nombre"}» no está igual en todas las fichas. Para cambiarlo, entra a cada ficha.`}
+          className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-dashed border-neutral-300 bg-neutral-50 px-2 py-1 text-xs text-neutral-400"
+        >
+          <span className="font-black text-amber-600">?</span> {o.nombre || "sin nombre"} 🔒
+        </span>
+      );
+    return (
+      <span key={`${cual}-${o.nombre}`} className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-1 text-xs ${cual === "buttons" ? "border-violet-300 bg-violet-50" : "border-emerald-300 bg-emerald-50"}`}>
+        <span className="px-1 font-semibold text-neutral-800">{o.nombre}</span>
+        <Interruptor
+          valores={o.encendidos}
+          titulo={`El ${cosa} «${o.nombre}»`}
+          alCambiar={(encender) => cambiarOpcion(l, i, cual, o.nombre, (x) => ({ ...x, enabled: encender ? undefined : false }))}
+        />
+        <button
+          type="button"
+          title={`Cambiarle el nombre en todas`}
+          className="rounded px-1 py-0.5 hover:bg-white"
+          onClick={() => {
+            const nuevo = window.prompt(`Nuevo nombre del ${cosa} «${o.nombre}» (en todas las fichas):`, o.nombre);
+            if (nuevo === null || !nuevo.trim() || nuevo.trim() === o.nombre) return;
+            cambiarOpcion(l, i, cual, o.nombre, (x) => ({ ...x, [cual === "buttons" ? "label" : "title"]: cual === "buttons" ? nuevo.trim().slice(0, 20) : nuevo.trim() }));
+          }}
+        >
+          ✏️
+        </button>
+        <button
+          type="button"
+          title={`Eliminarlo en todas (su cable también se va)`}
+          className="rounded px-1 py-0.5 hover:bg-red-50"
+          onClick={() => {
+            if (!window.confirm(`¿Eliminar el ${cosa} «${o.nombre}» en las ${borrador.length} fichas? Su cable también se va. (Ctrl+Z lo devuelve.)`)) return;
+            cambiarOpcion(l, i, cual, o.nombre, "quitar");
+          }}
+        >
+          🗑
+        </button>
+      </span>
+    );
+  };
+  return (
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
+      <div className="burbujas-nuevo prolijo my-8 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta shadow-2xl">
+        <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
+          <div className="min-w-0">
+            <h3 className="bn-titulo text-sm font-bold text-tinta">✏️ {fichas.length} fichas a la vez</h3>
+            <p className="bn-subtitulo truncate text-xs text-tinta-suave">{etiquetas.join(" · ")}</p>
+          </div>
+          {hayCambios ? (
+            <span className="flex shrink-0 items-center gap-2">
+              <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold">
+                Cancelar
+              </button>
+              <button type="button" onClick={aplicar} className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white">
+                ✓ Listo
+              </button>
+            </span>
+          ) : (
+            <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold">
+              Cerrar
+            </button>
+          )}
+        </div>
+        <div className="bn-cuerpo space-y-4 p-4">
+          {!coinciden ? (
+            <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              <p className="font-black">Estas fichas no coinciden: no hay nada en común para cambiar.</p>
+              <ul className="mt-2 list-disc pl-5 text-xs">
+                {borrador.map((f, k) => (
+                  <li key={f.id}>
+                    {etiquetas[k]}: {listasDeBurbujas(f).map((l) => `${l.leer(f).length} burbuja(s)${f.tipo === "seguimientos" ? ` en ${l.etiqueta.replace("⏳ ", "")}` : ""}`).join(", ") || "sin burbujas"}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs">Para que sean comunes deben tener la misma cantidad de burbujas{fichas[0].tipo === "seguimientos" ? " (y de seguimientos y versiones)" : ""}. Para cambiarlas, entra a cada una.</p>
+            </div>
+          ) : (
+            <>
+              <p className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs text-sky-950">
+                Lo que cambies aquí se aplica <strong>a las {fichas.length} fichas</strong>. Solo sale lo que es igual en todas: misma burbuja y mismo
+                nombre. Lo que lleva <strong>«?» 🔒</strong> no es igual en todas y no se puede tocar desde aquí. Los textos se escriben entrando a cada
+                ficha.
+              </p>
+              {listas.map((l) => (
+                <div key={l.etiqueta} className="space-y-2">
+                  {listas.length > 1 && <p className="text-sm font-black text-tinta">{l.etiqueta}</p>}
+                  {l.leer(borrador[0]).map((_p, i) => {
+                    const pasos = borrador.map((f) => l.leer(f)[i]);
+                    const textos = pasos.map((p) => (p?.texts ?? []).join(" | ").trim());
+                    const mismoTexto = textos.every((t) => t === textos[0]);
+                    const botones = opciones(l, i, "buttons");
+                    const cuadritos = opciones(l, i, "decisions");
+                    return (
+                      <div key={i} className="rounded-lg border border-borde bg-relleno p-3">
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-600 text-xs font-black text-white">{i + 1}</span>
+                          <p className="min-w-0 flex-1 truncate text-xs text-tinta" title={mismoTexto ? textos[0] : undefined}>
+                            {mismoTexto ? textos[0] || `(${pasos[0]?.type ?? "burbuja"} sin texto)` : <span className="italic text-tinta-suave">El texto no es igual en todas</span>}
+                          </p>
+                          <Interruptor
+                            valores={pasos.map((p) => p?.enabled !== false)}
+                            titulo={`La burbuja ${i + 1}`}
+                            alCambiar={(encender) => enTodas(l, i, (p) => ({ ...p, enabled: encender ? undefined : false }))}
+                          />
+                        </div>
+                        {botones.length > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-9">
+                            <span className="text-[11px] font-semibold text-violet-800">Botones:</span>
+                            {botones.map((o) => chip(l, i, "buttons", o))}
+                          </div>
+                        )}
+                        {cuadritos.length > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-9">
+                            <span className="text-[11px] font-semibold text-emerald-800">Cuadritos:</span>
+                            {cuadritos.map((o) => chip(l, i, "decisions", o))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AjustesDeLaFicha({
   ficha,
   productos,
@@ -34465,6 +34779,8 @@ function AjustesDeLaFicha({
   onEditarEntrega,
   registroDeAnuncios,
   onRegistroDeAnuncios,
+  grupo,
+  onGuardarGrupo,
 }: {
   /** El registro de anuncios (para las etiquetas AD de las rutas del Ruteador, como en los menús). */
   registroDeAnuncios?: AdRegistryEntry[];
@@ -34487,17 +34803,60 @@ function AjustesDeLaFicha({
   onAbrirBurbujas: () => void;
   onGuardar: (cambio: Partial<FichaEnElEditor>) => void;
   onCerrar: () => void;
+  /** VARIAS FICHAS DEL MISMO TIPO ELEGIDAS (13/11/2026): las OTRAS. Lo igual en todas se cambia en todas; lo distinto sale
+   *  con «?» y bloqueado. */
+  grupo?: FichaEnElEditor[];
+  /** Con `grupo`: aplica en UN solo guardado esta ficha y las demás (un Ctrl+Z las deshace todas). */
+  onGuardarGrupo?: (porFicha: Record<string, Partial<FichaEnElEditor>>) => void;
 }) {
-  const [b, setB] = useState<FichaEnElEditor>(() => {
-    // UN COBRO «CONTRIBUCIÓN» SIN MONTOS NI TRAMOS SE ABRE COMO «PRECIO DE UN PRODUCTO» (01/11/2026). Él: «cuando
-    // abro la ficha de cobro automáticamente aparece seleccionado el modo contribución». Así nacían los Cobros
-    // (antes de a013811): nunca se configuraron como contribución. Al dar Listo queda guardado como producto;
-    // con Cancelar no cambia nada. Una contribución de verdad (con mínimo o tramos) se abre como siempre.
-    const c = ficha.cobro;
+  // UN COBRO «CONTRIBUCIÓN» SIN MONTOS NI TRAMOS SE ABRE COMO «PRECIO DE UN PRODUCTO» (01/11/2026). Él: «cuando
+  // abro la ficha de cobro automáticamente aparece seleccionado el modo contribución». Así nacían los Cobros
+  // (antes de a013811): nunca se configuraron como contribución. Al dar Listo queda guardado como producto;
+  // con Cancelar no cambia nada. Una contribución de verdad (con mínimo o tramos) se abre como siempre.
+  const abrirComo = (f: FichaEnElEditor): FichaEnElEditor => {
+    const c = f.cobro;
     const sinMontos =
       !!c && c.modo === "abierto" && Object.keys(c.minimo_por_pais ?? {}).length === 0 && !Object.values(c.tramos_por_pais ?? {}).some((l) => (l ?? []).length > 0);
-    return ficha.tipo === "cobro" && sinMontos ? { ...ficha, cobro: { ...c, modo: "producto" } } : ficha;
+    return f.tipo === "cobro" && sinMontos ? { ...f, cobro: { ...c, modo: "producto" } } : f;
+  };
+  const [b, setB] = useState<FichaEnElEditor>(() => abrirComo(ficha));
+  // ── VARIAS FICHAS A LA VEZ (13/11/2026) ─────────────────────────────────────────────────────────────
+  // Él: «si yo elijo 3 fichas para cambiar algo es solo para cambiar lo que es común». Un ajuste es común si vale lo mismo
+  // en todas; si no, sale con «?» y bloqueado (hay que entrar a cada una).
+  const [inicial] = useState(() => abrirComo(ficha));
+  const [grupoAlAbrir] = useState(() => (grupo ?? []).map(abrirComo));
+  const enGrupo = grupoAlAbrir.length > 0 && !!onGuardarGrupo;
+  const valorDe = (x: FichaEnElEditor, k: string) => JSON.stringify((x as unknown as Record<string, unknown>)[k], (_k, v) => (v === "" ? undefined : v)) ?? "";
+  const [distintas] = useState(() => {
+    if (!enGrupo) return new Set<string>();
+    const fuera = new Set(["id", "x", "y", "tipo", "steps", "variantes", "seguimientos", "guardada", "apagada"]);
+    const claves = new Set([inicial, ...grupoAlAbrir].flatMap((x) => Object.keys(x)).filter((k) => !fuera.has(k)));
+    return new Set([...claves].filter((k) => grupoAlAbrir.some((g) => valorDe(g, k) !== valorDe(inicial, k))));
   });
+  /** Un ajuste que no es igual en todas: se ve tenue, con «?», y no se puede tocar. */
+  const comun = (claves: string[], nodo: ReactNode): ReactNode =>
+    !enGrupo || !claves.some((k) => distintas.has(k)) ? (
+      nodo
+    ) : (
+      <div className="relative" title="No es igual en las fichas elegidas: para cambiarlo, entra a cada una.">
+        {/* `inert`: ni el ratón ni el Tab entran ahí. */}
+        <div className="pointer-events-none select-none opacity-40" aria-disabled inert>
+          {nodo}
+        </div>
+        <span className="absolute -top-1 right-0 rounded-md border border-amber-400 bg-amber-100 px-1.5 text-xs font-black text-amber-900">? distinto 🔒</span>
+      </div>
+    );
+  const guardarElGrupo = () => {
+    // A las demás, solo lo que cambió y era común (lo distinto no se pudo tocar).
+    const cambiadas = Object.keys({ ...inicial, ...b }).filter((k) => !distintas.has(k) && valorDe(b, k) !== valorDe(inicial, k));
+    // Y en ésta tampoco cambia lo bloqueado (por si acaso): se queda como estaba.
+    const propia = { ...b } as unknown as Record<string, unknown>;
+    for (const k of distintas) propia[k] = (inicial as unknown as Record<string, unknown>)[k];
+    const porFicha: Record<string, Partial<FichaEnElEditor>> = { [ficha.id]: propia as unknown as FichaEnElEditor };
+    for (const g of grupoAlAbrir)
+      porFicha[g.id] = Object.fromEntries(cambiadas.map((k) => [k, (b as unknown as Record<string, unknown>)[k]])) as Partial<FichaEnElEditor>;
+    onGuardarGrupo?.(porFicha);
+  };
   // EL BUSCADOR DE «LO QUE SE ENTREGA» (27/10/2026): con muchos productos, la lista era eterna.
   const [buscarEntrega, setBuscarEntrega] = useState("");
   const [pais, setPais] = useState(paisInicial);
@@ -34529,13 +34888,24 @@ function AjustesDeLaFicha({
         <p className="text-sm font-black">
           {a.icono} {a.nombre}
         </p>
+        {enGrupo && (
+          <div className="mt-2 rounded-lg border-2 border-sky-400 bg-sky-50 px-3 py-2 text-xs text-sky-950">
+            <p className="text-sm font-black">✏️ {grupoAlAbrir.length + 1} fichas a la vez</p>
+            <p className="mt-0.5">
+              Lo que cambies aquí se aplica <strong>a las {grupoAlAbrir.length + 1}</strong>. Lo que lleva <strong>«? distinto 🔒»</strong> no es igual en
+              todas: para cambiarlo, entra a cada ficha.
+            </p>
+          </div>
+        )}
         <div className="mt-3 space-y-4">
-          {ficha.tipo !== "inicio" && (
-            <label className={etiqueta}>
-              Nombre de la ficha
-              <input value={b.titulo ?? ""} onChange={(e) => setB({ ...b, titulo: e.target.value })} placeholder={a.nombre} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal" />
-            </label>
-          )}
+          {ficha.tipo !== "inicio" &&
+            comun(
+              ["titulo"],
+              <label className={etiqueta}>
+                Nombre de la ficha
+                <input value={b.titulo ?? ""} onChange={(e) => setB({ ...b, titulo: e.target.value })} placeholder={a.nombre} className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1 text-sm font-normal" />
+              </label>
+            )}
           {ficha.tipo === "inicio" && (
             <>
               <label className={etiqueta}>
@@ -34555,7 +34925,9 @@ function AjustesDeLaFicha({
           {(ficha.tipo === "mensaje" || ficha.tipo === "cobro" || ficha.tipo === "seguimientos" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
             <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
               {/* (05/11/2026, en el Cobro: «esa vaina está escondida»; dice lo que es.) */}
-              {ficha.tipo === "seguimientos"
+              {enGrupo && ficha.tipo !== "intro_ob" && ficha.tipo !== "correo"
+                ? `🔘 Botones y cuadritos en común de las ${grupoAlAbrir.length + 1}`
+                : ficha.tipo === "seguimientos"
                 ? "✏️ Abrir sus seguimientos"
                 : ficha.tipo === "intro_ob"
                   ? "✏️ Abrir sus versiones"
@@ -34565,38 +34937,45 @@ function AjustesDeLaFicha({
             </button>
           )}
           {/* QUÉ PRODUCTO PRESENTA (23/10/2026): la IA solo habla de lo que ya se le presentó. */}
-          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "seguimientos") && (
-            <div className={etiqueta}>
-              Presenta estos productos
-              <span className="mt-1 block">
-                <ListaDeProductos todos={productos} elegidos={b.presenta ?? []} onCambio={(ids) => setB({ ...b, presenta: ids })} />
-              </span>
-              <span className={ayuda}>
-                Desde que sale esta ficha, la IA conoce su contenido y su precio (de su ficha en Productos) y puede contestar «qué contiene» o «cuánto
-                cuesta». Un producto que todavía no se presentó no existe para la IA: así el oculto sigue oculto hasta su intro.
-              </span>
-            </div>
-          )}
+          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "seguimientos") &&
+            comun(
+              ["presenta"],
+              <div className={etiqueta}>
+                Presenta estos productos
+                <span className="mt-1 block">
+                  <ListaDeProductos todos={productos} elegidos={b.presenta ?? []} onCambio={(ids) => setB({ ...b, presenta: ids })} />
+                </span>
+                <span className={ayuda}>
+                  Desde que sale esta ficha, la IA conoce su contenido y su precio (de su ficha en Productos) y puede contestar «qué contiene» o «cuánto
+                  cuesta». Un producto que todavía no se presentó no existe para la IA: así el oculto sigue oculto hasta su intro.
+                </span>
+              </div>
+            )}
           {/* «⏳ ESPERA ANTES DE SALIR» (25/10/2026, punto 9): el upsell no sale en el mismo segundo de la
               entrega. Vive aquí dentro; la tarjeta no muestra nada. Desde el 01/11/2026 solo se ve en las fichas
               que van DESPUÉS de una Entrega (o si ya tiene un tiempo puesto): en la venta confundía. */}
-          {ficha.tipo === "mensaje" && (despuesDeLaVenta || (b.espera_min ?? 0) > 0) && (
-            <div className={etiqueta}>
-              ⏳ Espera antes de salir <span className="ml-2"><CampoDeTiempoDelTablero valor={b.espera_min} onCambio={(m) => setB({ ...b, espera_min: m })} /></span>
-              <span className={ayuda}>Después de la venta: cuánto espera antes de mandar estos mensajes. Vacío = enseguida.</span>
-            </div>
-          )}
-          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") && (
-            <div className={etiqueta}>
-              ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
-              <span className={ayuda}>
-                {ficha.tipo === "correo"
-                  ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
-                  : "Si nadie contesta en ese tiempo, pasa a la ficha conectada en «⏳ Si no responde». Vacío = el tiempo del regalo de tus Ajustes."}
-              </span>
-            </div>
-          )}
-          {ficha.tipo === "correo" && (
+          {ficha.tipo === "mensaje" &&
+            (despuesDeLaVenta || (b.espera_min ?? 0) > 0) &&
+            comun(
+              ["espera_min"],
+              <div className={etiqueta}>
+                ⏳ Espera antes de salir <span className="ml-2"><CampoDeTiempoDelTablero valor={b.espera_min} onCambio={(m) => setB({ ...b, espera_min: m })} /></span>
+                <span className={ayuda}>Después de la venta: cuánto espera antes de mandar estos mensajes. Vacío = enseguida.</span>
+              </div>
+            )}
+          {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") &&
+            comun(
+              ["sin_respuesta_min"],
+              <div className={etiqueta}>
+                ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
+                <span className={ayuda}>
+                  {ficha.tipo === "correo"
+                    ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
+                    : "Si nadie contesta en ese tiempo, pasa a la ficha conectada en «⏳ Si no responde». Vacío = el tiempo del regalo de tus Ajustes."}
+                </span>
+              </div>
+            )}
+          {ficha.tipo === "correo" && comun(["correo_asunto", "correo_texto"], (
             <div className="space-y-2">
               <label className={etiqueta}>
                 Asunto del correo
@@ -34622,9 +35001,9 @@ function AjustesDeLaFicha({
                 </span>
               </label>
             </div>
-          )}
+          ))}
           {ficha.tipo === "entregar" &&
-            (() => {
+            comun(["entregas", "producto_id"], (() => {
               // LAS ENTREGAS DE LA FICHA (25/10/2026): una o varias, en orden, de uno o varios productos.
               // Se guarda la lista y, para lo de antes, el producto de la primera.
               const lista = b.entregas?.length ? b.entregas : b.producto_id ? [b.producto_id] : [""];
@@ -34738,9 +35117,9 @@ function AjustesDeLaFicha({
                   <span className={ayuda}>Salen en este orden. Si dice «compra aprobada», no sirve para algo gratis: para eso usa una entrega extra.</span>
                 </div>
               );
-            })()}
+            })())}
           {/* «📧 OFRECER TAMBIÉN POR CORREO» (24/10/2026): sin borrador de correo; van los enlaces de su entrega. */}
-          {ficha.tipo === "entregar" && (
+          {ficha.tipo === "entregar" && comun(["por_correo", "correo_pregunta", "correo_si", "correo_no", "correo_pide"], (
             <div className="space-y-2">
               <label className="flex items-start gap-2 text-xs font-semibold">
                 <input type="checkbox" checked={b.por_correo === true} onChange={(e) => setB({ ...b, por_correo: e.target.checked || undefined })} className="mt-0.5" />
@@ -34777,9 +35156,9 @@ function AjustesDeLaFicha({
                 </div>
               )}
             </div>
-          )}
+          ))}
           {/* EL CEREBRO DE ESTA ETAPA (24/10/2026): opcional. */}
-          {ficha.tipo !== "inicio" && ficha.tipo !== "condicion" && ficha.tipo !== "reparto" && ficha.tipo !== "esperar" && ficha.tipo !== "workflow" && (
+          {ficha.tipo !== "inicio" && ficha.tipo !== "condicion" && ficha.tipo !== "reparto" && ficha.tipo !== "esperar" && ficha.tipo !== "workflow" && comun(["instrucciones"], (
             <label className={etiqueta}>
               🧠 Instrucciones para la IA aquí (opcional)
               <textarea
@@ -34791,21 +35170,21 @@ function AjustesDeLaFicha({
               />
               <span className={ayuda}>Solo vale mientras el cliente está en esta ficha, sumado al cerebro general. Una a tres líneas bastan.</span>
             </label>
-          )}
-          {ficha.tipo === "esperar" && (
+          ))}
+          {ficha.tipo === "esperar" && comun(["minutos"], (
             <div className={etiqueta}>
               Esperar <span className="ml-2"><CampoDeTiempoDelTablero valor={b.minutos} onCambio={(m) => setB({ ...b, minutos: m })} /></span>
               <span className={ayuda}>Y sigue por su cable. Respeta las horas de silencio. Si mientras tanto paga un cobro abierto, el pago manda.</span>
             </div>
-          )}
-          {ficha.tipo === "workflow" && (
+          ))}
+          {ficha.tipo === "workflow" && comun(["workflow_id"], (
             <label className={etiqueta}>
               Workflow al que lleva
               {selector(b.workflow_id, (v) => setB({ ...b, workflow_id: v }), workflows, workflows.length ? "(elige un workflow)" : "(no hay workflows: créalos en Mis tiendas)")}
               <span className={ayuda}>El cliente sigue en ese workflow desde su ▶ Inicio.</span>
             </label>
-          )}
-          {ficha.tipo === "reparto" && (
+          ))}
+          {ficha.tipo === "reparto" && comun(["reparto"], (
             <div className="space-y-2">
               <span className={etiqueta}>Rutas y su peso</span>
               {(b.reparto ?? []).map((o, i) => (
@@ -34872,8 +35251,8 @@ function AjustesDeLaFicha({
               </button>
               <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Si una ruta tiene anuncios, quien vino de ellos va por ella (aunque esté en OFF) y el sorteo ya no la usa para los demás.</span>
             </div>
-          )}
-          {ficha.tipo === "condicion" && (
+          ))}
+          {ficha.tipo === "condicion" && comun(["condicion"], (
             <div className="space-y-2">
               <label className={etiqueta}>
                 Pregunta
@@ -34899,8 +35278,8 @@ function AjustesDeLaFicha({
               )}
               <span className={ayuda}>Salen dos cables: «Sí» y «No».</span>
             </div>
-          )}
-          {ficha.tipo === "cobro" && (
+          ))}
+          {ficha.tipo === "cobro" && comun(["cobro"], (
             <div className="space-y-3">
               <div className="flex gap-2 text-xs">
                 {(["producto", "abierto"] as const).map((m) => (
@@ -35067,7 +35446,7 @@ function AjustesDeLaFicha({
               </span>
               <span className={ayuda}>Se revisa como en la venta de siempre: comprobante repetido, fecha (si el país la exige) y, en Yape/Plin, que esté a nombre de quien cobra.</span>
             </div>
-          )}
+          ))}
           {ficha.tipo === "regalo" && (
             <div className="space-y-2">
               <button type="button" onClick={onAbrirBurbujas} className="rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-semibold hover:bg-tarjeta">
@@ -35087,7 +35466,7 @@ function AjustesDeLaFicha({
               <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
                 Cancelar
               </button>
-              <button type="button" onClick={() => onGuardar(b)} className="rounded-xl bg-emerald-600 px-[18px] py-[9px] text-sm font-bold text-white hover:bg-emerald-700">
+              <button type="button" onClick={() => (enGrupo ? guardarElGrupo() : onGuardar(b))} className="rounded-xl bg-emerald-600 px-[18px] py-[9px] text-sm font-bold text-white hover:bg-emerald-700">
                 Listo
               </button>
             </>
@@ -42079,7 +42458,7 @@ function BubbleButtonsEditor({
       </div>
       <div className="space-y-3">
         {buttons.map((button, index) => (
-          <div key={button.id} className="rounded-md border border-violet-200 bg-violet-50/50 p-3">
+          <div key={button.id} className={`rounded-md border border-violet-200 bg-violet-50/50 p-3 ${button.enabled === false ? "opacity-60" : ""}`}>
             {/* EL NOMBRE DEL BOTÓN, EN SU PROPIA LÍNEA.
                 Los tres campos iban en una sola fila —nombre, acción, papelera—
                 y la acción se lleva 220 px fijos. Este editor no vive a lo
@@ -42092,7 +42471,7 @@ function BubbleButtonsEditor({
               Texto del botón (lo que ve el cliente)
               <input value={button.label} onChange={(e) => update(index, { label: e.target.value })} maxLength={20} placeholder="Ej: Quiero pagar" className="mt-1 block w-full min-w-0 rounded border border-neutral-300 bg-tarjeta px-2 py-1.5 text-sm" />
             </label>
-            <div className="mt-2 grid gap-2 grid-cols-[minmax(0,1fr)_auto]">
+            <div className={`mt-2 grid gap-2 ${enElTablero ? "grid-cols-[minmax(0,1fr)_auto_auto]" : "grid-cols-[minmax(0,1fr)_auto]"}`}>
               {/* LAS BURBUJAS SE CONSERVAN AL CAMBIAR DE ACCIÓN. Antes solo se
                   preparaban para «Enviar burbujas»; ahora cualquier acción puede
                   llevar su texto delante, así que lo escrito no se pierde por
@@ -42125,6 +42504,22 @@ function BubbleButtonsEditor({
                 <option value="human">Pasar a humano</option>
                 <option value="start_workflow">▶ Activar un workflow</option>
               </select>
+              )}
+              {/* EL BOTÓN APAGADO (13/11/2026), solo en el tablero: el cliente no lo ve y no cuenta como opción. Su cable
+                  se queda guardado para cuando lo vuelvas a encender. */}
+              {enElTablero && (
+                <button
+                  type="button"
+                  aria-pressed={button.enabled !== false}
+                  title={button.enabled === false ? "Apagado: el cliente no ve este botón. Clic para encenderlo." : "Encendido. Clic para apagarlo (el cliente deja de verlo)."}
+                  onClick={() => {
+                    onSnapshot();
+                    update(index, { enabled: button.enabled === false ? undefined : false });
+                  }}
+                  className={`rounded px-2 py-1 text-xs font-bold ${button.enabled === false ? "border border-neutral-300 bg-neutral-100 text-neutral-500" : "bg-emerald-600 text-white"}`}
+                >
+                  {button.enabled === false ? "OFF" : "ON"}
+                </button>
               )}
               <button type="button" onClick={() => { if (confirm("¿Quitar este botón?")) { onSnapshot(); onChange(buttons.filter((_, i) => i !== index)); } }} className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs text-red-700">🗑️</button>
             </div>

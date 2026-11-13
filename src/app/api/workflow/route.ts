@@ -338,6 +338,8 @@ interface EditorBubbleButton {
   id: string;
   label: string;
   action: BubbleButtonAction;
+  /** false = apagado (13/11/2026, solo en el tablero). */
+  enabled?: boolean;
   steps?: EditorStep[];
   /** Para "send_payment_method": QUÉ método manda, no una copia de sus datos.
    *  Sus datos viven en Precios y pagos, por país. */
@@ -927,6 +929,8 @@ function readBubbleButtons(value: unknown): EditorBubbleButton[] {
             : [],
           payment_method: str(item.payment_method),
           workflow_id: str(item.workflow_id),
+          // EL BOTÓN APAGADO (13/11/2026): solo un false explícito apaga, como en los cuadritos. Solo lo lee el tablero.
+          ...(item.enabled === false ? { enabled: false } : {}),
         }))
         .filter((item) => item.id && item.label)
     : [];
@@ -1389,6 +1393,7 @@ function writeBubbleButtons(
       id: button.id.trim(),
       label: button.label.trim(),
       action: button.action,
+      ...(button.enabled === false ? { enabled: false } : {}),
       ...(button.action === "send_steps"
         ? { steps: (button.steps ?? []).map(writeStep) }
         : {}),
