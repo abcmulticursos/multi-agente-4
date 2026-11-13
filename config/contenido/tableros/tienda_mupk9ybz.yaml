@@ -7406,7 +7406,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvrom-s0283
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvrom-gmpvf
               peso: 1
@@ -7687,8 +7687,10 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvrom-qmb54
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvrom-cku31
               peso: 1
@@ -7852,6 +7854,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvrom-vr6hd
       tipo: cobro
       x: 1738
@@ -7895,7 +7899,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvrom-roskp
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvrom-iimii
               peso: 1
@@ -8054,8 +8058,10 @@ whatsapp:
                           enabled: false
                   spintax_ia:
                     - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cuál es el método de pago de tu preferencia* 👇🏼}"
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvrom-awsfd
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvrom-hyu3l
               peso: 1
@@ -8198,6 +8204,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvrom-bogfz
       tipo: entregar
       x: 2673
@@ -8556,7 +8564,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvroq-k7kih
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvroq-yshi0
               peso: 1
@@ -8837,8 +8845,10 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvroq-vagbw
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvroq-ijcqq
               peso: 1
@@ -9002,6 +9012,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvroq-ciq9d
       tipo: cobro
       x: 1914
@@ -9057,7 +9069,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvroq-ge5u4
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvroq-585bm
               peso: 1
@@ -9214,8 +9226,10 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvroq-jl8w0
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvroq-lvjr9
               peso: 1
@@ -9358,6 +9372,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvror-o44rd
       tipo: mensaje
       x: -385
@@ -9708,7 +9724,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvror-oejqf
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvror-u89jl
               peso: 1
@@ -9992,8 +10008,10 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvror-joghc
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvror-fzifp
               peso: 1
@@ -10157,6 +10175,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvror-zla8c
       tipo: cobro
       x: 1903
@@ -10212,7 +10232,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvror-upl30
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvror-x7kk8
               peso: 1
@@ -10374,8 +10394,10 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvror-8nu3e
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvror-sljsx
               peso: 1
@@ -10518,6 +10540,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvror-k1utx
       tipo: mensaje
       x: -495
@@ -10883,7 +10907,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvros-z8t5m
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvros-96eg1
               peso: 1
@@ -11164,8 +11188,10 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvros-nahqt
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvros-xlxth
               peso: 1
@@ -11329,6 +11355,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvros-wapyw
       tipo: cobro
       x: 1793
@@ -11372,7 +11400,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvros-l5tgb
-          minutos: 20
+          minutos: 3
           variantes:
             - id: v-mwdnvros-jkll8
               peso: 1
@@ -11531,8 +11559,10 @@ whatsapp:
                           enabled: false
                   spintax_ia:
                     - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cual es el método de pago de tu preferencia* 👇🏼}"
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwdnvros-2suvb
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwdnvros-n48se
               peso: 1
@@ -11675,6 +11705,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
     - id: f-mwdnvros-x4f90
       tipo: entregar
       x: 2728
