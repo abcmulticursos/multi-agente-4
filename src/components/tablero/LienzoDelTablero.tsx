@@ -2210,7 +2210,152 @@ function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: s
   );
 }
 
-const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, esquinas: NodoDeEsquinas };
+/**
+ * UN TEXTO SUELTO (13/11/2026, la herramienta «T»). Él: «la opción de escribir un texto y moverlo… y color… y cambiar de
+ * tamaño de fuente… para yo poner textos ahí». Se arrastra como una ficha; doble clic lo edita; elegido, arriba sale su
+ * barrita: tamaño en puntos (− / +), color (la paleta de la casa), negrita y borrar. Vacío al terminar de escribir = se
+ * quita. Solo pantalla: el bot no lo lee.
+ */
+type NotaDelTablero = NonNullable<Tablero["textos"]>[number];
+type DatosDeTexto = {
+  nota: NotaDelTablero;
+  tema: "claro" | "oscuro";
+  editarAlNacer: boolean;
+  alCambiar: (n: NotaDelTablero) => void;
+  alBorrar: () => void;
+  selectorDeColor?: (valor: string, alElegir: (color: string) => void) => ReactNode;
+};
+function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
+  const n = data.nota;
+  const [editando, setEditando] = useState(data.editarAlNacer);
+  const [borrador, setBorrador] = useState(n.texto);
+  // El foco a la caja al empezar a escribir (el lienzo a veces se lo queda tras el clic que lo creó).
+  const campo = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (!editando) return;
+    const t = window.setTimeout(() => {
+      campo.current?.focus();
+      campo.current?.select();
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [editando]);
+  const [pintando, setPintando] = useState<{ x: number; y: number } | null>(null);
+  // La barrita se ve del mismo tamaño aunque se aleje la vista.
+  const zoom = useStore((s) => s.transform[2]);
+  const tam = n.tam ?? 24;
+  const color = n.color || (data.tema === "oscuro" ? "#f1f5f9" : "#1e293b");
+  const estilo = { fontSize: tam, color, fontWeight: n.negrita ? 800 : 500, lineHeight: 1.15 } as const;
+  const terminar = () => {
+    setEditando(false);
+    if (!borrador.trim()) data.alBorrar();
+    else if (borrador !== n.texto) data.alCambiar({ ...n, texto: borrador });
+  };
+  const ponerTam = (t: number) => data.alCambiar({ ...n, tam: Math.max(6, Math.min(400, Math.round(t))) });
+  const lineas = borrador.split("\n");
+  const boton = "rounded-md border border-slate-300 bg-white px-2 py-0.5 text-xs font-bold text-slate-700 hover:bg-slate-100";
+  return (
+    <div
+      className="relative"
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setBorrador(n.texto);
+        setEditando(true);
+      }}
+      title={editando ? undefined : "Arrastra para moverlo · doble clic para escribir"}
+    >
+      {selected && !editando && (
+        <div
+          className="nodrag nopan absolute bottom-full left-0 mb-2 flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-300 bg-white p-1 shadow-lg"
+          style={{ transform: `scale(${1 / Math.max(zoom, 0.02)})`, transformOrigin: "bottom left" }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
+        >
+          <button type="button" className={boton} title="Más chico" onClick={() => ponerTam(tam - (tam > 40 ? 8 : 2))}>
+            A−
+          </button>
+          <input
+            type="number"
+            min={6}
+            max={400}
+            value={tam}
+            title="Tamaño de la letra, en puntos"
+            onChange={(e) => Number(e.target.value) > 0 && ponerTam(Number(e.target.value))}
+            onKeyDown={(e) => e.stopPropagation()}
+            className="w-14 rounded-md border border-slate-300 px-1 py-0.5 text-center text-xs text-slate-800"
+          />
+          <span className="text-[10px] font-semibold text-slate-500">pt</span>
+          <button type="button" className={boton} title="Más grande" onClick={() => ponerTam(tam + (tam >= 40 ? 8 : 2))}>
+            A+
+          </button>
+          {data.selectorDeColor && (
+            <button
+              type="button"
+              className={`${boton} flex items-center gap-1`}
+              title="Color del texto"
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                setPintando({ x: r.left, y: r.bottom + 6 });
+              }}
+            >
+              <span className="h-3 w-3 rounded-sm border border-black/20" style={{ backgroundColor: color }} /> Color
+            </button>
+          )}
+          <button type="button" className={`${boton} ${n.negrita ? "bg-slate-800 text-white hover:bg-slate-700" : ""}`} title="Negrita" onClick={() => data.alCambiar({ ...n, negrita: n.negrita ? undefined : true })}>
+            B
+          </button>
+          <button type="button" className={`${boton} text-red-700`} title="Borrar este texto (Ctrl+Z lo devuelve)" onClick={data.alBorrar}>
+            🗑
+          </button>
+        </div>
+      )}
+      {pintando &&
+        data.selectorDeColor &&
+        createPortal(
+          <div
+            ref={(el) => encajarEnLaPantalla(el)}
+            className="nodrag nopan nowheel fixed z-[400] rounded-lg border border-slate-300 bg-white p-3 text-slate-800 shadow-2xl"
+            style={{ left: pintando.x, top: pintando.y }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between gap-4 text-xs font-bold text-slate-600">
+              🎨 Color del texto
+              <button type="button" onClick={() => setPintando(null)} className="rounded px-1.5 hover:bg-slate-100" title="Cerrar">
+                ✕
+              </button>
+            </div>
+            {data.selectorDeColor(n.color ?? "", (c) => data.alCambiar({ ...n, color: c || undefined }))}
+          </div>,
+          document.body
+        )}
+      {editando ? (
+        <textarea
+          ref={campo}
+          autoFocus
+          value={borrador}
+          onChange={(e) => setBorrador(e.target.value)}
+          onBlur={terminar}
+          onFocus={(e) => e.currentTarget.select()}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            if (e.key === "Escape") e.currentTarget.blur();
+          }}
+          rows={Math.max(1, lineas.length)}
+          cols={Math.max(6, ...lineas.map((l) => l.length + 1))}
+          placeholder="Escribe aquí"
+          className="nodrag nopan nowheel resize-none overflow-hidden rounded-md border-2 border-violet-500 bg-white/90 px-1 outline-none"
+          style={{ ...estilo, color: n.color || "#1e293b" }}
+        />
+      ) : (
+        <div className={`cursor-move whitespace-pre px-1 ${selected ? "rounded-md outline outline-2 outline-violet-500" : ""}`} style={estilo}>
+          {n.texto || "Texto"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, esquinas: NodoDeEsquinas, texto: NodoDeTexto };
 const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
 
 /**
@@ -2483,6 +2628,15 @@ export default function LienzoDelTablero({
   // velo ahí, con ese tamaño (un clic suelto lo pone con el tamaño de siempre). Esc cancela. Solo al crearlo; después se
   // estira por sus esquinas como siempre.
   const [dibujando, setDibujando] = useState<{ pais?: string } | null>(null);
+  // LA HERRAMIENTA «T» (13/11/2026): con ella puesta, un clic en el tablero pone un texto ahí y se escribe en el acto.
+  const [poniendoTexto, setPoniendoTexto] = useState(false);
+  const [textoRecienCreado, setTextoRecienCreado] = useState<string | null>(null);
+  useEffect(() => {
+    if (!poniendoTexto) return;
+    const alPulsar = (e: KeyboardEvent) => e.key === "Escape" && setPoniendoTexto(false);
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [poniendoTexto]);
   const [trazo, setTrazo] = useState<{ x0: number; y0: number; x1: number; y1: number; ox: number; oy: number } | null>(null);
   useEffect(() => {
     if (!dibujando) return;
@@ -2788,6 +2942,21 @@ export default function LienzoDelTablero({
         // En modo estaciones el bloque es ancho y casi todo aire: el aire deja pasar el ratón al fondo (la manito).
         ...((estaciones && esEstacion(f, tablero)) || f.tipo === "reparto" ? { style: { pointerEvents: "none" as const } } : {}),
       });
+    // LOS TEXTOS SUELTOS (13/11/2026, la «T»).
+    for (const n of tablero.textos ?? [])
+      nodos.push({
+        id: `texto:${n.id}`,
+        type: "texto",
+        position: { x: n.x, y: n.y },
+        data: {
+          nota: n,
+          tema,
+          editarAlNacer: textoRecienCreado === n.id,
+          alCambiar: (nuevo: NotaDelTablero) => cambiar({ ...vivo.current, textos: (vivo.current.textos ?? []).map((x) => (x.id === n.id ? nuevo : x)) }),
+          alBorrar: () => cambiar({ ...vivo.current, textos: (vivo.current.textos ?? []).filter((x) => x.id !== n.id) }),
+          selectorDeColor,
+        } satisfies DatosDeTexto,
+      });
     // 🪞 LOS ESPEJOS (05/11/2026): la misma ficha, otra vez, donde él la puso. Un Inicio no lleva espejo.
     for (const e of tablero.espejos ?? []) {
       const f = visibles.find((x) => x.id === e.ficha);
@@ -2806,7 +2975,7 @@ export default function LienzoDelTablero({
     }
     return nodos;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tablero, tema, cajaElegida, paisVisto, mirando, estaciones]);
+  }, [tablero, tema, cajaElegida, paisVisto, mirando, estaciones, textoRecienCreado]);
   const [nodos, setNodos, alCambiarNodos] = useNodesState<Node>(nodosDesdeProps);
   // LO ELEGIDO SIGUE ELEGIDO AL REDIBUJAR (24/10/2026): «al mover se deseleccionan». Cada cambio
   // (soltar lo que se movió, por ejemplo) rehace las fichas desde el tablero, y se rehacían sin
@@ -2953,7 +3122,19 @@ export default function LienzoDelTablero({
       }
     return { colitas, colitasQueLlegan: llegan, fichasConColitas: conColitas };
   }, [tablero, todoCable]);
-  const abrirMenu = useCallback((x: number, y: number, m: Menu) => setMenu({ x, y, m }), []);
+  const abrirMenu = useCallback(
+    (x: number, y: number, m: Menu) => {
+      setMenu({ x, y, m });
+      // EL CLIC DERECHO TAMBIÉN LA ELIGE (13/11/2026). Él: «al dar clic derecho… no se selecciona la ficha, entonces no sé qué
+      // ficha se está editando». Si ya estaba entre las elegidas, la elección se queda (el menú es de todas); si no, queda
+      // elegida solo ella.
+      if (m.tipo !== "ficha") return;
+      const id = m.espejo ? `esp:${m.espejo}` : m.fichaId;
+      setNodos((ns) => (ns.some((n) => n.id === id && n.selected) ? ns : ns.map((n) => (n.id === id ? (n.selected ? n : { ...n, selected: true }) : n.selected ? { ...n, selected: false } : n))));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const soltarElCable = useCallback(() => setTirando(null), []);
   const inicioDelTiro = useRef<Punto | null>(null);
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
@@ -3308,6 +3489,13 @@ export default function LienzoDelTablero({
         if (!pegarLoCopiado()) return;
         e.preventDefault();
       } else if (tecla === "delete" || tecla === "backspace") {
+        // Los textos sueltos elegidos se borran sin preguntar (Ctrl+Z los devuelve) (13/11/2026).
+        const textosElegidos = new Set(nodos.filter((n) => n.selected && n.type === "texto").map((n) => n.id.slice(6)));
+        if (textosElegidos.size && elegidas().length === 0 && !cajaElegida) {
+          cambiar({ ...actual, textos: (actual.textos ?? []).filter((x) => !textosElegidos.has(x.id)) });
+          e.preventDefault();
+          return;
+        }
         if (cajaElegida) {
           cambiar({ ...actual, cajas: (actual.cajas ?? []).filter((x) => x.id !== cajaElegida) });
           setCajaElegida(null);
@@ -3485,8 +3673,17 @@ export default function LienzoDelTablero({
             const donde = new Map(movidos.filter((n) => !n.id.startsWith("caja:") && !n.id.startsWith("est:") && !n.id.startsWith("esp:") && n.draggable !== false).map((n) => [n.id, n.position]));
             const cajas = new Map(movidos.filter((n) => n.id.startsWith("caja:")).map((n) => [n.id.slice(5), n.position]));
             const espejosMovidos = new Map(movidos.filter((n) => n.id.startsWith("esp:")).map((n) => [n.id.slice(4), n.position]));
+            const textosMovidos = new Map(movidos.filter((n) => n.id.startsWith("texto:")).map((n) => [n.id.slice(6), n.position]));
             cambiar({
               ...actual,
+              ...(textosMovidos.size
+                ? {
+                    textos: (actual.textos ?? []).map((x) => {
+                      const p = textosMovidos.get(x.id);
+                      return p ? { ...x, x: Math.round(p.x), y: Math.round(p.y) } : x;
+                    }),
+                  }
+                : {}),
               ...(espejosMovidos.size
                 ? {
                     espejos: (actual.espejos ?? []).map((e) => {
@@ -3619,6 +3816,26 @@ export default function LienzoDelTablero({
           <ZoomDelTablero />
         </ReactFlow>
 
+        {/* LA «T» PUESTA (13/11/2026): un clic pone el texto ahí y se escribe en el acto; Esc cancela. */}
+        {poniendoTexto && (
+          <div
+            data-poniendo-texto
+            className="absolute inset-0 z-30"
+            style={{ cursor: "text" }}
+            onClick={(e) => {
+              const p = instancia.current?.screenToFlowPosition({ x: e.clientX, y: e.clientY }) ?? { x: 0, y: 0 };
+              const id = `t-${Date.now().toString(36)}`;
+              setTextoRecienCreado(id);
+              setPoniendoTexto(false);
+              cambiar({ ...vivo.current, textos: [...(vivo.current.textos ?? []), { id, x: Math.round(p.x), y: Math.round(p.y - 14), texto: "Texto" }] });
+              window.setTimeout(() => setTextoRecienCreado(null), 600);
+            }}
+          >
+            <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
+              T · Haz clic donde quieres el texto · Esc cancela
+            </div>
+          </div>
+        )}
         {/* DIBUJAR EL VELO (13/11/2026): encima del lienzo mientras se dibuja; Esc cancela. */}
         {dibujando && (
           <div
@@ -3747,6 +3964,17 @@ export default function LienzoDelTablero({
               </div>
             )}
           </div>
+          {/* LA HERRAMIENTA «T» (13/11/2026): escribir un texto suelto en el tablero. */}
+          <button
+            type="button"
+            onClick={() => setPoniendoTexto((v) => !v)}
+            title="Texto: clic aquí y luego clic en el tablero donde lo quieres"
+            className={`flex h-9 w-9 items-center justify-center rounded-full font-serif text-lg font-black shadow-md ${
+              poniendoTexto ? "bg-violet-600 text-white" : "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
+            }`}
+          >
+            T
+          </button>
           {/* LA BARRA LIMPIA (01/11/2026). Él: «me confunde lo de los menús que están arriba… quitan espacio,
               meterlos en el menú hamburguesa». Estaciones, acomodar, qué falta conectar y ver todo como cable van
               DENTRO del ☰ (`despuesDelMas` los recibe y los pone en su lista). */}
@@ -3969,6 +4197,20 @@ export default function LienzoDelTablero({
                   >
                     📋 Pegar aquí ({portapapeles.fichas.length} ficha{portapapeles.fichas.length === 1 ? "" : "s"}
                     {portapapeles.cajas?.length ? ` y ${portapapeles.cajas.length} velo${portapapeles.cajas.length === 1 ? "" : "s"}` : ""})
+                  </button>
+                )}
+                {/* UN VELO SIMPLE DESDE EL CLIC DERECHO (13/11/2026). Él: «agrégale la opción de crear velos simples con el
+                    clic derecho en el tablero». Se dibuja arrastrando, como desde el «+». */}
+                {!menu.m.desde && (
+                  <button
+                    type="button"
+                    className={`${opcionDeMenu} border-b border-slate-200`}
+                    onClick={() => {
+                      setMenu(null);
+                      setDibujando({});
+                    }}
+                  >
+                    ⬚ Velo simple (dibújalo arrastrando)
                   </button>
                 )}
                 <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">

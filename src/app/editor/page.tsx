@@ -25162,6 +25162,39 @@ function ChatPreview({
     window.addEventListener("keydown", alPulsar, true);
     return () => window.removeEventListener("keydown", alPulsar, true);
   }, [seleccion, contextMenu]);
+  /**
+   * SUPR BORRA LA BURBUJA ELEGIDA (13/11/2026). Él: «cuando yo seleccione burbujas, o una burbuja, al presionar delete se
+   * borre». Con burbujas marcadas, esas; si no, la que está elegida (la del borde verde). Con la misma pregunta de
+   * «Eliminar» de siempre. Escribiendo en un campo, Supr sigue siendo de la letra.
+   */
+  const raizDelVisor = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!onRemoveStep) return;
+    const marcadas = seleccion ? [...seleccion].filter((i) => i < steps.length) : [];
+    if (marcadas.length === 0 && activeStepIndex == null) return;
+    const alPulsar = (evento: KeyboardEvent) => {
+      if (evento.key !== "Delete" && evento.key !== "Backspace") return;
+      if (evento.ctrlKey || evento.metaKey || evento.altKey || contextMenu) return;
+      const t = evento.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      // Solo el visor que se está viendo: a la vista y, con una ventana abierta, dentro de la de arriba (no uno escondido
+      // detrás, ni el del lienzo, que tiene su propio Supr).
+      const raiz = raizDelVisor.current;
+      if (!raiz || raiz.getClientRects().length === 0) return;
+      const ventanas = document.querySelectorAll('.fixed.inset-0[class*="bg-black/"], [aria-modal="true"], [data-ventana-en-gris]');
+      const arriba = ventanas[ventanas.length - 1];
+      if (arriba && !arriba.contains(raiz)) return;
+      evento.preventDefault();
+      evento.stopPropagation();
+      if (marcadas.length) {
+        onRemoveStep(marcadas.length === 1 ? marcadas[0] : marcadas);
+        setSeleccion(null);
+      } else if (activeStepIndex != null && activeStepIndex < steps.length) onRemoveStep(activeStepIndex);
+    };
+    window.addEventListener("keydown", alPulsar, true);
+    return () => window.removeEventListener("keydown", alPulsar, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seleccion, activeStepIndex, contextMenu, steps.length, onRemoveStep]);
   const marcar = (index: number) => {
     setSeleccion((antes) => {
       const siguiente = new Set(antes ?? []);
@@ -25549,6 +25582,7 @@ function ChatPreview({
   // sirve para lo único que sirve, comprobar cómo llega el mensaje.
   return (
     <div
+      ref={raizDelVisor}
       className={`bn-visor relative rounded-xl border border-neutral-300 bg-[#efeae2] p-2 ${
         sinTopeDeAncho ? "" : "w-full max-w-[420px]"
       }`}
@@ -25885,7 +25919,8 @@ function ChatPreview({
             role="menu"
             ref={(el) => encajarEnLaPantalla(el)}
             style={{ left: contextMenu.x, top: contextMenu.y }}
-            className="fixed z-30 min-w-52 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-xs font-semibold text-neutral-800 shadow-lg"
+            // MÁS GRANDE (13/11/2026, él: «agranda un poco los textos del menú… al dar clic derecho en la burbuja, están muy chicos»).
+            className="fixed z-30 min-w-64 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-[15px] font-semibold text-neutral-800 shadow-lg"
           >
             {/* CON BURBUJAS MARCADAS, EL MENÚ ES DE ELLAS.
                 Mezclar «Copiar burbuja» (ésta) y «Copiar las 3» (las marcadas)
@@ -25895,7 +25930,7 @@ function ChatPreview({
                 y al final ofrece salir del modo. */}
             {seleccionadas.length > 0 ? (
               <>
-                <div className="border-b border-neutral-200 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-neutral-500">
+                <div className="border-b border-neutral-200 px-3 py-2 text-xs font-bold uppercase tracking-wide text-neutral-500">
                   {seleccionadas.length} seleccionadas
                 </div>
                 <button type="button" onClick={() => { setContextMenu(null); copiarSeleccionadas(); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Copiar las {seleccionadas.length}</button>
@@ -25917,6 +25952,22 @@ function ChatPreview({
             <>
             {onEditStep && (
               <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onEditStep(index); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Editar esta burbuja</button>
+            )}
+            {/* CREAR UNA BURBUJA NUEVA DEBAJO (13/11/2026). Él: «una opción más: "crear burbuja abajo" y que cree una
+                burbuja con un texto que diga "reemplaza tu texto aquí"». */}
+            {onPasteStep && (
+              <button
+                type="button"
+                onClick={() => {
+                  const index = contextMenu.index;
+                  setContextMenu(null);
+                  onPasteStep(index, [textStep("Reemplaza tu texto aquí")]);
+                  setAvisoDelMenu(`Burbuja nueva debajo de la ${index + 1}. Cámbiale el texto.`);
+                }}
+                className="block w-full px-3 py-2 text-left hover:bg-neutral-50"
+              >
+                ➕ Crear burbuja abajo
+              </button>
             )}
             {onDuplicateStep && (
               <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onDuplicateStep(index); setAvisoDelMenu(`Burbuja ${index + 1} duplicada. La copia está justo debajo.`); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Duplicar burbuja</button>
@@ -30816,10 +30867,11 @@ function PasoDelGestor({ n, titulo, detalle, elegido, onElegir, apagado }: { n: 
       onClick={onElegir}
       className={`flex w-full items-start gap-2 rounded-lg border px-2 py-2 text-left ${elegido ? "border-acento bg-acento-suave" : "border-borde bg-tarjeta hover:bg-relleno"} ${apagado ? "opacity-60" : ""}`}
     >
-      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${elegido ? "bg-acento text-white" : "bg-relleno text-tinta-suave"}`}>{n}</span>
+      {/* UN POCO MÁS GRANDE (13/11/2026, él: «Seguimiento 1, seguimiento 2… solo un poco más grande, no necesita mucho»). */}
+      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${elegido ? "bg-acento text-white" : "bg-relleno text-tinta-suave"}`}>{n}</span>
       <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold text-tinta">{titulo}</span>
-        {detalle && <span className="block truncate text-[11px] text-tinta-suave">{detalle}</span>}
+        <span className="block truncate text-[15px] font-semibold text-tinta">{titulo}</span>
+        {detalle && <span className="block truncate text-xs text-tinta-suave">{detalle}</span>}
       </span>
     </button>
   );
@@ -30862,16 +30914,16 @@ function GestorDelRegalo({
         <button
           type="button"
           onClick={() => acciones.alternarRegalo?.(!rg?.encendido)}
-          className={`rounded px-2 py-1 text-xs font-bold text-white ${rg?.encendido ? "bg-emerald-600" : "bg-slate-400"}`}
+          className={`rounded-lg px-3 py-1.5 text-sm font-bold text-white ${rg?.encendido ? "bg-emerald-600" : "bg-slate-400"}`}
           title="El mismo interruptor del menú Regalo: uno solo para todo el bot"
         >
           {rg?.encendido ? "ENCENDIDO" : "APAGADO"}
         </button>
-        <span className="text-xs text-tinta-suave">Uno solo para todo el bot: vale para todos los países y todas tus tiendas.</span>
+        <span className="text-sm text-tinta-suave">Uno solo para todo el bot: vale para todos los países y todas tus tiendas.</span>
         {/* EN MINUTOS (19/10/2026: «el regalo hay que ponerlo en minutos»). Se guarda en segundos,
             el mismo dato de siempre (menú ajustes). */}
         {acciones.cambiarTiempo && (
-          <label className="ml-auto flex items-center gap-1 text-xs text-tinta" title="De silencio, desde que recibe su compra (o desde la oferta del upsell). Si el cliente escribe, vuelve a cero.">
+          <label className="ml-auto flex items-center gap-1 text-sm text-tinta" title="De silencio, desde que recibe su compra (o desde la oferta del upsell). Si el cliente escribe, vuelve a cero.">
             Se ofrece tras
             <input
               key={acciones.tiempos?.regalo ?? 0}
@@ -30883,7 +30935,7 @@ function GestorDelRegalo({
                 const seg = Math.max(0, Math.round((Number(e.target.value) || 0) * 60));
                 if (seg !== (acciones.tiempos?.regalo ?? 0)) acciones.cambiarTiempo?.("regalo", seg);
               }}
-              className="w-16 rounded border border-borde bg-tarjeta px-1 py-0.5"
+              className="w-16 rounded-lg border border-borde bg-tarjeta px-2 py-1"
             />
             min de silencio
           </label>
@@ -33295,6 +33347,26 @@ function GestorDeVersiones({
   const nuevoId = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
   const vivo = useRef({ segs, versiones });
   vivo.current = { segs, versiones };
+  // CTRL+Z / CTRL+Y CON EL GESTOR ABIERTO (13/11/2026). Él: «dupliqué la versión de la ficha, y al presionar control Z, no se
+  // deshizo». Se deshacía en la ficha, pero el gestor seguía enseñando su lista de antes. Lo de aquí se aplica a la ficha al
+  // instante, así que si la ficha cambia y no coincide con lo de aquí, cambió desde fuera (Ctrl+Z): el gestor la vuelve a leer.
+  useEffect(() => {
+    const segsDeFuera = JSON.stringify(ficha.seguimientos ?? []);
+    const versionesDeFuera = JSON.stringify(ficha.variantes ?? []);
+    const s = segsDeFuera !== JSON.stringify(vivo.current.segs) ? (JSON.parse(segsDeFuera) as Seg[]) : null;
+    const v = versionesDeFuera !== JSON.stringify(vivo.current.versiones) ? (JSON.parse(versionesDeFuera) as Version[]) : null;
+    if (!s && !v) return;
+    if (s) setSegs(s);
+    if (v) setVersiones(v);
+    const listaS = s ?? vivo.current.segs;
+    const listaV = v ?? vivo.current.versiones;
+    setElegida((e) => {
+      const seg = Math.min(e.seg, Math.max(0, listaS.length - 1));
+      const cuantas = esSeg ? listaS[seg]?.variantes.length ?? 0 : listaV.length;
+      return { seg, ver: Math.min(e.ver, Math.max(0, cuantas - 1)) };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ficha.seguimientos, ficha.variantes]);
   const aplicar = (s: Seg[], v: Version[]) => onCambiar(esSeg ? { seguimientos: s } : { variantes: v });
   // «LISTO» Y «CANCELAR» (01/11/2026). Él: «en el pop up de seguimientos le faltan los botones de "listo" y
   // "cancelar"; solo dice "cerrar"». Lo de aquí se sigue viendo en la ficha al ir cambiando; Cancelar (o
@@ -33446,7 +33518,7 @@ function GestorDeVersiones({
               ))}
               <button
                 type="button"
-                className="mt-1 rounded-lg border border-dashed border-borde bg-tarjeta px-2 py-2 text-left text-xs font-semibold text-tinta hover:bg-relleno"
+                className="mt-1 rounded-lg border border-dashed border-borde bg-tarjeta px-2 py-2 text-left text-sm font-semibold text-tinta hover:bg-relleno"
                 onClick={() => {
                   const ultimo = vivo.current.segs[vivo.current.segs.length - 1]?.minutos ?? 0;
                   const nuevos = [...vivo.current.segs, { id: nuevoId("s"), minutos: ultimo ? ultimo + 120 : 180, variantes: [{ id: nuevoId("v"), peso: 1, steps: [] }] }];
@@ -33456,7 +33528,7 @@ function GestorDeVersiones({
               >
                 + Agregar seguimiento
               </button>
-              <p className="mt-1 text-[11px] text-tinta-suave">🗑 lo quita de esta caja. Salen en el orden de sus tiempos.</p>
+              <p className="mt-1 text-xs text-tinta-suave">🗑 lo quita de esta caja. Salen en el orden de sus tiempos.</p>
             </>
           ) : (
             <>
@@ -33579,11 +33651,12 @@ function GestorDeVersiones({
             />
           )}
           {version && (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-tinta">
+            // MÁS GRANDE (13/11/2026, él: «"encendida" y "duplicar versión"… están pequeños, necesito que sea más grande»).
+            <div className="flex flex-wrap items-center gap-2 text-sm text-tinta">
               <button
                 type="button"
                 onClick={() => cambiarVersion({ peso: (version.peso ?? 1) === 0 ? 1 : 0 })}
-                className={`rounded px-1.5 py-0.5 text-[11px] font-bold text-white ${(version.peso ?? 1) === 0 ? "bg-slate-400" : "bg-emerald-600"}`}
+                className={`rounded-lg px-3 py-1.5 text-sm font-bold text-white ${(version.peso ?? 1) === 0 ? "bg-slate-400" : "bg-emerald-600"}`}
                 title={(version.peso ?? 1) === 0 ? "Apagada: el bot no la manda. Clic para encenderla." : "Encendida. Clic para apagarla."}
               >
                 {(version.peso ?? 1) === 0 ? "APAGADA" : "ENCENDIDA"}
@@ -33596,13 +33669,13 @@ function GestorDeVersiones({
                     min={0}
                     value={version.peso ?? 1}
                     onChange={(e) => cambiarVersion({ peso: Math.max(0, Math.floor(Number(e.target.value) || 0)) })}
-                    className="w-14 rounded border border-borde bg-tarjeta px-1 py-0.5"
+                    className="w-16 rounded-lg border border-borde bg-tarjeta px-2 py-1"
                   />
                 </label>
               )}
               <button
                 type="button"
-                className="rounded border border-borde px-2 py-0.5 text-[11px] font-semibold hover:bg-relleno"
+                className="rounded-lg border border-borde px-3 py-1.5 text-sm font-semibold hover:bg-relleno"
                 title="Una copia de esta versión, aquí mismo"
                 onClick={() => {
                   const copia = { ...JSON.parse(JSON.stringify(version)), id: nuevoId("v") } as Version;
@@ -33616,7 +33689,7 @@ function GestorDeVersiones({
               {lista.length > 1 && (
                 <button
                   type="button"
-                  className="rounded border border-red-200 px-2 py-0.5 text-[11px] font-semibold text-red-700 hover:bg-red-50"
+                  className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50"
                   onClick={() => {
                     const actual = esSeg ? vivo.current.segs[elegida.seg]?.variantes ?? [] : vivo.current.versiones;
                     ponerLista(actual.filter((_, j) => j !== elegida.ver));
@@ -33722,7 +33795,8 @@ function SelectorDeRegalo({ cfg, tiendaId, aplicar }: { cfg: FullConfig; tiendaI
   const propio = !elegido && Object.keys(tienda?.regalo ?? {}).length > 0;
   const usan = elegido ? (cfg.tiendas ?? []).filter((t) => t.regalo_origen === elegido) : [];
   return (
-    <div data-selector-de-regalo className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-pink-200 bg-pink-50 px-3 py-2 text-xs text-tinta">
+    // MÁS GRANDE (13/11/2026, él: «Propio de esta tienda, está muy pequeño, Guardar como regalo también… me fuerza la vista»).
+    <div data-selector-de-regalo className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-pink-200 bg-pink-50 px-3 py-2.5 text-[15px] text-tinta">
       <span className="font-bold text-pink-900">🎁 ¿Qué regalo?</span>
       <select
         value={elegido || (propio ? "__propio" : "")}
@@ -33732,7 +33806,7 @@ function SelectorDeRegalo({ cfg, tiendaId, aplicar }: { cfg: FullConfig; tiendaI
           if (propio && !window.confirm("Esta tienda tiene un regalo propio sin guardar en la lista. Si eliges otro, se reemplaza. ¿Seguir?")) return;
           aplicar(conRegaloElegido(cfg, tiendaId, v));
         }}
-        className="rounded-md border border-borde bg-tarjeta px-2 py-1 text-xs font-semibold"
+        className="rounded-lg border border-borde bg-tarjeta px-3 py-1.5 text-[15px] font-semibold"
       >
         <option value="">🌐 El regalo general del bot</option>
         {propio && <option value="__propio">✏️ Propio de esta tienda (sin guardar en la lista)</option>}
@@ -33749,7 +33823,7 @@ function SelectorDeRegalo({ cfg, tiendaId, aplicar }: { cfg: FullConfig; tiendaI
           if (nombre === null) return;
           aplicar(conRegaloGuardadoDeLaTienda(cfg, tiendaId, nombre));
         }}
-        className="rounded-md border border-borde bg-tarjeta px-2 py-1 font-semibold hover:bg-relleno"
+        className="rounded-lg border border-borde bg-tarjeta px-3 py-1.5 font-semibold hover:bg-relleno"
         title="Guarda el regalo que ves ahora como uno nuevo de la lista, para usarlo en otras tiendas"
       >
         💾 Guardar como regalo nuevo
@@ -33763,12 +33837,12 @@ function SelectorDeRegalo({ cfg, tiendaId, aplicar }: { cfg: FullConfig; tiendaI
             if (nombre === null || !nombre.trim()) return;
             aplicar(conRegaloGuardado(cfg, { ...r, nombre: nombre.trim() }));
           }}
-          className="rounded-md border border-borde bg-tarjeta px-2 py-1 font-semibold hover:bg-relleno"
+          className="rounded-lg border border-borde bg-tarjeta px-3 py-1.5 font-semibold hover:bg-relleno"
         >
           ✏️ Renombrar
         </button>
       )}
-      <span className="text-[11px] text-tinta-suave">
+      <span className="text-sm text-tinta-suave">
         {elegido
           ? `Lo usan: ${usan.map((t) => t.nombre?.trim() || t.id).join(", ")}. Lo que cambies aquí cambia en todas ellas.`
           : propio
@@ -34938,9 +35012,30 @@ function AjustesDeLaFicha({
         style={ficha.tipo === "reparto" ? { zoom: 1.15 } : undefined}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-sm font-black">
-          {a.icono} {a.nombre}
-        </p>
+        {/* LOS BOTONES ARRIBA A LA DERECHA (13/11/2026). Él: «el botoncito de guardar/cancelar/cerrar, estén arriba… a la
+            derecha como las demás fichas para mantener la armonía». La cabecera se queda pegada arriba al desplazar. */}
+        <div className="sticky -top-5 z-10 -mx-5 -mt-5 mb-1 flex items-center justify-between gap-3 border-b border-borde bg-tarjeta px-5 py-3">
+          <p className="text-sm font-black">
+            {a.icono} {a.nombre}
+          </p>
+          <span className="flex shrink-0 items-center gap-2">
+            {hayCambios ? (
+              <>
+                {/* Del tamaño del «Cerrar» de la ventana de las burbujas (13/11/2026). */}
+                <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
+                  Cancelar
+                </button>
+                <button type="button" onClick={() => (enGrupo ? guardarElGrupo() : onGuardar(b))} className="rounded-xl bg-emerald-600 px-[18px] py-[9px] text-sm font-bold text-white hover:bg-emerald-700">
+                  Listo
+                </button>
+              </>
+            ) : (
+              <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
+                Cerrar
+              </button>
+            )}
+          </span>
+        </div>
         {enGrupo && (
           <div className="mt-2 rounded-lg border-2 border-sky-400 bg-sky-50 px-3 py-2 text-xs text-sky-950">
             <p className="text-sm font-black">✏️ {grupoAlAbrir.length + 1} fichas a la vez</p>
@@ -35511,23 +35606,6 @@ function AjustesDeLaFicha({
             </div>
           )}
           {ficha.tipo === "humano" && <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>}
-        </div>
-        <div className="mt-5 flex justify-end gap-2">
-          {hayCambios ? (
-            <>
-              {/* Del tamaño del «Cerrar» de la ventana de las burbujas (13/11/2026). */}
-              <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
-                Cancelar
-              </button>
-              <button type="button" onClick={() => (enGrupo ? guardarElGrupo() : onGuardar(b))} className="rounded-xl bg-emerald-600 px-[18px] py-[9px] text-sm font-bold text-white hover:bg-emerald-700">
-                Listo
-              </button>
-            </>
-          ) : (
-            <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
-              Cerrar
-            </button>
-          )}
         </div>
       </div>
     </div>

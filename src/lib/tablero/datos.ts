@@ -362,6 +362,27 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
         return [{ id, x: Math.round(x), y: Math.round(y), ancho: Math.round(ancho), alto: Math.round(alto), titulo: texto(k.titulo, 80), ...(color ? { color } : {}), ...(inicio ? { inicio } : {}) }];
       })
     : [];
+  // LOS TEXTOS SUELTOS (13/11/2026, la herramienta «T»): notas para él. Solo pantalla.
+  const textos = Array.isArray(crudo.textos)
+    ? crudo.textos.slice(0, 500).flatMap((k) => {
+        if (!esObjeto(k)) return [];
+        const x = numero(k.x), y = numero(k.y), tam = numero(k.tam);
+        const id = texto(k.id, 80).trim();
+        if (!id || x === undefined || y === undefined) return [];
+        const color = texto(k.color, 20).trim();
+        return [
+          {
+            id,
+            x: Math.round(x),
+            y: Math.round(y),
+            texto: texto(k.texto, 4000),
+            ...(tam ? { tam: Math.max(6, Math.min(400, Math.round(tam))) } : {}),
+            ...(color ? { color } : {}),
+            ...(k.negrita === true ? { negrita: true } : {}),
+          },
+        ];
+      })
+    : [];
   return {
     encendido: crudo.encendido === true,
     ...(nombre ? { nombre } : {}),
@@ -371,6 +392,7 @@ export function leeTablero(v: unknown, leerPasos: (pasos: unknown[]) => unknown[
     ...(Object.keys(curvas).length ? { curvas } : {}),
     ...(cajas.length ? { cajas } : {}),
     ...(espejos.length ? { espejos } : {}),
+    ...(textos.length ? { textos } : {}),
   };
 }
 

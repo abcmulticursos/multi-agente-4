@@ -284,6 +284,8 @@ export interface Tablero {
      */
     inicio?: string;
   }>;
+  /** LOS TEXTOS SUELTOS (13/11/2026): la herramienta «T» del tablero. Tamaño en puntos, color y negrita. Solo pantalla. */
+  textos?: Array<{ id: string; x: number; y: number; texto: string; tam?: number; color?: string; negrita?: boolean }>;
 }
 
 /** Los canales: un tablero por canal, como la sección Canales. */
