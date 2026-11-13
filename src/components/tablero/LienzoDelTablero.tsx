@@ -71,6 +71,20 @@ export interface TableroEnElEditor extends Omit<Tablero, "fichas"> {
 }
 
 type Punto = { x: number; y: number };
+
+/**
+ * DUPLICAR SIN ENCIMARSE (13/11/2026). Él: «cuando vuelvo a duplicar esa misma ficha, cae encima… que también haya un
+ * movimiento abajo a la derecha». Si donde caería la copia ya hay una ficha, baja un paso más (40 px abajo a la derecha)
+ * hasta un sitio libre. Devuelve el desplazamiento a usar.
+ */
+function sinEncimarse(fichas: Array<{ x: number; y: number }>, f: { x: number; y: number }, d: Punto): Punto {
+  let { x, y } = d;
+  for (let k = 0; k < 60 && fichas.some((o) => Math.abs(o.x - (f.x + x)) < 20 && Math.abs(o.y - (f.y + y)) < 20); k++) {
+    x += 40;
+    y += 40;
+  }
+  return { x, y };
+}
 type BurbujaDelEditor = { type?: string; texts?: string[]; enabled?: boolean; delay_after_sec?: number; buttons?: unknown[]; decisions?: unknown[] };
 
 const TEMA = {
@@ -1047,7 +1061,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             className="nodrag rounded px-1 text-sm leading-none text-white/90 hover:bg-white/20 hover:text-white"
             onClick={(e) => {
               e.stopPropagation();
-              const c = copiarFichas([f], [], { x: 40, y: 260 });
+              const c = copiarFichas([f], [], sinEncimarse(ctx.tablero.fichas, f, { x: 40, y: 260 }));
               ctx.cambiar({ ...ctx.tablero, fichas: [...ctx.tablero.fichas, ...c.fichas] });
             }}
             onDoubleClick={(e) => e.stopPropagation()}
@@ -1969,7 +1983,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
                 className="nodrag rounded-md p-1 text-[17px] leading-none text-slate-500 hover:bg-slate-200 hover:text-slate-800"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const c = copiarFichas([f], [], { x: 40, y: 260 });
+                  const c = copiarFichas([f], [], sinEncimarse(ctx.tablero.fichas, f, { x: 40, y: 260 }));
                   ctx.cambiar({ ...ctx.tablero, fichas: [...ctx.tablero.fichas, ...c.fichas] });
                 }}
                 onDoubleClick={(e) => e.stopPropagation()}
@@ -2790,15 +2804,24 @@ export default function LienzoDelTablero({
   familiaViva.current = familiaEspejo;
   const conLaFamilia = (n: Node): Node =>
     familiaViva.current?.has(n.id) ? { ...n, className: "tablero-familia" } : n.className === "tablero-familia" ? { ...n, className: undefined } : n;
-  useEffect(
-    () =>
-      setNodos((antes) => {
-        const elegidos = new Set(antes.filter((n) => n.selected).map((n) => n.id));
-        return (elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps).map(conLaFamilia);
-      }),
+  // LO QUE APARECE QUEDA ELEGIDO (13/11/2026). Él: «la ficha o fichas duplicadas deben estar automáticamente
+  // seleccionadas… lo que se borra y se recupera (Ctrl+Z) aparece seleccionado, así yo busco y veo dónde está». Las fichas
+  // y los 🪞 espejos que no estaban en el dibujo anterior (una copia, lo pegado, lo que vuelve con Ctrl+Z o Ctrl+Y) quedan
+  // elegidos, y solo ellos. Al abrir el tablero (antes no había nada dibujado) no se elige nada.
+  const idsAntes = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const elegibles = (id: string) => !id.startsWith("est:") && !id.startsWith("caja:") && !id.startsWith("esquinas");
+    const ahora = new Set(nodosDesdeProps.map((n) => n.id).filter(elegibles));
+    const antes = idsAntes.current;
+    idsAntes.current = ahora;
+    const aparecieron = antes && antes.size > 0 ? new Set([...ahora].filter((id) => !antes.has(id))) : new Set<string>();
+    setNodos((previos) => {
+      if (aparecieron.size) return nodosDesdeProps.map((n) => (aparecieron.has(n.id) ? { ...n, selected: true } : n)).map(conLaFamilia);
+      const elegidos = new Set(previos.filter((n) => n.selected).map((n) => n.id));
+      return (elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps).map(conLaFamilia);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodosDesdeProps, setNodos]
-  );
+  }, [nodosDesdeProps, setNodos]);
   useEffect(() => {
     setNodos((ns) => ns.map(conLaFamilia));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3521,7 +3544,8 @@ export default function LienzoDelTablero({
           {...(vistaGuardada ? { defaultViewport: vistaGuardada } : {})}
           fitView={!vistaGuardada}
           fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
-          minZoom={0.1}
+          // MÁS LEJOS (13/11/2026, él: «necesito más zoom out… no puedo ver mis demás workflows cuando son muchos»): del 10 % al 2 %.
+          minZoom={0.02}
           // MÁS ACERCAMIENTO CON LA RUEDITA (28/10/2026: «mira el tamaño que ofrece Sendy»): hasta 4×.
           maxZoom={4}
           // EL IMÁN AL ARRASTRAR (28/10/2026: «clap, clap, clap, se alinea a los puntos… pasos cortitos»):
@@ -4023,7 +4047,7 @@ export default function LienzoDelTablero({
                       type="button"
                       className={opcionDeMenu}
                       onClick={() => {
-                        const c = copiarFichas([fichaDelMenu], [], { x: 40, y: 260 });
+                        const c = copiarFichas([fichaDelMenu], [], sinEncimarse(vivo.current.fichas, fichaDelMenu, { x: 40, y: 260 }));
                         cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
                         setMenu(null);
                       }}
@@ -4063,7 +4087,7 @@ export default function LienzoDelTablero({
                               onClick={() => {
                                 const m = mantaDelPais(vivo.current, p)!;
                                 const original = vivo.current.fichas.find((x) => x.id === fichaDelMenu.id)!;
-                                const c = copiarFichas([original], [], { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y });
+                                const c = copiarFichas([original], [], sinEncimarse(vivo.current.fichas, original, { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y }));
                                 cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
                                 setMenu(null);
                                 setAviso(`Copia puesta en la manta de ${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}, abajo a la izquierda. Conéctala con su cable.`);

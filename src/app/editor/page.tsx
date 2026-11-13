@@ -30004,6 +30004,12 @@ function VistaPizarra({
               setTiendaId(id);
             })
           }
+          // A UNA TIENDA RECIÉN CREADA O DUPLICADA se entra directo (13/11/2026): sus cambios son justo los que hay sin guardar,
+          // y el aviso de «salir sin guardar» se cruzaba y no la abría. Lo hecho sigue en el borrador (se guarda con Ctrl+S).
+          onTiendaNueva={(id) => {
+            setWorkflowAbierto(null);
+            setTiendaId(id);
+          }}
           onVolver={() => {
             setWorkflowAbierto(null);
             irA("tiendas");
@@ -31840,6 +31846,7 @@ function PantallaDelTableroCargada({
   tema,
   onTema,
   onTienda,
+  onTiendaNueva,
   onVolver,
   aplicar,
   onConfigChange,
@@ -31847,6 +31854,8 @@ function PantallaDelTableroCargada({
   onPais,
   paisDeLaBandera,
 }: {
+  /** Entrar a una tienda recién creada o duplicada, sin el aviso de «salir sin guardar» (13/11/2026). */
+  onTiendaNueva?: (id: string) => void;
   /** Pone la bandera de abajo a la derecha en ese país (al tocar una ficha de su manta). */
   onPais?: (pais: string) => void;
   /** LA BANDERA DE ABAJO A LA DERECHA (02/11/2026). Él: «al cambiar la bandera también el precio se respete». El
@@ -31947,6 +31956,8 @@ function PantallaDelTableroCargada({
   // LAS PLANTILLAS (01/11/2026): la ventana abierta, y a qué fichas llevar la vista al traer una.
   const [ventanaDePlantillas, setVentanaDePlantillas] = useState(false);
   const [duplicando, setDuplicando] = useState(false);
+  /** «＋ NUEVA TIENDA» desde el selector de tiendas del tablero (13/11/2026). */
+  const [creandoTienda, setCreandoTienda] = useState(false);
   const [enfocarFichas, setEnfocarFichas] = useState<{ ids: string[]; vez: number } | undefined>(undefined);
   // LOS NÚMEROS DE CADA FICHA (25/10/2026): clientes que llegaron y cuántos pagaron, como en la
   // pizarra. Se piden al abrir y cada minuto; si falla, simplemente no se muestran.
@@ -32306,6 +32317,17 @@ function PantallaDelTableroCargada({
                             </button>
                           ))}
                         </div>
+                        {/* CREAR AQUÍ MISMO (13/11/2026). Él: «falta la opción NUEVA TIENDA, solo hay para seleccionar». */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEligiendoTienda(false);
+                            setCreandoTienda(true);
+                          }}
+                          className="block w-full border-t border-borde bg-emerald-50 px-3 py-2 text-left text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+                        >
+                          ＋ Nueva tienda
+                        </button>
                       </>
                     );
                   })()}
@@ -32686,8 +32708,24 @@ function PantallaDelTableroCargada({
             if (!r) return;
             onSnapshot();
             aplicar(r.cfg);
-            onTienda(r.id);
+            (onTiendaNueva ?? onTienda)(r.id);
             setAvisoDelTablero(`Tienda «${nombre}» creada. Ya estás en su tablero, sin número y apagado. Guarda para que quede.`);
+          }}
+        />
+      )}
+      {creandoTienda && (
+        <GuardarTiendaComo
+          nueva
+          original=""
+          onCerrar={() => setCreandoTienda(false)}
+          onGuardar={(nombre) => {
+            // La misma tienda vacía que crea «+ Crear tienda» en Mis tiendas.
+            const id = `tienda_${Date.now().toString(36)}`;
+            setCreandoTienda(false);
+            onSnapshot();
+            aplicar({ ...vivoCfg.current, tiendas: [...(vivoCfg.current.tiendas ?? []), { id, nombre, numero: "", semimodalidad: "" }] });
+            (onTiendaNueva ?? onTienda)(id);
+            setAvisoDelTablero(`Tienda «${nombre}» creada. Ya estás en su tablero (vacío y apagado). Su número, productos y cobrador van en ⚙. Guarda para que quede.`);
           }}
         />
       )}
@@ -34246,8 +34284,19 @@ const FORMAS_DE_PLANTILLA = [
  * «GUARDAR COMO» AL DUPLICAR UNA TIENDA (01/11/2026). Él: «que al duplicar la tienda salga una especie de
  * SAVE AS, y ponerle nombre a la tienda, y al guardarla yo estar dentro de ella en el tablero».
  */
-function GuardarTiendaComo({ original, onGuardar, onCerrar }: { original: string; onGuardar: (nombre: string) => void; onCerrar: () => void }) {
-  const [nombre, setNombre] = useState(`${original} (copia)`);
+function GuardarTiendaComo({
+  original,
+  onGuardar,
+  onCerrar,
+  nueva = false,
+}: {
+  original: string;
+  onGuardar: (nombre: string) => void;
+  onCerrar: () => void;
+  /** «＋ NUEVA TIENDA» (13/11/2026): la misma ventanita, para una tienda vacía. */
+  nueva?: boolean;
+}) {
+  const [nombre, setNombre] = useState(nueva ? "" : `${original} (copia)`);
   useEscapeEnPila(() => onCerrar());
   const listo = nombre.trim().length > 0;
   return (
@@ -34259,7 +34308,7 @@ function GuardarTiendaComo({ original, onGuardar, onCerrar }: { original: string
         }}
         className="w-full max-w-md rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl"
       >
-        <p className="text-sm font-black">⧉ Duplicar «{original}»</p>
+        <p className="text-sm font-black">{nueva ? "＋ Nueva tienda" : `⧉ Duplicar «${original}»`}</p>
         <label className="mt-3 block text-xs font-semibold">
           Nombre de la tienda nueva
           <input
@@ -34270,13 +34319,17 @@ function GuardarTiendaComo({ original, onGuardar, onCerrar }: { original: string
             className="mt-1 w-full rounded-md border border-borde bg-relleno px-2 py-1.5 text-sm font-normal"
           />
         </label>
-        <p className="mt-2 text-[11px] text-tinta-suave">Copia completa (productos, tablero, pizarra, cobrador), sin número y con el tablero apagado. Al guardar, entras a su tablero.</p>
+        <p className="mt-2 text-[11px] text-tinta-suave">
+          {nueva
+            ? "Una tienda vacía, sin número y con el tablero apagado. Al crearla, entras a su tablero. Su número, productos y cobrador se ponen en ⚙ (Datos de esta tienda)."
+            : "Copia completa (productos, tablero, pizarra, cobrador), sin número y con el tablero apagado. Al guardar, entras a su tablero."}
+        </p>
         <div className="mt-4 flex justify-end gap-2">
           <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold hover:bg-relleno">
             Cancelar
           </button>
           <button type="submit" disabled={!listo} className="rounded-md bg-violet-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-40">
-            Guardar y abrir
+            {nueva ? "Crear y abrir" : "Guardar y abrir"}
           </button>
         </div>
       </form>
