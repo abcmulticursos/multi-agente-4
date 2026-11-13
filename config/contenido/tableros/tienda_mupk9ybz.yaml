@@ -11721,8 +11721,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mweg7vsa-v6h68
       tipo: mensaje
-      x: -1683
-      y: 17303
+      x: -682
+      y: 19668
       steps:
         - type: text
           body_variants:
@@ -11791,8 +11791,8 @@ whatsapp:
             - |-
               *MAMÁ / PAPÁ,* esta es tu oportunidad de llevarte {{producto_base}} completo 📚️✨️
 
-              📚️ 6 Libros completos
-              🎁 +6 Regalos especiales
+              📚️ *6 Libros completos*
+              🎁 *+6 Regalos especiales*
 
               🖨️ Todo en formato PDF listo para descargar e imprimir
 
@@ -11806,9 +11806,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {🔥 Completá tu pago hoy y *recibí GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtenés de regalo un plus adicional GRATIS* 🎁|🔥 Realizá tu pago ya y *recibí un regalo sorpresa adicional completamente GRATIS* 🎁}
-
-              🛒 ¿CÓMO COMPRO? *FÁCIL!, RESPONDÉ CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 ¿CÓMO COMPRO? *FÁCIL!, PUEDES HACERLO A TRAVES DEL SIGUIENTE METODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
