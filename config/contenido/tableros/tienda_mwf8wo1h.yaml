@@ -3180,8 +3180,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwf9hyrd-hp6o1
       tipo: regalo
-      x: 4301
-      y: 3652
+      x: 4367
+      y: 3663
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
