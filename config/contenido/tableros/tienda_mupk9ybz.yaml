@@ -2451,14 +2451,14 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+              {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 *¿CÓMO COMPRO?* FACIL!, *RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
           decisions:
-            - id: d-mwczmr06-bhzio
+            - id: 1bdf5e34-c89e-44b7-9703-da490d9c8504
               title: Nequi
               keywords:
                 - nequi
@@ -2488,7 +2488,7 @@ whatsapp:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwczmr06-jwovv
+            - id: 0046a0a5-f073-4464-902b-7ba55b161bd5
               title: DAVIPLATA
               keywords:
                 - Daviplata
@@ -2517,7 +2517,7 @@ whatsapp:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwczmr06-4a67w
+            - id: 309a73e3-653b-4314-8afc-474c79b36ed5
               title: Bre-B
               keywords:
                 - bre
@@ -2546,7 +2546,7 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwczmr06-seikp
+            - id: 43710a39-b57f-4912-91c5-8ef6cddcfede
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -3607,7 +3607,7 @@ whatsapp:
             - |-
               {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 *¿CÓMO COMPRO?* FACIL!, *RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -4759,12 +4759,12 @@ whatsapp:
             - |-
               {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 *¿CÓMO COMPRO?* FACIL!, *RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
           decisions:
-            - id: 036d9d2e-3345-47aa-96b5-c71edc90e376
+            - id: 1bdf5e34-c89e-44b7-9703-da490d9c8504
               title: Nequi
               keywords:
                 - nequi
@@ -4794,7 +4794,7 @@ whatsapp:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
                   enabled: false
-            - id: 4af699eb-c36a-46b4-9dca-e67c6f2ba699
+            - id: 0046a0a5-f073-4464-902b-7ba55b161bd5
               title: DAVIPLATA
               keywords:
                 - Daviplata
@@ -4823,7 +4823,7 @@ whatsapp:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
                   enabled: false
-            - id: 63717b29-ddd5-44e5-930f-234bae9554a6
+            - id: 309a73e3-653b-4314-8afc-474c79b36ed5
               title: Bre-B
               keywords:
                 - bre
@@ -4852,7 +4852,7 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
-            - id: 94862723-10d0-4f0c-800b-8f7ba8fbafab
+            - id: 43710a39-b57f-4912-91c5-8ef6cddcfede
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -5934,14 +5934,14 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁
+              {🔥 Completa tu pago hoy y *recibe GRATIS aparte un regalito adicional* 🎁|🔥 Al realizar tu pago hoy *obtienes de regalo un plus adicional GRATIS* 🎁|🔥 Realiza tu pago ya y *recibe un regalo sorpresa adicional completamente GRATIS* 🎁}
 
-              🛒 ¿CÓMO COMPRO? *FACIL!, RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
+              🛒 *¿CÓMO COMPRO?* FACIL!, *RESPONDE CON UN MÉTODO DE PAGO* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
           decisions:
-            - id: d-mwdbe0qi-7xuhx
+            - id: 1bdf5e34-c89e-44b7-9703-da490d9c8504
               title: Nequi
               keywords:
                 - nequi
@@ -5971,7 +5971,7 @@ whatsapp:
                     - Luego nos envías tu comprobante y tu acceso será al instante
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdbe0qi-ltoza
+            - id: 0046a0a5-f073-4464-902b-7ba55b161bd5
               title: DAVIPLATA
               keywords:
                 - Daviplata
@@ -6000,7 +6000,7 @@ whatsapp:
                     - Luego nos envias tu comprobante y recibirás tu acceso en segundos
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdbe0qi-o22dy
+            - id: 309a73e3-653b-4314-8afc-474c79b36ed5
               title: Bre-B
               keywords:
                 - bre
@@ -6029,7 +6029,7 @@ whatsapp:
                     - luego nos envias tu comprobante y tendrás acceso al instante.
                   delay_after_sec: 6
                   enabled: false
-            - id: d-mwdbe0qi-g8dp9
+            - id: 43710a39-b57f-4912-91c5-8ef6cddcfede
               title: QUIERE COMPRAR
               keywords:
                 - quiero comprar
@@ -14102,26 +14102,10 @@ whatsapp:
       de: f-mwceddd4-fz4n
       salida: rep:r2
       a: f-mwcyp14g-iy170
-    - id: c-mwczmr07-0kucp
-      de: f-mwczmr06-i8lx4
-      salida: dec:d-mwczmr06-bhzio
-      a: f-mwczmr06-4se41
-    - id: c-mwczmr07-q1g7z
-      de: f-mwczmr06-i8lx4
-      salida: dec:d-mwczmr06-jwovv
-      a: f-mwczmr06-4se41
-    - id: c-mwczmr07-6x377
-      de: f-mwczmr06-i8lx4
-      salida: dec:d-mwczmr06-4a67w
-      a: f-mwczmr06-4se41
     - id: c-mwczmr07-8e25o
       de: f-mwczmr06-4se41
       salida: btn:b-mwczmr06-0cvbk
       a: f-mwczmr06-q3356
-    - id: c-mwczmr07-e1o2f
-      de: f-mwczmr06-i8lx4
-      salida: dec:d-mwczmr06-seikp
-      a: f-mwczmr06-4se41
     - id: c-mwczmr07-kvbdz
       de: f-mwczmr06-q3356
       salida: pagado
@@ -14287,26 +14271,10 @@ whatsapp:
       de: f-mwczmr06-2e3sw
       salida: rep:r2
       a: f-mwdatl63-t3ldy
-    - id: c-mwdbe0qj-9arag
-      de: f-mwdbe0qi-mh5tk
-      salida: dec:d-mwdbe0qi-7xuhx
-      a: f-mwdbe0qi-kojx7
-    - id: c-mwdbe0qj-q7jpn
-      de: f-mwdbe0qi-mh5tk
-      salida: dec:d-mwdbe0qi-ltoza
-      a: f-mwdbe0qi-kojx7
-    - id: c-mwdbe0qj-qvgjm
-      de: f-mwdbe0qi-mh5tk
-      salida: dec:d-mwdbe0qi-o22dy
-      a: f-mwdbe0qi-kojx7
     - id: c-mwdbe0qj-45bxp
       de: f-mwdbe0qi-kojx7
       salida: btn:b-mwdbe0qi-rs4e7
       a: f-mwdbe0qi-jw5gv
-    - id: c-mwdbe0qj-wef0m
-      de: f-mwdbe0qi-mh5tk
-      salida: dec:d-mwdbe0qi-g8dp9
-      a: f-mwdbe0qi-kojx7
     - id: c-mwdbe0qj-c4o1f
       de: f-mwdbe0qi-jw5gv
       salida: pagado
@@ -14378,22 +14346,6 @@ whatsapp:
       de: f-mwd56hao-5kx9i
       salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
       a: f-mwd56hap-9n5su
-    - id: c-mwdfbfa8-q37
-      de: f-mwdatl63-t3ldy
-      salida: dec:036d9d2e-3345-47aa-96b5-c71edc90e376
-      a: f-mwdatl63-96azn
-    - id: c-mwdfbi0h-zeo
-      de: f-mwdatl63-t3ldy
-      salida: dec:4af699eb-c36a-46b4-9dca-e67c6f2ba699
-      a: f-mwdatl63-96azn
-    - id: c-mwdfbiz4-yjm
-      de: f-mwdatl63-t3ldy
-      salida: dec:63717b29-ddd5-44e5-930f-234bae9554a6
-      a: f-mwdatl63-96azn
-    - id: c-mwdfbk2y-ide
-      de: f-mwdatl63-t3ldy
-      salida: dec:94862723-10d0-4f0c-800b-8f7ba8fbafab
-      a: f-mwdatl63-96azn
     - id: c-mwdnvros-2d2ll
       de: f-mwdnvrol-efc90
       salida: dec:d-mwdnvrom-y3wl3
