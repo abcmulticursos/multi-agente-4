@@ -36070,6 +36070,29 @@ function VentanaDelCobro({
  * 🔀 Ruteador, sus rutas una al lado de la otra (prendidas y apagadas); donde el camino se divide (botones, cuadritos,
  * «si elige»), se elige la rama arriba de la ficha. Las fichas sueltas, sin cable, no salen. Solo pantalla.
  */
+/**
+ * LAS RUTAS QUE ÉL ELIGE VER EN LA W (13/11/2026). Él: «no aparezcan todas las rutas que me da el ruteador, sino yo
+ * elegirlas y agregarlas, esto para no saturar la memoria». Por tienda, canal, país y Ruteador; siguen elegidas al
+ * cambiar de bandera, al cerrar la W y al recargar, hasta que él las quite. Solo pantalla.
+ */
+const RUTAS_DEL_RECORRIDO = "recorrido-del-tablero-rutas";
+let rutasDelRecorridoEnMemoria: Record<string, string[]> | null = null;
+function leerRutasDelRecorrido(): Record<string, string[]> {
+  if (rutasDelRecorridoEnMemoria) return rutasDelRecorridoEnMemoria;
+  try {
+    rutasDelRecorridoEnMemoria = JSON.parse(localStorage.getItem(RUTAS_DEL_RECORRIDO) ?? "{}") ?? {};
+  } catch {
+    rutasDelRecorridoEnMemoria = {};
+  }
+  return rutasDelRecorridoEnMemoria!;
+}
+function guardarRutasDelRecorrido(rutas: Record<string, string[]>) {
+  rutasDelRecorridoEnMemoria = rutas;
+  try {
+    localStorage.setItem(RUTAS_DEL_RECORRIDO, JSON.stringify(rutas));
+  } catch {}
+}
+
 function RecorridoDelTablero({
   cfg,
   tablero,
@@ -36088,6 +36111,14 @@ function RecorridoDelTablero({
 }) {
   useEscapeEnPila(() => onCerrar());
   const [elegidas, setElegidas] = useState<Record<string, string>>({});
+  const [rutasVistas, setRutasVistas] = useState<Record<string, string[]>>(leerRutasDelRecorrido);
+  const claveDeRutas = (repartoId: string) => `${tienda?.id ?? "workflow"}|${canal ?? "whatsapp"}|${pais}|${repartoId}`;
+  const ponerRutas = (repartoId: string, ids: string[]) =>
+    setRutasVistas((r) => {
+      const nuevas = { ...r, [claveDeRutas(repartoId)]: ids };
+      guardarRutasDelRecorrido(nuevas);
+      return nuevas;
+    });
   const cfgVista = configComoLaVeLaTienda(cfg, tienda, "lineal");
   const alineacion = tienda?.alineacion as Record<string, unknown> | undefined;
   const fichaDe = (id: string) => tablero.fichas.find((f) => f.id === id && !f.guardada);
@@ -36192,20 +36223,66 @@ function RecorridoDelTablero({
         // LAS RUTAS DEL RUTEADOR, UNA AL LADO DE LA OTRA: prendidas y apagadas.
         const ops = f.reparto ?? [];
         const total = ops.reduce((s, o) => s + o.peso, 0) || 1;
+        // Solo las rutas que él agregó (y que siguen con cable); el número de cada una es el de siempre.
+        const conectadas = ops.map((o, i) => ({ o, i })).filter(({ o }) => cableDe(f.id, `rep:${o.id}`));
+        const nombreRuta = (o: (typeof ops)[number], i: number) => o.nombre || `Ruta ${i + 1}`;
+        const puestas = rutasVistas[claveDeRutas(f.id)] ?? [];
+        const vistas = conectadas.filter(({ o }) => puestas.includes(o.id));
+        const porAgregar = conectadas.filter(({ o }) => !puestas.includes(o.id));
+        const repartoId = f.id;
         out.push(
-          <div key={`${f.id}-rutas`} className="flex items-start justify-center gap-4 pb-2">
-            {ops
-              .filter((o) => cableDe(f.id, `rep:${o.id}`))
-              .map((o, i) => (
+          <div key={`${f.id}-elegir`} className="flex w-[400px] flex-wrap items-center gap-1.5 rounded-lg border border-borde bg-relleno px-2 py-1.5">
+            <span className="text-[11px] font-semibold text-tinta-suave">Rutas en la vista:</span>
+            {vistas.length === 0 && <span className="text-[11px] italic text-tinta-suave">ninguna</span>}
+            {vistas.map(({ o, i }) => (
+              <button
+                key={o.id}
+                type="button"
+                title="Quitar de la vista"
+                onClick={() => ponerRutas(repartoId, puestas.filter((x) => x !== o.id))}
+                className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${o.peso > 0 ? "border-emerald-400 bg-emerald-100 text-emerald-800" : "border-slate-300 bg-slate-200 text-slate-600"}`}
+              >
+                {nombreRuta(o, i)} ✕
+              </button>
+            ))}
+            {porAgregar.length > 0 && (
+              <select
+                value=""
+                onChange={(e) => e.target.value && ponerRutas(repartoId, [...puestas, e.target.value])}
+                className="rounded-md border border-borde bg-tarjeta px-1.5 py-0.5 text-[11px] font-semibold"
+              >
+                <option value="">＋ Agregar ruta…</option>
+                {porAgregar.map(({ o, i }) => (
+                  <option key={o.id} value={o.id}>
+                    {nombreRuta(o, i)} {o.peso > 0 ? "🟢 (activa)" : "⚪ (apagada)"}
+                  </option>
+                ))}
+              </select>
+            )}
+            {vistas.length > 0 && (
+              <button
+                type="button"
+                onClick={() => ponerRutas(repartoId, [])}
+                className="ml-auto rounded-md border border-borde bg-tarjeta px-2 py-0.5 text-[11px] font-semibold text-tinta hover:bg-relleno"
+              >
+                Ocultar todas
+              </button>
+            )}
+          </div>
+        );
+        if (vistas.length)
+          out.push(
+            <div key={`${f.id}-rutas`} className="flex items-start justify-center gap-4 pb-2">
+              {vistas.map(({ o, i }) => (
                 <div key={o.id} className="flex w-max shrink-0 flex-col items-center gap-3">
                   <p className={`w-[400px] rounded-full px-3 py-1 text-center text-[12px] font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
-                    {o.peso > 0 ? `🟢 ${o.nombre || `Ruta ${i + 1}`} · vende ${Math.round((o.peso / total) * 100)}%` : `⚪ ${o.nombre || `Ruta ${i + 1}`} · apagada`}
+                    {o.peso > 0 ? `🟢 ${nombreRuta(o, i)} · vende ${Math.round((o.peso / total) * 100)}%` : `⚪ ${nombreRuta(o, i)} · apagada`}
                   </p>
                   {camino(cableDe(f.id, `rep:${o.id}`)?.a, new Set(vistos), prof + 1)}
                 </div>
               ))}
-          </div>
-        );
+            </div>
+          );
         break;
       }
       if (conCable.length === 0) {
