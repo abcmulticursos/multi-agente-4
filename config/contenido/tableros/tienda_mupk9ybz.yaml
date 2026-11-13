@@ -12564,9 +12564,21 @@ whatsapp:
               1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
           delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwelg57r-su9j9
+              enabled: false
               title: SUPER PACK
               keywords:
                 - pack
@@ -12584,6 +12596,7 @@ whatsapp:
               color: esmeralda
               steps: []
             - id: d-mwelg57r-ojhx2
+              enabled: false
               title: GRAFISMO
               keywords:
                 - Grafismo fonetico
