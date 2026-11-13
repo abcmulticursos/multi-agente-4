@@ -2867,6 +2867,8 @@ whatsapp:
 
               📲 Después, envíame tu comprobante por aquí. ¡Gracias por tu apoyo! 🙏✨
           delay_after_sec: 6
+      presenta:
+        - "@tienda:basico"
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
