@@ -6,6 +6,7 @@ whatsapp:
       x: -2024
       y: 2618
       pais: PE
+      sin_venta: true
     - id: f-mwcazaoj-bn8iw
       tipo: mensaje
       x: -363
@@ -24,6 +25,11 @@ whatsapp:
               ✅ Ideal para mantener su atención *sin obligarlo*
 
               ✅ Funciona en casa o en un aula. Individual o en grupo 👩‍👦‍👦
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1nV4dPLUK1-c7hvcKqQM-qKc1aM1s7YQH/view?usp=sharing
+          caption_variants:
+            - ""
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -60,8 +66,8 @@ whatsapp:
 
               🟠 *¿COMO LO ADQUIERO?*
 
-              * 1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              1.- 💴 Realiza un único pago de *{{PRECIO_BASE}}*
+              2.- 📲 Y envíanos tu comprobante de pago
 
               *! Al instante recibes tu Material + Bonos en segundos* 😊⚡
           delay_after_sec: 6
@@ -14896,36 +14902,42 @@ whatsapp:
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#a94c4c"
     - id: velo-mwczlz19-0
       x: -616
       y: 3135
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#a94c4c"
     - id: velo-mwczmr07-0
       x: -583
       y: 10351
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwczmr07-1
       x: -649
       y: 12023
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwd4ohbb-0
       x: -649
       y: 13772
       ancho: 4400
       alto: 1749
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwd56hap-0
       x: -583
       y: 8745
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwdnvros-0
       x: -792
       y: 16511
@@ -14939,24 +14951,28 @@ whatsapp:
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#00aaff"
     - id: velo-mwdnvros-2
       x: -627
       y: 19954
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#00aaff"
     - id: velo-mwdnvros-3
       x: -627
       y: 21703
       ancho: 4400
       alto: 1749
       titulo: Nueva caja
+      color: "#00aaff"
     - id: velo-mwdnvros-4
       x: -561
       y: 16676
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
+      color: "#00aaff"
   espejos:
     - id: e-mwcbh8tj-q1pa
       ficha: f-mwcazaok-en2px
