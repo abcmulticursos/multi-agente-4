@@ -4318,6 +4318,64 @@ export function permisoDeMedicionDeLaCuenta(businessId: string): string | null {
   return null;
 }
 
+/**
+ * EL PERMISO GUARDADO DE UNA CUENTA DE FACEBOOK (13/11/2026), para «↻ Actualizar» sin volver a Facebook: el del
+ * último login de esa cuenta en alguno de sus negocios. Por su id; sin id (Meta no lo dijo), por su nombre.
+ */
+const stmtPermisoPorFacebook = db.prepare<[string, string], { token_conexion: string | null }>(
+  `SELECT token_conexion FROM meta_cuentas
+   WHERE token_conexion IS NOT NULL
+     AND ((facebook_id IS NOT NULL AND facebook_id = ?) OR (facebook_id IS NULL AND facebook_nombre = ?))
+   ORDER BY updated_at DESC LIMIT 1`
+);
+export function permisoDeLaCuentaDeFacebook(facebookId: string | null, nombre: string | null): string | null {
+  const fila = stmtPermisoPorFacebook.get(facebookId ?? "\u0000", nombre ?? "\u0000");
+  return fila?.token_conexion ? decryptMetaValue(fila.token_conexion) || null : null;
+}
+
+/** Los negocios que hoy están a nombre de esa cuenta de Facebook, con su permiso (sin devolverlo descifrado). */
+export function negociosDeLaCuentaDeFacebook(facebookId: string | null, nombre: string | null): Array<{ id: string; nombre: string | null; token: string | null }> {
+  return stmtListMetaCuentas
+    .all()
+    .filter((f) => (facebookId ? f.facebook_id === facebookId : !f.facebook_id && !!nombre && f.facebook_nombre === nombre))
+    .map((f) => ({ id: f.business_id, nombre: f.business_name, token: f.token_conexion ? decryptMetaValue(f.token_conexion) || null : null }));
+}
+
+/**
+ * QUITAR UNA CUENTA DE FACEBOOK DE META CONNECT (13/11/2026). Él: «Alberto ya no quiere que se use ahí». Borra, en
+ * una sola vez: los números y páginas que solo llegaban por ella (los decide quien llama, tras revisar con las demás
+ * cuentas), sus negocios con su permiso, y sus píxeles de la lista. No toca nada en Meta, ni el contenido, ni las
+ * tiendas, ni los chats.
+ */
+export function quitarCuentaDeFacebookDeLaBase(o: {
+  numeros: string[];
+  paginas: string[];
+  negocios: string[];
+  /** Los píxeles que solo podía usar ella (los decide quien llama). */
+  pixeles: string[];
+}): void {
+  db.transaction(() => {
+    for (const id of o.numeros) stmtDeleteMetaWhatsAppConnection.run(id);
+    for (const id of o.paginas) {
+      if (getMetaRuntimeSetting("active_instagram_page_id") === id) stmtDeleteMetaRuntimeSetting.run("active_instagram_page_id");
+      stmtDeleteMetaConnection.run(id);
+    }
+    for (const id of new Set(o.negocios)) db.prepare("DELETE FROM meta_cuentas WHERE business_id = ?").run(id);
+    // Sus píxeles salen de la lista de los selectores.
+    const pixeles = new Set(o.pixeles);
+    try {
+      const crudo = getMetaRuntimeSetting("pixels_detectados");
+      const lista = crudo ? JSON.parse(crudo) : [];
+      if (Array.isArray(lista) && pixeles.size) {
+        const quedan = lista.filter((p: { pixelId?: string }) => !pixeles.has(String(p?.pixelId ?? "")));
+        if (quedan.length !== lista.length) stmtUpsertMetaRuntimeSetting.run("pixels_detectados", encryptMetaValue(JSON.stringify(quedan)));
+      }
+    } catch {
+      // Una lista ilegible se queda como está.
+    }
+  })();
+}
+
 /** Para la pantalla: qué permiso tiene cada cuenta, SIN devolver ninguno. */
 export function listPermisosDeCuentas(): Array<{
   id: string;

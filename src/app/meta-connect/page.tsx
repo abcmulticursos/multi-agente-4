@@ -532,7 +532,9 @@ type CuentasDeMeta = {
   };
   pixelsDeOtras: string[];
   /** Toda cuenta de Facebook que inició sesión, con los BM que trajo (21/10/2026). */
-  conectadas?: Array<{ nombre: string | null; origen: "principal" | "nueva"; negocios: string[] }>;
+  conectadas?: Array<{ id?: string | null; nombre: string | null; origen: "principal" | "nueva"; negocios: string[] }>;
+  /** Las páginas de sus BM que cada cuenta no ve (13/11/2026). Por el nombre de la cuenta. */
+  sinAcceso?: Array<{ nombre: string | null; paginas: Array<{ id: string; nombre: string; negocioId: string; negocioNombre: string | null }> }>;
 };
 
 /** Cómo se lee cada pieza en la fila de una tienda: icono y qué quiere decir. */
@@ -905,6 +907,87 @@ function DiferenciacionPorNegocio() {
     void leerSuscripciones();
   }, []);
 
+  // ── «↻ ACTUALIZAR» Y «QUITAR ESTA CUENTA» (13/11/2026) ─────────────────────────────────────────────
+  // Él: «¿hay alguna manera de actualizar el contenido sin reloguear?» y «necesito poder desconectar las cuentas que no
+  // quiero». Al terminar se recarga la página entera: así todas las secciones de Meta Connect leen lo nuevo.
+  const [actualizando, setActualizando] = useState(false);
+  const [resultadoDeActualizar, setResultadoDeActualizar] = useState<string[] | null>(null);
+  const actualizar = async () => {
+    setActualizando(true);
+    setResultadoDeActualizar(null);
+    try {
+      const r = await fetch("/api/meta/connect/actualizar", { method: "POST" });
+      const d = (await r.json()) as { ok: boolean; cuentas?: Array<{ nombre: string | null; ok: boolean; error?: string; paginas?: number; numeros?: number; sinAcceso?: unknown[] }> };
+      const lineas = (d.cuentas ?? []).map((c) =>
+        c.ok
+          ? `✓ ${c.nombre ?? "Cuenta"}: ${c.numeros ?? 0} número(s) y ${c.paginas ?? 0} página(s)${c.sinAcceso?.length ? ` · ⚠ ${c.sinAcceso.length} página(s) de sus negocios sin acceso` : ""}`
+          : `✗ ${c.nombre ?? "Cuenta"}: ${c.error ?? "no se pudo"}`
+      );
+      if (!lineas.length) lineas.push("No hay ninguna cuenta de Facebook conectada todavía.");
+      if (d.ok) {
+        try {
+          window.sessionStorage.setItem("meta-connect-actualizado", JSON.stringify(lineas));
+        } catch {
+          // sin el resumen tras recargar, nada más
+        }
+        window.location.reload();
+        return;
+      }
+      setResultadoDeActualizar(lineas);
+    } catch {
+      setResultadoDeActualizar(["✗ No pude hablar con el servidor. Vuelve a intentarlo."]);
+    }
+    setActualizando(false);
+  };
+  // El resumen de la última actualización, tras recargar.
+  useEffect(() => {
+    try {
+      const guardado = window.sessionStorage.getItem("meta-connect-actualizado");
+      if (guardado) {
+        window.sessionStorage.removeItem("meta-connect-actualizado");
+        setResultadoDeActualizar(JSON.parse(guardado));
+      }
+    } catch {
+      // nada
+    }
+  }, []);
+  type VistaPreviaDeQuitar = {
+    ok: boolean;
+    error?: string;
+    cuenta?: string;
+    negocios?: string[];
+    numeros?: Array<{ id: string; nombre: string; activo: boolean }>;
+    paginas?: Array<{ id: string; nombre: string; activa: boolean }>;
+    pixeles?: Array<{ id: string; nombre: string }>;
+    pixelGeneral?: boolean;
+    tiendas?: Array<{ nombre: string; motivos: string[] }>;
+    otrasConError?: string[];
+  };
+  const [quitando, setQuitando] = useState<{ id: string | null; nombre: string | null; fase: "revisando" | "lista" | "quitando"; vista?: VistaPreviaDeQuitar } | null>(null);
+  const pedirQuitar = async (id: string | null, nombre: string | null, confirmar: boolean) => {
+    setQuitando((q) => ({ id, nombre, fase: confirmar ? "quitando" : "revisando", vista: q?.vista }));
+    try {
+      const r = await fetch("/api/meta/connect/quitar-cuenta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, nombre, confirmar }),
+      });
+      const d = (await r.json()) as VistaPreviaDeQuitar & { hecho?: boolean };
+      if (d.ok && d.hecho) {
+        try {
+          window.sessionStorage.setItem("meta-connect-actualizado", JSON.stringify([`✓ ${d.cuenta ?? "La cuenta"} ya no está en Meta Connect.`]));
+        } catch {
+          // nada
+        }
+        window.location.reload();
+        return;
+      }
+      setQuitando({ id, nombre, fase: "lista", vista: d });
+    } catch {
+      setQuitando({ id, nombre, fase: "lista", vista: { ok: false, error: "No pude hablar con el servidor. Vuelve a intentarlo." } });
+    }
+  };
+
   async function suscribir(phoneNumberId: string) {
     const otras = otrasApps[phoneNumberId] ?? [];
     if (
@@ -1210,6 +1293,32 @@ function DiferenciacionPorNegocio() {
             <p className="text-center font-titulo text-xl font-extrabold text-tinta">
               {filas.length ? "Tus cuentas de Facebook" : "Ningún negocio identificado todavía"}
             </p>
+            {/* ↻ ACTUALIZAR SIN VOLVER A FACEBOOK (13/11/2026). */}
+            {(filas.length > 0 || conectadas.length > 0) && (
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={actualizando}
+                  onClick={() => void actualizar()}
+                  className="inline-flex items-center rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100 disabled:opacity-60"
+                  title="Vuelve a leer de Meta tus páginas, números, negocios y píxeles con el permiso que ya diste, sin abrir Facebook"
+                >
+                  {actualizando ? "Actualizando con Meta…" : "↻ Actualizar desde Meta"}
+                </button>
+                <p className="max-w-xl text-center text-xs text-tinta-suave">
+                  Trae lo nuevo de tus cuentas (por ejemplo, una página que le asignaste en Business Suite) sin volver a iniciar sesión.
+                </p>
+                {resultadoDeActualizar && (
+                  <div className="w-full max-w-xl rounded-lg border border-borde bg-relleno px-3 py-2 text-xs text-tinta">
+                    {resultadoDeActualizar.map((l, i) => (
+                      <p key={i} className={l.startsWith("✗") ? "font-semibold text-red-700" : ""}>
+                        {l}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {filas.map((f) => {
               const sinToken = f.negocios.reduce((s, c) => s + c.numerosConId.filter((n) => tokenDe[n.id] === false).length, 0);
               const vacia = f.negocios.length === 0;
@@ -1242,6 +1351,33 @@ function DiferenciacionPorNegocio() {
                     ) : null}
                     {!vacia && <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>}
                   </button>
+                  {/* LAS PÁGINAS DE SUS BM QUE ESTA CUENTA NO VE (13/11/2026). Él: «he creado una nueva página… y no
+                      sale». Casi siempre es que no está asignada a esta persona en Business Suite. */}
+                  {(() => {
+                    const faltan = (datos.sinAcceso ?? []).find((s) => s.nombre && s.nombre === f.nombre)?.paginas ?? [];
+                    if (!faltan.length) return null;
+                    return (
+                      <div className="space-y-1.5 border-t border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-950">
+                        <p className="font-bold">
+                          ⚠ {faltan.length === 1 ? "1 página de sus negocios no se ve" : `${faltan.length} páginas de sus negocios no se ven`} con la cuenta de{" "}
+                          {f.nombre}:
+                        </p>
+                        <ul className="list-disc pl-5">
+                          {faltan.map((p) => (
+                            <li key={p.id}>
+                              <b>{p.nombre}</b>
+                              {p.negocioNombre ? <span className="text-amber-800"> · del negocio {p.negocioNombre}</span> : null}
+                            </li>
+                          ))}
+                        </ul>
+                        <p>
+                          Para usarla: en Business Suite → Configuración → Páginas → elige la página → <b>«Asignar personas»</b> → <b>{f.nombre}</b> con
+                          acceso total. Luego toca <b>«↻ Actualizar desde Meta»</b>. Si aun así no sale, vuelve a iniciar sesión con {f.nombre} y, en
+                          la ventana de Facebook, márcala en «Editar acceso».
+                        </p>
+                      </div>
+                    );
+                  })()}
                   {/* SIN PÁGINAS NI NÚMEROS (21/10/2026): «Regresa a tu cuenta de Facebook "nombre" y
                       agrega páginas a tu negocio para empezar a usarlas». Los BM vacíos no se listan. */}
                   {vacia && (
@@ -1295,6 +1431,143 @@ function DiferenciacionPorNegocio() {
                       </button>
                     </div>
                     <div className="space-y-1.5 p-4">{abierta.negocios.map((cuenta) => filaDeNegocio(cuenta))}</div>
+                    {/* QUITAR ESTA CUENTA (13/11/2026). La principal no: es la que mide las compras. */}
+                    {abierta.nombre && (
+                      <div className="border-t border-borde px-5 py-3">
+                        {abierta.principal ? (
+                          <p className="text-xs text-tinta-suave">
+                            Es la cuenta principal (la que mide las compras): no se puede quitar desde aquí. Para quitarla, primero entra con otra cuenta con
+                            «Iniciar sesión con Facebook».
+                          </p>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const c = conectadas.find((x) => x.nombre === abierta.nombre);
+                              setCuentaFbAbierta(null);
+                              void pedirQuitar(c?.id ?? null, abierta.nombre, false);
+                            }}
+                            className="rounded-lg border border-red-200 bg-tarjeta px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                          >
+                            🚪 Quitar esta cuenta de Meta Connect
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            {/* LA VISTA PREVIA DE «QUITAR ESTA CUENTA»: qué deja de funcionar, antes de borrar nada. */}
+            {quitando ? (
+              <div className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4" role="dialog" aria-modal="true" aria-label="Quitar una cuenta">
+                <div className="flex min-h-full items-start justify-center">
+                  <div className="my-8 w-full max-w-xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
+                    <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
+                      <h3 className="text-sm font-extrabold uppercase tracking-wide text-tinta">🚪 Quitar {quitando.nombre ?? "la cuenta"}</h3>
+                      {quitando.fase === "lista" && (
+                        <button type="button" onClick={() => setQuitando(null)} className="rounded-md border border-borde px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno">
+                          Cerrar
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-3 px-5 py-4 text-sm text-tinta">
+                      {quitando.fase !== "lista" ? (
+                        <p>{quitando.fase === "quitando" ? "Quitando…" : "Revisando con tus otras cuentas qué depende solo de ésta… (puede tardar un poco)"}</p>
+                      ) : !quitando.vista?.ok ? (
+                        <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 font-semibold text-red-800">{quitando.vista?.error ?? "No se pudo."}</p>
+                      ) : (
+                        (() => {
+                          const v = quitando.vista;
+                          const nada = !v.numeros?.length && !v.paginas?.length && !v.pixeles?.length;
+                          return (
+                            <>
+                              <p>
+                                Ya revisé con tus otras cuentas: lo que ellas también ven <b>se queda</b> y sigue funcionando. Esto es lo que llegaba{" "}
+                                <b>solo</b> por {v.cuenta}:
+                              </p>
+                              {nada ? (
+                                <p className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 font-semibold text-emerald-900">
+                                  ✓ Nada depende solo de esta cuenta. Al quitarla, todo sigue funcionando igual.
+                                </p>
+                              ) : (
+                                <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950">
+                                  {!!v.numeros?.length && (
+                                    <div>
+                                      <p className="font-bold">📱 Estos números dejan de funcionar aquí:</p>
+                                      <ul className="list-disc pl-5">
+                                        {v.numeros.map((n) => (
+                                          <li key={n.id}>
+                                            {n.nombre}
+                                            {n.activo ? <b> · es el número principal del bot</b> : null}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {!!v.paginas?.length && (
+                                    <div>
+                                      <p className="font-bold">📘 Estas páginas dejan de funcionar aquí:</p>
+                                      <ul className="list-disc pl-5">
+                                        {v.paginas.map((p) => (
+                                          <li key={p.id}>
+                                            {p.nombre}
+                                            {p.activa ? <b> · es la página activa de Messenger</b> : null}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {!!v.pixeles?.length && (
+                                    <div>
+                                      <p className="font-bold">📊 Estos píxeles salen de la lista:</p>
+                                      <ul className="list-disc pl-5">
+                                        {v.pixeles.map((p) => (
+                                          <li key={p.id}>{p.nombre}</li>
+                                        ))}
+                                      </ul>
+                                      {v.pixelGeneral && <p className="font-bold">⚠ Uno es el píxel general de Meta Connect: elige otro después.</p>}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {!!v.tiendas?.length && (
+                                <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-900">
+                                  <p className="font-bold">🏪 Tiendas que se quedan sin algo suyo:</p>
+                                  <ul className="list-disc pl-5">
+                                    {v.tiendas.map((t, i) => (
+                                      <li key={i}>
+                                        {t.nombre}: {t.motivos.join(", ")}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  <p className="mt-1">Cámbiales el número, la página o el píxel en sus datos antes o después de quitarla.</p>
+                                </div>
+                              )}
+                              {!!v.otrasConError?.length && (
+                                <p className="text-xs text-amber-800">⚠ No pude revisar con: {v.otrasConError.join(" · ")}</p>
+                              )}
+                              <p className="text-xs text-tinta-suave">
+                                En Meta no se borra nada: la cuenta, sus números y sus páginas siguen allá. Si un día la quieres de vuelta, entra con ella en
+                                «Agregar otra cuenta de Facebook».
+                              </p>
+                              <div className="flex justify-end gap-2 pt-1">
+                                <button type="button" onClick={() => setQuitando(null)} className="rounded-lg border border-borde px-4 py-2 text-sm font-bold hover:bg-relleno">
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => void pedirQuitar(quitando.id, quitando.nombre, true)}
+                                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
+                                >
+                                  Sí, quitar {v.cuenta}
+                                </button>
+                              </div>
+                            </>
+                          );
+                        })()
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

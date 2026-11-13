@@ -444,8 +444,8 @@ type BordesDelNegocio = {
   client_whatsapp_business_accounts?: { data?: MetaWaba[] };
   owned_pixels?: { data?: Array<{ id?: string; name?: string; owner_business?: { id?: string; name?: string } }> };
   client_pixels?: { data?: Array<{ id?: string; name?: string; owner_business?: { id?: string; name?: string } }> };
-  owned_pages?: { data?: Array<{ id?: string }> };
-  client_pages?: { data?: Array<{ id?: string }> };
+  owned_pages?: { data?: Array<{ id?: string; name?: string }> };
+  client_pages?: { data?: Array<{ id?: string; name?: string }> };
 };
 async function bordesDelNegocio(negocioId: string, accessToken: string): Promise<BordesDelNegocio | null> {
   if (!memoriaDelLogin.getStore()) return null;
@@ -455,8 +455,9 @@ async function bordesDelNegocio(negocioId: string, accessToken: string): Promise
       `client_whatsapp_business_accounts.limit(100){${CAMPOS_WABA_LOGIN}}`,
       `owned_pixels.limit(100){${CAMPOS_PIXEL_LOGIN}}`,
       `client_pixels.limit(100){${CAMPOS_PIXEL_LOGIN}}`,
-      "owned_pages.limit(200){id}",
-      "client_pages.limit(200){id}",
+      // (13/11/2026: con su nombre, para avisar de las páginas del BM que la cuenta no tiene asignadas.)
+      "owned_pages.limit(200){id,name}",
+      "client_pages.limit(200){id,name}",
     ].join(","),
   });
 }
@@ -688,7 +689,9 @@ export async function accesoDeLasPaginas(
   negocios: CuentaDeMeta[],
   /** Si se pasa, se llena con el DUEÑO de cada página (la que la tiene en «owned_pages»):
    *  así no hay que preguntarlo página por página (21/10/2026). */
-  duenos?: Map<string, CuentaDeMeta>
+  duenos?: Map<string, CuentaDeMeta>,
+  /** Si se pasa, se llena con el NOMBRE de cada página que el negocio tiene como propia (13/11/2026). */
+  nombres?: Map<string, string>
 ): Promise<Map<string, CuentaDeMeta[]>> {
   const acceso = new Map<string, CuentaDeMeta[]>();
   for (const negocio of negocios) {
@@ -697,13 +700,14 @@ export async function accesoDeLasPaginas(
       try {
         const cuerpo = juntos
           ? juntos[borde] ?? { data: [] }
-          : await graphGet<{ data?: Array<{ id?: string }> }>(
+          : await graphGet<{ data?: Array<{ id?: string; name?: string }> }>(
               `${negocio.id}/${borde}`,
               userAccessToken,
-              { fields: "id", limit: "200" }
+              { fields: "id,name", limit: "200" }
             );
         for (const pagina of cuerpo?.data ?? []) {
           if (!pagina.id) continue;
+          if (borde === "owned_pages" && nombres && pagina.name && !nombres.has(pagina.id)) nombres.set(pagina.id, pagina.name);
           const lista = acceso.get(pagina.id) ?? [];
           sumarAcceso(lista, negocio);
           acceso.set(pagina.id, lista);

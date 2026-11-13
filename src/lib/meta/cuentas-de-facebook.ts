@@ -30,6 +30,16 @@ export function cuentasDeFacebookConectadas(): CuentaDeFacebookConectada[] {
   }
 }
 
+/** Quita una cuenta de la lista, por su id o (sin id) por su nombre (13/11/2026, «Quitar esta cuenta»). */
+export function quitarCuentaDeLaLista(id: string | null, nombre: string | null): void {
+  try {
+    const lista = cuentasDeFacebookConectadas().filter((x) => !(id ? x.id === id : !x.id && x.nombre === nombre));
+    setMetaRuntimeSettings({ [CLAVE]: JSON.stringify(lista) });
+  } catch {
+    // Sin la lista, Meta Connect se ve como antes.
+  }
+}
+
 /** Anota (o pone al día) la cuenta que acaba de iniciar sesión. Nunca lanza. */
 export function anotarCuentaDeFacebook(c: Omit<CuentaDeFacebookConectada, "cuando">): void {
   try {
