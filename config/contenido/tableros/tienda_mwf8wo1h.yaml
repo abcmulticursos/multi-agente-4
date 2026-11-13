@@ -4121,65 +4121,99 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ¡Hola! Qué gusto tenerte por aquí 👋
+              😩📚¿CANSAD@ DE PASAR HORAS PREPARANDO CLASES Y BUSCANDO ACTIVIDADES QUE MOTIVEN A TUS ESTUDIANTES? 👩‍🏫
 
-              ¿Te ha pasado que a los 10 minutos de la tarea tu hijo o hija ya está distraído con el celular o la tele? 😔📱 Quieres que ese rato deje de ser una pelea y se convierta en algo que de verdad le ayude a aprender. ✨
+              _*✂️✨Imagina enseñar GRAMÁTICA, ORTOGRAFÍA Y LITERATURA con actividades que tus alumnos puedan RECORTAR, ARMAR Y DESCUBRIR POR SÍ MISMOS*_
 
-              No es que sea flojo, es que nadie le ha enseñado *cómo* estimular su memoria y concentración.
+              📚 *¿QUÉ INCLUYE EL MEGAPACK?* 👇
 
-              Te muestro algo que te va a ayudar. 👇
+              📘 *KIT 1 — GRAMÁTICA EN ACCIÓN*
+              ✅ Sustantivos, adjetivos y pronombres.
+              ✅ Verbos, adverbios y conjunciones.
+              ✅ Sujeto, predicado y tipos de oraciones.
+              ✅ Análisis morfológico y sintáctico.
+              ✏️ *KIT 2 — ORTOGRAFÍA Y VOCABULARIO*
+              ✅ Reglas de acentuación y tildes.
+              ✅ Uso correcto de letras y puntuación.
+              ✅ Sinónimos, antónimos y homónimos.
+              ✅ Prefijos, sufijos y familias de palabras.
           delay_after_sec: 6
-        - type: video
-          drive_url: https://drive.google.com/file/d/1qTEau0efp_5gJoC_tW9rCrPmKo9KmEgJ/view?usp=drive_link
-          caption_variants:
+        - type: text
+          body_variants:
             - |-
-              Te presento el *Kit de Estimulación y Gimnasia Cerebral.* 🚀
-
-              El primer sistema basado en *TRIADA* :   el método que entrena la mente, acompaña la frustración y te da claridad sobre el desarrollo de tu hijo, los tres a la vez.
-
-              Cada dinámica está pensada para sostener la atención en el único momento en que un niño realmente aprende: jugando, sin darse cuenta de que está aprendiendo.
-
-              Más de 700 actividades, listas para usar desde hoy.
+              📖 *KIT 3 — COMPRENSIÓN LECTORA*
+              ✅ Estrategias antes, durante y después de leer.
+              ✅ Ideas principales, resúmenes e inferencias.
+              ✅ Mapas conceptuales e interpretación de gráficos.
+              ✅ Lectura crítica y análisis de información.
+              📝 *KIT 4 — ESCRITURA Y PRODUCCIÓN DE TEXTOS*
+              ✅ Redacción de párrafos y uso de conectores.
+              ✅ Cuentos, descripciones e informes.
+              ✅ Ensayos, reseñas y textos argumentativos.
+              ✅ Historietas, diálogos y guiones.
+              🎭 *KIT 5 — LITERATURA EN ACCIÓN*
+              ✅ Géneros literarios, cuentos y novelas.
+              ✅ Fábulas, mitos y leyendas.
+              ✅ Poesía, rimas y figuras literarias.
+              ✅ Teatro y creación literaria.
+              🗣️ *KIT 6 — COMUNICACIÓN Y EXPRESIÓN ORAL*
+              ✅ Comunicación verbal y no verbal.
+              ✅ Escucha activa y diálogo.
+              ✅ Exposiciones, entrevistas y debates.
           delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
+              ✂️ *¿QUÉ ENCONTRARÁS DENTRO DE LOS KITS?*
+              ⭐ Armables interactivos.
+              ⭐ Plegables y minilibros educativos.
+              ⭐ Crucigramas, pupiletras y sopas de letras.
+              ⭐ Juegos y dinámicas grupales.
+              ⭐ Actividades listas para imprimir.
+              ⭐ Respuestas y explicaciones de cada armable.
+              💡 _¡MENOS HORAS PREPARANDO Y MÁS TIEMPO ENSEÑANDO!_
+              📥 TODO EN FORMATO DIGITAL, LISTO PARA DESCARGAR E IMPRIMIR.
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎯🤩😱 *¡Y ESO NO ES TODO!HOY RECIBES 2 BONOS ESPECIALES GRATIS*
+
+              *🎁BANCO DE 40 LECTURAS CON COMPRENSIÓN*
+              ✅ 40 lecturas organizadas en 4 niveles de dificultad.
+              ✅ Ideales para tareas, evaluaciones y reforzamiento.
+              🎁*+100 DINÁMICAS DE LECTURA Y ESCRITURA🎯*
+              ✅ 102 actividades educativas.
+              ✅ 60 dinámicas sin materiales.
+              ✅ 42 dinámicas con recursos imprimibles.
+              ✅ Juegos, debates y retos creativos.
+              ----------------------------------------------------------------------------------
+
+              *🔥¡OFERTA POR TIEMPO LIMITADO!*
+
+              ~❌ANTES: S/ 85.90 Soles ❌~
+              ✅ HOY ÚNICO PAGO: 15 SOLES
+
+              💜YAPE: 947354095
+              👤 Titular: Cristian Huaman
+
+              ENTREGA INMEDIATA Y SEGURA🔒
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              💳 *PARA COMPRAR* a solo *15 SOLES aceptamos* diferentes métodos de pago.
+
+              🔥 *SELECCIONA* tu método de pago que más utilizas.
+
+              *🟣 YAPE:*
+              *🟢 PLIN:*
+              *🔵 BCP:*
+          delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1fIltKK0s1aQt3m43g-Vrl-i69pxP8UwM/view?usp=drive_link
           caption_variants:
-            - |-
-              Eso que te conté hoy tiene nombre: *Mi Guardería Lista* 💜
-
-              *+120 actividades listas* para niños de 0 a 3 años, pensadas para lo que cada etapa necesita: sentidos, movimiento, lenguaje, música, creatividad y juego.
-
-              Funciona así de simple: *abres, eliges y aplicas.*
-
-              Cada actividad ya te dice qué hacer, qué materiales usar y qué estimula en el niño. Tú solo llegas al aula y empiezas ✨
-
-              Y para que tengas la semana resuelta, uses materiales que ya tienes y *no te lleves más trabajo a casa*,
-              también te llevas estos *bonos de regalo* 👇
-
-              🎁 *Calendario de 30 Días*: sabes qué aplicar cada día
-              🎁 *Planificador Semanal*: tu planificación lista para la directora
-              🎁 *Carteles de Rutina para el Aula*: orden y calma en el día
-              🎁 *Fichas de Observación Infantil*: registras el avance de cada niño
-              🎁 *Guía de Acogida y Adaptación*: para el llanto de los primeros días
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - |-
-              Una sesión de estimulación en academia cuesta desde S/80 a más.
-
-              Hoy te llevas *TODO EL KIT COMPLETO* por solo *S/10* — _(diez soles, pago único y acceso de por vida)_.
-
-              Los que empiezan hoy son los que dejan de improvisar,  solo asignan una actividad a su hijo y empiezan⏳
-
-               Aceptamos: 
-              💳 *Yape o Plin*
-              💳 *Transferencia*
-
-              Nos envías el comprobante de pago por aquí 📸 y apenas lo confirmemos, te enviamos todo el material. 🙌
-          delay_after_sec: 4
-        - type: text
-          body_variants:
-            - ¿Con qué método de pago te gustaría adquirirlo? 😊
+            - ""
           delay_after_sec: 4
       presenta:
         - ptfig_figurarte
