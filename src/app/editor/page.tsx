@@ -7811,6 +7811,63 @@ export default function EditorPage() {
     });
   }
 
+  // CTRL+Z CON UNA VENTANA ABIERTA (13/11/2026). Él: «edité una burbuja con "editar esta burbuja", hice clic fuera
+  // de la caja de texto y al hacer Cmd+Z… se hizo undo en algún elemento fuera de ese pop up… puedo perder cambios
+  // valiosos». Con una ventana encima, deshacer solo toca lo hecho DENTRO de ella: el historial del editor vale
+  // mientras tenga fotos tomadas con la ventana ya abierta (la cima de cada pila se apunta al tocarla por primera
+  // vez); si no, se deshace en la última caja de texto que se escribió en ella; y si no hay ninguna, nada.
+  const pilaDeDeshacer = useRef(history);
+  const pilaDeRehacer = useRef(redoHistory);
+  useEffect(() => { pilaDeDeshacer.current = history; }, [history]);
+  useEffect(() => { pilaDeRehacer.current = redoHistory; }, [redoHistory]);
+  const cimaAlAbrir = useRef(new WeakMap<HTMLElement, { deshacer: EditorHistoryEntry | null; rehacer: EditorHistoryEntry | null }>());
+  const ultimaCajaEscrita = useRef<HTMLElement | null>(null);
+  const cimaDeLaVentana = (ventana: HTMLElement) => {
+    let cima = cimaAlAbrir.current.get(ventana);
+    if (!cima) {
+      cima = { deshacer: pilaDeDeshacer.current.at(-1) ?? null, rehacer: pilaDeRehacer.current.at(-1) ?? null };
+      cimaAlAbrir.current.set(ventana, cima);
+    }
+    return cima;
+  };
+  useEffect(() => {
+    // Antes de cualquier cambio dentro de la ventana hay un toque, un foco o una tecla: ahí se apunta su cima.
+    const alTocar = () => { const ventana = laVentanaDeArriba(); if (ventana) cimaDeLaVentana(ventana); };
+    const alEscribir = (event: Event) => {
+      if (event.target instanceof HTMLElement && escribiendoEnUnCampo(event.target)) ultimaCajaEscrita.current = event.target;
+    };
+    window.addEventListener("pointerdown", alTocar, true);
+    window.addEventListener("focusin", alTocar, true);
+    window.addEventListener("keydown", alTocar, true);
+    window.addEventListener("input", alEscribir, true);
+    return () => {
+      window.removeEventListener("pointerdown", alTocar, true);
+      window.removeEventListener("focusin", alTocar, true);
+      window.removeEventListener("keydown", alTocar, true);
+      window.removeEventListener("input", alEscribir, true);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  /** Con una ventana abierta: ¿se deshizo (o rehízo) algo dentro de ella? Si devuelve false, no se toca nada más. */
+  function deshacerDentroDeLaVentana(ventana: HTMLElement, rehacer: boolean): boolean {
+    const cima = cimaDeLaVentana(ventana);
+    const pila = rehacer ? pilaDeRehacer.current : pilaDeDeshacer.current;
+    const tope = pila.at(-1) ?? null;
+    // Una foto igual a lo que hay no deshace nada: la toma el cajón de una ventana con borrador propio
+    // («Editar esta burbuja»), cuyo texto aún no ha llegado al editor. Ahí manda la caja de texto.
+    if (tope && tope !== (rehacer ? cima.rehacer : cima.deshacer) && tope.config !== cfgRef.current) {
+      if (rehacer) redo();
+      else undo();
+      return true;
+    }
+    const caja = ultimaCajaEscrita.current;
+    if (caja && caja.isConnected && ventana.contains(caja)) {
+      caja.focus({ preventScroll: true });
+      return document.execCommand(rehacer ? "redo" : "undo");
+    }
+    return false;
+  }
+
   // Atajos de aplicación: evitan Guardar página del navegador y trabajan sobre
   // el historial completo del editor (incluye textos, burbujas y botones).
   useEffect(() => {
@@ -7840,6 +7897,11 @@ export default function EditorPage() {
         // texto, que es el que querías.
         if (escribiendoEnUnCampo(event.target)) return;
         event.preventDefault();
+        const ventana = laVentanaDeArriba();
+        if (ventana) {
+          deshacerDentroDeLaVentana(ventana, esRehacer || event.shiftKey);
+          return;
+        }
         if (esRehacer || event.shiftKey) redo();
         else undo();
       }
@@ -22630,6 +22692,18 @@ function SentEmailMiniPreview({
  * Sirve para no robarle al navegador el deshacer del texto. Se mira el
  * elemento del evento y, si no lo hay, el que tenga el foco.
  */
+/**
+ * La ventana (pop up) que está encima, o null. Son las de fondo oscuro a pantalla entera y las `aria-modal`; el visor
+ * «◧ con la pizarra» no cuenta (la pizarra sigue en uso a su lado). Una ventana abierta dentro de otra va después en
+ * la página: se toma la última.
+ */
+function laVentanaDeArriba(): HTMLElement | null {
+  const ventanas = document.querySelectorAll<HTMLElement>(
+    '.fixed.inset-0[class*="bg-black/"], [aria-modal="true"], [data-ventana-en-gris]'
+  );
+  return ventanas.length ? ventanas[ventanas.length - 1] : null;
+}
+
 function escribiendoEnUnCampo(objetivo: EventTarget | null): boolean {
   const el =
     objetivo instanceof HTMLElement
@@ -36177,12 +36251,19 @@ function VentanaDelCajon({
     historial.current.adelante = [];
     setBorradorDirecto(siguiente);
   };
+  const raizDeLaVentana = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const alTeclear = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey)) return;
       const tecla = e.key.toLowerCase();
       const rehacer = (tecla === "z" && e.shiftKey) || tecla === "y";
       if (tecla !== "z" && tecla !== "y") return;
+      // CON OTRA VENTANA ENCIMA, EL CTRL+Z ES DE ELLA (13/11/2026). Él: «edité una burbuja con "editar esta burbuja",
+      // hice clic fuera de la caja de texto y al hacer Cmd+Z… se hizo undo en algún elemento fuera de ese pop up». Era
+      // este: deshacía el borrador de esta ventana, tapada por la de la burbuja. Ahora lo atiende el editor
+      // (`deshacerDentroDeLaVentana`), que solo toca lo de la ventana de arriba.
+      const arriba = laVentanaDeArriba();
+      if (arriba && raizDeLaVentana.current && !arriba.contains(raizDeLaVentana.current)) return;
       // En un campo de texto, el deshacer del propio campo (letras).
       const el = document.activeElement as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
@@ -36279,7 +36360,7 @@ function VentanaDelCajon({
   };
   if (incrustado) {
     return (
-      <div className="flex min-w-0 flex-col gap-3">
+      <div ref={raizDeLaVentana} className="flex min-w-0 flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {nombre !== undefined ? (
             <input
@@ -36343,7 +36424,7 @@ function VentanaDelCajon({
     );
   }
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+    <div ref={raizDeLaVentana} className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
       {/* `prolijo`: la letra y el aire de Sendy, y su oscuro con la pizarra en 🌙 (globals.css). */}
       {/* `burbujas-nuevo`: SU DISEÑO (02/11/2026, sus montajes «INTERFAZ CLARA/OSCURA» y «ABIERTO»), con sus colores medidos,
           en claro, mixto y oscuro (el ☀️/🌙 de la pizarra). Solo este pop up: ver globals.css. */}
