@@ -2793,8 +2793,8 @@ whatsapp:
         - ptfig_figurarte
     - id: f-mwf9cf0q-i89e
       tipo: mensaje
-      x: 3311
-      y: 3707
+      x: 3322
+      y: 3564
       steps:
         - type: text
           body_variants:
@@ -2813,6 +2813,59 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1e70ldJwBrvA_k5J1gUUd_ZxI9KVPUPa7/view?usp=drive_link
           caption_variants:
             - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎨✨ ¡Ya tienes FIGURARTE! 🦁🌈
+
+              💖 Si deseas apoyar este proyecto, puedes elegir una de las siguientes contribuciones:
+
+              🎁 S/10 — CONTRIBUCIÓN SEMILLA
+              📘 Material completo de FIGURARTE.
+
+              🎁 S/15 — CONTRIBUCIÓN DE APOYO
+              📘 Material completo + 🎁 1 bono.
+
+              🎁 S/20 — CONTRIBUCIÓN ESPECIAL
+              📘 Material completo + 🎁 los 2 bonos.
+
+              🎁 S/25 — CONTRIBUCIÓN DE BENDICIÓN
+              📘 Material completo + 🎁 3 bonos incluidos.
+
+              🎁 S/30 — CONTRIBUCIÓN GENEROSA
+              📘 Material completo + 🎁 todos los bonos + un aporte especial al proyecto.
+
+              🙏 Tu apoyo ayuda a que este proyecto siga creciendo y llegue a más personas.
+
+              🥰 ¡Gracias por tu generosidad y por apoyar
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🟣 Yape | 🟢 Plin 
+              931986562
+              Titular: Rubén Castope O.
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              En cuanto realices tu aporte, envía tu comprobante por aquí, por WhatsApp. 📲
+
+              🎁✨ Te enviaré el material completo + los bonos correspondientes a tu contribución.
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ¡Hola de nuevo! 😊 Solo quería recordarte que al realizar tu aporte recibirás el material completo de FIGURARTE, junto con 4 BONOS SORPRESA GRATIS 🎁.
+
+              Puedes hacer tu aporte a través de:
+              🟣 YAPE: 931986562
+              🟢 PLIN: 931986562
+              🔵 BCP: 24574807802061
+              👤 Titular: Rubén Castope O.
+
+              📲 Después, envíame tu comprobante por aquí. ¡Gracias por tu apoyo! 🙏✨
           delay_after_sec: 6
   cables:
     - id: c-mw4xecum-dlm
@@ -2957,6 +3010,10 @@ whatsapp:
       de: f-mw929103-8pb4
       salida: rep:rmw929v1i
       a: f-mwbkfjb2-pghwg
+    - id: c-mwf9fpm1-rh8
+      de: f-mwf8zlxo-lnhl5
+      salida: dec:d2274ecf-d578-4221-8992-ac79065158e5
+      a: f-mwf9cf0q-i89e
   cajas:
     - id: manta-fig_inicio
       x: 108
