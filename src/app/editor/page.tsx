@@ -33005,7 +33005,7 @@ function PantallaDelTableroCargada({
               const suyas = (cfg.tiendas ?? [])
                 .filter((t) => Object.values((t?.alineacion ?? {}) as Record<string, unknown>).includes(p.id))
                 .map((t) => String(t?.nombre ?? "").trim() || "Tienda sin nombre");
-              return { id: p.id, nombre: p.name?.trim() || p.id, tienda: suyas.length > 2 ? `${suyas.slice(0, 2).join(", ")} y ${suyas.length - 2} más` : suyas.join(", ") };
+              return { id: p.id, nombre: p.name?.trim() || p.id, tiendas: suyas };
             }),
           ]}
           entregasPorProducto={entregasPorProducto}
@@ -33941,7 +33941,7 @@ function ListaDeProductos({
   elegidos,
   onCambio,
 }: {
-  todos: Array<{ id: string; nombre: string; tienda?: string }>;
+  todos: Array<{ id: string; nombre: string; tiendas?: string[] }>;
   elegidos: string[];
   onCambio: (ids: string[]) => void;
 }) {
@@ -33951,9 +33951,17 @@ function ListaDeProductos({
   const otros = todos.filter((x) => !x.id.startsWith("@tienda:"));
   const poner = (id: string) => onCambio(elegidos.includes(id) ? elegidos.filter((y) => y !== id) : [...elegidos, id]);
   const q = sinTildesDelEditor(busca.trim());
-  const enLaLista = otros.filter(
-    (x) => !elegidos.includes(x.id) && (!q || sinTildesDelEditor(x.nombre).includes(q) || sinTildesDelEditor(x.tienda ?? "").includes(q))
-  );
+  // UN SEPARADOR POR TIENDA (13/11/2026). Él: «debería haber un separador para yo saber que es otra tienda». Los sin
+  // tienda van juntos en un solo grupo al final; el que está en dos tiendas sale en las dos.
+  const porTienda = new Map<string, typeof otros>();
+  for (const x of otros) {
+    if (elegidos.includes(x.id)) continue;
+    for (const t of x.tiendas?.length ? x.tiendas : [""]) {
+      if (q && !sinTildesDelEditor(x.nombre).includes(q) && !sinTildesDelEditor(t).includes(q)) continue;
+      porTienda.set(t, [...(porTienda.get(t) ?? []), x]);
+    }
+  }
+  const grupos = [...porTienda.entries()].sort(([a], [b]) => (!a ? 1 : !b ? -1 : a.localeCompare(b, "es")));
   const otrosElegidos = otros.filter((x) => elegidos.includes(x.id));
   const chip = (x: { id: string; nombre: string }, puesto: boolean, conCruz = false) => (
     <button
@@ -33995,22 +34003,28 @@ function ListaDeProductos({
             />
             {abierta && (
               <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-md border border-borde bg-tarjeta py-1 text-xs font-normal shadow-xl">
-                {enLaLista.length === 0 && <li className="px-2 py-1 italic text-tinta-suave">Ningún producto se llama así.</li>}
-                {enLaLista.map((x) => (
-                  <li key={x.id}>
-                    <button
-                      type="button"
-                      // mousedown, no click: el clic quitaría primero el foco del buscador y cerraría la lista.
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        poner(x.id);
-                        setBusca("");
-                      }}
-                      className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left hover:bg-relleno"
-                    >
-                      <span className="truncate">{x.nombre}</span>
-                      <span className="shrink-0 text-[11px] text-tinta-suave">{x.tienda ? `🏪 ${x.tienda}` : "(sin tienda)"}</span>
-                    </button>
+                {grupos.length === 0 && <li className="px-2 py-1 italic text-tinta-suave">Ningún producto se llama así.</li>}
+                {grupos.map(([t, lista]) => (
+                  <li key={t || "-"}>
+                    <div className="sticky top-0 border-y border-borde bg-relleno px-2 py-1 text-[11px] font-bold">{t ? `🏪 ${t}` : "Sin tienda"}</div>
+                    <ul>
+                      {lista.map((x) => (
+                        <li key={x.id}>
+                          <button
+                            type="button"
+                            // mousedown, no click: el clic quitaría primero el foco del buscador y cerraría la lista.
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              poner(x.id);
+                              setBusca("");
+                            }}
+                            className="w-full truncate px-3 py-1 text-left hover:bg-relleno"
+                          >
+                            {x.nombre}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
                 ))}
               </ul>
@@ -34448,7 +34462,7 @@ function AjustesDeLaFicha({
   onAbrirPagos?: (pais: string) => void;
   ficha: FichaEnElEditor;
   /** `tienda`: de qué tienda(s) es, para la lista con buscador (vacío = de ninguna). */
-  productos: Array<{ id: string; nombre: string; tienda?: string }>;
+  productos: Array<{ id: string; nombre: string; tiendas?: string[] }>;
   /** Para la ficha Entregar: las entregas de cada producto, los de esta tienda primero (`propio`). */
   entregasPorProducto?: Array<{ id: string; nombre: string; propio: boolean; opciones: Array<{ clave: string; nombre: string }> }>;
   anuncios: Array<{ id: string; nombre: string }>;
