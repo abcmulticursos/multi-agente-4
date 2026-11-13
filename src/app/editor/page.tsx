@@ -31798,7 +31798,8 @@ function VentanaFlotante({
             // `bn-cancelar`: el «Cerrar» grande de la ventana de las burbujas (13/11/2026, él: «el cerrar de las fichas de
             // seguimientos es muy pequeño casi imperceptible»). Fuera de esas ventanas la clase no cambia nada.
             <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
-              ✕ Cerrar
+              {/* (13/11/2026, él: «quítale esa X»: solo «Cerrar», como las demás.) */}
+              Cerrar
             </button>
           )}
         </div>
@@ -42872,6 +42873,63 @@ function StepCard({
   enVentana?: boolean;
 }) {
   const isMedia = step.type !== "text";
+  // EL TIPO SE PONE SOLO AL PEGAR EL ENLACE (13/11/2026). Él: «¿el bot sabe cuándo algo es video, audio etc en Drive?
+  // necesito que se auto seleccione en vez de yo seleccionar». Al cambiar el enlace (no al abrir una burbuja vieja: eso
+  // no se toca solo), se mira su extensión o se le pregunta a Drive —lo mismo que ya usa la vista previa— y el selector
+  // pasa a Imagen / Video / Audio / PDF. Él lo puede cambiar a mano después. Si Drive no dice nada (privado,
+  // restringido, sin conexión), se queda como estaba.
+  const [tipoPuestoSolo, setTipoPuestoSolo] = useState<string | null>(null);
+  const tipoVivo = useRef(step.type);
+  tipoVivo.current = step.type;
+  const enlaceVivo = useRef(step.drive_url);
+  enlaceVivo.current = step.drive_url;
+  // El `onUpdate` de AHORA: el de cuando se escribió el enlace conoce la burbuja de antes y, al poner el tipo, devolvería el
+  // enlace viejo.
+  const onUpdateVivo = useRef(onUpdate);
+  onUpdateVivo.current = onUpdate;
+  const esperaDelTipo = useRef<number | null>(null);
+  /** Se llama al escribir o pegar el enlace (nunca al abrir: una burbuja vieja no se toca sola). */
+  const adivinarElTipo = (crudo: string) => {
+    if (esperaDelTipo.current) window.clearTimeout(esperaDelTipo.current);
+    const url = crudo.trim();
+    if (!url) return;
+    const poner = (k: LinkMediaResolution | undefined) => {
+      // Solo si el enlace sigue siendo ése (si lo cambió mientras se preguntaba, manda el nuevo).
+      if (enlaceVivo.current.trim() !== url) return;
+      if (k !== "image" && k !== "video" && k !== "audio" && k !== "document") return;
+      if (k === tipoVivo.current) return;
+      onUpdateVivo.current({ type: k });
+      setTipoPuestoSolo(LINK_MEDIA_LABEL[k]);
+    };
+    // (Con un respiro también lo ya sabido: primero tiene que quedar puesto el enlace nuevo.)
+    const porExtension = inferLinkMediaKind(url);
+    if (porExtension !== "unknown") {
+      esperaDelTipo.current = window.setTimeout(() => poner(porExtension), 120);
+      return;
+    }
+    if (!shouldResolveLinkMediaKind(url)) return;
+    const sabido = tiposDeEnlaceYaVistos().get(url);
+    if (sabido) {
+      esperaDelTipo.current = window.setTimeout(() => poner(sabido), 120);
+      return;
+    }
+    // Un respiro mientras pega o escribe: se pregunta por el enlace ya completo.
+    esperaDelTipo.current = window.setTimeout(() => {
+      void fetch(`/api/editor/media-kind?url=${encodeURIComponent(url)}`)
+        .then((res) => res.json())
+        .then((data: { kind?: string }) => {
+          const k: LinkMediaResolution =
+            data.kind === "image" || data.kind === "audio" || data.kind === "video" || data.kind === "document"
+              ? data.kind
+              : data.kind === "restricted"
+                ? "restringido"
+                : "unknown";
+          recordarTipoDeEnlace(url, k);
+          poner(k);
+        })
+        .catch(() => undefined);
+    }, 400);
+  };
   // EL DESPLEGABLE DE LA BURBUJA SE RECUERDA. ANTES NO.
   //
   // ESTE ERA EL «CAJÓN 8 QUE SEGUÍA ABIERTO».
@@ -43132,10 +43190,17 @@ function StepCard({
           <input
             type="text"
             value={step.drive_url}
-            onChange={(e) => onUpdate({ drive_url: e.target.value })}
+            onChange={(e) => {
+              setTipoPuestoSolo(null);
+              onUpdate({ drive_url: e.target.value });
+              adivinarElTipo(e.target.value);
+            }}
             placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
             className="bn-texto w-full rounded-md border border-neutral-300 bg-tarjeta px-3 py-2 text-xs text-neutral-800"
           />
+          {tipoPuestoSolo && (
+            <p className="mt-1 text-xs font-semibold text-emerald-700">✓ Es {tipoPuestoSolo.toLowerCase()}: el tipo se puso solo. Puedes cambiarlo arriba si no es así.</p>
+          )}
         </div>
       )}
 
