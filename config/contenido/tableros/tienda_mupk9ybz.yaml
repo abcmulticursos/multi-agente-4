@@ -12949,7 +12949,9 @@ whatsapp:
                       🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}
 
-                      💰 EL COSTO DE TODO EL MATERIAL de *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO {{PRECIO_FULL}}
+
+                      💰 Y SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
                   spintax_ia:
                     - "{y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}"
@@ -13206,6 +13208,7 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+                  enabled: false
                 - type: text
                   body_variants:
                     - |-
@@ -13213,11 +13216,15 @@ whatsapp:
 
                       🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
-                      label: SI QUIERO
+                      label: SUPER PACK 2 EN 1
+                      action: send_steps
+                      steps: []
+                    - id: be42ec7d-7e31-467b-9c30-a81950daa9ce
+                      label: SOLO GRAFISMO
                       action: send_steps
                       steps: []
                   decisions:
