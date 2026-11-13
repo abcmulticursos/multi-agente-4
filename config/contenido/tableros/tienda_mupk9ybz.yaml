@@ -14325,6 +14325,11 @@ whatsapp:
       salida: sin_pago
       a: f-mwelg57r-k0c2i
       a_espejo: e-mwet9mfm-h1z0
+    - id: c-mwetigwq-3ui
+      de: f-mwei09n9-5ugnj
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
+      a: f-mwelg57r-hvdw9
+      vista: colita
   cajas:
     - id: velo-mwcazaol-0
       x: -869
