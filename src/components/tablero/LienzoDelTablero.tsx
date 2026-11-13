@@ -1393,6 +1393,29 @@ function ElegirPaisDeLaManta({
   );
 }
 
+/**
+ * UNA SOLA PALETA DE COLOR A LA VEZ (13/11/2026). Él: «cuando toco otro velo y toco "color" aparece otra paleta
+ * flotante… debería aparecer la nueva paleta y la anterior desaparece». Cada velo (y cada texto de la «T») tenía la
+ * suya; ahora, al abrir una, se avisa y las demás se cierran.
+ */
+const PALETA_ABIERTA = "tablero:paleta-abierta";
+function useUnaSolaPaleta(): [{ x: number; y: number } | null, (p: { x: number; y: number } | null) => void] {
+  const [pintando, setPintando] = useState<{ x: number; y: number } | null>(null);
+  const yo = useRef({});
+  useEffect(() => {
+    const otraSeAbrio = (e: Event) => {
+      if ((e as CustomEvent).detail !== yo.current) setPintando(null);
+    };
+    window.addEventListener(PALETA_ABIERTA, otraSeAbrio);
+    return () => window.removeEventListener(PALETA_ABIERTA, otraSeAbrio);
+  }, []);
+  const poner = (p: { x: number; y: number } | null) => {
+    if (p) window.dispatchEvent(new CustomEvent(PALETA_ABIERTA, { detail: yo.current }));
+    setPintando(p);
+  };
+  return [pintando, poner];
+}
+
 function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   const t = TEMA[data.tema];
   const manta = data.manta;
@@ -1403,7 +1426,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   // EL COLOR DEL VELO (13/11/2026). Él: «me estoy confundiendo qué velo corresponde a cada país… darle color al velo,
   // pero… seguirá siendo velo». Teñido transparente y un filo de su color; sin color, el de siempre. Solo pantalla.
   const color = /^#[0-9a-f]{6}$/i.test(String(data.caja.color ?? "").trim()) ? String(data.caja.color).trim() : "";
-  const [pintando, setPintando] = useState<{ x: number; y: number } | null>(null);
+  const [pintando, setPintando] = useUnaSolaPaleta();
   const abrirColor = (r: DOMRect) => setPintando({ x: r.left, y: r.bottom + 6 });
   return (
     <div className="h-full w-full" style={{ pointerEvents: "none" }}>
@@ -2239,7 +2262,7 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
     }, 60);
     return () => window.clearTimeout(t);
   }, [editando]);
-  const [pintando, setPintando] = useState<{ x: number; y: number } | null>(null);
+  const [pintando, setPintando] = useUnaSolaPaleta();
   // La barrita se ve del mismo tamaño aunque se aleje la vista.
   const zoom = useStore((s) => s.transform[2]);
   const tam = n.tam ?? 24;
