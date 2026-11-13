@@ -38872,6 +38872,9 @@ function JourneyPreviewBlock({
           onSelectStep={onStepsChange ? setActiveStepIndex : undefined}
           onEditStep={(index) => {
             if (onStepsChange) onSnapshot?.();
+            // AL CERRAR, EN LA QUE SE EDITÓ (12/11/2026). Él: «estoy en la burbuja 2, clic derecho a la 1, la edito y al dar
+            // listo sigo en la 2; eso es incorrecto y confuso». Editar es elegirla: queda elegida (visor y cajón) desde ya.
+            if (onStepsChange) setActiveStepIndex(index);
             onEdit(index);
           }}
           onDuplicateStep={onStepsChange ? duplicateStep : undefined}
@@ -39171,6 +39174,8 @@ function StepEditorPreviewPair({
           onVaryAll={() => setPreviewRolls({})}
           onEditStep={(index) => {
             onSnapshot();
+            // Al cerrar, en la que se editó (12/11/2026; desde el visor o desde el clic derecho de su cajón, que abre el mismo menú).
+            setActiveStepIndex(index);
             setEditingStepIndex(index);
           }}
           onDuplicateStep={duplicatePreviewStep}
