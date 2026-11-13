@@ -12111,6 +12111,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mweg7vsd-r3noo
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -12141,6 +12142,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mweg7vsd-95jss
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -12170,6 +12172,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mweg7vsd-54xhg
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -12199,6 +12202,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mweg7vsd-wvgfl
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
