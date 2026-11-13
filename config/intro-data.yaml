@@ -5781,9 +5781,9 @@ biblioteca_de_productos:
     market_price: 45
     precios_por_pais:
       AR:
-        price_soles: 8000
-        discount_price_soles: 5000
-        market_price: 16000
+        price_soles: 4600
+        discount_price_soles: 3100
+        market_price: 23200
       PE:
         price_soles: 10
         discount_price_soles: 7
@@ -5937,9 +5937,9 @@ biblioteca_de_productos:
         discount_price_soles: 4.5
         market_price: 30
       AR:
-        price_soles: 9000
-        discount_price_soles: 6500
-        market_price: 27000
+        price_soles: 0
+        discount_price_soles: 0
+        market_price: 0
   - id: pmuq3a33s
     name: SUPER KIT PRISMA 2000
     aliases: []
@@ -6053,9 +6053,9 @@ biblioteca_de_productos:
         discount_price_soles: 3.5
         market_price: 30
       AR:
-        price_soles: 11000
-        discount_price_soles: 9000
-        market_price: 27000
+        price_soles: 6400
+        discount_price_soles: 5000
+        market_price: 25000
       CO:
         price_soles: 14000
         discount_price_soles: 11000
