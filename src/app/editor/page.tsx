@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEscapeEnPila } from "@/lib/escape-en-pila";
 import { encajarEnLaPantalla } from "@/lib/encajar-en-pantalla";
-import { pasarAVoseo } from "@/lib/voseo";
+import { pasarAVoseo, type ModoDeVoseo } from "@/lib/voseo";
 import EmojiPicker from "@/components/EmojiPicker";
 import InterruptorDeTema from "@/components/InterruptorDeTema";
 import WhatsAppIdentityAvatar from "@/components/WhatsAppIdentityAvatar";
@@ -39594,7 +39594,7 @@ function VentanaDeVoseo({
   onCerrar,
 }: {
   steps: EditorStep[];
-  modo?: "voseo" | "ortografia";
+  modo?: ModoDeVoseo;
   onAplicar: (nuevos: EditorStep[]) => void;
   onCerrar: () => void;
 }) {
@@ -39663,7 +39663,9 @@ function VentanaDeVoseo({
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" data-ventana-del-tablero>
       <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: 1.25 }}>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-base font-bold text-tinta">{voseo ? "🇦🇷 Pasar a voseo" : "✏️ Corregir ortografía"} · todas las burbujas</h3>
+          <h3 className="text-base font-bold text-tinta">
+            {voseo ? "🇦🇷 Pasar a voseo" : modo === "tuteo" ? "🔄 Quitar voseo" : "✏️ Corregir ortografía"} · todas las burbujas
+          </h3>
           <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
             ✕
           </button>
@@ -39671,10 +39673,12 @@ function VentanaDeVoseo({
         <p className="mb-3 text-[13px] text-tinta-suave">
           {voseo
             ? "Pasa el tuteo al voseo (tienes → tenés, escribe → escribí), algunas palabras a las de Argentina (niños → chicos, aquí → acá) y corrige la ortografía. "
-            : "Corrige tildes y palabras mal escritas, sin cambiar el trato (tú, vos o usted) ni las palabras. "}
+            : modo === "tuteo"
+              ? "Pasa el voseo al tuteo (tenés → tienes, escribí → escribe, chicos → niños) para Colombia, Perú o Ecuador, y corrige la ortografía. "
+              : "Corrige tildes y palabras mal escritas, sin cambiar el trato (tú, vos o usted) ni las palabras. "}
           Los comodines, enlaces, precios y nombres no cambian. Se aplica solo; Ctrl+Z lo deshace.
         </p>
-        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">{voseo ? "Pasando a voseo…" : "Corrigiendo…"}</p>}
+        {!resultados && !error && <p className="py-6 text-center text-sm text-tinta-suave">{voseo ? "Pasando a voseo…" : modo === "tuteo" ? "Quitando el voseo…" : "Corrigiendo…"}</p>}
         {resultados && (
           <div className="flex flex-col gap-2">
             {cambiadas.length === 0 && descartadas.length === 0 && <p className="text-sm text-tinta-suave">No hay nada que cambiar en estas burbujas.</p>}
@@ -40322,7 +40326,7 @@ function StepList({
   // «🇦🇷 Voseo» (12/11/2026, ver `VentanaDeVoseo`). Siempre a la vista: el país del visor sale de los cables desde el Inicio,
   // y una ficha sin conectar o compartida se ve como Perú; el botón se escondía justo en las fichas que él está armando.
   // «✏️ Ortografía» (12/11/2026): lo mismo, solo tildes y erratas, sin tocar el trato.
-  const [voseando, setVoseando] = useState<false | "voseo" | "ortografia">(false);
+  const [voseando, setVoseando] = useState<false | ModoDeVoseo>(false);
   const conSpintaxIA = steps.some((s) => (s.spintax_ia ?? []).some((g) => (s.texts[0] ?? "").includes(g)));
   const conTexto = steps.some((s) => s.enabled !== false && (s.texts[0] ?? "").trim());
 
@@ -40375,6 +40379,16 @@ function StepList({
             className="rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-100"
           >
             ✏️ Ortografía
+          </button>
+        )}
+        {conTexto && (
+          <button
+            type="button"
+            onClick={() => setVoseando("tuteo")}
+            title="Quita el voseo: pasa estas burbujas al tuteo (tenés → tienes, escribí → escribe) para usarlas en Colombia, Perú o Ecuador. No toca comodines, precios, nombres ni enlaces. Se aplica solo; Ctrl+Z lo deshace."
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-bold text-amber-800 hover:bg-amber-100"
+          >
+            🔄 Quitar voseo
           </button>
         )}
         {conTexto && (

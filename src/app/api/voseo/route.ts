@@ -67,11 +67,16 @@ function palabrasNuevas(conMarcas: string, dicho: string): string[] {
  * argentinas de la orden. Todo lo demás vuelve a como lo escribió él. Un nombre con mayúscula («Ormidas») solo puede
  * recibir una tilde.
  */
-export type Modo = "voseo" | "ortografia";
+// «🔄 QUITAR VOSEO» (12/11/2026). Él: «tengo un texto buenísimo pero está en argentino y lo quiero usar en Colombia o
+// Perú… al igual que se le pone voseo, quitarlo». `tuteo` = el camino de vuelta, con la misma aduana al revés.
+export type Modo = "voseo" | "ortografia" | "tuteo";
 const ARGENTINAS: Record<string, string[]> = {
   tu: ["vos"], ti: ["vos"], eres: ["sos"], ven: ["veni"], ninos: ["chicos"], ninas: ["chicas"], nino: ["nene", "chico"], nina: ["nena", "chica"],
   aqui: ["aca"], alli: ["alla"], dinero: ["plata"], movil: ["celular"], ordenador: ["computadora"], coger: ["agarrar"], vale: ["dale"], ahorita: ["ahora"],
 };
+/** La misma lista al revés, para quitar el voseo: vos → tú, sos → eres, chicos → niños… */
+const DE_VUELTA: Record<string, string[]> = {};
+for (const [tuteo, voseos] of Object.entries(ARGENTINAS)) for (const v of voseos) (DE_VUELTA[v] ??= []).push(tuteo);
 const CLITICO = /(me|nos|te|lo|la|le|los|las|les)$/;
 function distancia(a: string, b: string): number {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array<number>(b.length).fill(0)]);
@@ -88,6 +93,14 @@ function cambioValido(o: string, n: string, modo: Modo): boolean {
   if (sn === `${so}r`) return true; // verbo incompleto: aprovecha → aprovechar
   // escencial → esencial (pero nunca un verbo entero que pierde su «r»: realizar → realizá no es una errata).
   if (minuscula && so.length >= 4 && so[0] === sn[0] && so !== `${sn}r` && distancia(so, sn) <= 1) return true;
+  if (modo === "tuteo") {
+    if ((DE_VUELTA[so] ?? []).includes(sn)) return true;
+    // El verbo de vuelta: misma primera letra, el voseo terminaba en vocal con tilde (+ s): podés → puedes, escribí → escribe.
+    if (so[0] === sn[0] && /[áéí]s?$/iu.test(o) && /[aei]s?$/iu.test(sn) && Math.abs(so.length - sn.length) <= 2) return true;
+    // El imperativo con su pronombre: decime → dime, contame → cuéntame, hacelo → hazlo.
+    const c = so.match(CLITICO)?.[1];
+    return !!c && sn.endsWith(c) && so[0] === sn[0] && Math.abs(so.length - sn.length) <= 2;
+  }
   if (modo !== "voseo") return false;
   if ((ARGENTINAS[so] ?? []).includes(sn)) return true;
   // El verbo al voseo: misma primera letra, y el nuevo termina en vocal con tilde (+ s): puedes → podés, escribe → escribí.
@@ -100,6 +113,8 @@ function cambioValido(o: string, n: string, modo: Modo): boolean {
 /** ¿Vale este cambio de tildes? Poner o mover una tilde, sí; quitarla solo en el voseo de un imperativo (envíanos → envianos). */
 function tildeValida(o: string, n: string, modo: Modo): boolean {
   if (/[áéíóú]/iu.test(n)) return true;
+  // De vuelta al tuteo, la tilde del voseo se va: realizá → realiza, mirá → mira.
+  if (modo === "tuteo") return /[áéí]s?$/iu.test(o);
   return modo === "voseo" && (CLITICO.test(sinTildes(o)) || /[aei]$/i.test(sinTildes(o)));
 }
 /** La palabra nueva con las mayúsculas y minúsculas de la suya (COMO → CÓMO, nunca «Cómo»). */
@@ -121,7 +136,10 @@ function porLaAduana(conMarcas: string, dicho: string, modo: Modo): string | nul
       viejas.forEach((o, k) => {
         if (!cambioValido(o, nuevas[k][0], modo)) partes[nuevas[k][1]] = o;
       });
-    } else if (!(modo === "voseo" && viejas.length === 1 && sinTildes(viejas[0]) === "contigo" && nuevas.map((x) => sinTildes(x[0])).join(" ") === "con vos")) {
+    } else if (
+      !(modo === "voseo" && viejas.length === 1 && sinTildes(viejas[0]) === "contigo" && nuevas.map((x) => sinTildes(x[0])).join(" ") === "con vos") &&
+      !(modo === "tuteo" && viejas.map(sinTildes).join(" ") === "con vos" && nuevas.length === 1 && sinTildes(nuevas[0][0]) === "contigo")
+    ) {
       return false;
     }
     viejas = [];
@@ -217,6 +235,18 @@ const ORDEN_VOSEO =
   ORTOGRAFIA_DE_PASO +
   "Si un texto usa «usted», déjalo igual. " +
   COMUN;
+const ORDEN_TUTEO =
+  "Pasas mensajes de WhatsApp de ventas del VOSEO argentino al TUTEO neutro (para Colombia, Perú, Ecuador…), cambiando LO MÍNIMO. " +
+  "«vos» → «tú» (o «ti» tras preposición: para vos → para ti; con vos → contigo); los verbos (tenés → tienes, podés → puedes, querés → quieres, sos → eres, " +
+  "sabés → sabes, necesitás → necesitas, venís → vienes, deseás → deseas, preferís → prefieres, recibís → recibes, obtenés → obtienes); " +
+  "los imperativos (escribí → escribe, mirá → mira, elegí → elige, enviá → envía, envianos → envíanos, mandanos → mándanos, realizá → realiza, respondé → responde, " +
+  "indicá → indica, descargá → descarga, completá → completa, llevate → llévate, contame → cuéntame, decime → dime, hacelo → hazlo, vení → ven, aprovechá → aprovecha); " +
+  "también en MAYÚSCULAS (RESPONDÉ → RESPONDE, ESCRIBÍ → ESCRIBE). El verbo ENTERO (podés realizar → puedes realizar) se queda entero. " +
+  "Las palabras muy argentinas, de vuelta: chicos/chicas (hijos) → niños/niñas, nene/nena → niño/niña, plata → dinero. «acá» puede quedarse. " +
+  "Pasa la burbuja COMPLETA: no dejes un «vos» al lado de un «tú». " +
+  ORTOGRAFIA_DE_PASO +
+  "Si un texto usa «usted», déjalo igual. " +
+  COMUN;
 const ORDEN_ORTOGRAFIA =
   "Corriges la ORTOGRAFÍA de mensajes de WhatsApp de ventas, cambiando LO MÍNIMO. " +
   ORTOGRAFIA_DE_PASO +
@@ -230,7 +260,7 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
   }
-  const modo: Modo = body.modo === "ortografia" ? "ortografia" : "voseo";
+  const modo: Modo = body.modo === "ortografia" ? "ortografia" : body.modo === "tuteo" ? "tuteo" : "voseo";
   const textos = Array.isArray(body.textos) ? body.textos.map((t) => (typeof t === "string" ? t.slice(0, 4000) : "")).slice(0, 60) : [];
   if (!textos.some((t) => t.trim())) return NextResponse.json({ error: "No hay texto que revisar." }, { status: 400 });
   const piezas = textos.map(protegido);
@@ -240,7 +270,7 @@ export async function POST(req: NextRequest) {
       temperature: 0,
       ...({ reasoning: { enabled: false }, usage: { include: true } } as object),
       messages: [
-        { role: "system", content: modo === "voseo" ? ORDEN_VOSEO : ORDEN_ORTOGRAFIA },
+        { role: "system", content: modo === "voseo" ? ORDEN_VOSEO : modo === "tuteo" ? ORDEN_TUTEO : ORDEN_ORTOGRAFIA },
         { role: "user", content: JSON.stringify({ textos: piezas.map((p) => p.conMarcas) }) },
       ],
     });

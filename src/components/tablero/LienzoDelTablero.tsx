@@ -42,7 +42,7 @@ import "@xyflow/react/dist/style.css";
 import { createPortal } from "react-dom";
 import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
-import { pasarAVoseo, pasosConVoseo, textosDeLosPasos } from "@/lib/voseo";
+import { pasarAVoseo, pasosConVoseo, textosDeLosPasos, type ModoDeVoseo } from "@/lib/voseo";
 import { banderaDe } from "@/components/pizarra/banderas";
 import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import { ASPECTO, TIPOS_PARA_CREAR } from "./aspecto";
@@ -2331,8 +2331,8 @@ export default function LienzoDelTablero({
   const [aviso, setAviso] = useState<string | null>(null);
   // «🇦🇷 Pasar a voseo» de las fichas elegidas: mientras pide, y el resumen al terminar.
   const [voseo, setVoseo] = useState<
-    | { fase: "pidiendo"; modo: "voseo" | "ortografia"; fichas: number }
-    | { fase: "listo"; modo: "voseo" | "ortografia"; fichas: number; cambiadas: number; descartadas: Array<{ ficha: string; texto: string; motivo: string }>; costo: number }
+    | { fase: "pidiendo"; modo: ModoDeVoseo; fichas: number }
+    | { fase: "listo"; modo: ModoDeVoseo; fichas: number; cambiadas: number; descartadas: Array<{ ficha: string; texto: string; motivo: string }>; costo: number }
     | null
   >(null);
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
@@ -2932,7 +2932,7 @@ export default function LienzoDelTablero({
     ...(f.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps)),
     ...(f.seguimientos ?? []).flatMap((s) => (s.variantes ?? []).flatMap((v) => textosDeLosPasos(v.steps))),
   ];
-  const vosear = async (ids: string[], modo: "voseo" | "ortografia") => {
+  const vosear = async (ids: string[], modo: ModoDeVoseo) => {
     const fichas = vivo.current.fichas.filter((f) => ids.includes(f.id));
     setVoseo({ fase: "pidiendo", modo, fichas: fichas.length });
     const { porTexto, costo } = await pasarAVoseo(fichas.flatMap(textosDeLaFicha), modo);
@@ -3576,10 +3576,12 @@ export default function LienzoDelTablero({
         {voseo && (
           <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={() => voseo.fase === "listo" && setVoseo(null)}>
             <div className="my-16 w-full max-w-xl rounded-xl border border-slate-200 bg-white p-5 text-slate-800 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <h3 className="mb-2 text-base font-bold">{voseo.modo === "voseo" ? "🇦🇷 Pasar a voseo" : "✏️ Corregir ortografía"}</h3>
+              <h3 className="mb-2 text-base font-bold">
+                {voseo.modo === "voseo" ? "🇦🇷 Pasar a voseo" : voseo.modo === "tuteo" ? "🔄 Quitar voseo" : "✏️ Corregir ortografía"}
+              </h3>
               {voseo.fase === "pidiendo" ? (
                 <p className="py-4 text-sm text-slate-600">
-                  {voseo.modo === "voseo" ? "Pasando a voseo" : "Corrigiendo"} {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`}… (unos segundos; los
+                  {voseo.modo === "voseo" ? "Pasando a voseo" : voseo.modo === "tuteo" ? "Quitando el voseo de" : "Corrigiendo"} {voseo.fichas === 1 ? "1 ficha" : `${voseo.fichas} fichas`}… (unos segundos; los
                   comodines no llegan a la IA)
                 </p>
               ) : (
@@ -3765,6 +3767,17 @@ export default function LienzoDelTablero({
                         }}
                       >
                         ✏️ Corregir ortografía{cuantas}
+                      </button>
+                      <button
+                        type="button"
+                        className={opcionDeMenu}
+                        disabled={voseo?.fase === "pidiendo"}
+                        onClick={() => {
+                          setMenu(null);
+                          void vosear(ids, "tuteo");
+                        }}
+                      >
+                        🔄 Quitar voseo{cuantas}
                       </button>
                     </>
                   );

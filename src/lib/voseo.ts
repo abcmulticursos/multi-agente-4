@@ -7,10 +7,12 @@
  * mismo con `modo: "ortografia"`: solo tildes y erratas, sin tocar el tuteo.
  */
 export type ResultadoDeVoseo = { texto: string | null; motivo?: string };
+/** voseo = poner el voseo; tuteo = quitarlo («🔄 Quitar voseo», 12/11/2026); ortografia = solo tildes y erratas. */
+export type ModoDeVoseo = "voseo" | "ortografia" | "tuteo";
 
 export async function pasarAVoseo(
   textos: string[],
-  modo: "voseo" | "ortografia" = "voseo"
+  modo: ModoDeVoseo = "voseo"
 ): Promise<{ porTexto: Map<string, ResultadoDeVoseo>; costo: number }> {
   const unicos = [...new Set(textos.filter((t) => t.trim()))];
   let costo = 0;
