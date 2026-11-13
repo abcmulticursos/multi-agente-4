@@ -2777,6 +2777,18 @@ whatsapp:
 
               Responde SÍ para recibirlo. 🥰
           delay_after_sec: 4
+          decisions:
+            - id: d2274ecf-d578-4221-8992-ac79065158e5
+              title: SI
+              keywords:
+                - si
+                - sí
+                - sii
+                - siii
+                - ssi
+                - sy
+              color: esmeralda
+              steps: []
       presenta:
         - ptfig_figurarte
   cables:
