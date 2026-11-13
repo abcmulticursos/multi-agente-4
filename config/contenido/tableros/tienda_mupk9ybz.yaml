@@ -11808,7 +11808,7 @@ whatsapp:
             - |-
               🛒 ¿CÓMO COMPRO? *FÁCIL!, Podés realizar tu pago mediante TRANSFERENCIA (ALIAS o CBU).*  🏦
 
-              🟢 *¿Deseas que te facilite los datos para realizar el pago* ❓️ 😊
+              🟢 *¿Deseas que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
           delay_after_sec: 6
           decisions:
             - id: d-mweg7vsd-r3noo
