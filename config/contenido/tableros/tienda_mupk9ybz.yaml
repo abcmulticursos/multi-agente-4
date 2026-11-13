@@ -7029,12 +7029,18 @@ whatsapp:
       y: 19778
       reparto:
         - id: r1
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: r2
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: rmwd4ovya
-          peso: 1
+          peso: 0
+          peso_antes: 1
         - id: rmwd56uqa
+          peso: 0
+          peso_antes: 1
+        - id: rmwetuaux
           peso: 1
     - id: f-mwdnvrol-efc90
       tipo: mensaje
@@ -11721,8 +11727,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mweg7vsa-v6h68
       tipo: mensaje
-      x: 4400
-      y: 17468
+      x: -396
+      y: 24662
       steps:
         - type: text
           body_variants:
@@ -12073,8 +12079,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwei09n9-5ugnj
       tipo: seguimientos
-      x: 4730
-      y: 16973
+      x: -66
+      y: 24167
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -12786,8 +12792,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwelg57r-hvdw9
       tipo: mensaje
-      x: 5423
-      y: 17633
+      x: 627
+      y: 24827
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -12907,8 +12913,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwelg57r-k0c2i
       tipo: seguimientos
-      x: 5665
-      y: 17215
+      x: 869
+      y: 24409
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -13758,8 +13764,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwet8o4z-3toub
       tipo: cobro
-      x: 6523
-      y: 17138
+      x: 1727
+      y: 24332
       steps:
         - type: text
           body_variants:
@@ -13786,8 +13792,8 @@ whatsapp:
         metodos: true
     - id: f-mwet8o4z-6y6hz
       tipo: cobro
-      x: 6512
-      y: 17919
+      x: 1716
+      y: 25113
       steps:
         - type: text
           body_variants:
@@ -13814,22 +13820,22 @@ whatsapp:
         metodos: true
     - id: f-mwet8o4z-hq0iv
       tipo: entregar
-      x: 7436
-      y: 17149
+      x: 2640
+      y: 24343
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mwet8o4z-8af33
       tipo: entregar
-      x: 7447
-      y: 17875
+      x: 2651
+      y: 25069
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mwet8o4z-4dqj1
       tipo: regalo
-      x: 8063
-      y: 17567
+      x: 3267
+      y: 24761
       titulo: Regalo
   cables:
     - id: c-mwcazaok-glm60
@@ -14720,6 +14726,10 @@ whatsapp:
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwelg57r-hvdw9
       vista: colita
+    - id: c-mwetui7d-q38
+      de: f-mwdbnotb-nbdmi
+      salida: rep:rmwetuaux
+      a: f-mweg7vsa-v6h68
   cajas:
     - id: velo-mwcazaol-0
       x: -869
@@ -14884,9 +14894,9 @@ whatsapp:
       y: 21912
     - id: e-mwet9jnu-ivia
       ficha: f-mwelg57r-k0c2i
-      x: 6831
-      y: 16786
+      x: 2035
+      y: 23980
     - id: e-mwet9mfm-h1z0
       ficha: f-mwelg57r-k0c2i
-      x: 6787
-      y: 17556
+      x: 1991
+      y: 24750
