@@ -3257,6 +3257,30 @@ whatsapp:
           body_variants:
             - Con què mètodo de pago te gustarìa adquirirlo? 😊
           delay_after_sec: 4
+          decisions:
+            - id: 25aab0c5-e983-4e09-8947-4118e6cc98f0
+              title: YAPE
+              keywords:
+                - yape
+                - llape
+                - iape
+                - yap
+                - yappe
+                - yapee
+                - ype
+                - yae
+                - yaee
+                - yaaee
+                - yaapee
+                - plin
+                - pli
+                - pln
+                - pilin
+                - pln
+                - lin
+                - plon
+              color: esmeralda
+              steps: []
       presenta:
         - ptfig_figurarte
     - id: f-mwfakgez-jbxkz
@@ -3589,6 +3613,38 @@ whatsapp:
                       🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
+    - id: f-mwfavwgq-qgys
+      tipo: mensaje
+      x: 3366
+      y: 4554
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Te comparto los medios de pago: 👇
+
+              💳 Yape o Plin: 931322111
+              💳 BCP: 55091152401066
+
+              👤 A nombre: David Cotrina F.
+
+              😊 Estás a 1 paso de recibir todo tu material 👇
+
+              🧾 Enviar el comprobante por aquí
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚠️ SOLO quedan 5 cupos con descuento + regalos sorpresa.
+
+              Después sube al precio normal y ya no incluye los bonos especiales.
+
+              Iré preparando todo el material para enviarte ✅
+          delay_after_sec: 6
+    - id: f-mwfayorl-bg34l
+      tipo: regalo
+      x: 4026
+      y: 4576
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -3752,6 +3808,10 @@ whatsapp:
       de: f-mwfa70ry-6ztan
       salida: siguiente
       a: f-mwfakgez-jbxkz
+    - id: c-mwfayk5d-tn3
+      de: f-mwfa70ry-6ztan
+      salida: dec:25aab0c5-e983-4e09-8947-4118e6cc98f0
+      a: f-mwfavwgq-qgys
   cajas:
     - id: manta-fig_inicio
       x: 108
