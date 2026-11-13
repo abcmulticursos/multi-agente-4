@@ -11789,7 +11789,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *MAMÁ / PAPÁ,* esta es tu oportunidad de llevarte {{producto_base}} completo 📚️✨️
+              *MAMÁ / PAPÁ,* esta es tu oportunidad de llevarte *{{producto_base}} completo* 📚️✨️
 
               📚️ *6 Libros completos*
               🎁 *+6 Regalos especiales*
