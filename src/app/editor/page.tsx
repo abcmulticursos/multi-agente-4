@@ -41211,13 +41211,8 @@ function BubbleDecisionsEditor({
           )}
         </div>
       </div>
-      {/* Con varios elegidos (Shift + clic), solo cuántos y cómo actuar: las acciones van en el clic derecho. */}
-      {elegidos.size > 1 && (
-        <div data-barra-de-elegidos className="mb-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-900">
-          <strong>{elegidos.size} elegidos</strong> · clic derecho en uno de ellos para copiar, duplicar, apagar o borrar los {elegidos.size} ·
-          Ctrl+C copia · clic afuera suelta
-        </div>
-      )}
+      {/* SIN EL AVISO DE «N ELEGIDOS» (13/11/2026). Él: «se mueven los cuadritos cuando aparece ese aviso, y no se siente
+          bien al trabajar». Las acciones siguen en el clic derecho; los elegidos se ven por su marca. */}
       {menuCuadrito &&
         (() => {
           const objetivo = decisions.filter((d) => menuCuadrito.ids.includes(d.id));
