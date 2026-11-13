@@ -1391,6 +1391,12 @@ input,
 .burbujas-nuevo .bn-cuerpo.max-h-\[78vh\] {
   max-height: calc((100vh - 2 * 32px * 0.9) / 0.9 - 133px);
 }
+/* EL FONDO DEL RECORRIDO (W) DEL TABLERO, UN POCO MÁS OSCURO (13/11/2026, su montaje «ANTES / DESPUÉS»). Solo esa ventana y
+   solo con su marco claro; el oscuro ya es oscuro. Una sombra por dentro tiñe el fondo sin tocar las fichas de encima. */
+:root:not([data-pizarra-tema="oscuro"]):not([data-tema="oscuro"]) .burbujas-nuevo[data-recorrido-del-tablero],
+:root[data-tema="oscuro"][data-pizarra-tema]:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo[data-recorrido-del-tablero] {
+  box-shadow: inset 0 0 0 100vmax rgba(40, 80, 140, 0.12), 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
 /* Una ventana abierta DENTRO de otra («Editar esta burbuja») no se achica dos veces. */
 .burbujas-nuevo .burbujas-nuevo.burbujas-nuevo {
   zoom: 1;

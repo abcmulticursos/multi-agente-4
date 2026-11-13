@@ -1280,7 +1280,14 @@ type DatosDeCaja = {
   alHacerDePais?: (pais: string) => void;
   /** Un velo de país vuelve a ser común (su Inicio se queda donde está). */
   alHacerComun?: () => void;
+  selectorDeColor?: (valor: string, alElegir: (color: string) => void) => ReactNode;
 };
+
+/** «#rrggbb» + transparencia: el velo sigue siendo velo, solo teñido de su color. */
+const conTransparencia = (hex: string, alfa: number) =>
+  `${hex}${Math.round(alfa * 255)
+    .toString(16)
+    .padStart(2, "0")}`;
 
 /** El selector de país de una manta (doble clic en su bandera), con buscador como el de las tiendas. */
 function ElegirPaisDeLaManta({
@@ -1379,10 +1386,23 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
   // ELEGIDO TAMBIÉN EN EL RECUADRO SE VE (10/11/2026, él: «al pegar solo pega las fichas, los velos no
   // aparecen»): el velo que entraba en la selección no se marcaba, y el que quedaba fuera tampoco se notaba.
   const marcada = data.elegida || !!selected;
+  // EL COLOR DEL VELO (13/11/2026). Él: «me estoy confundiendo qué velo corresponde a cada país… darle color al velo,
+  // pero… seguirá siendo velo». Teñido transparente y un filo de su color; sin color, el de siempre. Solo pantalla.
+  const color = /^#[0-9a-f]{6}$/i.test(String(data.caja.color ?? "").trim()) ? String(data.caja.color).trim() : "";
+  const [pintando, setPintando] = useState<{ x: number; y: number } | null>(null);
+  const abrirColor = (r: DOMRect) => setPintando({ x: r.left, y: r.bottom + 6 });
   return (
     <div className="h-full w-full" style={{ pointerEvents: "none" }}>
       {/* Sus cuatro esquinas viven en `NodoDeEsquinas`, ENCIMA de las fichas. */}
-      <div className="h-full w-full rounded-2xl" style={{ background: t.caja, outline: marcada ? `3px solid ${t.tituloCaja}` : "none", pointerEvents: "none" }}>
+      <div
+        className="h-full w-full rounded-2xl"
+        style={{
+          background: color ? conTransparencia(color, data.tema === "oscuro" ? 0.24 : 0.16) : t.caja,
+          boxShadow: color ? `inset 0 0 0 4px ${conTransparencia(color, 0.75)}` : undefined,
+          outline: marcada ? `3px solid ${t.tituloCaja}` : "none",
+          pointerEvents: "none",
+        }}
+      >
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -1411,8 +1431,19 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             ocupados={manta.ocupados ?? []}
             donde={eligiendoPais}
             onCerrar={() => setEligiendoPais(null)}
-            extras={
-              data.alHacerComun
+            extras={[
+              ...(data.selectorDeColor
+                ? [
+                    {
+                      texto: "🎨 Color del velo",
+                      alElegir: () => {
+                        setPintando(eligiendoPais);
+                        setEligiendoPais(null);
+                      },
+                    },
+                  ]
+                : []),
+              ...(data.alHacerComun
                 ? [
                     {
                       texto: "⬜ Sin país (velo común)",
@@ -1423,8 +1454,8 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
                       },
                     },
                   ]
-                : []
-            }
+                : []),
+            ]}
             onElegir={(p) => {
               const de = manta.pais ? `${banderaDe(manta.pais)} ${manta.pais}` : "🌍 Otros países";
               const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
@@ -1450,6 +1481,17 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
                   if (nuevo !== null) data.alCambiar({ ...data.caja, titulo: nuevo.slice(0, 80) });
                 },
               },
+              ...(data.selectorDeColor
+                ? [
+                    {
+                      texto: "🎨 Color del velo",
+                      alElegir: () => {
+                        setPintando(eligiendoPais);
+                        setEligiendoPais(null);
+                      },
+                    },
+                  ]
+                : []),
             ]}
             onElegir={(p) => {
               const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
@@ -1475,6 +1517,47 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             🗑 Borrar
           </button>
         )}
+        {data.elegida && data.selectorDeColor && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              abrirColor(e.currentTarget.getBoundingClientRect());
+            }}
+            className="nodrag nopan ml-2 mt-3 inline-block rounded-md border border-slate-300 bg-white px-2 py-0.5 align-top text-[11px] font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+            style={{ pointerEvents: "all" }}
+            title="El color de este velo (solo para verlo: el bot no lo lee)"
+          >
+            🎨 Color
+          </button>
+        )}
+        {pintando &&
+          data.selectorDeColor &&
+          createPortal(
+            <div
+              ref={(el) => encajarEnLaPantalla(el)}
+              className="nodrag nopan nowheel fixed z-[400] rounded-lg border border-slate-300 bg-white p-3 text-slate-800 shadow-2xl"
+              style={{ left: pintando.x, top: pintando.y }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setPintando(null);
+              }}
+            >
+              <div className="mb-2 flex items-center justify-between gap-4 text-xs font-bold text-slate-600">
+                🎨 Color del velo
+                <button type="button" onClick={() => setPintando(null)} className="rounded px-1.5 hover:bg-slate-100" title="Cerrar">
+                  ✕
+                </button>
+              </div>
+              {data.selectorDeColor(color, (c) => {
+                const { color: _quitado, ...sinColor } = data.caja;
+                void _quitado;
+                data.alCambiar(c ? { ...data.caja, color: c } : sinColor);
+              })}
+            </div>,
+            document.body
+          )}
         {/* «▶ VER RECORRIDO», como en la pizarra: su ruta se ilumina y lo demás queda tenue. */}
         {manta && (
           <button
@@ -2311,6 +2394,7 @@ export default function LienzoDelTablero({
   antesDelMas,
   despuesDelMas,
   numeros,
+  selectorDeColor,
   onFichaTocada,
   quienCobra,
   alTocarQuienCobra,
@@ -2357,6 +2441,8 @@ export default function LienzoDelTablero({
   despuesDelMas?: ReactNode | ((herramientas: ReactNode) => ReactNode);
   /** LOS NÚMEROS DE CADA FICHA (25/10/2026), como los de las rutas de la pizarra. */
   numeros?: Record<string, { clientes: number; ventas: number; ahora?: number }>;
+  /** EL COLOR DEL VELO (13/11/2026): el selector de colores de la casa (fijos + mezclador + «mi paleta»). */
+  selectorDeColor?: (valor: string, alElegir: (color: string) => void) => ReactNode;
 }) {
   const instancia = useRef<ReactFlowInstance<Node, Edge> | null>(null);
   const vivo = useRef(tablero);
@@ -2589,6 +2675,7 @@ export default function LienzoDelTablero({
             setNodos((ns) => ns.map((n) => (n.id === `caja:${c.id}` ? { ...n, selected: true } : sumar || !n.selected ? n : { ...n, selected: false })));
           },
           alCambiar: (n: typeof c) => cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).map((x) => (x.id === c.id ? n : x)) }),
+          selectorDeColor,
           alBorrar: () => {
             cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).filter((x) => x.id !== c.id) });
             setCajaElegida(null);

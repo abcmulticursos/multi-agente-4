@@ -24037,7 +24037,7 @@ const ES_ENLACE = /^https?:\/\/\S+$/;
 
 // Convierte el formato de WhatsApp de UNA línea a nodos (negrita/cursiva/etc.),
 // dejando los enlaces intactos.
-function parseWaInline(text: string): ReactNode[] {
+function parseWaInline(text: string, valores?: string[]): ReactNode[] {
   // Se arma la lista a mano en vez de con flatMap: las dos ramas devuelven
   // cosas de tipo distinto —una etiqueta suelta y una lista de nodos— y
   // TypeScript deducía el tipo de la primera y luego rechazaba la segunda.
@@ -24045,15 +24045,35 @@ function parseWaInline(text: string): ReactNode[] {
   text.split(ENLACE_RE).forEach((trozo, i) => {
     if (!trozo) return;
     if (ES_ENLACE.test(trozo)) {
-      salida.push(<TwemojiText key={`enlace-${i}`} text={trozo} />);
+      salida.push(<span key={`enlace-${i}`}>{hojaConComodines(trozo, valores)}</span>);
       return;
     }
-    salida.push(...parseWaInlineSinEnlaces(trozo, i));
+    salida.push(...parseWaInlineSinEnlaces(trozo, i, valores));
   });
   return salida;
 }
 
-function parseWaInlineSinEnlaces(text: string, prefijo = 0): ReactNode[] {
+/**
+ * UN TROZO DE TEXTO YA SIN FORMATO, con los comodines resaltados en su sitio (13/11/2026). Él: «al activar comodín, los
+ * estilos desaparecen… no solo el estilo del comodín sino de toda la frase». Antes el texto se partía en cada comodín y
+ * cada pedazo se formateaba solo: «*Con {{PRODUCTO}}*» quedaba en «*Con » y «*», y la negrita se perdía. Ahora el
+ * formato se lee sobre la frase entera y el comodín se pinta DENTRO de su negrita. Sin `valores`, lo de siempre.
+ */
+function hojaConComodines(text: string, valores?: string[]): ReactNode {
+  if (!valores?.length || !text.includes(MARCA_ABRE)) return <TwemojiText text={text} />;
+  return text.split(new RegExp(`${MARCA_ABRE}(\\d+)${MARCA_CIERRA}`)).map((parte, indice) => {
+    if (indice % 2 === 0) return parte ? <TwemojiText key={indice} text={parte} /> : null;
+    const valor = valores[Number(parte)] ?? "";
+    if (!valor) return null;
+    return (
+      <span key={indice} title="Valor generado por comodín" className="rounded border border-sky-300 bg-sky-100 px-0.5 text-sky-900">
+        {renderWa(valor)}
+      </span>
+    );
+  });
+}
+
+function parseWaInlineSinEnlaces(text: string, prefijo = 0, valores?: string[]): ReactNode[] {
   const parts: ReactNode[] = [];
   const re = /(\*[^*\n]+\*|_[^_\n]+_|~[^~\n]+~|```[^`]+```)/g;
   let last = 0;
@@ -24061,43 +24081,43 @@ function parseWaInlineSinEnlaces(text: string, prefijo = 0): ReactNode[] {
   let key = prefijo * 1000;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last)
-      parts.push(<TwemojiText key={key++} text={text.slice(last, m.index)} />);
+      parts.push(<span key={key++}>{hojaConComodines(text.slice(last, m.index), valores)}</span>);
     const tok = m[0];
     if (tok.startsWith("```"))
       parts.push(
         <code key={key++} className="font-mono text-[0.92em]">
-          {tok.slice(3, -3)}
+          {hojaConComodines(tok.slice(3, -3), valores)}
         </code>
       );
     else if (tok[0] === "*")
       parts.push(
         <strong key={key++}>
-          <TwemojiText text={tok.slice(1, -1)} />
+          {hojaConComodines(tok.slice(1, -1), valores)}
         </strong>
       );
     else if (tok[0] === "_")
       parts.push(
         <em key={key++}>
-          <TwemojiText text={tok.slice(1, -1)} />
+          {hojaConComodines(tok.slice(1, -1), valores)}
         </em>
       );
     else
       parts.push(
         <s key={key++}>
-          <TwemojiText text={tok.slice(1, -1)} />
+          {hojaConComodines(tok.slice(1, -1), valores)}
         </s>
       );
     last = m.index + tok.length;
   }
   if (last < text.length)
-    parts.push(<TwemojiText key={key++} text={text.slice(last)} />);
+    parts.push(<span key={key++}>{hojaConComodines(text.slice(last), valores)}</span>);
   return parts;
 }
 
-function renderWa(text: string): ReactNode {
+function renderWa(text: string, valores?: string[]): ReactNode {
   return text.split("\n").map((line, i, arr) => (
     <span key={i}>
-      {parseWaInline(line)}
+      {parseWaInline(line, valores)}
       {i < arr.length - 1 ? <br /> : null}
     </span>
   ));
@@ -24155,31 +24175,8 @@ function renderPreviewTextWithHighlights(
     roll,
     stepIdx
   );
-  if (valores.length === 0) return renderWa(resuelto);
-  const partes = resuelto.split(
-    new RegExp(`${MARCA_ABRE}(\\d+)${MARCA_CIERRA}`)
-  );
-  const fragments: ReactNode[] = [];
-  partes.forEach((parte, indice) => {
-    // split con grupo captura devuelve [texto, número, texto, número, …]: los
-    // impares son el índice del comodín que iba en ese hueco.
-    if (indice % 2 === 1) {
-      const valor = valores[Number(parte)] ?? "";
-      if (!valor) return;
-      fragments.push(
-        <span
-          key={indice}
-          title="Valor generado por comodín"
-          className="rounded border border-sky-300 bg-sky-100 px-0.5 font-semibold text-sky-900"
-        >
-          {renderWa(valor)}
-        </span>
-      );
-      return;
-    }
-    if (parte) fragments.push(<span key={indice}>{renderWa(parte)}</span>);
-  });
-  return fragments;
+  // El formato se lee sobre la frase ENTERA, con las marcas dentro; cada marca se pinta en su sitio (`hojaConComodines`).
+  return renderWa(resuelto, valores);
 }
 
 function placeholderMatchAtCursor(text: string, cursor: number) {
@@ -31737,7 +31734,9 @@ function VentanaFlotante({
               </button>
             </span>
           ) : (
-            <button type="button" onClick={onCerrar} className="rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
+            // `bn-cancelar`: el «Cerrar» grande de la ventana de las burbujas (13/11/2026, él: «el cerrar de las fichas de
+            // seguimientos es muy pequeño casi imperceptible»). Fuera de esas ventanas la clase no cambia nada.
+            <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-borde px-3 py-1.5 text-xs font-semibold text-tinta-suave hover:bg-relleno">
               ✕ Cerrar
             </button>
           )}
@@ -32558,6 +32557,22 @@ function PantallaDelTableroCargada({
           }}
           buscar={buscar}
           numeros={esWorkflow ? undefined : numeros}
+          // EL COLOR DEL VELO (13/11/2026): la paleta de la casa (la de los anuncios y los usuarios, con «mi paleta»).
+          selectorDeColor={(valor, alElegir) => (
+            <AdColorSelect
+              value={valor}
+              onChange={alElegir}
+              sinElegir="Sin color"
+              palette={vivoCfg.current.ad_color_palette ?? []}
+              onSavePalette={(c) => {
+                const paleta = vivoCfg.current.ad_color_palette ?? [];
+                if (!paleta.some((p) => p.value.toLowerCase() === c.value.toLowerCase())) onConfigChange({ ...vivoCfg.current, ad_color_palette: [...paleta, c] });
+              }}
+              onDeletePalette={(c) =>
+                onConfigChange({ ...vivoCfg.current, ad_color_palette: (vivoCfg.current.ad_color_palette ?? []).filter((p) => p.value.toLowerCase() !== c.toLowerCase()) })
+              }
+            />
+          )}
           antesDelMas={
             <button
               type="button"
@@ -34486,6 +34501,11 @@ function AjustesDeLaFicha({
   // EL BUSCADOR DE «LO QUE SE ENTREGA» (27/10/2026): con muchos productos, la lista era eterna.
   const [buscarEntrega, setBuscarEntrega] = useState("");
   const [pais, setPais] = useState(paisInicial);
+  // SIN CAMBIOS, SOLO «CERRAR» (13/11/2026). Él: «Cancelar / Listo, eso solo debe aparecer cuando hay un cambio».
+  // Por contenido: un nombre borrado a mano («» en vez de nada) cuenta como sin cambios.
+  const huella = (x: FichaEnElEditor) => JSON.stringify(x, (_k, v) => (v === "" ? undefined : v));
+  const alAbrir = useRef(huella(b));
+  const hayCambios = huella(b) !== alAbrir.current;
   const a = ASPECTO[ficha.tipo];
   const cobro = b.cobro ?? { modo: "producto" as const };
   const tramos = cobro.tramos_por_pais?.[pais] ?? [];
@@ -35061,12 +35081,21 @@ function AjustesDeLaFicha({
           {ficha.tipo === "humano" && <p className="text-xs text-tinta-suave">El bot deja de contestar a este cliente y te llega un aviso.</p>}
         </div>
         <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold">
-            Cancelar
-          </button>
-          <button type="button" onClick={() => onGuardar(b)} className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">
-            Listo
-          </button>
+          {hayCambios ? (
+            <>
+              {/* Del tamaño del «Cerrar» de la ventana de las burbujas (13/11/2026). */}
+              <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
+                Cancelar
+              </button>
+              <button type="button" onClick={() => onGuardar(b)} className="rounded-xl bg-emerald-600 px-[18px] py-[9px] text-sm font-bold text-white hover:bg-emerald-700">
+                Listo
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={onCerrar} className="rounded-xl border border-borde px-[18px] py-[9px] text-sm font-bold hover:bg-relleno">
+              Cerrar
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -36142,7 +36171,7 @@ function RecorridoDelTablero({
           basicoPrice={previewBasicoPriceFromConfig(cfgVista)}
           {...(typeof precio === "number" ? { previewPriceOverride: precio } : {})}
           previewContext={conProductosDeLaFicha(previewContextFromConfig(cfgVista, pais as CountryCode), productos)}
-          highlightPlaceholders
+          // (13/11/2026: el resaltado de comodines sigue la letra C, como en los visores de las fichas.)
           channelLabel={canal === "messenger" ? "Messenger" : canal === "instagram" ? "Instagram" : "WhatsApp"}
         />
       </ProductosDeLaFichaContext.Provider>
@@ -36201,7 +36230,7 @@ function RecorridoDelTablero({
       if (!f) break;
       if (vistos.has(f.id)) {
         out.push(
-          <p key={`vuelve-${f.id}-${paso}`} className="w-[400px] rounded-lg border border-dashed border-borde px-3 py-2 text-xs font-semibold text-tinta-suave">
+          <p key={`vuelve-${f.id}-${paso}`} className="w-[436px] rounded-lg border border-dashed border-borde px-3 py-2 text-xs font-semibold text-tinta-suave">
             ↩ Vuelve a «{nombreDe(f)}»
           </p>
         );
@@ -36210,7 +36239,7 @@ function RecorridoDelTablero({
       vistos.add(f.id);
       const conCable = salidasDeLaFicha(f as unknown as FichaDelTablero, pais, undefined, tablero as unknown as Tablero).filter((s) => cableDe(f.id, s.clave));
       out.push(
-        <div key={f.id} className={`w-[400px] rounded-xl border border-borde bg-tarjeta p-2 shadow-sm ${f.apagada ? "opacity-60" : ""}`}>
+        <div key={f.id} className={`w-[436px] rounded-xl border border-borde bg-tarjeta p-2 shadow-sm ${f.apagada ? "opacity-60" : ""}`}>
           <p className="mb-1 flex items-center gap-2 px-1 text-[15px] font-extrabold text-tinta">
             <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: ASPECTO[f.tipo].trazo }} />
             {nombreDe(f)}
@@ -36231,16 +36260,16 @@ function RecorridoDelTablero({
         const porAgregar = conectadas.filter(({ o }) => !puestas.includes(o.id));
         const repartoId = f.id;
         out.push(
-          <div key={`${f.id}-elegir`} className="flex w-[400px] flex-wrap items-center gap-1.5 rounded-lg border border-borde bg-relleno px-2 py-1.5">
-            <span className="text-[11px] font-semibold text-tinta-suave">Rutas en la vista:</span>
-            {vistas.length === 0 && <span className="text-[11px] italic text-tinta-suave">ninguna</span>}
+          <div key={`${f.id}-elegir`} className="flex w-[436px] flex-wrap items-center gap-2 rounded-lg border border-borde bg-relleno px-2.5 py-2">
+            <span className="text-sm font-semibold text-tinta-suave">Rutas en la vista:</span>
+            {vistas.length === 0 && <span className="text-sm italic text-tinta-suave">ninguna</span>}
             {vistas.map(({ o, i }) => (
               <button
                 key={o.id}
                 type="button"
                 title="Quitar de la vista"
                 onClick={() => ponerRutas(repartoId, puestas.filter((x) => x !== o.id))}
-                className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${o.peso > 0 ? "border-emerald-400 bg-emerald-100 text-emerald-800" : "border-slate-300 bg-slate-200 text-slate-600"}`}
+                className={`rounded-full border px-2.5 py-0.5 text-sm font-bold ${o.peso > 0 ? "border-emerald-400 bg-emerald-100 text-emerald-800" : "border-slate-300 bg-slate-200 text-slate-600"}`}
               >
                 {nombreRuta(o, i)} ✕
               </button>
@@ -36249,7 +36278,7 @@ function RecorridoDelTablero({
               <select
                 value=""
                 onChange={(e) => e.target.value && ponerRutas(repartoId, [...puestas, e.target.value])}
-                className="rounded-md border border-borde bg-tarjeta px-1.5 py-0.5 text-[11px] font-semibold"
+                className="rounded-md border border-borde bg-tarjeta px-2 py-1 text-sm font-semibold"
               >
                 <option value="">＋ Agregar ruta…</option>
                 {porAgregar.map(({ o, i }) => (
@@ -36263,7 +36292,7 @@ function RecorridoDelTablero({
               <button
                 type="button"
                 onClick={() => ponerRutas(repartoId, [])}
-                className="ml-auto rounded-md border border-borde bg-tarjeta px-2 py-0.5 text-[11px] font-semibold text-tinta hover:bg-relleno"
+                className="ml-auto rounded-md border border-borde bg-tarjeta px-2.5 py-1 text-sm font-semibold text-tinta hover:bg-relleno"
               >
                 Ocultar todas
               </button>
@@ -36275,7 +36304,7 @@ function RecorridoDelTablero({
             <div key={`${f.id}-rutas`} className="flex items-start justify-center gap-4 pb-2">
               {vistas.map(({ o, i }) => (
                 <div key={o.id} className="flex w-max shrink-0 flex-col items-center gap-3">
-                  <p className={`w-[400px] rounded-full px-3 py-1 text-center text-[12px] font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
+                  <p className={`w-[436px] rounded-full px-3 py-1.5 text-center text-base font-bold ${o.peso > 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"}`}>
                     {o.peso > 0 ? `🟢 ${nombreRuta(o, i)} · vende ${Math.round((o.peso / total) * 100)}%` : `⚪ ${nombreRuta(o, i)} · apagada`}
                   </p>
                   {camino(cableDe(f.id, `rep:${o.id}`)?.a, new Set(vistos), prof + 1)}
@@ -36287,7 +36316,7 @@ function RecorridoDelTablero({
       }
       if (conCable.length === 0) {
         out.push(
-          <p key={`fin-${f.id}`} className="w-[400px] rounded-lg bg-relleno px-3 py-2 text-center text-xs font-semibold text-tinta-suave">
+          <p key={`fin-${f.id}`} className="w-[436px] rounded-lg bg-relleno px-3 py-2 text-center text-xs font-semibold text-tinta-suave">
             🛑 Aquí termina el camino
           </p>
         );
@@ -36296,7 +36325,7 @@ function RecorridoDelTablero({
       const sigue = conCable.find((s) => s.clave === elegidas[f.id]) ?? conCable[0];
       if (conCable.length > 1)
         out.push(
-          <div key={`${f.id}-ramas`} className="flex w-[400px] flex-wrap items-center gap-1 px-1">
+          <div key={`${f.id}-ramas`} className="flex w-[436px] flex-wrap items-center gap-1 px-1">
             <span className="text-[11px] font-semibold text-tinta-suave">Sigue por:</span>
             {conCable.map((s) => (
               <button
@@ -36317,7 +36346,7 @@ function RecorridoDelTablero({
   return (
     // La ventana crece con el camino (varias rutas lado a lado) y la pantalla se desliza en las dos direcciones.
     <div className="fixed inset-0 z-[60] overflow-auto bg-black/40 p-4" data-ventana-del-tablero>
-      <div className="burbujas-nuevo prolijo mx-auto my-6 w-max min-w-[min(72rem,100%)] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
+      <div data-recorrido-del-tablero className="burbujas-nuevo prolijo mx-auto my-6 w-max min-w-[min(72rem,100%)] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl">
         <div className="bn-cabecera sticky left-0 flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
           <div className="min-w-0 flex-1">
             <h3 className="bn-titulo text-sm font-bold text-neutral-900">▶ Recorrido de {nombrePais}</h3>
@@ -38999,7 +39028,7 @@ function JourneyStepEditorModal({
               fuera de la ventana. Es un teléfono: mide lo que mide en todas
               partes. */}
           <div className="bn-columna-visor min-h-0 overflow-y-auto lg:border-l lg:border-neutral-200 lg:pl-4">
-            <ChatPreview steps={[step]} previewRolls={{ 0: tirada }} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewPriceOverride={previewPriceOverride} previewComboPriceOverride={previewComboPriceOverride} previewBasicoPriceOverride={previewBasicoPriceOverride} previewContext={previewContext} highlightPlaceholders />
+            <ChatPreview steps={[step]} previewRolls={{ 0: tirada }} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewPriceOverride={previewPriceOverride} previewComboPriceOverride={previewComboPriceOverride} previewBasicoPriceOverride={previewBasicoPriceOverride} previewContext={previewContext} />
           </div>
         </div>
       </div>
@@ -39132,7 +39161,6 @@ function JourneyPreviewBlock({
           previewComboPriceOverride={previewComboPriceOverride}
           previewBasicoPriceOverride={previewBasicoPriceOverride}
           previewContext={previewContext}
-          highlightPlaceholders
           channelLabel={channelLabel}
           perBubbleVary
           // La ventana de recorrido ya tiene su selector móvil/normal/ancho a
@@ -48766,7 +48794,7 @@ function GiftTextEditorModal({
         </div>
         <div className="bn-cuerpo grid max-h-[75vh] gap-4 overflow-y-auto p-4 lg:grid-cols-2">
           <EditorEmojiTextarea value={value} onChange={onChange} rows={10} className="rounded border border-neutral-300 bg-tarjeta px-3 py-2 text-sm" />
-          <ChatPreview steps={[textStep(value)]} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewContext={previewContext} highlightPlaceholders />
+          <ChatPreview steps={[textStep(value)]} priceSoles={priceSoles} comboPrice={comboPrice} basicoPrice={basicoPrice} previewContext={previewContext} />
         </div>
       </div>
     </div>
