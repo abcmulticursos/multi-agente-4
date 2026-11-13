@@ -11940,8 +11940,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwei09n9-5ugnj
       tipo: seguimientos
-      x: -1859
-      y: 16753
+      x: -2134
+      y: 16621
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -11991,6 +11991,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwei09na-qs0x9
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -12021,6 +12022,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-hjyk5
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -12050,6 +12052,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-vq11y
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -12079,6 +12082,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-5zjas
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -12136,6 +12140,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwei09na-ds3g5
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -12166,6 +12171,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-jkp9l
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -12195,6 +12201,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-62kyg
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -12224,6 +12231,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwei09na-81u8l
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -13086,6 +13094,10 @@ whatsapp:
       de: f-mwdbnotb-nbdmi
       salida: rep:rmwd4ovya
       a: f-mwdnvrol-efc90
+    - id: c-mwekj2dz-acq
+      de: f-mweg7vsa-v6h68
+      salida: siguiente
+      a: f-mwei09n9-5ugnj
   cajas:
     - id: velo-mwcazaol-0
       x: -869
