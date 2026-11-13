@@ -2478,6 +2478,22 @@ export default function LienzoDelTablero({
   // «▶ Ver recorrido» (el Inicio cuya ruta se ilumina) y el buscador: solo vista, no cambian nada.
   const [mirando, setMirando] = useState<string | null>(null);
   const [menuMas, setMenuMas] = useState(false);
+  // DIBUJAR EL VELO AL CREARLO (13/11/2026). Él: «al elegir área de país o caja libre, que yo arrastre y cree el velo…
+  // para no tener que buscar la caja por algún lado». Tras elegirlo en el «+», el puntero es una cruz: arrastrar dibuja el
+  // velo ahí, con ese tamaño (un clic suelto lo pone con el tamaño de siempre). Esc cancela. Solo al crearlo; después se
+  // estira por sus esquinas como siempre.
+  const [dibujando, setDibujando] = useState<{ pais?: string } | null>(null);
+  const [trazo, setTrazo] = useState<{ x0: number; y0: number; x1: number; y1: number; ox: number; oy: number } | null>(null);
+  useEffect(() => {
+    if (!dibujando) return;
+    const alPulsar = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setDibujando(null);
+      setTrazo(null);
+    };
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [dibujando]);
   // LA VISTA DE CUANDO GUARDÓ (06/11/2026). Él: «el "guardar" también guarda la zona visible donde me quedé…
   // si no guardé no debería quedar». Al guardar (el editor avisa con «contenido-guardado») se apunta el zoom y
   // la posición de ESTE tablero; al volver a entrar se abre ahí. Moverse sin guardar no cambia lo apuntado.
@@ -3092,6 +3108,33 @@ export default function LienzoDelTablero({
   const centroDeLaVista = (): Punto =>
     instancia.current?.screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 }) ?? { x: 200, y: 200 };
 
+  /** El velo dibujado (en la pantalla, de una esquina a la otra): una caja libre, o el área de un país con su Inicio. */
+  const crearVeloDibujado = (d: { pais?: string }, a: Punto, b: Punto) => {
+    const aFlujo = (p: Punto) => instancia.current?.screenToFlowPosition(p) ?? p;
+    const pa = aFlujo(a);
+    const pb = aFlujo(b);
+    const esPais = d.pais !== undefined;
+    // Un clic suelto (o un trazo muy chico): el tamaño de siempre, con su esquina donde hizo clic.
+    const chico = Math.abs(b.x - a.x) < 30 || Math.abs(b.y - a.y) < 30;
+    const x = Math.round(chico ? pa.x : Math.min(pa.x, pb.x));
+    const y = Math.round(chico ? pa.y : Math.min(pa.y, pb.y));
+    const ancho = Math.round(chico ? (esPais ? 1280 : 600) : Math.abs(pb.x - pa.x));
+    const alto = Math.round(chico ? (esPais ? 620 : 400) : Math.abs(pb.y - pa.y));
+    const actual = vivo.current;
+    if (!esPais) {
+      cambiar({ ...actual, cajas: [...(actual.cajas ?? []), { id: `k-${Date.now().toString(36)}`, x, y, ancho, alto, titulo: "Nueva caja" }] });
+      return;
+    }
+    const p = d.pais ?? "";
+    const inicio: FichaEnElEditor = { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: x + 40, y: y + 70 };
+    cambiar({
+      ...actual,
+      fichas: [...actual.fichas, inicio],
+      cajas: [...(actual.cajas ?? []), { id: `manta-${inicio.id}`, x, y, ancho, alto, titulo: "", inicio: inicio.id }],
+    });
+    setAviso(`${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: su Inicio y su manta. Conecta el Inicio a la primera ficha de su ruta.`);
+  };
+
   const elegidas = () => nodos.filter((n) => n.selected && (n.type === "ficha" || n.type === "inicio")).map((n) => n.id);
 
   // COPIAR Y PEGAR, los mismos para Ctrl+C / Ctrl+V y para el clic derecho (06/11/2026: «que las fichas, a la hora
@@ -3576,6 +3619,44 @@ export default function LienzoDelTablero({
           <ZoomDelTablero />
         </ReactFlow>
 
+        {/* DIBUJAR EL VELO (13/11/2026): encima del lienzo mientras se dibuja; Esc cancela. */}
+        {dibujando && (
+          <div
+            data-dibujando-velo
+            className="absolute inset-0 z-30 cursor-crosshair"
+            style={{ touchAction: "none" }}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              const r = e.currentTarget.getBoundingClientRect();
+              setTrazo({ x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY, ox: r.left, oy: r.top });
+            }}
+            onPointerMove={(e) => {
+              if (trazo) setTrazo({ ...trazo, x1: e.clientX, y1: e.clientY });
+            }}
+            onPointerUp={(e) => {
+              if (!trazo) return;
+              crearVeloDibujado(dibujando, { x: trazo.x0, y: trazo.y0 }, { x: e.clientX, y: e.clientY });
+              setTrazo(null);
+              setDibujando(null);
+            }}
+          >
+            <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
+              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${dibujando.pais ? `${banderaDe(dibujando.pais)} ${dibujando.pais}` : "🌍 Otros países"}`} · Esc cancela
+            </div>
+            {trazo && (
+              <div
+                className="pointer-events-none absolute rounded-2xl border-2 border-dashed border-violet-500 bg-violet-500/10"
+                style={{
+                  left: Math.min(trazo.x0, trazo.x1) - trazo.ox,
+                  top: Math.min(trazo.y0, trazo.y1) - trazo.oy,
+                  width: Math.abs(trazo.x1 - trazo.x0),
+                  height: Math.abs(trazo.y1 - trazo.y0),
+                }}
+              />
+            )}
+          </div>
+        )}
+
         {/* ← + ☰, DENTRO DEL LIENZO, arriba a la izquierda, como en la pizarra (24/10/2026): «el selector
             de ficha, país, caja, buscar, están en una posición que me tapa, guíate de cómo se hizo en el
             modo automático». Lo demás se abre al pulsarlos. */}
@@ -3640,18 +3721,9 @@ export default function LienzoDelTablero({
                       type="button"
                       className="flex w-full items-center gap-2 px-5 py-1 text-left text-xs hover:bg-slate-100"
                       onClick={() => {
+                        // (13/11/2026: ya no cae sola en un sitio libre: él la dibuja arrastrando. Ver `dibujando`.)
                         setMenuMas(false);
-                        const c = centroDeLaVista();
-                        // EN UN SITIO LIBRE (11/11/2026, él: «al agregar Argentina el velo cae sobre los elementos»): el área
-                        // nueva iba al centro de la vista, encima de lo que hubiera. Si ahí choca con una ficha o un velo,
-                        // va debajo de todo, alineada a la izquierda, y la vista la encuadra.
-                        const libre = sitioLibreParaUnArea(vivo.current, { x: Math.round(c.x - 540), y: Math.round(c.y - 220) });
-                        const inicio: FichaEnElEditor = { id: `inicio-${p || "otros"}-${Date.now().toString(36)}`, tipo: "inicio", ...(p ? { pais: p } : {}), x: libre.x + 40, y: libre.y + 70 };
-                        const conInicio = { ...vivo.current, fichas: [...vivo.current.fichas, inicio] };
-                        const manta = mantaPara(conInicio, inicio);
-                        cambiar({ ...conInicio, cajas: [...(conInicio.cajas ?? []), manta] });
-                        window.setTimeout(() => instancia.current?.fitBounds({ x: manta.x, y: manta.y, width: manta.ancho, height: manta.alto }, { padding: 0.15, duration: 400 }), 50);
-                        setAviso(`${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: su Inicio y su manta. Conecta el Inicio a la primera ficha de su ruta.`);
+                        setDibujando({ pais: p });
                       }}
                     >
                       {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
@@ -3664,10 +3736,9 @@ export default function LienzoDelTablero({
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-slate-100"
                   title="Solo un fondo para ordenar, sin país: se estira por las esquinas y se borra con Delete"
                   onClick={() => {
+                    // (13/11/2026: se dibuja arrastrando. Ver `dibujando`.)
                     setMenuMas(false);
-                    const c = centroDeLaVista();
-                    const caja = { id: `k-${Date.now().toString(36)}`, x: Math.round(c.x - 300), y: Math.round(c.y - 200), ancho: 600, alto: 400, titulo: "Nueva caja" };
-                    cambiar({ ...vivo.current, cajas: [...(vivo.current.cajas ?? []), caja] });
+                    setDibujando({});
                   }}
                 >
                   <span className="h-2.5 w-3.5 rounded-sm border-2 border-dashed border-slate-400" /> Caja libre (solo fondo, sin país)
