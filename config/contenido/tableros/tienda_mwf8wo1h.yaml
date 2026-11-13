@@ -3184,8 +3184,8 @@ whatsapp:
       y: 3663
     - id: f-mwfa70ry-6ztan
       tipo: mensaje
-      x: 2409
-      y: 4334
+      x: 2464
+      y: 4565
       titulo: Presentación (botón SÍ)
       steps:
         - type: text
@@ -3259,6 +3259,336 @@ whatsapp:
           delay_after_sec: 4
       presenta:
         - ptfig_figurarte
+    - id: f-mwfakgez-jbxkz
+      tipo: seguimientos
+      x: 2739
+      y: 4279
+      vista_compra:
+        f-mvw3kh4y-eknk7:2: cable
+        f-mvvo0a7c-uyvc:2: cable
+        f-mvw3kh4y-eknk7:1: cable
+        f-mvvo0a7c-uyvc:1: cable
+      seguimientos:
+        - id: s-mwfakgfi-gv2gj
+          minutos: 30
+          variantes:
+            - id: v-mwfakgfi-eenjg
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1oqfJBXGYJD9Cwj5AJEuDJrHL1DqpAVGx/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      Recupera tus noches y tus domingos 💜🙏
+
+                      Te soy sincera… 🥺
+                      Sé lo que es salir de la cuna y seguir trabajando en casa, buscando ideas en el celular hasta tarde, mientras tu familia te espera 😔
+
+                      No quiero que tú sigas así ❤️
+
+                      Por eso *ahora mismo* te dejo *Mi Guardería Lista* con un precio especial solo para ti 🎁
+
+                      ❌ Antes: ~S/10~
+                      ✅ *Hoy: S/7* 😊
+
+                      Te llevas *TODO*:
+                      🧸 *+120 actividades listas* para niños de 0 a 3 años
+                      📅 *Calendario de 30 Días*
+                      📝 *Planificador Semanal*
+                      🖼️ *Carteles de Rutina para el Aula*
+                      👀 *Fichas de Observación Infantil*
+                      🤗 *Guía de Acogida y Adaptación*
+
+                      Tú mereces disfrutar tu trabajo, no vivir cansada 🥰✨
+
+                      Si te interesa recibirlo responde *YAPE* o *PLIN* 👇💜
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      🔴 {*Para adquirirlo responde el método de pago que prefieras*|*Si deseas adquirirlo, indícanos qué método de pago prefieres*|*Para adquirir FIGURARTE, solo responde con el método de pago de tu preferencia*} 👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ {*Si lo llevas en los próximos 10 minutos*|*Si decides adquirirlo durante los próximos 10 minutos*|*Aprovecha y llévatelo dentro de los próximos 10 minutos*} 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwfakgfi-uk6px
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-fer6n
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-etjau
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-pj9dg
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      📈 *{MUCHAS MAMITAS Y MAESTROS CONFÍAN EN NOSOTROS|CADA VEZ MÁS MAMITAS Y MAESTROS ELIGEN CONFIAR EN NOSOTROS|SOMOS LA ELECCIÓN DE MUCHAS MAMITAS Y MAESTROS}*
+
+                      RECUERDA: Nuestra oferta es de *{{PRECIO_BASE}}*
+
+                      *{NO DEJES PASAR ESTA OPORTUNIDAD|¡APROVECHA ESTA GRAN OPORTUNIDAD!|¡NO TE QUEDES SIN APROVECHAR ESTA OFERTA!}*
+
+                      💰 *Hoy puedes obtener todo por solo {{PRECIO_BASE}}*
+                      ✅ Pago único, acceso de por vida.
+                      📲 Apenas confirmes, te envío el material completo y sus bonos de inmediato por aquí.
+
+                      {{METODO_DE_PAGO_1}}
+
+                      Me mandas el comprobante y enseguida te llegan 💛
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwfakgfi-uk6px
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-fer6n
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-etjau
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfakgfi-pj9dg
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+        - id: s-mwfakgfi-1yxpn
+          minutos: 480
+          variantes:
+            - id: v-mwfakgfi-fd1s6
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1uqd9dU7UZGHZQCbHDLKAspSH3WC6GUby/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      🚨⚗️ *{¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS!!|¡PROMOCIÓN FLASH DISPONIBLE! ¡APROVECHA ESTOS 20 MINUTOS!|¡OFERTA ESPECIAL POR TIEMPO LIMITADO! ¡SOLO 20 MINUTOS!}* ⏰🔥
+
+                      📚️ *{{Producto_BASE}}* a tan solo 💰️ *{{precio_BASE}}!!*
+
+                      Por tiempo limitado!! 😱
+
+                      🤗 {*Ya puedes adquirir estos bonitos libros para colorear a un super precio*, apresúrate que la oferta está casi por terminar|*Ahora puedes adquirir estos hermosos libros para colorear a un precio especial*, ¡aprovecha antes de que termine la oferta!|*Adquiere estos lindos libros para colorear a un precio increíble*, ¡no esperes más porque la promoción está por finalizar!} 🏃‍♀️
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 💫
+
+                      ✅ *{PARA ADQUIRIRLO|PARA DESCARGARLO|PARA REALIZAR TU PAGO}* 🫰🏼
+
+                      🔴 *Realiza una inversión mínima de tan solo* {{PRECIO_BASE}}* 👇🏼
+
+                      {{METODO_DE_PAGO_1}}
+
+                      🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
+                  delay_after_sec: 6
+          activa_oferta: true
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -3418,6 +3748,10 @@ whatsapp:
       de: f-mwf9cf0q-i89e
       salida: pagado
       a: f-mwf9hyrd-hp6o1
+    - id: c-mwfam38l-4hm
+      de: f-mwfa70ry-6ztan
+      salida: siguiente
+      a: f-mwfakgez-jbxkz
   cajas:
     - id: manta-fig_inicio
       x: 108
