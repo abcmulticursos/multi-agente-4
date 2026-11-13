@@ -3733,32 +3733,35 @@ whatsapp:
               peso: 1
               steps:
                 - type: image
-                  drive_url: https://drive.google.com/file/d/1oqfJBXGYJD9Cwj5AJEuDJrHL1DqpAVGx/view?usp=drive_link
+                  drive_url: https://drive.google.com/file/d/1SUHmp5XWh6JQ-eqdtYlAc3hMSkVVOQxb/view?usp=drive_link
                   caption_variants:
                     - |-
-                      Recupera tus noches y tus domingos 💜🙏
+                      Hola de nuevo. 💛 Veo que te quedaste con la duda sobre el Kit de Estimulación y Gimnasia Cerebral 🧠✨
 
-                      Te soy sincera… 🥺
-                      Sé lo que es salir de la cuna y seguir trabajando en casa, buscando ideas en el celular hasta tarde, mientras tu familia te espera 😔
+                      Así está organizado el material: 16 carpetas con +170 libros ilustrados y +15 fichas cognitivas, listas para imprimir 🧩
 
-                      No quiero que tú sigas así ❤️
+                      *¿Por dónde empezar?*
+                      👶 Niños pequeños: Grafomotricidad, Colorear, Coordinación Bilateral y Libros Ilustrados.
+                      🎒 Edad escolar: Lógico-Matemáticas, Caligrafía, Atención y Memoria y Kit Didáctico.
+                      🧑 Jóvenes y adultos: Funciones Ejecutivas, Gimnasia Cerebral, Estimulación Cognitiva y Regulación Emocional.
 
-                      Por eso *ahora mismo* te dejo *Mi Guardería Lista* con un precio especial solo para ti 🎁
+                      Todo por un solo pago de *S/10*. 💛
 
-                      ❌ Antes: ~S/10~
-                      ✅ *Hoy: S/7* 😊
+                      Cualquier duda, aquí estoy. 😊
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1YjX633Min_Gq-ayqYMwLQM7kT74mB1HD/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      Sé que a veces se pasa por alto un mensaje 💛 y no quiero insistir más de la cuenta.
 
-                      Te llevas *TODO*:
-                      🧸 *+120 actividades listas* para niños de 0 a 3 años
-                      📅 *Calendario de 30 Días*
-                      📝 *Planificador Semanal*
-                      🖼️ *Carteles de Rutina para el Aula*
-                      👀 *Fichas de Observación Infantil*
-                      🤗 *Guía de Acogida y Adaptación*
+                      *Última oportunidad para potenciar el cerebro de tu hijo hoy, no "después"*
 
-                      Tú mereces disfrutar tu trabajo, no vivir cansada 🥰✨
+                      Capaz pensaste que te iba a tomar mucho tiempo, o que tu hijo no se iba a enganchar. Pero esa tarde tranquila sigue a tu alcance.
 
-                      Si te interesa recibirlo responde *YAPE* o *PLIN* 👇💜
+                      Por eso el Kit baja de S/10 a *S/5*, este es mi último mensaje sobre esto.
+
+                      Responde *YAPE* o *PLIN* y te paso los datos. 💛
                   delay_after_sec: 6
                 - type: image
                   drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
