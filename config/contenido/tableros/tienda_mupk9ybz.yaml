@@ -12914,9 +12914,6 @@ whatsapp:
       tipo: seguimientos
       x: 869
       y: 24409
-      presenta:
-        - "@tienda:basico"
-        - "@tienda:full"
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
