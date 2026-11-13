@@ -488,11 +488,19 @@ function colorDelNombre(nombre: string): string {
  * el que va a cobrar, no me preocupa». Su avatar arriba a la derecha y su nombre debajo, como su dibujo. Si cobra
  * «por defecto» (la tienda sin cobrador o el cobrador sin cuenta en este país), lo dice. Sin foto: la silueta.
  */
-function QuienCobraEnElInicio({ pais }: { pais?: string }) {
+function QuienCobraEnElInicio({ pais, deLejos = 1 }: { pais?: string; deLejos?: number }) {
   const ctx = useContext(Contexto);
   const q = pais ? ctx?.quienCobra?.[pais] : undefined;
   const [roto, setRoto] = useState(false);
+  // Dónde está, sin la escala (offsetLeft no la cuenta): para correrlo a la derecha de la bandera cuando ésta crece.
+  const caja = useRef<HTMLDivElement>(null);
+  const [izquierda, setIzquierda] = useState(160);
+  useEffect(() => {
+    if (caja.current) setIzquierda(caja.current.offsetLeft);
+  }, [q?.nombre, q?.porDefecto]);
   if (!q) return null;
+  // La bandera mide ~56 px y crece igual (`deLejos`): el cobrador empieza siempre a su derecha.
+  const correr = Math.max(0, 56 * deLejos + 8 - izquierda);
   const foto = String(q.foto ?? "").trim();
   const nombreCorto = q.nombre.trim().split(/\s+/)[0] || q.nombre;
   const deLaGaleria = foto.startsWith("/avatares/");
@@ -500,9 +508,13 @@ function QuienCobraEnElInicio({ pais }: { pais?: string }) {
   const colorElegido = /^#[0-9a-f]{6}$/i.test(String(q.color ?? "").trim()) ? String(q.color).trim() : "";
   return (
     <div
+      ref={caja}
       role="button"
       tabIndex={0}
       className="nodrag pointer-events-auto absolute -right-6 -top-5 flex cursor-pointer flex-col items-center"
+      // Crece al alejar, como la bandera (13/11/2026, él: «al alejarse se sigue viendo grande, igual con el cobrador»).
+      // Hacia arriba y a la derecha de la bandera: no tapa la bandera ni el nombre del país (que crece hacia abajo).
+      style={{ transform: `translateX(${correr}px) scale(${deLejos})`, transformOrigin: "bottom left" }}
       title={`Cobra aquí: ${q.nombre}${q.porDefecto ? " (por defecto: los Datos para pago del país)" : ""}.\nClic: cambiar quién cobra en cada país.`}
       onClick={(e) => {
         e.stopPropagation();
@@ -582,7 +594,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
       }}
       title={conectado ? undefined : "Desconectado: arrastra el punto naranja hasta la primera ficha de esta ruta."}
     >
-      <QuienCobraEnElInicio pais={f.pais} />
+      <QuienCobraEnElInicio pais={f.pais} deLejos={deLejos} />
       <LogoDelCanal tamano={44} />
       {/* La bandera, grande, encima del Inicio (crece al alejar). DOBLE CLIC: cambiar el país de esta área (12/11/2026,
           él: «los velos tienen una bandera arriba a la izquierda… dar doble clic en su bandera y seleccionar el país»). */}
@@ -615,7 +627,8 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
       )}
       {/* Su país, solo el nombre, debajo del Inicio (crece al alejar). */}
       <div
-        className="pointer-events-none absolute left-0 top-full mt-1 whitespace-nowrap text-xl font-black leading-none text-slate-700"
+        // Blanco con la pizarra oscura (13/11/2026, él: «no se pueden ver sobre el fondo oscuro»).
+        className={`pointer-events-none absolute left-0 top-full mt-1 whitespace-nowrap text-xl font-black leading-none ${ctx?.tema === "oscuro" ? "text-white" : "text-slate-700"}`}
         style={{ transform: `scale(${deLejos})`, transformOrigin: "top left" }}
       >
         {nombreDelPais}
