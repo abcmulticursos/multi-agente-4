@@ -11721,8 +11721,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mweg7vsa-v6h68
       tipo: mensaje
-      x: -3498
-      y: 17094
+      x: 4400
+      y: 17468
       steps:
         - type: text
           body_variants:
@@ -12073,8 +12073,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwei09n9-5ugnj
       tipo: seguimientos
-      x: -3168
-      y: 16599
+      x: 4730
+      y: 16973
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -12519,8 +12519,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwelg57r-hvdw9
       tipo: mensaje
-      x: -2475
-      y: 17259
+      x: 5423
+      y: 17633
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -12640,8 +12640,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwelg57r-k0c2i
       tipo: seguimientos
-      x: -2288
-      y: 16852
+      x: 5665
+      y: 17215
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -13099,6 +13099,81 @@ whatsapp:
           activa_oferta: true
           ignora_silencio: true
           ignora_tardio: true
+    - id: f-mwet8o4z-3toub
+      tipo: cobro
+      x: 6523
+      y: 17138
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *A través de Nequi o Daviplata*
+
+              {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:full"
+        metodos: true
+    - id: f-mwet8o4z-6y6hz
+      tipo: cobro
+      x: 6512
+      y: 17919
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *A través de Nequi o Daviplata*
+
+              {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwet8o4z-hq0iv
+      tipo: entregar
+      x: 7436
+      y: 17149
+      producto_id: "@tienda:full"
+      entregas:
+        - "@tienda:full"
+    - id: f-mwet8o4z-8af33
+      tipo: entregar
+      x: 7447
+      y: 17875
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mwet8o4z-4dqj1
+      tipo: regalo
+      x: 8063
+      y: 17567
+      titulo: Regalo
   cables:
     - id: c-mwcazaok-glm60
       de: f-mwcazaoj-bn8iw
@@ -13947,6 +14022,42 @@ whatsapp:
       de: f-mweg7vsa-v6h68
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwelg57r-hvdw9
+    - id: c-mwet8o4z-0az7x
+      de: f-mwet8o4z-3toub
+      salida: pagado
+      a: f-mwet8o4z-hq0iv
+    - id: c-mwet8o4z-x1cuc
+      de: f-mwet8o4z-6y6hz
+      salida: pagado
+      a: f-mwet8o4z-8af33
+    - id: c-mwet8o4z-es73m
+      de: f-mwet8o4z-hq0iv
+      salida: siguiente
+      a: f-mwet8o4z-4dqj1
+      vista: cable
+    - id: c-mwet8o4z-xz41c
+      de: f-mwet8o4z-8af33
+      salida: siguiente
+      a: f-mwet8o4z-4dqj1
+      vista: cable
+    - id: c-mwet922a-8kk
+      de: f-mwelg57r-hvdw9
+      salida: btn:ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+      a: f-mwet8o4z-3toub
+    - id: c-mwet93ys-zwi
+      de: f-mwelg57r-hvdw9
+      salida: btn:394bf664-5e29-4d43-bc0f-cbda4e7c675e
+      a: f-mwet8o4z-6y6hz
+    - id: c-mwet9p96-746
+      de: f-mwet8o4z-3toub
+      salida: sin_pago
+      a: f-mwelg57r-k0c2i
+      a_espejo: e-mwet9jnu-ivia
+    - id: c-mwet9qpu-xtv
+      de: f-mwet8o4z-6y6hz
+      salida: sin_pago
+      a: f-mwelg57r-k0c2i
+      a_espejo: e-mwet9mfm-h1z0
   cajas:
     - id: velo-mwcazaol-0
       x: -869
@@ -14109,3 +14220,11 @@ whatsapp:
       ficha: f-mwdnvros-uookl
       x: 2068
       y: 21912
+    - id: e-mwet9jnu-ivia
+      ficha: f-mwelg57r-k0c2i
+      x: 6831
+      y: 16786
+    - id: e-mwet9mfm-h1z0
+      ficha: f-mwelg57r-k0c2i
+      x: 6787
+      y: 17556
