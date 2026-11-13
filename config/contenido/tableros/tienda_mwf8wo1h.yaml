@@ -4051,8 +4051,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwfb7n22-fz8mr
       tipo: mensaje
-      x: 3542
-      y: 5753
+      x: 3597
+      y: 5709
       steps:
         - type: text
           body_variants:
@@ -4085,6 +4085,473 @@ whatsapp:
       tipo: cobro
       x: 3322
       y: 5313
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *Te comparto los medios de pago:* 👇
+
+              🟣🟢 *Yape o Plin:* 966254785  
+              💳 *BCP:* 55015143617017
+              🔑 *Desde otro banco (CCI)*
+                 ➜ 00255011514361701729
+              👤 *A nombre:* Leinner Cordova H.
+
+              😊 Estás a 1 paso de recibir todo tu material 👇
+              📸 Envíar el comprobante por aquí
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚠️ Quedan pocos cupos con el precio actual + regalos incluidos.
+
+              Después de eso, el precio sube y ya no incluye los bonos.
+
+              Ya estoy preparando tu material para enviarte ✅
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        metodos: true
+    - id: f-mwfbnfx1-8pnz5
+      tipo: mensaje
+      x: 2486
+      y: 6655
+      titulo: Presentación (botón SÍ)
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              ¡Hola! Qué gusto tenerte por aquí 👋
+
+              ¿Te ha pasado que a los 10 minutos de la tarea tu hijo o hija ya está distraído con el celular o la tele? 😔📱 Quieres que ese rato deje de ser una pelea y se convierta en algo que de verdad le ayude a aprender. ✨
+
+              No es que sea flojo, es que nadie le ha enseñado *cómo* estimular su memoria y concentración.
+
+              Te muestro algo que te va a ayudar. 👇
+          delay_after_sec: 6
+        - type: video
+          drive_url: https://drive.google.com/file/d/1qTEau0efp_5gJoC_tW9rCrPmKo9KmEgJ/view?usp=drive_link
+          caption_variants:
+            - |-
+              Te presento el *Kit de Estimulación y Gimnasia Cerebral.* 🚀
+
+              El primer sistema basado en *TRIADA* :   el método que entrena la mente, acompaña la frustración y te da claridad sobre el desarrollo de tu hijo, los tres a la vez.
+
+              Cada dinámica está pensada para sostener la atención en el único momento en que un niño realmente aprende: jugando, sin darse cuenta de que está aprendiendo.
+
+              Más de 700 actividades, listas para usar desde hoy.
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1fIltKK0s1aQt3m43g-Vrl-i69pxP8UwM/view?usp=drive_link
+          caption_variants:
+            - |-
+              Eso que te conté hoy tiene nombre: *Mi Guardería Lista* 💜
+
+              *+120 actividades listas* para niños de 0 a 3 años, pensadas para lo que cada etapa necesita: sentidos, movimiento, lenguaje, música, creatividad y juego.
+
+              Funciona así de simple: *abres, eliges y aplicas.*
+
+              Cada actividad ya te dice qué hacer, qué materiales usar y qué estimula en el niño. Tú solo llegas al aula y empiezas ✨
+
+              Y para que tengas la semana resuelta, uses materiales que ya tienes y *no te lleves más trabajo a casa*,
+              también te llevas estos *bonos de regalo* 👇
+
+              🎁 *Calendario de 30 Días*: sabes qué aplicar cada día
+              🎁 *Planificador Semanal*: tu planificación lista para la directora
+              🎁 *Carteles de Rutina para el Aula*: orden y calma en el día
+              🎁 *Fichas de Observación Infantil*: registras el avance de cada niño
+              🎁 *Guía de Acogida y Adaptación*: para el llanto de los primeros días
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
+              Una sesión de estimulación en academia cuesta desde S/80 a más.
+
+              Hoy te llevas *TODO EL KIT COMPLETO* por solo *S/10* — _(diez soles, pago único y acceso de por vida)_.
+
+              Los que empiezan hoy son los que dejan de improvisar,  solo asignan una actividad a su hijo y empiezan⏳
+
+               Aceptamos: 
+              💳 *Yape o Plin*
+              💳 *Transferencia*
+
+              Nos envías el comprobante de pago por aquí 📸 y apenas lo confirmemos, te enviamos todo el material. 🙌
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - ¿Con qué método de pago te gustaría adquirirlo? 😊
+          delay_after_sec: 4
+      presenta:
+        - ptfig_figurarte
+    - id: f-mwfbnfx1-i8jad
+      tipo: seguimientos
+      x: 2761
+      y: 6369
+      vista_compra:
+        f-mvw3kh4y-eknk7:2: cable
+        f-mvvo0a7c-uyvc:2: cable
+        f-mvw3kh4y-eknk7:1: cable
+        f-mvvo0a7c-uyvc:1: cable
+      seguimientos:
+        - id: s-mwfbnfx2-nzgtz
+          minutos: 30
+          variantes:
+            - id: v-mwfbnfx2-udpqp
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1SUHmp5XWh6JQ-eqdtYlAc3hMSkVVOQxb/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      Hola de nuevo. 💛 Veo que te quedaste con la duda sobre el Kit de Estimulación y Gimnasia Cerebral 🧠✨
+
+                      Así está organizado el material: 16 carpetas con +170 libros ilustrados y +15 fichas cognitivas, listas para imprimir 🧩
+
+                      *¿Por dónde empezar?*
+                      👶 Niños pequeños: Grafomotricidad, Colorear, Coordinación Bilateral y Libros Ilustrados.
+                      🎒 Edad escolar: Lógico-Matemáticas, Caligrafía, Atención y Memoria y Kit Didáctico.
+                      🧑 Jóvenes y adultos: Funciones Ejecutivas, Gimnasia Cerebral, Estimulación Cognitiva y Regulación Emocional.
+
+                      Todo por un solo pago de *S/10*. 💛
+
+                      Cualquier duda, aquí estoy. 😊
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1YjX633Min_Gq-ayqYMwLQM7kT74mB1HD/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      Sé que a veces se pasa por alto un mensaje 💛 y no quiero insistir más de la cuenta.
+
+                      *Última oportunidad para potenciar el cerebro de tu hijo hoy, no "después"*
+
+                      Capaz pensaste que te iba a tomar mucho tiempo, o que tu hijo no se iba a enganchar. Pero esa tarde tranquila sigue a tu alcance.
+
+                      Por eso el Kit baja de S/10 a *S/5*, este es mi último mensaje sobre esto.
+
+                      Responde *YAPE* o *PLIN* y te paso los datos. 💛
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1T627F-kWnhS3YZNhB6BmKScUyueuOuD3/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      🔴 {*Para adquirirlo responde el método de pago que prefieras*|*Si deseas adquirirlo, indícanos qué método de pago prefieres*|*Para adquirir FIGURARTE, solo responde con el método de pago de tu preferencia*} 👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ {*Si lo llevas en los próximos 10 minutos*|*Si decides adquirirlo durante los próximos 10 minutos*|*Aprovecha y llévatelo dentro de los próximos 10 minutos*} 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwfbnfx2-9dq4p
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-da0va
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-ms6qf
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-0nctj
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      📈 *{MUCHAS MAMITAS Y MAESTROS CONFÍAN EN NOSOTROS|CADA VEZ MÁS MAMITAS Y MAESTROS ELIGEN CONFIAR EN NOSOTROS|SOMOS LA ELECCIÓN DE MUCHAS MAMITAS Y MAESTROS}*
+
+                      RECUERDA: Nuestra oferta es de *{{PRECIO_BASE}}*
+
+                      *{NO DEJES PASAR ESTA OPORTUNIDAD|¡APROVECHA ESTA GRAN OPORTUNIDAD!|¡NO TE QUEDES SIN APROVECHAR ESTA OFERTA!}*
+
+                      💰 *Hoy puedes obtener todo por solo {{PRECIO_BASE}}*
+                      ✅ Pago único, acceso de por vida.
+                      📲 Apenas confirmes, te envío el material completo y sus bonos de inmediato por aquí.
+
+                      {{METODO_DE_PAGO_1}}
+
+                      Me mandas el comprobante y enseguida te llegan 💛
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwfbnfx2-9dq4p
+                      enabled: false
+                      title: YAPE
+                      keywords:
+                        - yape
+                        - llape
+                        - iape
+                        - con yape
+                        - yapeo
+                        - a donde yapeo
+                        - como yapeo
+                      color: esmeralda
+                      steps:
+                        - type: text
+                          body_variants:
+                            - "Genial puees pagar al siguiente número:"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envías tu comprobante y tu acceso será al instante
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-da0va
+                      enabled: false
+                      title: PLIN
+                      keywords:
+                        - pli
+                        - plin
+                        - pln
+                        - pilin
+                        - con pln
+                        - plinear
+                        - tengo plin
+                      color: ambar
+                      steps:
+                        - type: text
+                          body_variants:
+                            - Chevere puedes pagar al siguiente enlace
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{LISTA_METODOS_POR_PAIS}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-ms6qf
+                      enabled: false
+                      title: BCP
+                      keywords:
+                        - bcp
+                        - transferencia
+                        - con bcp
+                        - trasfencia
+                        - traferencia
+                        - traferir
+                        - transferir
+                        - trnsferencia
+                      color: violeta
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                    - id: d-mwfbnfx2-0nctj
+                      enabled: false
+                      title: QUIERE COMPRAR
+                      keywords:
+                        - quiero comprar
+                        - como pago
+                        - voy a pagar
+                        - a donde pago
+                        - quiero pagar
+                      color: azul
+                      steps:
+                        - type: text
+                          body_variants:
+                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - "{{METODO_DE_PAGO_1}}"
+                          delay_after_sec: 6
+                          enabled: false
+                        - type: text
+                          body_variants:
+                            - luego nos envias tu comprobante y tendrás acceso al instante.
+                          delay_after_sec: 6
+                          enabled: false
+                  enabled: false
+        - id: s-mwfbnfx2-wzker
+          minutos: 480
+          variantes:
+            - id: v-mwfbnfx2-d1cie
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1uqd9dU7UZGHZQCbHDLKAspSH3WC6GUby/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      🚨⚗️ *{¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS!!|¡PROMOCIÓN FLASH DISPONIBLE! ¡APROVECHA ESTOS 20 MINUTOS!|¡OFERTA ESPECIAL POR TIEMPO LIMITADO! ¡SOLO 20 MINUTOS!}* ⏰🔥
+
+                      📚️ *{{Producto_BASE}}* a tan solo 💰️ *{{precio_BASE}}!!*
+
+                      Por tiempo limitado!! 😱
+
+                      🤗 {*Ya puedes adquirir estos bonitos libros para colorear a un super precio*, apresúrate que la oferta está casi por terminar|*Ahora puedes adquirir estos hermosos libros para colorear a un precio especial*, ¡aprovecha antes de que termine la oferta!|*Adquiere estos lindos libros para colorear a un precio increíble*, ¡no esperes más porque la promoción está por finalizar!} 🏃‍♀️
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      *{⚠️ No dejes que la oportunidad se te escape!|⚠️ ¡No dejes pasar esta oportunidad!|⚠️ ¡Aprovecha esta oportunidad antes de que se escape!}* 💫
+
+                      ✅ *{PARA ADQUIRIRLO|PARA DESCARGARLO|PARA REALIZAR TU PAGO}* 🫰🏼
+
+                      🔴 *Realiza una inversión mínima de tan solo* {{PRECIO_BASE}}* 👇🏼
+
+                      {{METODO_DE_PAGO_1}}
+
+                      🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
+                  delay_after_sec: 6
+          activa_oferta: true
+    - id: f-mwfbnfx2-33gln
+      tipo: mensaje
+      x: 3608
+      y: 6754
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Te comparto los medios de pago: 👇
+
+              💳 Yape o Plin: 931322111
+              💳 BCP: 55091152401066
+
+              👤 A nombre: David Cotrina F.
+
+              😊 Estás a 1 paso de recibir todo tu material 👇
+
+              🧾 Enviar el comprobante por aquí
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚠️ SOLO quedan 5 cupos con descuento + regalos sorpresa.
+
+              Después sube al precio normal y ya no incluye los bonos especiales.
+
+              Iré preparando todo el material para enviarte ✅
+          delay_after_sec: 6
+    - id: f-mwfbnfx2-1c5m8
+      tipo: regalo
+      x: 4136
+      y: 6655
+    - id: f-mwfbnfx2-npe5d
+      tipo: cobro
+      x: 3333
+      y: 6358
       steps:
         - type: text
           body_variants:
@@ -4283,6 +4750,10 @@ whatsapp:
       de: f-mwfb7n22-zhc69
       salida: siguiente
       a: f-mwfb7n22-e6k5g
+    - id: c-mwfbnfx2-nlhtc
+      de: f-mwfbnfx1-8pnz5
+      salida: siguiente
+      a: f-mwfbnfx1-i8jad
   cajas:
     - id: manta-fig_inicio
       x: 108
@@ -4344,6 +4815,13 @@ whatsapp:
     - id: velo-mwfb7n22-0
       x: 2365
       y: 5236
+      ancho: 2376
+      alto: 902
+      titulo: Nueva caja
+      color: "#16a34a"
+    - id: velo-mwfbnfx2-0
+      x: 2376
+      y: 6281
       ancho: 2376
       alto: 902
       titulo: Nueva caja
