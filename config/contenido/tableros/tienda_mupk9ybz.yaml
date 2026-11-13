@@ -11729,14 +11729,24 @@ whatsapp:
             - |-
               *Hola!! {te saluda Andrea* 🙋‍♀️ ¡un gusto saludarte! 😊|*soy Andrea* 🙋‍♀️ ¡encantada de saludarte! 😊|*Andrea te escribe* 🙋‍♀️ ¡qué lindo tenerte por acá! 😊}
 
-              🧠 *¿A tu hijo le cuesta aprender a leer y se distrae fácilmente?*
-              El problema no es la falta de capacidad, sino la manera en que se le enseña. 😰
+              ¿Te pasa que...?
 
-              *Con {{PRODUCTO_BASE}}* vas a transformar su aprendizaje en diversión. *¡Jugando e interactuando sobre las hojas, va a mejorar su lectura de manera natural!* 📚🥳
+              ⏰ *Pasas horas tratando de enseñar a leer a tu hijo?.*
+              🔎 *Buscas actividades en diferentes lugares.*
+              📖 *Tus hijos no comprenden lo que leen.*?
+              😴 *La gramática y la ortografía les parecen aburridas.*
 
-              ✅ Ideal para mantener su atención *sin necesidad de obligarlo*.
+              Si te identificaste con alguno, esto es para ti 👇
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              Por eso creamos el super KIT de
+              📚 *{{PRODUCTO_BASE}}*
 
-              ✅ Funciona tanto en casa como en el aula. {De manera individual o en grupo 👩‍👦‍👦|Solo o acompañado 👩‍👦‍👦|De forma individual o con otros chicos 👩‍👦‍👦}
+              Una colección digital con *más de 250 páginas en PDF imprimible* para enseñar las Sílabas de una manera mucho más visual, práctica y divertida. 🔠
+
+              💡Ideal para niños que se aburren con los métodos tradicionales.
           delay_after_sec: 6
         - type: text
           body_variants:
