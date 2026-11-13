@@ -3182,6 +3182,83 @@ whatsapp:
       tipo: regalo
       x: 4367
       y: 3663
+    - id: f-mwfa70ry-6ztan
+      tipo: mensaje
+      x: 2409
+      y: 4334
+      titulo: Presentación (botón SÍ)
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola maestra 👋 Soy *Sofía*, asesora de *Mi Guardería Lista*.
+
+              ¿Terminas tu jornada con los bebés y, en vez de descansar, te toca buscar en el celular qué hacer mañana? 😮‍💨
+
+              Y cuando no encuentras nada, *repites las mismas actividades* y los niños se aburren a los 10 minutos.
+
+              *No es falta de creatividad.* Nadie te dio ideas pensadas de verdad para niños de 0 a 3 años.
+
+              Tengo algo que te va a cambiar eso, te envío un audio rapidito, ¿sí? 👇
+          delay_after_sec: 6
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1cLPtqiMfZ5-06xi4-i5zXWq2B7JrsS5s/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 4
+        - type: video
+          drive_url: https://drive.google.com/file/d/1TXyEPalJGYacdgSh193VYXTB5LQK_CeQ/view?usp=sharing
+          caption_variants:
+            - |-
+              Eso que te conté hoy tiene nombre: *Mi Guardería Lista* 💜
+
+              *+120 actividades listas* para niños de 0 a 3 años, pensadas para lo que cada etapa necesita: sentidos, movimiento, lenguaje, música, creatividad y juego.
+
+              Funciona así de simple: *abres, eliges y aplicas.*
+
+              Cada actividad ya te dice qué hacer, qué materiales usar y qué estimula en el niño. Tú solo llegas al aula y empiezas ✨
+
+              Y para que tengas la semana resuelta, uses materiales que ya tienes y *no te lleves más trabajo a casa*,
+              también te llevas estos *bonos de regalo* 👇
+
+              🎁 *Calendario de 30 Días*: sabes qué aplicar cada día
+              🎁 *Planificador Semanal*: tu planificación lista para la directora
+              🎁 *Carteles de Rutina para el Aula*: orden y calma en el día
+              🎁 *Fichas de Observación Infantil*: registras el avance de cada niño
+              🎁 *Guía de Acogida y Adaptación*: para el llanto de los primeros días
+          delay_after_sec: 4
+        - type: image
+          drive_url: https://drive.google.com/file/d/1R1y9haGKlVOPVwbXMQN2kSYsh5B3qnkE/view?usp=drive_link
+          caption_variants:
+            - |-
+              Estas son maestras de cuna y nido que dejaron de planificar de noche y ahora llegan al aula con una actividad nueva cada día.
+              Con el mismo algodón, botellas y cintas que ya tienes en tu aula 🧸
+
+              *¿CÓMO FUNCIONA?*
+
+              📱 Realizas el pago de tu kit
+              📸 Nos envías el comprobante y en menos de 2 minutos recibes tu acceso en tu WhatsApp
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - |-
+              ❌ Precio antes: S/ ~69.90~
+
+              ✅ Hoy te llevarás *TODO Mi Guardería Lista* por solo *S/10*
+              _(Diez soles)_
+
+              ⚠️ Es una inversión única a este precio. Las maestras que se organizan primero son las que dejan de llevarse trabajo a casa.
+
+              🏧 Aceptamos Yape, Plin y transferencia.
+
+              🎁 Si confirmas tu pago en los próximos 10 minutos, te incluyo un regalo sorpresa ⏳
+          delay_after_sec: 4
+        - type: text
+          body_variants:
+            - Con què mètodo de pago te gustarìa adquirirlo? 😊
+          delay_after_sec: 4
+      presenta:
+        - ptfig_figurarte
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
