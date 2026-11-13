@@ -14736,6 +14736,16 @@ whatsapp:
       de: f-mwdbnotb-nbdmi
       salida: rep:rmwetuaux
       a: f-mweg7vsa-v6h68
+    - id: c-mwev628o-m2h
+      de: f-mwelg57r-k0c2i
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
+      a: f-mwet8o4z-3toub
+      vista: colita
+    - id: c-mwev680i-cbf
+      de: f-mwelg57r-k0c2i
+      salida: btn:be42ec7d-7e31-467b-9c30-a81950daa9ce
+      a: f-mwet8o4z-6y6hz
+      vista: colita
   cajas:
     - id: velo-mwcazaol-0
       x: -869
