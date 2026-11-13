@@ -4051,8 +4051,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwfb7n22-fz8mr
       tipo: mensaje
-      x: 3377
-      y: 5599
+      x: 3542
+      y: 5753
       steps:
         - type: text
           body_variants:
@@ -4079,8 +4079,39 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwfb7n22-86m3b
       tipo: regalo
-      x: 4037
-      y: 5621
+      x: 4125
+      y: 5610
+    - id: f-mwfbjn4m-7my0
+      tipo: cobro
+      x: 3322
+      y: 5313
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *Te comparto los medios de pago:* 👇
+
+              🟣🟢 *Yape o Plin:* 966254785  
+              💳 *BCP:* 55015143617017
+              🔑 *Desde otro banco (CCI)*
+                 ➜ 00255011514361701729
+              👤 *A nombre:* Leinner Cordova H.
+
+              😊 Estás a 1 paso de recibir todo tu material 👇
+              📸 Envíar el comprobante por aquí
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ⚠️ Quedan pocos cupos con el precio actual + regalos incluidos.
+
+              Después de eso, el precio sube y ya no incluye los bonos.
+
+              Ya estoy preparando tu material para enviarte ✅
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        metodos: true
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
