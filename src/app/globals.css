@@ -1475,15 +1475,18 @@ input,
 }
 
 /* 🪞 LA FAMILIA DE ESPEJOS LATE (12/11/2026): al tocar la original o un espejo, todos se iluminan ~2,5 s. */
+/* (13/11/2026) Más fuerte y más largo: «está un poco apagada, no me doy cuenta cuáles son sus reflejos». Aro grueso
+   fucsia + halo cian amplio, 6 latidos (~4 s), y la ficha se adelanta un poco para que se note entre las demás. */
 .react-flow__node.tablero-brillo {
   border-radius: 14px;
-  animation: tablero-brillo 0.6s ease-in-out 4 alternate;
+  z-index: 1000 !important;
+  animation: tablero-brillo 0.65s ease-in-out 6 alternate;
 }
 @keyframes tablero-brillo {
   from {
-    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0);
+    box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.5), 0 0 12px 4px rgba(34, 211, 238, 0.4);
   }
   to {
-    box-shadow: 0 0 0 6px rgba(217, 70, 239, 0.9), 0 0 34px 12px rgba(34, 211, 238, 0.85);
+    box-shadow: 0 0 0 10px rgba(217, 70, 239, 1), 0 0 60px 26px rgba(34, 211, 238, 0.95);
   }
 }

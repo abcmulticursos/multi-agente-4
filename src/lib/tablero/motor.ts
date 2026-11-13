@@ -4400,17 +4400,28 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // Las opciones de la ficha donde está (y de sus seguimientos) que llevan a pagar: un Cobro o el Order bump.
   const opcionesDeCompra = () => {
     const duenas = [fichaAqui, segAqui].filter((x): x is FichaDelTablero => !!x);
-    const haciaPagar = duenas.flatMap((duena) => {
+    const todas = duenas.flatMap((duena) => {
       const { botones, cuadritos } = opcionesDe(pasosQueValen(convo.id, duena));
       return [
         ...botones.map((b) => ({ duena, salida: `btn:${b.id}`, boton: b.id as string | null, cuadrito: null as BubbleDecision | null })),
         ...cuadritos.map((d) => ({ duena, salida: `dec:${d.id}`, boton: null as string | null, cuadrito: d as BubbleDecision | null })),
         ...eligeDeLaFicha(duena).map((id) => ({ duena, salida: `elige:${id}`, boton: null as string | null, cuadrito: null as BubbleDecision | null })),
-      ].filter((o) => {
-        const destino = t.fichas.find((x) => x.id === cableDeLaSalida(t, duena.id, o.salida)?.a);
-        return destino?.tipo === "cobro" || destino?.tipo === "intro_ob";
-      });
+      ];
     });
+    const destinoDe = (o: (typeof todas)[number]) => t.fichas.find((x) => x.id === cableDeLaSalida(t, o.duena.id, o.salida)?.a);
+    let haciaPagar = todas.filter((o) => {
+      const destino = destinoDe(o);
+      return destino?.tipo === "cobro" || destino?.tipo === "intro_ob";
+    });
+    // EL «SÍ» ESCRITO SIGUE AL BOTÓN QUE LLEVA A COMPRAR (13/11/2026, su 468 de GRAFISMO AR): su «SI QUIERO» lleva a
+    // un MENSAJE (su «INTRO DE ORDER BUMP», hecha con un Mensaje) y de ahí a los Cobros. Solo se miraban Cobros e
+    // intros de order bump, así que «sí», «vale», «quiero pagar» no encontraban camino y la IA daba vueltas. Ahora,
+    // si no hay ninguno directo, vale la opción desde cuyo destino se llega a un Cobro (por cables): lo mismo que tocarla.
+    if (haciaPagar.length === 0)
+      haciaPagar = todas.filter((o) => {
+        const destino = destinoDe(o);
+        return !!destino && destino.id !== o.duena.id && alcanzables(t, [destino.id]).some((id) => t.fichas.find((x) => x.id === id)?.tipo === "cobro");
+      });
     const destinos = new Set(haciaPagar.map((o) => cableDeLaSalida(t, o.duena.id, o.salida)?.a));
     const cobros = [...destinos].map((id) => t.fichas.find((x) => x.id === id)).filter((x): x is FichaDelTablero => x?.tipo === "cobro");
     return { haciaPagar, destinos, soloCobros: cobros.length === destinos.size ? cobros : [] };

@@ -78,7 +78,8 @@ const TEMA = {
   oscuro: { fondo: "#15161a", puntos: "#34373f", caja: "rgba(255,255,255,0.13)", tituloCaja: "#f1f5f9" },
 };
 /** El brillo del 🪞 espejo: dos halos, cian y fucsia, como un letrero de neón. */
-const ESPEJO_NEON = "0 0 0 1px #a5f3fc, 0 0 10px 2px rgba(34,211,238,0.85), 0 0 26px 6px rgba(217,70,239,0.35)";
+// (13/11/2026: más encendido; él no distinguía los espejos de las demás fichas.)
+const ESPEJO_NEON = "0 0 0 2px #67e8f9, 0 0 14px 4px rgba(34,211,238,1), 0 0 36px 10px rgba(217,70,239,0.6)";
 const PUNTO_VERDE ="!h-[21px] !w-[21px] !border-2 !border-white !bg-emerald-500";
 const PUNTO_NARANJA = "!h-[21px] !w-[21px] !border-2 !border-white !bg-orange-500";
 /** Los conectores del 🔀 Ruteador (03/11/2026: «sus conectores rosa»). */
@@ -351,6 +352,18 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
         !conCable(f.id, "siguiente")
       )
         faltas.push({ ficha: f.id, salida: s.clave, motivo: "Si no responde a esta oferta, ¿a dónde va? (en la venta de siempre, al Regalo)." });
+    }
+    // EL CALLEJÓN (13/11/2026). Él: «necesito que algo me indique si la compra no se va a realizar… verlo en el tablero
+    // rápidamente antes de testear». Un Mensaje u Order bump de la venta (antes de entregar) desde el que, por ningún
+    // cable (también los de sus Seguimientos), se llega a un Cobro, una Entrega, un asesor o un workflow: ahí el cliente
+    // no puede comprar. Las cajas de Seguimientos no se miran solas: cuelgan de su ficha (un Cobro sigue abierto, las
+    // opciones de un Mensaje siguen valiendo), y esa ficha ya se revisa.
+    if ((f.tipo === "mensaje" || f.tipo === "intro_ob") && !trasUnaEntrega.has(f.id)) {
+      const llega = [...rutaDe(t, f.id)].some((id) => {
+        const x = t.fichas.find((y) => y.id === id);
+        return !!x && !x.apagada && ["cobro", "entregar", "humano", "workflow"].includes(x.tipo);
+      });
+      if (!llega) faltas.push({ ficha: f.id, salida: "callejon", motivo: "Callejón: desde aquí el cliente no llega a ningún Cobro (no puede comprar)." });
     }
   }
   return faltas;
@@ -2726,7 +2739,31 @@ export default function LienzoDelTablero({
   const [tirando, setTirando] = useState<{ de: string; salida: string } | null>(null);
   // «🔍 QUÉ FALTA CONECTAR»
   const [revisando, setRevisando] = useState(false);
-  const faltas = useMemo(() => (revisando ? faltasDelTablero(tablero, paisVisto, nombres) : null), [revisando, tablero, paisVisto, nombres]);
+  const faltasDeTodo = useMemo(() => (revisando ? faltasDelTablero(tablero, paisVisto, nombres) : null), [revisando, tablero, paisVisto, nombres]);
+  // REVISAR UNA SOLA RUTA (13/11/2026). Él: «esa lupa me muestra todo… yo normalmente hago una ruta y luego la copio».
+  // Se elige un país o una ruta de su Ruteador y solo cuenta lo que se alcanza desde ahí. "" = todo el tablero.
+  const [alcance, setAlcance] = useState("");
+  const alcances = useMemo(() => {
+    if (!revisando) return [];
+    const ops: Array<{ id: string; nombre: string }> = [];
+    for (const ini of tablero.fichas.filter((f) => f.tipo === "inicio" && !f.guardada)) {
+      const pais = ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países";
+      ops.push({ id: ini.id, nombre: `${pais} · todo el país` });
+      const ruta = rutaDe(tablero, ini.id);
+      for (const r of tablero.fichas.filter((f) => f.tipo === "reparto" && ruta.has(f.id)))
+        (r.reparto ?? []).forEach((o, i) => {
+          const a = tablero.cables.find((c) => c.de === r.id && c.salida === `rep:${o.id}`)?.a;
+          if (a) ops.push({ id: a, nombre: `${pais} · ${o.nombre || `Ruta ${i + 1}`}${o.peso > 0 ? "" : " (apagada)"}` });
+        });
+    }
+    return ops;
+  }, [revisando, tablero]);
+  const faltas = useMemo(() => {
+    if (!faltasDeTodo) return null;
+    if (!alcance || !tablero.fichas.some((f) => f.id === alcance)) return faltasDeTodo;
+    const ruta = rutaDe(tablero, alcance);
+    return faltasDeTodo.filter((x) => ruta.has(x.ficha));
+  }, [faltasDeTodo, alcance, tablero]);
   const faltasPorFicha = useMemo(() => {
     if (!faltas) return null;
     const m = new Map<string, Map<string, string>>();
@@ -3305,7 +3342,8 @@ export default function LienzoDelTablero({
               window.clearTimeout(apagarBrillo.current);
               apagarBrillo.current = window.setTimeout(
                 () => setNodos((ns) => ns.map((x) => (x.className === "tablero-brillo" ? { ...x, className: undefined } : x))),
-                2600
+                // (13/11/2026: 6 latidos, ~4 s; ver globals.css.)
+                4000
               );
             }
           }}
@@ -3496,23 +3534,62 @@ export default function LienzoDelTablero({
               )
             : despuesDelMas}
           {faltas && (
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow ${faltas.length ? "bg-red-100 text-red-900" : "bg-emerald-100 text-emerald-900"}`}>
-              {faltas.length === 0 ? (
-                "✅ No falta ninguna conexión"
-              ) : (
-                <>
-                  Faltan {faltas.length} ·{" "}
-                  <button
-                    type="button"
-                    className="underline"
-                    title={faltas.map((x) => `${numeroDe[x.ficha] ?? "▶"} · ${x.motivo}`).join("\n")}
-                    onClick={() => instancia.current?.fitView({ nodes: [...new Set(faltas.map((x) => x.ficha))].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 })}
-                  >
-                    verlas
-                  </button>
-                </>
+            <div className="relative flex flex-col items-start gap-1">
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={alcance}
+                  onChange={(e) => setAlcance(e.target.value)}
+                  title="Qué revisar: todo el tablero, un país o una ruta de su Ruteador"
+                  className="rounded-full border border-borde bg-tarjeta px-2 py-1 text-[11px] font-semibold text-tinta shadow"
+                >
+                  <option value="">🔍 Todo el tablero</option>
+                  {alcances.map((o) => (
+                    <option key={o.id + o.nombre} value={o.id}>
+                      {o.nombre}
+                    </option>
+                  ))}
+                </select>
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow ${faltas.length ? "bg-red-100 text-red-900" : "bg-emerald-100 text-emerald-900"}`}>
+                  {faltas.length === 0 ? (
+                    "✅ Sin faltas"
+                  ) : (
+                    <>
+                      Faltan {faltas.length} ·{" "}
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={() => instancia.current?.fitView({ nodes: [...new Set(faltas.map((x) => x.ficha))].map((id) => ({ id })), padding: 0.3, maxZoom: 1, duration: 500 })}
+                      >
+                        verlas todas
+                      </button>
+                    </>
+                  )}
+                </span>
+              </div>
+              {/* La lista, a la vista y no en un globo: cada línea lleva a su ficha. */}
+              {faltas.length > 0 && (
+                <ul className="max-h-56 w-[340px] max-w-[80vw] overflow-y-auto rounded-lg border border-red-200 bg-tarjeta p-1 text-[11px] text-tinta shadow-lg">
+                  {faltas.map((x, i) => (
+                    <li key={x.ficha + x.salida + i}>
+                      <button
+                        type="button"
+                        onClick={() => instancia.current?.fitView({ nodes: [{ id: x.ficha }], padding: 0.4, maxZoom: 1, duration: 500 })}
+                        className="flex w-full gap-1.5 rounded px-2 py-1 text-left hover:bg-red-50"
+                      >
+                        <span className="shrink-0 font-bold text-red-700">{numeroDe[x.ficha] ?? "▶"}</span>
+                        <span>
+                          {(() => {
+                            const f = tablero.fichas.find((y) => y.id === x.ficha);
+                            return f ? <b>{f.titulo?.trim() || ASPECTO[f.tipo].nombre} · </b> : null;
+                          })()}
+                          {x.motivo}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </span>
+            </div>
           )}
           {coincidentes && (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-900 shadow">
