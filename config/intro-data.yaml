@@ -4426,6 +4426,8 @@ ad_color_palette:
     value: "#e5ef4d"
   - label: "#75DDFF"
     value: "#75ddff"
+  - label: "#00AAFF"
+    value: "#00aaff"
 comment_automation:
   enabled: true
   accept_any: false
