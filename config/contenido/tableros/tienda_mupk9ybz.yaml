@@ -7949,6 +7949,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvrom-0mivz
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -7979,6 +7980,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-5mrzq
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -8008,6 +8010,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-4o7eh
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -8037,6 +8040,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-apsrl
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -8096,6 +8100,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvrom-lrbkj
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -8126,6 +8131,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-b92d8
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -8155,6 +8161,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-hvj70
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -8184,6 +8191,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvrom-5t1or
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -9119,6 +9127,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvroq-tfyd2
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -9149,6 +9158,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvroq-psh78
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -9178,6 +9188,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvroq-gfs81
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -9207,6 +9218,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvroq-dyxfo
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -9264,6 +9276,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-n3t4t
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -9294,6 +9307,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-nukci
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -9323,6 +9337,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-llcnl
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -9352,6 +9367,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-7kmaw
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -10287,6 +10303,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-94ouq
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -10317,6 +10334,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-479m9
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -10346,6 +10364,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-8a7ak
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -10375,6 +10394,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-xhl7e
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -10432,6 +10452,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvror-9ti7g
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -10462,6 +10483,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-gmjuw
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -10491,6 +10513,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-t2aas
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -10520,6 +10543,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvror-lf80q
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -11582,6 +11606,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvros-a5uv1
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -11612,6 +11637,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-bdfxt
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -11641,6 +11667,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-nlhzv
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -11670,6 +11697,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-r26p1
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
@@ -11729,6 +11757,7 @@ whatsapp:
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwdnvros-pgyoj
+                      enabled: false
                       title: Nequi
                       keywords:
                         - nequi
@@ -11759,6 +11788,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-3vw6a
+                      enabled: false
                       title: DAVIPLATA
                       keywords:
                         - Daviplata
@@ -11788,6 +11818,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-1rosf
+                      enabled: false
                       title: Bre-B
                       keywords:
                         - bre
@@ -11817,6 +11848,7 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                     - id: d-mwdnvros-waeba
+                      enabled: false
                       title: QUIERE COMPRAR
                       keywords:
                         - quiero comprar
