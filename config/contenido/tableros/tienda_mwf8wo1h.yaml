@@ -2791,6 +2791,29 @@ whatsapp:
               steps: []
       presenta:
         - ptfig_figurarte
+    - id: f-mwf9cf0q-i89e
+      tipo: mensaje
+      x: 3311
+      y: 3707
+      steps:
+        - type: text
+          body_variants:
+            - ¡Perfecto! 😊 Te enviaré parte del material para que puedas revisarlos y comprobar la calidad del contenido. ✨
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - 🎁✨ ¡Aquí tienes tu material!
+          delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: document
+          drive_url: https://drive.google.com/file/d/1e70ldJwBrvA_k5J1gUUd_ZxI9KVPUPa7/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
