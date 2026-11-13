@@ -4219,8 +4219,8 @@ whatsapp:
         - ptfig_figurarte
     - id: f-mwfbnfx1-i8jad
       tipo: seguimientos
-      x: 2761
-      y: 6369
+      x: 2948
+      y: 6380
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -4784,10 +4784,6 @@ whatsapp:
       de: f-mwfb7n22-zhc69
       salida: siguiente
       a: f-mwfb7n22-e6k5g
-    - id: c-mwfbnfx2-nlhtc
-      de: f-mwfbnfx1-8pnz5
-      salida: siguiente
-      a: f-mwfbnfx1-i8jad
   cajas:
     - id: manta-fig_inicio
       x: 108
