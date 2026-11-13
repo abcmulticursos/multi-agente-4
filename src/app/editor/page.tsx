@@ -21838,6 +21838,9 @@ function GalleryCaptionBubbleEditor({ item, onChange, onSnapshot, onEdit, id, on
               sinBotonesRepetidos(pasos[indice], pasos),
               ...pasos.slice(indice + 1),
             ]);
+            // La copia, elegida y a la vista en el visor (12/11/2026).
+            marcarSinDesplazar(true);
+            setBurbujaActiva(indice + 1);
           }}
           onToggleStep={(indice) => {
             const cuales = new Set(Array.isArray(indice) ? indice : [indice]);
@@ -21873,6 +21876,8 @@ function GalleryCaptionBubbleEditor({ item, onChange, onSnapshot, onEdit, id, on
           onPasteStep={(indice, nuevos) => {
             onSnapshot();
             aplicarPasos(pegarPasos(pasos, indice, nuevos.map((paso) => cloneJson(paso))));
+            marcarSinDesplazar(true);
+            setBurbujaActiva(indice + 1);
           }}
           onMoveStep={(desde, hasta, donde) => {
             const destino = donde === "after" ? hasta + 1 : hasta;
@@ -25245,7 +25250,7 @@ function ChatPreview({
         (step.texts.some((t) => t && t.trim()) || step.drive_url.trim())
     );
   useEffect(() => {
-    if (!useScrollContainer || activeStepIndex == null || !puedeDesplazar()) return;
+    if (!useScrollContainer || activeStepIndex == null || !puedeDesplazar(true)) return;
     const container = previewScrollRef.current;
     const node = container?.querySelector<HTMLDivElement>(
       `[data-preview-step="${activeStepIndex}"]`
@@ -25410,11 +25415,11 @@ function ChatPreview({
     try {
       texto = (await navigator.clipboard.readText()).trim();
     } catch {
-      setAvisoDelMenu("El navegador no dejó leer lo copiado. Acepta el permiso del portapapeles e inténtalo otra vez.");
+      setErrorDelMenu("El navegador no dejó leer lo copiado. Acepta el permiso del portapapeles e inténtalo otra vez.");
       return;
     }
     if (!texto) {
-      setAvisoDelMenu("No hay texto copiado. Copia un texto (Ctrl+C) y vuelve a intentarlo.");
+      setErrorDelMenu("No hay texto copiado. Copia un texto (Ctrl+C) y vuelve a intentarlo.");
       return;
     }
     onPasteStep(index, [{ ...emptyStep("text"), texts: [texto] }]);
@@ -25450,12 +25455,18 @@ function ChatPreview({
   //
   // Un aviso de dos segundos cuesta poco y evita que alguien dé tres veces a
   // duplicar creyendo que no funciona — y se encuentre tres copias.
-  const [avisoDelMenu, setAvisoDelMenu] = useState<string | null>(null);
+  //
+  // SIN EL AVISO VERDE (12/11/2026). Él: «el aviso verde que sale encima… cuando aparece mueve las burbujas y luego al
+  // desaparecer las burbujas regresan a su posición original; por ahora no necesito ese aviso». Ahora lo que se hizo se
+  // ve en la burbuja (la copia o la primera pegada quedan elegidas y a la vista), así que el aviso ya no se muestra.
+  // Los dos errores del portapapeles sí: flotando encima, sin mover nada.
+  const [, setAvisoDelMenu] = useState<string | null>(null);
+  const [errorDelMenu, setErrorDelMenu] = useState<string | null>(null);
   useEffect(() => {
-    if (!avisoDelMenu) return;
-    const t = window.setTimeout(() => setAvisoDelMenu(null), 3500);
+    if (!errorDelMenu) return;
+    const t = window.setTimeout(() => setErrorDelMenu(null), 3500);
     return () => window.clearTimeout(t);
-  }, [avisoDelMenu]);
+  }, [errorDelMenu]);
   // EL VISOR ES UN TELÉFONO Y SE QUEDA DEL ANCHO DE UN TELÉFONO.
   //
   // Al ensanchar la página, todo lo demás gana sitio —que es de lo que se
@@ -25464,13 +25475,13 @@ function ChatPreview({
   // sirve para lo único que sirve, comprobar cómo llega el mensaje.
   return (
     <div
-      className={`bn-visor rounded-xl border border-neutral-300 bg-[#efeae2] p-2 ${
+      className={`bn-visor relative rounded-xl border border-neutral-300 bg-[#efeae2] p-2 ${
         sinTopeDeAncho ? "" : "w-full max-w-[420px]"
       }`}
     >
-      {avisoDelMenu && (
-        <div className="mb-2 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-900">
-          ✅ {avisoDelMenu}
+      {errorDelMenu && (
+        <div className="pointer-events-none absolute inset-x-2 top-2 z-20 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-900 shadow">
+          {errorDelMenu}
         </div>
       )}
       <div className="bn-visor-cab mb-2 flex items-center justify-between gap-2">
@@ -37565,12 +37576,17 @@ function eliminarPieza(cfg: FullConfig, canal: ChannelKey, piezaId: string): { c
  * única acción que lleve a su cuadro editor debe ser un clic izquierdo». Durante un instante, los cajones y el visor no
  * se desplazan hacia la burbuja que se acaba de marcar.
  */
+// EL VISOR SÍ VA A LA NUEVA (12/11/2026). Él: «cuando duplique una burbuja en el visor, yo aparezca en la nueva burbuja,
+// seleccionada; cuando pegue 3 o más, encima de la primera; cuando cree una con lo copiado, en esa». Con `dejarElVisor`
+// el visor se desplaza a la burbuja marcada; los cajones siguen quietos (lo del clic izquierdo, 02/11).
 let noDesplazarHasta = 0;
-function marcarSinDesplazar(): void {
+let visorLibre = false;
+function marcarSinDesplazar(dejarElVisor = false): void {
   noDesplazarHasta = Date.now() + 600;
+  visorLibre = dejarElVisor;
 }
-function puedeDesplazar(): boolean {
-  return Date.now() >= noDesplazarHasta;
+function puedeDesplazar(enElVisor = false): boolean {
+  return Date.now() >= noDesplazarHasta || (enElVisor && visorLibre);
 }
 
 /**
@@ -38786,8 +38802,8 @@ function JourneyPreviewBlock({
     // Y SIN BOTONES REPETIDOS EN LA FICHA (18/10/2026, el del DNI): ver `sinBotonesRepetidos`.
     next.splice(index + 1, 0, sinBotonesRepetidos(step, steps));
     onStepsChange(next);
-    // (02/11/2026: la copia queda ELEGIDA, sin mover la pantalla —solo el clic izquierdo lleva a su cajón—.)
-    marcarSinDesplazar();
+    // (02/11/2026: la copia queda ELEGIDA sin mover los cajones —solo el clic izquierdo lleva a su cajón—; 12/11: el visor sí va.)
+    marcarSinDesplazar(true);
     setActiveStepIndex(index + 1);
   };
   const toggleStep = (index: number | number[]) => {
@@ -38866,6 +38882,9 @@ function JourneyPreviewBlock({
               ? (index, nuevos) => {
                   onSnapshot?.();
                   onStepsChange(pegarPasos(steps, index, nuevos));
+                  // La primera pegada, elegida y a la vista en el visor (12/11/2026).
+                  marcarSinDesplazar(true);
+                  setActiveStepIndex(index + 1);
                 }
               : undefined
           }
@@ -38944,8 +38963,8 @@ function StepEditorPreviewPair({
     const next = [...steps];
     next.splice(index + 1, 0, copy);
     onChange(next);
-    // (02/11/2026: la copia queda ELEGIDA, sin mover la pantalla; solo el clic izquierdo lleva a su cajón.)
-    marcarSinDesplazar();
+    // (02/11/2026: la copia queda ELEGIDA sin mover los cajones; solo el clic izquierdo lleva a su cajón. 12/11: el visor sí va.)
+    marcarSinDesplazar(true);
     setActiveStepIndex(index + 1);
   };
   const togglePreviewStep = (index: number | number[]) => {
@@ -39159,8 +39178,11 @@ function StepEditorPreviewPair({
           onRemoveStep={removePreviewStep}
           onPasteStep={(index, nuevos) => {
             onSnapshot();
-            // Pegar no lleva a su cajón (02/11/2026): solo el clic izquierdo.
+            // Pegar no lleva a su cajón (02/11/2026): solo el clic izquierdo. Pero en el visor, la primera pegada queda
+            // elegida y a la vista (12/11/2026, «cuando pegue 3 o más, aparezca encima de la primera»).
             onChange(pegarPasos(steps, index, nuevos));
+            marcarSinDesplazar(true);
+            setActiveStepIndex(index + 1);
           }}
           onMoveStep={movePreviewStep}
           pedidoDelCajon={pedidoDelCajon}
@@ -40217,8 +40239,8 @@ function StepList({
     // Sin botones repetidos en la ficha (18/10/2026): ver `sinBotonesRepetidos`.
     copy.splice(i + 1, 0, sinBotonesRepetidos(step, steps));
     onChange(copy);
-    // (02/11/2026: la copia queda elegida, sin mover la pantalla.)
-    marcarSinDesplazar();
+    // (02/11/2026: la copia queda elegida sin mover los cajones; 12/11: el visor sí va a ella.)
+    marcarSinDesplazar(true);
     onActiveStepIndexChange?.(i + 1);
   };
   const removeStep = (i: number) => {
