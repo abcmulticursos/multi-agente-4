@@ -14956,28 +14956,28 @@ whatsapp:
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#96d7f8"
     - id: velo-mwdnvros-2
       x: -627
       y: 19954
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#96d7f8"
     - id: velo-mwdnvros-3
       x: -627
       y: 21703
       ancho: 4400
       alto: 1749
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#96d7f8"
     - id: velo-mwdnvros-4
       x: -561
       y: 16676
       ancho: 4395
       alto: 1489
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#96d7f8"
   espejos:
     - id: e-mwcbh8tj-q1pa
       ficha: f-mwcazaok-en2px
