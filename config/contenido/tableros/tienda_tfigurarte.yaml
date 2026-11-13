@@ -444,6 +444,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
       x: 550
@@ -883,6 +884,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93oy8j-k14si
       tipo: seguimientos
       x: 550
@@ -1297,6 +1299,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93uthu-md9xx
       tipo: seguimientos
       x: 539
@@ -7380,6 +7383,7 @@ messenger:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
       x: 550
@@ -7819,6 +7823,7 @@ messenger:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93oy8j-k14si
       tipo: seguimientos
       x: 550
@@ -8233,6 +8238,7 @@ messenger:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93uthu-md9xx
       tipo: seguimientos
       x: 539
@@ -12954,6 +12960,7 @@ instagram:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
       x: 550
@@ -13393,6 +13400,7 @@ instagram:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93oy8j-k14si
       tipo: seguimientos
       x: 550
@@ -13807,6 +13815,7 @@ instagram:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw93uthu-md9xx
       tipo: seguimientos
       x: 539
