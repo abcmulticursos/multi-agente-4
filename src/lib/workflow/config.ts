@@ -3585,7 +3585,7 @@ export function tiendaPorFraseDeEntrada(
  */
 function tiendaAnotada(
   convo:
-    | { tienda_id?: string | null; wa_phone_number_id?: string | null }
+    | { tienda_id?: string | null; wa_phone_number_id?: string | null; channel?: string | null }
     | null
     | undefined,
   config?: WorkflowConfig | null
@@ -3593,8 +3593,11 @@ function tiendaAnotada(
   const id = String(convo?.tienda_id ?? "").trim();
   if (!id) return null;
   const cfg = config ?? loadWorkflowConfig();
+  // EL TESTEADOR PRUEBA AUNQUE LA TIENDA ESTÉ APAGADA (13/11/2026). Él: «cuando la tienda esté apagada que no
+  // funcione en vivo, pero sí en el testeador». Solo la conversación de prueba (`channel = "test"`) la toma apagada.
+  const dePrueba = convo?.channel === "test";
   const tienda = (cfg?.tiendas ?? []).find(
-    (t) => t?.enabled !== false && String(t?.id ?? "").trim() === id
+    (t) => (t?.enabled !== false || dePrueba) && String(t?.id ?? "").trim() === id
   );
   if (!tienda) return null;
   const numero = String(convo?.wa_phone_number_id ?? "").trim();

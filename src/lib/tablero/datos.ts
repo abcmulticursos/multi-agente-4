@@ -846,10 +846,14 @@ export function laTiendaTieneTablero(t: Tablero | null | undefined): boolean {
   return !!t && t.fichas.some((f) => f.tipo !== "inicio" && !f.guardada);
 }
 
-export function elTableroAtiende(t: Tablero | null | undefined, pais?: string): boolean {
-  if (!t?.encendido) return false;
+export function elTableroAtiende(t: Tablero | null | undefined, pais?: string, dePrueba = false): boolean {
+  // `dePrueba` (13/11/2026, solo el testeador): «cuando la tienda esté apagada que no funcione en vivo, pero sí en el
+  // testeador». Los interruptores de apagado no le cierran el paso; el Inicio conectado sí hace falta.
+  if (!t) return false;
+  if (!t.encendido && !dePrueba) return false;
   const inicio = pais ? inicioDelPais(t, pais) : t.fichas.find((f) => f.tipo === "inicio");
-  if (!inicio || inicio.sin_venta || inicio.en_revision) return false;
+  if (!inicio) return false;
+  if ((inicio.sin_venta || inicio.en_revision) && !dePrueba) return false;
   return !!cableDeLaSalida(t, inicio.id, "siguiente") || (inicio.anuncios ?? []).some((k) => !!cableDeLaSalida(t, inicio.id, `anuncio:${k}`));
 }
 

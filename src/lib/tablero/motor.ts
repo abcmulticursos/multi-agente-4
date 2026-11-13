@@ -3655,7 +3655,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const canal = canalDelTablero(convo);
     const t = tableroDe(config, tienda?.id, canal);
     if (!tienda?.id || !t) return false;
-    if (!elTableroAtiende(t, pais)) {
+    if (!elTableroAtiende(t, pais, convo.channel === "test")) {
       // APAGADO = NO ATIENDE (01/11/2026). Una tienda que ya tiene tablero no cae en la venta automática cuando
       // está apagado (o sin Inicio de su país, o ese Inicio no vende): no se le contesta. La conversación sigue
       // «new»: al encenderlo, su próximo mensaje entra por el Inicio. Sin tablero, el automático de siempre.
