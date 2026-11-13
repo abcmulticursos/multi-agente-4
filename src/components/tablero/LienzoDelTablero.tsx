@@ -377,6 +377,16 @@ function CableQueSeTira({ fromX, fromY, toX, toY, fromPosition, toPosition, from
   return <path d={camino} fill="none" stroke={color} strokeWidth={4} strokeDasharray="10 6" />;
 }
 
+/** EL ZOOM DEL TABLERO EN CSS (`--zoom-tablero`), para que el borde de la familia del espejo tenga el mismo grosor
+ *  en pantalla con cualquier zoom (13/11/2026). Solo pantalla. */
+function ZoomDelTablero() {
+  const zoom = useStore((s) => s.transform[2]);
+  useEffect(() => {
+    document.documentElement.style.setProperty("--zoom-tablero", String(zoom || 1));
+  }, [zoom]);
+  return null;
+}
+
 /** ESCAPE SUELTA EL CABLE QUE SE ESTÁ TIRANDO (27/10/2026): el que ya estaba queda como estaba. */
 function SoltarConEscape({ tirando, alSoltar }: { tirando: boolean; alSoltar: () => void }) {
   const tienda = useStoreApi();
@@ -2667,14 +2677,28 @@ export default function LienzoDelTablero({
   // LO ELEGIDO SIGUE ELEGIDO AL REDIBUJAR (24/10/2026): «al mover se deseleccionan». Cada cambio
   // (soltar lo que se movió, por ejemplo) rehace las fichas desde el tablero, y se rehacían sin
   // elegir. Como en la pizarra, se conserva la elección.
+  // 🪞 LA FAMILIA DEL ESPEJO MARCADA (13/11/2026). Él: «no me gusta el resplandor tipo pulse… me distrae, tengo que
+  // esperar a que se quite para editar… un borde magenta notorio, y que sus otros espejos tengan ese mismo borde al
+  // mismo tiempo que selecciono 1… que cuando me aleje ese borde siga grueso». Fijo hasta tocar otra cosa; el grosor
+  // se compensa con el zoom (`--zoom-tablero`, globals.css). Solo pantalla.
+  const [familiaEspejo, setFamiliaEspejo] = useState<Set<string> | null>(null);
+  const familiaViva = useRef<Set<string> | null>(null);
+  familiaViva.current = familiaEspejo;
+  const conLaFamilia = (n: Node): Node =>
+    familiaViva.current?.has(n.id) ? { ...n, className: "tablero-familia" } : n.className === "tablero-familia" ? { ...n, className: undefined } : n;
   useEffect(
     () =>
       setNodos((antes) => {
         const elegidos = new Set(antes.filter((n) => n.selected).map((n) => n.id));
-        return elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps;
+        return (elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps).map(conLaFamilia);
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nodosDesdeProps, setNodos]
   );
+  useEffect(() => {
+    setNodos((ns) => ns.map(conLaFamilia));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [familiaEspejo, setNodos]);
   // SHIFT + ARRASTRAR SUMA A LO YA ELEGIDO (como en la pizarra): React Flow suelta todo al empezar el
   // recuadro; aquí se vuelve a elegir lo que ya estaba.
   const sumando = useRef<Set<string> | null>(null);
@@ -2789,7 +2813,6 @@ export default function LienzoDelTablero({
   const abrirMenu = useCallback((x: number, y: number, m: Menu) => setMenu({ x, y, m }), []);
   const soltarElCable = useCallback(() => setTirando(null), []);
   const inicioDelTiro = useRef<Punto | null>(null);
-  const apagarBrillo = useRef<number | undefined>(undefined);
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
   // sigue sin ponerse donde no encaja, con su aviso.)
   // Las esquinas de cada velo, encima de las fichas (ver `NodoDeEsquinas`): mismo sitio y tamaño que el velo AHORA.
@@ -3327,25 +3350,17 @@ export default function LienzoDelTablero({
             setCajaElegida(null);
             setMenu(null);
             setDestacada(null);
+            setFamiliaEspejo(null);
           }}
           // TOCAR UNA FICHA DE UN PAÍS CAMBIA LA BANDERA a ese país (27/10/2026).
           onNodeClick={(_, n) => {
             if (n.type === "ficha" || n.type === "inicio") onFichaTocada?.(n.id);
             // 🪞 LA FAMILIA DE ESPEJOS SE ILUMINA (12/11/2026). Él: «cuando clickee la ficha original los espejos se
             // resalten unos segundos… y al tocar el espejo, todos los vinculados». La original y todos sus espejos
-            // laten ~2,5 s (clase `tablero-brillo`, globals.css). Solo pantalla.
+            // quedan con el borde magenta fijo (13/11/2026; antes latían unos segundos) hasta tocar otra cosa.
             const ficha = fichaDelNodo(n.id);
             const suyos = (vivo.current.espejos ?? []).filter((e) => e.ficha === ficha);
-            if (suyos.length) {
-              const familia = new Set([ficha, `est:${ficha}`, ...suyos.map((e) => `esp:${e.id}`)]);
-              setNodos((ns) => ns.map((x) => (familia.has(x.id) ? { ...x, className: "tablero-brillo" } : x.className === "tablero-brillo" ? { ...x, className: undefined } : x)));
-              window.clearTimeout(apagarBrillo.current);
-              apagarBrillo.current = window.setTimeout(
-                () => setNodos((ns) => ns.map((x) => (x.className === "tablero-brillo" ? { ...x, className: undefined } : x))),
-                // (13/11/2026: 6 latidos, ~4 s; ver globals.css.)
-                4000
-              );
-            }
+            setFamiliaEspejo(suyos.length ? new Set([ficha, `est:${ficha}`, ...suyos.map((e) => `esp:${e.id}`)]) : null);
           }}
           connectionLineComponent={CableQueSeTira}
           // El clic en un puntito abre la lista «Conectar a…» (no el modo de conectar con dos clics).
@@ -3392,6 +3407,7 @@ export default function LienzoDelTablero({
           />
           <ZonaDeLaSeleccion />
           <SoltarConEscape tirando={!!tirando} alSoltar={soltarElCable} />
+          <ZoomDelTablero />
         </ReactFlow>
 
         {/* ← + ☰, DENTRO DEL LIENZO, arriba a la izquierda, como en la pizarra (24/10/2026): «el selector

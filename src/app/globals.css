@@ -1474,19 +1474,16 @@ input,
   padding: 18px 20px;
 }
 
-/* 🪞 LA FAMILIA DE ESPEJOS LATE (12/11/2026): al tocar la original o un espejo, todos se iluminan ~2,5 s. */
-/* (13/11/2026) Más fuerte y más largo: «está un poco apagada, no me doy cuenta cuáles son sus reflejos». Aro grueso
-   fucsia + halo cian amplio, 6 latidos (~4 s), y la ficha se adelanta un poco para que se note entre las demás. */
-.react-flow__node.tablero-brillo {
+/* 🪞 LA FAMILIA DE ESPEJOS (12/11/2026): al tocar la original o un espejo, todos se marcan. */
+/* (13/11/2026) SIN LATIDO: «el resplandor tipo pulse me distrae… un borde magenta notorio… que cuando me aleje ese
+   borde siga grueso». Borde fijo de 5 px DE PANTALLA con cualquier zoom (--zoom-tablero lo pone el lienzo), hasta
+   tocar otra cosa. */
+.react-flow__node.tablero-familia,
+.lienzo-del-tablero .react-flow__node.selected.tablero-familia:not(.react-flow__node-caja),
+.lienzo-del-tablero .react-flow__node.selected.tablero-familia:not(.react-flow__node-caja):focus,
+.lienzo-del-tablero .react-flow__node.selected.tablero-familia:not(.react-flow__node-caja):focus-visible {
   border-radius: 14px;
-  z-index: 1000 !important;
-  animation: tablero-brillo 0.65s ease-in-out 6 alternate;
-}
-@keyframes tablero-brillo {
-  from {
-    box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.5), 0 0 12px 4px rgba(34, 211, 238, 0.4);
-  }
-  to {
-    box-shadow: 0 0 0 10px rgba(217, 70, 239, 1), 0 0 60px 26px rgba(34, 211, 238, 0.95);
-  }
+  /* !important: la ficha tocada también queda elegida, y el borde de «elegida» lo pisaba. */
+  outline: calc(5px / var(--zoom-tablero, 1)) solid #ff00ff !important;
+  outline-offset: calc(4px / var(--zoom-tablero, 1)) !important;
 }
