@@ -33000,7 +33000,13 @@ function PantallaDelTableroCargada({
                   { id: FULL_DE_LA_TIENDA, nombre: `🏪 ${nombres[FULL_DE_LA_TIENDA]}` },
                 ]
               : []),
-            ...productos.map((p) => ({ id: p.id, nombre: p.name?.trim() || p.id })),
+            ...productos.map((p) => {
+              // DE QUÉ TIENDA ES (13/11/2026, para la lista con buscador): las tiendas que lo tienen en su selector.
+              const suyas = (cfg.tiendas ?? [])
+                .filter((t) => Object.values((t?.alineacion ?? {}) as Record<string, unknown>).includes(p.id))
+                .map((t) => String(t?.nombre ?? "").trim() || "Tienda sin nombre");
+              return { id: p.id, nombre: p.name?.trim() || p.id, tienda: suyas.length > 2 ? `${suyas.slice(0, 2).join(", ")} y ${suyas.length - 2} más` : suyas.join(", ") };
+            }),
           ]}
           entregasPorProducto={entregasPorProducto}
           anuncios={(cfg.ad_registry ?? []).map((a) => ({ id: a.key, nombre: a.name || a.key }))}
@@ -33925,6 +33931,97 @@ function CampoDeTiempoDelTablero({ valor, onCambio }: { valor: number | undefine
   );
 }
 
+/**
+ * LOS PRODUCTOS DE UNA FICHA (13/11/2026). Él: «deja los productos de la tienda fijos, y los demás… ponles una lista
+ * en un buscador y que aparezca su tienda». Arriba, fijos, «Básico / Full de la tienda» (los `@tienda:`); debajo,
+ * los otros elegidos en azul con su ✕, y un buscador que despliega la lista con la tienda de cada uno.
+ */
+function ListaDeProductos({
+  todos,
+  elegidos,
+  onCambio,
+}: {
+  todos: Array<{ id: string; nombre: string; tienda?: string }>;
+  elegidos: string[];
+  onCambio: (ids: string[]) => void;
+}) {
+  const [busca, setBusca] = useState("");
+  const [abierta, setAbierta] = useState(false);
+  const deLaTienda = todos.filter((x) => x.id.startsWith("@tienda:"));
+  const otros = todos.filter((x) => !x.id.startsWith("@tienda:"));
+  const poner = (id: string) => onCambio(elegidos.includes(id) ? elegidos.filter((y) => y !== id) : [...elegidos, id]);
+  const q = sinTildesDelEditor(busca.trim());
+  const enLaLista = otros.filter(
+    (x) => !elegidos.includes(x.id) && (!q || sinTildesDelEditor(x.nombre).includes(q) || sinTildesDelEditor(x.tienda ?? "").includes(q))
+  );
+  const otrosElegidos = otros.filter((x) => elegidos.includes(x.id));
+  const chip = (x: { id: string; nombre: string }, puesto: boolean, conCruz = false) => (
+    <button
+      key={x.id}
+      type="button"
+      onClick={() => poner(x.id)}
+      title={puesto ? "Quitar" : "Elegir"}
+      className={`rounded-md border px-2 py-0.5 text-xs ${puesto ? "border-blue-700 bg-blue-600 font-bold text-white" : "border-borde"}`}
+    >
+      {puesto ? "✓ " : ""}
+      {x.nombre}
+      {conCruz ? " ✕" : ""}
+    </button>
+  );
+  return (
+    <div className="flex flex-col gap-1.5">
+      {deLaTienda.length > 0 && <div className="flex flex-wrap gap-1">{deLaTienda.map((x) => chip(x, elegidos.includes(x.id)))}</div>}
+      {otros.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {deLaTienda.length > 0 && <span className="text-[11px] font-normal text-tinta-suave">Otros productos:</span>}
+          {otrosElegidos.length > 0 && <div className="flex flex-wrap gap-1">{otrosElegidos.map((x) => chip(x, true, true))}</div>}
+          <div className="relative">
+            <input
+              value={busca}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                setAbierta(true);
+              }}
+              onFocus={() => setAbierta(true)}
+              onBlur={() => setAbierta(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && abierta) {
+                  e.stopPropagation();
+                  setAbierta(false);
+                }
+              }}
+              placeholder="🔍 Buscar otro producto (o su tienda)…"
+              className="w-full rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-normal"
+            />
+            {abierta && (
+              <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-md border border-borde bg-tarjeta py-1 text-xs font-normal shadow-xl">
+                {enLaLista.length === 0 && <li className="px-2 py-1 italic text-tinta-suave">Ningún producto se llama así.</li>}
+                {enLaLista.map((x) => (
+                  <li key={x.id}>
+                    <button
+                      type="button"
+                      // mousedown, no click: el clic quitaría primero el foco del buscador y cerraría la lista.
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        poner(x.id);
+                        setBusca("");
+                      }}
+                      className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left hover:bg-relleno"
+                    >
+                      <span className="truncate">{x.nombre}</span>
+                      <span className="shrink-0 text-[11px] text-tinta-suave">{x.tienda ? `🏪 ${x.tienda}` : "(sin tienda)"}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ListaDeEleccion({
   todos,
   elegidos,
@@ -34350,7 +34447,8 @@ function AjustesDeLaFicha({
   /** Abre «Datos de pago por país» en ese país (los textos que el cobro manda por método). */
   onAbrirPagos?: (pais: string) => void;
   ficha: FichaEnElEditor;
-  productos: Array<{ id: string; nombre: string }>;
+  /** `tienda`: de qué tienda(s) es, para la lista con buscador (vacío = de ninguna). */
+  productos: Array<{ id: string; nombre: string; tienda?: string }>;
   /** Para la ficha Entregar: las entregas de cada producto, los de esta tienda primero (`propio`). */
   entregasPorProducto?: Array<{ id: string; nombre: string; propio: boolean; opciones: Array<{ clave: string; nombre: string }> }>;
   anuncios: Array<{ id: string; nombre: string }>;
@@ -34437,7 +34535,7 @@ function AjustesDeLaFicha({
             <div className={etiqueta}>
               Presenta estos productos
               <span className="mt-1 block">
-                <ListaDeEleccion todos={productos} elegidos={b.presenta ?? []} onCambio={(ids) => setB({ ...b, presenta: ids })} />
+                <ListaDeProductos todos={productos} elegidos={b.presenta ?? []} onCambio={(ids) => setB({ ...b, presenta: ids })} />
               </span>
               <span className={ayuda}>
                 Desde que sale esta ficha, la IA conoce su contenido y su precio (de su ficha en Productos) y puede contestar «qué contiene» o «cuánto
@@ -34786,7 +34884,7 @@ function AjustesDeLaFicha({
                   <div className={etiqueta}>
                     También acepta
                     <span className="mt-1 block">
-                      <ListaDeEleccion todos={productos.filter((p) => p.id !== cobro.producto_id)} elegidos={cobro.acepta ?? []} onCambio={(ids) => ponCobro({ ...cobro, acepta: ids })} />
+                      <ListaDeProductos todos={productos.filter((p) => p.id !== cobro.producto_id)} elegidos={cobro.acepta ?? []} onCambio={(ids) => ponCobro({ ...cobro, acepta: ids })} />
                     </span>
                     <span className={ayuda}>
                       Como en la venta de siempre: si paga el precio de uno más caro de estos, se le entrega ese; si paga el de uno más barato, se le pregunta si fue un error o si lo prefiere. Cada uno sale por su cable.
