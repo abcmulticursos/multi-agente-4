@@ -3178,6 +3178,10 @@ whatsapp:
                       🕑️ Apresúrate antes que se termine la oferta 🏃‍♀️
                   delay_after_sec: 6
           activa_oferta: true
+    - id: f-mwf9hyrd-hp6o1
+      tipo: regalo
+      x: 4301
+      y: 3652
   cables:
     - id: c-mw4xecum-dlm
       de: fig_presenta
@@ -3333,6 +3337,10 @@ whatsapp:
       de: f-mwf9h2ll-4bkrv
       salida: fin
       a: f-mwf9cf0q-i89e
+    - id: c-mwf9iaa8-62d
+      de: f-mwf9cf0q-i89e
+      salida: pagado
+      a: f-mwf9hyrd-hp6o1
   cajas:
     - id: manta-fig_inicio
       x: 108
