@@ -11721,13 +11721,13 @@ whatsapp:
       titulo: Regalo
     - id: f-mweg7vsa-v6h68
       tipo: mensaje
-      x: -682
-      y: 19668
+      x: -2002
+      y: 20581
       steps:
         - type: text
           body_variants:
             - |-
-              *Hola!! {te saluda Andrea* 🙋‍♀️ ¡un gusto saludarte! 😊|*soy Andrea* 🙋‍♀️ ¡encantada de saludarte! 😊|*Andrea te escribe* 🙋‍♀️ ¡qué lindo tenerte por acá! 😊}
+              *Hola!! {te saluda Andrea* 🙋‍♀️ ¡un gusto conocerte! 😊|*soy Andrea* 🙋‍♀️ ¡encantada de saludarte! 😊|*Andrea te escribe* 🙋‍♀️ ¡qué lindo tenerte por acá! 😊}
 
               ¿Te pasa que...?
 
@@ -11796,9 +11796,9 @@ whatsapp:
 
               🖨️ Todo en formato PDF listo para descargar e imprimir
 
-              🔥 Todo POR SOLO {{PRECIO_BASE}}
+              🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
 
-              * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envíanos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
@@ -11808,7 +11808,7 @@ whatsapp:
             - |-
               🛒 ¿CÓMO COMPRO? *FÁCIL!, Podés realizar tu pago mediante TRANSFERENCIA (ALIAS o CBU).*  🏦
 
-              🟢 ¿Deseas que te facilite los datos para realizar el pago? 😊
+              🟢 *¿Deseas que te facilite los datos para realizar el pago* ❓️ 😊
           delay_after_sec: 6
           decisions:
             - id: d-mweg7vsd-r3noo
