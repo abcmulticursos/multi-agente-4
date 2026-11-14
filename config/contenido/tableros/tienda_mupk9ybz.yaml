@@ -11739,8 +11739,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdnvros-ly7iu
       tipo: seguimientos
-      x: -297
-      y: 22110
+      x: -187
+      y: 22099
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -11750,8 +11750,8 @@ whatsapp:
             - id: v-mwdnvros-jkll8
               peso: 1
               steps:
-                - type: image
-                  drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
@@ -12036,6 +12036,7 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
+                  enabled: false
                 - type: text
                   body_variants:
                     - |-
