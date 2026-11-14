@@ -8244,8 +8244,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvrom-qmb54
           minutos: 5
           variantes:
@@ -8550,8 +8548,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvrom-vr6hd
       tipo: cobro
       x: 1738
@@ -8891,8 +8887,6 @@ whatsapp:
                   spintax_ia:
                     - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cuál es el método de pago de tu preferencia* 👇🏼}"
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvrom-awsfd
           minutos: 5
           variantes:
@@ -9174,8 +9168,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvrom-bogfz
       tipo: entregar
       x: 2673
@@ -10239,8 +10231,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvroq-vagbw
           minutos: 5
           variantes:
@@ -10545,8 +10535,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvroq-ciq9d
       tipo: cobro
       x: 1914
@@ -10896,8 +10884,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvroq-jl8w0
           minutos: 5
           variantes:
@@ -11176,8 +11162,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvror-o44rd
       tipo: mensaje
       x: -385
@@ -12236,8 +12220,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvror-joghc
           minutos: 5
           variantes:
@@ -12676,8 +12658,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvror-zla8c
       tipo: cobro
       x: 1903
@@ -13032,8 +13012,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvror-8nu3e
           minutos: 5
           variantes:
@@ -13315,8 +13293,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvror-k1utx
       tipo: mensaje
       x: -495
@@ -14249,8 +14225,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvros-nahqt
           minutos: 5
           variantes:
@@ -14555,8 +14529,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvros-wapyw
       tipo: cobro
       x: 1793
@@ -15024,8 +14996,6 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvros-2suvb
           minutos: 5
           variantes:
@@ -15304,8 +15274,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvros-x4f90
       tipo: entregar
       x: 2728
@@ -16102,8 +16070,6 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwei09na-4sgyv
           minutos: 5
           variantes:
@@ -16382,8 +16348,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwelg57r-hvdw9
       tipo: mensaje
       x: 627
@@ -17064,8 +17028,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwelg57r-d1yej
           minutos: 5
           variantes:
@@ -17500,8 +17462,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwet8o4z-3toub
       tipo: cobro
       x: 1727
