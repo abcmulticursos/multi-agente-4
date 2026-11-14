@@ -1397,6 +1397,16 @@ input,
 :root[data-tema="oscuro"][data-pizarra-tema]:not([data-pizarra-tema="oscuro"]) .burbujas-nuevo[data-recorrido-del-tablero] {
   box-shadow: inset 0 0 0 100vmax rgba(40, 80, 140, 0.12), 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+/* EL MENÚ DEL CLIC DERECHO DE LAS BURBUJAS, CON LA OPCIÓN BAJO EL RATÓN BIEN MARCADA (13/11/2026). Él: «ese gris que es
+   un poquito más oscuro… casi no se diferencia con el gris del menú». Un azul claro que se ve en claro y en oscuro. */
+[data-menu-de-burbuja] button:hover:not(:disabled) {
+  background-color: #cfe3fb !important;
+  color: #0b2a4a !important;
+}
+[data-menu-de-burbuja] button.text-red-600:hover:not(:disabled) {
+  background-color: #fcd7d7 !important;
+  color: #9f1239 !important;
+}
 /* Una ventana abierta DENTRO de otra («Editar esta burbuja») no se achica dos veces. */
 .burbujas-nuevo .burbujas-nuevo.burbujas-nuevo {
   zoom: 1;

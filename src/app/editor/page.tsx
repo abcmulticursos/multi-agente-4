@@ -25920,6 +25920,8 @@ function ChatPreview({
             ref={(el) => encajarEnLaPantalla(el)}
             style={{ left: contextMenu.x, top: contextMenu.y }}
             // MÁS GRANDE (13/11/2026, él: «agranda un poco los textos del menú… al dar clic derecho en la burbuja, están muy chicos»).
+            // `data-menu-de-burbuja`: el resaltado de la opción bajo el ratón, más marcado (globals.css).
+            data-menu-de-burbuja
             className="fixed z-30 min-w-64 overflow-hidden rounded-md border border-neutral-300 bg-tarjeta py-1 text-[15px] font-semibold text-neutral-800 shadow-lg"
           >
             {/* CON BURBUJAS MARCADAS, EL MENÚ ES DE ELLAS.
