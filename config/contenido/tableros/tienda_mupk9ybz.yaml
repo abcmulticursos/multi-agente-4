@@ -7428,17 +7428,13 @@ whatsapp:
       y: 19778
       reparto:
         - id: r1
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: r2
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: rmwd4ovya
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: rmwd56uqa
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: rmwetuaux
           peso: 1
     - id: f-mwdnvrol-efc90
