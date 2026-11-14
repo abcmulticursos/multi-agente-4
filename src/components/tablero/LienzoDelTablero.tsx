@@ -939,7 +939,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             style={{ borderColor: ASPECTO[porSuNombre.tipo].trazo }}
             title={`Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
           >
-            ↺ → {ctx.numeroDe[porSuNombre.id] ?? ""}
+            {/* En palabras (13/11/2026, él: «no entiendo esos jeroglíficos»: era «↺ → 80»). */}
+            va solo a {ctx.numeroDe[porSuNombre.id] ?? ""}
           </span>
         )}
         {conPunto && !destino && (() => {
@@ -952,7 +953,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
               style={{ borderColor: ASPECTO[solo.tipo].trazo }}
               title={`Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
             >
-              ↺ → {ctx.numeroDe[solo.id] ?? ""}
+              va solo a {ctx.numeroDe[solo.id] ?? ""}
             </span>
           );
         })()}
