@@ -1007,6 +1007,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             🪞
           </span>
         )}
+        {/* LO SUELTO, ESCRITO (14/11/2026): no solo el color. La misma cuenta del aviso «⚠ N sin conectar». */}
+        {falta && <span className="ml-auto shrink-0 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">sin conectar</span>}
         {/* En palabras (13/11/2026, él: «no entiendo esos jeroglíficos»: era «↺ → 80»); con su tipo desde el 14/11. */}
         {porSuNombre &&
           pastillaDelDestino(
@@ -3346,7 +3348,10 @@ export default function LienzoDelTablero({
   const [tirando, setTirando] = useState<{ de: string; salida: string } | null>(null);
   // «🔍 QUÉ FALTA CONECTAR»
   const [revisando, setRevisando] = useState(false);
-  const faltasDeTodo = useMemo(() => (revisando ? faltasDelTablero(tablero, paisVisto, nombres) : null), [revisando, tablero, paisVisto, nombres]);
+  // SIEMPRE A LA VISTA (14/11/2026). Él: «no hay un indicador claro que me diga "falta"… puedo lanzar un workflow sin cosas
+  // sin conectar y nada me asegura que esté bien». Se calcula siempre (la MISMA cuenta de «Qué falta conectar», que ya usa
+  // la regla del bot): lo suelto sale en rojo en su ficha y arriba el aviso «⚠ N sin conectar». La lista, al tocarlo.
+  const faltasDeTodo = useMemo(() => faltasDelTablero(tablero, paisVisto, nombres), [tablero, paisVisto, nombres]);
   // REVISAR UNA SOLA RUTA (13/11/2026). Él: «esa lupa me muestra todo… yo normalmente hago una ruta y luego la copio».
   // Se elige un país o una ruta de su Ruteador y solo cuenta lo que se alcanza desde ahí. "" = todo el tablero.
   const [alcance, setAlcance] = useState("");
@@ -3366,11 +3371,10 @@ export default function LienzoDelTablero({
     return ops;
   }, [revisando, tablero]);
   const faltas = useMemo(() => {
-    if (!faltasDeTodo) return null;
-    if (!alcance || !tablero.fichas.some((f) => f.id === alcance)) return faltasDeTodo;
+    if (!revisando || !alcance || !tablero.fichas.some((f) => f.id === alcance)) return faltasDeTodo;
     const ruta = rutaDe(tablero, alcance);
     return faltasDeTodo.filter((x) => ruta.has(x.ficha));
-  }, [faltasDeTodo, alcance, tablero]);
+  }, [faltasDeTodo, alcance, tablero, revisando]);
   const faltasPorFicha = useMemo(() => {
     if (!faltas) return null;
     const m = new Map<string, Map<string, string>>();
@@ -4351,7 +4355,18 @@ export default function LienzoDelTablero({
               className="h-9 w-52 rounded-full border-2 border-violet-500 bg-white px-3 text-sm text-slate-800 shadow-md outline-none"
             />
           )}
-          {faltas && (
+          {/* EL AVISO, SIEMPRE (14/11/2026): rojo con cuántas faltan, verde si no falta nada. Tocarlo abre la lista. */}
+          {!revisando && (
+            <button
+              type="button"
+              onClick={() => setRevisando(true)}
+              title={faltas.length ? "Lo que, sin cable, deja al cliente sin camino. Clic: ver la lista" : "Todo lo que vende lleva a algún lado"}
+              className={`h-9 rounded-full px-3 text-xs font-bold shadow-md ${faltas.length ? "bg-red-600 text-white hover:bg-red-700" : "bg-emerald-100 text-emerald-900"}`}
+            >
+              {faltas.length ? `⚠ ${faltas.length} sin conectar` : "✅ Todo conectado"}
+            </button>
+          )}
+          {revisando && (
             <div className="relative flex flex-col items-start gap-1">
               <div className="flex items-center gap-1.5">
                 <select
@@ -4383,6 +4398,14 @@ export default function LienzoDelTablero({
                     </>
                   )}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setRevisando(false)}
+                  title="Cerrar la lista (el aviso sigue arriba)"
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-tarjeta text-xs font-bold text-tinta shadow hover:bg-relleno"
+                >
+                  ✕
+                </button>
               </div>
               {/* La lista, a la vista y no en un globo: cada línea lleva a su ficha. */}
               {faltas.length > 0 && (
