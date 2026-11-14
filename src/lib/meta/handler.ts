@@ -97,7 +97,7 @@ import {
 } from "@/lib/workflow/config";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
 import { leerComprobante, ultimosMensajes } from "@/lib/tablero/lector";
-import { avisarQueLaIANoRespondio, notifyAdmin } from "@/lib/notifications";
+import { avisarQueLaIANoRespondio } from "@/lib/notifications";
 import { estadoEnElTablero } from "@/lib/tablero/estado";
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { overrideResumenInNocodb, syncLeadStatus } from "@/lib/leads-sync";
@@ -662,6 +662,24 @@ export function pasoLaVentanaDeRespuesta(
 }
 
 /**
+ * LAS 70 HORAS SOLO CUENTAN CON LOS GRATIS DEL MES GASTADOS (14/11/2026, consultado en la página de precios de Meta ese
+ * día). Él: «la ventana de las 70 horas debería permanecer abierta hasta los 1000 mensajes». Meta regala 1000 mensajes de
+ * servicio al mes por número: mientras queden, contestar pasadas las 70 horas no cuesta. Se usa el MISMO tope de Ajustes
+ * que los orgánicos (`organicos_tope_mensajes`, 950: nuestra cuenta puede diferir en unos pocos de la de Meta) y la misma
+ * cuenta (`mensajesDelMesDelNumero`). Tope 0 = nunca hay gratis: las 70 horas como antes. Solo WhatsApp (Meta cobra ahí).
+ */
+export function quedanMensajesGratis(convo: { channel?: string | null; wa_phone_number_id?: string | null }): boolean {
+  if (convo.channel !== "whatsapp" && convo.channel !== "test") return false;
+  const tope = topeDeOrganicos(loadWorkflowConfig());
+  return tope > 0 && mensajesDelMesDelNumero(convo.wa_phone_number_id) < tope;
+}
+
+/** ¿El bot ya no contesta a esta conversación? Pasaron las 70 horas Y el número gastó sus gratis del mes. */
+export function ventanaCerrada(convo: ConversationRow): boolean {
+  return pasoLaVentanaDeRespuesta(convo) && !quedanMensajesGratis(convo);
+}
+
+/**
  * LA ÚNICA EXCEPCIÓN A LAS 70 HORAS: EL COMPROBANTE DE UN PAGO PENDIENTE (03/11/2026, decidido por él). «Si cliente
  * escribe luego de las 72 ya no se responde, pero si hubiere enviado un ticket de pago, sí debería entregar.» Si lo
  * último que mandó es una IMAGEN o un documento y le quedaba algo por pagar (un cobro abierto del tablero, o la venta de
@@ -684,14 +702,17 @@ function esUnComprobanteDeUnPagoPendiente(convo: ConversationRow): boolean {
  * PASADAS LAS 70 HORAS, LA FOTO QUE NO ES UN COMPROBANTE (03/11/2026, él: «si no es un comprobante, el bot no le contesta
  * y me avisa»). Con un cobro del tablero abierto, la imagen se lee antes de dejar pasar el turno: si no es un comprobante,
  * no se le contesta y se avisa al dueño para que lo vea a mano. (La venta de siempre no tiene este lector: ahí pasa.)
+ * Desde el 14/11/2026: sin aviso; se le pide amablemente el comprobante correcto (ver abajo).
  */
 async function fueraDeVentanaSoloSiEsComprobante(convo: ConversationRow): Promise<boolean> {
   if (!estadoEnElTablero(convo.id)?.cobro_ficha_id) return true;
   const lectura = await leerComprobante(convo.id);
   if (lectura) return true;
-  console.log(`[wh] convo ${convo.id}: pasadas las ${HORAS_PARA_DEJAR_DE_RESPONDER} h mandó una imagen que no es un comprobante → no contesto y aviso al dueño`);
-  if (convo.channel !== "test")
-    void notifyAdmin(`📎 *Imagen fuera de las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas*: ${convo.client_name ?? convo.name ?? convo.phone} tenía un pago pendiente y mandó una imagen que no parece un comprobante. Revísala a mano.`).catch(() => {});
+  // SIN AVISO AL DUEÑO, CON UNA RESPUESTA AMABLE (14/11/2026, él: «que no me avise, solo que diga que el comprobante no
+  // es válido y muy amablemente le diga que envíe el correcto»). Un solo mensaje; lo demás sigue sin respuesta.
+  // Sirve para tú y para vos (Argentina) sin cambiar una letra.
+  console.log(`[wh] convo ${convo.id}: pasadas las ${HORAS_PARA_DEJAR_DE_RESPONDER} h y sin gratis del mes mandó una imagen que no es un comprobante → le pido el correcto`);
+  await sendBotText(convo, "La imagen que enviaste no es un comprobante de pago válido 🙏 ¿Podrías enviarme la captura del comprobante correcto, por favor? 😊").catch((e) => console.error(`[wh] convo ${convo.id}: no salió el pedido del comprobante correcto:`, e));
   return false;
 }
 
@@ -714,13 +735,13 @@ function leContestamos(convo: ConversationRow): boolean {
     return false;
   }
   // LA VENTANA VA PRIMERO: manda sobre todo lo demás, incluido quien ya pagó. Ver arriba.
-  if (pasoLaVentanaDeRespuesta(convo)) {
+  if (ventanaCerrada(convo)) {
     if (esUnComprobanteDeUnPagoPendiente(convo)) {
       console.log(`[wh] convo ${convo.id}: pasaron las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas, pero mandó una imagen con un pago pendiente → la leo (puede ser su comprobante)`);
       return true;
     }
     console.log(
-      `[wh] convo ${convo.id}: pasaron las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas desde que entró — no contesto (su mensaje queda guardado)`
+      `[wh] convo ${convo.id}: pasaron las ${HORAS_PARA_DEJAR_DE_RESPONDER} horas desde que entró y el número ya gastó sus mensajes gratis del mes — no contesto (su mensaje queda guardado)`
     );
     return false;
   }
@@ -1731,7 +1752,7 @@ async function handleIncomingMessage(
   // leído y nada que esperar. Cortar aquí es lo que hace que no cueste ni un
   // mensaje ni un token.
   if (!testOptions && !leContestamos(fresh)) return;
-  if (pasoLaVentanaDeRespuesta(fresh) && !(await fueraDeVentanaSoloSiEsComprobante(fresh))) return;
+  if (ventanaCerrada(fresh) && !(await fueraDeVentanaSoloSiEsComprobante(fresh))) return;
 
   // MODERACIÓN. Va antes que nada para que un pesado no cueste ni un token:
   // si aquí se corta, el motor y el modelo no llegan a ejecutarse.

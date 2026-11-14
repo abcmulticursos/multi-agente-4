@@ -9,6 +9,7 @@ import {
 } from "@/lib/db";
 import { MetaApiError, sendTextMessage } from "@/lib/meta/client";
 import { conElNumeroDeLaConversacion } from "@/lib/meta/numero-de-la-conversacion";
+import { ventanaCerrada } from "@/lib/meta/handler";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -35,8 +36,9 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const value = getTestMessageButtons(message.id);
     if (value.length) buttons[message.id] = value;
   }
+  // ¿El bot ya calla aquí? La misma regla del bot (70 horas y sin mensajes gratis del mes), para que el panel no diga otra cosa.
   return NextResponse.json(
-    { conversation: convo, messages, buttons },
+    { conversation: { ...convo, ventana_cerrada: ventanaCerrada(convo) }, messages, buttons },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

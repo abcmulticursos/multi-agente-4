@@ -139,6 +139,8 @@ interface ConversationDTO {
   created_at: number;
   /** Última entrada por un anuncio (unix); las 70 horas cuentan desde aquí si es más reciente. */
   anuncio_at?: number | null;
+  /** Lo calcula el servidor con la regla del bot (`ventanaCerrada`): 70 horas Y sin mensajes gratis del mes (14/11/2026). */
+  ventana_cerrada?: boolean;
   pinned: number;
   ad_source_id: string | null;
   ad_headline: string | null;
@@ -343,6 +345,8 @@ export default function ConversationPanel({
    * un temporizador más es una pieza que se puede quedar colgada.
    */
   const pasoLasSetentaHoras = (() => {
+    // El servidor ya dice si el bot calla (cuenta también los mensajes gratis del mes, 14/11/2026).
+    if (typeof state.conversation?.ventana_cerrada === "boolean") return state.conversation.ventana_cerrada;
     const nacio = state.conversation?.created_at;
     if (typeof nacio !== "number" || !(nacio > 0)) return false;
     // O desde su última entrada por un anuncio, si es más reciente (09/11/2026), como el motor.
@@ -1980,9 +1984,9 @@ export default function ConversationPanel({
         */}
         {pasoLasSetentaHoras ? (
           <div className="mb-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            <span className="font-semibold">Pasaron las 70 horas.</span> El bot ya
-            no responde a esta conversación, para no pagar fuera de la ventana de
-            Meta. Si quieres atenderla, escríbele tú desde aquí.
+            <span className="font-semibold">Pasaron las 70 horas y este número ya gastó sus mensajes gratis del mes.</span> El bot
+            ya no responde a esta conversación (solo lee un comprobante de un pago pendiente), para no pagarle a Meta. Si
+            quieres atenderla, escríbele tú desde aquí.
           </div>
         ) : (
           is24hWindow && (

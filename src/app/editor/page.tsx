@@ -57341,6 +57341,12 @@ function AjustesTab({
                 950 deja margen bajo los 1000 de Meta · 0 = no contestar nunca a un orgánico nuevo
               </span>
             </label>
+            {/* 14/11/2026: el mismo tope abre las 70 horas (`ventanaCerrada` en handler.ts). */}
+            <p className="mt-1 text-xs text-neutral-600">
+              <strong>Este tope vale también para las 70 horas</strong>, con el interruptor encendido o apagado: mientras el
+              número no llegue a él, el bot sigue contestando aunque hayan pasado las 70 horas. Al llegar, ya no contesta;
+              solo lee un comprobante de un pago pendiente y entrega.
+            </p>
             <MensajesDelMes
               tope={typeof g.organicos_tope_mensajes === "number" ? g.organicos_tope_mensajes : 950}
               encendido={g.no_responder_organicos === true}
