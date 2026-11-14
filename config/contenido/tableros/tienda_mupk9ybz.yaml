@@ -7131,7 +7131,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ✅ 📚 *SOLO POR HOY {{PRECIO_BASE}}* ‼️
 
               🟠 *¿CÓMO LO ADQUIERO?*
 
@@ -8306,7 +8306,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ✅ 📚 *SOLO POR HOY {{PRECIO_BASE}}* ‼️
 
               🟠 *¿CÓMO LO ADQUIERO?*
 
@@ -9478,7 +9478,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ✅ 📚 *SOLO POR HOY {{PRECIO_BASE}}* ‼️
 
               🟠 *¿CÓMO LO ADQUIERO?*
 
@@ -10673,7 +10673,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ✅ 📚 *SOLO POR HOY {{PRECIO_BASE}}* ‼️
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
               * 2.- 📲 Y envianos tu comprobante de pago
