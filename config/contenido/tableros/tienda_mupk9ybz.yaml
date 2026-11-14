@@ -15142,6 +15142,38 @@ whatsapp:
       de: f-mwdnvror-k1utx
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwdnvror-b91u4
+    - id: c-mwfoiizy-3yv
+      de: f-mwdatl63-t3ldy
+      salida: dec:1bdf5e34-c89e-44b7-9703-da490d9c8504
+      a: f-mwdatl63-96azn
+    - id: c-mwfoikgm-26z
+      de: f-mwdatl63-t3ldy
+      salida: dec:0046a0a5-f073-4464-902b-7ba55b161bd5
+      a: f-mwdatl63-96azn
+    - id: c-mwfoim4u-42w
+      de: f-mwdatl63-t3ldy
+      salida: dec:309a73e3-653b-4314-8afc-474c79b36ed5
+      a: f-mwdatl63-96azn
+    - id: c-mwfoinpy-dru
+      de: f-mwdatl63-t3ldy
+      salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
+      a: f-mwdatl63-96azn
+    - id: c-mwfoiswu-nz4
+      de: f-mwczmr06-i8lx4
+      salida: dec:1bdf5e34-c89e-44b7-9703-da490d9c8504
+      a: f-mwczmr06-4se41
+    - id: c-mwfoiu1r-lv2
+      de: f-mwczmr06-i8lx4
+      salida: dec:0046a0a5-f073-4464-902b-7ba55b161bd5
+      a: f-mwczmr06-4se41
+    - id: c-mwfoiv7i-m72
+      de: f-mwczmr06-i8lx4
+      salida: dec:309a73e3-653b-4314-8afc-474c79b36ed5
+      a: f-mwczmr06-4se41
+    - id: c-mwfoiwev-xz9
+      de: f-mwczmr06-i8lx4
+      salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
+      a: f-mwczmr06-4se41
   cajas:
     - id: velo-mwcazaol-0
       x: -869
