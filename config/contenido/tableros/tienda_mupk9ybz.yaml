@@ -8307,8 +8307,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdnvrom-7xk2i
       tipo: seguimientos
-      x: -352
-      y: 20229
+      x: -297
+      y: 20218
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -8319,7 +8319,7 @@ whatsapp:
               peso: 1
               steps:
                 - type: image
-                  drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
+                  drive_url: https://drive.google.com/file/d/1KyufPzHVfhrziA4M1BC-yjc7rIoi6Nzx/view?usp=drive_link
                   caption_variants:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
