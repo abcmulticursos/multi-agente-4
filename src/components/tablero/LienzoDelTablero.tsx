@@ -906,24 +906,41 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
    * El ícono de esa ficha (la bolsita 💰 del cobro; en una entrega, 📦 el full y 📚 los demás), la palabra, el número y,
    * en un cobro o una entrega, su producto. Con el ratón encima se ve la línea hasta ella. `solo` = sin cable (punteada).
    */
-  const pastillaDelDestino = (d: FichaEnElEditor, solo: boolean, titulo: string) => {
+  const pastillaDelDestino = (d: FichaEnElEditor, solo: boolean, titulo: string, conPuntoGrande = false) => {
     const pid = d.tipo === "cobro" ? (d.cobro?.modo === "abierto" ? undefined : d.cobro?.producto_id) : d.tipo === "entregar" ? (d.entregas?.[0] ?? d.producto_id) : undefined;
     const esFull = !!pid && (pid.split("#")[0] === FULL_DE_LA_TIENDA || (!!ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA] && pid.split("#")[0] === ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA]));
     const icono = d.tipo === "entregar" ? (esFull ? "📦" : "📚") : ASPECTO[d.tipo].icono;
     const producto = d.tipo === "entregar" ? listaDeProductos(d.entregas?.length ? d.entregas : d.producto_id ? [d.producto_id] : []) : nombreDeProducto(pid);
     // El producto va en el letrero del ratón: escrito en la pastilla, empujaba fuera el nombre del botón (probado en su ficha 86).
     const texto = `${solo ? "solo a " : ""}${icono} ${PALABRA_DEL_TIPO[d.tipo]} ${ctx.numeroDe[d.id] ?? ""}`;
+    // COMO COLITA, FUERA DE LA FICHA (14/11/2026). Él: «las fichas antes mostraban los nombres de los botones completos,
+    // ahora muestran solo a cobro… haz que salgan como colitas, y el color del cable tiene que ser el color de la ficha».
+    // Un trazo corto del color de ESTA ficha (punteado si va solo, sin cable) y la etiqueta con el borde de su destino;
+    // dentro de la ficha queda el nombre entero del botón.
+    const colorDeLaFicha = ASPECTO[f.tipo].trazo;
     return (
       <span
-        className={`ml-auto shrink-0 rounded-full border-2 ${solo ? "border-dashed" : ""} bg-white px-1.5 text-[10px] font-bold text-slate-800`}
-        style={{ borderColor: ASPECTO[d.tipo].trazo }}
+        className="absolute top-1/2 z-10 flex -translate-y-1/2 items-center"
+        // (Al lado del puntito grande de la entrega, 📚 / 📦, un poco más lejos para no taparlo.)
+        style={{ left: conPuntoGrande ? "calc(100% + 30px)" : "calc(100% + 13px)" }}
         title={`${titulo}${producto ? `\n${ASPECTO[d.tipo].nombre}: ${producto}` : ""}`}
-        onMouseEnter={(e) => ponerLineaAlDestino({ el: e.currentTarget, a: d.id, color: ASPECTO[d.tipo].trazo })}
+        onMouseEnter={(e) => verLaLinea(e.currentTarget, d)}
         onMouseLeave={() => ponerLineaAlDestino(null)}
       >
-        {texto}
+        <span style={{ width: 16, borderTop: `3px ${solo ? "dashed" : "solid"} ${colorDeLaFicha}` }} />
+        <span
+          className="whitespace-nowrap rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800 shadow-sm"
+          style={{ borderColor: ASPECTO[d.tipo].trazo, borderStyle: solo ? "dashed" : "solid" }}
+        >
+          {texto}
+        </span>
       </span>
     );
+  };
+  /** La línea hasta su destino, del color de ESTA ficha, desde el puntito de su fila (al pasar el ratón). */
+  const verLaLinea = (el: HTMLElement, d: FichaEnElEditor) => {
+    const punto = el.closest("[data-fila-salida]")?.querySelector<HTMLElement>(".react-flow__handle") ?? el;
+    ponerLineaAlDestino({ el: punto, a: d.id, color: ASPECTO[f.tipo].trazo });
   };
   /** ¿El cable de esta salida se dibuja desde ESTE nodo? (Conectado desde un espejo, sale del espejo; si no, de la original.) */
   const seDibujaAqui = (clave: string) => {
@@ -968,9 +985,15 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       !!falta ||
       (!porSuNombre && (boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
     const icono = iconoDeEntrega(f, s.clave, ctx.tablero, ctx.nombres, ctx.upsellDe[f.id] !== undefined);
+    // A dónde va, cuando su cable no se dibuja desde esta fila (14/11/2026): el ratón sobre el puntito también enseña la línea.
+    const aDonde =
+      porSuNombre ??
+      (conPunto && !destino ? aDondeVaSolo(f, s.clave, ctx.tablero) : null) ??
+      (destino && (!conPunto || !seDibujaAqui(s.clave)) ? destino : null);
     return (
       <div
         key={llave}
+        data-fila-salida=""
         title={falta ?? undefined}
         onMouseEnter={conGemelo ? () => setGemeloEncima(s.clave) : undefined}
         onMouseLeave={conGemelo ? () => setGemeloEncima((x) => (x === s.clave ? null : x)) : undefined}
@@ -1025,7 +1048,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           return pastillaDelDestino(
             solo,
             true,
-            `Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`
+            `Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`,
+            !!icono
           );
         })()}
         {/* CONECTADA DESDE OTRO SITIO (14/11/2026, su ficha 86: conectada desde un 🪞 espejo, en la original no se veía nada
@@ -1036,7 +1060,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           pastillaDelDestino(
             destino,
             false,
-            `Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}. El cable se ve desde ${espejo ? "la ficha original" : "su espejo 🪞"}, donde se conectó.`
+            `Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}. El cable se ve desde ${espejo ? "la ficha original" : "su espejo 🪞"}, donde se conectó.`,
+            !!icono
           )}
         {/* La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va. */}
         {!conPunto &&
@@ -1049,6 +1074,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             // El gemelo lleva su propio puntito (React Flow no admite dos con el mismo id); al conectar vale la salida de siempre.
             id={conPunto ? s.clave : `${s.clave}${GEMELO}${llave}`}
             className={`${icono ? PUNTO_DE_ENTREGA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
+            onMouseEnter={aDonde ? (e) => verLaLinea(e.currentTarget, aDonde) : undefined}
+            onMouseLeave={aDonde ? () => ponerLineaAlDestino(null) : undefined}
             title={
               icono
                 ? "Aquí se entrega el producto. Del ícono sale el cable: tíralo a donde sigue (el Regalo, otro upsell…), o haz clic para elegir de una lista"
@@ -1458,7 +1485,8 @@ function LineaAlDestinoVisible() {
   const nodo = useInternalNode(v?.a ?? "");
   if (!v || !nodo || !v.el.isConnected) return null;
   const r = v.el.getBoundingClientRect();
-  const s = screenToFlowPosition({ x: r.right, y: r.top + r.height / 2 });
+  // Desde el centro del puntito (o de lo que se señaló).
+  const s = screenToFlowPosition({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
   const tx = nodo.internals.positionAbsolute.x;
   const ty = nodo.internals.positionAbsolute.y + (nodo.measured?.height ?? 200) / 2;
   const [camino] = getBezierPath({ sourceX: s.x, sourceY: s.y, sourcePosition: Position.Right, targetX: tx, targetY: ty, targetPosition: Position.Left });
@@ -1466,7 +1494,8 @@ function LineaAlDestinoVisible() {
   return (
     <ViewportPortal>
       <svg style={{ position: "absolute", left: 0, top: 0, width: 1, height: 1, overflow: "visible", pointerEvents: "none", zIndex: 1000 }}>
-        <path d={camino} fill="none" stroke={v.color} strokeWidth={3.5 / z} strokeDasharray={`${9 / z} ${6 / z}`} opacity={0.85} />
+        {/* (14/11/2026: «sale un cable azul que casi ni se ve»: del color de su ficha, más grueso y sin transparencia.) */}
+        <path d={camino} fill="none" stroke={v.color} strokeWidth={5 / z} strokeDasharray={`${12 / z} ${7 / z}`} />
         <circle cx={tx} cy={ty} r={6 / z} fill={v.color} />
       </svg>
     </ViewportPortal>
