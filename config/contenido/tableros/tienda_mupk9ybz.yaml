@@ -3231,7 +3231,7 @@ whatsapp:
               peso: 1
               steps:
                 - type: image
-                  drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
+                  drive_url: https://drive.google.com/file/d/1KyufPzHVfhrziA4M1BC-yjc7rIoi6Nzx/view?usp=drive_link
                   caption_variants:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
@@ -4719,8 +4719,9 @@ whatsapp:
           spintax_ia:
             - "{Individual o en grupo 👩‍👦‍👦|solo o en compañía 👩‍👦‍👦|de forma individual o con otros 👩‍👦‍👦}"
             - "{te saluda Andrea* 🙋‍♀️ un gusto saludarte 😊|*soy Andrea* 🙋‍♀️ encantada de saludarte 😊|*Andrea te escribe* 🙋‍♀️ qué gusto tenerte por aquí 😊}"
-        - type: text
-          body_variants:
+        - type: image
+          drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
+          caption_variants:
             - |-
               *Con el Kit Escencial de {{PRODUCTO_BASE}}* recibirás:
 
@@ -4737,7 +4738,7 @@ whatsapp:
             - "{📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}"
             - "{* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,}"
         - type: image
-          drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
           caption_variants:
             - |-
               *Además recibirás GRATIS estos complementos* ‼️👇🏼
