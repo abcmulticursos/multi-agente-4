@@ -3231,7 +3231,12 @@ export default function LienzoDelTablero({
     return () => window.clearTimeout(r);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mirando]);
-  const consulta = paraBuscar(buscar.trim());
+  // EL 🔍 DENTRO DEL TABLERO (14/11/2026). Él: «no veo el buscador de fichas, te dije que quería ubicar el número»: la
+  // cajita de la barra de arriba no se notaba. Este botón redondo, al lado de ← + T ☰, abre su propia caja; lo escrito
+  // ahí manda sobre la de arriba y hace lo mismo (número → va a esa ficha; texto → marca las que lo dicen).
+  const [lupaAbierta, setLupaAbierta] = useState(false);
+  const [enLaLupa, setEnLaLupa] = useState("");
+  const consulta = paraBuscar((lupaAbierta && enLaLupa.trim() ? enLaLupa : buscar).trim());
   // BUSCAR POR NÚMERO (14/11/2026). Él: «dame un buscador de fichas, porque cuando tú me dices "la 86" tengo que estar
   // buscando». Escribir solo el número («86» o «#86») marca esa ficha y la vista va a ella (ver más abajo).
   const numeroBuscado = /^#?\d{1,4}$/.test(consulta) ? Number(consulta.replace("#", "")) : null;
@@ -4236,6 +4241,35 @@ export default function LienzoDelTablero({
                 </>
               )
             : despuesDelMas}
+          <button
+            type="button"
+            onClick={() => {
+              setLupaAbierta((v) => !v);
+              setEnLaLupa("");
+            }}
+            title="Buscar una ficha por su número (86) o por lo que dice"
+            className={`flex h-9 w-9 items-center justify-center rounded-full text-lg shadow-md ${
+              lupaAbierta ? "bg-violet-600 text-white" : "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
+            }`}
+          >
+            🔍
+          </button>
+          {lupaAbierta && (
+            <input
+              autoFocus
+              type="search"
+              value={enLaLupa}
+              onChange={(e) => setEnLaLupa(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setEnLaLupa("");
+                  setLupaAbierta(false);
+                }
+              }}
+              placeholder="N.º de ficha (ej. 86) o texto"
+              className="h-9 w-52 rounded-full border-2 border-violet-500 bg-white px-3 text-sm text-slate-800 shadow-md outline-none"
+            />
+          )}
           {faltas && (
             <div className="relative flex flex-col items-start gap-1">
               <div className="flex items-center gap-1.5">
