@@ -12,7 +12,7 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -25,6 +25,7 @@ import {
   Position,
   ReactFlow,
   SelectionMode,
+  useInternalNode,
   useNodes,
   useNodesState,
   useReactFlow,
@@ -864,6 +865,30 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     const c = ctx.tablero.cables.find((x) => x.de === f.id && x.salida === clave);
     return c ? ctx.tablero.fichas.find((x) => x.id === c.a) : undefined;
   };
+  /**
+   * A DÓNDE VA, CON SU TIPO (14/11/2026). Él: «va al 85… necesito algo que identifique a dónde va… que diga va a cobro».
+   * El ícono de esa ficha (la bolsita 💰 del cobro; en una entrega, 📦 el full y 📚 los demás), la palabra, el número y,
+   * en un cobro o una entrega, su producto. Con el ratón encima se ve la línea hasta ella. `solo` = sin cable (punteada).
+   */
+  const pastillaDelDestino = (d: FichaEnElEditor, solo: boolean, titulo: string) => {
+    const pid = d.tipo === "cobro" ? (d.cobro?.modo === "abierto" ? undefined : d.cobro?.producto_id) : d.tipo === "entregar" ? (d.entregas?.[0] ?? d.producto_id) : undefined;
+    const esFull = !!pid && (pid.split("#")[0] === FULL_DE_LA_TIENDA || (!!ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA] && pid.split("#")[0] === ctx.nombres[ID_DEL_FULL_DE_LA_TIENDA]));
+    const icono = d.tipo === "entregar" ? (esFull ? "📦" : "📚") : ASPECTO[d.tipo].icono;
+    const producto = d.tipo === "entregar" ? listaDeProductos(d.entregas?.length ? d.entregas : d.producto_id ? [d.producto_id] : []) : nombreDeProducto(pid);
+    // El producto va en el letrero del ratón: escrito en la pastilla, empujaba fuera el nombre del botón (probado en su ficha 86).
+    const texto = `${solo ? "solo a " : ""}${icono} ${PALABRA_DEL_TIPO[d.tipo]} ${ctx.numeroDe[d.id] ?? ""}`;
+    return (
+      <span
+        className={`ml-auto shrink-0 rounded-full border-2 ${solo ? "border-dashed" : ""} bg-white px-1.5 text-[10px] font-bold text-slate-800`}
+        style={{ borderColor: ASPECTO[d.tipo].trazo }}
+        title={`${titulo}${producto ? `\n${ASPECTO[d.tipo].nombre}: ${producto}` : ""}`}
+        onMouseEnter={(e) => ponerLineaAlDestino({ el: e.currentTarget, a: d.id, color: ASPECTO[d.tipo].trazo })}
+        onMouseLeave={() => ponerLineaAlDestino(null)}
+      >
+        {texto}
+      </span>
+    );
+  };
   /** ¿El cable de esta salida se dibuja desde ESTE nodo? (Conectado desde un espejo, sale del espejo; si no, de la original.) */
   const seDibujaAqui = (clave: string) => {
     const c = ctx.tablero.cables.find((x) => x.de === f.id && x.salida === clave);
@@ -940,51 +965,37 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             🪞
           </span>
         )}
-        {porSuNombre && (
-          <span
-            className="ml-auto shrink-0 rounded-full border-2 border-dashed bg-white px-1.5 text-[10px] font-bold text-slate-800"
-            style={{ borderColor: ASPECTO[porSuNombre.tipo].trazo }}
-            title={`Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
-          >
-            {/* En palabras (13/11/2026, él: «no entiendo esos jeroglíficos»: era «↺ → 80»). */}
-            va solo a {ctx.numeroDe[porSuNombre.id] ?? ""}
-          </span>
-        )}
+        {/* En palabras (13/11/2026, él: «no entiendo esos jeroglíficos»: era «↺ → 80»); con su tipo desde el 14/11. */}
+        {porSuNombre &&
+          pastillaDelDestino(
+            porSuNombre,
+            true,
+            `Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`
+          )}
         {conPunto && !destino && (() => {
           // SIN CABLE PERO SABE A DÓNDE IR (05/11/2026): su colita automática, con el número y el color de esa ficha.
           const solo = aDondeVaSolo(f, s.clave, ctx.tablero);
           if (!solo) return null;
-          return (
-            <span
-              className="ml-auto shrink-0 rounded-full border-2 border-dashed bg-white px-1.5 text-[10px] font-bold text-slate-800"
-              style={{ borderColor: ASPECTO[solo.tipo].trazo }}
-              title={`Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
-            >
-              va solo a {ctx.numeroDe[solo.id] ?? ""}
-            </span>
+          return pastillaDelDestino(
+            solo,
+            true,
+            `Automático: sin cable, el bot lo lleva a ${ctx.numeroDe[solo.id] ?? ""} ${solo.titulo?.trim() || ASPECTO[solo.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`
           );
         })()}
-        {conPunto && destino && !seDibujaAqui(s.clave) && (
-          // CONECTADA DESDE OTRO SITIO (14/11/2026, su ficha 86: conectada desde un 🪞 espejo, en la original no se veía nada
-          // y parecía suelta). El cable se dibuja donde él lo puso; aquí, en palabras, a dónde va.
-          <span
-            className="ml-auto shrink-0 rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800"
-            style={{ borderColor: ASPECTO[destino.tipo].trazo }}
-            title={`Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}. El cable se ve desde ${espejo ? "la ficha original" : "su espejo 🪞"}, donde se conectó.`}
-          >
-            va a {ctx.numeroDe[destino.id] ?? ""}
-          </span>
-        )}
-        {!conPunto && destino && (
-          // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.
-          <span
-            className="ml-auto shrink-0 rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800"
-            style={{ borderColor: ASPECTO[destino.tipo].trazo }}
-            title={`Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre} (el mismo cable de arriba)`}
-          >
-            va a {ctx.numeroDe[destino.id] ?? ""}
-          </span>
-        )}
+        {/* CONECTADA DESDE OTRO SITIO (14/11/2026, su ficha 86: conectada desde un 🪞 espejo, en la original no se veía nada
+            y parecía suelta). El cable se dibuja donde él lo puso; aquí, a dónde va. */}
+        {conPunto &&
+          destino &&
+          !seDibujaAqui(s.clave) &&
+          pastillaDelDestino(
+            destino,
+            false,
+            `Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}. El cable se ve desde ${espejo ? "la ficha original" : "su espejo 🪞"}, donde se conectó.`
+          )}
+        {/* La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va. */}
+        {!conPunto &&
+          destino &&
+          pastillaDelDestino(destino, false, `Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre} (el mismo cable de arriba)`)}
         {(conPunto || conGemelo) && (
           <Handle
             type="source"
@@ -1374,6 +1385,64 @@ function ZonaDeLaSeleccion() {
     </ViewportPortal>
   );
 }
+
+/**
+ * LA LÍNEA QUE APARECE Y DESAPARECE DE UN «A DÓNDE VA» (14/11/2026). Él: «necesito… un cable tipo esos cables que aparecen
+ * y desaparecen». Con el ratón sobre la pastilla «💰 cobro 85» de una opción sin cable dibujado ahí, se ve la línea hasta
+ * su ficha, como la de una colita. Fuera del contexto del lienzo a propósito: pasar el ratón no vuelve a dibujar las fichas.
+ */
+type LineaAlDestino = { el: HTMLElement; a: string; color: string } | null;
+let lineaAlDestino: LineaAlDestino = null;
+const oyentesDeLaLinea = new Set<() => void>();
+const ponerLineaAlDestino = (v: LineaAlDestino) => {
+  lineaAlDestino = v;
+  oyentesDeLaLinea.forEach((o) => o());
+};
+function LineaAlDestinoVisible() {
+  const v = useSyncExternalStore(
+    (o) => {
+      oyentesDeLaLinea.add(o);
+      return () => oyentesDeLaLinea.delete(o);
+    },
+    () => lineaAlDestino,
+    () => null
+  );
+  const { screenToFlowPosition } = useReactFlow();
+  const zoom = useStore((s) => s.transform[2]);
+  const nodo = useInternalNode(v?.a ?? "");
+  if (!v || !nodo || !v.el.isConnected) return null;
+  const r = v.el.getBoundingClientRect();
+  const s = screenToFlowPosition({ x: r.right, y: r.top + r.height / 2 });
+  const tx = nodo.internals.positionAbsolute.x;
+  const ty = nodo.internals.positionAbsolute.y + (nodo.measured?.height ?? 200) / 2;
+  const [camino] = getBezierPath({ sourceX: s.x, sourceY: s.y, sourcePosition: Position.Right, targetX: tx, targetY: ty, targetPosition: Position.Left });
+  const z = Math.max(zoom, 0.05);
+  return (
+    <ViewportPortal>
+      <svg style={{ position: "absolute", left: 0, top: 0, width: 1, height: 1, overflow: "visible", pointerEvents: "none", zIndex: 1000 }}>
+        <path d={camino} fill="none" stroke={v.color} strokeWidth={3.5 / z} strokeDasharray={`${9 / z} ${6 / z}`} opacity={0.85} />
+        <circle cx={tx} cy={ty} r={6 / z} fill={v.color} />
+      </svg>
+    </ViewportPortal>
+  );
+}
+
+/** La palabra corta de cada tipo de ficha, para «a dónde va» (14/11/2026: «que diga va a cobro»). */
+const PALABRA_DEL_TIPO: Record<TipoDeFicha, string> = {
+  inicio: "inicio",
+  mensaje: "mensaje",
+  seguimientos: "seguimientos",
+  intro_ob: "order bump",
+  entregar: "entrega",
+  cobro: "cobro",
+  condicion: "condición",
+  reparto: "ruteador",
+  esperar: "esperar",
+  workflow: "workflow",
+  regalo: "regalo",
+  humano: "asesor",
+  correo: "correo",
+};
 
 /** Para el buscador: sin tildes ni mayúsculas. */
 const paraBuscar = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -3964,6 +4033,7 @@ export default function LienzoDelTablero({
             style={{ cursor: "pointer" }}
           />
           <ZonaDeLaSeleccion />
+          <LineaAlDestinoVisible />
           <SoltarConEscape tirando={!!tirando} alSoltar={soltarElCable} />
           <ZoomDelTablero />
         </ReactFlow>
