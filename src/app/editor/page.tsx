@@ -25974,6 +25974,13 @@ function ChatPreview({
             {onDuplicateStep && (
               <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onDuplicateStep(index); setAvisoDelMenu(`Burbuja ${index + 1} duplicada. La copia está justo debajo.`); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Duplicar burbuja</button>
             )}
+            {/* SUBIR Y BAJAR SIN ARRASTRAR (13/11/2026, él: «copiar burbujas, subir, bajar, etc.» en el recorrido). */}
+            {onMoveStep && contextMenu.index > 0 && (
+              <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onMoveStep(index, index - 1, "before"); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">⬆ Subir burbuja</button>
+            )}
+            {onMoveStep && contextMenu.index < steps.length - 1 && (
+              <button type="button" onClick={() => { const index = contextMenu.index; setContextMenu(null); onMoveStep(index, index + 1, "after"); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">⬇ Bajar burbuja</button>
+            )}
             <button type="button" onClick={() => { copyStep(steps[contextMenu.index]); setContextMenu(null); setAvisoDelMenu("Burbuja copiada. Abre el menú donde la quieras —otra intro, un seguimiento, el upsell— y elige «Pegar debajo de esta burbuja»."); }} className="block w-full px-3 py-2 text-left hover:bg-neutral-50">Copiar burbuja</button>
             {/* CORTAR = COPIAR Y QUITAR.
                 Sin esto, mover una burbuja a otra secuencia eran dos pasos y
@@ -33217,7 +33224,18 @@ function PantallaDelTableroCargada({
           onEditarEntrega={setEntregaEditando}
         />
       )}
-      {verCamino && <RecorridoDelTablero cfg={cfg} tablero={tablero} tienda={tienda} pais={paisVisto} canal={esWorkflow ? undefined : canal} onCerrar={() => setVerCamino(false)} />}
+      {verCamino && (
+        <RecorridoDelTablero
+          cfg={cfg}
+          tablero={tablero}
+          tienda={tienda}
+          pais={paisVisto}
+          canal={esWorkflow ? undefined : canal}
+          onCerrar={() => setVerCamino(false)}
+          // (13/11/2026: se edita desde el recorrido; cada cambio es un paso de Ctrl+Z.)
+          onCambiarFicha={cambiarFicha}
+        />
+      )}
       {/* EDITAR LA ENTREGA AQUÍ MISMO (03/11/2026). Él: «un botón que abra el cuadro del texto de la entrega para no tener
           que regresar a la ficha (del producto) y poder editarla ahí mismo en un pop up». Edita lo que el bot manda: la
           entrega principal del producto (`delivery`) o esa entrega extra. Encima de los ajustes (z-[90]). */}
@@ -36642,6 +36660,7 @@ function RecorridoDelTablero({
   pais,
   canal,
   onCerrar,
+  onCambiarFicha,
 }: {
   cfg: FullConfig;
   tablero: TableroEnElEditor;
@@ -36650,8 +36669,12 @@ function RecorridoDelTablero({
   /** El canal del tablero: el visor dice «Vista previa (Messenger)» en el de Messenger. Sin él (workflow), WhatsApp. */
   canal?: CanalDeTablero;
   onCerrar: () => void;
+  /** EDITAR DESDE EL RECORRIDO (13/11/2026): cambia una ficha de verdad. Sin él, el recorrido es solo para mirar. */
+  onCambiarFicha?: (fid: string, cambio: Partial<FichaEnElEditor>) => void;
 }) {
   useEscapeEnPila(() => onCerrar());
+  // «💾 GUARDAR» AQUÍ MISMO (13/11/2026, él: «voy a necesitar un botón de guardar en el modo recorrido»).
+  const guardado = useContext(GuardadoDelEditor);
   const [elegidas, setElegidas] = useState<Record<string, string>>({});
   const [rutasVistas, setRutasVistas] = useState<Record<string, string[]>>(leerRutasDelRecorrido);
   const claveDeRutas = (repartoId: string) => `${tienda?.id ?? "workflow"}|${canal ?? "whatsapp"}|${pais}|${repartoId}`;
@@ -36669,11 +36692,37 @@ function RecorridoDelTablero({
   const inicioPropio = tablero.fichas.find((f) => f.tipo === "inicio" && (f.pais ?? "") === pais);
   const inicio = inicioPropio ?? tablero.fichas.find((f) => f.tipo === "inicio" && !f.pais);
   const nombreDe = (f: FichaEnElEditor) => `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
-  const visor = (f: FichaEnElEditor, steps: unknown[] | undefined, clave: string) => {
-    const pasos = ((steps ?? []) as EditorStep[]).filter((s) => s.enabled !== false);
-    if (!pasos.length) return <p className="px-2 py-1 text-xs italic text-tinta-suave">(sin burbujas)</p>;
+  /** `poner`: cómo se guardan las burbujas de ESE sitio de la ficha. Sin él (las entregas), solo se mira. */
+  const visor = (f: FichaEnElEditor, steps: unknown[] | undefined, clave: string, poner?: (pasos: EditorStep[]) => FichaEnElEditor) => {
+    const todos = (steps ?? []) as EditorStep[];
+    const pasos = todos.filter((s) => s.enabled !== false);
+    const editable = !!onCambiarFicha && !!poner;
+    if (!(editable ? todos : pasos).length) return <p className="px-2 py-1 text-xs italic text-tinta-suave">(sin burbujas)</p>;
     const productos = productosParaElVisor(cfg, f, pais, tablero, alineacion);
     const precio = productos?.productos.find((x) => x.id === productos.idPorDefecto)?.precio ?? undefined;
+    const vista = {
+      priceSoles: previewFullPriceFromConfig(cfgVista),
+      comboPrice: previewComboPriceFromConfig(cfgVista),
+      basicoPrice: previewBasicoPriceFromConfig(cfgVista),
+      ...(typeof precio === "number" ? { previewPriceOverride: precio } : {}),
+      previewContext: conProductosDeLaFicha(previewContextFromConfig(cfgVista, pais as CountryCode), productos),
+      channelLabel: canal === "messenger" ? "Messenger" : canal === "instagram" ? "Instagram" : "WhatsApp",
+    };
+    if (editable)
+      return (
+        <ProductosDeLaFichaContext.Provider value={productos}>
+          <VisorEditableDelRecorrido
+            key={clave}
+            titulo={nombreDe(f)}
+            steps={todos}
+            vista={vista}
+            onStepsChange={(nuevos) => {
+              const nueva = poner!(nuevos);
+              onCambiarFicha!(f.id, { steps: nueva.steps, variantes: nueva.variantes, seguimientos: nueva.seguimientos });
+            }}
+          />
+        </ProductosDeLaFichaContext.Provider>
+      );
     return (
       <ProductosDeLaFichaContext.Provider value={productos}>
         <ChatPreview
@@ -36690,21 +36739,41 @@ function RecorridoDelTablero({
       </ProductosDeLaFichaContext.Provider>
     );
   };
+  // La versión que se enseña (la primera encendida, o la primera): es la que se edita.
+  const versionVista = (vs: Array<{ peso?: number }> | undefined) => {
+    const j = (vs ?? []).findIndex((v) => (v.peso ?? 1) > 0);
+    return j >= 0 ? j : 0;
+  };
   const contenido = (f: FichaEnElEditor) => {
-    if (f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo") return visor(f, f.steps, f.id);
-    if (f.tipo === "intro_ob") return visor(f, f.variantes?.find((v) => (v.peso ?? 1) > 0)?.steps ?? f.variantes?.[0]?.steps, f.id);
+    if (f.tipo === "mensaje" || f.tipo === "cobro" || f.tipo === "correo")
+      return visor(f, f.steps, f.id, (pasos) => ({ ...f, steps: pasos as unknown as FichaEnElEditor["steps"] }));
+    if (f.tipo === "intro_ob") {
+      const j = versionVista(f.variantes);
+      return visor(f, f.variantes?.[j]?.steps, f.id, (pasos) => ({
+        ...f,
+        variantes: (f.variantes ?? []).map((v, k) => (k === j ? { ...v, steps: pasos as unknown as typeof v.steps } : v)),
+      }));
+    }
     if (f.tipo === "seguimientos")
       return (
         <div className="space-y-2">
-          {(f.seguimientos ?? []).map((s, i) => (
-            <div key={s.id}>
-              <p className="px-1 text-[12px] font-bold text-orange-700">
-                ⏳ Seguimiento {i + 1} · a los {minutosLegiblesDelTablero(s.minutos)}
-                {s.activa_oferta ? " · activa la oferta" : ""}
-              </p>
-              {visor(f, s.variantes.find((v) => (v.peso ?? 1) > 0)?.steps ?? s.variantes[0]?.steps, `${f.id}-${s.id}`)}
-            </div>
-          ))}
+          {(f.seguimientos ?? []).map((s, i) => {
+            const j = versionVista(s.variantes);
+            return (
+              <div key={s.id}>
+                <p className="px-1 text-[12px] font-bold text-orange-700">
+                  ⏳ Seguimiento {i + 1} · a los {minutosLegiblesDelTablero(s.minutos)}
+                  {s.activa_oferta ? " · activa la oferta" : ""}
+                </p>
+                {visor(f, s.variantes[j]?.steps, `${f.id}-${s.id}`, (pasos) => ({
+                  ...f,
+                  seguimientos: (f.seguimientos ?? []).map((ss, k) =>
+                    k !== i ? ss : { ...ss, variantes: ss.variantes.map((v, kk) => (kk === j ? { ...v, steps: pasos as unknown as typeof v.steps } : v)) }
+                  ),
+                }))}
+              </div>
+            );
+          })}
         </div>
       );
     if (f.tipo === "entregar") {
@@ -36865,11 +36934,25 @@ function RecorridoDelTablero({
             <h3 className="bn-titulo text-sm font-bold text-neutral-900">▶ Recorrido de {nombrePais}</h3>
             <p className="bn-subtitulo mt-0.5 text-xs text-neutral-500">
               Lo que recibe un cliente de este país, siguiendo los cables. Cambia la bandera para ver otro país. Las fichas sin cable no salen.
+              {onCambiarFicha ? " Clic derecho en una burbuja para editarla; lo que cambies es la ficha de verdad (Ctrl+Z lo deshace)." : ""}
             </p>
           </div>
-          <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
-            Cerrar (W)
-          </button>
+          <span className="flex shrink-0 items-center gap-2">
+            {onCambiarFicha && guardado && (
+              <button
+                type="button"
+                disabled={!guardado.sucio || guardado.guardando}
+                onClick={() => void guardado.guardar()}
+                title={guardado.sucio ? "Guarda los cambios (igual que Ctrl+S)" : "No hay cambios sin guardar"}
+                className="bn-listo rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40"
+              >
+                {guardado.guardando ? "Guardando…" : guardado.sucio ? "💾 Guardar" : "✓ Guardado"}
+              </button>
+            )}
+            <button type="button" onClick={onCerrar} className="bn-cancelar rounded border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">
+              Cerrar (W)
+            </button>
+          </span>
         </div>
         <div className="bn-cuerpo space-y-3 p-4">
           {!inicio ? (
@@ -39555,6 +39638,103 @@ function JourneyPreviewSection({ title, children }: { title: string; children: R
       <h3 className="mb-2 text-sm font-bold text-neutral-800">{title}</h3>
       <div className="space-y-4">{children}</div>
     </section>
+  );
+}
+
+/**
+ * UN VISOR DEL RECORRIDO (W) DEL TABLERO QUE SE PUEDE EDITAR (13/11/2026). Él: «en el modo recorrido solo se pueden ver…
+ * ¿poner en modo editar burbujas con clic derecho sobrecarga?» — no: el menú y la ventana solo existen al abrirlos.
+ * Clic derecho en una burbuja: editar (la misma ventana «Editar esta burbuja»), crear abajo, duplicar, subir, bajar,
+ * copiar, cortar, pegar, apagar y eliminar — lo mismo que el recorrido de la pizarra (`JourneyPreviewBlock`). Cada cambio va
+ * a la FICHA de verdad (Ctrl+Z lo deshace; se guarda con «💾 Guardar» o Ctrl+S).
+ */
+function VisorEditableDelRecorrido({
+  titulo,
+  steps,
+  onStepsChange,
+  vista,
+}: {
+  titulo: string;
+  /** TODAS sus burbujas (también las apagadas): el visor enseña las encendidas y edita por su posición real. */
+  steps: EditorStep[];
+  onStepsChange: (steps: EditorStep[]) => void;
+  /** Lo del visor: precios, comodines y canal (lo mismo que el recorrido de solo mirar). */
+  vista: {
+    priceSoles?: number;
+    comboPrice?: number;
+    basicoPrice?: number;
+    previewPriceOverride?: number;
+    previewContext: PreviewContext;
+    channelLabel: string;
+  };
+}) {
+  const { activeStepIndex, setActiveStepIndex } = useSeleccionDeBurbuja();
+  const [editando, setEditando] = useState<number | null>(null);
+  const moveStep = (from: number, target: number, placement: "before" | "after") => {
+    if (from === target) return;
+    const next = [...steps];
+    const [moved] = next.splice(from, 1);
+    let destination = target + (placement === "after" ? 1 : 0);
+    if (from < destination) destination -= 1;
+    next.splice(destination, 0, moved);
+    onStepsChange(next);
+    setActiveStepIndex(destination);
+  };
+  return (
+    <>
+      <ChatPreview
+        steps={steps}
+        priceSoles={vista.priceSoles}
+        comboPrice={vista.comboPrice}
+        basicoPrice={vista.basicoPrice}
+        {...(typeof vista.previewPriceOverride === "number" ? { previewPriceOverride: vista.previewPriceOverride } : {})}
+        previewContext={vista.previewContext}
+        channelLabel={vista.channelLabel}
+        activeStepIndex={activeStepIndex}
+        onSelectStep={setActiveStepIndex}
+        onEditStep={(index) => {
+          setActiveStepIndex(index);
+          setEditando(index);
+        }}
+        onDuplicateStep={(index) => {
+          const step = steps[index];
+          if (!step) return;
+          const next = [...steps];
+          next.splice(index + 1, 0, sinBotonesRepetidos(step, steps));
+          onStepsChange(next);
+          setActiveStepIndex(index + 1);
+        }}
+        onToggleStep={(index) => {
+          const cuales = new Set(Array.isArray(index) ? index : [index]);
+          onStepsChange(steps.map((s, i) => (cuales.has(i) ? { ...s, enabled: s.enabled === false } : s)));
+        }}
+        onRemoveStep={(index, opciones) => {
+          const cuales = new Set(Array.isArray(index) ? index : [index]);
+          if (!opciones?.sinPreguntar && !window.confirm(cuales.size > 1 ? `¿Eliminar estas ${cuales.size} burbujas? Ctrl+Z las devuelve.` : "¿Eliminar esta burbuja? Ctrl+Z la devuelve.")) return;
+          onStepsChange(steps.filter((_, i) => !cuales.has(i)));
+          setActiveStepIndex(null);
+        }}
+        onPasteStep={(index, nuevos) => {
+          onStepsChange(pegarPasos(steps, index, nuevos));
+          setActiveStepIndex(index + 1);
+        }}
+        onMoveStep={moveStep}
+      />
+      {editando !== null && steps[editando] && (
+        <JourneyStepEditorModal
+          title={`${titulo} · burbuja ${editando + 1}`}
+          steps={steps}
+          stepIndex={editando}
+          previewContext={vista.previewContext}
+          priceSoles={vista.priceSoles}
+          comboPrice={vista.comboPrice}
+          basicoPrice={vista.basicoPrice}
+          {...(typeof vista.previewPriceOverride === "number" ? { previewPriceOverride: vista.previewPriceOverride } : {})}
+          onChange={onStepsChange}
+          onClose={() => setEditando(null)}
+        />
+      )}
+    </>
   );
 }
 
