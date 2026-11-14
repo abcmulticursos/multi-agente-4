@@ -25771,6 +25771,12 @@ function ChatPreview({
                   event.stopPropagation();
                   // EL CLIC DERECHO NO BUSCA SU CAJÓN (02/11/2026). Él: «con clic derecho que no scrollee el visor»: solo
                   // abre el menú. El izquierdo sigue buscando su par, como siempre.
+                  // (14/11/2026) PERO SÍ LA ELIGE. Él: «aparece su menú, pero sigue seleccionada la burbuja 5… cualquiera cree
+                  // que se está editando la 5… que quede seleccionada, pero que no scrollee». Elegida sin desplazar nada.
+                  if (seleccion === null) {
+                    marcarSinDesplazar();
+                    onSelectStep?.(originalIndex);
+                  }
                   setContextMenu({ index: originalIndex, ...sinElZoom(event) });
                 }}
                 className={`bn-burbuja max-w-[88%] rounded-lg rounded-tr-none bg-[#d9fdd3] px-2.5 py-1.5 shadow-sm transition ${
@@ -41427,6 +41433,11 @@ function StepList({
                   if ((evento.target as HTMLElement).closest("[data-cuadrito], [data-barra-de-elegidos]")) return;
                   evento.preventDefault();
                   evento.stopPropagation();
+                  // (14/11/2026) El clic derecho también la elige, sin desplazar ni el visor ni los cajones.
+                  if (seleccion == null) {
+                    marcarSinDesplazar();
+                    onActiveStepIndexChange?.(i);
+                  }
                   { const { x, y } = sinElZoom(evento); onMenuDelCajon(i, x, y); }
                 }
               : undefined
