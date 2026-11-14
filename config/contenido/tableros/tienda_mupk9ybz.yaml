@@ -4756,7 +4756,7 @@ whatsapp:
           body_variants:
             - |-
               ❌*(antes)* ~precio original {{PRECIO_ANTES_BASE}}~
-              ✅ 📚 *{{PRECIO_BASE}}* ‼️
+              ✅ 📚 *SOLO POR HOY!*  *{{PRECIO_BASE}}* ‼️
 
               🟠 *¿COMO LO ADQUIERO?*
 
