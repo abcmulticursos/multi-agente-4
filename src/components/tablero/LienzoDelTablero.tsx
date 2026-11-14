@@ -864,6 +864,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     const c = ctx.tablero.cables.find((x) => x.de === f.id && x.salida === clave);
     return c ? ctx.tablero.fichas.find((x) => x.id === c.a) : undefined;
   };
+  /** ¿El cable de esta salida se dibuja desde ESTE nodo? (Conectado desde un espejo, sale del espejo; si no, de la original.) */
+  const seDibujaAqui = (clave: string) => {
+    const c = ctx.tablero.cables.find((x) => x.de === f.id && x.salida === clave);
+    if (!c) return true;
+    const desdeEspejo = !!c.de_espejo && (ctx.tablero.espejos ?? []).some((e) => e.id === c.de_espejo && e.ficha === f.id);
+    return desdeEspejo ? c.de_espejo === espejo : !espejo;
+  };
   // «⏳ SI NO RESPONDE» NO SE VE CON SEGUIMIENTOS CONECTADOS (27/10/2026): ahí mandan ellos y el bot no
   // la usa. Si ya tenía cable, se ve (para poder cortarlo).
   const conSeguimientos = destinoDe("siguiente")?.tipo === "seguimientos";
@@ -957,6 +964,17 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             </span>
           );
         })()}
+        {conPunto && destino && !seDibujaAqui(s.clave) && (
+          // CONECTADA DESDE OTRO SITIO (14/11/2026, su ficha 86: conectada desde un 🪞 espejo, en la original no se veía nada
+          // y parecía suelta). El cable se dibuja donde él lo puso; aquí, en palabras, a dónde va.
+          <span
+            className="ml-auto shrink-0 rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800"
+            style={{ borderColor: ASPECTO[destino.tipo].trazo }}
+            title={`Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre}. El cable se ve desde ${espejo ? "la ficha original" : "su espejo 🪞"}, donde se conectó.`}
+          >
+            va a {ctx.numeroDe[destino.id] ?? ""}
+          </span>
+        )}
         {!conPunto && destino && (
           // La misma opción en otro seguimiento: su cable sale de la primera; aquí, a dónde va.
           <span
@@ -964,7 +982,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             style={{ borderColor: ASPECTO[destino.tipo].trazo }}
             title={`Va a ${ctx.numeroDe[destino.id] ?? ""} ${destino.titulo?.trim() || ASPECTO[destino.tipo].nombre} (el mismo cable de arriba)`}
           >
-            → {ctx.numeroDe[destino.id] ?? ""}
+            va a {ctx.numeroDe[destino.id] ?? ""}
           </span>
         )}
         {(conPunto || conGemelo) && (
@@ -3145,7 +3163,14 @@ export default function LienzoDelTablero({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mirando]);
   const consulta = paraBuscar(buscar.trim());
+  // BUSCAR POR NÚMERO (14/11/2026). Él: «dame un buscador de fichas, porque cuando tú me dices "la 86" tengo que estar
+  // buscando». Escribir solo el número («86» o «#86») marca esa ficha y la vista va a ella (ver más abajo).
+  const numeroBuscado = /^#?\d{1,4}$/.test(consulta) ? Number(consulta.replace("#", "")) : null;
   const coincidentes = useMemo(() => {
+    if (numeroBuscado !== null) {
+      const numeros = numerarFichas(tablero);
+      return new Set(visibles.filter((f) => numeros[f.id] === numeroBuscado).map((f) => f.id));
+    }
     if (consulta.length < 2) return null;
     return new Set(
       visibles
@@ -3183,6 +3208,17 @@ export default function LienzoDelTablero({
   // EL MODO INALÁMBRICO (27/10/2026): cada conexión, cable o colita, como él la eligió.
   const [todoCable, setTodoCable] = useState(false);
   const [destacada, setDestacada] = useState<string | null>(null);
+  // La vista va sola a la ficha del número buscado (con una pausa corta: «8» y luego «86» no salta dos veces).
+  useEffect(() => {
+    if (numeroBuscado === null || !coincidentes || coincidentes.size !== 1) return;
+    const [id] = [...coincidentes];
+    const espera = window.setTimeout(() => {
+      instancia.current?.fitView({ nodes: [{ id }], padding: 1.2, maxZoom: 1, duration: 500 });
+      setDestacada(id);
+    }, 450);
+    return () => window.clearTimeout(espera);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numeroBuscado, coincidentes]);
   const [verEntrantes, setVerEntrantes] = useState<string | null>(null);
   // AL TIRAR DE NUEVO DESDE UNA SALIDA CON CABLE, el viejo no se ve mientras se tira; si el nuevo no
   // llega a ninguna ficha, vuelve a verse tal cual (no se desconecta nada).
@@ -3974,7 +4010,7 @@ export default function LienzoDelTablero({
             }}
           >
             <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
-              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${dibujando.pais ? `${banderaDe(dibujando.pais)} ${dibujando.pais}` : "🌍 Otros países"}`} · Esc cancela
+              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${dibujando.pais ? `${banderaDe(dibujando.pais)} ${dibujando.pais}` : "🌍 Otros países"}`}, o haz un clic · Esc cancela
             </div>
             {trazo && (
               <div
@@ -4315,20 +4351,6 @@ export default function LienzoDelTablero({
                     {portapapeles.cajas?.length ? ` y ${portapapeles.cajas.length} velo${portapapeles.cajas.length === 1 ? "" : "s"}` : ""})
                   </button>
                 )}
-                {/* UN VELO SIMPLE DESDE EL CLIC DERECHO (13/11/2026). Él: «agrégale la opción de crear velos simples con el
-                    clic derecho en el tablero». Se dibuja arrastrando, como desde el «+». */}
-                {!menu.m.desde && (
-                  <button
-                    type="button"
-                    className={`${opcionDeMenu} border-b border-slate-200`}
-                    onClick={() => {
-                      setMenu(null);
-                      setDibujando({});
-                    }}
-                  >
-                    ⬚ Velo simple (dibújalo arrastrando)
-                  </button>
-                )}
                 <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
                   {menu.m.desde ? "Crear conectada" : "Crear aquí"}
                 </div>
@@ -4346,6 +4368,21 @@ export default function LienzoDelTablero({
                     {ASPECTO[tipo].icono} {ASPECTO[tipo].nombre}
                   </button>
                 ))}
+                {/* LA CAJA LIBRE, IGUAL QUE EN EL «+» (14/11/2026). Él: que la del clic derecho sea la misma «Caja libre (solo
+                    fondo, sin país)», al final y con su mismo dibujito; se dibuja arrastrando, o un clic la pone de su tamaño. */}
+                {!menu.m.desde && (
+                  <button
+                    type="button"
+                    className={`${opcionDeMenu} flex items-center gap-2 border-t border-slate-200`}
+                    title="Solo un fondo para ordenar, sin país: arrastra para dibujarla, o haz un clic y sale de su tamaño"
+                    onClick={() => {
+                      setMenu(null);
+                      setDibujando({});
+                    }}
+                  >
+                    <span className="h-2.5 w-3.5 shrink-0 rounded-sm border-2 border-dashed border-slate-400" /> Caja libre (solo fondo, sin país)
+                  </button>
+                )}
               </>
             )}
             {menu.m.tipo === "ficha" && fichaDelMenu && (

@@ -32441,8 +32441,8 @@ function PantallaDelTableroCargada({
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           onKeyDown={(e) => e.key === "Escape" && setBuscar("")}
-          placeholder="🔍 Buscar"
-          title="Busca en los títulos y en lo que dicen las burbujas · Esc: borrar"
+          placeholder="🔍 Buscar o n.º de ficha"
+          title="Busca en los títulos y en lo que dicen las burbujas. Escribe solo un número (86) para ir a esa ficha · Esc: borrar"
           className="w-40 rounded-md border border-borde bg-relleno px-2 py-1 text-xs text-tinta"
         />
         {!esWorkflow && (
