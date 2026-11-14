@@ -879,6 +879,52 @@ export function cableDeLaSalida(t: Tablero, fichaId: string, salida: string): Ca
 }
 
 /**
+ * EL BOTÓN SIN CABLE QUE NOMBRA UN PRODUCTO VA A SU COBRO (14/11/2026, sus conversaciones 487–490 de GRAFISMO AR). Él
+ * cambió los cuadritos conectados de sus Order bump por botones «SUPER PACK 2 EN 1» / «SOLO GRAFISMO» sin cable: el
+ * cliente los escribía y no le llegaban los datos de pago. Y la pantalla decía «solo a 💰 cobro 74» porque miraba otros
+ * cables: «no me entregues cosas que mienten». Ahora hay UNA regla, y la usan el motor y la pantalla:
+ *   - Solo botones encendidos de un Mensaje o un Order bump, sin cable propio.
+ *   - Cobros candidatos, los de SU ruta: los que la ficha conecta directamente, y los que cuelgan sus mismos
+ *     Seguimientos («si no paga» → la caja a la que va su «si no responde»).
+ *   - Va al que comparte con el botón una palabra que NINGÚN otro candidato tiene (nombre del producto y título del
+ *     Cobro). Ninguno o empate = sin cable, como antes.
+ * Es un cable de lectura (`por_nombre`): no se guarda y lo que él dibuje manda siempre.
+ */
+export function conCablesPorElNombre(t: Tablero, nombreDe: (productoId: string) => string): Tablero {
+  const palabras = (s: string) =>
+    new Set(
+      s
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Mn}/gu, "")
+        .replace(/[^a-z0-9ñ]+/g, " ")
+        .split(" ")
+        .filter((w) => w.length >= 3 && !["los", "las", "del", "con", "por", "para", "que", "una", "uno", "the"].includes(w))
+    );
+  const vivas = (id: string) => t.fichas.find((x) => x.id === id && !x.guardada && !x.apagada);
+  const extra: CableDelTablero[] = [];
+  for (const f of t.fichas) {
+    if (f.guardada || f.apagada || (f.tipo !== "mensaje" && f.tipo !== "intro_ob")) continue;
+    const sinCable = opcionesDe(pasosDeLaFicha(f)).botones.filter((b) => b.label?.trim() && !cableDeLaSalida(t, f.id, `btn:${b.id}`));
+    if (!sinCable.length) continue;
+    const cajas = new Set(t.cables.filter((c) => c.de === f.id && (c.salida === "siguiente" || c.salida === "sin_respuesta")).map((c) => c.a));
+    const cobros = new Map<string, FichaDelTablero>();
+    for (const c of t.cables) {
+      const a = c.de === f.id ? vivas(c.a) : c.salida === "sin_pago" && cajas.has(c.a) ? vivas(c.de) : undefined;
+      if (a?.tipo === "cobro" && a.cobro?.modo !== "abierto" && a.cobro?.producto_id) cobros.set(a.id, a);
+    }
+    if (cobros.size < 1) continue;
+    const lista = [...cobros.values()].map((c) => ({ c, w: palabras(`${nombreDe(c.cobro!.producto_id!)} ${c.titulo ?? ""}`) }));
+    for (const b of sinCable) {
+      const dichas = palabras(b.label);
+      const acierta = lista.filter((x) => [...dichas].some((w) => x.w.has(w) && lista.every((o) => o === x || !o.w.has(w))));
+      if (acierta.length === 1) extra.push({ id: `por-nombre:${f.id}:${b.id}`, de: f.id, salida: `btn:${b.id}`, a: acierta[0].c.id, por_nombre: true });
+    }
+  }
+  return extra.length ? { ...t, cables: [...t.cables, ...extra] } : t;
+}
+
+/**
  * ¿Este tablero atiende a un cliente de ese país? Encendido, con el Inicio de su país (o el de
  * «Otros países») vendiendo, fuera de revisión y con su cable puesto.
  */

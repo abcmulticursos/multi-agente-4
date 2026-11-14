@@ -89,7 +89,8 @@ comprobar("una salida, un cable", /if \(vistos\.has\(llave\)\) return \[\];/.tes
 console.log("\n— 5. el dinero —\n");
 comprobar("la IA del tablero solo nombra montos de su cobro", /prohibidos = \(t: string\) => importesDelTexto\(t\)/.test(ia));
 comprobar("el mismo comprobante no vale dos veces", /if \(huella && !apuntarHuella\(huella, convo\.id\)\)/.test(motor));
-comprobar("un botón ya usado no repite la entrega", /botonYaUsado\(convo\.id, id\)/.test(motor));
+// (14/11/2026: ahora con su destino — `botonYaUsado(convo.id, id, cable?.a)` —; el freno es el mismo.)
+comprobar("un botón ya usado no repite la entrega", /botonYaUsado\(convo\.id, id(, [^)]+)?\)/.test(motor));
 
 console.log("\n— 6. lo del 23/10: seguimientos, 24 h, regalo, workflows, botones —\n");
 comprobar("los relojes no salen fuera de las 24 h", /if \(fueraDeLaVentana\(fresca\)\)/.test(motor));

@@ -41,7 +41,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { createPortal } from "react-dom";
-import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
+import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, conCablesPorElNombre, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { pasarAVoseo, pasosConVoseo, textosDeLosPasos, type ModoDeVoseo } from "@/lib/voseo";
 import { banderaDe } from "@/components/pizarra/banderas";
@@ -168,8 +168,38 @@ function aDondeVaSolo(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): 
  * por el producto que nombra. Aquí, a dónde: la opción de su master (o el Cobro del que cuelga) cuyo texto o producto
  * comparte una palabra que NINGUNA otra tiene («super», «pack», «solo»). Una sola = ésa; ninguna o empate = null.
  */
-function aDondeVaPorSuNombre(t: TableroEnElEditor, seg: FichaEnElEditor, etiqueta: string, nombres: Record<string, string>): FichaEnElEditor | null {
+/**
+ * EL TABLERO COMO LO LEE EL BOT (14/11/2026): con los cables «por su nombre» de `conCablesPorElNombre`, la MISMA regla
+ * del motor. El nombre de «el básico / el full de la tienda» es el de su producto de verdad, como en el motor.
+ */
+function leidoComoElBot(t: TableroEnElEditor, nombres: Record<string, string>): TableroEnElEditor {
+  const nombreDe = (pid: string) =>
+    pid === FULL_DE_LA_TIENDA
+      ? nombres[nombres[ID_DEL_FULL_DE_LA_TIENDA]] ?? ""
+      : pid === BASICO_DE_LA_TIENDA
+        ? nombres[nombres[ID_DEL_BASICO_DE_LA_TIENDA]] ?? ""
+        : nombres[pid] ?? "";
+  return conCablesPorElNombre(t as Tablero, nombreDe) as TableroEnElEditor;
+}
+
+function aDondeVaPorSuNombre(t0: TableroEnElEditor, seg: FichaEnElEditor, etiqueta: string, nombres: Record<string, string>): FichaEnElEditor | null {
   if (seg.tipo !== "seguimientos") return null;
+  const t = leidoComoElBot(t0, nombres);
+  // (14/11/2026) PRIMERO, LO QUE HACE EL BOT CON SU MASTER: si la ficha de la que cuelga (no un Cobro) tiene un botón con
+  // el MISMO texto, va a donde va ése (su cable o por su nombre) — y si ése no va a ningún lado, este tampoco: nada de
+  // sacarlo de otro padre. Antes se mezclaban los padres y decía «cobro 74» aunque desde su master no se llegaba.
+  const igual = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "").replace(/[^a-z0-9ñ]+/g, " ").trim();
+  const masters = t.cables
+    .filter((c) => c.a === seg.id && (c.salida === "siguiente" || c.salida === "sin_respuesta"))
+    .map((c) => t.fichas.find((x) => x.id === c.de))
+    .filter((x): x is FichaEnElEditor => !!x && !x.guardada && x.tipo !== "cobro");
+  for (const m of masters) {
+    const b = opcionesDe(pasosDeLaFicha(m as FichaDelTablero)).botones.find((x) => igual(x.label ?? "") === igual(etiqueta));
+    if (b) {
+      const c = t.cables.find((x) => x.de === m.id && x.salida === `btn:${b.id}`);
+      return c ? t.fichas.find((x) => x.id === c.a) ?? null : null;
+    }
+  }
   const palabras = (s: string) =>
     new Set(
       s
@@ -189,7 +219,9 @@ function aDondeVaPorSuNombre(t: TableroEnElEditor, seg: FichaEnElEditor, etiquet
     .filter((c) => c.a === seg.id && (c.salida === "siguiente" || c.salida === "sin_respuesta" || c.salida === "sin_pago"))
     .map((c) => t.fichas.find((x) => x.id === c.de))
     .filter((x): x is FichaEnElEditor => !!x && !x.guardada);
-  for (const p of padres) {
+  // Con master (Mensaje / Order bump), solo él: es donde está el cliente cuando le llegan. Los Cobros cuentan solo si
+  // cuelga únicamente de Cobros.
+  for (const p of masters.length ? masters : padres) {
     if (p.tipo === "cobro") {
       sumar(p, nombres[p.cobro?.producto_id ?? ""] ?? "");
       continue;
@@ -379,7 +411,9 @@ function filasDeSeguimientos(f: FichaEnElEditor): Array<{ n: number; minutos: nu
  */
 function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Record<string, string>): Array<{ ficha: string; salida: string; motivo: string }> {
   const faltas: Array<{ ficha: string; salida: string; motivo: string }> = [];
-  const conCable = (de: string, salida: string) => t.cables.some((c) => c.de === de && c.salida === salida);
+  // (14/11/2026) Con los cables «por su nombre» del bot: un botón que el bot ya lleva a su Cobro no falta.
+  const leido = leidoComoElBot(t, nombres);
+  const conCable = (de: string, salida: string) => leido.cables.some((c) => c.de === de && c.salida === salida);
   const enVenta = new Set<string>();
   for (const ini of t.fichas.filter((f) => f.tipo === "inicio" && !f.guardada)) {
     if (ini.sin_venta) continue;
@@ -478,6 +512,8 @@ function SoltarConEscape({ tirando, alSoltar }: { tirando: boolean; alSoltar: ()
 
 const Contexto = createContext<{
   tablero: TableroEnElEditor;
+  /** «ficha|salida» → la ficha a la que el bot lleva ese botón sin cable, por su nombre (`conCablesPorElNombre`). */
+  porNombre: Map<string, string>;
   tema: "claro" | "oscuro";
   paisVisto: string;
   nombres: Record<string, string>;
@@ -921,7 +957,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
     const destino = destinoDe(s.clave);
     // Botón de seguimiento sin cable que su master resuelve por el nombre (13/11/2026): a dónde, a la vista.
-    const porSuNombre = boton && !destino && f.tipo === "seguimientos" ? aDondeVaPorSuNombre(ctx.tablero, f, s.etiqueta.replace(/^🔘 /, ""), ctx.nombres) : null;
+    // (14/11/2026) Y el botón sin cable de un Mensaje / Order bump que el bot lleva a su Cobro por el nombre (`porNombre`).
+    const porSuNombre =
+      boton && !destino
+        ? f.tipo === "seguimientos"
+          ? aDondeVaPorSuNombre(ctx.tablero, f, s.etiqueta.replace(/^🔘 /, ""), ctx.nombres)
+          : ctx.tablero.fichas.find((x) => x.id === ctx.porNombre.get(`${f.id}|${s.clave}`)) ?? null
+        : null;
     const pide =
       !!falta ||
       (!porSuNombre && (boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
@@ -970,7 +1012,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           pastillaDelDestino(
             porSuNombre,
             true,
-            `Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`
+            f.tipo === "seguimientos"
+              ? `Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`
+              : `Automático: sin cable, el bot lo lleva por su nombre al ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre} (el Cobro de ese producto en esta ruta). Si tiras tu propio cable, manda el tuyo.`
           )}
         {conPunto && !destino && (() => {
           // SIN CABLE PERO SABE A DÓNDE IR (05/11/2026): su colita automática, con el número y el color de esa ficha.
@@ -3822,9 +3866,17 @@ export default function LienzoDelTablero({
 
   // EL CONTEXTO, ESTABLE (27/10/2026): antes era un objeto nuevo en cada redibujo y, al arrastrar una
   // ficha, se redibujaban TODAS las fichas en cada movimiento. Ahora solo cambia cuando cambia algo suyo.
+  // LOS CABLES «POR SU NOMBRE» DEL BOT (14/11/2026): botón sin cable → el Cobro al que lo lleva el motor. Solo para
+  // decirlo en su pastilla («solo a 💰 cobro N»); no se dibujan como cable ni se guardan.
+  const porNombre = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of leidoComoElBot(tablero, nombres).cables) if (c.por_nombre) m.set(`${c.de}|${c.salida}`, c.a);
+    return m;
+  }, [tablero, nombres]);
   const contexto = useMemo(
     () => ({
       tablero,
+      porNombre,
       tema,
       paisVisto,
       nombres,
@@ -3854,7 +3906,7 @@ export default function LienzoDelTablero({
     }),
     // (`quienCobra` llega nuevo en cada dibujo del editor: cuenta por su contenido, no por su identidad.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tablero, tema, paisVisto, nombres, resumenDe, abrirConSuGrupo, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe, upgradeDe]
+    [tablero, porNombre, tema, paisVisto, nombres, resumenDe, abrirConSuGrupo, onAjustes, numeros, numeroDe, colitas, colitasQueLlegan, fichasConColitas, destacada, verEntrantes, faltasPorFicha, JSON.stringify(quienCobra ?? {}), estaciones, comoAgente, upsellDe, upgradeDe]
   );
 
   const paisesConInicio = new Set(tablero.fichas.filter((f) => f.tipo === "inicio").map((f) => f.pais ?? ""));

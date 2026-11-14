@@ -482,18 +482,24 @@ export function fichasVisitadas(conversationId: number): string[] {
   ).map((f) => f.ficha_id);
 }
 
-export function botonYaUsado(conversationId: number, botonId: string): boolean {
+// CON SU DESTINO (14/11/2026, Ruta 5 de GRAFISMO AR en la copia): su «SI QUIERO» de la intro y su «SUPER PACK 2 EN 1» de
+// los seguimientos tienen el MISMO código (copias). Tocar «SI QUIERO» lo dejaba «usado», y luego tocar SUPER PACK se
+// tomaba por repetido: no salían los datos de pago. Ahora se apunta «código>destino»: repetido es el mismo botón que
+// lleva al MISMO sitio. Lo apuntado antes, solo con el código, sigue contando como antes.
+export function botonYaUsado(conversationId: number, botonId: string, destino?: string): boolean {
   const fila = db.prepare("SELECT botones_usados FROM tablero_estado WHERE conversation_id = ?").get(conversationId) as
     | { botones_usados?: string }
     | undefined;
-  return (fila?.botones_usados ?? "").split("\n").includes(botonId);
+  const usados = (fila?.botones_usados ?? "").split("\n");
+  return usados.includes(botonId) || (!!destino && usados.includes(`${botonId}>${destino}`));
 }
 
-export function apuntarBoton(conversationId: number, botonId: string): void {
-  if (botonYaUsado(conversationId, botonId)) return;
+export function apuntarBoton(conversationId: number, botonId: string, destino?: string): void {
+  if (botonYaUsado(conversationId, botonId, destino)) return;
+  const marca = destino ? `${botonId}>${destino}` : botonId;
   db.prepare(
     "UPDATE tablero_estado SET botones_usados = CASE WHEN botones_usados = '' THEN ? ELSE botones_usados || char(10) || ? END WHERE conversation_id = ?"
-  ).run(botonId, botonId, conversationId);
+  ).run(marca, marca, conversationId);
 }
 
 /**

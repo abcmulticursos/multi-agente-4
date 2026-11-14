@@ -119,6 +119,7 @@ import {
   FULL_DE_LA_TIENDA,
   pideElNombre,
   conProductosDeLaTienda,
+  conCablesPorElNombre,
 } from "./datos";
 import { laEntrega } from "./entregas";
 import {
@@ -195,7 +196,9 @@ function tableroDe(config: WorkflowConfig | null, clave: string | null | undefin
   const t = leeTablerosPorTienda(crudo?.tableros)[clave]?.[canal] ?? null;
   // «El básico / el full de la tienda» (01/11/2026): aquí, y solo aquí, se cambian por sus productos.
   const conProductos = conProductosDeLaTienda(t, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
-  return conCobroEnSusFichas(conProductos, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
+  const listo = conCobroEnSusFichas(conProductos, (config?.tiendas ?? []).find((x) => x.id === clave)?.alineacion as Record<string, unknown> | undefined);
+  // El botón sin cable que nombra un producto, a su Cobro (14/11/2026): la misma regla que dibuja la pantalla.
+  return listo ? conCablesPorElNombre(listo, (pid) => producto(config, pid)?.name ?? "") : listo;
 }
 
 /**
@@ -3650,10 +3653,16 @@ function seQuedoEnLaTuberiaVieja(
  * copiados entre rutas, comparten códigos): se busca primero donde está el cliente (sus seguimientos colgados y su
  * ficha), y solo si no está ahí, en todo el tablero como antes. Así un cliente de la Ruta 3 no salta al cable de la Ruta 5.
  */
+// (14/11/2026, sus conversaciones 487–490) PRIMERO LA QUE LLEVA A ALGÚN LADO. Sus Seguimientos colgados tienen el MISMO
+// código que el botón de su Order bump, sin cable; escribir «SUPER PACK 2 EN 1» se quedaba con el de los Seguimientos y
+// no llegaba al Cobro. De las de donde está el cliente, la que tiene cable (o cable por su nombre) para ese botón; si
+// ninguna, la primera que lo tiene, como antes. En todo el tablero, igual. Nunca salta a otra ruta si aquí lo tiene.
 function fichaDelBoton(t: Tablero, estado: { ficha_id?: string | null; seg_ficha?: string | null }, id: string): FichaDelTablero | undefined {
   const tiene = (f: FichaDelTablero) => opcionesDe(pasosDeLaFicha(f)).botones.some((b) => b.id === id);
-  const aqui = [estado.seg_ficha, estado.ficha_id].map((x) => (x ? t.fichas.find((f) => f.id === x) : undefined)).find((f) => !!f && tiene(f));
-  return aqui ?? t.fichas.find(tiene);
+  const conCable = (f: FichaDelTablero) => !!cableDeLaSalida(t, f.id, `btn:${id}`);
+  const aqui = [estado.seg_ficha, estado.ficha_id].map((x) => (x ? t.fichas.find((f) => f.id === x) : undefined)).filter((f): f is FichaDelTablero => !!f && tiene(f));
+  const todas = t.fichas.filter(tiene);
+  return aqui.find(conCable) ?? aqui[0] ?? todas.find(conCable) ?? todas[0];
 }
 
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
@@ -3726,9 +3735,22 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const suFicha = fichaDelBoton(t, estado, id);
     const boton = suFicha ? opcionesDe(pasosDeLaFicha(suFicha)).botones.find((b) => b.id === id) : undefined;
     if (suFicha?.tipo === "seguimientos" && boton?.label?.trim() && !cableDeLaSalida(t, suFicha.id, `btn:${id}`)) {
-      contenido = boton.label.trim();
-      tocoSinCable = true;
-      console.log(`[tablero] convo ${convo.id}: tocó «${contenido}» de un seguimiento sin cable → vale como si lo escribiera`);
+      // (14/11/2026) EL MISMO BOTÓN EN SU MASTER: si la ficha donde está tiene un botón con el MISMO texto y ése lleva a
+      // algún lado (su cable, o por su nombre), es ése. Lo mismo que dice la pantalla («solo a 💰 cobro N»).
+      const igual = (s: string) => sinTildes(s).replace(/[^a-z0-9ñ]+/g, " ").trim();
+      const dondeEsta = estado?.ficha_id;
+      const master = dondeEsta ? t.fichas.find((f) => f.id === dondeEsta) : undefined;
+      const gemelo = master
+        ? opcionesDe(pasosDeLaFicha(master)).botones.find((b) => igual(b.label ?? "") === igual(boton.label!) && cableDeLaSalida(t, master.id, `btn:${b.id}`))
+        : undefined;
+      if (gemelo) {
+        contenido = `bubble:${gemelo.id}`;
+        console.log(`[tablero] convo ${convo.id}: tocó «${boton.label.trim()}» de un seguimiento sin cable → el mismo botón de su ficha`);
+      } else {
+        contenido = boton.label.trim();
+        tocoSinCable = true;
+        console.log(`[tablero] convo ${convo.id}: tocó «${contenido}» de un seguimiento sin cable → vale como si lo escribiera`);
+      }
     }
   }
 
@@ -4459,7 +4481,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   const seguirLaOpcion = async (o: { duena: FichaDelTablero; salida: string; boton: string | null; cuadrito: BubbleDecision | null }) => {
     if (o.cuadrito) await actuarCuadrito(convo, t, o.duena, o.cuadrito);
     else {
-      if (o.boton) apuntarBoton(convo.id, o.boton);
+      if (o.boton) apuntarBoton(convo.id, o.boton, cableDeLaSalida(t, o.duena.id, o.salida)?.a);
       await irA(convo.id, t, cableDeLaSalida(t, o.duena.id, o.salida)!.a);
     }
   };
@@ -4516,6 +4538,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // EL «SÍ» QUE NO ESTÁ EN LA LISTA LO DECIDE LA IA (04/11/2026, su 280: «si porfavor», junto, no era «sí» para la lista y
   // la IA improvisó los pasos). Él: «el bot tiene que darse cuenta cuando se está confirmando, sin palabritas». Solo
   // cuando el bot acaba de invitar a comprar y la respuesta es corta; la lista sigue primero (gratis), la IA desempata.
+  // EL «SÍ» QUE NO LLEVA A NINGÚN COBRO (14/11/2026, su 487: dijo «SI», nada lo llevaba a pagar y la IA contestó «Dándole
+  // un momento al sistema para que te envíe los datos de pago…», que nunca llegaron). Se marca aquí y la IA del paso 8
+  // recibe, SOLO en ese turno, que no hay datos que vayan a salir.
+  let siSinCamino = false;
   let afirma = !metodoDicho && AFIRMA.test(normal.replace(/[^a-zñ\s]/g, " ").replace(/\s+/g, " ").trim());
   if (!afirma && !metodoDicho && texto && !estado.cobro_ficha_id && invitaAComprar && !esPreguntaQueNoElige(texto) && normal.split(/\s+/).filter(Boolean).length <= 6)
     afirma =
@@ -4527,6 +4553,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       ])) === "acepta";
   if (texto && !estado.cobro_ficha_id && (soloElMetodo || afirma)) {
     if (invitaAComprar) {
+      // Si nada de abajo lo lleva a pagar, la IA lo sabrá (ver el paso 8): no puede prometer datos que no salen.
+      siSinCamino = true;
       const { haciaPagar, destinos, soloCobros } = opcionesDeCompra();
       const nombreDelDestino = (o: (typeof haciaPagar)[number]) => {
         const d = t.fichas.find((x) => x.id === cableDeLaSalida(t, o.duena.id, o.salida)?.a);
@@ -4955,9 +4983,9 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const id = contenido.slice("bubble:".length);
     const suFicha = fichaDelBoton(t, estado, id);
     const cable = suFicha ? cableDeLaSalida(t, suFicha.id, `btn:${id}`) : null;
-    const repetido = !!suFicha && suFicha.id !== ficha?.id && botonYaUsado(convo.id, id);
+    const repetido = !!suFicha && suFicha.id !== ficha?.id && botonYaUsado(convo.id, id, cable?.a);
     if (cable && !repetido) {
-      apuntarBoton(convo.id, id);
+      apuntarBoton(convo.id, id, cable.a);
       await irA(convo.id, t, cable.a);
       return true;
     }
@@ -5104,7 +5132,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         if (cable && cable.a === estado.cobro_ficha_id) {
           // (sigue abajo: la IA le contesta desde donde va)
         } else if (cable) {
-          if (cual.op.id.startsWith("btn:")) apuntarBoton(convo.id, cual.op.id.slice(4));
+          if (cual.op.id.startsWith("btn:")) apuntarBoton(convo.id, cual.op.id.slice(4), cable.a);
           await irA(convo.id, t, cable.a);
           return true;
         }
@@ -5118,7 +5146,13 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // «no respondió» vuelve a contar desde ahora, y el seguimiento 1 también (colgado o en su caja).
   if (ficha) respondio(convo, t);
   estado = estadoEnElTablero(convo.id) ?? estado;
-  await contestarConIA(convo, t);
+  await contestarConIA(
+    convo,
+    t,
+    siSinCamino
+      ? "El cliente aceptó, pero en este momento el sistema NO va a enviarle datos de pago. No digas que el sistema, tú ni nadie se los enviará, ni que esperes. Pregúntale con naturalidad cuál de las opciones quiere (con su precio), o qué le falta para decidir."
+      : undefined
+  );
   return true;
 }
 

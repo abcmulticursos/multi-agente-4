@@ -244,6 +244,11 @@ export interface CableDelTablero {
    */
   de_espejo?: string;
   a_espejo?: string;
+  /**
+   * NO LO DIBUJÓ ÉL (14/11/2026): un botón sin cable que nombra un producto va al Cobro de ese producto en su ruta
+   * (`conCablesPorElNombre`). Nunca se guarda: lo arman el motor y la pantalla al leer, con la MISMA regla.
+   */
+  por_nombre?: boolean;
 }
 
 export interface Tablero {
