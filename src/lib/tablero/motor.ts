@@ -3645,6 +3645,17 @@ function seQuedoEnLaTuberiaVieja(
   return { modo: (presentacion.presenta ?? []).length >= 2 ? "avisar" : "desde_inicio", inicio, presentacion };
 }
 
+/**
+ * LA FICHA DE UN BOTÓN TOCADO (13/11/2026). El mismo código puede estar en varias fichas (sus Seguimientos de Argentina,
+ * copiados entre rutas, comparten códigos): se busca primero donde está el cliente (sus seguimientos colgados y su
+ * ficha), y solo si no está ahí, en todo el tablero como antes. Así un cliente de la Ruta 3 no salta al cable de la Ruta 5.
+ */
+function fichaDelBoton(t: Tablero, estado: { ficha_id?: string | null; seg_ficha?: string | null }, id: string): FichaDelTablero | undefined {
+  const tiene = (f: FichaDelTablero) => opcionesDe(pasosDeLaFicha(f)).botones.some((b) => b.id === id);
+  const aqui = [estado.seg_ficha, estado.ficha_id].map((x) => (x ? t.fichas.find((f) => f.id === x) : undefined)).find((f) => !!f && tiene(f));
+  return aqui ?? t.fichas.find(tiene);
+}
+
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
   let estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
@@ -3705,6 +3716,22 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
 
+  // EL BOTÓN DE UN SEGUIMIENTO SIN CABLE VALE COMO ESCRIBIR SU TEXTO (13/11/2026). Él: «¿por qué no puede elegir sin
+  // conectar? si ya está escrito el nombre en el botón». Tocar «SUPER PACK 2 EN 1» sin cable no hacía nada; escribirlo,
+  // sí (lo decide su master por el nombre). Ahora es lo mismo: el toque se vuelve su texto y sigue el camino de lo
+  // escrito. Con cable, manda el cable (más abajo, como siempre). Solo botones de Seguimientos.
+  let tocoSinCable = false;
+  if (t && contenido.startsWith("bubble:")) {
+    const id = contenido.slice("bubble:".length);
+    const suFicha = fichaDelBoton(t, estado, id);
+    const boton = suFicha ? opcionesDe(pasosDeLaFicha(suFicha)).botones.find((b) => b.id === id) : undefined;
+    if (suFicha?.tipo === "seguimientos" && boton?.label?.trim() && !cableDeLaSalida(t, suFicha.id, `btn:${id}`)) {
+      contenido = boton.label.trim();
+      tocoSinCable = true;
+      console.log(`[tablero] convo ${convo.id}: tocó «${contenido}» de un seguimiento sin cable → vale como si lo escribiera`);
+    }
+  }
+
   // «YO NO PEDÍ ESTO», ANTES QUE TODO (03/11/2026): ver `avisarSiReclamaOtroProducto`.
   if (t && (await avisarSiReclamaOtroProducto(convo, contenido))) return true;
 
@@ -3712,7 +3739,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // contesta: se guarda como su nombre (el mismo lector de la venta de siempre) y sigue por «👤 Al dar su
   // nombre». Si no parece un nombre (una pregunta, «precio»), la IA le contesta y sigue igual: la ficha no se
   // queda esperando para siempre. Un comprobante o un botón no son un nombre: siguen su camino.
-  if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "") && !contenido.startsWith("bubble:")) {
+  if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "") && !contenido.startsWith("bubble:") && !tocoSinCable) {
     const aqui = t.fichas.find((f) => f.id === estado?.ficha_id);
     if (
       aqui &&
@@ -4881,7 +4908,8 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // 3. UN BOTÓN ESCRITO. En Instagram los botones salen como lista numerada («1. Sí, quiero»)
   // y el cliente contesta «1» o el texto; en cualquier canal alguien puede escribir el texto del
   // botón en vez de tocarlo. Solo los botones que VIO, de la ÚLTIMA burbuja que los tenga.
-  if (conRespuesta && !contenido.startsWith("bubble:")) {
+  // (Un toque de seguimiento sin cable ya se volvió su texto: no se vuelve a convertir en ese mismo botón.)
+  if (conRespuesta && !contenido.startsWith("bubble:") && !tocoSinCable) {
     const conBotones = vistos.filter((p) => (p.buttons ?? []).some((b) => b.enabled !== false));
     const botones = (conBotones[conBotones.length - 1]?.buttons ?? []).filter((b) => b.id && b.label?.trim() && b.enabled !== false).slice(0, 3);
     const limpio = (s: string) =>
@@ -4925,7 +4953,7 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // único en el tablero). Tocado otra vez desde un mensaje viejo, no repite nada.
   if (contenido.startsWith("bubble:")) {
     const id = contenido.slice("bubble:".length);
-    const suFicha = t.fichas.find((f) => opcionesDe(pasosDeLaFicha(f)).botones.some((b) => b.id === id));
+    const suFicha = fichaDelBoton(t, estado, id);
     const cable = suFicha ? cableDeLaSalida(t, suFicha.id, `btn:${id}`) : null;
     const repetido = !!suFicha && suFicha.id !== ficha?.id && botonYaUsado(convo.id, id);
     if (cable && !repetido) {

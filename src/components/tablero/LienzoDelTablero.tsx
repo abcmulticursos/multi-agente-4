@@ -161,6 +161,56 @@ function aDondeVaSolo(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): 
   return null;
 }
 
+/**
+ * EL BOTÓN DE UN SEGUIMIENTO SIN CABLE, POR SU NOMBRE (13/11/2026). Él: «¿por qué no puede elegir sin conectar? si ya
+ * está escrito el nombre en el botón». El motor ya lo hace: tocarlo vale como escribir su texto, y su master lo lleva
+ * por el producto que nombra. Aquí, a dónde: la opción de su master (o el Cobro del que cuelga) cuyo texto o producto
+ * comparte una palabra que NINGUNA otra tiene («super», «pack», «solo»). Una sola = ésa; ninguna o empate = null.
+ */
+function aDondeVaPorSuNombre(t: TableroEnElEditor, seg: FichaEnElEditor, etiqueta: string, nombres: Record<string, string>): FichaEnElEditor | null {
+  if (seg.tipo !== "seguimientos") return null;
+  const palabras = (s: string) =>
+    new Set(
+      s
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Mn}/gu, "")
+        .replace(/[^a-z0-9ñ]+/g, " ")
+        .split(" ")
+        .filter((w) => w.length >= 3 && !["los", "las", "del", "con", "por", "para", "que", "una", "uno"].includes(w))
+    );
+  const textos = new Map<string, { destino: FichaEnElEditor; texto: string }>();
+  const sumar = (destino: FichaEnElEditor, texto: string) => {
+    const antes = textos.get(destino.id);
+    textos.set(destino.id, { destino, texto: `${antes?.texto ?? ""} ${texto}` });
+  };
+  const padres = t.cables
+    .filter((c) => c.a === seg.id && (c.salida === "siguiente" || c.salida === "sin_respuesta" || c.salida === "sin_pago"))
+    .map((c) => t.fichas.find((x) => x.id === c.de))
+    .filter((x): x is FichaEnElEditor => !!x && !x.guardada);
+  for (const p of padres) {
+    if (p.tipo === "cobro") {
+      sumar(p, nombres[p.cobro?.producto_id ?? ""] ?? "");
+      continue;
+    }
+    const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(p as FichaDelTablero));
+    for (const c of t.cables) {
+      if (c.de !== p.id) continue;
+      const d = t.fichas.find((x) => x.id === c.a);
+      if (!d || (d.tipo !== "cobro" && d.tipo !== "intro_ob")) continue;
+      const b = botones.find((x) => `btn:${x.id}` === c.salida);
+      const q = cuadritos.find((x) => `dec:${x.id}` === c.salida);
+      const e = c.salida.startsWith("elige:") ? nombres[c.salida.slice(6)] : undefined;
+      if (!b && !q && !e) continue;
+      sumar(d, [b?.label, q?.title, e, d.tipo === "cobro" ? nombres[d.cobro?.producto_id ?? ""] : ""].filter(Boolean).join(" "));
+    }
+  }
+  const lista = [...textos.values()].map((x) => ({ ...x, w: palabras(x.texto) }));
+  const dichas = palabras(etiqueta);
+  const conUnica = lista.filter((x) => [...dichas].some((w) => x.w.has(w) && lista.every((o) => o === x || !o.w.has(w))));
+  return conUnica.length === 1 ? conUnica[0].destino : null;
+}
+
 const ICONO: Record<string, string> = { text: "💬", image: "🖼️", video: "🎬", audio: "🎤", document: "📄" };
 const ESQUINAS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 const BURBUJAS_A_LA_VISTA = 5;
@@ -351,6 +401,8 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
     for (const s of salidas) {
       if (conCable(f.id, s.clave)) continue;
       const nombre = s.etiqueta.replace(/^(🔘|💬) /, "");
+      // (13/11/2026: el de un seguimiento que su master resuelve por su nombre no está suelto: ver `aDondeVaPorSuNombre`.)
+      if (s.clave.startsWith("btn:") && f.tipo === "seguimientos" && aDondeVaPorSuNombre(t, f, nombre, nombres)) continue;
       if (s.clave.startsWith("btn:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `El botón «${nombre}» no lleva a ningún lado.` });
       else if (s.clave.startsWith("elige:")) faltas.push({ ficha: f.id, salida: s.clave, motivo: `«${s.etiqueta.replace(/^✍️ /, "")}» no lleva a ningún lado.` });
       else if (s.clave.startsWith("dec:")) {
@@ -835,10 +887,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     const cuadrito = s.clave.startsWith("dec:") || s.clave.startsWith("elige:");
     const falta = faltan?.get(s.clave);
     // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
+    const destino = destinoDe(s.clave);
+    // Botón de seguimiento sin cable que su master resuelve por el nombre (13/11/2026): a dónde, a la vista.
+    const porSuNombre = boton && !destino && f.tipo === "seguimientos" ? aDondeVaPorSuNombre(ctx.tablero, f, s.etiqueta.replace(/^🔘 /, ""), ctx.nombres) : null;
     const pide =
       !!falta ||
-      ((boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
-    const destino = destinoDe(s.clave);
+      (!porSuNombre && (boton || cuadrito || s.clave === "sin_pago" || s.clave.startsWith("rep:") || f.tipo === "condicion") && !conCable.has(s.clave));
     const icono = iconoDeEntrega(f, s.clave, ctx.tablero, ctx.nombres, ctx.upsellDe[f.id] !== undefined);
     return (
       <div
@@ -877,6 +931,15 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             title={`🪞 El mismo ${boton ? "botón" : "cuadrito"} está también en el Seguimiento ${gemelos!.join(" y ")}: es UN solo cable para todos. Conéctalo desde cualquiera de ellos.`}
           >
             🪞
+          </span>
+        )}
+        {porSuNombre && (
+          <span
+            className="ml-auto shrink-0 rounded-full border-2 border-dashed bg-white px-1.5 text-[10px] font-bold text-slate-800"
+            style={{ borderColor: ASPECTO[porSuNombre.tipo].trazo }}
+            title={`Automático: sin cable, tocarlo vale como escribir «${s.etiqueta.replace(/^🔘 /, "")}», y su master lo lleva por el nombre a ${ctx.numeroDe[porSuNombre.id] ?? ""} ${porSuNombre.titulo?.trim() || ASPECTO[porSuNombre.tipo].nombre}. Si tiras tu propio cable, manda el tuyo.`}
+          >
+            ↺ → {ctx.numeroDe[porSuNombre.id] ?? ""}
           </span>
         )}
         {conPunto && !destino && (() => {
