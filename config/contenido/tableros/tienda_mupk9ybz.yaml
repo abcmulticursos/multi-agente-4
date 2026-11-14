@@ -15174,6 +15174,22 @@ whatsapp:
       de: f-mwczmr06-i8lx4
       salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
       a: f-mwczmr06-4se41
+    - id: c-mwfojc9q-3kl
+      de: f-mwdbe0qi-mh5tk
+      salida: dec:1bdf5e34-c89e-44b7-9703-da490d9c8504
+      a: f-mwdbe0qi-kojx7
+    - id: c-mwfojdiu-wuz
+      de: f-mwdbe0qi-mh5tk
+      salida: dec:0046a0a5-f073-4464-902b-7ba55b161bd5
+      a: f-mwdbe0qi-kojx7
+    - id: c-mwfojekm-lh5
+      de: f-mwdbe0qi-mh5tk
+      salida: dec:309a73e3-653b-4314-8afc-474c79b36ed5
+      a: f-mwdbe0qi-kojx7
+    - id: c-mwfojfrj-4tz
+      de: f-mwdbe0qi-mh5tk
+      salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
+      a: f-mwdbe0qi-kojx7
   cajas:
     - id: velo-mwcazaol-0
       x: -869
