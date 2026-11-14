@@ -7781,6 +7781,126 @@ whatsapp:
               steps: []
           spintax_ia:
             - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animás a esta_ *Oferta Especial*?}"
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
+          delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mwelg57r-su9j9
+              enabled: false
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: d-mwelg57r-ojhx2
+              enabled: false
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
+          spintax_ia:
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ELEGÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
+          delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5~cmwgu0vty0
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e~cmwgu0vty1
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mwelg57r-su9j9
+              enabled: false
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: d-mwelg57r-ojhx2
+              enabled: false
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
+          spintax_ia:
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
         - type: text
           body_variants:
             - |-
@@ -9625,6 +9745,66 @@ whatsapp:
               color: esmeralda
               steps: []
             - id: d-mwdnvron-pr8r8
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
+          spintax_ia:
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ELEGÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
+          delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mwelg57r-su9j9
+              enabled: false
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: d-mwelg57r-ojhx2
+              enabled: false
               title: GRAFISMO
               keywords:
                 - Grafismo fonetico
@@ -11589,6 +11769,65 @@ whatsapp:
         - type: text
           body_variants:
             - |-
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ELEGÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
+              __________
+
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
+          delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mwelg57r-su9j9
+              enabled: false
+              title: SUPER PACK
+              keywords:
+                - pack
+                - el pack
+                - super pack
+                - pac
+                - el pac
+                - super pac
+                - el super
+                - super
+                - pac
+                - sper pac
+                - el completo
+                - el full
+              color: esmeralda
+              steps: []
+            - id: d-mwelg57r-ojhx2
+              enabled: false
+              title: GRAFISMO
+              keywords:
+                - Grafismo fonetico
+                - grafismo
+                - grfismo
+                - el grafismo
+                - el de grafismo
+                - el mas barato
+                - el que cuesta menos
+                - el mas barato nomas
+                - grfismo
+                - el grafismo
+                - el mas comodo
+              color: ambar
+              steps: []
+          spintax_ia:
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
+        - type: text
+          body_variants:
+            - |-
               {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ESCRIBÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
@@ -11632,6 +11871,7 @@ whatsapp:
               steps: []
           spintax_ia:
             - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
+          enabled: false
         - type: text
           body_variants:
             - |-
@@ -13720,15 +13960,27 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animás a esta_ *Oferta Especial*?}  *ESCRIBÍ UNA OPCION* para poder brindarte los datos de pago 😊👇🏼
+              {🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}  *ELEGÍ UNA OPCIÓN* para poder brindarte los datos de pago 😊👇🏼
               __________
 
-              🟢 *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
+              1️⃣ *{{PRODUCTO_FULL}}* - (Los 2 Kits juntos 📚+📚) 👉🏼 *{{PRECIO_FULL}}*
 
-              🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+              2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
+
+              *¿CUAL ELIGES?* 😊
           delay_after_sec: 6
+          buttons:
+            - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 394bf664-5e29-4d43-bc0f-cbda4e7c675e
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
-            - id: d-mwdnvror-5culo
+            - id: d-mwelg57r-su9j9
+              enabled: false
               title: SUPER PACK
               keywords:
                 - pack
@@ -13745,7 +13997,8 @@ whatsapp:
                 - el full
               color: esmeralda
               steps: []
-            - id: d-mwdnvror-26gls
+            - id: d-mwelg57r-ojhx2
+              enabled: false
               title: GRAFISMO
               keywords:
                 - Grafismo fonetico
@@ -13762,7 +14015,7 @@ whatsapp:
               color: ambar
               steps: []
           spintax_ia:
-            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Te animás a esta_ *Oferta Especial*?}"
+            - "{🎁 _¿Te animás a_ *aprovechar esta Oferta Especial*?|🎁 _¿Te gustaría_ *aprovechar esta Oferta Especial*?|🎁 _¿Querés_ *aprovechar esta Oferta Especial*?}"
         - type: text
           body_variants:
             - |-
@@ -18233,16 +18486,6 @@ whatsapp:
       de: f-mwdnvror-j3uta
       salida: pagado
       a: f-mwdnvros-njm3r
-    - id: c-mwdnvros-nalk8
-      de: f-mwdnvror-b91u4
-      salida: dec:d-mwdnvror-5culo
-      a: f-mwdnvror-j3uta
-      vista: cable
-    - id: c-mwdnvros-a6rrg
-      de: f-mwdnvror-b91u4
-      salida: dec:d-mwdnvror-26gls
-      a: f-mwdnvros-wapyw
-      vista: cable
     - id: c-mwdnvros-k4wzp
       de: f-mwdnvror-b91u4
       salida: sin_respuesta
