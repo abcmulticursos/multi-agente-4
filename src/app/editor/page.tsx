@@ -32645,6 +32645,8 @@ function PantallaDelTableroCargada({
             setGrupoDeAjustes(grupo ?? []);
             setAjustes(fid);
           }}
+          // Al cerrarse cualquiera de estas ventanas, la ficha abierta vuelve a quedar elegida (14/11/2026).
+          hayFichaAbierta={!!(cajon || gestor || enComun.length || ajustes || regaloAbierto)}
           // TOCAR UNA FICHA LLEVA LA BANDERA A SU PAÍS (27/10/2026): el de su Inicio, si es de uno solo.
           onFichaTocada={(fid) => {
             const f = tablero.fichas.find((x) => x.id === fid);

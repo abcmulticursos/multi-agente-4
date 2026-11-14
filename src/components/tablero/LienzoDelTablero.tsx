@@ -2753,6 +2753,7 @@ export default function LienzoDelTablero({
   onCambiar,
   onAbrir,
   onAjustes,
+  hayFichaAbierta,
   buscar = "",
   antesDelMas,
   despuesDelMas,
@@ -2797,6 +2798,8 @@ export default function LienzoDelTablero({
   onAbrir: (id: string, burbuja?: number, grupo?: string[]) => void;
   /** `grupo`: las OTRAS del mismo tipo elegidas junto con ella (13/11/2026). */
   onAjustes: (id: string, grupo?: string[]) => void;
+  /** ¿Hay abierta la ventana de una ficha? Al cerrarse, la ficha abierta vuelve a quedar elegida (14/11/2026). */
+  hayFichaAbierta?: boolean;
   /** EL BUSCADOR VIVE ARRIBA, EN LA BARRA, como en la pizarra (24/10/2026). */
   buscar?: string;
   /** LOS BOTONES REDONDOS DE ARRIBA A LA IZQUIERDA, como en la pizarra: ← antes del «+», ☰ después. */
@@ -3777,8 +3780,31 @@ export default function LienzoDelTablero({
     const otras = vivo.current.fichas.filter((x) => x.tipo === f.tipo && x.id !== id && !x.guardada && elegidas.has(x.id)).map((x) => x.id);
     return otras.length ? otras : undefined;
   };
+  // AL CERRAR SU VENTANA, LA FICHA SIGUE ELEGIDA (14/11/2026). Él: «al tocar una ficha con doble clic, editar y salir de la
+  // ficha, esta queda deseleccionada y no sé cuál ficha era la que estaba editando… que al salir del pop up de cualquier
+  // ficha esta quede seleccionada». Al abrir se apunta lo elegido (o, si no había nada, la ficha abierta y sus 🪞 espejos);
+  // cuando el editor avisa que se cerró (`hayFichaAbierta` pasa a false), se vuelve a elegir eso mismo.
+  const paraReelegir = useRef<Set<string> | null>(null);
+  const apuntarParaReelegir = (id: string) => {
+    const elegidos = nodosVivos.current.filter((n) => n.selected).map((n) => n.id);
+    const suyos = new Set([id, ...(vivo.current.espejos ?? []).filter((e) => e.ficha === id).map((e) => `esp:${e.id}`)]);
+    paraReelegir.current = elegidos.some((x) => suyos.has(x)) ? new Set(elegidos) : new Set([id]);
+  };
+  const habiaFichaAbierta = useRef(false);
+  useEffect(() => {
+    const antes = habiaFichaAbierta.current;
+    habiaFichaAbierta.current = !!hayFichaAbierta;
+    if (!antes || hayFichaAbierta || !paraReelegir.current) return;
+    const ids = paraReelegir.current;
+    paraReelegir.current = null;
+    // Después de lo que haya soltado la selección al cerrar (un clic en el fondo, Escape).
+    const r = window.setTimeout(() => setNodos((ns) => ns.map((n) => (ids.has(n.id) === !!n.selected ? n : { ...n, selected: ids.has(n.id) }))), 150);
+    return () => window.clearTimeout(r);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hayFichaAbierta]);
   const abrirConSuGrupo = useCallback(
     (id: string, burbuja?: number) => {
+      apuntarParaReelegir(id);
       onAbrir(id, burbuja, grupoDe(id));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3786,7 +3812,10 @@ export default function LienzoDelTablero({
   );
   // LO MISMO CON EL ⚙ (13/11/2026): con varias del mismo tipo elegidas, sus ajustes son los de todas (lo distinto, con «?»).
   const ajustesConSuGrupo = useCallback(
-    (id: string) => onAjustes(id, grupoDe(id)),
+    (id: string) => {
+      apuntarParaReelegir(id);
+      onAjustes(id, grupoDe(id));
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onAjustes]
   );
@@ -4538,7 +4567,7 @@ export default function LienzoDelTablero({
                   </button>
                 )}
                 {fichaDelMenu.tipo !== "inicio" && (
-                  <button type="button" className={opcionDeMenu} onClick={() => (onAbrir(fichaDelMenu.id), setMenu(null))}>
+                  <button type="button" className={opcionDeMenu} onClick={() => (apuntarParaReelegir(fichaDelMenu.id), onAbrir(fichaDelMenu.id), setMenu(null))}>
                     ✏️ Abrir
                   </button>
                 )}
