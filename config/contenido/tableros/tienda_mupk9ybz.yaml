@@ -3219,8 +3219,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwczmr07-pq322
       tipo: seguimientos
-      x: -374
-      y: 12298
+      x: -297
+      y: 12287
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -6708,8 +6708,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwdbe0qi-m18se
       tipo: seguimientos
-      x: -319
-      y: 14179
+      x: -242
+      y: 14146
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -6719,8 +6719,8 @@ whatsapp:
             - id: v-mwdbe0qi-prbek
               peso: 1
               steps:
-                - type: image
-                  drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|*Soy Andrea* 👋🏼 Solo quería confirmar que te llegó la info que te mandé.|*Soy Andrea* 👋🏼 Quería verificar que hayas recibido la información que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
