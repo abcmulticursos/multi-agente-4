@@ -18470,6 +18470,18 @@ whatsapp:
       de: f-mwdbe0qi-mh5tk
       salida: dec:43710a39-b57f-4912-91c5-8ef6cddcfede
       a: f-mwdbe0qi-kojx7
+    - id: c-mwfqi08s-8n2
+      de: f-mwdnvrom-8r8fq
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
+      a: f-mwdnvrom-2xe9z
+    - id: c-mwfqi3j0-w7v
+      de: f-mwdnvror-o44rd
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
+      a: f-mwdnvror-j3w2b
+    - id: c-mwfqi70k-3hv
+      de: f-mwdnvrol-efc90
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
+      a: f-mwdnvrom-c4yne
   cajas:
     - id: velo-mwcazaol-0
       x: -869
@@ -18621,11 +18633,11 @@ whatsapp:
     - id: esp-mwdnvros-xkv9a
       ficha: f-mwdnvron-d0uwy
       x: 2189
-      y: 16742
+      y: 16643
     - id: esp-mwdnvros-dudw2
       ficha: f-mwdnvron-d0uwy
-      x: 2167
-      y: 17446
+      x: 2178
+      y: 17391
     - id: esp-mwdnvros-axdv6
       ficha: f-mwdnvror-8elhp
       x: 2178
