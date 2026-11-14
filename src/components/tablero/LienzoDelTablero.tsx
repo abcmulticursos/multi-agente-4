@@ -306,10 +306,16 @@ function caminosDeCompra(
   return [...out.values()];
 }
 
+/** El puntito del gemelo: `<salida>@@<dónde>`. Al conectar se quita lo de después (`salidaDelPunto`). */
+const GEMELO = "@@";
+const salidaDelPunto = (id: string) => id.split(GEMELO)[0];
+
 /** Las opciones de cada seguimiento de una caja de Seguimientos: su número, sus minutos y sus salidas. */
 function filasDeSeguimientos(f: FichaEnElEditor): Array<{ n: number; minutos: number; claves: string[] }> {
   return (f.seguimientos ?? []).map((s, i) => {
-    const pasos = (s.variantes ?? []).flatMap((v) => (v.steps ?? []) as never[]);
+    // SOLO LAS BURBUJAS ENCENDIDAS (13/11/2026, su ficha 73: un «SI QUIERO» de una burbuja APAGADA salía como un tercer
+    // botón, y le robaba el puntito a otro). Lo apagado no sale al cliente: botones y cuadritos, igual.
+    const pasos = (s.variantes ?? []).flatMap((v) => ((v.steps ?? []) as Array<{ enabled?: boolean }>).filter((p) => p.enabled !== false) as never[]);
     const { botones, cuadritos } = opcionesDe(pasos as never);
     return { n: i + 1, minutos: s.minutos, claves: [...botones.map((b) => `btn:${b.id}`), ...cuadritos.map((d) => `dec:${d.id}`)] };
   });
@@ -759,6 +765,8 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
 
 function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor; espejo?: string }>>) {
   const ctx = useContext(Contexto);
+  // 🪞 EL BOTÓN GEMELO (13/11/2026): la opción repetida en otro seguimiento que el ratón tiene encima (se marca su pareja).
+  const [gemeloEncima, setGemeloEncima] = useState<string | null>(null);
   const f = data.ficha;
   // 🪞 EL ESPEJO (05/11/2026): la misma ficha en otro sitio. Se dibuja igual, con un borde de neón y su marca.
   const espejo = data.espejo;
@@ -817,8 +825,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       s.clave === "sin_pago" && destinoDe("sin_pago")?.tipo === "seguimientos" ? { ...s, etiqueta: "⏳ Seguimientos (si no paga)" } : s
     );
   /** Una salida con su puntito (o, repetida en otro seguimiento, con el letrero de a dónde va). */
-  const pastilla = (s: { clave: string; etiqueta: string }, conPunto: boolean, llave: string) => {
+  // `gemelos`: los otros seguimientos donde está la MISMA opción (mismo código). Él, 13/11/2026: «no hay nada que me
+  // indique que un botón igual vale por 2… como voy a conectar si no tiene punto». Cada aparición lleva su 🪞, su
+  // puntito (el cable es UNO: se dibuja desde la primera) y, con el ratón encima, su pareja se marca en magenta.
+  const pastilla = (s: { clave: string; etiqueta: string }, conPunto: boolean, llave: string, gemelos?: number[]) => {
     const boton = s.clave.startsWith("btn:");
+    const conGemelo = !!gemelos?.length;
+    const marcado = conGemelo && gemeloEncima === s.clave;
     const cuadrito = s.clave.startsWith("dec:") || s.clave.startsWith("elige:");
     const falta = faltan?.get(s.clave);
     // Pide cable lo que sin cable deja al cliente sin camino: sus opciones y el «Si no paga».
@@ -831,6 +844,9 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
       <div
         key={llave}
         title={falta ?? undefined}
+        onMouseEnter={conGemelo ? () => setGemeloEncima(s.clave) : undefined}
+        onMouseLeave={conGemelo ? () => setGemeloEncima((x) => (x === s.clave ? null : x)) : undefined}
+        style={marcado ? { outline: "3px solid #ff00ff", outlineOffset: 2 } : undefined}
         className={`relative flex items-center gap-1.5 rounded-full border px-2 py-0.5 ${icono ? "pr-6" : "pr-4"} text-[11px] font-semibold ${
           falta
             ? "border-red-500 bg-red-50 text-red-800"
@@ -855,6 +871,14 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           {/* Tocarlo o escribirlo lleva por el mismo cable (27/10/2026). */}
           {boton && <span className="ml-1 text-[9px] font-normal opacity-60">· o escrito</span>}
         </span>
+        {conGemelo && (
+          <span
+            className="shrink-0 text-[11px]"
+            title={`🪞 El mismo ${boton ? "botón" : "cuadrito"} está también en el Seguimiento ${gemelos!.join(" y ")}: es UN solo cable para todos. Conéctalo desde cualquiera de ellos.`}
+          >
+            🪞
+          </span>
+        )}
         {conPunto && !destino && (() => {
           // SIN CABLE PERO SABE A DÓNDE IR (05/11/2026): su colita automática, con el número y el color de esa ficha.
           const solo = aDondeVaSolo(f, s.clave, ctx.tablero);
@@ -879,11 +903,12 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
             → {ctx.numeroDe[destino.id] ?? ""}
           </span>
         )}
-        {conPunto && (
+        {(conPunto || conGemelo) && (
           <Handle
             type="source"
             position={Position.Right}
-            id={s.clave}
+            // El gemelo lleva su propio puntito (React Flow no admite dos con el mismo id); al conectar vale la salida de siempre.
+            id={conPunto ? s.clave : `${s.clave}${GEMELO}${llave}`}
             className={`${icono ? PUNTO_DE_ENTREGA : PUNTO_NARANJA} ${pide ? "punto-pide-cable" : ""}`}
             title={
               icono
@@ -1183,7 +1208,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           {(() => {
             const yaPuestas = new Set<string>();
             const porClave = new Map(visibles.map((s) => [s.clave, s]));
-            return filasDeSeguimientos(f).map((fila) => (
+            const filas = filasDeSeguimientos(f);
+            return filas.map((fila) => (
               <div key={fila.n} className="flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-900">
                   ⏳ Seguimiento {fila.n} <span className="font-semibold text-orange-700">· {minutosLegibles(fila.minutos)}</span>
@@ -1193,7 +1219,8 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
                   if (!s) return [];
                   const primera = !yaPuestas.has(clave);
                   yaPuestas.add(clave);
-                  return [<div key={`${fila.n}-${clave}`} className="pl-3">{pastilla(s, primera, `${fila.n}-${clave}`)}</div>];
+                  const gemelos = filas.filter((x) => x.n !== fila.n && x.claves.includes(clave)).map((x) => x.n);
+                  return [<div key={`${fila.n}-${clave}`} className="pl-3">{pastilla(s, primera, `${fila.n}-${clave}`, gemelos)}</div>];
                 })}
               </div>
             ));
@@ -3732,19 +3759,21 @@ export default function LienzoDelTablero({
             const a = fichaDelNodo(c.target);
             if (de === a) return;
             const actual = vivo.current;
+            // 🪞 Desde el puntito de un gemelo (13/11/2026): la salida es la misma de su primera aparición.
+            const salida = salidaDelPunto(c.sourceHandle);
             // NO SE CONECTA DONDE NO DEBE (26/10/2026): el cable no se pone y se dice por qué.
-            const motivo = porQueNoSeConecta(actual, de, c.sourceHandle, a);
+            const motivo = porQueNoSeConecta(actual, de, salida, a);
             if (motivo) {
               setAviso(motivo);
               return;
             }
             // UNA SALIDA, UN CABLE: tirar otro desde el mismo puntito reemplaza al anterior.
-            const lista = actual.cables.filter((x) => !(x.de === de && x.salida === c.sourceHandle));
+            const lista = actual.cables.filter((x) => !(x.de === de && x.salida === salida));
             // 🪞 Conectado desde o hacia un espejo: el cable es de la ficha; solo se dibuja desde ahí.
             lista.push({
               id: `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
               de,
-              salida: c.sourceHandle,
+              salida,
               a,
               ...(c.source.startsWith("esp:") ? { de_espejo: c.source.slice(4) } : {}),
               ...(c.target.startsWith("esp:") ? { a_espejo: c.target.slice(4) } : {}),
@@ -3754,7 +3783,7 @@ export default function LienzoDelTablero({
           onConnectStart={(e, p) => {
             const q = "touches" in e ? e.touches[0] : (e as MouseEvent);
             inicioDelTiro.current = q ? { x: q.clientX, y: q.clientY } : null;
-            if (p.nodeId && p.handleId && p.handleType === "source") setTirando({ de: fichaDelNodo(p.nodeId), salida: p.handleId });
+            if (p.nodeId && p.handleId && p.handleType === "source") setTirando({ de: fichaDelNodo(p.nodeId), salida: salidaDelPunto(p.handleId) });
           }}
           // SOLTAR EL CABLE EN EL VACÍO: se ofrece crear ahí una ficha ya conectada. (El cable viejo
           // vuelve a verse: solo se reemplaza si el nuevo llega a una ficha o se crea una.)
@@ -3767,7 +3796,7 @@ export default function LienzoDelTablero({
             if (desde && Math.hypot(punto.clientX - desde.x, punto.clientY - desde.y) < 6) return;
             const p = instancia.current?.screenToFlowPosition({ x: punto.clientX, y: punto.clientY });
             if (!p) return;
-            setMenu({ x: punto.clientX, y: punto.clientY, m: { tipo: "crear", donde: { x: p.x, y: p.y - 20 }, desde: { ficha: fichaDelNodo(estado.fromNode.id), salida: estado.fromHandle.id } } });
+            setMenu({ x: punto.clientX, y: punto.clientY, m: { tipo: "crear", donde: { x: p.x, y: p.y - 20 }, desde: { ficha: fichaDelNodo(estado.fromNode.id), salida: salidaDelPunto(estado.fromHandle.id) } } });
           }}
           onPaneContextMenu={(e) => {
             e.preventDefault();
