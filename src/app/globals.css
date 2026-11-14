@@ -638,9 +638,10 @@ input,
 .lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus,
 .lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus-visible {
   border-radius: 14px;
-  outline: calc(7px / var(--zoom-tablero, 1)) solid #00e5ff !important;
+  /* (14/11/2026) UN POCO MÁS DELGADO QUE EL MAGENTA (5 px): «que queden un poco más delgados que los magentas». 4 px y
+     sin el halo, que lo hacía ver el doble de grueso. */
+  outline: calc(4px / var(--zoom-tablero, 1)) solid #00e5ff !important;
   outline-offset: calc(4px / var(--zoom-tablero, 1)) !important;
-  box-shadow: 0 0 0 calc(14px / var(--zoom-tablero, 1)) rgba(0, 229, 255, 0.28);
 }
 
 /* EL MINIMAPA, SIEMPRE EN SU ESQUINA Y SIN ATRAPAR EL RATÓN (19/10/2026). */
