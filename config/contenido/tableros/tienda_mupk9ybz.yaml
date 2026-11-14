@@ -11271,8 +11271,8 @@ whatsapp:
                       💰 EL COSTO DE TODO EL MATERIAL POR *$ 3 Dólares*
                   delay_after_sec: 6
                   enabled: false
-                - type: image
-                  drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1YttQ9Vz4xxGFfCBWzg_VrZqXy4LD3-dV/view?usp=drive_link
                   caption_variants:
                     - |-
                       *Hola! {Soy Andrea* 👋🏼 Deseaba Asegurarme que recibiste la información que envié.|Soy Andrea* 👋🏼 Quería confirmar que te llegó correctamente la información que te mandé.|Soy Andrea* 👋🏼 Solo pasaba a ver si recibiste lo que te compartí.} ¿Le quedó alguna duda o pregunta? Estoy aquí para ayudarle! 😊
