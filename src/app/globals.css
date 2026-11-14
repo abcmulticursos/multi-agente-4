@@ -631,12 +631,16 @@ input,
 
 /* LA FICHA ELEGIDA EN EL TABLERO, EN CIAN Y QUE SE NOTE (28/10/2026: «el borde azul es demasiado bajo,
    aunque sea cian pero que se note»). */
+/* (13/11/2026) MÁS GRUESO Y QUE SE VEA DE LEJOS, como el magenta de los espejos. Él: «que también las fichas adquieran
+   color cian… más grueso y que a lo lejos se distinga». 7 px DE PANTALLA con cualquier zoom (--zoom-tablero), más su halo.
+   La familia de un espejo sigue en magenta: su regla va más abajo y gana. */
 .lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja),
 .lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus,
 .lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus-visible {
-  outline: 4px solid #06b6d4 !important;
-  outline-offset: 4px;
-  box-shadow: 0 0 0 8px rgba(6, 182, 212, 0.25);
+  border-radius: 14px;
+  outline: calc(7px / var(--zoom-tablero, 1)) solid #00e5ff !important;
+  outline-offset: calc(4px / var(--zoom-tablero, 1)) !important;
+  box-shadow: 0 0 0 calc(14px / var(--zoom-tablero, 1)) rgba(0, 229, 255, 0.28);
 }
 
 /* EL MINIMAPA, SIEMPRE EN SU ESQUINA Y SIN ATRAPAR EL RATÓN (19/10/2026). */
