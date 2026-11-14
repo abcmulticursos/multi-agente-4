@@ -11295,7 +11295,9 @@ whatsapp:
                       🎯 *Podés aprovechar nuestra promoción activa* y realizar un único pago ahora mismo!
                       *Ellos ya lo hicieron*... {y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}
 
-                      💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
+                      💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
+
+                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
                   spintax_ia:
                     - "{y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}"
