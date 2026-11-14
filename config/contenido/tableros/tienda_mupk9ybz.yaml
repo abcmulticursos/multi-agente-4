@@ -6553,9 +6553,11 @@ whatsapp:
 
                       🚨⚗️ *¡OFERTA FLASH ACTIVADA! SOLO POR 20 MINUTOS* ⏰🔥
 
-                      {{Producto_BASE}} a tan solo *{{precio_BASE}}*
+                      💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      por tiempo limitado
+                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+
+                      😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
                 - type: text
                   body_variants:
