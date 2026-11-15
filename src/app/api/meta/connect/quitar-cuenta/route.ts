@@ -88,6 +88,12 @@ export async function POST(req: NextRequest) {
       if (idsPaginas.has(String(t.pagina ?? "").trim())) motivos.push("su página");
       const pixel = String(t.pixel ?? "").trim() || pixelGeneral;
       if (pixel && idsPixeles.has(pixel)) motivos.push("su píxel");
+      // (14/11/2026) Lo de cada uno de sus países (`Tienda.por_pais`).
+      for (const [pais, g] of Object.entries(t.por_pais ?? {})) {
+        if (idsNumeros.has(String(g?.numero ?? "").trim())) motivos.push(`el número de ${pais}`);
+        if (idsPaginas.has(String(g?.pagina ?? "").trim())) motivos.push(`la página de ${pais}`);
+        if (idsPixeles.has(String(g?.pixel ?? "").trim())) motivos.push(`el píxel de ${pais}`);
+      }
       return { nombre: String(t.nombre ?? "").trim() || "Tienda sin nombre", motivos };
     })
     .filter((t) => t.motivos.length > 0);

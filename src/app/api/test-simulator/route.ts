@@ -115,10 +115,13 @@ export async function POST(req: NextRequest) {
       // En WhatsApp manda el numero; en Messenger, la pagina. Se escribe solo el del
       // canal que se esta simulando: escribir los dos haria que la tienda se
       // encontrara por un camino que en vivo no existe para ese canal.
+      // (14/11/2026) El número (o la página) del país elegido, si la tienda tiene uno propio ahí (`Tienda.por_pais`):
+      // un cliente de ese país entraría por ahí.
+      const delPais = suya.por_pais?.[country];
       if (channel === "whatsapp") {
-        setConversationWaPhoneNumberId(convo.id, String(suya.numero ?? "").trim());
+        setConversationWaPhoneNumberId(convo.id, String(delPais?.numero ?? "").trim() || String(suya.numero ?? "").trim());
       } else {
-        setConversationMessengerPage(convo.id, String(suya.pagina ?? "").trim());
+        setConversationMessengerPage(convo.id, String(delPais?.pagina ?? "").trim() || String(suya.pagina ?? "").trim());
       }
       // UNA TIENDA CON FRASES DE ENTRADA comparte número con otras, así que el número solo
       // no la elige: en vivo la elige la frase del primer mensaje. Aquí se elige a mano y se
@@ -168,8 +171,9 @@ export async function GET(req: NextRequest) {
         nombre: String(t?.nombre ?? "").trim() || `Tienda ${i + 1}`,
         // Para avisar en la pantalla si esa tienda no atiende el canal que se
         // esta simulando: sin numero no hay WhatsApp, sin pagina no hay Messenger.
-        tieneNumero: Boolean(String(t?.numero ?? "").trim()),
-        tienePagina: Boolean(String(t?.pagina ?? "").trim()),
+        // (14/11/2026) También el número o la página de uno de sus países.
+        tieneNumero: Object.values(t?.por_pais ?? {}).some((g) => String(g?.numero ?? "").trim()) || Boolean(String(t?.numero ?? "").trim()),
+        tienePagina: Object.values(t?.por_pais ?? {}).some((g) => String(g?.pagina ?? "").trim()) || Boolean(String(t?.pagina ?? "").trim()),
         apagada: t?.enabled === false,
       }));
     return NextResponse.json({ tiendas });

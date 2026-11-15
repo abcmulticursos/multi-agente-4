@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
-import { loadWorkflowConfig } from "@/lib/workflow/config";
+import { loadWorkflowConfig, numerosDeLaTienda } from "@/lib/workflow/config";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
@@ -74,7 +74,8 @@ export async function GET(req: Request) {
   // la cuenta de Facebook, también los que atiende otra app. El aviso solo cuenta los que usa
   // este proyecto: el activo y los que tiene alguna tienda. Los demás salen en gris.
   const deTiendas = new Set(
-    (loadWorkflowConfig()?.tiendas ?? []).filter((t) => t?.enabled !== false).map((t) => String(t?.numero ?? "").trim()).filter(Boolean)
+    // (14/11/2026) También los números de sus países (`Tienda.por_pais`).
+    (loadWorkflowConfig()?.tiendas ?? []).filter((t) => t?.enabled !== false).flatMap((t) => numerosDeLaTienda(t))
   );
   const numeros = listMetaWhatsAppConnections().map((c) => ({
     // (Un número pausado en este proyecto no se usa aquí: lo atiende otro.)

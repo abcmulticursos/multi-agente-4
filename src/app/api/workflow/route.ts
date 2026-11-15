@@ -598,6 +598,24 @@ function leeTiendas(
           );
           return Object.keys(por).length ? { cobradores_por_pais: por } : {};
         })(),
+        // EL GRUPO DE CADA PAÍS (14/11/2026): su número, su página y su pixel. Solo los países con algo puesto; lo vacío
+        // usa lo de toda la tienda. Ver `Tienda.por_pais` en `config.ts`.
+        ...(() => {
+          const crudo = t?.por_pais && typeof t.por_pais === "object" ? (t.por_pais as Record<string, unknown>) : {};
+          const por: Record<string, { numero?: string; pagina?: string; pixel?: string }> = {};
+          for (const [pais, g] of Object.entries(crudo)) {
+            const p = String(pais).trim().toUpperCase();
+            if (!p || !g || typeof g !== "object") continue;
+            const x = g as Record<string, unknown>;
+            const grupo = {
+              ...(str(x.numero).trim() ? { numero: str(x.numero).trim() } : {}),
+              ...(str(x.pagina).trim() ? { pagina: str(x.pagina).trim() } : {}),
+              ...(str(x.pixel).trim() ? { pixel: str(x.pixel).trim() } : {}),
+            };
+            if (Object.keys(grupo).length) por[p] = grupo;
+          }
+          return Object.keys(por).length ? { por_pais: por } : {};
+        })(),
         // SU CONJUNTO DE DATOS de Meta —él lo llama «el pixel»—, donde se marcan las
         // compras de esta tienda. Vacío = el elegido en Meta Connect, que es lo de
         // siempre. Lo pidió el 01/10/2026: «para marcar la compra se necesita waba,

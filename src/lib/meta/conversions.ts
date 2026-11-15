@@ -11,7 +11,7 @@ import {
 // `getWhatsAppRuntimeConfig` ya no se importa: lo único que se le pedía aquí era la WABA,
 // y ese dato dejó de mandarse el 3 de octubre de 2026. Ver el porqué más abajo.
 import { getCapiAccessToken, getCapiPixelId } from "@/lib/meta/runtime-config";
-import { laTiendaDeLaConversacion } from "@/lib/workflow/config";
+import { getEffectiveCountryCode, grupoDelPais, laTiendaDeLaConversacion } from "@/lib/workflow/config";
 import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 import { esBSUID } from "@/lib/meta/bsuid";
 
@@ -151,16 +151,20 @@ function laMedicionDeLaTienda(conversationId: number | null | undefined): {
   // Medir no puede romper una venta: si la fila no se puede leer, se mide como antes
   // de este campo en vez de dejar la compra sin registrar.
   let suya = null;
+  let grupo: { pagina?: string; pixel?: string } | undefined;
   try {
-    suya = conversationId
-      ? laTiendaDeLaConversacion(getConversationById(conversationId))
-      : null;
+    const convo = conversationId ? getConversationById(conversationId) : undefined;
+    suya = convo ? laTiendaDeLaConversacion(convo) : null;
+    // EL GRUPO DE SU PAÍS (14/11/2026): la página y el pixel del país del cliente, si la tienda los tiene propios
+    // (`Tienda.por_pais`). Sin grupo, los de toda la tienda, como siempre.
+    grupo = suya && convo ? grupoDelPais(suya, getEffectiveCountryCode(convo.phone)) : undefined;
   } catch {
     suya = null;
+    grupo = undefined;
   }
   return {
-    pagina: String(suya?.pagina ?? "").trim() || null,
-    pixel: String(suya?.pixel ?? "").trim() || null,
+    pagina: String(grupo?.pagina ?? "").trim() || String(suya?.pagina ?? "").trim() || null,
+    pixel: String(grupo?.pixel ?? "").trim() || String(suya?.pixel ?? "").trim() || null,
   };
 }
 
@@ -183,10 +187,13 @@ function laMedicionDeLaTienda(conversationId: number | null | undefined): {
 function elPermisoDeLaTienda(conversationId: number | null | undefined): string | null {
   try {
     if (!conversationId) return null;
-    const tienda = laTiendaDeLaConversacion(getConversationById(conversationId));
+    const convo = getConversationById(conversationId);
+    const tienda = laTiendaDeLaConversacion(convo);
     if (!tienda) return null;
-    const numero = String(tienda.numero ?? "").trim();
-    const pagina = String(tienda.pagina ?? "").trim();
+    // (14/11/2026) La cuenta del número AL QUE ESCRIBIÓ (puede ser el de su país, `Tienda.por_pais`), y si no, el de la
+    // tienda; la página, la de su país si la tiene.
+    const numero = String(convo?.wa_phone_number_id ?? "").trim() || String(tienda.numero ?? "").trim();
+    const pagina = String(laMedicionDeLaTienda(conversationId).pagina ?? "").trim();
     const cuenta =
       (numero ? getMetaWhatsAppConnection(numero)?.business_id : null) ??
       (pagina ? getMetaConnectionByPageId(pagina)?.business_id : null) ??

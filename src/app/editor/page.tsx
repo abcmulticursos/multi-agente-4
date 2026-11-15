@@ -2424,6 +2424,9 @@ interface TiendaEditor {
   cobrador?: string;
   /** QUIÉN COBRA EN CADA PAÍS (29/10/2026): país → id del usuario. Un país sin elegir usa `cobrador`. */
   cobradores_por_pais?: Record<string, string>;
+  /** EL GRUPO DE CADA PAÍS (14/11/2026): su número, página y pixel. Lo vacío usa lo de toda la tienda. Ver
+   *  `Tienda.por_pais` en config.ts. */
+  por_pais?: Record<string, { numero?: string; pagina?: string; pixel?: string }>;
   /** SU CONJUNTO DE DATOS de Meta —él lo llama «el pixel»—, donde se marcan las
    *  compras de esta tienda. Vacío = el de Meta Connect. Ver `Tienda.pixel`. */
   pixel?: string;
@@ -36458,24 +36461,33 @@ function quienCobraEn(cfg: FullConfig, tienda: Pick<TiendaEditor, "cobrador" | "
  *   · hay números escritos a mano en textos que leen los clientes de ese país → le pagarían a ESE número, no a la
  *     persona elegida, y el comprobante no se aprobaría (rojo, con dónde arreglarlo).
  */
+/**
+ * LOS PAÍSES DE UNA TIENDA (los Inicios de su tablero, o los países que venden), más los que ya tienen algo elegido
+ * (quién cobra o su grupo). Lo usan «quién cobra por país» y los pop ups de cada país (14/11/2026).
+ */
+function paisesDeLaTienda(cfg: FullConfig, tienda: TiendaEditor): string[] {
+  const deSuTablero = Object.values(cfg.tableros?.[tienda.id] ?? {}).flatMap((t) =>
+    ((t as TableroEnElEditor | undefined)?.fichas ?? []).filter((f) => f.tipo === "inicio" && f.pais).map((f) => String(f.pais).toUpperCase())
+  );
+  const base = deSuTablero.length ? deSuTablero : paisesQueVenden(comoCuentas(cfg)).map((p) => p.toUpperCase());
+  return [...new Set([...base, ...Object.keys(tienda.cobradores_por_pais ?? {}), ...Object.keys(tienda.por_pais ?? {})])];
+}
+
 function CobradorPorPais({
   cfg,
   tienda,
   onCambiar,
+  paisesFijos,
 }: {
   cfg: FullConfig;
   tienda: TiendaEditor;
   onCambiar: (pais: string, id: string) => void;
+  /** Solo estos países (14/11/2026: el pop up de un país enseña solo el suyo). */
+  paisesFijos?: string[];
 }) {
   const limpio = (v: unknown) => String(v ?? "").trim();
   const elegidos = tienda.cobradores_por_pais ?? {};
-  const paises = useMemo(() => {
-    const deSuTablero = Object.values(cfg.tableros?.[tienda.id] ?? {}).flatMap((t) =>
-      ((t as TableroEnElEditor | undefined)?.fichas ?? []).filter((f) => f.tipo === "inicio" && f.pais).map((f) => String(f.pais).toUpperCase())
-    );
-    const base = deSuTablero.length ? deSuTablero : paisesQueVenden(comoCuentas(cfg)).map((p) => p.toUpperCase());
-    return [...new Set([...base, ...Object.keys(elegidos)])];
-  }, [cfg, tienda.id, elegidos]);
+  const paises = useMemo(() => paisesFijos ?? paisesDeLaTienda(cfg, tienda), [cfg, tienda, paisesFijos]);
   // Solo si eligió a alguien por país: buscar los números a mano recorre todo su contenido.
   const hayElegidos = Object.keys(elegidos).length > 0;
   const hallazgos = useMemo(() => (hayElegidos ? buscarNumerosAMano(comoCuentas(cfg)).filter((h) => h.tipo === "numero") : []), [cfg, hayElegidos]);
@@ -36536,6 +36548,146 @@ function CobradorPorPais({
         })}
       </div>
     </div>
+  );
+}
+
+/**
+ * UNA VENTANA CON «CANCELAR / ✓ LISTO» (14/11/2026), la misma idea que Productos y precios: Cancelar (y Escape) deja
+ * todo como estaba al abrir; Listo deja lo hecho. Ninguno sube nada: eso sigue siendo Guardar o Ctrl+S.
+ */
+function VentanaConListo({ titulo, detalle, onCerrar, children, ancho }: { titulo: string; detalle?: string; onCerrar: () => void; children: ReactNode; ancho?: string }) {
+  const guardado = useContext(GuardadoDelEditor);
+  const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
+  const cancelar = () => {
+    if (guardado && huellaAlAbrir && guardado.sucio && guardado.huella !== huellaAlAbrir) guardado.restaurar(huellaAlAbrir);
+    onCerrar();
+  };
+  return (
+    <VentanaFlotante
+      titulo={titulo}
+      detalle={detalle}
+      ancho={ancho ?? "max-w-2xl"}
+      onCerrar={cancelar}
+      onListo={onCerrar}
+      onCancelar={cancelar}
+      hayCambios={!!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir}
+    >
+      {children}
+    </VentanaFlotante>
+  );
+}
+
+/**
+ * EL GRUPO DE UN PAÍS (14/11/2026). Él: «un pop up para el grupo de inicio de Perú: número, página y pixel, y quién
+ * cobra… otro pop up para Argentina con las mismas características». Lo vacío usa lo de toda la tienda. Como en la
+ * tienda, EL NÚMERO FIJA LA CUENTA (BM): página y pixel solo se ofrecen de ésa, y si algo queda mezclado, se avisa en
+ * rojo (`cuentaDeLaTienda`, la misma regla de Meta Connect). Ver `Tienda.por_pais` en config.ts.
+ */
+function VentanaDelPais({
+  cfg,
+  tienda,
+  pais,
+  conexiones,
+  onGrupo,
+  onCobrador,
+  onSnapshot,
+  onCerrar,
+}: {
+  cfg: FullConfig;
+  tienda: TiendaEditor;
+  pais: string;
+  conexiones: ConexionesDelProyecto;
+  onGrupo: (parche: { numero?: string; pagina?: string; pixel?: string }) => void;
+  onCobrador: (pais: string, id: string) => void;
+  onSnapshot: () => void;
+  onCerrar: () => void;
+}) {
+  const limpio = (v: unknown) => String(v ?? "").trim();
+  const g = tienda.por_pais?.[pais] ?? {};
+  // Lo que de verdad usa ese país: lo suyo, o lo de toda la tienda.
+  const efectivo = { numero: limpio(g.numero) || limpio(tienda.numero), pagina: limpio(g.pagina) || limpio(tienda.pagina), pixel: limpio(g.pixel) || limpio(tienda.pixel) };
+  const { cuenta, mezcla } = cuentaDeLaTienda(efectivo, conexiones, conexiones.pixelGeneral);
+  const conSuBM = <T extends ConexionElegible>(lista: T[]): T[] =>
+    lista.map((o) => (o.cuentaNombre ? { ...o, detalle: [o.detalle, `BM: ${o.cuentaNombre}`].filter(Boolean).join(" · ") } : o));
+  const etiqueta = (lista: ConexionElegible[], id: string) => lista.find((o) => o.id === id)?.etiqueta ?? id;
+  const deLaTienda = (lista: ConexionElegible[], id: string, nada: string) => (id ? `Vacío = el de toda la tienda (${etiqueta(lista, id)})` : nada);
+  const paginas = soloDeLaCuenta(conSuBM(conexiones.paginas), cuenta?.id, g.pagina);
+  const pixels = soloDeLaCuenta(conSuBM(conexiones.pixels), cuenta?.id, g.pixel);
+  return (
+    <VentanaConListo
+      titulo={`${banderaDe(pais)} ${COUNTRIES[pais as CountryCode]?.label ?? pais} · ${tienda.nombre?.trim() || "esta tienda"}`}
+      detalle="Número, página, pixel y quién cobra para los clientes de este país. Lo que dejes vacío usa lo de toda la tienda."
+      onCerrar={onCerrar}
+    >
+      <div className="grid gap-3 p-1 md:grid-cols-2">
+        <div className="block text-xs font-medium text-tinta-suave">
+          📱 Número de WhatsApp de {pais}
+          <ElegirConexion
+            valor={g.numero ?? ""}
+            opciones={conSuBM(conexiones.numeros)}
+            onCambio={(v) => onGrupo({ numero: v })}
+            onSnapshot={onSnapshot}
+            vacio={deLaTienda(conexiones.numeros, limpio(tienda.numero), "Vacío = la tienda no tiene número")}
+            sinLista="No hay ningún número conectado todavía. Conéctalo en Meta Connect, o escribe su ID aquí."
+          />
+          {(() => {
+            // EL NÚMERO YA ES DE OTRA TIENDA: el bot le da sus clientes a la que lo tiene como suyo (`tiendaDelNumero`).
+            const n = limpio(g.numero);
+            const otra = n
+              ? (cfg.tiendas ?? []).find((t) => t.id !== tienda.id && t.enabled !== false && (limpio(t.numero) === n || Object.values(t.por_pais ?? {}).some((x) => limpio(x?.numero) === n)))
+              : undefined;
+            return otra ? (
+              <span className="mt-1 block text-[11px] font-bold text-rojo">
+                ⚠ Este número ya lo usa «{otra.nombre?.trim() || "otra tienda"}». Sus clientes irían a esa tienda, no a ésta.
+              </span>
+            ) : null;
+          })()}
+          <span className="mt-1 block text-[10px] text-tinta-suave">
+            Quien escriba a este número entra a esta tienda. Lo atiende el Inicio de <strong>su</strong> país, con su precio, y
+            todo le sale por este número.
+          </span>
+        </div>
+        <div className="block text-xs font-medium text-tinta-suave">
+          📘 Página de Facebook de {pais}
+          <ElegirConexion
+            valor={g.pagina ?? ""}
+            opciones={paginas.visibles}
+            onCambio={(v) => onGrupo({ pagina: v })}
+            onSnapshot={onSnapshot}
+            vacio={deLaTienda(conexiones.paginas, limpio(tienda.pagina), "Vacío = la tienda no tiene página")}
+            sinLista="No hay ninguna página de esa cuenta. Conéctala en Meta Connect, o escribe su ID aquí."
+          />
+          <span className="mt-1 block text-[10px] text-tinta-suave">Con ella Meta registra las compras de este país (y atiende su Messenger).</span>
+        </div>
+        <div className="block text-xs font-medium text-tinta-suave">
+          📊 Pixel (conjunto de datos) de {pais}
+          <ElegirConexion
+            valor={g.pixel ?? ""}
+            opciones={pixels.visibles}
+            onCambio={(v) => onGrupo({ pixel: v })}
+            onSnapshot={onSnapshot}
+            vacio={deLaTienda(conexiones.pixels, limpio(tienda.pixel), "Vacío = el de Meta Connect")}
+            sinLista="No hay ningún pixel de esa cuenta. Escribe su ID aquí, o déjalo vacío."
+            esConjuntoDeDatos
+          />
+          <span className="mt-1 block text-[10px] text-tinta-suave">Donde se marcan las compras de los clientes de este país.</span>
+        </div>
+        <div className="block text-xs font-medium text-tinta-suave">
+          🏢 Cuenta (BM) de {pais}
+          <div className={`mt-1 rounded-md border px-2 py-1.5 text-sm font-semibold ${mezcla ? "border-red-400 bg-red-50 text-red-800" : "border-borde bg-tarjeta text-tinta"}`}>
+            {cuenta ? cuenta.nombre : "Sin identificar (elige un número conectado)"}
+          </div>
+          {mezcla ? (
+            <span className="mt-1 block text-[11px] font-bold text-rojo">⚠ {mezcla} Número, página y pixel de un país tienen que ser del mismo BM.</span>
+          ) : (
+            <span className="mt-1 block text-[10px] text-tinta-suave">La fija el número. Página y pixel solo se ofrecen de ésta (y lo compartido con ella).</span>
+          )}
+        </div>
+      </div>
+      <div className="mt-3 p-1">
+        <CobradorPorPais cfg={cfg} tienda={tienda} onCambiar={onCobrador} paisesFijos={[pais]} />
+      </div>
+    </VentanaConListo>
   );
 }
 
@@ -60320,6 +60472,9 @@ function TiendasDelProyecto({
    *  SE GUARDA EL ID, NO LA POSICIÓN: si él borra una tienda de arriba, la posición
    *  pasaría a señalar a otra y se abriría la equivocada. */
   const [tiendaAbierta, setTiendaAbierta] = useState<string | null>(abiertaAlInicio ?? null);
+  // (14/11/2026) El pop up del país abierto («tienda|país») y el de «Qué productos vende» (id de la tienda).
+  const [paisAbierto, setPaisAbierto] = useState<string | null>(null);
+  const [productosAbiertos, setProductosAbiertos] = useState<string | null>(null);
   // EL BUSCADOR (09/11/2026, él: «las tiendas salen ordenadas en lista pero no hay un buscador»).
   // Solo esconde filas: no cambia el orden ni nada de las tiendas. Busca por nombre, sin tildes.
   const [buscarTienda, setBuscarTienda] = useState("");
@@ -61053,17 +61208,57 @@ function TiendasDelProyecto({
                 </select>
                 </span>
               </label>
-              <CobradorPorPais
-                cfg={cfg}
-                tienda={tienda}
-                onCambiar={(pais, id) => {
-                  onSnapshot();
-                  const por = { ...(tienda.cobradores_por_pais ?? {}) };
-                  if (id) por[pais] = id;
-                  else delete por[pais];
-                  parchar(i, { cobradores_por_pais: Object.keys(por).length ? por : undefined });
-                }}
-              />
+              {/* CADA PAÍS, SU GRUPO (14/11/2026). Él: «un pop up para el grupo de inicio de Perú: número, página y pixel,
+                  y quién cobra… lo mismo para cada país». Un botón por país; su pop up. Lo vacío usa lo de arriba. */}
+              <div className="block text-xs font-medium text-tinta-suave md:col-span-2">
+                🌎 Cada país: número, página, pixel y quién cobra
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {paisesDeLaTienda(cfg, tienda).map((pais) => {
+                    const g = tienda.por_pais?.[pais] ?? {};
+                    const propios = [g.numero && "📱", g.pagina && "📘", g.pixel && "📊", tienda.cobradores_por_pais?.[pais] && "💰"].filter(Boolean);
+                    return (
+                      <button
+                        key={pais}
+                        type="button"
+                        onClick={() => setPaisAbierto(`${tienda.id}|${pais}`)}
+                        title={propios.length ? "Tiene lo suyo en este país. Clic para verlo o cambiarlo." : "Usa lo de toda la tienda. Clic para darle lo suyo."}
+                        className={`rounded-full border px-3 py-1 text-xs font-bold ${propios.length ? "border-emerald-400 bg-emerald-50 text-emerald-900" : "border-borde bg-tarjeta text-tinta hover:bg-relleno"}`}
+                      >
+                        {banderaDe(pais)} {pais} {propios.length ? propios.join("") : "· como la tienda"}
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="mt-1 block text-[10px] text-tinta-suave">
+                  Lo que no elijas en un país usa el número, la página, el pixel y quién cobra de toda la tienda (arriba).
+                </span>
+              </div>
+              {paisAbierto?.startsWith(`${tienda.id}|`) && (
+                <VentanaDelPais
+                  cfg={cfg}
+                  tienda={tienda}
+                  pais={paisAbierto.slice(tienda.id.length + 1)}
+                  conexiones={conexiones}
+                  onSnapshot={onSnapshot}
+                  onCerrar={() => setPaisAbierto(null)}
+                  onGrupo={(parche) => {
+                    const pais = paisAbierto.slice(tienda.id.length + 1);
+                    const por = { ...(tienda.por_pais ?? {}) };
+                    const nuevo = { ...(por[pais] ?? {}), ...parche };
+                    for (const k of Object.keys(nuevo) as Array<keyof typeof nuevo>) if (!String(nuevo[k] ?? "").trim()) delete nuevo[k];
+                    if (Object.keys(nuevo).length) por[pais] = nuevo;
+                    else delete por[pais];
+                    parchar(i, { por_pais: Object.keys(por).length ? por : undefined });
+                  }}
+                  onCobrador={(pais, id) => {
+                    onSnapshot();
+                    const por = { ...(tienda.cobradores_por_pais ?? {}) };
+                    if (id) por[pais] = id;
+                    else delete por[pais];
+                    parchar(i, { cobradores_por_pais: Object.keys(por).length ? por : undefined });
+                  }}
+                />
+              )}
               <label className="block text-xs font-medium text-tinta-suave">
                 Cómo presenta esta tienda
                 <select
@@ -61154,10 +61349,22 @@ function TiendasDelProyecto({
                 aparecer los dos asientos aunque el bot general venda uno solo.
                 Por eso se le pasa la configuración con el selector de la tienda
                 puesto — es una copia para la pantalla, no se guarda. */}
-            <details className="mt-3 rounded-md border border-borde bg-relleno p-2">
-              <summary className="cursor-pointer text-xs font-bold text-tinta-suave">
-                📦 Qué productos vende esta tienda
-              </summary>
+            {/* (14/11/2026) EN SU PROPIO POP UP. Él: «"qué productos vende esta tienda" pasaría a ser otro pop up dentro de la
+                misma configuración de la tienda». El contenido es el mismo de antes. */}
+            <button
+              type="button"
+              onClick={() => setProductosAbiertos(tienda.id)}
+              className="mt-3 rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-bold text-tinta hover:bg-tarjeta"
+            >
+              📦 Qué productos vende esta tienda
+            </button>
+            {productosAbiertos === tienda.id && (
+            <VentanaConListo
+              titulo={`📦 Qué productos vende · ${tienda.nombre?.trim() || "esta tienda"}`}
+              detalle="Los productos que juega esta tienda, por puesto. Sin elegir nada, juega los de la alineación general."
+              ancho="max-w-4xl"
+              onCerrar={() => setProductosAbiertos(null)}
+            >
               <div className="mt-2">
                 <AlineacionDeLaModalidad
                   cfg={{
@@ -61195,7 +61402,8 @@ function TiendasDelProyecto({
                   </button>
                 )}
               </div>
-            </details>
+            </VentanaConListo>
+            )}
           </div>
             </VentanaDeProducto>
           </div>

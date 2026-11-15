@@ -3533,9 +3533,14 @@ export function tiendaDelNumero(
   const cfg = config ?? loadWorkflowConfig();
   const tiendas = cfg?.tiendas;
   if (!Array.isArray(tiendas)) return null;
-  const delNumero = tiendas.filter(
+  const comoSuyo = tiendas.filter(
     (t) => t?.enabled !== false && String(t?.numero ?? "").trim() === suyo
   );
+  // EL NÚMERO DE UN PAÍS (14/11/2026): si ninguna tienda lo tiene como el suyo, la que lo tiene en el grupo de uno de sus
+  // países (`Tienda.por_pais`). Sin grupos puestos, esta lista es la de siempre.
+  const delNumero = comoSuyo.length
+    ? comoSuyo
+    : tiendas.filter((t) => t?.enabled !== false && numerosDeLaTienda(t).includes(suyo));
   // UN NÚMERO, UNA TIENDA: la de siempre, tal cual.
   if (delNumero.length <= 1) return delNumero[0] ?? null;
   // VARIAS TIENDAS EN EL MISMO NÚMERO (frases de entrada, 12/10/2026): sin frase que la
@@ -3569,7 +3574,8 @@ export function tiendaPorFraseDeEntrada(
   const tiendas = Array.isArray(cfg?.tiendas) ? cfg!.tiendas : [];
   let mejor: { tienda: Tienda; largo: number } | null = null;
   for (const t of tiendas) {
-    if (!t || t.enabled === false || String(t.numero ?? "").trim() !== suyo) continue;
+    // (14/11/2026) Cualquiera de sus números, también el de uno de sus países.
+    if (!t || t.enabled === false || !numerosDeLaTienda(t).includes(suyo)) continue;
     for (const frase of frasesDeEntrada(t)) {
       if (!` ${texto} `.includes(` ${frase} `)) continue;
       if (!mejor || frase.length > mejor.largo) mejor = { tienda: t, largo: frase.length };
@@ -3603,8 +3609,32 @@ function tiendaAnotada(
   );
   if (!tienda) return null;
   const numero = String(convo?.wa_phone_number_id ?? "").trim();
-  if (numero && String(tienda.numero ?? "").trim() !== numero) return null;
+  // (14/11/2026) Cualquiera de SUS números: el de la tienda o el de uno de sus países (`numerosDeLaTienda`).
+  if (numero && !numerosDeLaTienda(tienda).includes(numero)) return null;
   return tienda;
+}
+
+/** EL GRUPO DE UN PAÍS de una tienda (14/11/2026): su número, página y pixel propios, si los tiene. Ver `Tienda.por_pais`. */
+export function grupoDelPais(
+  tienda: Pick<Tienda, "por_pais"> | null | undefined,
+  pais: string | null | undefined
+): { numero?: string; pagina?: string; pixel?: string } | undefined {
+  const p = String(pais ?? "").trim().toUpperCase();
+  return p ? tienda?.por_pais?.[p] : undefined;
+}
+
+/** TODOS LOS NÚMEROS DE UNA TIENDA (14/11/2026): el suyo y el de cada país que tenga uno propio. */
+export function numerosDeLaTienda(tienda: Pick<Tienda, "numero" | "por_pais"> | null | undefined): string[] {
+  if (!tienda) return [];
+  const todos = [tienda.numero, ...Object.values(tienda.por_pais ?? {}).map((g) => g?.numero)];
+  return [...new Set(todos.map((n) => String(n ?? "").trim()).filter(Boolean))];
+}
+
+/** TODAS LAS PÁGINAS DE UNA TIENDA (14/11/2026): la suya y la de cada país que tenga una propia. */
+export function paginasDeLaTienda(tienda: Pick<Tienda, "pagina" | "por_pais"> | null | undefined): string[] {
+  if (!tienda) return [];
+  const todas = [tienda.pagina, ...Object.values(tienda.por_pais ?? {}).map((g) => g?.pagina)];
+  return [...new Set(todas.map((n) => String(n ?? "").trim()).filter(Boolean))];
 }
 
 /**
@@ -3630,7 +3660,10 @@ export function tiendaDeLaPagina(
   return (
     tiendas.find(
       (t) => t?.enabled !== false && String(t?.pagina ?? "").trim() === suya
-    ) ?? null
+    ) ??
+    // LA PÁGINA DE UN PAÍS (14/11/2026): si ninguna la tiene como la suya, la que la tiene en el grupo de un país.
+    tiendas.find((t) => t?.enabled !== false && paginasDeLaTienda(t).includes(suya)) ??
+    null
   );
 }
 
@@ -3883,6 +3916,15 @@ export interface Tienda {
    *  ya que puedo trabajar en 4 países al mismo tiempo». País → id del almacén de usuarios. Un país sin
    *  elegir usa `cobrador` (el de toda la tienda), y sin ése, la cuenta del país: lo de siempre. */
   cobradores_por_pais?: Record<string, string>;
+  /**
+   * EL GRUPO DE CADA PAÍS (14/11/2026). Él: «yo quiero tener los 2 números en la misma tienda… un pop up para el grupo
+   * de inicio de Perú: número, página y pixel, lo mismo para cada país». País → su número de WhatsApp, su página y su
+   * pixel. Lo que no esté puesto usa lo de toda la tienda (`numero`, `pagina`, `pixel`): lo de siempre.
+   *   · Quien escribe a cualquiera de sus números (o de sus páginas) entra a ESTA tienda (`tiendaDelNumero`).
+   *   · Lo atiende el Inicio de SU país, con su precio (opción A): el número no cambia el país del cliente.
+   *   · Todo le sale por el número al que escribió; la compra se mide con la página y el pixel de SU país.
+   */
+  por_pais?: Record<string, { numero?: string; pagina?: string; pixel?: string }>;
   /**
    * SU CONJUNTO DE DATOS DE META —él lo llama «el pixel»—, al que se le reportan
    * las compras de esta tienda.

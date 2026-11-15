@@ -55,6 +55,8 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
     // Una tienda sin número ni página (solo por frase de entrada) sale si ya tiene chats.
     if (!numero && !String(t.pagina ?? "").trim() && !enUso.has(`t:${t.id}`)) continue;
     if (numero) deTiendas.add(numero);
+    // (14/11/2026) Y los números de sus países (`Tienda.por_pais`): sus chats van en la bandeja de la tienda.
+    for (const g of Object.values(t.por_pais ?? {})) if (String(g?.numero ?? "").trim()) deTiendas.add(String(g.numero).trim());
     const n = numeros.find((x) => x.phone_number_id === numero);
     bandejas.push({
       clave: `t:${t.id}`,
