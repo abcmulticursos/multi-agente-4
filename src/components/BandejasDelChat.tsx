@@ -208,7 +208,13 @@ export function BarraDeBandejas({
                     <Punto o={o} />
                     <span className="min-w-0 flex-1">
                       <span className={`block truncate text-sm ${activa ? "font-bold text-neutral-900" : "font-semibold text-neutral-700"}`}>{o.nombre}</span>
-                      {o.detalle && <span className="block truncate text-[11px] text-neutral-500">{o.detalle}</span>}
+                      {/* (15/11/2026) Una tienda con varios números (los de sus países): uno por línea, que no se corten. */}
+                      {o.detalle &&
+                        o.detalle.split(" · ").map((linea) => (
+                          <span key={linea} className="block truncate text-[11px] text-neutral-500">
+                            {linea}
+                          </span>
+                        ))}
                     </span>
                     <Contador n={o.cuenta} urgente={o.urgente} />
                   </>

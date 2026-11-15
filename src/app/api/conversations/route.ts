@@ -58,11 +58,16 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
     // (14/11/2026) Y los números de sus países (`Tienda.por_pais`): sus chats van en la bandeja de la tienda.
     for (const g of Object.values(t.por_pais ?? {})) if (String(g?.numero ?? "").trim()) deTiendas.add(String(g.numero).trim());
     const n = numeros.find((x) => x.phone_number_id === numero);
+    // (15/11/2026) TODOS SUS NÚMEROS, no solo el principal. Él: «en esa tienda he usado 2 números… en el chat solo sale
+    // un número». El de la tienda primero y luego los de sus países, sin repetir.
+    const susNumeros = [...new Set([numero, ...Object.values(t.por_pais ?? {}).map((g) => String(g?.numero ?? "").trim())].filter(Boolean))].map(
+      (id) => numeros.find((x) => x.phone_number_id === id)?.display_phone_number ?? id
+    );
     bandejas.push({
       clave: `t:${t.id}`,
       nombre: t.nombre?.trim() || "Tienda sin nombre",
       color: t.color?.trim() || null,
-      detalle: n?.display_phone_number ?? null,
+      detalle: susNumeros.length ? susNumeros.join(" · ") : null,
       numeroId: n?.phone_number_id ?? null,
       verificado: n?.verified_name ?? null,
       telefono: n?.display_phone_number ?? null,
