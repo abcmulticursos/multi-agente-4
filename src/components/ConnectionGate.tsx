@@ -392,8 +392,9 @@ export default function ConnectionGate({ initialView }: Props) {
   const identidadDeLaBandeja = useMemo(() => {
     if (!conBarra) return null;
     if (bandejaVigente === TODAS) {
-      const tiendas = bandejas.filter((b) => b.clave.startsWith("t:")).length;
-      const sueltos = bandejas.length - tiendas;
+      // (15/11/2026) Una tienda con una bandeja por número cuenta una vez («t:<id>#<número>»).
+      const tiendas = new Set(bandejas.filter((b) => b.clave.startsWith("t:")).map((b) => b.clave.split("#")[0])).size;
+      const sueltos = bandejas.filter((b) => !b.clave.startsWith("t:")).length;
       return {
         nombre: "Todas tus tiendas",
         telefono: null,

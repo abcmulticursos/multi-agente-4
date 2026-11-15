@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { listConversations, listMetaWhatsAppConnections } from "@/lib/db";
+import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import {
   laTiendaDeLaConversacion,
   loadWorkflowConfig,
@@ -43,7 +44,38 @@ type BandejaDelChat = {
   verificado: string | null;
   telefono: string | null;
   paginaId: string | null;
+  /** Una bandeja de UNO de los números de una tienda que tiene varios (15/11/2026): se pinta el teléfono en grande. */
+  deUnNumero?: boolean;
 };
+
+/** La bandera de un país («AR» → 🇦🇷). */
+const bandera = (pais: string) => (/^[A-Z]{2}$/.test(pais) ? String.fromCodePoint(...[...pais].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : "");
+
+/**
+ * LOS NÚMEROS DE UNA TIENDA, CADA UNO CON SUS PAÍSES (15/11/2026). Él: «una bandeja de entrada para cada número, doy click
+ * en un número y veo su chat». El de la tienda primero; un país que repite el de la tienda va con él.
+ */
+function numerosConSusPaises(t: { numero?: string; por_pais?: Record<string, { numero?: string } | undefined> }): { numero: string; paises: string[]; principal: boolean }[] {
+  const principal = String(t.numero ?? "").trim();
+  const lista: { numero: string; paises: string[]; principal: boolean }[] = principal ? [{ numero: principal, paises: [], principal: true }] : [];
+  for (const [pais, g] of Object.entries(t.por_pais ?? {})) {
+    const n = String(g?.numero ?? "").trim();
+    if (!n) continue;
+    const ya = lista.find((x) => x.numero === n);
+    if (ya) ya.paises.push(pais);
+    else lista.push({ numero: n, paises: [pais], principal: false });
+  }
+  return lista;
+}
+
+/** La bandeja de una conversación de una tienda: la de su número si la tienda tiene varios; si no, la de la tienda. */
+function bandejaDeLaTienda(t: { id: string; numero?: string; por_pais?: Record<string, { numero?: string } | undefined> }, suNumero: string | null | undefined): string {
+  const nums = numerosConSusPaises(t);
+  if (nums.length < 2) return `t:${t.id}`;
+  const n = String(suNumero ?? "").trim();
+  // Entró por otro sitio (su página, una frase de entrada en otro número): a la bandeja del número de la tienda.
+  return `t:${t.id}#${nums.some((x) => x.numero === n) ? n : nums[0].numero}`;
+}
 
 function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
   const numeros = listMetaWhatsAppConnections();
@@ -58,16 +90,31 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
     // (14/11/2026) Y los números de sus países (`Tienda.por_pais`): sus chats van en la bandeja de la tienda.
     for (const g of Object.values(t.por_pais ?? {})) if (String(g?.numero ?? "").trim()) deTiendas.add(String(g.numero).trim());
     const n = numeros.find((x) => x.phone_number_id === numero);
-    // (15/11/2026) TODOS SUS NÚMEROS, no solo el principal. Él: «en esa tienda he usado 2 números… en el chat solo sale
-    // un número». El de la tienda primero y luego los de sus países, sin repetir.
-    const susNumeros = [...new Set([numero, ...Object.values(t.por_pais ?? {}).map((g) => String(g?.numero ?? "").trim())].filter(Boolean))].map(
-      (id) => numeros.find((x) => x.phone_number_id === id)?.display_phone_number ?? id
-    );
+    // (15/11/2026) UNA BANDEJA POR NÚMERO cuando la tienda tiene varios (los de sus países): cada una solo con sus chats.
+    const susNumeros = numerosConSusPaises(t);
+    if (susNumeros.length >= 2) {
+      for (const sn of susNumeros) {
+        const c = numeros.find((x) => x.phone_number_id === sn.numero);
+        const paises = sn.paises.map((p) => `${bandera(p)} ${COUNTRIES[p as CountryCode]?.label ?? p}`).join(" · ");
+        bandejas.push({
+          clave: `t:${t.id}#${sn.numero}`,
+          nombre: t.nombre?.trim() || "Tienda sin nombre",
+          color: t.color?.trim() || null,
+          detalle: [sn.principal ? "Número de la tienda" : "", paises].filter(Boolean).join(" · ") || null,
+          numeroId: sn.numero,
+          verificado: c?.verified_name ?? null,
+          telefono: c?.display_phone_number ?? sn.numero,
+          paginaId: String(t.pagina ?? "").trim() || null,
+          deUnNumero: true,
+        });
+      }
+      continue;
+    }
     bandejas.push({
       clave: `t:${t.id}`,
       nombre: t.nombre?.trim() || "Tienda sin nombre",
       color: t.color?.trim() || null,
-      detalle: susNumeros.length ? susNumeros.join(" · ") : null,
+      detalle: n?.display_phone_number ?? null,
       numeroId: n?.phone_number_id ?? null,
       verificado: n?.verified_name ?? null,
       telefono: n?.display_phone_number ?? null,
@@ -130,7 +177,8 @@ export async function GET(req: NextRequest) {
       tienda_nombre: suya?.nombre?.trim() || null,
       tienda_color: suya?.color?.trim() || null,
       // SU BANDEJA EN LA BARRA DEL CHAT (21/10/2026): su tienda, o su número si no tiene tienda.
-      bandeja: suya ? `t:${suya.id}` : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
+      // (15/11/2026) Con varios números en la tienda, la bandeja de SU número (`bandejaDeLaTienda`).
+      bandeja: suya ? bandejaDeLaTienda(suya, fila.wa_phone_number_id) : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
     };
   });
   return NextResponse.json(

@@ -23,6 +23,8 @@ export interface Bandeja {
   verificado?: string | null;
   telefono?: string | null;
   paginaId?: string | null;
+  /** Bandeja de UNO de los números de una tienda con varios (15/11/2026): el teléfono va en grande. */
+  deUnNumero?: boolean;
 }
 
 export interface ChatDeBandeja {
@@ -66,6 +68,8 @@ interface Opcion {
   cuenta: number;
   /** El contador de «Te necesitan» es de chats, no de no leídos: se pinta distinto. */
   urgente?: boolean;
+  /** El teléfono de la bandeja de un número (tienda con varios números). */
+  telefono?: string | null;
 }
 
 function opciones(bandejas: Bandeja[], chats: ChatDeBandeja[]): Opcion[] {
@@ -79,6 +83,7 @@ function opciones(bandejas: Bandeja[], chats: ChatDeBandeja[]): Opcion[] {
       color: b.color,
       icono: b.clave.startsWith("n:") ? "📱" : undefined,
       cuenta: chats.filter((c) => c.bandeja === b.clave && sinLeer(c)).length,
+      telefono: b.deUnNumero ? b.telefono ?? null : null,
     })),
   ];
 }
@@ -149,7 +154,7 @@ export function BarraDeBandejas({
   const lista = plegada ? todas : filtrar(todas, busca, elegida);
   return (
     <nav
-      className={`hidden shrink-0 flex-col border-r border-neutral-200 bg-neutral-50 md:flex ${plegada ? "w-16" : "w-56"}`}
+      className={`hidden shrink-0 flex-col border-r border-neutral-200 bg-neutral-50 md:flex ${plegada ? "w-16" : "w-64"}`}
       aria-label="Tiendas"
     >
       <div className={`flex items-center px-3 pb-2 pt-3 ${plegada ? "justify-center" : "justify-between"}`}>
@@ -208,13 +213,10 @@ export function BarraDeBandejas({
                     <Punto o={o} />
                     <span className="min-w-0 flex-1">
                       <span className={`block truncate text-sm ${activa ? "font-bold text-neutral-900" : "font-semibold text-neutral-700"}`}>{o.nombre}</span>
-                      {/* (15/11/2026) Una tienda con varios números (los de sus países): uno por línea, que no se corten. */}
-                      {o.detalle &&
-                        o.detalle.split(" · ").map((linea) => (
-                          <span key={linea} className="block truncate text-[11px] text-neutral-500">
-                            {linea}
-                          </span>
-                        ))}
+                      {/* (15/11/2026) UNA BANDEJA POR NÚMERO: el teléfono grande y claro, debajo sus países. Él: «no me presentes
+                          los números así de chiquitos… bien ordenado». */}
+                      {o.telefono && <span className="mt-0.5 block truncate text-[15px] font-bold tracking-wide text-neutral-900">📱 {o.telefono}</span>}
+                      {o.detalle && <span className={`block text-xs font-medium text-neutral-600 ${o.telefono ? "leading-snug" : "truncate"}`}>{o.detalle}</span>}
                     </span>
                     <Contador n={o.cuenta} urgente={o.urgente} />
                   </>
@@ -355,6 +357,7 @@ export function FilaDeBandejas({
           >
             <Punto o={o} />
             <span className="max-w-[9rem] truncate">{o.nombre}</span>
+            {o.telefono && <span className="whitespace-nowrap font-bold text-neutral-900">{o.telefono}</span>}
             <Contador n={o.cuenta} urgente={o.urgente} />
           </button>
         );
