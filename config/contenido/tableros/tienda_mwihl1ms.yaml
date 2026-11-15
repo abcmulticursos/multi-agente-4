@@ -10,7 +10,7 @@ whatsapp:
     - id: f-mwihnbhe-b1z5
       tipo: mensaje
       x: 418
-      y: 77
+      y: 253
       steps:
         - type: text
           body_variants:
@@ -61,4 +61,12 @@ whatsapp:
 
               👇 ¿Te gustaría recibir la muestra? Responde SÍ. 💬
           delay_after_sec: 6
-  cables: []
+    - id: f-mwihqdpl-vov7
+      tipo: entregar
+      x: 1496
+      y: 242
+  cables:
+    - id: c-mwihsumf-y2i
+      de: inicio
+      salida: siguiente
+      a: f-mwihnbhe-b1z5
