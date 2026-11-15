@@ -6061,7 +6061,7 @@ biblioteca_de_productos:
         discount_price_soles: 3.5
         market_price: 30
       AR:
-        price_soles: 6400
+        price_soles: 6500
         discount_price_soles: 5000
         market_price: 25000
       CO:
