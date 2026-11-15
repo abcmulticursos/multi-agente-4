@@ -67,6 +67,7 @@ import {
   type WorkflowConfig,
   getPaymentMethods,
   getPaymentMethodsOfCountry,
+  paisDelNumero,
   soloEstaDeAcuerdo,
 } from "@/lib/workflow/config";
 import {
@@ -1198,10 +1199,17 @@ async function irA(
         await seguir(`rep:${porSuAnuncio.id}`);
         return;
       }
-      const sinAnuncios = conectadas.filter((r) => !(r.anuncios ?? []).length);
-      const o = sortear(sinAnuncios.length ? sinAnuncios : conectadas);
+      // LOS DEMÁS, ENTRE TODAS LAS RUTAS ENCENDIDAS (15/11/2026), tengan anuncios o no. Él: «qué tiene que ver que tengan
+      // anuncios, eso no debe impedir que entren los orgánicos por ahí». Antes, solo entre las SIN anuncios: en FIGURARTE
+      // esa era PADRE - MADRE, en 0 %, y un orgánico se quedaba sin respuesta aunque había dos rutas encendidas.
+      const o = sortear(conectadas);
       if (o) await seguir(`rep:${o.id}`);
-      else console.warn(`[tablero] convo ${convoId}: el Reparto «${f.titulo || f.id}» no tiene ninguna ruta conectada`);
+      else
+        console.warn(
+          `[tablero] convo ${convoId}: el Reparto «${f.titulo || f.id}» no tiene adónde mandarlo: ${
+            conectadas.length ? "todas sus rutas conectadas están en 0 %" : "ninguna ruta tiene cable"
+          }`
+        );
       return;
     }
 
@@ -3698,13 +3706,8 @@ function fichaDelBoton(t: Tablero, estado: { ficha_id?: string | null; seg_ficha
  * SOLO la ruta: precios, métodos de pago y quién cobra siguen saliendo del país de su lada (`pais` en todo lo demás).
  */
 function paisDeLaRuta(convo: ConversationRow, tienda: Tienda | null | undefined, paisDelCliente: string): string {
-  const numero = String(convo.wa_phone_number_id ?? "").trim();
-  if (!numero || !tienda?.por_pais) return paisDelCliente;
-  const paises = Object.entries(tienda.por_pais)
-    .filter(([, g]) => String(g?.numero ?? "").trim() === numero)
-    .map(([p]) => p);
-  if (!paises.length) return paisDelCliente;
-  return paises.includes(paisDelCliente) ? paisDelCliente : paises[0];
+  // La misma regla que la medición en Meta (`paisDelNumero`, config.ts): una sola.
+  return paisDelNumero(tienda, convo.wa_phone_number_id, paisDelCliente);
 }
 
 /** ¿El cliente es de otro país que el de su ruta? (escribió al número de otro país: `paisDeLaRuta`) */
@@ -5275,6 +5278,23 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero):
   contarSeguimientosDesde(convo.id, ahora());
   const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[e.seg_idx], e.seg_idx, ahora());
   programar(convo, ACCION_SEGUIMIENTO, { ficha: ficha.id, idx: e.seg_idx, token }, cuando, sinSilencio);
+}
+
+/**
+ * UNA CONVERSACIÓN RETOMADA (15/11/2026): al guardarla aparte se canceló lo programado (`archivarConversacion`). Al
+ * volver, sus seguimientos colgados siguen desde el que le falta (los ya enviados no se repiten). Solo si es del tablero
+ * y tiene unos colgados; lo demás (cobro abierto, ficha donde estaba) ya quedó guardado en su estado.
+ */
+export function retomarLoProgramado(convo: ConversationRow): void {
+  try {
+    const e = estadoEnElTablero(convo.id);
+    if (!e?.seg_ficha) return;
+    const t = tableroDe(loadWorkflowConfig(), e.tienda_id, (e.canal as CanalDelTablero) || "whatsapp");
+    const seg = t?.fichas.find((f) => f.id === e.seg_ficha);
+    if (t && seg?.tipo === "seguimientos" && !seg.apagada) colgarSeguimientos(convo, seg, t);
+  } catch (err) {
+    console.error(`[tablero] convo ${convo.id}: no se pudieron rearmar sus seguimientos al retomarla`, err);
+  }
 }
 
 /** ¿Esta conversación es del tablero? Para que el motor de siempre no le programe nada. */

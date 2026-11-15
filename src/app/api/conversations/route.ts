@@ -83,9 +83,12 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
   const bandejas: BandejaDelChat[] = [];
   for (const t of loadWorkflowConfig()?.tiendas ?? []) {
     if (!t || t.enabled === false) continue;
-    const numero = String(t.numero ?? "").trim();
+    // (15/11/2026) Su número: el de la tienda o, si lo dejó vacío, el primero de sus países. Él vació la «Configuración
+    // general» de GRAFISMO (sus números solo en las tarjetas de Colombia y Argentina) y la tienda desapareció del chat.
+    const numero = String(t.numero ?? "").trim() || numerosConSusPaises(t)[0]?.numero || "";
+    const tienePagina = !!String(t.pagina ?? "").trim() || Object.values(t.por_pais ?? {}).some((g) => String(g?.pagina ?? "").trim());
     // Una tienda sin número ni página (solo por frase de entrada) sale si ya tiene chats.
-    if (!numero && !String(t.pagina ?? "").trim() && !enUso.has(`t:${t.id}`)) continue;
+    if (!numero && !tienePagina && ![...enUso].some((b) => b === `t:${t.id}` || b.startsWith(`t:${t.id}#`))) continue;
     if (numero) deTiendas.add(numero);
     // (14/11/2026) Y los números de sus países (`Tienda.por_pais`): sus chats van en la bandeja de la tienda.
     for (const g of Object.values(t.por_pais ?? {})) if (String(g?.numero ?? "").trim()) deTiendas.add(String(g.numero).trim());

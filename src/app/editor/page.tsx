@@ -35725,7 +35725,7 @@ function MisTiendas({
   }, []);
   useEffect(() => leerNumeros(), [leerNumeros]);
   const numeroDe = (t: TiendaEditor) => {
-    const id = String(t.numero ?? "").trim();
+    const id = numeroVisibleDeLaTienda(t);
     return id && numeros ? numeros.find((n) => n.id === id) ?? null : null;
   };
   /** Pausa o reanuda un número al instante (lo mismo que el botón de Meta Connect). */
@@ -35807,7 +35807,7 @@ function MisTiendas({
         <div className="space-y-2">
           {visibles.map((t, i) => {
             const apagada = t.enabled === false;
-            const sinNumero = !String(t.numero ?? "").trim();
+            const sinNumero = !numeroVisibleDeLaTienda(t);
             const cobrador = (cfg.cobradores ?? []).find((c) => c.id === t.cobrador);
             const frases = (t.frases_de_entrada ?? []).filter((f) => f.trim());
             // SIN PALABRA, LA SEGUNDA DE UN NÚMERO NO RECIBE A NADIE (22/10/2026). Si comparte número
@@ -35850,8 +35850,8 @@ function MisTiendas({
                   )}
                 </div>
                 {/* El teléfono, no el código interno de Meta (si este proyecto lo conoce). */}
-                <span className="text-[11px] text-tinta-suave" title={sinNumero ? undefined : `ID en Meta: ${t.numero}`}>
-                  📱 {sinNumero ? "sin número" : numeroDe(t)?.telefono ?? t.numero}
+                <span className="text-[11px] text-tinta-suave" title={sinNumero ? undefined : `ID en Meta: ${numeroVisibleDeLaTienda(t)}`}>
+                  📱 {sinNumero ? "sin número" : numeroDe(t)?.telefono ?? numeroVisibleDeLaTienda(t)}
                 </span>
                 {(() => {
                   // EL ESTADO DE VERDAD: apagada, sin número, su número pausado, su número no
@@ -59927,6 +59927,21 @@ type ConexionesDelProyecto = {
  * que estén en `ajenos`; nada se pone en su lugar. Un id escrito a mano que no se conoce no se toca.
  * Devuelve la lista nueva y cuántos se quitaron, por tienda.
  */
+/**
+ * EL NÚMERO QUE SE ENSEÑA DE UNA TIENDA (15/11/2026): el de «Configuración general» o, si lo dejó vacío, el primero de
+ * sus países (`por_pais`). Él vació la general de GRAFISMO (sus números solo en Colombia y Argentina) y la tienda salía
+ * «Sin número — no atiende a nadie» aunque el bot sí la atendía por esos números. Solo pantalla: el bot ya los usa.
+ */
+function numeroVisibleDeLaTienda(t: Pick<TiendaEditor, "numero" | "por_pais">): string {
+  return (
+    String(t.numero ?? "").trim() ||
+    Object.values(t.por_pais ?? {})
+      .map((g) => String(g?.numero ?? "").trim())
+      .find(Boolean) ||
+    ""
+  );
+}
+
 function AvisoDeLoAjeno({ quitados }: { quitados: { tienda: string; cuantos: number }[] }) {
   if (!quitados.length) return null;
   return (
@@ -60446,7 +60461,8 @@ function revisarTienda(
 ): AvisoDeTienda[] {
   const avisos: AvisoDeTienda[] = [];
   const id = String(tienda.id ?? "").trim();
-  const numero = String(tienda.numero ?? "").trim();
+  // (15/11/2026) El de la tienda o, si la general está vacía, el de sus países: no es «sin número» (`numeroVisibleDeLaTienda`).
+  const numero = numeroVisibleDeLaTienda(tienda);
 
   // ── LA TIENDA QUE MEZCLA CUENTAS DE META ──
   //
@@ -60817,7 +60833,7 @@ function TiendasDelProyecto({
     return tiendas.some((t, j) => j !== i && String(t.numero ?? "").trim() === mio);
   };
   const vendiendo = tiendas.filter(
-    (t) => t.enabled !== false && String(t.numero ?? "").trim()
+    (t) => t.enabled !== false && numeroVisibleDeLaTienda(t)
   ).length;
   /** Los avisos de una tienda quitando los que él ya miró y decidió ignorar. */
   const avisosVivos = (tienda: TiendaEditor, i: number): AvisoDeTienda[] => {
@@ -60945,7 +60961,7 @@ function TiendasDelProyecto({
       {tiendas.map((tienda, i) => {
         // La que está abierta en su ventana no se esconde aunque no coincida.
         if (!coincideConLaBusqueda(tienda, i) && tienda.id !== tiendaAbierta) return null;
-        const sinNumero = !String(tienda.numero ?? "").trim();
+        const sinNumero = !numeroVisibleDeLaTienda(tienda);
         /**
          * EL NÚMERO FIJA LA CUENTA, y la página y el píxel solo se ofrecen de ésa.
          *

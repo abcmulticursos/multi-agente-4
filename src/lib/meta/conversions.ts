@@ -11,7 +11,7 @@ import {
 // `getWhatsAppRuntimeConfig` ya no se importa: lo único que se le pedía aquí era la WABA,
 // y ese dato dejó de mandarse el 3 de octubre de 2026. Ver el porqué más abajo.
 import { getCapiAccessToken, getCapiPixelId } from "@/lib/meta/runtime-config";
-import { getEffectiveCountryCode, grupoDelPais, laTiendaDeLaConversacion } from "@/lib/workflow/config";
+import { getEffectiveCountryCode, grupoDelPais, laTiendaDeLaConversacion, paisDelNumero } from "@/lib/workflow/config";
 import { LIMITE_CONSULTA_MS } from "@/lib/limites";
 import { esBSUID } from "@/lib/meta/bsuid";
 
@@ -155,9 +155,15 @@ function laMedicionDeLaTienda(conversationId: number | null | undefined): {
   try {
     const convo = conversationId ? getConversationById(conversationId) : undefined;
     suya = convo ? laTiendaDeLaConversacion(convo) : null;
-    // EL GRUPO DE SU PAÍS (14/11/2026): la página y el pixel del país del cliente, si la tienda los tiene propios
-    // (`Tienda.por_pais`). Sin grupo, los de toda la tienda, como siempre.
-    grupo = suya && convo ? grupoDelPais(suya, getEffectiveCountryCode(convo.phone)) : undefined;
+    // EL GRUPO DEL NÚMERO AL QUE ESCRIBIÓ (15/11/2026): la página y el pixel de la tarjeta de ese número, la de su
+    // campaña, sea cual sea la lada del cliente (`paisDelNumero`, la misma regla que la ruta del tablero). Él: «la compra
+    // va al pixel que pusiste junto al número al que escribió». Antes era el país de la lada: un peruano en el número de
+    // Argentina de GRAFISMO buscaba el pixel de Perú, no había, y la compra NO SE MANDABA (sus convos 507 y 508).
+    // Sin grupo, los de toda la tienda, como siempre.
+    grupo =
+      suya && convo
+        ? grupoDelPais(suya, paisDelNumero(suya, convo.wa_phone_number_id, getEffectiveCountryCode(convo.phone)))
+        : undefined;
   } catch {
     suya = null;
     grupo = undefined;

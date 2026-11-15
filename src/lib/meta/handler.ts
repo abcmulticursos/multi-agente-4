@@ -27,6 +27,8 @@ import {
   mensajesDelMesDelNumero,
   anotarEntradaPorAnuncio,
   archivarConversacion,
+  conversacionesGuardadasDelTelefono,
+  restaurarConversacion,
   getConversationByPhone,
   anotarAlias,
   telefonoDelAlias,
@@ -95,7 +97,7 @@ import {
   getSamplesOfferBubble,
   topeDeOrganicos,
 } from "@/lib/workflow/config";
-import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { alRecibirMensaje, contestarEnElRegalo, esDelTablero, retomarLoProgramado } from "@/lib/tablero/motor";
 import { leerComprobante, ultimosMensajes } from "@/lib/tablero/lector";
 import { avisarQueLaIANoRespondio } from "@/lib/notifications";
 import { estadoEnElTablero } from "@/lib/tablero/estado";
@@ -1524,6 +1526,8 @@ async function handleIncomingMessage(
   // SIEMPRE corre (todos los mensajes se guardan); la RESPUESTA se decide
   // después, en la FASE 2, tras el debounce.
   let convoId = 0;
+  // (15/11/2026) La conversación que se retomó al volver a una tienda (ver abajo), para rearmar sus seguimientos.
+  let conversacionRetomada: number | null = null;
   await withPhoneLock(phone, async () => {
   // LA MISMA PERSONA EN EL NÚMERO DE OTRA TIENDA (09/11/2026, antes de sus campañas por país). Hay una
   // conversación por teléfono: quien compró GRAFISMO y días después escribe por el anuncio de LENGUA caía
@@ -1544,9 +1548,25 @@ async function handleIncomingMessage(
       const tiendaNueva = (tiendaPorFraseDeEntrada(content, numeroNuevo) ?? tiendaDelNumero(numeroNuevo))?.id ?? null;
       if (tiendaVieja !== tiendaNueva) {
         archivarConversacion(anterior.id);
-        console.log(
-          `[wh] ${phone} escribe por el número de otra tienda (${tiendaVieja ?? "sin tienda"} → ${tiendaNueva ?? "sin tienda"}): la convo ${anterior.id} se guarda aparte y empieza una nueva`
-        );
+        // (15/11/2026) VUELVE A UNA TIENDA DONDE YA HABLABA: se RETOMA esa conversación, donde se quedó, en vez de
+        // empezar otra desde la intro. Él: GRAFISMO → FIGURARTE → GRAFISMO desde el mismo celular, y la tercera vez le
+        // llegó la intro de nuevo. Es como si nunca se hubiera ido: su ficha, lo que eligió, lo que pagó.
+        const guardada = tiendaNueva
+          ? conversacionesGuardadasDelTelefono(phone).find(
+              (c) => c.channel === "whatsapp" && laTiendaDeLaConversacion(c)?.id === tiendaNueva
+            )
+          : undefined;
+        if (guardada) {
+          restaurarConversacion(guardada.id, phone);
+          conversacionRetomada = guardada.id;
+          console.log(
+            `[wh] ${phone} vuelve a la tienda ${tiendaNueva}: la convo ${anterior.id} se guarda aparte y se retoma la ${guardada.id}, donde se quedó`
+          );
+        } else {
+          console.log(
+            `[wh] ${phone} escribe por el número de otra tienda (${tiendaVieja ?? "sin tienda"} → ${tiendaNueva ?? "sin tienda"}): la convo ${anterior.id} se guarda aparte y empieza una nueva`
+          );
+        }
       }
     }
   }
@@ -1556,6 +1576,8 @@ async function handleIncomingMessage(
   // mismo tambien en los seguimientos programados, que salen del worker horas
   // despues y ya no tienen el webhook delante.
   setConversationWaPhoneNumberId(convo.id, getOutboundWhatsAppNumber());
+  // (15/11/2026) RETOMADA: lo programado se canceló al guardarla aparte; sus seguimientos vuelven desde el que le falta.
+  if (conversacionRetomada === convo.id) retomarLoProgramado(getConversationById(convo.id) ?? convo);
   // LA FRASE DE ENTRADA ELIGE LA TIENDA — para que un número atienda varias (12/10/2026).
   //
   // Va AQUÍ, antes que todo lo que depende de la tienda —el precio congelado, la

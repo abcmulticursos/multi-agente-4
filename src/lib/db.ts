@@ -3011,6 +3011,25 @@ export function archivarConversacion(conversationId: number): void {
   stmtArchivarConversacion.run(String(conversationId), conversationId);
 }
 
+/**
+ * LAS CONVERSACIONES GUARDADAS APARTE DE ESTE TELÉFONO (15/11/2026), la más reciente primero. Para RETOMAR la de una
+ * tienda cuando la persona vuelve a escribirle: él probó GRAFISMO → FIGURARTE → GRAFISMO desde el mismo celular y la
+ * tercera vez le llegó la intro otra vez, porque la de GRAFISMO se había guardado aparte y nadie la buscaba.
+ */
+const stmtArchivadasDelTelefono = db.prepare<[string, string], ConversationRow>(
+  "SELECT * FROM conversations WHERE substr(phone, 1, length(?) + 1) = (? || '~') ORDER BY id DESC"
+);
+export function conversacionesGuardadasDelTelefono(phone: string): ConversationRow[] {
+  return stmtArchivadasDelTelefono.all(phone, phone);
+}
+const stmtRestaurarConversacion = db.prepare<[string, number]>(
+  "UPDATE conversations SET phone = ? WHERE id = ? AND instr(phone, '~') > 0"
+);
+/** Vuelve a ser LA conversación de su teléfono. La que lo era debe estar ya guardada aparte (`archivarConversacion`). */
+export function restaurarConversacion(conversationId: number, phone: string): void {
+  stmtRestaurarConversacion.run(phone, conversationId);
+}
+
 export function cancelPendingActionsByTypeForConvo(
   conversationId: number,
   actionType: string

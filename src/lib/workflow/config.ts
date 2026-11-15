@@ -3614,6 +3614,26 @@ function tiendaAnotada(
   return tienda;
 }
 
+/**
+ * EL PAÍS DE LA TARJETA DEL NÚMERO AL QUE ESCRIBIÓ (15/11/2026). UNA SOLA REGLA para la ruta del tablero y para la
+ * medición en Meta. Él: «el número decide la ruta» y «la compra va al pixel que pusiste junto al número al que escribió».
+ * El número puesto en la tarjeta de un país (`Tienda.por_pais`) da ese país. El mismo número en varios países: el de la
+ * lada del cliente si es uno de ellos; si no, el primero. Un número que no está en ningún país: el de la lada, como antes.
+ */
+export function paisDelNumero(
+  tienda: Pick<Tienda, "por_pais"> | null | undefined,
+  numero: string | null | undefined,
+  paisDelCliente: string
+): string {
+  const n = String(numero ?? "").trim();
+  if (!n || !tienda?.por_pais) return paisDelCliente;
+  const paises = Object.entries(tienda.por_pais)
+    .filter(([, g]) => String(g?.numero ?? "").trim() === n)
+    .map(([p]) => p);
+  if (!paises.length) return paisDelCliente;
+  return paises.includes(paisDelCliente) ? paisDelCliente : paises[0];
+}
+
 /** EL GRUPO DE UN PAÍS de una tienda (14/11/2026): su número, página y pixel propios, si los tiene. Ver `Tienda.por_pais`. */
 export function grupoDelPais(
   tienda: Pick<Tienda, "por_pais"> | null | undefined,

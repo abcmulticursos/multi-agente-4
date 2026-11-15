@@ -595,12 +595,13 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
   }
 
   async function guardarApp() {
-    // CAMBIAR DE PUERTA: los números suscritos a la app anterior dejarían de llegar aquí.
+    // (15/11/2026) MULTI APP: la app de ahora NO se pierde; pasa a «otras apps» con su clave y sus números siguen
+    // recibiendo (`settings` → `guardarOtraApp`). El aviso de antes («dejarán de llegar…») ya no era verdad y asustaba.
     if (
       app?.appId &&
       app.appId !== appId.trim() &&
       !window.confirm(
-        `Ya tienes conectada la app «${app.nombre ?? app.appId}». Si pones otra, los números suscritos a la anterior dejarán de llegar a tu CRM hasta que los suscribas a la nueva. ¿Seguir?`
+        `Vas a agregar otra app. «${app.nombre ?? app.appId}» sigue funcionando: sus números siguen recibiendo mensajes. La nueva queda como principal. ¿Seguir?`
       )
     )
       return;
@@ -664,8 +665,9 @@ function PasoApp({ casillas, marcar, alListo, volver }: { casillas: Record<strin
               <button type="button" className="block w-full rounded-xl border-2 border-sky-500 bg-sky-50 p-3 text-left font-bold" onClick={() => ir("preparar")}>
                 Seguir con esta app →
               </button>
-              <button type="button" className="text-xs font-semibold text-neutral-500 hover:underline" onClick={() => ir("claves")}>
-                Cambiar a otra app
+              {/* (15/11/2026) No «cambiar»: agregar. La de ahora sigue funcionando (multi app). */}
+              <button type="button" className="block w-full rounded-xl border-2 border-emerald-500 bg-emerald-50 p-3 text-left font-bold" onClick={() => ir("claves")}>
+                ➕ Agregar otra app <span className="font-normal text-neutral-600">(la de ahora sigue funcionando)</span>
               </button>
             </>
           ) : (
