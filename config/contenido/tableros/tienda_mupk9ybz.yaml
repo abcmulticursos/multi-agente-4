@@ -7436,9 +7436,8 @@ whatsapp:
       y: 19778
       reparto:
         - id: r1
-          peso: 1
-          anuncios:
-            - meta_52583313910383
+          peso: 0
+          peso_antes: 1
         - id: r2
           peso: 1
           anuncios:
@@ -7455,6 +7454,7 @@ whatsapp:
           peso: 1
           anuncios:
             - meta_52583313909583
+            - meta_52583313910383
     - id: f-mwdnvrol-efc90
       tipo: mensaje
       x: -550
