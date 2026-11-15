@@ -894,7 +894,10 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   if (!ctx) return null;
   const a = ASPECTO[f.tipo];
   if (deLejos && !ctx.estaciones && f.tipo !== "reparto") {
-    const salidasConCable = [...new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida))];
+    // Solo las salidas que la ficha completa muestra (14/11/2026: un cable de un cuadrito de una burbuja APAGADA sigue
+    // guardado, y de lejos se dibujaba hacia su Cobro — una conexión que el bot no usa). Nada de cables mentirosos.
+    const suyas = new Set(salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero).map((s) => s.clave));
+    const salidasConCable = [...new Set(ctx.tablero.cables.filter((c) => c.de === f.id && suyas.has(c.salida)).map((c) => c.salida))];
     const conFalta = !!ctx.faltas?.get(f.id)?.size;
     return (
       <div
