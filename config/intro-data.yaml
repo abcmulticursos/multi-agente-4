@@ -9258,6 +9258,11 @@ tiendas:
     alineacion:
       basico: ptfig_figurarte
       unico: ptfig_figurarte
+    por_pais:
+      PE:
+        numero: "1398675606660512"
+        pagina: "1366771866527889"
+        pixel: "1099242126440992"
     pixel: "1099242126440992"
     color: "#f97316"
     regalo:
