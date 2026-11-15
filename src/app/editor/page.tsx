@@ -36591,7 +36591,7 @@ function CabezaDelCampo({ icono, fondo, titulo, ayuda }: { icono: string; fondo:
       </span>
       <span className="min-w-0">
         <span className="font-titulo block text-sm font-extrabold tracking-tight">{titulo}</span>
-        <span className="block text-[11px] leading-snug opacity-75">{ayuda}</span>
+        <span className="block text-[11px] leading-snug opacity-90">{ayuda}</span>
       </span>
     </div>
   );
@@ -36640,9 +36640,9 @@ function VentanaDelPais({
       onCerrar={onCerrar}
       // (14/11/2026) Él: «demasiado angosto… los nombres de las páginas a duras penas se leen» y «120 estaría bien».
       ancho="max-w-5xl"
-      zoom={1.2}
+      zoom={1.05}
     >
-      <div className="grid gap-4 p-1 md:grid-cols-2">
+      <div className="mas-contraste grid gap-4 p-1 md:grid-cols-2">
         <div className="bn-cajon">
           <CabezaDelCampo icono="📱" fondo="bg-emerald-100" titulo={`Número de WhatsApp · ${pais}`} ayuda="Quien escriba a este número entra a esta tienda." />
           <ElegirConexion
@@ -36760,7 +36760,8 @@ function TarjetaDeLaPortada({
       tabIndex={0}
       onClick={onAbrir}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onAbrir())}
-      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-borde bg-tarjeta px-5 py-4 text-left shadow-sm transition-colors hover:bg-relleno"
+      // (14/11/2026) Más contraste: él, «le falta un poco de contraste». Borde azulado más marcado, letra más oscura.
+      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border-[1.5px] border-[color-mix(in_srgb,var(--bn-activo)_35%,var(--bn-sel-borde))] bg-tarjeta px-5 py-4 text-left shadow-md transition-colors hover:bg-relleno"
     >
       <span aria-hidden className="shrink-0 text-xs text-tinta-suave">
         ▶
@@ -36770,10 +36771,10 @@ function TarjetaDeLaPortada({
       </span>
       <span className="min-w-0 flex-1">
         <span className="font-titulo block text-base font-extrabold uppercase tracking-tight text-tinta">{titulo}</span>
-        <span className="mt-0.5 block truncate text-xs leading-snug text-tinta-suave">{subtitulo}</span>
+        <span className="mt-0.5 block truncate text-xs leading-snug text-tinta opacity-80">{subtitulo}</span>
       </span>
       {estado}
-      <span className="shrink-0 rounded-full bg-relleno px-3 py-1.5 text-xs font-bold text-tinta-suave">Abrir</span>
+      <span className="shrink-0 rounded-full bg-[var(--bn-chip)] px-3 py-1.5 text-xs font-bold text-[var(--bn-chip-texto)]">Abrir</span>
     </div>
   );
 }
@@ -61035,7 +61036,7 @@ function TiendasDelProyecto({
                 exactamente ésas: no se inventa una ventana nueva. */}
             <VentanaDeProducto
               titulo="🏪 Configuración de la tienda"
-              zoom={1.1}
+              zoom={1.05}
               color={pintada ? suColor : undefined}
               onCerrar={() => {
                 setTiendaAbierta(null);

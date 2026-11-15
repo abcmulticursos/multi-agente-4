@@ -1015,6 +1015,13 @@ input,
   font-size: 13px !important;
 }
 
+/* (14/11/2026) EL POP UP DE UN PAÍS, CON MÁS CONTRASTE. Él: «le falta un poco de contraste». Solo sus tarjetas: borde
+   azulado más marcado y sombra algo más honda; los colores no cambian. */
+.burbujas-nuevo .mas-contraste .bn-cajon {
+  border: 1.5px solid color-mix(in srgb, var(--bn-activo) 35%, var(--bn-cajon-borde)) !important;
+  box-shadow: 0 4px 14px rgba(16, 34, 72, 0.12) !important;
+}
+
 /* EL CAJÓN */
 .burbujas-nuevo .bn-cajon {
   background: var(--bn-cajon);
