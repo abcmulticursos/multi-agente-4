@@ -2360,12 +2360,21 @@ whatsapp:
       reparto:
         - id: r1
           peso: 1
+          anuncios:
+            - meta_52583315359383
         - id: r2
           peso: 1
+          anuncios:
+            - meta_52583315358783
         - id: rmwd4ovya
           peso: 1
+          anuncios:
+            - meta_52583315359983
         - id: rmwd56uqa
           peso: 1
+          anuncios:
+            - meta_52583315358183
+            - meta_52583315358583
     - id: f-mwczmr06-i8lx4
       tipo: mensaje
       x: -572
@@ -6298,9 +6307,8 @@ whatsapp:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
-        - type: image
-          drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
-          caption_variants:
+        - type: text
+          body_variants:
             - |-
               🎁 *Además recibirás GRATIS estos regalitos* ‼️👇🏼
 
@@ -7429,14 +7437,24 @@ whatsapp:
       reparto:
         - id: r1
           peso: 1
+          anuncios:
+            - meta_52583313910383
         - id: r2
           peso: 1
+          anuncios:
+            - meta_52583313909783
         - id: rmwd4ovya
           peso: 1
+          anuncios:
+            - meta_52583313910183
         - id: rmwd56uqa
           peso: 1
+          anuncios:
+            - meta_52583313911183
         - id: rmwetuaux
           peso: 1
+          anuncios:
+            - meta_52583313909583
     - id: f-mwdnvrol-efc90
       tipo: mensaje
       x: -550
