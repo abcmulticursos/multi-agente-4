@@ -7,7 +7,7 @@ import {
 } from "@/lib/db";
 import type { MetaPixelOption } from "@/lib/meta/connect";
 import { getCapiPixelId } from "@/lib/meta/runtime-config";
-import { esDeLaApp, negocioDeLaApp } from "@/lib/meta/negocio-de-la-app";
+import { esDeLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
 
 /**
  * LO QUE YA ESTÁ CONECTADO, PARA ELEGIRLO EN UNA LISTA EN VEZ DE COPIAR IDS.
@@ -152,10 +152,10 @@ export function loConectado() {
   // EL PÍXEL DE META CONNECT, el que usa una tienda con el suyo vacío. Hace falta para
   // avisar de la mezcla: una tienda sin píxel propio mide con éste.
   const pixelGeneral = getCapiPixelId();
-  // (15/11/2026) SOLO LO DEL NEGOCIO DE LA APP. Ver `negocioDeLaApp`: lo de otros negocios no recibe
+  // (15/11/2026) SOLO LO DEL NEGOCIO DE LA APP. Ver `negociosDeLasApps`: lo de otros negocios no recibe
   // mensajes, así que no se ofrece. `ajenos` son los ids conocidos de otros negocios: las tiendas que
   // los tengan puestos los sueltan (un id escrito a mano que no se conoce NO está aquí y no se toca).
-  const negocio = negocioDeLaApp();
+  const negocio = negociosDeLasApps();
   const suyo = <T extends { cuenta: string | null }>(x: T) => esDeLaApp(negocio, x.cuenta);
   const ajenos = [...numeros, ...paginas, ...pixels].filter((x) => !suyo(x)).map((x) => x.id);
   return {
@@ -163,7 +163,7 @@ export function loConectado() {
     paginas: paginas.filter(suyo),
     pixels: pixels.filter(suyo),
     pixelGeneral,
-    negocioDeLaApp: negocio,
+    negociosDeLasApps: negocio,
     ajenos,
   };
 }

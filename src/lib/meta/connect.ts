@@ -8,6 +8,7 @@ import {
   getMetaOAuthAppSecret,
 } from "@/lib/meta/runtime-config";
 import { LIMITE_CONSULTA_MS } from "@/lib/limites";
+import { idsDeNuestrasApps } from "@/lib/meta/apps-de-meta";
 
 export const META_CONNECT_COOKIE = "meta_oauth_state";
 export const META_CONNECT_INSTAGRAM_COOKIE = "meta_oauth_instagram";
@@ -971,13 +972,15 @@ export async function estaSuscritaAEstaApp(input: {
 }): Promise<boolean | null> {
   const nuestraApp = getMetaAppId();
   if (!nuestraApp) return null;
+  // MULTI APP (15/11/2026): cualquiera de nuestras apps cuenta (`idsDeNuestrasApps`).
+  const nuestras = idsDeNuestrasApps();
   try {
     const cuerpo = await graphGet<{
       data?: Array<{ whatsapp_business_api_data?: { id?: string }; id?: string }>;
     }>(`${input.wabaId}/subscribed_apps`, input.accessToken);
     if (!cuerpo) return null;
     return (cuerpo.data ?? []).some(
-      (app) => (app.whatsapp_business_api_data?.id ?? app.id) === nuestraApp
+      (app) => nuestras.includes(String(app.whatsapp_business_api_data?.id ?? app.id ?? ""))
     );
   } catch {
     return null;

@@ -1,21 +1,25 @@
 import { getMetaRuntimeSetting, listMetaConnections, listMetaWhatsAppConnections } from "@/lib/db";
 import { getMetaAppId } from "@/lib/meta/connect";
+import { otrasApps } from "@/lib/meta/apps-de-meta";
 
 /**
- * EL NEGOCIO DUEÑO DE LA APP, Y SOLO LO SUYO (15/11/2026).
+ * LOS NEGOCIOS DUEÑOS DE NUESTRAS APPS, Y SOLO LO SUYO (15/11/2026).
  *
- * Lo que pasó: GRAFISMO tenía dos números del negocio «Premium Academy Violeta» y la app del bot es de
+ * Lo que pasó: GRAFISMO tenía dos números del negocio «Premium Academy Violeta» y la app del bot era de
  * «Premium Academy Turquesa». Meta los dejaba «suscritos», el mensaje llegaba al celular con dos
  * palomitas… y al bot no le llegaba NADA: con el acceso estándar, Meta solo le pasa a una app los
  * mensajes de los números de SU negocio. Medido ese día con su token: los números de Turquesa entran
  * (FIGURARTE), los de Violeta no. Él: «solo debería mostrarme las páginas y los activos del mismo bm».
  *
- * Así que Meta Connect y los selectores de las tiendas enseñan solo lo del negocio de la app.
+ * Con MULTI APP (`apps-de-meta.ts`) son los negocios de TODAS nuestras apps: la principal y las otras.
+ * Meta Connect y los selectores de las tiendas enseñan solo lo de esos negocios.
  *
- * Sin saber cuál es el negocio de la app (no se ha leído todavía, o no hay app), `null`: no se esconde
- * nada. Esconder a ciegas dejaría vacías las listas de alguien a quien sí le funcionan.
+ * Si de alguna app no se sabe el negocio, `null`: no se esconde nada. Esconder a ciegas dejaría vacías
+ * las listas de alguien a quien sí le funcionan.
  */
-export function negocioDeLaApp(): { id: string; nombre: string } | null {
+export type NegociosDeLasApps = { ids: string[]; nombres: string[] };
+
+function negocioDeLaPrincipal(): { id: string; nombre: string } | null {
   const appId = getMetaAppId();
   if (!appId) return null;
   const nombre = getMetaRuntimeSetting(`app_negocio_${appId}`)?.trim();
@@ -29,8 +33,19 @@ export function negocioDeLaApp(): { id: string; nombre: string } | null {
   return ids.length === 1 ? { id: ids[0], nombre } : null;
 }
 
-/** ¿Es del negocio de la app? Sin negocio conocido, todo vale (ver arriba). */
-export function esDeLaApp(negocio: { id: string } | null, businessId: string | null | undefined): boolean {
-  if (!negocio) return true;
-  return String(businessId ?? "").trim() === negocio.id;
+export function negociosDeLasApps(): NegociosDeLasApps | null {
+  const principal = negocioDeLaPrincipal();
+  if (!principal) return null;
+  const otras = otrasApps();
+  if (otras.some((a) => !a.negocioId)) return null;
+  return {
+    ids: [principal.id, ...otras.map((a) => a.negocioId as string)],
+    nombres: [principal.nombre, ...otras.map((a) => a.negocio || (a.negocioId as string))],
+  };
+}
+
+/** ¿Es de uno de los negocios de nuestras apps? Sin saberlo, todo vale (ver arriba). */
+export function esDeLaApp(negocios: NegociosDeLasApps | null, businessId: string | null | undefined): boolean {
+  if (!negocios) return true;
+  return negocios.ids.includes(String(businessId ?? "").trim());
 }

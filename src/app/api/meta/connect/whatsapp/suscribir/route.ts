@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getMetaWhatsAppConnection, listMetaWhatsAppConnections } from "@/lib/db";
-import { estaSuscritaAEstaApp, getMetaAppId, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
+import { estaSuscritaAEstaApp, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
+import { idsDeNuestrasApps } from "@/lib/meta/apps-de-meta";
 import { MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta } from "@/lib/meta/freno";
 
@@ -59,10 +60,11 @@ async function otrasAppsDeLaCuenta(wabaId: string, accessToken: string): Promise
     const r = (await (await fetchMeta(url)).json()) as {
       data?: Array<{ whatsapp_business_api_data?: { id?: string; name?: string } }>;
     };
-    const nuestra = getMetaAppId();
+    // MULTI APP (15/11/2026): ninguna de NUESTRAS apps es «otra app».
+    const nuestras = idsDeNuestrasApps();
     return (r.data ?? [])
       .map((a) => a.whatsapp_business_api_data)
-      .filter((a) => !!a?.id && a.id !== nuestra)
+      .filter((a) => !!a?.id && !nuestras.includes(a.id))
       .map((a) => a?.name || a?.id || "otra app")
       // (Las apps internas de Meta, como «WA DevX Webhook Events 1P App», no son otro bot.)
       .filter((nombre) => !/WA DevX|1P App|Meta Internal/i.test(nombre));

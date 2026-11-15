@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifySignature } from "@/lib/meta/verify";
+import { clavesDeFirma } from "@/lib/meta/apps-de-meta";
 import {
   cancelPendingActionsByTypeForConvo,
   getActiveInstagramMetaConnection,
@@ -158,7 +159,8 @@ export async function POST(req: NextRequest) {
   const appSecret = getWebhookAppSecret("instagram");
   const sig = req.headers.get("x-hub-signature-256");
 
-  if (appSecret && sig && !verifySignature(raw, sig, appSecret)) {
+  // MULTI APP (15/11/2026): vale la firma de cualquiera de nuestras apps (`clavesDeFirma`).
+  if (appSecret && sig && !verifySignature(raw, sig, appSecret) && !clavesDeFirma("instagram").some((clave) => verifySignature(raw, sig, clave))) {
     console.warn("[instagram] firma invalida, rechazando webhook");
     return new NextResponse("invalid signature", { status: 401 });
   }

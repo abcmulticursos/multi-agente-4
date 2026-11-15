@@ -840,6 +840,106 @@ function MedicionPorCuenta() {
  * Por eso, tras suscribir, se relee el estado de todos — dos números de la misma cuenta
  * pasan a «✓ Suscrito» a la vez, y así lo ve.
  */
+/**
+ * LAS APPS DE ESTE BOT (15/11/2026). Él: «hazlo multi app y que funcione en el mismo chat que ya existe». Con el
+ * acceso estándar, una app de Meta solo recibe los mensajes de los números de SU negocio: una app por negocio, y
+ * todas entran a este mismo bot y a este mismo chat. La principal es la del asistente («🔑 Mi app»); aquí se
+ * agregan las otras con su ID y su clave secreta. Ver `src/lib/meta/apps-de-meta.ts`.
+ */
+function AppsDelBot() {
+  type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null };
+  const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null } | null; otras: Otra[] } | null>(null);
+  const [appId, setAppId] = useState("");
+  const [clave, setClave] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+  const [resultado, setResultado] = useState<string | null>(null);
+  const leer = () =>
+    fetch("/api/meta/connect/apps", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setDatos(d))
+      .catch(() => {});
+  useEffect(() => {
+    void leer();
+  }, []);
+  async function agregar() {
+    setOcupado(true);
+    setResultado(null);
+    try {
+      const r = await fetch("/api/meta/connect/apps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appId, appSecret: clave }),
+      });
+      const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string; app?: Otra; pasos?: Array<{ paso: string; ok: boolean; detalle: string }> } | null;
+      if (!d?.ok) {
+        setResultado(`❌ ${d?.error ?? "No se pudo agregar."}`);
+        return;
+      }
+      setAppId("");
+      setClave("");
+      setResultado(
+        [`✅ «${d.app?.nombre ?? appId}» agregada${d.app?.negocio ? ` (${d.app.negocio})` : ""}. Recarga la página para ver sus números.`]
+          .concat((d.pasos ?? []).map((p) => `${p.ok ? "✅" : "❌"} ${p.paso}: ${p.detalle}`))
+          .join("\n")
+      );
+      await leer();
+    } finally {
+      setOcupado(false);
+    }
+  }
+  async function quitar(o: Otra) {
+    if (!window.confirm(`¿Quitar «${o.nombre ?? o.appId}» de este bot?\n\nSus números dejan de recibir mensajes aquí. En Meta no se toca nada.`)) return;
+    await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(o.appId)}`, { method: "DELETE" });
+    await leer();
+  }
+  if (!datos) return null;
+  return (
+    <section className="rounded-xl border border-borde bg-tarjeta p-4 shadow-sm">
+      <h2 className="text-sm font-extrabold uppercase tracking-wide text-tinta">🔑 Apps de este bot</h2>
+      <p className="mt-0.5 text-xs text-tinta-suave">
+        Una app por negocio: cada app recibe los mensajes de los números de su negocio, y todos llegan a este mismo chat.
+      </p>
+      <ul className="mt-3 space-y-2">
+        {datos.principal && (
+          <li className="flex items-center gap-3 rounded-lg border border-borde bg-relleno px-3 py-2 text-sm">
+            <span className="min-w-0 flex-1">
+              <b>{datos.principal.negocio ?? "App principal"}</b> <span className="text-xs text-tinta-suave">· ID {datos.principal.appId}</span>
+            </span>
+            <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">Principal</span>
+          </li>
+        )}
+        {datos.otras.map((o) => (
+          <li key={o.appId} className="flex items-center gap-3 rounded-lg border border-borde bg-relleno px-3 py-2 text-sm">
+            <span className="min-w-0 flex-1">
+              <b>{o.nombre ?? "App"}</b>
+              <span className="text-xs text-tinta-suave">
+                {" "}
+                · {o.negocio ?? "negocio sin identificar"} · ID {o.appId}
+              </span>
+            </span>
+            <button type="button" onClick={() => void quitar(o)} className="shrink-0 rounded-md border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">
+              Quitar
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input value={appId} onChange={(e) => setAppId(e.target.value.replace(/\D/g, ""))} placeholder="ID de la otra app" className="w-48 rounded-md border border-borde bg-tarjeta px-2.5 py-1.5 text-sm" />
+        <input value={clave} onChange={(e) => setClave(e.target.value.trim())} placeholder="Clave secreta de esa app" type="password" className="w-64 rounded-md border border-borde bg-tarjeta px-2.5 py-1.5 text-sm" />
+        <button
+          type="button"
+          disabled={ocupado || !appId || !clave}
+          onClick={() => void agregar()}
+          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {ocupado ? "Agregando…" : "➕ Agregar otra app"}
+        </button>
+      </div>
+      {resultado && <pre className="mt-2 whitespace-pre-wrap rounded-md bg-relleno px-3 py-2 text-xs text-tinta">{resultado}</pre>}
+    </section>
+  );
+}
+
 function DiferenciacionPorNegocio() {
   const [datos, setDatos] = useState<CuentasDeMeta | null>(null);
   const [fallo, setFallo] = useState(false);
@@ -3605,6 +3705,8 @@ export default function MetaConnectPage() {
         aria-disabled={!(status.appId && status.conectadoConFacebook)}
       >
 
+      {/* MULTI APP (15/11/2026): las apps del bot, una por negocio. Ver `AppsDelBot`. */}
+      <AppsDelBot />
       {/* LA DIFERENCIACIÓN, antes que nada: cuántas cuentas, de qué negocio es cada cosa,
           y suscribir cada número. Ver `DiferenciacionPorNegocio`. */}
       <DiferenciacionPorNegocio />

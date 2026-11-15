@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifySignature } from "@/lib/meta/verify";
+import { clavesDeFirma } from "@/lib/meta/apps-de-meta";
 import { textoDelBotonPulsado } from "@/lib/meta/handler";
 import {
   cancelPendingActionsByTypeForConvo,
@@ -189,7 +190,8 @@ export async function POST(req: NextRequest) {
   const appSecret = getWebhookAppSecret("messenger");
   const sig = req.headers.get("x-hub-signature-256");
 
-  if (appSecret && sig && !verifySignature(raw, sig, appSecret)) {
+  // MULTI APP (15/11/2026): vale la firma de cualquiera de nuestras apps (`clavesDeFirma`).
+  if (appSecret && sig && !verifySignature(raw, sig, appSecret) && !clavesDeFirma("messenger").some((clave) => verifySignature(raw, sig, clave))) {
     // El evento NO se procesa (la validación sigue bloqueándolo). PERO respondemos
     // 200 en vez de 401: con 401, Meta REINTENTA el evento sin parar y se forma una
     // tormenta de reintentos que satura el contenedor. Con 200, Meta lo marca

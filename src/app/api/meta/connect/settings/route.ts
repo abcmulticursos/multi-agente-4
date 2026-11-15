@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { getMetaRuntimeSetting, setMetaRuntimeSettings } from "@/lib/db";
 import { getMetaAppId, getMetaOAuthAppSecret } from "@/lib/meta/runtime-config";
+import { guardarOtraApp, otrasApps, quitarOtraApp } from "@/lib/meta/apps-de-meta";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -43,6 +44,22 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  // MULTI APP (15/11/2026): cambiar de app ya no deja mudos los números de la anterior. Ella pasa a «otras
+  // apps» con su clave (`apps-de-meta.ts`) y su firma se sigue reconociendo. Si la nueva estaba entre las
+  // otras, sale de ahí: ahora es la principal.
+  if (appId && currentAppId && appId !== currentAppId && currentAppSecret) {
+    guardarOtraApp(
+      {
+        appId: currentAppId,
+        nombre: null,
+        negocio: getMetaRuntimeSetting(`app_negocio_${currentAppId}`) ?? null,
+        negocioId: getMetaRuntimeSetting(`app_negocio_id_${currentAppId}`) ?? null,
+      },
+      currentAppSecret
+    );
+  }
+  if (appId && otrasApps().some((a) => a.appId === appId)) quitarOtraApp(appId);
 
   const values: Record<string, string> = {};
   if (appId) values.meta_app_id = appId;
