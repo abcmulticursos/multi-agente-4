@@ -101,6 +101,8 @@ export interface ContextoDeLaIA {
   /** El país del cliente y los OTROS países donde vende esta tienda, con sus métodos («Argentina (Transferencia)»). */
   paisDelCliente?: string;
   otrosPaises?: string[];
+  /** Cliente de Argentina: las preguntas fijas que agrega el bot salen en voseo (15/11/2026). Solo AR. */
+  voseo?: boolean;
   /**
    * LA LISTA CORTA DE LAS OPCIONES («*Opción 1* — nombre · precio»), SOLO SI FALTA (27/10/2026): si la
    * IA ya nombró todas las opciones, no se agrega (era texto fijo repetido). Va antes de `alFinal`.
@@ -451,6 +453,23 @@ const PREGUNTAS_DE_CIERRE = [
 /** Para elegir entre las opciones: rotan, sin repetir la que acaba de salir (28/10/2026). */
 const CIERRES_DE_DOS = ["¿Por cuál te animas? 😊", "¿Por cuál de las dos te animas?", "¿Cuál de las dos opciones te gusta más?"];
 const CIERRES_DE_VARIAS = ["¿Por cuál te animas? 😊", "¿Cuál de estas opciones te gusta más?", "¿Con cuál te quedas?"];
+
+/**
+ * LAS MISMAS, EN VOSEO, SOLO PARA ARGENTINA (15/11/2026). Él: «sí, solo para argentinos, cuidado se filtre a otros
+ * países». La IA ya le habla de vos; la pregunta que agrega el bot salía de tú. Mismo orden y mismo número que las de
+ * arriba: solo cambia la conjugación.
+ */
+const PREGUNTAS_DE_CIERRE_VOSEO = [
+  "¿Te gustaría que te indique cómo adquirirlo?",
+  "¿Querés saber los métodos de pago?",
+  "¿Te muestro los pasos para tenerlo?",
+  "¿Te gustaría que te indique cómo obtenerlo ya?",
+  "¿Querés que te explique cómo obtenerlo?",
+  "¿Te gustaría asegurar tu acceso hoy?",
+];
+const CIERRES_DE_DOS_VOSEO = ["¿Por cuál te animás? 😊", "¿Por cuál de las dos te animás?", "¿Cuál de las dos opciones te gusta más?"];
+const CIERRES_DE_VARIAS_VOSEO = ["¿Por cuál te animás? 😊", "¿Cuál de estas opciones te gusta más?", "¿Con cuál te quedás?"];
+const preguntasDeCierre = (c: ContextoDeLaIA) => (c.voseo ? PREGUNTAS_DE_CIERRE_VOSEO : PREGUNTAS_DE_CIERRE);
 
 function cierre(c: ContextoDeLaIA): string {
   if (c.nota) return "";
@@ -954,7 +973,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
       const ultima = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).pop() ?? "";
       // Si la IA cerró con OTRA pregunta (la de una duda), no se le suma otra encima.
       if (!/[?¿]/.test(ultima) || texto !== antes) {
-        const opciones = n === 2 ? CIERRES_DE_DOS : CIERRES_DE_VARIAS;
+        const opciones = c.voseo ? (n === 2 ? CIERRES_DE_DOS_VOSEO : CIERRES_DE_VARIAS_VOSEO) : n === 2 ? CIERRES_DE_DOS : CIERRES_DE_VARIAS;
         preguntaDeElegir = opciones.find((p) => !recientes.includes(p)) ?? opciones[0];
       }
     }
@@ -967,7 +986,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     // (Aunque haya un «problema» o lo posponga: aquí no se AGREGA una pregunta, se cambia la que la IA ya escribió.)
     if (propias.length && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto) {
       const plano = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
-      const invita = /(adquir|obten|tenerlo|llevarlo|metodos? de pago|los pasos|como pagar|asegur|te indico|te gustaria|deseas|quieres que)/;
+      const invita = /(adquir|obten|tenerlo|llevarlo|metodos? de pago|los pasos|como pagar|asegur|te indico|te gustaria|deseas|quieres que|queres que)/;
       const burbujas = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
       const ultimaB = burbujas[burbujas.length - 1] ?? "";
       if (propias.some((p) => ultimaB.includes(p.slice(0, 20)))) cerroConLaSuya = true;
@@ -988,7 +1007,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const burbujasFinales = texto.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
     const yaPreguntoAntesDeLaLista = burbujasFinales.length >= 2 && /[?¿]/.test(burbujasFinales[burbujasFinales.length - 2]) && ultimaBurbuja.length <= 160;
     if (!cerroConLaSuya && !yaPreguntoAntesDeLaLista && !preguntaDeElegir && n < 2 && !c.nota && c.etapa === "venta" && !conProblema && !loPospuso && !c.noOfrezcasImagenes && !c.sinPagoAprobado && !!texto && !/[?¿]/.test(ultimaBurbuja)) {
-      const lista = propias.length ? propias : PREGUNTAS_DE_CIERRE;
+      const lista = propias.length ? propias : preguntasDeCierre(c);
       const pregunta = lista.find((p) => !recientes.includes(p.slice(0, 20))) ?? lista[0];
       console.log(`[tablero:ia] convo ${convo.id}: su respuesta no cerró con una pregunta → se agrega «${pregunta}»`);
       // La pregunta va en su propia burbuja; con tope, las de antes se juntan para que quepa.
@@ -1160,7 +1179,7 @@ export async function responderConIA(convo: ConversationRow, c: ContextoDeLaIA):
     const recientes = ultimosMensajes(convo.id, 8).filter((m) => m.role !== "user").map((m) => m.content ?? "").join("\n");
     texto =
       c.etapa === "venta" && !c.nota
-        ? (cierresDeLaFicha(c).length ? cierresDeLaFicha(c) : PREGUNTAS_DE_CIERRE).find((p) => !recientes.includes(p.slice(0, 20))) ?? (cierresDeLaFicha(c)[0] ?? PREGUNTAS_DE_CIERRE[0])
+        ? (cierresDeLaFicha(c).length ? cierresDeLaFicha(c) : preguntasDeCierre(c)).find((p) => !recientes.includes(p.slice(0, 20))) ?? (cierresDeLaFicha(c)[0] ?? preguntasDeCierre(c)[0])
         : "¿En qué más te puedo ayudar? 😊";
     console.log(`[tablero:ia] convo ${convo.id}: la respuesta quedó vacía → sale «${texto}» (nunca mudo) · la IA había escrito: «${crudo.replace(/\s+/g, " ").slice(0, 300)}»`);
   }

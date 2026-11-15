@@ -11452,7 +11452,8 @@ export default function EditorPage() {
         >
         <fieldset
           disabled={saving}
-          className={`space-y-6 rounded-2xl border border-borde bg-panel p-5 shadow-sm transition ${
+          // `menus-contraste` (15/11/2026): en claro, el mismo tema con tonos un punto más oscuros (globals.css).
+          className={`menus-contraste space-y-6 rounded-2xl border border-borde bg-panel p-5 shadow-sm transition ${
             saving ? "cursor-wait opacity-60" : ""
           }`}
         >
@@ -36761,7 +36762,7 @@ function TarjetaDeLaPortada({
       onClick={onAbrir}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onAbrir())}
       // (14/11/2026) Más contraste: él, «le falta un poco de contraste». Borde azulado más marcado, letra más oscura.
-      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border-[1.5px] border-[color-mix(in_srgb,var(--bn-activo)_28%,var(--bn-sel-borde))] bg-tarjeta px-5 py-4 text-left shadow transition-colors hover:bg-relleno"
+      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border-[1.5px] border-[color-mix(in_srgb,var(--bn-activo)_40%,var(--bn-sel-borde))] bg-tarjeta px-5 py-4 text-left shadow-md transition-colors hover:bg-relleno"
     >
       <span aria-hidden className="shrink-0 text-xs text-tinta-suave">
         ▶
@@ -36824,7 +36825,8 @@ function PortadaDeLaTienda({
         <img src="/tablero/tienda.png" alt="" className="h-16 w-16 shrink-0 rounded-xl" />
         <div className="min-w-0 flex-1">
           <div className="text-[11px] font-black uppercase tracking-[0.35em] text-tinta">Tienda</div>
-          <div className="font-titulo truncate text-2xl font-extrabold leading-tight text-tinta">{nombre}</div>
+          {/* (15/11/2026) Él: «el nombre está un poco grande… bájale unos punticos». */}
+          <div className="font-titulo truncate text-xl font-extrabold leading-tight text-tinta">{nombre}</div>
           <div className="text-xs text-tinta-suave">Sus países, con su número y quién cobra, y los productos que vende.</div>
         </div>
         <button
@@ -36837,9 +36839,13 @@ function PortadaDeLaTienda({
           {pendientes ? `⚠ ${pendientes} ${pendientes === 1 ? "cosa" : "cosas"} por revisar` : "✅ Lista para vender"}
         </button>
       </div>
-      {paisesDeLaTienda(cfg, tienda).map((pais) => {
+      {/* (15/11/2026) ARRIBA LOS ABIERTOS. Él: «lo que manda en la posición de la lista en la tienda, arriba los activos».
+          Solo el orden de esta lista; el tablero no cambia. */}
+      {paisesDeLaTienda(cfg, tienda)
+        .map((pais) => ({ pais, abierto: paisAbiertoEnLaTienda(cfg, tienda, pais) }))
+        .sort((a, b) => Number(b.abierto) - Number(a.abierto))
+        .map(({ pais, abierto }) => {
         const g = tienda.por_pais?.[pais] ?? {};
-        const abierto = paisAbiertoEnLaTienda(cfg, tienda, pais);
         const numero = limpio(g.numero) ? `📱 ${etiquetaDe(conexiones.numeros, limpio(g.numero))}` : limpio(tienda.numero) ? "📱 El número de la tienda" : "📱 Sin número";
         const cobra = quienCobraEn(cfg, tienda, pais).nombre;
         return (
@@ -58304,7 +58310,10 @@ function AdRegistryManager({
       {importSummary && <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">{importSummary}</div>}
       {Object.entries(hierarchy).map(([bm, accounts]) => <Collapsible key={bm} title={`BM: ${bm}`} titleKey={`import_bm_${bm}`} defaultOpen>
         <div className="space-y-2 border-l-2 border-neutral-200 pl-3">{Object.entries(accounts).map(([account, campaigns]) => <Collapsible key={account} title={`Cuenta: ${account}`} titleKey={`import_account_${bm}_${account}`}>
-          <div className="space-y-2 border-l-2 border-neutral-200 pl-3">{Object.entries(campaigns).map(([campaign, ads]) => <Collapsible key={campaign} title={`Campaña: ${campaign}`} titleKey={`import_campaign_${bm}_${account}_${campaign}`}>
+          <div className="space-y-2 border-l-2 border-neutral-200 pl-3">{Object.entries(campaigns).map(([campaign, ads]) => <Collapsible key={campaign} title={`Campaña: ${campaign}`} titleKey={`import_campaign_${bm}_${account}_${campaign}`}
+            // (15/11/2026) EL COLOR DE SUS ADS, AL LADO DE «ABRIR». Él: «que el desplegable tenga al lado… un rectángulo de color
+            // con las esquinas un poquitito redondeadas». Uno por cada color distinto que tengan sus anuncios.
+            headerActions={(() => { const colores = [...new Set(ads.map((ad) => ad.color).filter((c): c is string => !!c))]; return colores.length ? <span className="flex items-center gap-1">{colores.map((c) => <span key={c} title="El color de los anuncios de esta campaña" className="inline-block h-5 w-8 rounded-[4px] border border-black/15 shadow-sm" style={{ backgroundColor: c }} />)}</span> : null; })()}>
             <div className="space-y-3 border-t border-neutral-200 bg-neutral-50 p-3">
               <div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const enabled = ads.some((ad) => ad.enabled !== false); onChange(entries.map((entry) => ads.some((ad) => ad.key === entry.key) ? { ...entry, enabled: !enabled } : entry)); }} className="rounded border border-neutral-300 bg-tarjeta px-2 py-1 text-xs font-semibold text-neutral-700">{ads.some((ad) => ad.enabled !== false) ? "Apagar campaña" : "Encender campaña"}</button><button type="button" onClick={() => { if (confirm(`Se quitarán del gestor los ${ads.length} Ads de la campaña \"${campaign}\". Esto no modifica Meta. ¿Continuar?`)) onChange(entries.filter((entry) => !ads.some((ad) => ad.key === entry.key))); }} className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs font-semibold text-red-600">Eliminar campaña</button>{(() => { const apagados = ads.filter((ad) => ad.enabled === false || ad.meta?.active === false); if (apagados.length === 0) return null; return <button type="button" onClick={() => { if (confirm(`Se quitarán del gestor los ${apagados.length} Ads APAGADOS de la campaña \"${campaign}\", con sus cajones de regalo.\n\nLos encendidos se quedan. Esto no modifica Meta.\n\n¿Continuar?`)) onChange(entries.filter((entry) => !apagados.some((ad) => ad.key === entry.key))); }} title="Al importar, Meta trae también los anuncios apagados. Esto los quita de golpe." className="rounded border border-amber-300 bg-tarjeta px-2 py-1 text-xs font-semibold text-amber-700">Quitar los {apagados.length} apagados</button>; })()}</div>
               <div className="flex flex-wrap gap-2">{ads.map((ad) => <span key={ad.key} onContextMenu={(event) => { setAdDelMenu(ad); menuDeAds.abrir(event); }} title="Click derecho para quitar este AD del gestor" style={{ borderColor: ad.color, backgroundColor: ad.color, color: adTagTextColor(ad.color) }} className="cursor-context-menu rounded border px-2 py-1 text-xs font-semibold">{ad.reference || ad.name} {ad.enabled === false || ad.meta?.active === false ? "OFF" : "ON"}</span>)}</div>

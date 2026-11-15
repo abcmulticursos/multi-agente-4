@@ -1471,7 +1471,8 @@ function esUnPedazo(normal: string): boolean {
 
 const INVITA_A_COMPRAR =
   // («cuál de LOS dos» también: la IA lo escribe así y el «sí» se iba a ella, que inventaba la elección.)
-  /(adquir|agregar?lo|lo agregas|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|eliges|te llama|quieres|te quedas|te gusta))/;
+  // (15/11/2026: y sus formas en voseo, que el bot agrega a los argentinos: «lo querés», «cuál elegís».)
+  /(adquir|agregar?lo|lo agregas|obten|tenerlo|tener tu|pasos|metodos? de pago|como pagar|proceder|asegur|tu acceso|avanz|llevarlo|llevartelo|comprarlo|te lo preparo|lo quieres|lo queres|lo deseas|te animas|te indico|cual (de (las|los) (dos|opciones)|prefieres|preferis|eliges|elegis|te llama|quieres|queres|te quedas|te gusta))/;
 
 const sinTildes = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
 
@@ -1842,6 +1843,7 @@ async function contestarConIA(
     // Solo para que la IA sepa si quedan muestras (las manda el bot cuando las pide; ella no tiene herramienta).
     muestras,
     dialecto: getCountryInfo(pais).dialect,
+    voseo: pais === "AR",
     ...(puedeReenviar
       ? {
           reenviar: async () => {
@@ -1989,7 +1991,7 @@ function textoDePostventa(config: WorkflowConfig | null, canal: string): string 
  * 27/10/2026: la galería salía sin cierre). El tablero usa el primero que tengas escrito, como hace
  * con tus textos de postventa.
  */
-function cierreDeLaGaleria(cuantas: number, deOrderBump: boolean): SequenceStep[] {
+function cierreDeLaGaleria(cuantas: number, deOrderBump: boolean, pais: string): SequenceStep[] {
   // Que se pueda ENVIAR (la regla de `sendSamplesAfterContent`): tu cierre está guardado como «texts» y
   // el envío lee «body_variants»; `burbujasDeLaFicha` lo traduce, como en tus fichas de producto.
   const enviable = (s: unknown): SequenceStep[] => {
@@ -2023,10 +2025,15 @@ function cierreDeLaGaleria(cuantas: number, deOrderBump: boolean): SequenceStep[
   return [
     {
       type: "text",
+      // (15/11/2026) EN VOSEO SOLO PARA ARGENTINA. Él: «sí, solo para argentinos, cuidado se filtre a otros países».
       body_variants:
-        cuantas >= 2
-          ? ["¿Cuál eliges? 😊", "¿Por cuál te animas? 😊", "¿Cuál de las dos te gusta más? 😊"]
-          : ["¿Te animas a llevarlo? 😊", "¿Te gustaría llevártelo hoy? 😊", "¿Lo quieres para empezar hoy mismo? 😊"],
+        pais === "AR"
+          ? cuantas >= 2
+            ? ["¿Cuál elegís? 😊", "¿Por cuál te animás? 😊", "¿Cuál de las dos te gusta más? 😊"]
+            : ["¿Te animás a llevarlo? 😊", "¿Te gustaría llevártelo hoy? 😊", "¿Lo querés para empezar hoy mismo? 😊"]
+          : cuantas >= 2
+            ? ["¿Cuál eliges? 😊", "¿Por cuál te animas? 😊", "¿Cuál de las dos te gusta más? 😊"]
+            : ["¿Te animas a llevarlo? 😊", "¿Te gustaría llevártelo hoy? 😊", "¿Lo quieres para empezar hoy mismo? 😊"],
     } as SequenceStep,
   ];
 }
@@ -2071,7 +2078,7 @@ async function mandarLaGaleria(convo: ConversationRow, t: Tablero, pais: string,
   // (`soloDe`) solo marca sus muestras: la general aún puede mandar las de los otros.
   anotarMuestras(convo.id, soloDe ? salieron : [...salieron, GALERIA_HECHA]);
   // Y después de las fotos, SOLO la pregunta de cierre: nada más en esa fila.
-  await sendConfiguredSteps(convo, cierreDeLaGaleria(delante.cuantas, delante.deOrderBump) as never);
+  await sendConfiguredSteps(convo, cierreDeLaGaleria(delante.cuantas, delante.deOrderBump, pais) as never);
   console.log(`[tablero] convo ${convo.id}: galería enviada${soloDe ? ` (solo de ${soloDe})` : ""} (${salieron.join(", ")}) · cierre de ${delante.cuantas >= 2 ? "elegir" : "un producto"}`);
   return true;
 }
