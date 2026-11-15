@@ -846,52 +846,48 @@ function MedicionPorCuenta() {
  * todas entran a este mismo bot y a este mismo chat. La principal es la del asistente («🔑 Mi app»); aquí se
  * agregan las otras con su ID y su clave secreta. Ver `src/lib/meta/apps-de-meta.ts`.
  */
-function AppsDelBot() {
+/**
+ * «TUS APPS», ORDENADO (15/11/2026, su modelo «burdo modelo» y su pedido: «que se vea ordenado bonito, que cada cosa esté
+ * vinculada a la otra»). Una caja por CUENTA DE FACEBOOK (la dueña del negocio de cada app) y, dentro, sus apps en filas
+ * alineadas: logo, nombre, ID, sus números / páginas / pixels en columnas, y sus botones. Abajo, en una línea, los tres
+ * botones de siempre. Reemplaza la tarjeta «APP CONECTADA» + «FACEBOOK CONECTADO» y la lista anterior cuando ya hay app y
+ * Facebook. SOLO PANTALLA: los botones llaman a lo que ya existía (asistente «app» / «cerrar», DELETE de apps, actualizar,
+ * conectar otra cuenta, el pop up del negocio).
+ */
+function AppsDelBot({ status }: { status: MetaStatus }) {
   type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null };
   const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null; negocioId: string | null } | null; otras: Otra[] } | null>(null);
-  // (15/11/2026) LOS ACTIVOS DE CADA APP. Él: «tiene que mostrar qué apps están conectadas, y sus activos». Salen de
-  // las mismas tarjetas por negocio de abajo (`/api/meta/connect/cuentas`): los del negocio dueño de cada app.
-  type Activos = { numeros: string[]; paginas: string[]; pixels: string[] };
+  // LOS ACTIVOS DE CADA APP: los del negocio dueño de cada app (`/api/meta/connect/cuentas`), y de qué cuenta de Facebook es.
+  type Activos = { numeros: string[]; paginas: string[]; pixels: string[]; facebook: string | null };
   const [activos, setActivos] = useState<Record<string, Activos>>({});
+  const [cuentasFb, setCuentasFb] = useState<string[]>([]);
   useEffect(() => {
     void fetch("/api/meta/connect/cuentas", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { cuentas?: Array<{ id: string; numeros: string[]; paginas: string[]; pixels: string[] }> } | null) => {
+      .then((d: CuentasDeMeta | null) => {
         if (!d?.cuentas) return;
-        setActivos(Object.fromEntries(d.cuentas.map((c) => [c.id, { numeros: c.numeros, paginas: c.paginas, pixels: c.pixels }])));
+        setActivos(Object.fromEntries(d.cuentas.map((c) => [c.id, { numeros: c.numeros, paginas: c.paginas, pixels: c.pixels, facebook: c.facebookNombre }])));
+        setCuentasFb([...new Set([...(d.conectadas ?? []).map((c) => c.nombre), ...d.cuentas.map((c) => c.facebookNombre)].filter((x): x is string => !!x))]);
       })
       .catch(() => {});
   }, [datos]);
-  /** La línea corta de una app: cuántos números, páginas y pixeles tiene su negocio. */
-  const cuantos = (negocioId: string | null) => {
-    if (!negocioId) return <span className="text-amber-700">negocio sin identificar</span>;
-    const a = activos[negocioId];
-    const n = (lista: string[] | undefined) => lista?.length ?? 0;
-    return (
-      <>
-        📱 {n(a?.numeros)} · 📘 {n(a?.paginas.filter((p) => !p.endsWith("(detectada)")))} · 📊 {n(a?.pixels)}
-      </>
-    );
-  };
-  /** LA TARJETA DE UNA APP (15/11/2026, su dibujo): nombre, negocio, cuántos activos y «Abrir» → el pop up de su negocio. */
-  const tarjeta = (app: { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null }, principal: boolean) => (
-    <button
-      key={app.appId}
-      type="button"
-      disabled={!app.negocioId}
-      onClick={() => app.negocioId && window.dispatchEvent(new CustomEvent("meta-connect:abrir-negocio", { detail: app.negocioId }))}
-      className="flex w-full items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-3 text-left shadow-sm hover:bg-relleno disabled:cursor-default"
-    >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-lg">🔑</span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-extrabold text-tinta">{app.nombre ?? app.negocio ?? `App ${app.appId}`}</span>
-        <span className="block truncate text-xs text-tinta-suave">{app.negocio ?? "Negocio sin identificar"}</span>
-        <span className="mt-0.5 block text-[13px] font-semibold text-tinta">{cuantos(app.negocioId)}</span>
-      </span>
-      {principal && <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">Principal</span>}
-      {app.negocioId && <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>}
-    </button>
-  );
+  const abrirAsistente = (paso: string) => window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: paso }));
+  const [quitando, setQuitando] = useState<string | null>(null);
+  async function desconectar(app: { appId: string; nombre: string | null }, principal: boolean) {
+    // Su única app: como siempre, el asistente («Cerrar sesión de Meta»).
+    if (principal && (datos?.otras.length ?? 0) === 0) return abrirAsistente("cerrar");
+    const nombre = app.nombre ?? app.appId;
+    if (!window.confirm(`¿Desconectar la app «${nombre}»? Sus números dejarán de llegar a este bot.${principal ? " Otra de tus apps pasa a ser la principal." : ""}`)) return;
+    setQuitando(app.appId);
+    try {
+      const r = await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(app.appId)}`, { method: "DELETE" });
+      const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      if (!d?.ok) window.alert(d?.error ?? "No se pudo desconectar.");
+      else window.location.reload();
+    } finally {
+      setQuitando(null);
+    }
+  }
   const [appId, setAppId] = useState("");
   const [clave, setClave] = useState("");
   const [ocupado, setOcupado] = useState(false);
@@ -937,20 +933,136 @@ function AppsDelBot() {
     }
   }
   if (!datos) return null;
+  type AppEnFila = Otra & { principal: boolean };
+  const apps: AppEnFila[] = [
+    ...(datos.principal ? [{ ...datos.principal, nombre: status.appName ?? nombreDeLaPrincipal, principal: true }] : []),
+    ...datos.otras.map((o) => ({ ...o, principal: false })),
+  ];
+  const cuentaDe = (a: AppEnFila) => (a.negocioId ? activos[a.negocioId]?.facebook ?? null : null);
+  // Una caja por cuenta conectada (aunque no sea dueña de ninguna app), y al final las apps cuya cuenta no está conectada.
+  const grupos: Array<{ cuenta: string | null; apps: AppEnFila[] }> = cuentasFb.map((c) => ({ cuenta: c, apps: apps.filter((a) => cuentaDe(a) === c) }));
+  if (!grupos.length && status.cuentaDeFacebook) grupos.push({ cuenta: status.cuentaDeFacebook, apps: [] });
+  const sueltas = apps.filter((a) => !grupos.some((g) => g.apps.includes(a)));
+  // Mientras las cuentas no han cargado, las apps van en la de la sesión (no se pintan como «sin cuenta» un instante).
+  if (sueltas.length && !Object.keys(activos).length && grupos.length) grupos[0].apps.push(...sueltas);
+  else if (sueltas.length) grupos.push({ cuenta: null, apps: sueltas });
+
+  const contar = (a: AppEnFila) => {
+    const x = a.negocioId ? activos[a.negocioId] : undefined;
+    return {
+      numeros: x?.numeros.length ?? null,
+      paginas: x ? x.paginas.filter((p) => !p.endsWith("(detectada)")).length : null,
+      pixels: x?.pixels.length ?? null,
+    };
+  };
+  const COLUMNAS = "sm:grid sm:grid-cols-[minmax(0,1fr)_76px_76px_76px] sm:items-center sm:gap-2";
+  const boton = "inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition";
+  const Cifra = ({ n, icono, nombre }: { n: number | null; icono: string; nombre: string }) => (
+    <span className="flex flex-col items-center text-center leading-tight" title={nombre}>
+      <span className="text-lg">{icono}</span>
+      <span className="text-lg font-extrabold text-tinta">{n ?? "–"}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-tinta-suave sm:hidden">{nombre}</span>
+    </span>
+  );
   return (
-    <section className="space-y-2">
+    <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-titulo text-xl font-extrabold text-tinta">🔑 Tus apps</h2>
+        <h2 className="font-titulo text-2xl font-extrabold text-tinta">Tus apps 🔑</h2>
         {/* (15/11/2026) Él: «en meta connect agrega la opción de ir al tablero». */}
         <a href="/editor?vista=tablero" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-800 hover:bg-emerald-100">
           🧩 Ir al tablero
         </a>
       </div>
-      {datos.principal && tarjeta({ ...datos.principal, nombre: nombreDeLaPrincipal }, true)}
-      {datos.otras.map((o) => tarjeta(o, false))}
-      {/* (15/11/2026) Una app NUEVA va con el asistente (login, números, suscripción); al guardarla, la principal de
-          ahora pasa sola a «otras». El formulario plegado es para volver a sumar una que ya estaba preparada. */}
-      <div className="flex justify-center pt-1">
+      {grupos.map((g) => (
+        <div key={g.cuenta ?? "sin-cuenta"} className="overflow-hidden rounded-2xl border border-borde bg-tarjeta shadow-sm">
+          {/* La cuenta de Facebook: arriba de sus apps. */}
+          <div className="flex flex-wrap items-center gap-3 border-b border-borde bg-relleno/60 px-4 py-3">
+            <img src="/facebook-logo.png" alt="" className={`h-9 w-9 shrink-0 object-contain ${g.cuenta ? "" : "opacity-40 grayscale"}`} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-tinta-suave">
+                {g.cuenta ? "Facebook conectado" : "Falta su Facebook"}
+              </p>
+              <p className={`text-lg font-extrabold leading-snug text-tinta ${g.cuenta ? "truncate" : ""}`} title="Conecta la cuenta de Facebook dueña de estas apps">
+                {g.cuenta ?? "Cuenta sin conectar"}
+              </p>
+            </div>
+            {g.cuenta ? (
+              <button type="button" onClick={() => abrirAsistente("inicio")} className={`${boton} bg-sky-600 text-white hover:bg-sky-700`}>
+                Abrir asistente
+              </button>
+            ) : (
+              <a href="/api/meta/connect/start?nueva=1" className={`${boton} bg-[#1877f2] text-white hover:opacity-90`}>
+                Conectar esa cuenta
+              </a>
+            )}
+          </div>
+          {g.apps.length > 0 && (
+            <div className={`hidden px-4 pt-2 text-[11px] font-bold uppercase tracking-wide text-tinta-suave ${COLUMNAS}`}>
+              <span>App</span>
+              <span className="text-center">Números</span>
+              <span className="text-center">Páginas</span>
+              <span className="text-center">Pixels</span>
+            </div>
+          )}
+          {g.apps.length === 0 && <p className="px-4 py-3 text-sm text-tinta-suave">Ninguna app es de los negocios de esta cuenta.</p>}
+          {g.apps.map((a, i) => {
+            const c = contar(a);
+            return (
+              <div key={a.appId} className={`px-4 py-3 ${i > 0 ? "border-t border-borde" : ""}`}>
+                <div className={`flex flex-col gap-3 ${COLUMNAS}`}>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow ring-1 ring-black/5">
+                      <img src="/meta-app-logo.png" alt="" className="h-full w-full object-contain" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="flex flex-wrap items-center gap-2">
+                        <span className="truncate font-titulo text-xl font-extrabold uppercase tracking-tight text-tinta">{a.nombre ?? `App ${a.appId}`}</span>
+                        {a.principal && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">Principal</span>}
+                      </p>
+                      <p className="truncate text-xs text-tinta-suave">
+                        ID {a.appId}
+                        {a.negocio ? ` · ${a.negocio}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 sm:contents">
+                    <Cifra n={c.numeros} icono="📱" nombre="Números" />
+                    <Cifra n={c.paginas} icono="🚩" nombre="Páginas" />
+                    <Cifra n={c.pixels} icono="📊" nombre="Pixels" />
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2 sm:pl-[60px]">
+                  {a.negocioId && activos[a.negocioId] && (
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent("meta-connect:abrir-negocio", { detail: a.negocioId }))}
+                      className={`${boton} border border-borde bg-tarjeta text-tinta hover:bg-relleno`}
+                    >
+                      Ver sus activos
+                    </button>
+                  )}
+                  {a.principal && (
+                    <button type="button" onClick={() => abrirAsistente("app")} className={`${boton} border border-borde bg-tarjeta text-tinta-suave hover:bg-relleno`}>
+                      Cambiar app
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={quitando === a.appId}
+                    onClick={() => void desconectar(a, a.principal)}
+                    className={`${boton} border border-red-200 bg-tarjeta text-red-700 hover:bg-red-50 disabled:opacity-50`}
+                  >
+                    {quitando === a.appId ? "Desconectando…" : "Desconectar"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+      {/* Los tres de siempre, en una sola línea. Una app NUEVA va con el asistente; «Actualizar» y «Otra cuenta» son los
+          de la sección de negocios (que ya no los repite). */}
+      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
         <button
           type="button"
           onClick={() => window.dispatchEvent(new Event("meta-connect:otra-app"))}
@@ -958,6 +1070,21 @@ function AppsDelBot() {
         >
           ➕ Conectar otra app
         </button>
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("meta-connect:actualizar"))}
+          title="Vuelve a leer de Meta tus páginas, números, negocios y píxeles con el permiso que ya diste, sin abrir Facebook"
+          className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100"
+        >
+          ↻ Actualizar desde Meta
+        </button>
+        <a
+          href="/api/meta/connect/start?nueva=1"
+          title="Antes, cierra sesión de Facebook en este navegador (o usa una ventana privada) y entra con esa cuenta. No cambia nada de lo que ya tienes."
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700"
+        >
+          + Conectar otra cuenta de Facebook
+        </a>
       </div>
       <details className="text-xs text-tinta-suave">
         <summary className="cursor-pointer text-center">¿Ya estaba preparada? Súmala solo con su ID y su clave ▾</summary>
@@ -1110,6 +1237,14 @@ function DiferenciacionPorNegocio() {
     }
     setActualizando(false);
   };
+  // (15/11/2026) El botón vive ahora arriba, en «Tus apps» (`AppsDelBot`): lo pide con este aviso y aquí se hace lo de siempre.
+  const actualizarRef = useRef(actualizar);
+  actualizarRef.current = actualizar;
+  useEffect(() => {
+    const alPedir = () => void actualizarRef.current();
+    window.addEventListener("meta-connect:actualizar", alPedir);
+    return () => window.removeEventListener("meta-connect:actualizar", alPedir);
+  }, []);
   // El resumen de la última actualización, tras recargar.
   useEffect(() => {
     try {
@@ -1465,20 +1600,10 @@ function DiferenciacionPorNegocio() {
                 app violeta, ver qué bm es y qué activos hay». Arriba van las apps («🔑 Tus apps», `AppsDelBot`), cada una
                 abre el pop up de su negocio. Las cuentas de Facebook quedan plegadas abajo, para quitarlas. */}
             {/* ↻ ACTUALIZAR SIN VOLVER A FACEBOOK (13/11/2026). */}
-            {(filas.length > 0 || conectadas.length > 0) && (
+            {(filas.length > 0 || conectadas.length > 0) && (actualizando || resultadoDeActualizar) && (
               <div className="flex flex-col items-center gap-1.5">
-                <button
-                  type="button"
-                  disabled={actualizando}
-                  onClick={() => void actualizar()}
-                  className="inline-flex items-center rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100 disabled:opacity-60"
-                  title="Vuelve a leer de Meta tus páginas, números, negocios y píxeles con el permiso que ya diste, sin abrir Facebook"
-                >
-                  {actualizando ? "Actualizando con Meta…" : "↻ Actualizar desde Meta"}
-                </button>
-                <p className="max-w-xl text-center text-xs text-tinta-suave">
-                  Trae lo nuevo de tus cuentas (por ejemplo, una página que le asignaste en Business Suite) sin volver a iniciar sesión.
-                </p>
+                {/* (15/11/2026) El botón está arriba, en «Tus apps»; aquí queda lo que responde Meta. */}
+                {actualizando && <p className="text-sm font-semibold text-sky-800">Actualizando con Meta…</p>}
                 {resultadoDeActualizar && (
                   <div className="w-full max-w-xl rounded-lg border border-borde bg-relleno px-3 py-2 text-xs text-tinta">
                     {resultadoDeActualizar.map((l, i) => (
@@ -1960,7 +2085,8 @@ function DiferenciacionPorNegocio() {
       {/* CONECTAR OTRA CUENTA DE FACEBOOK, por la misma app. Solo hace falta si los
           números de esa cuenta no salen ya aquí arriba. Y solo con una ya conectada: «otra» sin
           ninguna no tiene sentido (21/10/2026). */}
-      {datos.total > 0 || (datos.conectadas ?? []).length > 0 ? (
+      {/* (15/11/2026) El botón está arriba, en «Tus apps», junto a los otros dos. */}
+      {false ? (
       <div className="rounded-xl border border-borde bg-tarjeta p-4 text-center">
         <a
           href="/api/meta/connect/start?nueva=1"
@@ -3797,7 +3923,15 @@ export default function MetaConnectPage() {
         </div>
       </div>
 
-      <EstadoDeConexion status={status} />
+      {/* (15/11/2026) Con app y Facebook ya conectados, «Tus apps» ordenado (cada app dentro de su cuenta de Facebook)
+          reemplaza los dos recuadros «App conectada» / «Facebook conectado». Sin conectar, los recuadros de siempre. */}
+      {status?.appId && status.conectadoConFacebook ? (
+        <div className="mt-6">
+          <AppsDelBot status={status} />
+        </div>
+      ) : (
+        <EstadoDeConexion status={status} />
+      )}
 
       {/* EL ASISTENTE «CONTINUAR» (20/10/2026): la forma simple de conectar. Lo de abajo
           sigue igual, como siempre. Ver `asistente.tsx`. */}
@@ -3823,8 +3957,6 @@ export default function MetaConnectPage() {
         aria-disabled={!(status.appId && status.conectadoConFacebook)}
       >
 
-      {/* MULTI APP (15/11/2026): las apps del bot, una por negocio. Ver `AppsDelBot`. */}
-      <AppsDelBot />
       {/* LA DIFERENCIACIÓN, antes que nada: cuántas cuentas, de qué negocio es cada cosa,
           y suscribir cada número. Ver `DiferenciacionPorNegocio`. */}
       <DiferenciacionPorNegocio />
