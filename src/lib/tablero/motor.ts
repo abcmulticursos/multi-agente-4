@@ -1093,24 +1093,31 @@ async function irA(
         // cobro abierto se los manda; sin método todavía, se le pregunta.
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
         // Un Cobro SIN «preguntar el método» (28/10/2026) lleva los datos en sus burbujas: salen ésas, con lo
-        // que falta; no se le pregunta un método que esa ruta no pide.
-        if (!f.cobro?.metodos) await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
+        // que falta; no se le pregunta un método que esa ruta no pide. (15/11/2026: salvo un cliente de OTRO país,
+        // `clienteDeOtroPais`: esas burbujas son del país de la ruta; a él, los métodos del suyo.)
+        if (!f.cobro?.metodos && !clienteDeOtroPais(convo)) await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
         else if (!yaElegido) await preguntarElMetodo(convo, [] as never, precio, nombre);
         console.log(`[tablero] convo ${convoId}: upgrade a «${nombre}» — falta ${precio}`);
         return;
       }
-      if (f.cobro?.metodos) {
+      // (15/11/2026) UN CLIENTE DE OTRO PAÍS QUE EL DE LA RUTA (escribió al número de otro país, `paisDeLaRuta`): las
+      // burbujas de este cobro están escritas para el país de la ruta («A través de Nequi o Daviplata… Llave Bre-B» a un
+      // peruano). Él: «debería entregar los datos de Perú… en Perú no hay Bre-B». A él le llegan los métodos y datos de
+      // SU país («Métodos de pago»), como un cobro que pregunta el método. La contribución (abierto) queda como estaba.
+      const ajeno = f.cobro?.modo !== "abierto" && clienteDeOtroPais(convo);
+      if (ajeno) console.log(`[tablero] convo ${convoId}: cliente de otro país en el cobro «${f.titulo || f.id}» → los métodos de pago de su país, no las burbujas de la ficha`);
+      if (f.cobro?.metodos || ajeno) {
         // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése. Y CON UN SOLO
         // MÉTODO EN SU PAÍS (27/10/2026) tampoco: sus datos de frente. La contribución manda antes sus
         // burbujas (la lista de montos): sin ella no sabe cuánto aportar.
         const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
-        if (yaElegido && f.cobro.modo === "abierto") await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
+        if (yaElegido && f.cobro?.modo === "abierto") await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
         if (yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre))) {
           // (los datos ya salieron)
-        } else if (f.cobro.sin_preguntar) {
+        } else if (f.cobro?.sin_preguntar && !ajeno) {
           // El mensaje de antes ya preguntó el método: se espera su respuesta sin repetir la pregunta.
           console.log(`[tablero] convo ${convoId}: cobro abierto en silencio (el método ya se preguntó)`);
-        } else await preguntarElMetodo(convo, pasosDelCobro as never, precio, nombre);
+        } else await preguntarElMetodo(convo, (ajeno ? [] : pasosDelCobro) as never, precio, nombre);
       } else await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
       void sendInitiateCheckoutEvent({
         conversationId: convoId,
@@ -2178,6 +2185,13 @@ async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: Ficha
   const config = loadWorkflowConfig();
   const pais = getEffectiveCountryCode(convo.phone, config);
   const estado = estadoEnElTablero(convo.id);
+  // (15/11/2026) Un cliente de otro país que el de la ruta: los datos de SU país, no los escritos en la ficha.
+  if (clienteDeOtroPais(convo)) {
+    const metodo = metodoVigente(getConversationById(convo.id) ?? convo) ?? elUnicoMetodo(convo.phone);
+    if (metodo && (await mandarDatosDelMetodo(convo, metodo, precio))) return true;
+    await preguntarElMetodo(convo, [] as never, precio);
+    return true;
+  }
   const { vistos, conDatos } = burbujasConDatosDePago(f, estado);
   const ultimoTexto = [...vistos].reverse().find((p) => (p as { type: string }).type === "text");
   const pasos = conDatos.length ? conDatos : ultimoTexto ? [ultimoTexto] : [];
@@ -3687,6 +3701,15 @@ function paisDeLaRuta(convo: ConversationRow, tienda: Tienda | null | undefined,
     .map(([p]) => p);
   if (!paises.length) return paisDelCliente;
   return paises.includes(paisDelCliente) ? paisDelCliente : paises[0];
+}
+
+/** ¿El cliente es de otro país que el de su ruta? (escribió al número de otro país: `paisDeLaRuta`) */
+function clienteDeOtroPais(convo: ConversationRow): boolean {
+  const config = loadWorkflowConfig();
+  const pais = getEffectiveCountryCode(convo.phone, config);
+  const e = estadoEnElTablero(convo.id);
+  const tienda = (config?.tiendas ?? []).find((x) => x?.id === e?.tienda_id) ?? null;
+  return paisDeLaRuta(convo, tienda, pais) !== pais;
 }
 
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
