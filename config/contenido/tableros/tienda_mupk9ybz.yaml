@@ -7954,7 +7954,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvrom-s0283
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvrom-gmpvf
               peso: 1
@@ -8379,7 +8379,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdnvrom-qmb54
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvrom-cku31
               peso: 1
@@ -8725,7 +8725,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvrom-roskp
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvrom-iimii
               peso: 1
@@ -9021,10 +9021,8 @@ whatsapp:
                   spintax_ia:
                     - "{🔴 *Para adquirirlo respondé el método de pago que prefieras* 👇🏼|🔴 *Si deseás adquirirlo, solo decime cuál método de pago preferís* 👇🏼|🔴 *Para adquirirlo, solo indicanos cuál es el método de pago de tu preferencia* 👇🏼}"
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvrom-awsfd
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvrom-hyu3l
               peso: 1
@@ -9304,8 +9302,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvrom-bogfz
       tipo: entregar
       x: 2673
@@ -9875,7 +9871,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvroq-k7kih
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvroq-yshi0
               peso: 1
@@ -10430,7 +10426,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdnvroq-vagbw
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvroq-ijcqq
               peso: 1
@@ -10788,7 +10784,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvroq-ge5u4
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvroq-585bm
               peso: 1
@@ -11082,10 +11078,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvroq-jl8w0
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvroq-lvjr9
               peso: 1
@@ -11362,8 +11356,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvror-o44rd
       tipo: mensaje
       x: -385
@@ -11925,7 +11917,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvror-oejqf
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvror-u89jl
               peso: 1
@@ -12483,7 +12475,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdnvror-joghc
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvror-fzifp
               peso: 1
@@ -12975,7 +12967,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvror-upl30
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvror-x7kk8
               peso: 1
@@ -13274,10 +13266,8 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
                   enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvror-8nu3e
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvror-sljsx
               peso: 1
@@ -13557,8 +13547,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvror-k1utx
       tipo: mensaje
       x: -495
@@ -14069,7 +14057,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwdnvros-z8t5m
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvros-96eg1
               peso: 1
@@ -14239,7 +14227,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
                   spintax_ia:
                     - "{y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}"
@@ -14505,7 +14493,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwdnvros-nahqt
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvros-xlxth
               peso: 1
@@ -14851,7 +14839,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwdnvros-l5tgb
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwdnvros-jkll8
               peso: 1
@@ -15022,7 +15010,7 @@ whatsapp:
 
                       🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      🟢 *¿Deseas que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
+                      🟢 *¿Deseás que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
                   delay_after_sec: 6
                   decisions:
                     - id: d-mweg7vsd-r3noo
@@ -15275,10 +15263,8 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwdnvros-2suvb
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwdnvros-n48se
               peso: 1
@@ -15555,8 +15541,6 @@ whatsapp:
                           delay_after_sec: 6
                           enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwdnvros-x4f90
       tipo: entregar
       x: 2728
@@ -15649,7 +15633,7 @@ whatsapp:
               🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
 
               * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              * 2.- 📲 Y envianos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
@@ -15929,7 +15913,7 @@ whatsapp:
         - "@tienda:basico"
       seguimientos:
         - id: s-mwei09n9-3s81w
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwei09n9-6nlon
               peso: 1
@@ -16353,10 +16337,8 @@ whatsapp:
                             - luego nos envias tu comprobante y tendrás acceso al instante.
                           delay_after_sec: 6
                           enabled: false
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwei09na-4sgyv
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwei09na-aa51h
               peso: 1
@@ -16633,8 +16615,6 @@ whatsapp:
                           enabled: false
                   enabled: false
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwelg57r-hvdw9
       tipo: mensaje
       x: 550
@@ -16683,7 +16663,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELEGÍS?* 😊
+              *¿CUÁL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -16797,7 +16777,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
                   delay_after_sec: 6
                   spintax_ia:
                     - "{y ahora *sus hijos ya están aprendiendo* 🤗|y hoy *sus hijos ya están avanzando* 🤗|y ya *sus hijos están aprendiendo un montón* 🤗}"
@@ -16810,7 +16790,7 @@ whatsapp:
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   decisions:
                     - id: d-mwelg57r-0mb9p
