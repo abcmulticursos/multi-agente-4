@@ -5196,7 +5196,7 @@ payment_resend_steps:
       - "{Claro, aquí te envío los datos nuevamente 😊👇|Por supuesto, te reenvío los datos 😊👇|Entendido, aquí están nuevamente los datos 😊👇}"
     delay_after_sec: 6
 prompt_cache_enabled: true
-no_responder_organicos: false
+no_responder_organicos: true
 biblioteca_de_productos:
   - id: pmvxom7h2
     name: MEGA PACK DE RAZONAMIENTO VERBAL

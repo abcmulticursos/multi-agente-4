@@ -1392,6 +1392,7 @@ lineal:
     segunda_opcion_prestada: segunda_oculta
     modo_reenganche: true
     respaldo_entre_paises: false
+    no_responder_organicos: true
   offer:
     sequence_index: 2
     price_soles: 3.5
