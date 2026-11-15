@@ -15553,8 +15553,8 @@ whatsapp:
       titulo: Regalo
     - id: f-mweg7vsa-v6h68
       tipo: mensaje
-      x: -396
-      y: 24662
+      x: -473
+      y: 24563
       steps:
         - type: text
           body_variants:
@@ -15905,8 +15905,8 @@ whatsapp:
         ¿Deseas que te brinde los datos de pago? ✨
     - id: f-mwei09n9-5ugnj
       tipo: seguimientos
-      x: -66
-      y: 24167
+      x: -143
+      y: 24068
       presenta:
         - "@tienda:basico"
       seguimientos:
@@ -16619,8 +16619,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwelg57r-hvdw9
       tipo: mensaje
-      x: 627
-      y: 24827
+      x: 550
+      y: 24728
       titulo: INTRO DE ORDER BUMP PACK 2 EN 1
       steps:
         - type: image
@@ -16740,8 +16740,8 @@ whatsapp:
         - "@tienda:full"
     - id: f-mwelg57r-k0c2i
       tipo: seguimientos
-      x: 869
-      y: 24409
+      x: 792
+      y: 24310
       vista_compra:
         f-mvw3kh4y-eknk7:2: cable
         f-mvvo0a7c-uyvc:2: cable
@@ -17733,8 +17733,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwet8o4z-3toub
       tipo: cobro
-      x: 1727
-      y: 24332
+      x: 1650
+      y: 24233
       steps:
         - type: text
           body_variants:
@@ -17761,8 +17761,8 @@ whatsapp:
         metodos: true
     - id: f-mwet8o4z-6y6hz
       tipo: cobro
-      x: 1716
-      y: 25113
+      x: 1639
+      y: 25014
       steps:
         - type: text
           body_variants:
@@ -17789,22 +17789,22 @@ whatsapp:
         metodos: true
     - id: f-mwet8o4z-hq0iv
       tipo: entregar
-      x: 2640
-      y: 24343
+      x: 2563
+      y: 24244
       producto_id: "@tienda:full"
       entregas:
         - "@tienda:full"
     - id: f-mwet8o4z-8af33
       tipo: entregar
-      x: 2651
-      y: 25069
+      x: 2574
+      y: 24970
       producto_id: "@tienda:basico"
       entregas:
         - "@tienda:basico"
     - id: f-mwet8o4z-4dqj1
       tipo: regalo
-      x: 3267
-      y: 24761
+      x: 3190
+      y: 24662
       titulo: Regalo
     - id: f-mwgzrulf-di55y
       tipo: seguimientos
@@ -18862,10 +18862,6 @@ whatsapp:
       de: f-mwdnvror-o44rd
       salida: dec:d-mwdnvror-sbbva
       a: f-mwdnvror-j3w2b
-    - id: c-mwdnwr7w-w4y
-      de: f-mwdbnotb-nbdmi
-      salida: rep:r1
-      a: f-mwdnvrom-8r8fq
     - id: c-mwdnwvk4-xg3
       de: f-mwdbnotb-nbdmi
       salida: rep:r2
@@ -19103,6 +19099,13 @@ whatsapp:
       alto: 1489
       titulo: Nueva caja
       color: "#598fa1"
+    - id: k-mwhalmbx
+      x: -638
+      y: 23760
+      ancho: 4400
+      alto: 1496
+      titulo: Nueva caja
+      color: "#598fa1"
   espejos:
     - id: e-mwcbh8tj-q1pa
       ficha: f-mwcazaok-en2px
@@ -19171,24 +19174,24 @@ whatsapp:
     - id: esp-mwdnvros-axdv6
       ficha: f-mwdnvror-8elhp
       x: 2178
-      y: 18381
+      y: 18282
     - id: esp-mwdnvros-q8b1m
       ficha: f-mwdnvror-8elhp
-      x: 2156
-      y: 19085
+      x: 2189
+      y: 19041
     - id: esp-mwdnvros-60vms
       ficha: f-mwdnvros-uookl
       x: 2046
       y: 22671
     - id: esp-mwdnvros-2trm2
       ficha: f-mwdnvros-uookl
-      x: 2068
-      y: 21912
+      x: 2079
+      y: 21868
     - id: e-mwet9jnu-ivia
       ficha: f-mwelg57r-k0c2i
-      x: 2035
-      y: 23980
+      x: 1936
+      y: 23782
     - id: e-mwet9mfm-h1z0
       ficha: f-mwelg57r-k0c2i
-      x: 1980
-      y: 24662
+      x: 1903
+      y: 24563
