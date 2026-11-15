@@ -32607,24 +32607,8 @@ function PantallaDelTableroCargada({
             </div>
           </VentanaFlotante>
         )}
-        {/* «Montos de», al lado del Cerebro (01/11/2026); el tema (claro/mixto/oscuro) pasó al ☰. */}
-        <label className="flex items-center gap-1 text-[11px] text-tinta-suave" title="Los montos de los cobros se ven con los de este país">
-          Montos de
-          <select
-            value={paisVisto}
-            onChange={(e) => {
-              setPaisVisto(e.target.value);
-              onPais?.(e.target.value);
-            }}
-            className="rounded border border-borde bg-relleno px-1 py-0.5 text-[11px] text-tinta"
-          >
-            {paises.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* (15/11/2026) SIN «MONTOS DE»: hacía lo mismo que la bandera de abajo a la derecha (están unidos desde el
+            02/11) y bajaba la barra a dos líneas. Él: «quita eso nomás para recuperar campo visual». */}
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         <LienzoDelTablero

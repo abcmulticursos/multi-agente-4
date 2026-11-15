@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getMetaRuntimeSetting } from "@/lib/db";
+import { deleteMetaRuntimeSettings, getMetaRuntimeSetting, setMetaRuntimeSettings } from "@/lib/db";
 import { getPublicOrigin, graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getTokenDeLaConexion, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
-import { guardarOtraApp, otrasApps, quitarOtraApp } from "@/lib/meta/apps-de-meta";
+import { guardarOtraApp, otrasApps, quitarOtraApp, secretoDeOtraApp } from "@/lib/meta/apps-de-meta";
 import { fetchMeta } from "@/lib/meta/freno";
 import { olvidar } from "@/lib/meta/recuerdo";
+import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -17,11 +18,13 @@ export const runtime = "nodejs";
  */
 export async function GET() {
   const principal = getMetaAppId();
+  const suNegocio = negocioDeLaPrincipal();
   return NextResponse.json({
     principal: principal
       ? {
           appId: principal,
-          negocio: getMetaRuntimeSetting(`app_negocio_${principal}`) ?? null,
+          negocio: suNegocio?.nombre ?? getMetaRuntimeSetting(`app_negocio_${principal}`) ?? null,
+          negocioId: suNegocio?.id ?? null,
         }
       : null,
     otras: otrasApps(),
@@ -118,6 +121,28 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const appId = req.nextUrl.searchParams.get("appId")?.trim() ?? "";
   if (!appId) return NextResponse.json({ ok: false, error: "Falta el ID de la app." }, { status: 400 });
+  // LA PRINCIPAL (15/11/2026): otra de las apps pasa a ser la principal. Si es la única, no se puede desde aquí.
+  if (appId === getMetaAppId()) {
+    const siguiente = otrasApps().find((a) => secretoDeOtraApp(a.appId));
+    if (!siguiente) {
+      return NextResponse.json({
+        ok: false,
+        error: "Es tu única app. Para quitarla, usa «Cerrar sesión de Meta» en el asistente (deja Meta Connect vacío).",
+      });
+    }
+    const secreto = secretoDeOtraApp(siguiente.appId) as string;
+    setMetaRuntimeSettings({
+      meta_app_id: siguiente.appId,
+      meta_app_secret: secreto,
+      ...(siguiente.negocio ? { [`app_negocio_${siguiente.appId}`]: siguiente.negocio } : {}),
+      ...(siguiente.negocioId ? { [`app_negocio_id_${siguiente.appId}`]: siguiente.negocioId } : {}),
+    });
+    // Las firmas de los canales salen de la principal: una clave guardada a mano de la vieja ya no vale.
+    deleteMetaRuntimeSettings(["whatsapp_app_secret", "messenger_app_secret", "instagram_app_secret"]);
+    quitarOtraApp(siguiente.appId);
+    olvidar("");
+    return NextResponse.json({ ok: true, principal: siguiente.appId });
+  }
   quitarOtraApp(appId);
   olvidar("suscribir");
   return NextResponse.json({ ok: true });

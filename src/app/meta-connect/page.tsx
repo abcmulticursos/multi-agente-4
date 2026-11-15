@@ -848,16 +848,65 @@ function MedicionPorCuenta() {
  */
 function AppsDelBot() {
   type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null };
-  const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null } | null; otras: Otra[] } | null>(null);
+  const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null; negocioId: string | null } | null; otras: Otra[] } | null>(null);
+  // (15/11/2026) LOS ACTIVOS DE CADA APP. Él: «tiene que mostrar qué apps están conectadas, y sus activos». Salen de
+  // las mismas tarjetas por negocio de abajo (`/api/meta/connect/cuentas`): los del negocio dueño de cada app.
+  type Activos = { numeros: string[]; paginas: string[]; pixels: string[] };
+  const [activos, setActivos] = useState<Record<string, Activos>>({});
+  useEffect(() => {
+    void fetch("/api/meta/connect/cuentas", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { cuentas?: Array<{ id: string; numeros: string[]; paginas: string[]; pixels: string[] }> } | null) => {
+        if (!d?.cuentas) return;
+        setActivos(Object.fromEntries(d.cuentas.map((c) => [c.id, { numeros: c.numeros, paginas: c.paginas, pixels: c.pixels }])));
+      })
+      .catch(() => {});
+  }, [datos]);
+  /** La línea corta de una app: cuántos números, páginas y pixeles tiene su negocio. */
+  const cuantos = (negocioId: string | null) => {
+    if (!negocioId) return <span className="text-amber-700">negocio sin identificar</span>;
+    const a = activos[negocioId];
+    const n = (lista: string[] | undefined) => lista?.length ?? 0;
+    return (
+      <>
+        📱 {n(a?.numeros)} · 📘 {n(a?.paginas.filter((p) => !p.endsWith("(detectada)")))} · 📊 {n(a?.pixels)}
+      </>
+    );
+  };
+  /** LA TARJETA DE UNA APP (15/11/2026, su dibujo): nombre, negocio, cuántos activos y «Abrir» → el pop up de su negocio. */
+  const tarjeta = (app: { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null }, principal: boolean) => (
+    <button
+      key={app.appId}
+      type="button"
+      disabled={!app.negocioId}
+      onClick={() => app.negocioId && window.dispatchEvent(new CustomEvent("meta-connect:abrir-negocio", { detail: app.negocioId }))}
+      className="flex w-full items-center gap-3 rounded-xl border border-borde bg-tarjeta px-4 py-3 text-left shadow-sm hover:bg-relleno disabled:cursor-default"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-lg">🔑</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] font-extrabold text-tinta">{app.nombre ?? app.negocio ?? `App ${app.appId}`}</span>
+        <span className="block truncate text-xs text-tinta-suave">{app.negocio ?? "Negocio sin identificar"}</span>
+        <span className="mt-0.5 block text-[13px] font-semibold text-tinta">{cuantos(app.negocioId)}</span>
+      </span>
+      {principal && <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">Principal</span>}
+      {app.negocioId && <span className="shrink-0 rounded-full bg-relleno px-3 py-1 text-xs font-bold text-tinta-suave">Abrir</span>}
+    </button>
+  );
   const [appId, setAppId] = useState("");
   const [clave, setClave] = useState("");
   const [ocupado, setOcupado] = useState(false);
   const [resultado, setResultado] = useState<string | null>(null);
+  // El nombre de la principal («APP VIOLETA»): lo da `/api/meta/connect/app`, que ya lo recuerda media hora.
+  const [nombreDeLaPrincipal, setNombreDeLaPrincipal] = useState<string | null>(null);
   const leer = () =>
-    fetch("/api/meta/connect/apps", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setDatos(d))
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/meta/connect/apps", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d && setDatos(d)),
+      fetch("/api/meta/connect/app", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: { nombre?: string | null } | null) => setNombreDeLaPrincipal(d?.nombre ?? null)),
+    ]).catch(() => {});
   useEffect(() => {
     void leer();
   }, []);
@@ -887,43 +936,32 @@ function AppsDelBot() {
       setOcupado(false);
     }
   }
-  async function quitar(o: Otra) {
-    if (!window.confirm(`¿Quitar «${o.nombre ?? o.appId}» de este bot?\n\nSus números dejan de recibir mensajes aquí. En Meta no se toca nada.`)) return;
-    await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(o.appId)}`, { method: "DELETE" });
-    await leer();
-  }
   if (!datos) return null;
   return (
-    <section className="rounded-xl border border-borde bg-tarjeta p-4 shadow-sm">
-      <h2 className="text-sm font-extrabold uppercase tracking-wide text-tinta">🔑 Apps de este bot</h2>
-      <p className="mt-0.5 text-xs text-tinta-suave">
-        Una app por negocio: cada app recibe los mensajes de los números de su negocio, y todos llegan a este mismo chat.
-      </p>
-      <ul className="mt-3 space-y-2">
-        {datos.principal && (
-          <li className="flex items-center gap-3 rounded-lg border border-borde bg-relleno px-3 py-2 text-sm">
-            <span className="min-w-0 flex-1">
-              <b>{datos.principal.negocio ?? "App principal"}</b> <span className="text-xs text-tinta-suave">· ID {datos.principal.appId}</span>
-            </span>
-            <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">Principal</span>
-          </li>
-        )}
-        {datos.otras.map((o) => (
-          <li key={o.appId} className="flex items-center gap-3 rounded-lg border border-borde bg-relleno px-3 py-2 text-sm">
-            <span className="min-w-0 flex-1">
-              <b>{o.nombre ?? "App"}</b>
-              <span className="text-xs text-tinta-suave">
-                {" "}
-                · {o.negocio ?? "negocio sin identificar"} · ID {o.appId}
-              </span>
-            </span>
-            <button type="button" onClick={() => void quitar(o)} className="shrink-0 rounded-md border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">
-              Quitar
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+    <section className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-titulo text-xl font-extrabold text-tinta">🔑 Tus apps</h2>
+        {/* (15/11/2026) Él: «en meta connect agrega la opción de ir al tablero». */}
+        <a href="/editor?vista=tablero" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-800 hover:bg-emerald-100">
+          🧩 Ir al tablero
+        </a>
+      </div>
+      {datos.principal && tarjeta({ ...datos.principal, nombre: nombreDeLaPrincipal }, true)}
+      {datos.otras.map((o) => tarjeta(o, false))}
+      {/* (15/11/2026) Una app NUEVA va con el asistente (login, números, suscripción); al guardarla, la principal de
+          ahora pasa sola a «otras». El formulario plegado es para volver a sumar una que ya estaba preparada. */}
+      <div className="flex justify-center pt-1">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("meta-connect:otra-app"))}
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700"
+        >
+          ➕ Conectar otra app
+        </button>
+      </div>
+      <details className="text-xs text-tinta-suave">
+        <summary className="cursor-pointer text-center">¿Ya estaba preparada? Súmala solo con su ID y su clave ▾</summary>
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
         <input value={appId} onChange={(e) => setAppId(e.target.value.replace(/\D/g, ""))} placeholder="ID de la otra app" className="w-48 rounded-md border border-borde bg-tarjeta px-2.5 py-1.5 text-sm" />
         <input value={clave} onChange={(e) => setClave(e.target.value.trim())} placeholder="Clave secreta de esa app" type="password" className="w-64 rounded-md border border-borde bg-tarjeta px-2.5 py-1.5 text-sm" />
         <button
@@ -932,10 +970,11 @@ function AppsDelBot() {
           onClick={() => void agregar()}
           className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {ocupado ? "Agregando…" : "➕ Agregar otra app"}
+          {ocupado ? "Agregando…" : "➕ Agregar"}
         </button>
       </div>
       {resultado && <pre className="mt-2 whitespace-pre-wrap rounded-md bg-relleno px-3 py-2 text-xs text-tinta">{resultado}</pre>}
+      </details>
     </section>
   );
 }
@@ -953,6 +992,38 @@ function DiferenciacionPorNegocio() {
   const [errores, setErrores] = useState<Record<string, string>>({});
   /** El negocio cuyo pop up está abierto. null = ninguno. */
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
+  // (15/11/2026) POR APP: la tarjeta de una app («🔑 Tus apps») abre el pop up de SU negocio; aquí se sabe de qué app
+  // es cada negocio, para decirlo arriba y para «Desconectar esta app».
+  type AppDelNegocio = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null; principal: boolean };
+  const [appsDelBot, setAppsDelBot] = useState<AppDelNegocio[]>([]);
+  useEffect(() => {
+    const abrir = (e: Event) => setNegocioAbierto(String((e as CustomEvent).detail ?? "") || null);
+    window.addEventListener("meta-connect:abrir-negocio", abrir);
+    void fetch("/api/meta/connect/apps", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { principal?: { appId: string; negocio: string | null; negocioId: string | null } | null; otras?: AppDelNegocio[] } | null) => {
+        if (!d) return;
+        setAppsDelBot([
+          ...(d.principal ? [{ ...d.principal, nombre: null, principal: true }] : []),
+          ...(d.otras ?? []).map((o) => ({ ...o, principal: false })),
+        ]);
+      })
+      .catch(() => {});
+    return () => window.removeEventListener("meta-connect:abrir-negocio", abrir);
+  }, []);
+  async function desconectarApp(a: AppDelNegocio) {
+    const aviso = a.principal
+      ? `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nEs la app principal: otra de tus apps pasa a ser la principal. Sus números dejan de recibir mensajes en este bot. En Meta no se toca nada.`
+      : `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nSus números dejan de recibir mensajes en este bot. En Meta no se toca nada.`;
+    if (!window.confirm(aviso)) return;
+    const r = await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(a.appId)}`, { method: "DELETE" });
+    const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+    if (!d?.ok) {
+      window.alert(d?.error ?? "No se pudo desconectar.");
+      return;
+    }
+    window.location.reload();
+  }
   /** La cuenta de Facebook cuyo pop up está abierto (su nombre, o «sin-cuenta»). */
   const [cuentaFbAbierta, setCuentaFbAbierta] = useState<string | null>(null);
   /** EL TOKEN DE CADA NÚMERO, a la vista (21/10/2026): «pensé que se vería en la sección
@@ -1390,9 +1461,9 @@ function DiferenciacionPorNegocio() {
         const abierta = filas.find((f) => f.clave === cuentaFbAbierta);
         return (
           <>
-            <p className="text-center font-titulo text-xl font-extrabold text-tinta">
-              {filas.length ? "Tus cuentas de Facebook" : "Ningún negocio identificado todavía"}
-            </p>
+            {/* (15/11/2026) POR APP, NO POR CUENTA. Él: «nada me dice de qué app es cada una, confunde… sería entrar a la
+                app violeta, ver qué bm es y qué activos hay». Arriba van las apps («🔑 Tus apps», `AppsDelBot`), cada una
+                abre el pop up de su negocio. Las cuentas de Facebook quedan plegadas abajo, para quitarlas. */}
             {/* ↻ ACTUALIZAR SIN VOLVER A FACEBOOK (13/11/2026). */}
             {(filas.length > 0 || conectadas.length > 0) && (
               <div className="flex flex-col items-center gap-1.5">
@@ -1419,6 +1490,13 @@ function DiferenciacionPorNegocio() {
                 )}
               </div>
             )}
+            {filas.length > 0 && (
+            <details className="group rounded-xl border border-borde bg-tarjeta">
+              <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-semibold text-tinta-suave hover:text-tinta">
+                👤 Cuentas de Facebook conectadas ({filas.length}) <span className="group-open:hidden">▾</span>
+                <span className="hidden group-open:inline">▴</span>
+              </summary>
+              <div className="space-y-3 p-3 pt-0">
             {filas.map((f) => {
               const sinToken = f.negocios.reduce((s, c) => s + c.numerosConId.filter((n) => tokenDe[n.id] === false).length, 0);
               const vacia = f.negocios.length === 0;
@@ -1498,6 +1576,9 @@ function DiferenciacionPorNegocio() {
                 </div>
               );
             })}
+              </div>
+            </details>
+            )}
 
             {/* EL POP UP DE UNA CUENTA DE FACEBOOK: sus negocios, cada uno una fila que abre el suyo. */}
             {abierta ? (
@@ -1805,6 +1886,43 @@ function DiferenciacionPorNegocio() {
                     : vacio("Sin páginas en este negocio")}
                   {titulo("Píxeles")}
                   {listaDePixeles(pixeles)}
+                  {/* (15/11/2026) Las páginas de ESTE negocio que no se ven: una línea plegada, no la lista larga de antes. */}
+                  {(() => {
+                    const faltan = (datos.sinAcceso ?? []).flatMap((s) => s.paginas).filter((p) => p.negocioId === cuenta.id);
+                    if (!faltan.length) return null;
+                    return (
+                      <details className="mx-4 mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+                        <summary className="cursor-pointer font-semibold">
+                          ⚠ {faltan.length === 1 ? "1 página no se ve" : `${faltan.length} páginas no se ven`} · ver cómo arreglarlo
+                        </summary>
+                        <p className="mt-1">{faltan.map((p) => p.nombre).join(" · ")}</p>
+                        <p className="mt-1">
+                          En Business Suite → Configuración → Páginas → elige la página → <b>«Asignar personas»</b> → tu cuenta, con acceso total.
+                          Luego <b>«↻ Actualizar desde Meta»</b>.
+                        </p>
+                      </details>
+                    );
+                  })()}
+                  {/* (15/11/2026) DESCONECTAR LA APP DE ESTE NEGOCIO. */}
+                  {(() => {
+                    const app = appsDelBot.find((a) => a.negocioId === cuenta.id);
+                    if (!app) return null;
+                    return (
+                      <div className="mx-4 mt-3 flex items-center justify-between gap-3 border-t border-borde pt-3">
+                        <span className="text-xs text-tinta-suave">
+                          App: <b className="text-tinta">{app.nombre ?? app.negocio ?? app.appId}</b> · ID {app.appId}
+                          {app.principal ? " · principal" : ""}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void desconectarApp(app)}
+                          className="shrink-0 rounded-lg border border-red-200 bg-tarjeta px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        >
+                          🔌 Desconectar esta app
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

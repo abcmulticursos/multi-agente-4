@@ -19,7 +19,7 @@ import { otrasApps } from "@/lib/meta/apps-de-meta";
  */
 export type NegociosDeLasApps = { ids: string[]; nombres: string[] };
 
-function negocioDeLaPrincipal(): { id: string; nombre: string } | null {
+export function negocioDeLaPrincipal(): { id: string; nombre: string } | null {
   const appId = getMetaAppId();
   if (!appId) return null;
   const nombre = getMetaRuntimeSetting(`app_negocio_${appId}`)?.trim();

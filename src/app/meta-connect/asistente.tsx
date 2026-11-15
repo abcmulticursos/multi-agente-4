@@ -112,6 +112,16 @@ export default function AsistenteDeConexion() {
   const [bmDelToken, setBmDelToken] = useState<string | null>(null);
   /** La línea que deja el regreso de Facebook: éxito (se va sola) o qué hacer si falló. */
   const [regreso, setRegreso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
+  // MULTI APP (15/11/2026): «➕ Conectar otra app con el asistente» (en «🔑 Apps de este bot») lo abre en el paso de
+  // la app. Al guardar la nueva, la anterior pasa sola a «otras apps» y sigue funcionando (`settings`).
+  useEffect(() => {
+    const abrirEnLaApp = () => {
+      setAbierto(true);
+      setPaso("app");
+    };
+    window.addEventListener("meta-connect:otra-app", abrirEnLaApp);
+    return () => window.removeEventListener("meta-connect:otra-app", abrirEnLaApp);
+  }, []);
 
   // Lo que ya hay: la app y lo conectado.
   const [estado, setEstado] = useState<{ appId: string | null; appName: string | null; paginas: number; numeros: number; conFacebook?: boolean } | null>(null);
