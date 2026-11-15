@@ -32060,7 +32060,12 @@ function PantallaDelTableroCargada({
     const r = window.setTimeout(() => setAvisoDelTablero(null), 9000);
     return () => window.clearTimeout(r);
   }, [avisoDelTablero]);
-  const [paisDePagos, setPaisDePagos] = useState<string>("PE");
+  const [paisDePagos, setPaisDePagos] = useState<string>(paisVisto || "PE");
+  // (15/11/2026) «Datos de pago por país» SIGUE A LA BANDERITA de abajo a la derecha. Él: «el selector solo cambia
+  // cuando lo toco ahí, pero debería también funcionar con la banderita». Y al revés: elegir el país ahí mueve la bandera.
+  useEffect(() => {
+    if (paisVisto) setPaisDePagos(paisVisto);
+  }, [paisVisto]);
   const vivoCfg = useRef(cfg);
   vivoCfg.current = cfg;
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
@@ -32864,7 +32869,15 @@ function PantallaDelTableroCargada({
         >
           <label className="mb-3 flex items-center gap-2 text-xs font-semibold text-tinta">
             País
-            <select value={paisDePagos} onChange={(e) => setPaisDePagos(e.target.value)} className="rounded border border-borde bg-relleno px-2 py-1 text-xs">
+            <select
+              value={paisDePagos}
+              onChange={(e) => {
+                setPaisDePagos(e.target.value);
+                setPaisVisto(e.target.value);
+                onPais?.(e.target.value);
+              }}
+              className="rounded border border-borde bg-relleno px-2 py-1 text-xs"
+            >
               {paises.map((p) => (
                 <option key={p} value={p}>
                   {banderaDe(p)} {p}
@@ -34077,16 +34090,50 @@ function DatosDePagoDelTablero({
             {metodos.length === 0 && (
               <p className="text-xs text-tinta-suave">Este país no tiene métodos todavía (menú ajustes → Precios y pagos → Métodos de pago).</p>
             )}
-            {metodos.map(([m, etiqueta, pasos], i) => (
-              <PasoDelGestor
-                key={m}
-                n={String(i + 1)}
-                titulo={etiqueta}
-                detalle={pasos.length ? `${pasos.length} burbuja(s)` : "sin escribir: no manda nada"}
-                elegido={actual?.[0] === m}
-                onElegir={() => setElegido(i)}
-              />
-            ))}
+            {metodos.map(([m, etiqueta, pasos], i) => {
+              // (15/11/2026) «★ PRINCIPAL», el mismo de menú ajustes → Precios y pagos: el que el bot manda de frente
+              // cuando el cliente quiere pagar y no eligió método. Uno por país; tocarlo otra vez lo desmarca.
+              const esPrincipal = (perfil.payment_buttons ?? []).some((b) => b.method === m && b.principal === true);
+              return (
+                <div key={m} className="flex items-stretch gap-1">
+                  <div className="min-w-0 flex-1">
+                    <PasoDelGestor
+                      n={String(i + 1)}
+                      titulo={etiqueta}
+                      detalle={pasos.length ? `${pasos.length} burbuja(s)` : "sin escribir: no manda nada"}
+                      elegido={actual?.[0] === m}
+                      onElegir={() => setElegido(i)}
+                    />
+                  </div>
+                  {(perfil.payment_buttons ?? []).some((b) => b.method === m) && (
+                    <button
+                      type="button"
+                      title={esPrincipal ? "Método principal: sus datos salen de frente cuando el cliente quiere pagar. Toca para quitarlo." : "Marcar como principal: sus datos salen de frente cuando el cliente quiere pagar sin elegir método."}
+                      onClick={() => {
+                        onSnapshot();
+                        onConfigChange({
+                          ...cfg,
+                          modality_payment_profiles: {
+                            ...cfg.modality_payment_profiles,
+                            [mode]: {
+                              ...cfg.modality_payment_profiles?.[mode],
+                              [pais]: {
+                                ...perfil,
+                                payment_buttons: (perfil.payment_buttons ?? []).map((b) => ({ ...b, principal: !esPrincipal && b.method === m })),
+                              },
+                            },
+                          },
+                        });
+                      }}
+                      className={`shrink-0 rounded-lg border px-2 text-sm font-bold ${esPrincipal ? "border-amber-400 bg-amber-50 text-amber-600" : "border-borde text-tinta-suave hover:bg-relleno"}`}
+                    >
+                      {esPrincipal ? "★" : "☆"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            <p className="text-[11px] text-tinta-suave">★ = método principal: el que sale de frente cuando el cliente quiere pagar sin elegir.</p>
             <p className="mt-1 text-[11px] text-tinta-suave">
               Es lo que el cobro manda cuando el cliente elige ese método. {"{{PRODUCTO}}"} es el producto de ese cobro, y el precio
               es el de lo que eligió (el de la vista previa es de ejemplo).

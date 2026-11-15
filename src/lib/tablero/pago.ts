@@ -128,6 +128,20 @@ export function elUnicoMetodo(phone: string | null | undefined): string | null {
   return metodos.length === 1 ? metodos[0].method : null;
 }
 
+/**
+ * EL MÉTODO PRINCIPAL DE SU PAÍS (15/11/2026): el marcado con «★ Principal» (menú ajustes → Precios y pagos, o
+ * ☰ → Datos de pago por país). Él: «quiero comprar, cómo pago… dice que el cliente ya quiere pagar, ¿para qué
+ * repreguntar el método? Se le entregan los datos, punto». Sin ninguno marcado, null: se pregunta, como antes.
+ */
+export function metodoPrincipal(phone: string | null | undefined): string | null {
+  return getPaymentMethods(phone).find((m) => m.principal)?.method ?? null;
+}
+
+/** Con qué método mandarle los datos sin preguntar: el que ya eligió, el único de su país, o el principal. */
+export function metodoDeFrente(convo: ConversationRow): string | null {
+  return metodoVigente(convo) ?? elUnicoMetodo(convo.phone) ?? metodoPrincipal(convo.phone);
+}
+
 /** El nombre con que el cliente ve un método («PICHINCHA»), para decirle «¡Perfecto, con PICHINCHA!». */
 export function nombreDelMetodo(phone: string | null | undefined, metodo: string): string {
   return getPaymentMethods(phone).find((m) => m.method === metodo)?.label ?? metodo;

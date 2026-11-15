@@ -88,7 +88,7 @@ import {
 import { looksLikeMediaTurn, preguntaCuantasOpcionesHay } from "@/lib/openrouter";
 import { datosRecienEnviados, deQueHablaConIA, elegirOpcionConIA, responderConIA, type OpcionParaLaIA, type ProductoParaLaIA } from "./conversador";
 import { conLosComodinesDeLaFicha, type ProductoConPrecio } from "./comodines";
-import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, ponerPreparadorDeDatos, ponerPreparadorDeEntrega, preguntarElMetodo } from "./pago";
+import { conElNombreDelProducto, elUnicoMetodo, mandarDatosDelMetodo, metodoDeFrente, metodoPrincipal, metodoQueNombra, metodoVigente, nombreDelMetodo, ponerElPrecioPorDefecto, ponerPreparadorDeDatos, ponerPreparadorDeEntrega, preguntarElMetodo } from "./pago";
 import { correoQueSeLePropuso, correoQueSeMarco, revisarCorreo, textoDelCorreoDudoso, textoDelCorreoEnviado } from "./correo";
 import { sendBotButtons, sendBotMediaFromDrive, sendBotText } from "@/lib/workflow/sender";
 import { executeNotifyEmergency } from "@/lib/workflow/emergency";
@@ -1091,7 +1091,7 @@ async function irA(
         // Como la venta de siempre, SOLO ese mensaje: ya tiene los datos de su método (HEA1, 27/10/2026:
         // repetir «¡Excelente! puedes adquirirlo…» con los datos sonaba a otra compra). Si los pide, el
         // cobro abierto se los manda; sin método todavía, se le pregunta.
-        const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
+        const yaElegido = metodoDeFrente(getConversationById(convoId) ?? convo);
         // Un Cobro SIN «preguntar el método» (28/10/2026) lleva los datos en sus burbujas: salen ésas, con lo
         // que falta; no se le pregunta un método que esa ruta no pide. (15/11/2026: salvo un cliente de OTRO país,
         // `clienteDeOtroPais`: esas burbujas son del país de la ruta; a él, los métodos del suyo.)
@@ -1110,7 +1110,7 @@ async function irA(
         // CON EL MÉTODO YA ELEGIDO NO SE VUELVE A PREGUNTAR: le llegan los datos de ése. Y CON UN SOLO
         // MÉTODO EN SU PAÍS (27/10/2026) tampoco: sus datos de frente. La contribución manda antes sus
         // burbujas (la lista de montos): sin ella no sabe cuánto aportar.
-        const yaElegido = metodoVigente(getConversationById(convoId) ?? convo) ?? elUnicoMetodo(convo.phone);
+        const yaElegido = metodoDeFrente(getConversationById(convoId) ?? convo);
         if (yaElegido && f.cobro?.modo === "abierto") await sendConfiguredSteps(convo, pasosDelCobro as never, precio);
         if (yaElegido && (await mandarDatosDelMetodo(convo, yaElegido, precio, nombre))) {
           // (los datos ya salieron)
@@ -1863,7 +1863,11 @@ async function contestarConIA(
     ...(cobro?.cobro?.metodos && !metodo && !nota
       ? {
           sinMetodo: async () => {
-            await preguntarElMetodo(convo, [] as never, precioElegido, elegidoAhora ? nombreDe(elegidoAhora) ?? undefined : undefined);
+            // (15/11/2026) Con un método «★ Principal» en su país, sus datos de frente; sin él, la lista como antes.
+            const nombreElegido = elegidoAhora ? nombreDe(elegidoAhora) ?? undefined : undefined;
+            const principal = metodoPrincipal(convo.phone);
+            if (principal && (await mandarDatosDelMetodo(convo, principal, precioElegido, nombreElegido))) return;
+            await preguntarElMetodo(convo, [] as never, precioElegido, nombreElegido);
           },
         }
       : {}),
@@ -2187,7 +2191,7 @@ async function mandarDatosDeLaFicha(convo: ConversationRow, t: Tablero, f: Ficha
   const estado = estadoEnElTablero(convo.id);
   // (15/11/2026) Un cliente de otro país que el de la ruta: los datos de SU país, no los escritos en la ficha.
   if (clienteDeOtroPais(convo)) {
-    const metodo = metodoVigente(getConversationById(convo.id) ?? convo) ?? elUnicoMetodo(convo.phone);
+    const metodo = metodoDeFrente(getConversationById(convo.id) ?? convo);
     if (metodo && (await mandarDatosDelMetodo(convo, metodo, precio))) return true;
     await preguntarElMetodo(convo, [] as never, precio);
     return true;
