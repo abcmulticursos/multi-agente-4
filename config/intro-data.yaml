@@ -9517,6 +9517,10 @@ tiendas:
 
 
         Que tenga un excelente día!
+  - id: tienda_mwihl1ms
+    nombre: BORRAR
+    numero: ""
+    pagina: ""
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -13014,6 +13018,7 @@ tableros:
   tienda_mvxkyp9i: "@pieza:tableros/tienda_mvxkyp9i.yaml"
   tienda_mw91gb6s: "@pieza:tableros/tienda_mw91gb6s.yaml"
   tienda_mwf8wo1h: "@pieza:tableros/tienda_mwf8wo1h.yaml"
+  tienda_mwihl1ms: "@pieza:tableros/tienda_mwihl1ms.yaml"
 workflows:
   figurarte2:
     encendido: true

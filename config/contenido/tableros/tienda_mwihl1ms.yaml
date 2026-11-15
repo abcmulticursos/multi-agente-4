@@ -1,0 +1,64 @@
+whatsapp:
+  encendido: false
+  fichas:
+    - id: inicio
+      tipo: inicio
+      x: 0
+      y: 160
+      pais: AR
+      sin_venta: true
+    - id: f-mwihnbhe-b1z5
+      tipo: mensaje
+      x: 418
+      y: 77
+      steps:
+        - type: text
+          body_variants:
+            - ¡Hola! Te saluda *Rubén, asesor de Impulso 360 Digital* 👋. ¡Espero que estés genial! 🌟
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎨✨ ¡FIGURARTE: COLOREA POR FIGURAS!🔺🟢✨
+
+              Descubre una nueva forma de colorear donde las figuras geométricas se convierten en increíbles animales y personajes. 🐯🎨📚
+
+              ¡Incluye todo lo siguiente
+
+              🐯 Más de 80 animales para descubrir y colorear.
+              🦸 Más de 30 personajes formados por figuras geométricas.
+              🔵 Círculos, cuadrados, triángulos y rectángulos.
+              🎨 Una forma diferente de colorear, ¡sin utilizar números!
+              🟨 Figuras que se transforman en increíbles dibujos.
+              🧠 Actividades que estimulan la creatividad y la atención.
+              ✏️ Una experiencia divertida para aprender mientras coloreas.
+              🌈 Diseños originales para dar vida con tus colores.
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1putAGUALd6qUNYn6tEWjY3P1DZRV8srM/view?usp=drive_link
+          caption_variants:
+            - ""
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎁 Además, al adquirir FIGURARTE, recibes 4 BONOS SORPRESA GRATIS🎁🎨
+
+              🔺🟢 Descubre una nueva forma de colorear con figuras geométricas y transforma círculos, cuadrados, triángulos y rectángulos en increíbles animales y personajes.
+
+              📚🌎 Todo digital, en PDF y listo para recibir e imprimir.
+
+              ⚠️ ¡Aprovecha esta promoción antes de que termine y disfruta de una forma diferente, creativa y divertida de colorear! 🎨✨
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🎨🐯 ¡Descubre FIGURARTE! 🦁🌈
+
+              📚 Una forma divertida de aprender los colores, reconocer figuras y dejar volar la creatividad.
+
+              ❤️ ¡Lo recibes primero y pagas después!
+
+              👇 ¿Te gustaría recibir la muestra? Responde SÍ. 💬
+          delay_after_sec: 6
+  cables: []

@@ -650,6 +650,7 @@ whatsapp:
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
+        metodos: true
     - id: f-mw4xhgdb-dozb0
       tipo: seguimientos
       x: 924
