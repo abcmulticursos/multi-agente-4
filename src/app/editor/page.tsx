@@ -61036,7 +61036,7 @@ function TiendasDelProyecto({
                 exactamente ésas: no se inventa una ventana nueva. */}
             <VentanaDeProducto
               titulo="🏪 Configuración de la tienda"
-              zoom={0.9}
+              zoom={1}
               color={pintada ? suColor : undefined}
               onCerrar={() => {
                 setTiendaAbierta(null);
