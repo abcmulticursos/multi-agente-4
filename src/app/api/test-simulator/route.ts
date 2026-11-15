@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
     channel?: unknown;
     tienda?: unknown;
     ruta?: unknown;
+    numero?: unknown;
   };
   try {
     body = await req.json();
@@ -118,8 +119,12 @@ export async function POST(req: NextRequest) {
       // (14/11/2026) El número (o la página) del país elegido, si la tienda tiene uno propio ahí (`Tienda.por_pais`):
       // un cliente de ese país entraría por ahí.
       const delPais = suya.por_pais?.[country];
+      // (15/11/2026) `numero`: a qué número de la tienda escribe (el de OTRO país), para probar «el número decide la
+      // ruta y la lada los datos». Solo si es uno de sus números.
+      const pedido = typeof body.numero === "string" ? body.numero.trim() : "";
+      const susNumeros = [String(suya.numero ?? "").trim(), ...Object.values(suya.por_pais ?? {}).map((g) => String(g?.numero ?? "").trim())].filter(Boolean);
       if (channel === "whatsapp") {
-        setConversationWaPhoneNumberId(convo.id, String(delPais?.numero ?? "").trim() || String(suya.numero ?? "").trim());
+        setConversationWaPhoneNumberId(convo.id, (pedido && susNumeros.includes(pedido) ? pedido : "") || String(delPais?.numero ?? "").trim() || String(suya.numero ?? "").trim());
       } else {
         setConversationMessengerPage(convo.id, String(delPais?.pagina ?? "").trim() || String(suya.pagina ?? "").trim());
       }

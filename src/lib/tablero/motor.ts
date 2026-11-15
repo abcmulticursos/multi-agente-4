@@ -3672,6 +3672,23 @@ function fichaDelBoton(t: Tablero, estado: { ficha_id?: string | null; seg_ficha
   return aqui.find(conCable) ?? aqui[0] ?? todas.find(conCable) ?? todas[0];
 }
 
+/**
+ * EL PAÍS DE LA RUTA: LO DECIDE EL NÚMERO AL QUE ESCRIBIÓ (15/11/2026). Él: «si un número está conectado a un inicio,
+ * debe repartir lo de esa ruta… pero debe dar los datos de la persona del país de la lada». El número puesto en el pop
+ * up de un país (`Tienda.por_pais`) lleva a ese Inicio. El mismo número en varios países: si la lada del cliente es de
+ * uno de ellos, el suyo; si no, el primero. Un número que no está en ningún país: el del cliente, como antes.
+ * SOLO la ruta: precios, métodos de pago y quién cobra siguen saliendo del país de su lada (`pais` en todo lo demás).
+ */
+function paisDeLaRuta(convo: ConversationRow, tienda: Tienda | null | undefined, paisDelCliente: string): string {
+  const numero = String(convo.wa_phone_number_id ?? "").trim();
+  if (!numero || !tienda?.por_pais) return paisDelCliente;
+  const paises = Object.entries(tienda.por_pais)
+    .filter(([, g]) => String(g?.numero ?? "").trim() === numero)
+    .map(([p]) => p);
+  if (!paises.length) return paisDelCliente;
+  return paises.includes(paisDelCliente) ? paisDelCliente : paises[0];
+}
+
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
   let estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
@@ -3684,15 +3701,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     const canal = canalDelTablero(convo);
     const t = tableroDe(config, tienda?.id, canal);
     if (!tienda?.id || !t) return false;
-    if (!elTableroAtiende(t, pais, convo.channel === "test")) {
+    // (15/11/2026) La ruta, la del país del número al que escribió (`paisDeLaRuta`); sus datos, los de su lada (`pais`).
+    const paisRuta = paisDeLaRuta(convo, tienda, pais);
+    if (paisRuta !== pais) console.log(`[tablero] convo ${convo.id}: escribió al número de ${paisRuta} → ruta de ${paisRuta}, precios y cobro de ${pais}`);
+    if (!elTableroAtiende(t, paisRuta, convo.channel === "test")) {
       // APAGADO = NO ATIENDE (01/11/2026). Una tienda que ya tiene tablero no cae en la venta automática cuando
       // está apagado (o sin Inicio de su país, o ese Inicio no vende): no se le contesta. La conversación sigue
       // «new»: al encenderlo, su próximo mensaje entra por el Inicio. Sin tablero, el automático de siempre.
       if (!laTiendaTieneTablero(t)) return false;
-      console.log(`[tablero] convo ${convo.id}: «${tienda.nombre ?? tienda.id}» tiene tablero y no atiende (${canal}, ${pais}: ${t.encendido ? "su Inicio no vende" : "apagado"}) → no se le contesta`);
+      console.log(`[tablero] convo ${convo.id}: «${tienda.nombre ?? tienda.id}» tiene tablero y no atiende (${canal}, ${paisRuta}: ${t.encendido ? "su Inicio no vende" : "apagado"}) → no se le contesta`);
       return true;
     }
-    const inicio = inicioDelPais(t, pais)!;
+    const inicio = inicioDelPais(t, paisRuta)!;
     if (!entrarAlTablero(convo.id, tienda.id, inicio.id, canal)) return false;
     setConversationState(convo.id, "tablero");
     console.log(`[tablero] convo ${convo.id} entra al tablero de «${tienda.nombre ?? tienda.id}» (${canal}, ${pais})`);
@@ -3837,7 +3857,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   // RECONECTÓ EL INICIO A OTRA TUBERÍA y este cliente se quedó en la vieja: al volver a escribir pasa a la
   // nueva, como el automático al cambiar de modalidad (ver `seQuedoEnLaTuberiaVieja`).
   if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "")) {
-    const vieja = seQuedoEnLaTuberiaVieja(convo, t, estado, pais, contenido);
+    // (15/11/2026) Contra el Inicio de SU ruta (la del número), no el de su lada: si no, un peruano en la ruta de
+    // Argentina «se habría quedado en la tubería vieja» de Perú y saltaría allá.
+    const suTienda = (config?.tiendas ?? []).find((x) => x?.id === estado?.tienda_id) ?? null;
+    const vieja = seQuedoEnLaTuberiaVieja(convo, t, estado, paisDeLaRuta(convo, suTienda, pais), contenido);
     if (vieja) {
       // LO DE LA VIEJA SE SUELTA (28/10/2026, ronda 27: de 2 productos a 1, el bot seguía ofreciendo el
       // pack que la nueva ya no vende): sus seguimientos colgados y lo que presentó. Lo que ya recibió
