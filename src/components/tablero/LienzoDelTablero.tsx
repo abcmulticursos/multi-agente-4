@@ -142,8 +142,6 @@ function iconoDeEntrega(f: FichaEnElEditor, clave: string, t: TableroEnElEditor,
  * por cada botón de cada ficha que aparecía. El tablero es un objeto nuevo en cada cambio: mientras sea el mismo, el
  * resultado se reutiliza; al editar, se calcula de nuevo. Lo que se ve no cambia.
  */
-/** Por debajo de este zoom las fichas se dibujan simples (ver `NodoDeFicha`): sus botones ya no se leen. */
-const ZOOM_DE_LEJOS = 0.45;
 const recuerdos = new WeakMap<object, WeakMap<object, Map<string, unknown>>>();
 function recordado<R>(t: object, otro: object, clave: string, calcular: () => R): R {
   let porT = recuerdos.get(t);
@@ -887,37 +885,10 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const f = data.ficha;
   // 🪞 EL ESPEJO (05/11/2026): la misma ficha en otro sitio. Se dibuja igual, con un borde de neón y su marca.
   const espejo = data.espejo;
-  // DE LEJOS, LA FICHA SIMPLE (14/11/2026, nivel de detalle como Sendy/Miro). Él: «si hay delay es jodido trabajar». Con
-  // el zoom alejado no se leen los botones: se dibuja una caja con su color, número, ícono, título y el «!» si le falta
-  // algo. Al acercarse, la ficha completa. Los puntos de los cables siguen ahí (invisibles) para que lleguen a su sitio.
-  const deLejos = useStore((s) => s.transform[2] < ZOOM_DE_LEJOS);
+  // (14/11/2026: la ficha simple de lejos se quitó el mismo día. Él: «no me gusta que al alejarse se minimicen los
+  // elementos… corrígelo». Siempre la ficha completa.)
   if (!ctx) return null;
   const a = ASPECTO[f.tipo];
-  if (deLejos && !ctx.estaciones && f.tipo !== "reparto") {
-    // Solo las salidas que la ficha completa muestra (14/11/2026: un cable de un cuadrito de una burbuja APAGADA sigue
-    // guardado, y de lejos se dibujaba hacia su Cobro — una conexión que el bot no usa). Nada de cables mentirosos.
-    const suyas = new Set(salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero).map((s) => s.clave));
-    const salidasConCable = [...new Set(ctx.tablero.cables.filter((c) => c.de === f.id && suyas.has(c.salida)).map((c) => c.salida))];
-    const conFalta = !!ctx.faltas?.get(f.id)?.size;
-    return (
-      <div
-        onDoubleClick={() => ctx.abrir(f.id)}
-        className={`relative w-[250px] rounded-lg border-4 bg-white ${a.borde} ${f.apagada ? "opacity-50" : ""}`}
-        style={espejo ? { outline: "4px solid #22d3ee", outlineOffset: 3 } : undefined}
-      >
-        <Handle type="target" position={Position.Left} id="entra" className="!opacity-0" style={{ top: 18 }} />
-        <div className={`flex items-center gap-2 rounded-t-[4px] px-3 py-3 text-white ${a.color}`}>
-          <span className="rounded-full bg-white px-2.5 text-[26px] font-black leading-[38px] text-slate-900">{ctx.numeroDe[f.id] ?? ""}</span>
-          <span className="text-[30px] leading-none">{a.icono}</span>
-          {conFalta && <span className="ml-auto rounded-full bg-red-600 px-3 text-[30px] font-black leading-[40px] text-white">!</span>}
-        </div>
-        <div className="truncate px-3 py-3 text-[26px] font-bold text-slate-800">{f.titulo?.trim() || a.nombre}</div>
-        {salidasConCable.map((s) => (
-          <Handle key={s} type="source" position={Position.Right} id={s} className="!opacity-0" />
-        ))}
-      </div>
-    );
-  }
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero);
   const avisos = avisosDeLaFicha(ctx.tablero as Tablero, f as FichaDelTablero, ctx.paisVisto);
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
@@ -2561,20 +2532,28 @@ type DatosDeTexto = {
 function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
   const n = data.nota;
   const [editando, setEditando] = useState(data.editarAlNacer);
-  const [borrador, setBorrador] = useState(n.texto);
+  // (14/11/2026) El texto recién creado empieza vacío al escribir (antes se seleccionaba «Texto» para reemplazarlo; ahora
+  // solo hay cursor, y se escribía detrás: «TextoHola»). Si se deja vacío, se quita, como siempre.
+  const [borrador, setBorrador] = useState(data.editarAlNacer && n.texto === "Texto" ? "" : n.texto);
   // El foco a la caja al empezar a escribir (el lienzo a veces se lo queda tras el clic que lo creó).
   const campo = useRef<HTMLTextAreaElement>(null);
+  // (14/11/2026) EL CLIC QUE LO CREA A VECES LE QUITA EL FOCO al instante: en el primer medio segundo, un «blur» le
+  // devuelve el foco en vez de terminar (si no, el texto recién creado, vacío, se borraba solo).
+  const empezoAEscribir = useRef(0);
   useEffect(() => {
     if (!editando) return;
+    empezoAEscribir.current = Date.now();
+    // (14/11/2026) Solo el cursor, al final del texto: «al escribir que aparezca el cursor para escribir». Antes se
+    // seleccionaba todo el texto.
     const t = window.setTimeout(() => {
-      campo.current?.focus();
-      campo.current?.select();
+      const c = campo.current;
+      if (!c) return;
+      c.focus();
+      c.setSelectionRange(c.value.length, c.value.length);
     }, 60);
     return () => window.clearTimeout(t);
   }, [editando]);
   const [pintando, setPintando] = useUnaSolaPaleta();
-  // La barrita se ve del mismo tamaño aunque se aleje la vista.
-  const zoom = useStore((s) => s.transform[2]);
   const tam = n.tam ?? 24;
   const color = n.color || (data.tema === "oscuro" ? "#f1f5f9" : "#1e293b");
   const estilo = { fontSize: tam, color, fontWeight: n.negrita ? 800 : 500, lineHeight: 1.15 } as const;
@@ -2596,11 +2575,19 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
       }}
       title={editando ? undefined : "Arrastra para moverlo · doble clic para escribir"}
     >
-      {selected && !editando && (
+      {/* (14/11/2026) LA BARRITA, ARRIBA EN LA BARRA DEL EDITOR (junto a «Modo profesional»), mientras el texto está elegido
+          o se escribe. Tocar sus botones no saca de la escritura (mousedown sin quitar el foco). */}
+      {(selected || editando) &&
+        typeof document !== "undefined" &&
+        document.getElementById("barra-del-texto") &&
+        createPortal(
         <div
-          className="nodrag nopan absolute bottom-full left-0 mb-2 flex items-center gap-1 whitespace-nowrap rounded-lg border border-slate-300 bg-white p-1 shadow-lg"
-          style={{ transform: `scale(${1 / Math.max(zoom, 0.02)})`, transformOrigin: "bottom left" }}
-          onMouseDown={(e) => e.stopPropagation()}
+          className="flex items-center gap-0.5 whitespace-nowrap rounded-lg border border-slate-300 bg-white p-0.5 shadow-sm [&_button]:px-1.5 [&_button]:py-0 [&_button]:text-[11px]"
+          title="Opciones del texto elegido"
+          onMouseDown={(e) => {
+            if ((e.target as HTMLElement).tagName !== "INPUT") e.preventDefault();
+            e.stopPropagation();
+          }}
           onDoubleClick={(e) => e.stopPropagation()}
         >
           <button type="button" className={boton} title="Más chico" onClick={() => ponerTam(tam - (tam > 40 ? 8 : 2))}>
@@ -2614,9 +2601,8 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
             title="Tamaño de la letra, en puntos"
             onChange={(e) => Number(e.target.value) > 0 && ponerTam(Number(e.target.value))}
             onKeyDown={(e) => e.stopPropagation()}
-            className="w-14 rounded-md border border-slate-300 px-1 py-0.5 text-center text-xs text-slate-800"
+            className="w-10 rounded-md border border-slate-300 px-0.5 py-0 text-center text-[11px] text-slate-800"
           />
-          <span className="text-[10px] font-semibold text-slate-500">pt</span>
           <button type="button" className={boton} title="Más grande" onClick={() => ponerTam(tam + (tam >= 40 ? 8 : 2))}>
             A+
           </button>
@@ -2630,7 +2616,7 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
                 setPintando({ x: r.left, y: r.bottom + 6 });
               }}
             >
-              <span className="h-3 w-3 rounded-sm border border-black/20" style={{ backgroundColor: color }} /> Color
+              <span className="h-3 w-3 rounded-sm border border-black/20" style={{ backgroundColor: color }} />
             </button>
           )}
           <button type="button" className={`${boton} ${n.negrita ? "bg-slate-800 text-white hover:bg-slate-700" : ""}`} title="Negrita" onClick={() => data.alCambiar({ ...n, negrita: n.negrita ? undefined : true })}>
@@ -2639,7 +2625,8 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
           <button type="button" className={`${boton} text-red-700`} title="Borrar este texto (Ctrl+Z lo devuelve)" onClick={data.alBorrar}>
             🗑
           </button>
-        </div>
+        </div>,
+        document.getElementById("barra-del-texto")!
       )}
       {pintando &&
         data.selectorDeColor &&
@@ -2667,17 +2654,26 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
           autoFocus
           value={borrador}
           onChange={(e) => setBorrador(e.target.value)}
-          onBlur={terminar}
-          onFocus={(e) => e.currentTarget.select()}
+          onBlur={() => {
+            if (Date.now() - empezoAEscribir.current < 600) {
+              window.setTimeout(() => campo.current?.focus(), 0);
+              return;
+            }
+            terminar();
+          }}
           onKeyDown={(e) => {
             e.stopPropagation();
-            if (e.key === "Escape") e.currentTarget.blur();
+            if (e.key === "Escape") {
+              empezoAEscribir.current = 0;
+              e.currentTarget.blur();
+            }
           }}
           rows={Math.max(1, lineas.length)}
           cols={Math.max(6, ...lineas.map((l) => l.length + 1))}
           placeholder="Escribe aquí"
-          className="nodrag nopan nowheel resize-none overflow-hidden rounded-md border-2 border-violet-500 bg-white/90 px-1 outline-none"
-          style={{ ...estilo, color: n.color || "#1e293b" }}
+          // (14/11/2026) Sin borde ni fondo: solo el texto y su cursor, del color del texto.
+          className="nodrag nopan nowheel resize-none overflow-hidden border-0 bg-transparent px-1 outline-none"
+          style={{ ...estilo, caretColor: color }}
         />
       ) : (
         <div className={`cursor-move whitespace-pre px-1 ${selected ? "rounded-md outline outline-2 outline-violet-500" : ""}`} style={estilo}>
@@ -4287,14 +4283,13 @@ export default function LienzoDelTablero({
             onMouseEnter={() => setMenuMas(true)}
             onMouseLeave={() => setMenuMas(false)}
           >
-            <button
-              type="button"
-              onClick={() => setMenuMas((v) => !v)}
+            {/* (14/11/2026) SIN CLIC: solo se abre al pasar el ratón. Él: «el botón "+" no debe ser clickeable». */}
+            <span
               title="Agregar"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-xl font-bold text-white shadow-md hover:bg-violet-700"
+              className="flex h-9 w-9 cursor-default select-none items-center justify-center rounded-full bg-violet-600 text-xl font-bold text-white shadow-md"
             >
-              {menuMas ? "×" : "+"}
-            </button>
+              +
+            </span>
             {menuMas && (
               // El relleno de arriba (pt-2) es parte del menú: el puntero baja del «+» al menú sin salir de él.
               <div className="absolute left-0 top-full z-50 pt-2">
@@ -4413,35 +4408,56 @@ export default function LienzoDelTablero({
                 </>
               )
             : despuesDelMas}
-          <button
-            type="button"
-            onClick={() => {
-              setLupaAbierta((v) => !v);
-              setEnLaLupa("");
+          {/* (14/11/2026) LA LUPA, COMO EL «+»: se abre al pasar el ratón y se cierra al salir, salvo que tenga un número
+              escrito. Solo números (el número de la ficha). La ✕ lo borra y la cierra. */}
+          <div
+            className="flex items-center gap-2"
+            onMouseEnter={() => setLupaAbierta(true)}
+            onMouseLeave={() => {
+              if (!enLaLupa.trim()) setLupaAbierta(false);
             }}
-            title="Buscar una ficha por su número (86) o por lo que dice"
-            className={`flex h-9 w-9 items-center justify-center rounded-full text-lg shadow-md ${
-              lupaAbierta ? "bg-violet-600 text-white" : "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
-            }`}
           >
-            🔍
-          </button>
-          {lupaAbierta && (
-            <input
-              autoFocus
-              type="search"
-              value={enLaLupa}
-              onChange={(e) => setEnLaLupa(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setEnLaLupa("");
-                  setLupaAbierta(false);
-                }
-              }}
-              placeholder="N.º de ficha (ej. 86) o texto"
-              className="h-9 w-52 rounded-full border-2 border-violet-500 bg-white px-3 text-sm text-slate-800 shadow-md outline-none"
-            />
-          )}
+            <span
+              title="Buscar una ficha por su número"
+              className={`flex h-9 w-9 cursor-default select-none items-center justify-center rounded-full text-lg shadow-md ${
+                lupaAbierta ? "bg-violet-600 text-white" : "border border-slate-300 bg-white text-slate-800"
+              }`}
+            >
+              🔍
+            </span>
+            {lupaAbierta && (
+              <span className="relative flex items-center">
+                <input
+                  autoFocus
+                  type="text"
+                  inputMode="numeric"
+                  value={enLaLupa}
+                  onChange={(e) => setEnLaLupa(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setEnLaLupa("");
+                      setLupaAbierta(false);
+                    }
+                  }}
+                  placeholder="N.º de ficha (ej. 86)"
+                  className="h-9 w-48 rounded-full border-2 border-violet-500 bg-white pl-3 pr-8 text-sm text-slate-800 shadow-md outline-none"
+                />
+                {enLaLupa && (
+                  <button
+                    type="button"
+                    title="Borrar"
+                    onClick={() => {
+                      setEnLaLupa("");
+                      setLupaAbierta(false);
+                    }}
+                    className="absolute right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-300"
+                  >
+                    ✕
+                  </button>
+                )}
+              </span>
+            )}
+          </div>
           {/* EL AVISO, SIEMPRE (14/11/2026): rojo con cuántas faltan, verde si no falta nada. Tocarlo abre la lista. */}
           {!revisando && (
             <button

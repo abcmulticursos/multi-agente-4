@@ -634,9 +634,16 @@ input,
 /* (13/11/2026) MÁS GRUESO Y QUE SE VEA DE LEJOS, como el magenta de los espejos. Él: «que también las fichas adquieran
    color cian… más grueso y que a lo lejos se distinga». 7 px DE PANTALLA con cualquier zoom (--zoom-tablero), más su halo.
    La familia de un espejo sigue en magenta: su regla va más abajo y gana. */
-.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja),
-.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus,
-.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):focus-visible {
+/* (14/11/2026) EL TEXTO SUELTO («T») NO LLEVA ESTE BORDE: «al escribir el texto que aparezca el cursor, sin ese borde de
+   selección color cian». Elegido, lleva su marco violeta fino; escribiendo, solo el cursor. */
+.lienzo-del-tablero .react-flow__node-texto.selected,
+.lienzo-del-tablero .react-flow__node-texto.selected:focus,
+.lienzo-del-tablero .react-flow__node-texto.selected:focus-visible {
+  outline: none !important;
+}
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):not(.react-flow__node-texto),
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):not(.react-flow__node-texto):focus,
+.lienzo-del-tablero .react-flow__node.selected:not(.react-flow__node-caja):not(.react-flow__node-texto):focus-visible {
   border-radius: 14px;
   /* (14/11/2026) UN POCO MÁS DELGADO QUE EL MAGENTA (5 px): «que queden un poco más delgados que los magentas». 4 px y
      sin el halo, que lo hacía ver el doble de grueso. */

@@ -29928,6 +29928,9 @@ function VistaPizarra({
             </button>
           ))}
         </span>
+        {/* LAS OPCIONES DEL TEXTO SUELTO («T»), AQUÍ ARRIBA (14/11/2026). Él: «para cambiarle de tamaño no debe ser ahí
+            encima del texto sino arriba, al lado de donde dice Modo profesional». El texto elegido pone aquí su barrita. */}
+        <span id="barra-del-texto" className="inline-flex items-center" />
         <span className="ml-auto" />
         {/* CHAT Y KANBAN DESDE AQUÍ (11/11/2026, él: «en el tablero haya el botón de Kanban, para que me lleve al Kanban y
             al Chat… arriba, a la derecha antes de rehacer y deshacer»). Con algo sin guardar, pregunta antes (Guardar,
@@ -32697,14 +32700,13 @@ function PantallaDelTableroCargada({
               {/* SE ABRE AL PASAR EL PUNTERO Y SE CIERRA AL INSTANTE AL SALIR, como el «+» (01/11/2026). Él: «ese
                   menú hamburguesa que tenga la misma característica del menú "+"». El menú va pegado (pt-2, sin hueco). */}
               <div className="relative" onMouseEnter={() => setMenuHerramientas(true)} onMouseLeave={() => setMenuHerramientas(false)}>
-              <button
-                type="button"
-                onClick={() => setMenuHerramientas((v) => !v)}
+              {/* (14/11/2026) SIN CLIC, como el «+»: solo se abre al pasar el ratón. */}
+              <span
                 title="Tienda, productos y simulador"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-lg font-bold text-white shadow-md hover:bg-slate-800"
+                className="flex h-9 w-9 cursor-default select-none items-center justify-center rounded-full bg-slate-700 text-lg font-bold text-white shadow-md"
               >
-                {menuHerramientas ? "×" : "☰"}
-              </button>
+                ☰
+              </span>
               {menuHerramientas && (
                 <div className="absolute left-0 top-full z-50 pt-2">
                 <div className="w-72 overflow-hidden rounded-xl border border-borde bg-tarjeta py-1 text-sm text-tinta shadow-2xl">
