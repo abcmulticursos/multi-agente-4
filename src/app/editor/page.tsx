@@ -36640,7 +36640,7 @@ function VentanaDelPais({
       onCerrar={onCerrar}
       // (14/11/2026) Él: «demasiado angosto… los nombres de las páginas a duras penas se leen» y «120 estaría bien».
       ancho="max-w-5xl"
-      zoom={1.05}
+      zoom={1}
     >
       <div className="mas-contraste grid gap-4 p-1 md:grid-cols-2">
         <div className="bn-cajon">
@@ -36761,7 +36761,7 @@ function TarjetaDeLaPortada({
       onClick={onAbrir}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onAbrir())}
       // (14/11/2026) Más contraste: él, «le falta un poco de contraste». Borde azulado más marcado, letra más oscura.
-      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border-[1.5px] border-[color-mix(in_srgb,var(--bn-activo)_35%,var(--bn-sel-borde))] bg-tarjeta px-5 py-4 text-left shadow-md transition-colors hover:bg-relleno"
+      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border-[1.5px] border-[color-mix(in_srgb,var(--bn-activo)_28%,var(--bn-sel-borde))] bg-tarjeta px-5 py-4 text-left shadow transition-colors hover:bg-relleno"
     >
       <span aria-hidden className="shrink-0 text-xs text-tinta-suave">
         ▶
@@ -61036,7 +61036,7 @@ function TiendasDelProyecto({
                 exactamente ésas: no se inventa una ventana nueva. */}
             <VentanaDeProducto
               titulo="🏪 Configuración de la tienda"
-              zoom={1.05}
+              zoom={0.9}
               color={pintada ? suColor : undefined}
               onCerrar={() => {
                 setTiendaAbierta(null);
