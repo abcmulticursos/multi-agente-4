@@ -955,9 +955,10 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         onMouseEnter={(e) => verLaLinea(e.currentTarget, d)}
         onMouseLeave={() => ponerLineaAlDestino(null)}
       >
-        <span style={{ width: 16, borderTop: `3px ${solo ? "dashed" : "solid"} ${colorDeLaFicha}` }} />
+        {/* El trazo y la etiqueta, como los de una colita de verdad (`CableComoEtiqueta`). */}
+        <span style={{ width: 26, borderTop: `4px ${solo ? "dashed" : "solid"} ${colorDeLaFicha}` }} />
         <span
-          className="whitespace-nowrap rounded-full border-2 bg-white px-1.5 text-[10px] font-bold text-slate-800 shadow-sm"
+          className="whitespace-nowrap rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
           style={{ borderColor: ASPECTO[d.tipo].trazo, borderStyle: solo ? "dashed" : "solid" }}
         >
           {texto}
@@ -1522,8 +1523,9 @@ function LineaAlDestinoVisible() {
   return (
     <ViewportPortal>
       <svg style={{ position: "absolute", left: 0, top: 0, width: 1, height: 1, overflow: "visible", pointerEvents: "none", zIndex: 1000 }}>
-        {/* (14/11/2026: «sale un cable azul que casi ni se ve»: del color de su ficha, más grueso y sin transparencia.) */}
-        <path d={camino} fill="none" stroke={v.color} strokeWidth={5 / z} strokeDasharray={`${12 / z} ${7 / z}`} />
+        {/* (14/11/2026) IGUAL QUE LA LÍNEA DE UNA COLITA (`CableComoEtiqueta`), del color de su ficha. Él: «hazlo igual que la
+            ficha 71, la de la ficha 85 está muy grueso» (la 71 tiene su colita propia; la 85, cables puestos desde su espejo). */}
+        <path d={camino} fill="none" stroke={v.color} strokeWidth={3.5 / z} strokeDasharray={`${9 / z} ${6 / z}`} opacity={0.8} />
         <circle cx={tx} cy={ty} r={6 / z} fill={v.color} />
       </svg>
     </ViewportPortal>

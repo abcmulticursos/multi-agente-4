@@ -36496,7 +36496,8 @@ function CobradorPorPais({
   const nombreDeToda = cobradores.find((c) => c.id === limpio(tienda.cobrador))?.nombre?.trim();
   return (
     <div className="block text-xs font-medium text-tinta-suave">
-      Quién cobra en cada país
+      {/* (14/11/2026) En el pop up de un país ya lo dice su cabecera. */}
+      {!paisesFijos && "Quién cobra en cada país"}
       <div className="mt-1 space-y-1.5">
         {paises.map((pais) => {
           const q = quienCobraEn(cfg, tienda, pais);
@@ -36577,6 +36578,21 @@ function VentanaConListo({ titulo, detalle, onCerrar, children, ancho }: { titul
   );
 }
 
+/** La cabeza de una tarjeta del pop up de un país: su cuadrito de color con el ícono, el título y una línea (14/11/2026). */
+function CabezaDelCampo({ icono, fondo, titulo, ayuda }: { icono: string; fondo: string; titulo: string; ayuda: string }) {
+  return (
+    <div className="mb-2 flex items-center gap-3">
+      <span aria-hidden className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl shadow-sm ${fondo}`}>
+        {icono}
+      </span>
+      <span className="min-w-0">
+        <span className="font-titulo block text-sm font-extrabold tracking-tight">{titulo}</span>
+        <span className="block text-[11px] leading-snug opacity-75">{ayuda}</span>
+      </span>
+    </div>
+  );
+}
+
 /**
  * EL GRUPO DE UN PAÍS (14/11/2026). Él: «un pop up para el grupo de inicio de Perú: número, página y pixel, y quién
  * cobra… otro pop up para Argentina con las mismas características». Lo vacío usa lo de toda la tienda. Como en la
@@ -36619,9 +36635,9 @@ function VentanaDelPais({
       detalle="Número, página, pixel y quién cobra para los clientes de este país. Lo que dejes vacío usa lo de toda la tienda."
       onCerrar={onCerrar}
     >
-      <div className="grid gap-3 p-1 md:grid-cols-2">
-        <div className="block text-xs font-medium text-tinta-suave">
-          📱 Número de WhatsApp de {pais}
+      <div className="grid gap-4 p-1 md:grid-cols-2">
+        <div className="bn-cajon">
+          <CabezaDelCampo icono="📱" fondo="bg-emerald-100" titulo={`Número de WhatsApp · ${pais}`} ayuda="Quien escriba a este número entra a esta tienda." />
           <ElegirConexion
             valor={g.numero ?? ""}
             opciones={conSuBM(conexiones.numeros)}
@@ -36642,13 +36658,12 @@ function VentanaDelPais({
               </span>
             ) : null;
           })()}
-          <span className="mt-1 block text-[10px] text-tinta-suave">
-            Quien escriba a este número entra a esta tienda. Lo atiende el Inicio de <strong>su</strong> país, con su precio, y
-            todo le sale por este número.
+          <span className="mt-2 block text-[11px] opacity-75">
+            Lo atiende el Inicio de <strong>su</strong> país, con su precio, y todo le sale por este número.
           </span>
         </div>
-        <div className="block text-xs font-medium text-tinta-suave">
-          📘 Página de Facebook de {pais}
+        <div className="bn-cajon">
+          <CabezaDelCampo icono="📘" fondo="bg-blue-100" titulo={`Página de Facebook · ${pais}`} ayuda="Con ella Meta registra las compras de este país." />
           <ElegirConexion
             valor={g.pagina ?? ""}
             opciones={paginas.visibles}
@@ -36657,10 +36672,10 @@ function VentanaDelPais({
             vacio={deLaTienda(conexiones.paginas, limpio(tienda.pagina), "Vacío = la tienda no tiene página")}
             sinLista="No hay ninguna página de esa cuenta. Conéctala en Meta Connect, o escribe su ID aquí."
           />
-          <span className="mt-1 block text-[10px] text-tinta-suave">Con ella Meta registra las compras de este país (y atiende su Messenger).</span>
+          <span className="mt-2 block text-[11px] opacity-75">Y atiende su Messenger.</span>
         </div>
-        <div className="block text-xs font-medium text-tinta-suave">
-          📊 Pixel (conjunto de datos) de {pais}
+        <div className="bn-cajon">
+          <CabezaDelCampo icono="📊" fondo="bg-violet-100" titulo={`Pixel · ${pais}`} ayuda="El conjunto de datos donde se marcan sus compras." />
           <ElegirConexion
             valor={g.pixel ?? ""}
             opciones={pixels.visibles}
@@ -36670,24 +36685,183 @@ function VentanaDelPais({
             sinLista="No hay ningún pixel de esa cuenta. Escribe su ID aquí, o déjalo vacío."
             esConjuntoDeDatos
           />
-          <span className="mt-1 block text-[10px] text-tinta-suave">Donde se marcan las compras de los clientes de este país.</span>
         </div>
-        <div className="block text-xs font-medium text-tinta-suave">
-          🏢 Cuenta (BM) de {pais}
-          <div className={`mt-1 rounded-md border px-2 py-1.5 text-sm font-semibold ${mezcla ? "border-red-400 bg-red-50 text-red-800" : "border-borde bg-tarjeta text-tinta"}`}>
-            {cuenta ? cuenta.nombre : "Sin identificar (elige un número conectado)"}
+        <div className={`bn-cajon ${mezcla ? "!border-red-400" : ""}`}>
+          <CabezaDelCampo icono="🏢" fondo={mezcla ? "bg-red-100" : "bg-slate-100"} titulo={`Cuenta (BM) · ${pais}`} ayuda="La fija el número. Página y pixel solo se ofrecen de ésta." />
+          <div className={`mt-2 rounded-xl border px-4 py-3 text-sm font-bold ${mezcla ? "border-red-400 bg-red-50 text-red-800" : "border-[var(--bn-sel-borde)] bg-[var(--bn-sel)]"}`}>
+            {cuenta ? `🏢 ${cuenta.nombre}` : "Sin identificar · elige un número conectado"}
           </div>
-          {mezcla ? (
-            <span className="mt-1 block text-[11px] font-bold text-rojo">⚠ {mezcla} Número, página y pixel de un país tienen que ser del mismo BM.</span>
-          ) : (
-            <span className="mt-1 block text-[10px] text-tinta-suave">La fija el número. Página y pixel solo se ofrecen de ésta (y lo compartido con ella).</span>
+          {mezcla && (
+            <span className="mt-2 block text-[11px] font-bold text-rojo">⚠ {mezcla} Número, página y pixel de un país tienen que ser del mismo BM.</span>
           )}
         </div>
       </div>
-      <div className="mt-3 p-1">
+      <div className="bn-cajon mx-1 mt-4">
+        <CabezaDelCampo icono="💰" fondo="bg-amber-100" titulo={`Quién cobra · ${pais}`} ayuda="A quién le pagan los clientes de este país." />
         <CobradorPorPais cfg={cfg} tienda={tienda} onCambiar={onCobrador} paisesFijos={[pais]} />
       </div>
     </VentanaConListo>
+  );
+}
+
+/** El fondo del cuadrito de la bandera, con el color de su país (14/11/2026, su imagen de referencia). */
+const FONDO_DEL_PAIS: Record<string, string> = {
+  PE: "bg-red-100",
+  CO: "bg-sky-100",
+  AR: "bg-amber-100",
+  EC: "bg-yellow-100",
+  MX: "bg-emerald-100",
+  CL: "bg-blue-100",
+  BO: "bg-lime-100",
+  US: "bg-indigo-100",
+  ES: "bg-orange-100",
+};
+
+/**
+ * ¿ESTE PAÍS ESTÁ ABIERTO EN LA TIENDA? Con tablero, su Inicio encendido y conectado (lo mismo que dice el Inicio:
+ * «Encendido · vende»). Sin tablero, la tienda encendida. Solo pantalla.
+ */
+function paisAbiertoEnLaTienda(cfg: FullConfig, tienda: TiendaEditor, pais: string): boolean {
+  if (tienda.enabled === false) return false;
+  const tablero = (cfg.tableros?.[tienda.id] as { whatsapp?: TableroEnElEditor } | undefined)?.whatsapp;
+  const fichas = tablero?.fichas ?? [];
+  if (!fichas.some((f) => f.tipo !== "inicio")) return true;
+  const inicio = fichas.find((f) => f.tipo === "inicio" && String(f.pais ?? "").toUpperCase() === pais);
+  if (!inicio) return false;
+  return !inicio.sin_venta && !inicio.en_revision && (tablero?.cables ?? []).some((c) => c.de === inicio.id);
+}
+
+/** UNA TARJETA DE LA PORTADA (14/11/2026): el mismo aspecto que las filas de los menús (triangulito, cuadrito, Abrir). */
+function TarjetaDeLaPortada({
+  icono,
+  fondo,
+  titulo,
+  subtitulo,
+  estado,
+  onAbrir,
+}: {
+  icono: ReactNode;
+  fondo: string;
+  titulo: string;
+  subtitulo: string;
+  estado?: ReactNode;
+  onAbrir: () => void;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onAbrir}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onAbrir())}
+      className="flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-borde bg-tarjeta px-5 py-4 text-left shadow-sm transition-colors hover:bg-relleno"
+    >
+      <span aria-hidden className="shrink-0 text-xs text-tinta-suave">
+        ▶
+      </span>
+      <span aria-hidden className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-sm ${fondo}`}>
+        {icono}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="font-titulo block text-base font-extrabold uppercase tracking-tight text-tinta">{titulo}</span>
+        <span className="mt-0.5 block truncate text-xs leading-snug text-tinta-suave">{subtitulo}</span>
+      </span>
+      {estado}
+      <span className="shrink-0 rounded-full bg-relleno px-3 py-1.5 text-xs font-bold text-tinta-suave">Abrir</span>
+    </div>
+  );
+}
+
+/**
+ * LA PORTADA DE LA TIENDA (14/11/2026). Él, con su imagen de referencia: «yo toco la configuración de la tienda, y
+ * aparezca para elegir pop ups». Arriba su logo, «TIENDA» y su nombre; debajo una tarjeta por país (ABIERTO / CERRADO)
+ * que abre su pop up (número, página, pixel y quién cobra), la de los productos y la configuración general.
+ */
+function PortadaDeLaTienda({
+  cfg,
+  tienda,
+  conexiones,
+  nombre,
+  pendientes,
+  onPais,
+  onProductos,
+  onGeneral,
+}: {
+  cfg: FullConfig;
+  tienda: TiendaEditor;
+  conexiones: ConexionesDelProyecto;
+  nombre: string;
+  /** Cuántas cosas quedan por revisar (las de `revisarTienda` sin ignorar). */
+  pendientes: number;
+  onPais: (pais: string) => void;
+  onProductos: () => void;
+  onGeneral: () => void;
+}) {
+  const limpio = (v: unknown) => String(v ?? "").trim();
+  const etiquetaDe = (lista: ConexionElegible[], id: string) => lista.find((o) => o.id === id)?.etiqueta ?? id;
+  const insignia = (abierto: boolean) => (
+    <span
+      className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-black tracking-wide text-white shadow-sm ${abierto ? "bg-emerald-600" : "bg-red-600"}`}
+    >
+      {abierto ? "ABIERTO" : "CERRADO"}
+    </span>
+  );
+  const alineacion = (tienda.alineacion ?? {}) as Record<string, string>;
+  const productos = [...new Set(Object.values(alineacion).filter(Boolean))]
+    .map((id) => (cfg.biblioteca_de_productos ?? []).find((p) => p.id === id)?.name?.trim())
+    .filter(Boolean);
+  return (
+    <div className="space-y-3">
+      <div className="mb-4 flex items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/tablero/tienda.png" alt="" className="h-16 w-16 shrink-0 rounded-xl" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] font-black uppercase tracking-[0.35em] text-tinta">Tienda</div>
+          <div className="font-titulo truncate text-2xl font-extrabold leading-tight text-tinta">{nombre}</div>
+          <div className="text-xs text-tinta-suave">Sus países, con su número y quién cobra, y los productos que vende.</div>
+        </div>
+        <button
+          type="button"
+          onClick={onGeneral}
+          className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${
+            pendientes ? "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100" : "border-emerald-300 bg-emerald-50 text-emerald-800"
+          }`}
+        >
+          {pendientes ? `⚠ ${pendientes} ${pendientes === 1 ? "cosa" : "cosas"} por revisar` : "✅ Lista para vender"}
+        </button>
+      </div>
+      {paisesDeLaTienda(cfg, tienda).map((pais) => {
+        const g = tienda.por_pais?.[pais] ?? {};
+        const abierto = paisAbiertoEnLaTienda(cfg, tienda, pais);
+        const numero = limpio(g.numero) ? `📱 ${etiquetaDe(conexiones.numeros, limpio(g.numero))}` : limpio(tienda.numero) ? "📱 El número de la tienda" : "📱 Sin número";
+        const cobra = quienCobraEn(cfg, tienda, pais).nombre;
+        return (
+          <TarjetaDeLaPortada
+            key={pais}
+            icono={banderaDe(pais)}
+            fondo={FONDO_DEL_PAIS[pais] ?? "bg-slate-100"}
+            titulo={`${COUNTRIES[pais as CountryCode]?.label ?? pais} - ${abierto ? "Abierto" : "Cerrado"}`}
+            subtitulo={`${numero}${cobra ? ` · 💰 Cobra ${cobra}` : ""}`}
+            estado={insignia(abierto)}
+            onAbrir={() => onPais(pais)}
+          />
+        );
+      })}
+      <TarjetaDeLaPortada
+        icono="📦"
+        fondo="bg-orange-100"
+        titulo="Productos disponibles en la tienda"
+        subtitulo={productos.length ? productos.join(" · ") : "Sin elegir: juega los productos de la alineación general"}
+        onAbrir={onProductos}
+      />
+      <TarjetaDeLaPortada
+        icono="⚙️"
+        fondo="bg-slate-100"
+        titulo="Configuración general"
+        subtitulo="Nombre, color, número, página, pixel y quién cobra de toda la tienda, y cómo presenta"
+        estado={pendientes ? <span className="shrink-0 rounded-md bg-amber-500 px-2.5 py-1 text-xs font-black text-white shadow-sm">⚠ {pendientes}</span> : undefined}
+        onAbrir={onGeneral}
+      />
+    </div>
   );
 }
 
@@ -59925,7 +60099,8 @@ function ElegirConexion({
       {opciones.length === 0 ? (
         <p className="mt-1 text-[10px] text-amber-700 oscuro:text-amber-800">{sinLista}</p>
       ) : (
-        <span ref={cajaDelSelector} className="relative mt-1 block">
+        // (14/11/2026) `elegir-conexion` y sus `ec-*`: dentro de las ventanas emergentes toma su estilo (globals.css).
+        <span ref={cajaDelSelector} className="elegir-conexion relative mt-1 block">
           <button
             type="button"
             // SE PARA LA PROPAGACIÓN, Y NO ES UN DETALLE.
@@ -59943,7 +60118,7 @@ function ElegirConexion({
               e.preventDefault();
               setAbierto((v) => !v);
             }}
-            className="flex w-full items-center gap-3 rounded-lg border border-borde bg-tarjeta px-4 py-3 text-left hover:bg-neutral-50 oscuro:hover:bg-white/5"
+            className={`ec-boton ${abierto ? "ec-abierto" : ""} flex w-full items-center gap-3 rounded-lg border border-borde bg-tarjeta px-4 py-3 text-left hover:bg-neutral-50 oscuro:hover:bg-white/5`}
           >
             {elegido ? (
               filaDe(elegido)
@@ -59976,7 +60151,7 @@ function ElegirConexion({
 
                   Ese cierre por `mousedown` ya hace lo que hacía la capa: se añadió el
                   05/10/2026 justo para eso. Sin la capa, funciona solo. */}
-              <span className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-80 flex-col gap-0.5 overflow-auto rounded-lg border border-borde bg-tarjeta p-1.5 shadow-lg">
+              <span className="ec-lista absolute left-0 right-0 top-full z-50 mt-1 flex max-h-80 flex-col gap-0.5 overflow-auto rounded-lg border border-borde bg-tarjeta p-1.5 shadow-lg">
                 {/* «NINGUNO», PARA PODER QUITARLO.
                     LO PIDIÓ EL DUEÑO el 02/10/2026: «cuando despliego los selectores no
                     hay opción para quitarlas, debería también en el selector decir
@@ -59994,7 +60169,7 @@ function ElegirConexion({
                     onCambio("");
                     setAbierto(false);
                   }}
-                  className={`rounded-md px-3 py-2 text-left hover:bg-neutral-100 oscuro:hover:bg-white/10 ${
+                  className={`ec-opcion ${puesto === "" ? "ec-elegida" : ""} rounded-md px-3 py-2 text-left hover:bg-neutral-100 oscuro:hover:bg-white/10 ${
                     puesto === "" ? "bg-neutral-100 oscuro:bg-white/10" : ""
                   }`}
                 >
@@ -60008,7 +60183,7 @@ function ElegirConexion({
                 {ordenadas.map((o, i) => (
                   <Fragment key={o.id}>
                     {o.separador && o.separador !== ordenadas[i - 1]?.separador ? (
-                      <span className="mt-1.5 block border-t border-borde px-3 pb-0.5 pt-2 text-[11px] font-bold uppercase tracking-wide text-tinta-suave first:mt-0 first:border-t-0">
+                      <span className="ec-separador mt-1.5 block border-t border-borde px-3 pb-0.5 pt-2 text-[11px] font-bold uppercase tracking-wide text-tinta-suave first:mt-0 first:border-t-0">
                         {o.separador}
                       </span>
                     ) : null}
@@ -60022,11 +60197,16 @@ function ElegirConexion({
                         onCambio(o.id);
                         setAbierto(false);
                       }}
-                      className={`flex items-center gap-3 rounded-md px-3 py-2 hover:bg-neutral-100 oscuro:hover:bg-white/10 ${
+                      className={`ec-opcion ${o.id === puesto ? "ec-elegida" : ""} flex items-center gap-3 rounded-md px-3 py-2 hover:bg-neutral-100 oscuro:hover:bg-white/10 ${
                         o.id === puesto ? "bg-neutral-100 oscuro:bg-white/10" : ""
                       }`}
                     >
                       {filaDe(o)}
+                      {o.id === puesto && (
+                        <span aria-hidden className="ec-check shrink-0 text-sm font-black">
+                          ✓
+                        </span>
+                      )}
                     </button>
                   </Fragment>
                 ))}
@@ -60038,9 +60218,9 @@ function ElegirConexion({
                     setAMano(true);
                     setAbierto(false);
                   }}
-                  className="rounded-md px-3 py-2 text-left text-xs font-semibold text-tinta-suave hover:bg-neutral-100 oscuro:hover:bg-white/10"
+                  className="ec-opcion ec-mano rounded-md px-3 py-2 text-left text-xs font-semibold text-tinta-suave hover:bg-neutral-100 oscuro:hover:bg-white/10"
                 >
-                  Escribir a mano…
+                  ✏️ Escribir a mano…
                 </button>
               </span>
             </>
@@ -60053,7 +60233,7 @@ function ElegirConexion({
           onChange={(e) => onCambio(e.target.value)}
           onFocus={onSnapshot}
           placeholder={vacio}
-          className="mt-1 block w-full rounded-md border border-borde bg-tarjeta px-2 py-1.5 font-mono text-xs"
+          className="ec-input mt-1 block w-full rounded-md border border-borde bg-tarjeta px-2 py-1.5 font-mono text-xs"
         />
       )}
       {escribiendo && opciones.length > 0 && (
@@ -60475,6 +60655,8 @@ function TiendasDelProyecto({
   // (14/11/2026) El pop up del país abierto («tienda|país») y el de «Qué productos vende» (id de la tienda).
   const [paisAbierto, setPaisAbierto] = useState<string | null>(null);
   const [productosAbiertos, setProductosAbiertos] = useState<string | null>(null);
+  // (14/11/2026) El pop up de «Configuración general» (id de la tienda): lo de toda la tienda.
+  const [generalAbierta, setGeneralAbierta] = useState<string | null>(null);
   // EL BUSCADOR (09/11/2026, él: «las tiendas salen ordenadas en lista pero no hay un buscador»).
   // Solo esconde filas: no cambia el orden ni nada de las tiendas. Busca por nombre, sin tildes.
   const [buscarTienda, setBuscarTienda] = useState("");
@@ -60841,13 +61023,31 @@ function TiendasDelProyecto({
                 su clic fuera. Él pidió «las reglas de las otras pestañas» y éstas son
                 exactamente ésas: no se inventa una ventana nueva. */}
             <VentanaDeProducto
-              titulo={`🏪 ${comoSeLlama}`}
+              titulo="🏪 Configuración de la tienda"
               color={pintada ? suColor : undefined}
               onCerrar={() => {
                 setTiendaAbierta(null);
                 alCerrarLaVentana?.();
               }}
             >
+          {/* LA PORTADA (14/11/2026): tarjetas que abren sus pop ups. Lo de toda la tienda va en «Configuración general». */}
+          <PortadaDeLaTienda
+            cfg={cfg}
+            tienda={tienda}
+            conexiones={conexiones}
+            nombre={comoSeLlama}
+            pendientes={avisosVivos(tienda, i).length}
+            onPais={(pais) => setPaisAbierto(`${tienda.id}|${pais}`)}
+            onProductos={() => setProductosAbiertos(tienda.id)}
+            onGeneral={() => setGeneralAbierta(tienda.id)}
+          />
+          {generalAbierta === tienda.id && (
+          <VentanaConListo
+            titulo={`⚙️ Configuración general · ${comoSeLlama}`}
+            detalle="Lo de toda la tienda. Cada país usa esto mientras no tenga lo suyo."
+            ancho="max-w-5xl"
+            onCerrar={() => setGeneralAbierta(null)}
+          >
           <div
             className={`rounded-lg border p-3 ${
               tienda.enabled === false
@@ -61208,57 +61408,6 @@ function TiendasDelProyecto({
                 </select>
                 </span>
               </label>
-              {/* CADA PAÍS, SU GRUPO (14/11/2026). Él: «un pop up para el grupo de inicio de Perú: número, página y pixel,
-                  y quién cobra… lo mismo para cada país». Un botón por país; su pop up. Lo vacío usa lo de arriba. */}
-              <div className="block text-xs font-medium text-tinta-suave md:col-span-2">
-                🌎 Cada país: número, página, pixel y quién cobra
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {paisesDeLaTienda(cfg, tienda).map((pais) => {
-                    const g = tienda.por_pais?.[pais] ?? {};
-                    const propios = [g.numero && "📱", g.pagina && "📘", g.pixel && "📊", tienda.cobradores_por_pais?.[pais] && "💰"].filter(Boolean);
-                    return (
-                      <button
-                        key={pais}
-                        type="button"
-                        onClick={() => setPaisAbierto(`${tienda.id}|${pais}`)}
-                        title={propios.length ? "Tiene lo suyo en este país. Clic para verlo o cambiarlo." : "Usa lo de toda la tienda. Clic para darle lo suyo."}
-                        className={`rounded-full border px-3 py-1 text-xs font-bold ${propios.length ? "border-emerald-400 bg-emerald-50 text-emerald-900" : "border-borde bg-tarjeta text-tinta hover:bg-relleno"}`}
-                      >
-                        {banderaDe(pais)} {pais} {propios.length ? propios.join("") : "· como la tienda"}
-                      </button>
-                    );
-                  })}
-                </div>
-                <span className="mt-1 block text-[10px] text-tinta-suave">
-                  Lo que no elijas en un país usa el número, la página, el pixel y quién cobra de toda la tienda (arriba).
-                </span>
-              </div>
-              {paisAbierto?.startsWith(`${tienda.id}|`) && (
-                <VentanaDelPais
-                  cfg={cfg}
-                  tienda={tienda}
-                  pais={paisAbierto.slice(tienda.id.length + 1)}
-                  conexiones={conexiones}
-                  onSnapshot={onSnapshot}
-                  onCerrar={() => setPaisAbierto(null)}
-                  onGrupo={(parche) => {
-                    const pais = paisAbierto.slice(tienda.id.length + 1);
-                    const por = { ...(tienda.por_pais ?? {}) };
-                    const nuevo = { ...(por[pais] ?? {}), ...parche };
-                    for (const k of Object.keys(nuevo) as Array<keyof typeof nuevo>) if (!String(nuevo[k] ?? "").trim()) delete nuevo[k];
-                    if (Object.keys(nuevo).length) por[pais] = nuevo;
-                    else delete por[pais];
-                    parchar(i, { por_pais: Object.keys(por).length ? por : undefined });
-                  }}
-                  onCobrador={(pais, id) => {
-                    onSnapshot();
-                    const por = { ...(tienda.cobradores_por_pais ?? {}) };
-                    if (id) por[pais] = id;
-                    else delete por[pais];
-                    parchar(i, { cobradores_por_pais: Object.keys(por).length ? por : undefined });
-                  }}
-                />
-              )}
               <label className="block text-xs font-medium text-tinta-suave">
                 Cómo presenta esta tienda
                 <select
@@ -61349,15 +61498,11 @@ function TiendasDelProyecto({
                 aparecer los dos asientos aunque el bot general venda uno solo.
                 Por eso se le pasa la configuración con el selector de la tienda
                 puesto — es una copia para la pantalla, no se guarda. */}
+          </div>
+          </VentanaConListo>
+          )}
             {/* (14/11/2026) EN SU PROPIO POP UP. Él: «"qué productos vende esta tienda" pasaría a ser otro pop up dentro de la
                 misma configuración de la tienda». El contenido es el mismo de antes. */}
-            <button
-              type="button"
-              onClick={() => setProductosAbiertos(tienda.id)}
-              className="mt-3 rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-bold text-tinta hover:bg-tarjeta"
-            >
-              📦 Qué productos vende esta tienda
-            </button>
             {productosAbiertos === tienda.id && (
             <VentanaConListo
               titulo={`📦 Qué productos vende · ${tienda.nombre?.trim() || "esta tienda"}`}
@@ -61404,7 +61549,33 @@ function TiendasDelProyecto({
               </div>
             </VentanaConListo>
             )}
-          </div>
+            {/* EL POP UP DE CADA PAÍS (14/11/2026), abierto desde su tarjeta. */}
+            {paisAbierto?.startsWith(`${tienda.id}|`) && (
+              <VentanaDelPais
+                cfg={cfg}
+                tienda={tienda}
+                pais={paisAbierto.slice(tienda.id.length + 1)}
+                conexiones={conexiones}
+                onSnapshot={onSnapshot}
+                onCerrar={() => setPaisAbierto(null)}
+                onGrupo={(parche) => {
+                  const pais = paisAbierto.slice(tienda.id.length + 1);
+                  const por = { ...(tienda.por_pais ?? {}) };
+                  const nuevo = { ...(por[pais] ?? {}), ...parche };
+                  for (const k of Object.keys(nuevo) as Array<keyof typeof nuevo>) if (!String(nuevo[k] ?? "").trim()) delete nuevo[k];
+                  if (Object.keys(nuevo).length) por[pais] = nuevo;
+                  else delete por[pais];
+                  parchar(i, { por_pais: Object.keys(por).length ? por : undefined });
+                }}
+                onCobrador={(pais, id) => {
+                  onSnapshot();
+                  const por = { ...(tienda.cobradores_por_pais ?? {}) };
+                  if (id) por[pais] = id;
+                  else delete por[pais];
+                  parchar(i, { cobradores_por_pais: Object.keys(por).length ? por : undefined });
+                }}
+              />
+            )}
             </VentanaDeProducto>
           </div>
         );

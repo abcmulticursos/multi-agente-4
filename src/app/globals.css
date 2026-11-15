@@ -949,6 +949,66 @@ input,
   padding: 18px 20px;
 }
 
+/* EL SELECTOR DE NÚMERO, PÁGINA Y PIXEL DENTRO DE LAS VENTANAS (14/11/2026). Él: «mira la calidad que tienen estos pop
+   ups… aplícala a los selectores… que se vea bonito visualmente, mira cómo se ven los menús». La misma paleta de la
+   ventana: caja como sus selectores (`bn-sel`), lista como sus cajones (`bn-cajon`), la elegida con su azul y su ✓. */
+.burbujas-nuevo .elegir-conexion .ec-boton {
+  background: var(--bn-sel) !important;
+  border: 1px solid var(--bn-sel-borde) !important;
+  border-radius: 14px !important;
+  color: var(--bn-sel-texto);
+  box-shadow: 0 2px 6px rgba(32, 62, 112, 0.08);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.burbujas-nuevo .elegir-conexion .ec-boton:hover {
+  border-color: var(--bn-activo) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-activo) 18%, transparent), 0 2px 6px rgba(32, 62, 112, 0.08);
+}
+.burbujas-nuevo .elegir-conexion .ec-boton.ec-abierto {
+  border-color: var(--bn-activo) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-activo) 25%, transparent);
+}
+.burbujas-nuevo .elegir-conexion .ec-lista {
+  background: var(--bn-cajon) !important;
+  border: 1px solid var(--bn-cajon-borde) !important;
+  border-radius: 16px !important;
+  padding: 8px !important;
+  margin-top: 6px !important;
+  box-shadow: 0 18px 40px rgba(16, 34, 72, 0.28) !important;
+  gap: 2px;
+}
+.burbujas-nuevo .elegir-conexion .ec-opcion {
+  border-radius: 12px !important;
+  color: var(--bn-texto-cajon);
+  transition: background 0.12s;
+}
+.burbujas-nuevo .elegir-conexion .ec-opcion:hover {
+  background: var(--bn-chip) !important;
+}
+.burbujas-nuevo .elegir-conexion .ec-opcion.ec-elegida {
+  background: color-mix(in srgb, var(--bn-activo) 14%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--bn-activo);
+}
+.burbujas-nuevo .elegir-conexion .ec-check {
+  color: var(--bn-activo);
+}
+.burbujas-nuevo .elegir-conexion .ec-separador {
+  color: var(--bn-chip-texto) !important;
+  border-color: var(--bn-sel-borde) !important;
+  letter-spacing: 0.08em;
+}
+.burbujas-nuevo .elegir-conexion .ec-mano {
+  color: var(--bn-chip-texto) !important;
+}
+.burbujas-nuevo .ec-input {
+  background: var(--bn-caja-texto) !important;
+  border: 1px solid var(--bn-caja-texto-borde) !important;
+  border-radius: 12px !important;
+  color: var(--bn-caja-texto-letra);
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+}
+
 /* EL CAJÓN */
 .burbujas-nuevo .bn-cajon {
   background: var(--bn-cajon);
