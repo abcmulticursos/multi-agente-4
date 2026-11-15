@@ -46,6 +46,8 @@ type BandejaDelChat = {
   paginaId: string | null;
   /** Una bandeja de UNO de los números de una tienda que tiene varios (15/11/2026): se pinta el teléfono en grande. */
   deUnNumero?: boolean;
+  /** La tienda dentro de la que va este número (15/11/2026): en la barra sale debajo de ella. */
+  padre?: string;
 };
 
 /** La bandera de un país («AR» → 🇦🇷). */
@@ -96,6 +98,18 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
     // (15/11/2026) UNA BANDEJA POR NÚMERO cuando la tienda tiene varios (los de sus países): cada una solo con sus chats.
     const susNumeros = numerosConSusPaises(t);
     if (susNumeros.length >= 2) {
+      // (15/11/2026) UN SOLO CHAT CON SUS NÚMEROS DENTRO. Él: «se está mostrando como 2 tiendas… debe ser un chat con el
+      // nombre de la tienda y ahí los 2 números». Tocar la tienda enseña los chats de todos sus números; cada número, los suyos.
+      bandejas.push({
+        clave: `t:${t.id}`,
+        nombre: t.nombre?.trim() || "Tienda sin nombre",
+        color: t.color?.trim() || null,
+        detalle: `${susNumeros.length} números`,
+        numeroId: null,
+        verificado: null,
+        telefono: null,
+        paginaId: String(t.pagina ?? "").trim() || null,
+      });
       for (const sn of susNumeros) {
         const c = numeros.find((x) => x.phone_number_id === sn.numero);
         const paises = sn.paises.map((p) => `${bandera(p)} ${COUNTRIES[p as CountryCode]?.label ?? p}`).join(" · ");
@@ -109,6 +123,7 @@ function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
           telefono: c?.display_phone_number ?? sn.numero,
           paginaId: String(t.pagina ?? "").trim() || null,
           deUnNumero: true,
+          padre: `t:${t.id}`,
         });
       }
       continue;

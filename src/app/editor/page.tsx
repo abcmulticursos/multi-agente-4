@@ -29941,15 +29941,22 @@ function VistaPizarra({
             Descartar o Volver), como al cambiar de tienda. */}
         <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Ir a">
           {([["/", "💬 Chat"], ["/kanban", "📋 Kanban"]] as const).map(([destino, nombre]) => (
-            <button
+            // (15/11/2026) UN ENLACE DE VERDAD: Ctrl/⌘ + clic (o la rueda) lo abre en otra pestaña y el tablero se queda
+            // abierto, sin preguntar nada. Él: «si está ahí es porque quiero ir al chat sin cerrar el tablero». El clic
+            // normal sigue como antes (pregunta si hay algo sin guardar).
+            <a
               key={destino}
-              type="button"
-              onClick={() => cambiarDeTienda("__fuera__", () => window.location.assign(destino))}
-              title={`Ir al ${nombre.slice(3)}`}
-              className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno"
+              href={destino}
+              onClick={(e) => {
+                if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+                e.preventDefault();
+                cambiarDeTienda("__fuera__", () => window.location.assign(destino));
+              }}
+              title={`Ir al ${nombre.slice(3)} (Ctrl + clic: en otra pestaña)`}
+              className="bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave no-underline hover:bg-relleno"
             >
               {nombre}
-            </button>
+            </a>
           ))}
           {/* USUARIOS Y SIMULADOR AQUÍ ARRIBA (11/11/2026, él: «que los usuarios aparezcan también desde el mismo
               editor, al lado de Chat y Kanban… y al lado de Usuarios el botón del simulador, que ya no esté al lado del

@@ -900,7 +900,6 @@ export default function ConversationList({
                           su propia línea, para no quitarle sitio al nombre del cliente. */}
                       {mostrarTienda && c.tienda_nombre && (
                         <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] font-semibold text-neutral-500">
-                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: c.tienda_color || "#14b8a6" }} />
                           <span className="truncate">{c.tienda_nombre}</span>
                         </div>
                       )}

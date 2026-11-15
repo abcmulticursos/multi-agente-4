@@ -25,6 +25,8 @@ export interface Bandeja {
   paginaId?: string | null;
   /** Bandeja de UNO de los números de una tienda con varios (15/11/2026): el teléfono va en grande. */
   deUnNumero?: boolean;
+  /** La tienda dentro de la que va este número (15/11/2026): sale debajo de ella, sin repetir el nombre. */
+  padre?: string;
 }
 
 export interface ChatDeBandeja {
@@ -54,7 +56,12 @@ export function teNecesita(c: ChatDeBandeja): boolean {
 export function enLaBandeja(c: ChatDeBandeja, elegida: string): boolean {
   if (elegida === TODAS) return true;
   if (elegida === TE_NECESITAN) return teNecesita(c);
-  return c.bandeja === elegida;
+  return deLaBandeja(c, elegida);
+}
+
+/** Su bandeja, o la tienda que la contiene: la tienda con varios números junta los chats de todos (15/11/2026). */
+function deLaBandeja(c: ChatDeBandeja, clave: string): boolean {
+  return c.bandeja === clave || (clave.startsWith("t:") && !clave.includes("#") && !!c.bandeja?.startsWith(`${clave}#`));
 }
 
 const sinLeer = (c: ChatDeBandeja) => (c.unread_count ?? 0) > 0 || c.manually_unread === 1;
@@ -70,6 +77,8 @@ interface Opcion {
   urgente?: boolean;
   /** El teléfono de la bandeja de un número (tienda con varios números). */
   telefono?: string | null;
+  /** Va dentro de esta tienda: se pinta con sangría, sin el nombre. */
+  padre?: string;
 }
 
 function opciones(bandejas: Bandeja[], chats: ChatDeBandeja[]): Opcion[] {
@@ -82,8 +91,9 @@ function opciones(bandejas: Bandeja[], chats: ChatDeBandeja[]): Opcion[] {
       detalle: b.detalle,
       color: b.color,
       icono: b.clave.startsWith("n:") ? "📱" : undefined,
-      cuenta: chats.filter((c) => c.bandeja === b.clave && sinLeer(c)).length,
+      cuenta: chats.filter((c) => deLaBandeja(c, b.clave) && sinLeer(c)).length,
       telefono: b.deUnNumero ? b.telefono ?? null : null,
+      padre: b.padre,
     })),
   ];
 }
@@ -97,7 +107,11 @@ function filtrar(lista: Opcion[], busca: string, elegida: string): Opcion[] {
   const q = sinTildes(busca.trim());
   if (!q) return lista;
   return lista.filter(
-    (o) => o.clave === TODAS || o.clave === TE_NECESITAN || o.clave === elegida || sinTildes(`${o.nombre} ${o.detalle ?? ""}`).includes(q)
+    (o) =>
+      o.clave === TODAS ||
+      o.clave === TE_NECESITAN ||
+      o.clave === elegida ||
+      sinTildes(`${o.nombre} ${o.detalle ?? ""} ${o.telefono ?? ""}`).includes(q)
   );
 }
 function CajaDeBusqueda({ valor, alCambiar, className }: { valor: string; alCambiar: (v: string) => void; className?: string }) {
@@ -151,7 +165,8 @@ export function BarraDeBandejas({
 }) {
   const [busca, setBusca] = useState("");
   const todas = opciones(bandejas, chats);
-  const lista = plegada ? todas : filtrar(todas, busca, elegida);
+  // Plegada, los números de una tienda no salen: solo su tienda (un círculo por tienda).
+  const lista = plegada ? todas.filter((o) => !o.padre) : filtrar(todas, busca, elegida);
   return (
     <nav
       className={`hidden shrink-0 flex-col border-r border-neutral-200 bg-neutral-50 md:flex ${plegada ? "w-16" : "w-64"}`}
@@ -183,9 +198,9 @@ export function BarraDeBandejas({
                 type="button"
                 onClick={() => onElegir(o.clave)}
                 title={`${o.nombre}${o.detalle ? ` · ${o.detalle}` : ""}`}
-                className={`relative flex w-full items-center gap-2 rounded-lg py-2 text-left transition ${plegada ? "justify-center px-0" : "px-2.5"} ${
-                  activa ? "bg-white shadow-sm ring-1 ring-black/5" : "hover:bg-white/70"
-                }`}
+                className={`relative flex items-center gap-2 rounded-lg py-2 text-left transition ${plegada ? "w-full justify-center px-0" : "px-2.5"} ${
+                  o.padre && !plegada ? "ml-5 w-[calc(100%-1.25rem)]" : "w-full"
+                } ${activa ? "bg-white shadow-sm ring-1 ring-black/5" : "hover:bg-white/70"}`}
               >
                 {activa && <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r" style={{ backgroundColor: o.color || "#10b981" }} />}
                 {plegada ? (
@@ -210,9 +225,12 @@ export function BarraDeBandejas({
                   </span>
                 ) : (
                   <>
-                    <Punto o={o} />
+                    {/* (15/11/2026) Un número DENTRO de su tienda: sin punto y sin repetir el nombre, solo el teléfono y su país. */}
+                    {!o.padre && <Punto o={o} />}
                     <span className="min-w-0 flex-1">
-                      <span className={`block truncate text-sm ${activa ? "font-bold text-neutral-900" : "font-semibold text-neutral-700"}`}>{o.nombre}</span>
+                      {!o.padre && (
+                        <span className={`block truncate text-sm ${activa ? "font-bold text-neutral-900" : "font-semibold text-neutral-700"}`}>{o.nombre}</span>
+                      )}
                       {/* (15/11/2026) UNA BANDEJA POR NÚMERO: el teléfono grande y claro, debajo sus países. Él: «no me presentes
                           los números así de chiquitos… bien ordenado». */}
                       {o.telefono && <span className="mt-0.5 block truncate text-[15px] font-bold tracking-wide text-neutral-900">📱 {o.telefono}</span>}
@@ -355,8 +373,8 @@ export function FilaDeBandejas({
             }`}
             style={activa ? { ["--tw-ring-color" as string]: o.color || "#10b981" } : undefined}
           >
-            <Punto o={o} />
-            <span className="max-w-[9rem] truncate">{o.nombre}</span>
+            {!o.padre && <Punto o={o} />}
+            {!o.padre && <span className="max-w-[9rem] truncate">{o.nombre}</span>}
             {o.telefono && <span className="whitespace-nowrap font-bold text-neutral-900">{o.telefono}</span>}
             <Contador n={o.cuenta} urgente={o.urgente} />
           </button>

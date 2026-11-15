@@ -151,7 +151,6 @@ export default function DashboardHeader({
             {identidad.linea && (
               // El color va en el punto, no en la letra: un color claro de tienda no se leería.
               <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-neutral-700">
-                {identidad.color && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: identidad.color }} />}
                 <span className="truncate">{identidad.linea}</span>
               </div>
             )}
