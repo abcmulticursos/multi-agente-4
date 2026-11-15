@@ -16747,7 +16747,7 @@ whatsapp:
         f-mvvo0a7c-uyvc:1: cable
       seguimientos:
         - id: s-mwelg57r-9ou1c
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwelg57r-8dfn7
               peso: 1
@@ -17296,7 +17296,7 @@ whatsapp:
                           enabled: false
                   enabled: false
         - id: s-mwelg57r-d1yej
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwelg57r-euvvy
               peso: 1
