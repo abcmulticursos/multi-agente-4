@@ -32863,7 +32863,9 @@ function PantallaDelTableroCargada({
       {/* LOS DATOS DE PAGO POR PAÍS (24/10/2026): la MISMA ventana de «Precios y pagos» de los menús,
           aquí sin salir del tablero. Son los textos que el cobro manda al elegir cada método. */}
       {ventanaDeHerramienta === "pagos" && (
-        <VentanaFlotante
+        // (15/11/2026) CON «CANCELAR / ✓ LISTO» (`VentanaConListo`): él, «ese pop up no tiene cancelar/guardar, solo
+        // cerrar, mucho cuidado ahí». Cancelar (o Escape) deja todo como estaba al abrirla.
+        <VentanaConListo
           titulo="💳 Datos de pago por país"
           detalle="Lo que el cobro manda cuando el cliente elige cada método. Es lo mismo que menú ajustes → Precios y pagos: cambiarlo aquí lo cambia allá."
           onCerrar={() => setVentanaDeHerramienta(null)}
@@ -32884,7 +32886,7 @@ function PantallaDelTableroCargada({
             </select>
           </label>
           <DatosDePagoDelTablero key={paisDePagos} cfg={cfg} pais={paisDePagos as CountryCode} onConfigChange={onConfigChange} onSnapshot={onSnapshot} />
-        </VentanaFlotante>
+        </VentanaConListo>
       )}
       {ventanaDeHerramienta === "prueba" && (
         <VentanaFlotante
@@ -34123,9 +34125,11 @@ function DatosDePagoDelTablero({
                           },
                         });
                       }}
-                      className={`shrink-0 rounded-lg border px-2 text-sm font-bold ${esPrincipal ? "border-amber-400 bg-amber-50 text-amber-600" : "border-borde text-tinta-suave hover:bg-relleno"}`}
+                      // (15/11/2026) Más grande y con su palabra: él, «la estrellita está muy pequeña».
+                      className={`flex shrink-0 flex-col items-center justify-center rounded-lg border-2 px-2 text-[11px] font-bold leading-tight ${esPrincipal ? "border-amber-400 bg-amber-50 text-amber-700" : "border-borde text-tinta-suave hover:bg-relleno"}`}
                     >
-                      {esPrincipal ? "★" : "☆"}
+                      <span className="text-xl leading-none">{esPrincipal ? "★" : "☆"}</span>
+                      Principal
                     </button>
                   )}
                 </div>
