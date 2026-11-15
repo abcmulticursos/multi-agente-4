@@ -59883,7 +59883,57 @@ type ConexionesDelProyecto = {
   pixels: ConexionElegible[];
   /** El píxel de Meta Connect: el que usa una tienda con el suyo vacío. */
   pixelGeneral?: string | null;
+  /** (15/11/2026) Ids conocidos de OTROS negocios que el de la app: no reciben mensajes; las tiendas los sueltan. */
+  ajenos?: string[];
 };
+
+/**
+ * LAS TIENDAS SIN LO QUE NO ES DEL NEGOCIO DE LA APP (15/11/2026). Él: «limpia eso y deja solo con los
+ * activos que realmente se conectan… sin reemplazar números». GRAFISMO tenía dos números de otro negocio:
+ * Meta nunca le pasó sus mensajes al bot. Se quitan número, página y pixel (de la tienda y de cada país)
+ * que estén en `ajenos`; nada se pone en su lugar. Un id escrito a mano que no se conoce no se toca.
+ * Devuelve la lista nueva y cuántos se quitaron, por tienda.
+ */
+function AvisoDeLoAjeno({ quitados }: { quitados: { tienda: string; cuantos: number }[] }) {
+  if (!quitados.length) return null;
+  return (
+    <div className="mb-3 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+      <b>⚠ Quité de tus tiendas lo que no es del negocio de tu app</b> (no recibe mensajes de clientes):{" "}
+      {quitados.map((q) => `${q.tienda} (${q.cuantos})`).join(" · ")}. No puse nada en su lugar: elige tú el número, la
+      página o el pixel que falte. <b>Guarda (Ctrl+S) para que quede así.</b>
+    </div>
+  );
+}
+
+function sinLoAjeno(tiendas: TiendaEditor[], ajenos: string[]): { tiendas: TiendaEditor[]; quitados: { tienda: string; cuantos: number }[] } {
+  const fuera = new Set(ajenos);
+  const quitados: { tienda: string; cuantos: number }[] = [];
+  const limpias = tiendas.map((t, i) => {
+    let cuantos = 0;
+    const limpio = (v: unknown) => {
+      const s = String(v ?? "").trim();
+      if (s && fuera.has(s)) {
+        cuantos++;
+        return "";
+      }
+      return v as string | undefined;
+    };
+    const nueva: TiendaEditor = { ...t, numero: limpio(t.numero) ?? t.numero, pagina: limpio(t.pagina) ?? t.pagina, pixel: limpio(t.pixel) ?? t.pixel };
+    if (t.por_pais) {
+      const porPais: NonNullable<TiendaEditor["por_pais"]> = {};
+      for (const [pais, g] of Object.entries(t.por_pais)) {
+        const ng = { numero: limpio(g?.numero), pagina: limpio(g?.pagina), pixel: limpio(g?.pixel) };
+        const vivo = Object.fromEntries(Object.entries(ng).filter(([, v]) => String(v ?? "").trim())) as typeof ng;
+        if (Object.keys(vivo).length) porPais[pais] = vivo;
+      }
+      nueva.por_pais = porPais;
+    }
+    if (!cuantos) return t;
+    quitados.push({ tienda: t.nombre?.trim() || `Tienda ${i + 1}`, cuantos });
+    return nueva;
+  });
+  return { tiendas: quitados.length ? limpias : tiendas, quitados };
+}
 
 /**
  * EL SÍMBOLO DEL CONJUNTO DE DATOS.
@@ -60691,6 +60741,8 @@ function TiendasDelProyecto({
   // Si falla no se avisa con un error rojo: los tres selectores se quedan vacíos y
   // aparece la casilla para escribir a mano, que es exactamente la pantalla de antes
   // de este cambio. Un fallo al leer la lista no puede impedirle configurar.
+  // (15/11/2026) Lo que se les quitó a las tiendas por ser de otro negocio, para avisarlo arriba.
+  const [quitadosAjenos, setQuitadosAjenos] = useState<{ tienda: string; cuantos: number }[]>([]);
   const [conexiones, setConexiones] = useState<ConexionesDelProyecto>({
     numeros: [],
     paginas: [],
@@ -60708,6 +60760,16 @@ function TiendasDelProyecto({
           pixels: Array.isArray(d.pixels) ? d.pixels : [],
           pixelGeneral: typeof d.pixelGeneral === "string" ? d.pixelGeneral : null,
         });
+        // (15/11/2026) Las tiendas sueltan lo de otros negocios (`sinLoAjeno`). Queda sin guardar: él lo ve y guarda.
+        const ajenos = Array.isArray(d.ajenos) ? (d.ajenos as unknown[]).filter((x): x is string => typeof x === "string") : [];
+        if (ajenos.length) {
+          const r = sinLoAjeno(tiendas, ajenos);
+          if (r.quitados.length) {
+            onSnapshot();
+            onTiendas(r.tiendas);
+            setQuitadosAjenos(r.quitados);
+          }
+        }
       })
       .catch(() => {});
     return () => {
@@ -60809,6 +60871,7 @@ function TiendasDelProyecto({
         </p>
       )}
 
+      <AvisoDeLoAjeno quitados={quitadosAjenos} />
       {/* QUITAR «TIENDA» DE LOS NOMBRES (10/11/2026, él: «quitar el nombre de TIENDA que aparece en las tiendas…
           TIENDA FIGURARTE, TIENDA LECTOESCRITURA»). Es parte del nombre guardado, así que se cambia aquí, como
           cualquier edición suya (Ctrl+Z la deshace, Ctrl+S la guarda). Solo sale si alguna empieza así. */}
@@ -61053,6 +61116,7 @@ function TiendasDelProyecto({
               }}
             >
           {/* LA PORTADA (14/11/2026): tarjetas que abren sus pop ups. Lo de toda la tienda va en «Configuración general». */}
+          <AvisoDeLoAjeno quitados={quitadosAjenos} />
           <PortadaDeLaTienda
             cfg={cfg}
             tienda={tienda}

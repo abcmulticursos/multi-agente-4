@@ -89,6 +89,8 @@ async function leerApp(appId: string, appSecret: string) {
         } | null;
         const dueño = (cuerpo?.data ?? []).find((b) => (b.owned_apps?.data ?? []).some((a) => a.id === appId));
         if (dueño) negocio = dueño.name ?? dueño.id ?? null;
+        // (15/11/2026) Y su id: con él, Meta Connect y las tiendas enseñan solo lo de este negocio (`negocioDeLaApp`).
+        if (dueño?.id) setMetaRuntimeSettings({ [`app_negocio_id_${appId}`]: dueño.id });
       }
     } catch {
       // Se sigue por partes.
@@ -128,6 +130,7 @@ async function leerApp(appId: string, appSecret: string) {
           } | null;
           if ((lista?.data ?? []).some((app) => app.id === appId)) {
             negocio = uno.name ?? uno.id;
+            if (borde === "owned_apps") setMetaRuntimeSettings({ [`app_negocio_id_${appId}`]: uno.id });
             break;
           }
         }

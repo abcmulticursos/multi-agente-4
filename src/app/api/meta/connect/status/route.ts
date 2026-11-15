@@ -14,6 +14,7 @@ import {
   getPublicOrigin,
 } from "@/lib/meta/connect";
 import { getWebhookVerifyToken } from "@/lib/meta/runtime-config";
+import { esDeLaApp, negocioDeLaApp } from "@/lib/meta/negocio-de-la-app";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -43,12 +44,14 @@ export async function GET(req: NextRequest) {
     // Las cuentas que pueden usarla (dueña + compartidas): para el filtro «Ver cuenta».
     accesoDe: leerListaDeAcceso(row.compartido_con).map((c) => c.id),
   });
-  const connections = pageRows.filter((row) => row.selected === 1).map(serializePage);
-  const detectedPages = pageRows.filter((row) => row.selected !== 1).map(serializePage);
+  // (15/11/2026) Solo lo del negocio de la app: lo de otros no recibe mensajes (`negocioDeLaApp`).
+  const negocio = negocioDeLaApp();
+  const connections = pageRows.filter((row) => row.selected === 1 && esDeLaApp(negocio, row.business_id)).map(serializePage);
+  const detectedPages = pageRows.filter((row) => row.selected !== 1 && esDeLaApp(negocio, row.business_id)).map(serializePage);
   const whatsAppConnections = listMetaWhatsAppConnections()
     .filter((row) => {
       const name = row.verified_name?.trim().toLowerCase() ?? "";
-      return name !== "test number" && name !== "test whatsapp business account";
+      return name !== "test number" && name !== "test whatsapp business account" && esDeLaApp(negocio, row.business_id);
     })
     .map((row) => ({
     phoneNumberId: row.phone_number_id,
