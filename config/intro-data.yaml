@@ -8875,6 +8875,15 @@ tiendas:
       full: pmugne9ti
       upsell: pmv5xqgst
     upsell_apagado: pmtxy45s7
+    por_pais:
+      CO:
+        numero: "1428202673707739"
+        pagina: "1223728390822773"
+        pixel: "1467876624287697"
+      AR:
+        numero: "1467328843126629"
+        pagina: "1223728390822773"
+        pixel: "1467876624287697"
     pixel: "1467876624287697"
     color: "#ea580c"
     regalo:
