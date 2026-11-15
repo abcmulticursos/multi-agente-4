@@ -8865,8 +8865,8 @@ intro_tiendas: []
 tiendas:
   - id: tienda_mupk9ybz
     nombre: GRAFISMO FONETICO Y SUPER PACK 2 EN 1
-    numero: "1428202673707739"
-    pagina: "1223728390822773"
+    numero: ""
+    pagina: ""
     semimodalidad: dos_juntas
     alineacion:
       basico: pmu39gpb1
@@ -8884,7 +8884,6 @@ tiendas:
         numero: "1467328843126629"
         pagina: "1223728390822773"
         pixel: "1467876624287697"
-    pixel: "1467876624287697"
     color: "#ea580c"
     regalo:
       consent_sequence:
