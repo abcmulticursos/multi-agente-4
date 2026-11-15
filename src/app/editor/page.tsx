@@ -31778,7 +31778,10 @@ function VentanaFlotante({
   onCancelar,
   hayCambios = true,
   clase = "burbujas-nuevo prolijo",
+  zoom,
 }: {
+  /** Tamaño de la ventana y sus letras (14/11/2026, él: «yo he hecho a 125% y me gusta como se ve»). Sin él, como siempre. */
+  zoom?: number;
   /** Con «Listo / Cancelar»: sin cambios se enseña solo «Cerrar» (06/11/2026: «cuando no se haya hecho ningún cambio debe decir cerrar»). */
   hayCambios?: boolean;
   /** Clases de más para la ventana (por defecto, desde el 02/11/2026, el diseño de las ventanas de burbujas en todas) (02/11/2026: «burbujas-nuevo prolijo», el diseño del pop up de burbujas en Seguimientos). */
@@ -31800,7 +31803,7 @@ function VentanaFlotante({
     // SIN CERRAR AL HACER CLIC AFUERA (31/10/2026): «se cerró y todos mis cambios desaparecieron… la única
     // manera de cerrarlos será con escape, cancelar o listo». Ver `EL_CLIC_FUERA_CIERRA_LA_VENTANA`.
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4" onClick={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined}>
-      <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl ${clase}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`my-8 w-full ${ancho} rounded-xl border border-borde bg-tarjeta shadow-2xl ${clase}`} style={zoom ? { zoom } : undefined} onClick={(e) => e.stopPropagation()}>
         <div className="bn-cabecera flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
           <div>
             <h3 className="bn-titulo text-sm font-bold text-tinta">{titulo}</h3>
@@ -36556,7 +36559,7 @@ function CobradorPorPais({
  * UNA VENTANA CON «CANCELAR / ✓ LISTO» (14/11/2026), la misma idea que Productos y precios: Cancelar (y Escape) deja
  * todo como estaba al abrir; Listo deja lo hecho. Ninguno sube nada: eso sigue siendo Guardar o Ctrl+S.
  */
-function VentanaConListo({ titulo, detalle, onCerrar, children, ancho }: { titulo: string; detalle?: string; onCerrar: () => void; children: ReactNode; ancho?: string }) {
+function VentanaConListo({ titulo, detalle, onCerrar, children, ancho, zoom }: { titulo: string; detalle?: string; onCerrar: () => void; children: ReactNode; ancho?: string; zoom?: number }) {
   const guardado = useContext(GuardadoDelEditor);
   const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
   const cancelar = () => {
@@ -36568,6 +36571,7 @@ function VentanaConListo({ titulo, detalle, onCerrar, children, ancho }: { titul
       titulo={titulo}
       detalle={detalle}
       ancho={ancho ?? "max-w-2xl"}
+      zoom={zoom}
       onCerrar={cancelar}
       onListo={onCerrar}
       onCancelar={cancelar}
@@ -36634,6 +36638,9 @@ function VentanaDelPais({
       titulo={`${banderaDe(pais)} ${COUNTRIES[pais as CountryCode]?.label ?? pais} · ${tienda.nombre?.trim() || "esta tienda"}`}
       detalle="Número, página, pixel y quién cobra para los clientes de este país. Lo que dejes vacío usa lo de toda la tienda."
       onCerrar={onCerrar}
+      // (14/11/2026) Él: «demasiado angosto… los nombres de las páginas a duras penas se leen» y «120 estaría bien».
+      ancho="max-w-5xl"
+      zoom={1.2}
     >
       <div className="grid gap-4 p-1 md:grid-cols-2">
         <div className="bn-cajon">
@@ -51649,7 +51656,10 @@ function VentanaDeProducto({
   onCerrar,
   onCancelar,
   children,
+  zoom,
 }: {
+  /** Tamaño de la ventana y sus letras (14/11/2026). Sin él, como siempre. */
+  zoom?: number;
   titulo: string;
   /** El color guardado del botón que la abrió. */
   color?: string;
@@ -51730,6 +51740,7 @@ function VentanaDeProducto({
           feo… necesito que el aspecto de la tienda también tenga esa mejora visual». Todas las ventanas de la casa a la vez. */}
       <div
         className="burbujas-nuevo prolijo my-8 w-full max-w-[820px] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl"
+        style={zoom ? { zoom } : undefined}
         onClick={(evento) => evento.stopPropagation()}
       >
         <div className={`h-1.5 w-full rounded-t-xl ${tono.cinta}`} />
@@ -61024,6 +61035,7 @@ function TiendasDelProyecto({
                 exactamente ésas: no se inventa una ventana nueva. */}
             <VentanaDeProducto
               titulo="🏪 Configuración de la tienda"
+              zoom={1.1}
               color={pintada ? suColor : undefined}
               onCerrar={() => {
                 setTiendaAbierta(null);

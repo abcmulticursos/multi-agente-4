@@ -952,9 +952,11 @@ input,
 /* EL SELECTOR DE NÚMERO, PÁGINA Y PIXEL DENTRO DE LAS VENTANAS (14/11/2026). Él: «mira la calidad que tienen estos pop
    ups… aplícala a los selectores… que se vea bonito visualmente, mira cómo se ven los menús». La misma paleta de la
    ventana: caja como sus selectores (`bn-sel`), lista como sus cajones (`bn-cajon`), la elegida con su azul y su ✓. */
+/* (14/11/2026) MÁS CONTRASTE. Él: «se confunde el fondo blanco con el selector blanco». Un tinte azul y un borde más
+   marcado, sacados del color activo para que valga en claro y en oscuro. */
 .burbujas-nuevo .elegir-conexion .ec-boton {
-  background: var(--bn-sel) !important;
-  border: 1px solid var(--bn-sel-borde) !important;
+  background: color-mix(in srgb, var(--bn-activo) 8%, var(--bn-sel)) !important;
+  border: 1.5px solid color-mix(in srgb, var(--bn-activo) 45%, var(--bn-sel-borde)) !important;
   border-radius: 14px !important;
   color: var(--bn-sel-texto);
   box-shadow: 0 2px 6px rgba(32, 62, 112, 0.08);
@@ -968,9 +970,13 @@ input,
   border-color: var(--bn-activo) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--bn-activo) 25%, transparent);
 }
+/* (14/11/2026) LA LISTA EMPUJA, NO FLOTA. Él: «no me deja ver todos los pixels, la lista está dentro de ese contenedor».
+   Flotando se cortaba en el borde de la ventana; dentro de la tarjeta la estira y la ventana se recorre. */
 .burbujas-nuevo .elegir-conexion .ec-lista {
-  background: var(--bn-cajon) !important;
-  border: 1px solid var(--bn-cajon-borde) !important;
+  position: static !important;
+  max-height: 26rem !important;
+  background: color-mix(in srgb, var(--bn-activo) 5%, var(--bn-cajon)) !important;
+  border: 1.5px solid color-mix(in srgb, var(--bn-activo) 45%, var(--bn-sel-borde)) !important;
   border-radius: 16px !important;
   padding: 8px !important;
   margin-top: 6px !important;
