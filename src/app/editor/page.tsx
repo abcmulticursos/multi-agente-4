@@ -32060,12 +32060,14 @@ function PantallaDelTableroCargada({
     const r = window.setTimeout(() => setAvisoDelTablero(null), 9000);
     return () => window.clearTimeout(r);
   }, [avisoDelTablero]);
-  const [paisDePagos, setPaisDePagos] = useState<string>(paisVisto || "PE");
-  // (15/11/2026) «Datos de pago por país» SIGUE A LA BANDERITA de abajo a la derecha. Él: «el selector solo cambia
-  // cuando lo toco ahí, pero debería también funcionar con la banderita». Y al revés: elegir el país ahí mueve la bandera.
-  useEffect(() => {
-    if (paisVisto) setPaisDePagos(paisVisto);
-  }, [paisVisto]);
+  // (15/11/2026) «Datos de pago por país» USA EL PAÍS DE LA BANDERITA de abajo a la derecha, el mismo (`paisVisto`), sin
+  // copia aparte. Él: «cuando cambie la bandera de abajo cambien los datos de país». Con una copia, abrirla desde un cobro
+  // de Perú la dejaba en Perú aunque la bandera dijera Colombia. Elegir el país en la ventana mueve la bandera.
+  const paisDePagos = paisVisto || "PE";
+  const ponerPaisDePagos = (p: string) => {
+    setPaisVisto(p);
+    onPais?.(p);
+  };
   const vivoCfg = useRef(cfg);
   vivoCfg.current = cfg;
   const productos = (cfg.biblioteca_de_productos ?? []).filter((p) => p.id);
@@ -32871,11 +32873,7 @@ function PantallaDelTableroCargada({
             País
             <select
               value={paisDePagos}
-              onChange={(e) => {
-                setPaisDePagos(e.target.value);
-                setPaisVisto(e.target.value);
-                onPais?.(e.target.value);
-              }}
+              onChange={(e) => ponerPaisDePagos(e.target.value)}
               className="rounded border border-borde bg-relleno px-2 py-1 text-xs"
             >
               {paises.map((p) => (
@@ -33204,7 +33202,7 @@ function PantallaDelTableroCargada({
           })()}
           onAbrirPagos={(p) => {
             setAjustes(null);
-            setPaisDePagos(p);
+            ponerPaisDePagos(p);
             setVentanaDeHerramienta("pagos");
           }}
           grupo={grupoDeAjustes.map((id) => tablero.fichas.find((f) => f.id === id && f.tipo === fichaDeAjustes.tipo)).filter((f): f is FichaEnElEditor => !!f)}
