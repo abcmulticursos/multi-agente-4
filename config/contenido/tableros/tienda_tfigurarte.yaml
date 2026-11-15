@@ -645,8 +645,7 @@ whatsapp:
             - meta_120250734143030336
         - id: r2
           nombre: PADRE - MADRE
-          peso: 0
-          peso_antes: 1
+          peso: 1
         - id: rmw929v1i
           nombre: MAESTROS
           peso: 1
