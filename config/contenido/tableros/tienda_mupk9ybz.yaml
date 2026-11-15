@@ -7539,7 +7539,7 @@ whatsapp:
               🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              * 2.- 📲 Y envianos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
@@ -7550,7 +7550,7 @@ whatsapp:
 
               🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -7810,7 +7810,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -7870,7 +7870,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5~cmwgu0vty0
@@ -7986,7 +7986,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -8000,7 +8000,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -8417,7 +8417,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -8428,7 +8428,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -8751,7 +8751,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -9048,7 +9048,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -9378,7 +9378,7 @@ whatsapp:
               🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              * 2.- 📲 Y envianos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
@@ -9520,7 +9520,7 @@ whatsapp:
               🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              * 2.- 📲 Y envianos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
@@ -9531,7 +9531,7 @@ whatsapp:
 
               🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -9791,7 +9791,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -9917,7 +9917,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwfqgwmd0
@@ -10054,7 +10054,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -10468,7 +10468,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -10479,7 +10479,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -10814,7 +10814,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -11570,7 +11570,7 @@ whatsapp:
               🟠 *¿CÓMO LO ADQUIERO?*
 
               * 1.- 💴 Realizá un único pago de {{PRECIO_BASE}}*
-              * 2.- 📲 Y envíanos tu comprobante de pago
+              * 2.- 📲 Y envianos tu comprobante de pago
 
               *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
@@ -11581,7 +11581,7 @@ whatsapp:
 
               🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -11794,7 +11794,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -11972,7 +11972,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwfqgabo0
@@ -12232,7 +12232,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -12521,7 +12521,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -12532,7 +12532,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwfqgijg0
@@ -12793,7 +12793,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -13006,7 +13006,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -13301,7 +13301,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -13772,7 +13772,7 @@ whatsapp:
 
               🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -13985,7 +13985,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -14251,7 +14251,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -14543,7 +14543,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -14554,7 +14554,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -15150,7 +15150,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -15581,12 +15581,12 @@ whatsapp:
 
               ¿Te pasa que...?
 
-              ⏰ *Pasas horas tratando de enseñar a leer a tu hijo?.*
-              🔎 *Buscas actividades en diferentes lugares.*
+              ⏰ *Pasás horas tratando de enseñar a leer a tu hijo?.*
+              🔎 *Buscás actividades en diferentes lugares.*
               📖 *Tus hijos no comprenden lo que leen?*
               😴 *La gramática y la ortografía les parecen aburridas.*
 
-              Si te identificaste con alguno, esto es para ti 👇
+              Si te identificaste con alguno, esto es para vos 👇
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -15596,7 +15596,7 @@ whatsapp:
 
               Una colección digital con *más de 250 páginas en PDF imprimible* para enseñar las Sílabas de una manera mucho más visual, práctica y divertida. 🔠
 
-              💡Ideal para niños que se aburren con los métodos tradicionales.
+              💡Ideal para chicos que se aburren con los métodos tradicionales.
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1nV4dPLUK1-c7hvcKqQM-qKc1aM1s7YQH/view?usp=sharing
@@ -15624,7 +15624,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
             - |-
-              *Y si adquieres {{PRODUCTO_BASE}} el día de hoy*, te llevas estos *6 regalos GRATIS!*👇🏼
+              *Y si adquirís {{PRODUCTO_BASE}} el día de hoy*, te llevás estos *6 regalos GRATIS!*👇🏼
 
               {* 🔢 Cuaderno de los Números|* 🔢 Libro de los Números|* 🔢 Cuadernillo de los Números}
               * 🎴 Tarjetitas gráficas
@@ -15660,7 +15660,7 @@ whatsapp:
 
               🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -15792,7 +15792,7 @@ whatsapp:
 
               🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-              🟢 *¿Deseas que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
+              🟢 *¿Deseás que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
           delay_after_sec: 6
           decisions:
             - id: d-mweg7vsd-r3noo
@@ -15945,7 +15945,7 @@ whatsapp:
 
                       💰 EL COSTO DE TODO EL MATERIAL POR *{{PRECIO_BASE}}*
 
-                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, !GRATIS!"* 🎁✨
+                      ⚠️ *Si lo llevás en los próximos 10 minutos* 🕑 recibirás un *"Regalo Sorpresa EN PDF, ¡GRATIS!"* 🎁✨
                   delay_after_sec: 6
                   spintax_ia:
                     - "{y ahora *sus hijos ya están aprendiendo* 🤗|y *sus hijos ya están aprendiendo* 🤗|y ahora *los chicos ya están aprendiendo* 🤗}"
@@ -15957,7 +15957,7 @@ whatsapp:
 
                       🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      🟢 *¿Deseas que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
+                      🟢 *¿Deseás que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
                   delay_after_sec: 6
                   decisions:
                     - id: d-mweg7vsd-r3noo
@@ -16228,7 +16228,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -16683,7 +16683,7 @@ whatsapp:
 
               2️⃣ *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
 
-              *¿CUAL ELIGES?* 😊
+              *¿CUAL ELEGÍS?* 😊
           delay_after_sec: 6
           buttons:
             - id: ee89682a-2382-4aac-9ef3-6f4f1f7679e5
@@ -16934,7 +16934,7 @@ whatsapp:
 
                       🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      🟢 *¿Deseas que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
+                      🟢 *¿Deseás que te facilite los datos para que puedas adquirirlo correctamente* ❓️ 😊
                   delay_after_sec: 6
                   decisions:
                     - id: d-mweg7vsd-r3noo
@@ -17062,7 +17062,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
@@ -17354,7 +17354,7 @@ whatsapp:
 
                       💫💰️ EL COSTO de *{{PRODUCTO_FULL}}* A TAN SOLO *{{PRECIO_FULL}}*
 
-                      💰 O SI DESEAS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
+                      💰 O SI DESEÁS SOLO *{{PRODUCTO_BASE}}* POR *{{PRECIO_BASE}}*
 
                       😱 *por tiempo limitado* 🕑️
                   delay_after_sec: 6
@@ -17495,7 +17495,7 @@ whatsapp:
 
                       🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
 
-                      *HAZ CLICK EN EL BOTON DE ABAJO Y ELIGE LA ALTERNATIVA QUE MAS TE GUSTE* 😊👇️
+                      *HAZ CLICK EN EL BOTÓN DE ABAJO Y ELEGÍ LA ALTERNATIVA QUE MÁS TE GUSTE* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b1a048e8-b935-4f60-a368-a074dd707f41
