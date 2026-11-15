@@ -136,7 +136,29 @@ function iconoDeEntrega(f: FichaEnElEditor, clave: string, t: TableroEnElEditor,
  * misma ruta (`entregaDelProductoEnSuRuta`). Aquí, la misma búsqueda, para dibujarla como colita «↺ → N» con el color de
  * esa ficha (no un cable largo: «me descuadran»). Solo dibujo.
  */
+/**
+ * LO CALCULADO, UNA VEZ POR TABLERO (14/11/2026). Él: «muevo el tablero y tiene un delay terrible». Medido con la CPU 4
+ * veces más lenta: ~400 ms por paso al arrastrar, y casi la mitad era rehacer «a dónde va» (que recorre el tablero entero)
+ * por cada botón de cada ficha que aparecía. El tablero es un objeto nuevo en cada cambio: mientras sea el mismo, el
+ * resultado se reutiliza; al editar, se calcula de nuevo. Lo que se ve no cambia.
+ */
+/** Por debajo de este zoom las fichas se dibujan simples (ver `NodoDeFicha`): sus botones ya no se leen. */
+const ZOOM_DE_LEJOS = 0.45;
+const recuerdos = new WeakMap<object, WeakMap<object, Map<string, unknown>>>();
+function recordado<R>(t: object, otro: object, clave: string, calcular: () => R): R {
+  let porT = recuerdos.get(t);
+  if (!porT) recuerdos.set(t, (porT = new WeakMap()));
+  let m = porT.get(otro);
+  if (!m) porT.set(otro, (m = new Map()));
+  if (!m.has(clave)) m.set(clave, calcular());
+  return m.get(clave) as R;
+}
+const SIN_NOMBRES = {};
+
 function aDondeVaSolo(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): FichaEnElEditor | null {
+  return recordado(t, SIN_NOMBRES, `solo|${f.id}|${clave}`, () => aDondeVaSoloSinRecordar(f, clave, t));
+}
+function aDondeVaSoloSinRecordar(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): FichaEnElEditor | null {
   if (f.tipo === "entregar" || (clave !== "pagado" && !clave.startsWith("prod:"))) return null;
   const pid = clave.startsWith("prod:") ? clave.slice(5) : f.tipo === "cobro" ? f.cobro?.producto_id : productosQueCobraLaFicha(f as FichaDelTablero, t as Tablero)[0];
   if (!pid) return null;
@@ -173,6 +195,9 @@ function aDondeVaSolo(f: FichaEnElEditor, clave: string, t: TableroEnElEditor): 
  * del motor. El nombre de «el básico / el full de la tienda» es el de su producto de verdad, como en el motor.
  */
 function leidoComoElBot(t: TableroEnElEditor, nombres: Record<string, string>): TableroEnElEditor {
+  return recordado(t, nombres, "leido", () => leidoComoElBotSinRecordar(t, nombres));
+}
+function leidoComoElBotSinRecordar(t: TableroEnElEditor, nombres: Record<string, string>): TableroEnElEditor {
   const nombreDe = (pid: string) =>
     pid === FULL_DE_LA_TIENDA
       ? nombres[nombres[ID_DEL_FULL_DE_LA_TIENDA]] ?? ""
@@ -183,6 +208,9 @@ function leidoComoElBot(t: TableroEnElEditor, nombres: Record<string, string>): 
 }
 
 function aDondeVaPorSuNombre(t0: TableroEnElEditor, seg: FichaEnElEditor, etiqueta: string, nombres: Record<string, string>): FichaEnElEditor | null {
+  return recordado(t0, nombres, `nombre|${seg.id}|${etiqueta}`, () => aDondeVaPorSuNombreSinRecordar(t0, seg, etiqueta, nombres));
+}
+function aDondeVaPorSuNombreSinRecordar(t0: TableroEnElEditor, seg: FichaEnElEditor, etiqueta: string, nombres: Record<string, string>): FichaEnElEditor | null {
   if (seg.tipo !== "seguimientos") return null;
   const t = leidoComoElBot(t0, nombres);
   // (14/11/2026) PRIMERO, LO QUE HACE EL BOT CON SU MASTER: si la ficha de la que cuelga (no un Cobro) tiene un botón con
@@ -859,8 +887,34 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
   const f = data.ficha;
   // 🪞 EL ESPEJO (05/11/2026): la misma ficha en otro sitio. Se dibuja igual, con un borde de neón y su marca.
   const espejo = data.espejo;
+  // DE LEJOS, LA FICHA SIMPLE (14/11/2026, nivel de detalle como Sendy/Miro). Él: «si hay delay es jodido trabajar». Con
+  // el zoom alejado no se leen los botones: se dibuja una caja con su color, número, ícono, título y el «!» si le falta
+  // algo. Al acercarse, la ficha completa. Los puntos de los cables siguen ahí (invisibles) para que lleguen a su sitio.
+  const deLejos = useStore((s) => s.transform[2] < ZOOM_DE_LEJOS);
   if (!ctx) return null;
   const a = ASPECTO[f.tipo];
+  if (deLejos && !ctx.estaciones && f.tipo !== "reparto") {
+    const salidasConCable = [...new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida))];
+    const conFalta = !!ctx.faltas?.get(f.id)?.size;
+    return (
+      <div
+        onDoubleClick={() => ctx.abrir(f.id)}
+        className={`relative w-[250px] rounded-lg border-4 bg-white ${a.borde} ${f.apagada ? "opacity-50" : ""}`}
+        style={espejo ? { outline: "4px solid #22d3ee", outlineOffset: 3 } : undefined}
+      >
+        <Handle type="target" position={Position.Left} id="entra" className="!opacity-0" style={{ top: 18 }} />
+        <div className={`flex items-center gap-2 rounded-t-[4px] px-3 py-3 text-white ${a.color}`}>
+          <span className="rounded-full bg-white px-2.5 text-[26px] font-black leading-[38px] text-slate-900">{ctx.numeroDe[f.id] ?? ""}</span>
+          <span className="text-[30px] leading-none">{a.icono}</span>
+          {conFalta && <span className="ml-auto rounded-full bg-red-600 px-3 text-[30px] font-black leading-[40px] text-white">!</span>}
+        </div>
+        <div className="truncate px-3 py-3 text-[26px] font-bold text-slate-800">{f.titulo?.trim() || a.nombre}</div>
+        {salidasConCable.map((s) => (
+          <Handle key={s} type="source" position={Position.Right} id={s} className="!opacity-0" />
+        ))}
+      </div>
+    );
+  }
   const salidas = salidasDeLaFicha(f as FichaDelTablero, ctx.paisVisto, ctx.nombres, ctx.tablero as Tablero);
   const avisos = avisosDeLaFicha(ctx.tablero as Tablero, f as FichaDelTablero, ctx.paisVisto);
   const conCable = new Set(ctx.tablero.cables.filter((c) => c.de === f.id).map((c) => c.salida));
@@ -4134,6 +4188,7 @@ export default function LienzoDelTablero({
           snapGrid={[11, 11]}
           // SOLO SE DIBUJA LO QUE ESTÁ A LA VISTA (27/10/2026: «¿estás mostrando todas las fichas, incluso
           // las que no se ven?» — sí: todas, de todos los países). Al arrastrar ya no se recalcula todo.
+          // (14/11/2026, medido con la CPU 4× más lenta: con TODAS dibujadas el arrastre iba a ~290 ms por paso; así, ~125.)
           onlyRenderVisibleElements
           proOptions={{ hideAttribution: true }}
           style={{ background: "transparent" }}
