@@ -6487,6 +6487,8 @@ whatsapp:
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -7084,6 +7086,8 @@ whatsapp:
               ⚡💳 *A través de Nequi o Daviplata*
 
               {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
