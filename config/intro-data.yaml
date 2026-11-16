@@ -5417,6 +5417,7 @@ biblioteca_de_productos:
         price_soles: 4700
         discount_price_soles: 3400
         market_price: 23300
+    ofrecer_imagenes: false
   - id: pmwir7i3o
     name: PRODUCTO FICTICIO PARA CONTRIBUCION
     aliases: []
