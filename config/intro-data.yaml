@@ -9453,6 +9453,9 @@ tiendas:
     nombre: FLORES DE PAPEL
     numero: ""
     pagina: ""
+    alineacion:
+      basico: pmwjfhu1r
+      unico: pmwjfhu1r
     por_pais:
       CO:
         numero: "1398675606660512"
