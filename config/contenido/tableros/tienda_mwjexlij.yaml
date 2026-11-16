@@ -384,6 +384,16 @@ whatsapp:
 
                       *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
                   delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
           activa_oferta: true
     - id: f-mwjv96j2-unv4
       tipo: reparto
@@ -401,7 +411,7 @@ whatsapp:
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
       x: 1287
-      y: -286
+      y: -275
       steps:
         - type: text
           body_variants:
@@ -415,71 +425,6 @@ whatsapp:
       cobro:
         modo: producto
         metodos: true
-    - id: f-mwjvy3uq-dkpne
-      tipo: seguimientos
-      x: 1562
-      y: -660
-      seguimientos:
-        - id: s-mwjvy3uq-vow8p
-          minutos: 30
-          variantes:
-            - id: v-mwjvy3uq-x4kow
-              peso: 1
-              steps:
-                - type: video
-                  drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
-                  caption_variants:
-                    - |-
-                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
-
-                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
-
-                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
-                  delay_after_sec: 6
-                - type: text
-                  body_variants:
-                    - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
-                      __________
-
-                      {{LISTA_METODOS_POR_PAIS}}
-                      (transferencia)
-
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
-                  delay_after_sec: 6
-        - id: s-mwjvy3ur-l169i
-          minutos: 480
-          variantes:
-            - id: v-mwjvy3ur-le2sm
-              peso: 1
-              steps:
-                - type: image
-                  drive_url: https://drive.google.com/file/d/1Dn_SbjccMS_eRQvc2kcNUq14s04iuAEr/view?usp=drive_link
-                  caption_variants:
-                    - |-
-                      🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
-
-                      *{Sólo {{PRECIO_COMPLETO_MAYUSCULAS}}|Por sólo {{PRECIO_COMPLETO_MAYUSCULAS}}|Llévatelo por sólo {{PRECIO_COMPLETO_MAYUSCULAS}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
-                      __________
-
-                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
-
-                      *EN RESUMEN RECIBIRAS:*
-
-                      Nuestro *{{PRODUCTO}}* 📚 incluye:
-
-                      - 🌸 *50 modelos de Flores de Papel*,
-                      - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
-                      - 🌹 *Molde para hacer Rosas*
-                      - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
-                      - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
-                      - 🦋 Mariposas de Papel
-
-                      💛 *7 VIDEOS TUTORIALES PARA QUE APRENDAS A HACER FLORES AMARILLAS* 🫶
-
-                      *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
-                  delay_after_sec: 6
-          activa_oferta: true
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -509,7 +454,13 @@ whatsapp:
       de: f-mwjey94x-qrit
       salida: dec:15d92a58-33f0-454e-bdf8-085ea326f33a
       a: f-mwjvrxxv-a6r9
-    - id: c-mwjvy8vn-vua
+    - id: c-mwjw1ebu-dpf
       de: f-mwjvrxxv-a6r9
       salida: sin_pago
-      a: f-mwjvy3uq-dkpne
+      a: f-mwjfckbz-qeu2
+      a_espejo: e-mwjw1bmq-15lw
+  espejos:
+    - id: e-mwjw1bmq-15lw
+      ficha: f-mwjfckbz-qeu2
+      x: 1551
+      y: -660
