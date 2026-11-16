@@ -40742,6 +40742,7 @@ instagram:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
@@ -43310,9 +43311,8 @@ instagram:
           spintax_ia:
             - "{📲 *Se envía directamente a tu Whatsapp o correo* 💌|📲 *Te lo mandamos directo a tu Whatsapp o correo* 💌|📲 *Lo recibes al instante en tu Whatsapp o correo* 💌}"
             - "{* 👨‍👩‍👦 Imágenes de personas,|* 👨‍👩‍👦 Fotos de personas,|* 👨‍👩‍👦 Ilustraciones de personas,}"
-        - type: image
-          drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
-          caption_variants:
+        - type: text
+          body_variants:
             - |-
               *Además recibirás GRATIS estos complementos* ‼️👇🏼
 
@@ -44615,6 +44615,7 @@ instagram:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descarga la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: text
           body_variants:
             - |-
