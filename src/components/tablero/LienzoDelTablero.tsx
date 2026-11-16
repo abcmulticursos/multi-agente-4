@@ -52,6 +52,15 @@ import { hayVentanaAbierta } from "@/lib/escape-en-pila";
 import { encajarEnLaPantalla } from "@/lib/encajar-en-pantalla";
 export { copiarFichas, mantaPara };
 
+/**
+ * EL PAÍS CON SU NOMBRE COMPLETO (16/11/2026). Él: «dice BO, CO, PE, GT, eso es indescifrable para algunos… mejor el nombre
+ * completo» y con su banderita: «🇵🇪 Perú». Sin país, «🌍 Otros países». Solo pantalla: lo guardado sigue siendo el código.
+ */
+function paisConNombre(p: string | null | undefined): string {
+  if (!p) return "🌍 Otros países";
+  return `${banderaDe(p)} ${COUNTRIES[p as CountryCode]?.label ?? p}`;
+}
+
 /** El tablero tal como lo tiene el editor: igual que el del bot, con las burbujas del editor. */
 /** Una versión, como la tiene el editor (con sus etiquetas de anuncios). */
 export type VersionEnElEditor = { id: string; nombre?: string; peso?: number; steps?: unknown[]; anuncios?: string[]; dirigir?: boolean };
@@ -448,7 +457,7 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
       faltas.push({
         ficha: ini.id,
         salida: "siguiente",
-        motivo: `El Inicio de ${ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países"} no lleva a ninguna ficha: nadie de ahí entra.`,
+        motivo: `El Inicio de ${paisConNombre(ini.pais)} no lleva a ninguna ficha: nadie de ahí entra.`,
       });
     for (const id of rutaDe(t, ini.id)) enVenta.add(id);
   }
@@ -710,7 +719,7 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
     if (!ctx) return;
     ctx.cambiar({ ...ctx.tablero, fichas: ctx.tablero.fichas.map((x) => (x.id === f.id ? { ...x, ...cambio } : x)) });
   };
-  const etiqueta = f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países";
+  const etiqueta = paisConNombre(f.pais);
   // LA BANDERA Y EL PAÍS SE VEN DE LEJOS (11/11/2026, él: «no distingo qué país estamos a menos que me acerque… al
   // alejarme seguir viendo la bandera, y debajo del inicio diga el país, solo nombre»). Crecen al alejar la vista, para
   // que en pantalla no bajen de un tamaño legible. Solo pantalla.
@@ -752,8 +761,8 @@ function NodoDeInicio({ data }: NodeProps<Node<{ ficha: FichaEnElEditor }>>) {
           donde={eligiendoPais}
           onCerrar={() => setEligiendoPais(null)}
           onElegir={(p) => {
-            const de = f.pais ? `${banderaDe(f.pais)} ${f.pais}` : "🌍 Otros países";
-            const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+            const de = paisConNombre(f.pais);
+            const a = paisConNombre(p);
             setEligiendoPais(null);
             if (!window.confirm(`¿Cambiar esta área de ${de} a ${a}?\n\nDesde ahora los clientes de ${a} entran por este Inicio (los de ${de} ya no). Ctrl+Z lo deshace.`)) return;
             cambiar({ pais: p || undefined });
@@ -1740,7 +1749,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
           style={{ color: t.tituloCaja, pointerEvents: "all" }}
           title={
             manta
-              ? "La manta de este país · clic para elegirla (Delete la borra; las fichas se quedan) · doble clic para cambiar su país · estírala desde sus esquinas"
+              ? "El área de este país · clic para elegirla (Delete la borra; las fichas se quedan) · doble clic para cambiar su país · estírala desde sus esquinas"
               : "Clic para elegirla (Delete la borra) · doble clic para renombrarla · arrástrala desde sus esquinas"
           }
         >
@@ -1778,8 +1787,8 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
                 : []),
             ]}
             onElegir={(p) => {
-              const de = manta.pais ? `${banderaDe(manta.pais)} ${manta.pais}` : "🌍 Otros países";
-              const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+              const de = paisConNombre(manta.pais);
+              const a = paisConNombre(p);
               setEligiendoPais(null);
               if (!window.confirm(`¿Cambiar esta área de ${de} a ${a}?\n\nDesde ahora los clientes de ${a} entran por este Inicio (los de ${de} ya no). Ctrl+Z lo deshace.`)) return;
               manta.alCambiarPais?.(p);
@@ -1815,7 +1824,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
                 : []),
             ]}
             onElegir={(p) => {
-              const a = p ? `${banderaDe(p)} ${p}` : "🌍 Otros países";
+              const a = paisConNombre(p);
               setEligiendoPais(null);
               if (!window.confirm(`¿Hacer este velo el área de ${a}?\n\nSi ${a} no tiene Inicio, se le crea uno arriba a la izquierda SIN CONECTAR: tírale el cable a la primera ficha. Ctrl+Z lo deshace.`)) return;
               data.alHacerDePais?.(p);
@@ -3223,8 +3232,8 @@ export default function LienzoDelTablero({
             });
             setAviso(
               nuevo
-                ? `${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: el velo es su área y tiene su Inicio arriba a la izquierda. Conéctalo a la primera ficha de su ruta.`
-                : `${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: el velo es ahora el área de su Inicio.`
+                ? `${paisConNombre(p)}: el velo es su área y tiene su Inicio arriba a la izquierda. Conéctalo a la primera ficha de su ruta.`
+                : `${paisConNombre(p)}: el velo es ahora el área de su Inicio.`
             );
           },
           ...(ini
@@ -3243,7 +3252,7 @@ export default function LienzoDelTablero({
           ...(ini
             ? {
                 manta: {
-                  titulo: ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países",
+                  titulo: paisConNombre(ini.pais),
                   mirando: mirando === ini.id,
                   alVer: () => setMirando((m) => (m === ini.id ? null : ini.id)),
                   // CAMBIAR EL PAÍS DEL ÁREA (12/11/2026). Él: «doble clic al nombre en su bandera, seleccionar el país, y
@@ -3444,7 +3453,7 @@ export default function LienzoDelTablero({
     if (!revisando) return [];
     const ops: Array<{ id: string; nombre: string }> = [];
     for (const ini of tablero.fichas.filter((f) => f.tipo === "inicio" && !f.guardada)) {
-      const pais = ini.pais ? `${banderaDe(ini.pais)} ${ini.pais}` : "🌍 Otros países";
+      const pais = paisConNombre(ini.pais);
       ops.push({ id: ini.id, nombre: `${pais} · todo el país` });
       const ruta = rutaDe(tablero, ini.id);
       for (const r of tablero.fichas.filter((f) => f.tipo === "reparto" && ruta.has(f.id)))
@@ -3673,7 +3682,7 @@ export default function LienzoDelTablero({
       fichas: [...actual.fichas, inicio],
       cajas: [...(actual.cajas ?? []), { id: `manta-${inicio.id}`, x, y, ancho, alto, titulo: "", inicio: inicio.id }],
     });
-    setAviso(`${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}: su Inicio y su manta. Conecta el Inicio a la primera ficha de su ruta.`);
+    setAviso(`${paisConNombre(p)}: su Inicio y su área. Conecta el Inicio a la primera ficha de su ruta.`);
   };
 
   const elegidas = () => nodos.filter((n) => n.selected && (n.type === "ficha" || n.type === "inicio")).map((n) => n.id);
@@ -4256,7 +4265,7 @@ export default function LienzoDelTablero({
             }}
           >
             <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
-              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${dibujando.pais ? `${banderaDe(dibujando.pais)} ${dibujando.pais}` : "🌍 Otros países"}`}, o haz un clic · Esc cancela
+              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${paisConNombre(dibujando.pais)}`}, o haz un clic · Esc cancela
             </div>
             {trazo && (
               <div
@@ -4297,6 +4306,25 @@ export default function LienzoDelTablero({
               // El relleno de arriba (pt-2) es parte del menú: el puntero baja del «+» al menú sin salir de él.
               <div className="absolute left-0 top-full z-50 pt-2">
               <div className="max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
+                {/* EL ÁREA DE UN PAÍS, PRIMERO (16/11/2026, él: «que el país para elegir esté primero»), con el nombre completo. */}
+                <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">🌎 Área de un país</div>
+                <div className="max-h-40 overflow-y-auto">
+                  {[...paisesDisponibles.filter((p) => !paisesConInicio.has(p)), ...(paisesConInicio.has("") ? [] : [""])].map((p) => (
+                    <button
+                      key={p || "otros"}
+                      type="button"
+                      className="flex w-full items-center gap-2 px-5 py-1 text-left text-xs hover:bg-slate-100"
+                      onClick={() => {
+                        // (13/11/2026: ya no cae sola en un sitio libre: él la dibuja arrastrando. Ver `dibujando`.)
+                        setMenuMas(false);
+                        setDibujando({ pais: p });
+                      }}
+                    >
+                      {paisConNombre(p)}
+                    </button>
+                  ))}
+                </div>
+                <div className="my-1 border-t border-slate-200" />
                 <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">Agregar al tablero</div>
                 {/* LAS PLANTILLAS (01/11/2026), como importar en n8n: una tubería entera, conectada por dentro, al
                     lado de lo suyo y sin conectar a ningún país. */}
@@ -4325,25 +4353,6 @@ export default function LienzoDelTablero({
                     <span className="w-5 text-center">{ASPECTO[tipo].icono}</span> {ASPECTO[tipo].nombre}
                   </button>
                 ))}
-                <div className="my-1 border-t border-slate-200" />
-                {/* EL ÁREA DE UN PAÍS, como en la pizarra: su Inicio con su manta. */}
-                <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">🌎 Área de un país</div>
-                <div className="max-h-40 overflow-y-auto">
-                  {[...paisesDisponibles.filter((p) => !paisesConInicio.has(p)), ...(paisesConInicio.has("") ? [] : [""])].map((p) => (
-                    <button
-                      key={p || "otros"}
-                      type="button"
-                      className="flex w-full items-center gap-2 px-5 py-1 text-left text-xs hover:bg-slate-100"
-                      onClick={() => {
-                        // (13/11/2026: ya no cae sola en un sitio libre: él la dibuja arrastrando. Ver `dibujando`.)
-                        setMenuMas(false);
-                        setDibujando({ pais: p });
-                      }}
-                    >
-                      {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
-                    </button>
-                  ))}
-                </div>
                 <div className="my-1 border-t border-slate-200" />
                 <button
                   type="button"
@@ -4704,7 +4713,7 @@ export default function LienzoDelTablero({
                 {/* El nombre arriba, como en la pizarra: se sabe sobre qué ficha se está. */}
                 <div className="truncate border-b border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-500">
                   {fichaDelMenu.tipo === "inicio"
-                    ? `▶ Inicio · ${fichaDelMenu.pais ? `${banderaDe(fichaDelMenu.pais)} ${fichaDelMenu.pais}` : "🌍 Otros países"}`
+                    ? `▶ Inicio · ${paisConNombre(fichaDelMenu.pais)}`
                     : `${espejoDelMenu ? "🪞 Espejo de · " : ""}${ASPECTO[fichaDelMenu.tipo].icono} ${fichaDelMenu.titulo?.trim() || ASPECTO[fichaDelMenu.tipo].nombre}`}
                 </div>
                 {/* 🪞 EL ESPEJO (05/11/2026): desde un espejo, ir a la original o quitar solo este espejo. */}
@@ -4744,7 +4753,7 @@ export default function LienzoDelTablero({
                       setMenu(null);
                     }}
                   >
-                    🌎 Ponerle su manta
+                    🌎 Crear su área de país
                   </button>
                 )}
                 {fichaDelMenu.tipo !== "inicio" && (
@@ -4870,12 +4879,12 @@ export default function LienzoDelTablero({
                                 const c = copiarFichas([original], [], sinEncimarse(vivo.current.fichas, original, { x: m.x + 60 - original.x, y: m.y + Math.max(70, m.alto - 300) - original.y }));
                                 cambiar({ ...vivo.current, fichas: [...vivo.current.fichas, ...c.fichas] });
                                 setMenu(null);
-                                setAviso(`Copia puesta en la manta de ${p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}, abajo a la izquierda. Conéctala con su cable.`);
+                                setAviso(`Copia puesta en el área de ${paisConNombre(p)}, abajo a la izquierda. Conéctala con su cable.`);
                                 const nueva = c.fichas[0]?.id;
                                 if (nueva) window.setTimeout(() => instancia.current?.fitView({ nodes: [{ id: nueva }], padding: 1.2, maxZoom: 1, duration: 500 }), 80);
                               }}
                             >
-                              {p ? `${banderaDe(p)} ${p}` : "🌍 Otros países"}
+                              {paisConNombre(p)}
                             </button>
                           ))}
                         </div>
@@ -4935,7 +4944,7 @@ export default function LienzoDelTablero({
                     if (
                       !window.confirm(
                         esInicio
-                          ? "¿Quitar este país? Se van su Inicio y su manta; las fichas se quedan donde están."
+                          ? "¿Quitar este país? Se van su Inicio y su área; las fichas se quedan donde están."
                           : `¿Eliminar esta ficha y sus cables?${suyos ? ` También se van sus ${suyos} espejo(s) 🪞.` : ""}`
                       )
                     )
@@ -4997,7 +5006,7 @@ export default function LienzoDelTablero({
                   const de = tablero.fichas.find((f) => f.id === c.de);
                   const a = tablero.fichas.find((f) => f.id === c.a);
                   const nombreDe = (f?: FichaEnElEditor) =>
-                    !f ? "(ficha borrada)" : f.tipo === "inicio" ? `Inicio${f.pais ? ` ${banderaDe(f.pais)} ${f.pais}` : ""}` : `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
+                    !f ? "(ficha borrada)" : f.tipo === "inicio" ? `Inicio ${paisConNombre(f.pais)}` : `${ASPECTO[f.tipo].icono} ${f.titulo?.trim() || ASPECTO[f.tipo].nombre}`;
                   const salida = de ? salidasDeLaFicha(de as FichaDelTablero, paisVisto, nombres, tablero as Tablero).find((s) => s.clave === c.salida)?.etiqueta : undefined;
                   return (
                     <div className="max-w-xs border-b border-slate-200 px-3 py-1.5 text-[11px] leading-4 text-slate-600">
