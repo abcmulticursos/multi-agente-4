@@ -63,7 +63,7 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwihqdpl-vov7
       tipo: entregar
-      x: 1496
+      x: 1760
       y: 242
   cables:
     - id: c-mwihsumf-y2i
