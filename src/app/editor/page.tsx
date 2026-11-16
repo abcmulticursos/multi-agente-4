@@ -13184,6 +13184,7 @@ export default function EditorPage() {
                 onPalette={(ad_color_palette) =>
                   setCfg({ ...cfg, ad_color_palette })
                 }
+                onConfig={(c) => setCfg(c)}
               />
             </Collapsible>
             {/* EL ALMACÉN DE USUARIOS QUE COBRAN NO ESTÁ AQUÍ: está en el MENÚ
@@ -19065,7 +19066,10 @@ function AlineacionDeLaModalidad({
   onAlineacion,
   tiendaDeLaFila,
   onIrALaFila,
+  onAbrirProducto,
 }: {
+  /** «Abrir» al lado del producto elegido (16/11/2026): abre su ficha en su ventana. Sin él, no sale. */
+  onAbrirProducto?: (id: string) => void;
   /** Hace falta entera para saber si a un producto le falta el precio en algún
    *  país, que es la mitad de lo que mira el punto de estado. */
   cfg: FullConfig;
@@ -19254,6 +19258,17 @@ function AlineacionDeLaModalidad({
                   </option>
                 ))}
               </select>
+              {/* ABRIR EL PRODUCTO ELEGIDO (16/11/2026). Él: «una vez seleccionados me gustaría que al lado diga abrir… que se
+                  abra un pop up como siempre», para cambiarle el precio o lo que sea sin salir de aquí. */}
+              {producto && onAbrirProducto ? (
+                <button
+                  type="button"
+                  onClick={() => onAbrirProducto(producto.id)}
+                  className="rounded-full bg-sky-100 px-5 py-2 text-sm font-bold text-sky-800 hover:bg-sky-200"
+                >
+                  Abrir
+                </button>
+              ) : null}
             </div>
           );
         })}
@@ -20752,7 +20767,13 @@ function BibliotecaDeProductos({
   onMarcarPunto,
   onCancelarVentana,
   deLaTienda,
+  soloLaFicha,
+  alCerrarLaFicha,
 }: {
+  /** SOLO LA FICHA DE ESTE PRODUCTO, sin la lista (16/11/2026): el «Abrir» de «Qué productos vende» de una tienda. */
+  soloLaFicha?: string;
+  /** Al cerrar esa ficha (con `soloLaFicha`). */
+  alCerrarLaFicha?: () => void;
   /** LOS DE ESTA TIENDA (31/10/2026). Él: «me sale la lista enorme de todos los productos que no tienen nada
    *  que ver con la tienda». Desde la pizarra: su nombre y los productos que juega (su selector y los que usa
    *  su tablero, los mismos de «Lo que se entrega»). Solo filtra lo que se ve. */
@@ -20784,7 +20805,12 @@ function BibliotecaDeProductos({
   onMarcarPunto: () => void;
   onCancelarVentana: () => void;
 }) {
-  const [abierto, setAbierto] = useState<string | null>(null);
+  const [abierto, setAbiertoCrudo] = useState<string | null>(soloLaFicha ?? null);
+  // Con `soloLaFicha`, cerrar la ficha es cerrar todo: se avisa a quien la abrió.
+  const setAbierto = (id: string | null) => {
+    setAbiertoCrudo(id);
+    if (id === null && soloLaFicha) alCerrarLaFicha?.();
+  };
   const [aviso, setAviso] = useState<string | null>(null);
   // EL VISOR DE LA FICHA DEL PRODUCTO, EN EL PAÍS DE LA BANDERA (02/11/2026). Él: «al cambiar de país no cambia el
   // contenido, sigue igual el mismo precio… al cambiar la bandera también el precio se respete». Moneda, {precio} y los
@@ -21049,7 +21075,9 @@ function BibliotecaDeProductos({
 
   return (
     <EditorPreviewContext.Provider value={contextoDelPais}>
-    <TarjetaSuave className="space-y-3">
+    {/* Con `soloLaFicha` no hay tarjeta ni lista: solo la ventana del producto (16/11/2026). */}
+    <div className={soloLaFicha ? "" : "space-y-3 rounded-2xl border border-borde bg-tarjeta p-5 shadow-sm"}>
+      {!soloLaFicha && (<>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-acento">
@@ -21366,6 +21394,7 @@ function BibliotecaDeProductos({
           })}
         </div>
       )}
+      </>)}
 
       {productos.map((producto) =>
         abierto === producto.id ? (
@@ -21707,7 +21736,7 @@ function BibliotecaDeProductos({
           </VentanaDeProducto>
         ) : null
       )}
-    </TarjetaSuave>
+    </div>
     </EditorPreviewContext.Provider>
   );
 }
@@ -36291,6 +36320,7 @@ function VentanaDeDatosDeTienda({
         alCerrarLaVentana={onCerrar}
         onTiendas={(siguientes) => onConfigChange({ ...cfg, tiendas: conEsta(siguientes) })}
         onTodasLasTiendas={(todas) => onConfigChange({ ...cfg, tiendas: todas })}
+        onConfig={onConfigChange}
         onSnapshot={onSnapshot}
         onReenganche={(siguientes) =>
           onConfigChange({ ...cfg, tiendas: conEsta(siguientes), globals: { ...cfg.globals, modo_reenganche: true } })
@@ -60825,6 +60855,7 @@ function TiendasDelProyecto({
   tiendas,
   onTiendas,
   onTodasLasTiendas,
+  onConfig,
   onSnapshot,
   onReenganche,
   palette,
@@ -60846,6 +60877,8 @@ function TiendasDelProyecto({
   onTiendas: (siguientes: TiendaEditor[]) => void;
   /** La lista ENTERA de tiendas, para quitarle un número a otra (ver `conElNumero`). Sin él, `onTiendas` ya es la entera. */
   onTodasLasTiendas?: (todas: TiendaEditor[]) => void;
+  /** La configuración entera, para editar un producto desde «Qué productos vende» (su «Abrir»). Sin él, no sale. */
+  onConfig?: (c: FullConfig) => void;
   onSnapshot: () => void;
   /** Guarda las tiendas Y enciende el modo reenganche, en UNA sola escritura.
    *
@@ -60954,6 +60987,8 @@ function TiendasDelProyecto({
   // (14/11/2026) El pop up del país abierto («tienda|país») y el de «Qué productos vende» (id de la tienda).
   const [paisAbierto, setPaisAbierto] = useState<string | null>(null);
   const [productosAbiertos, setProductosAbiertos] = useState<string | null>(null);
+  /** El producto abierto desde «Qué productos vende» (su «Abrir», 16/11/2026). */
+  const [productoAbierto, setProductoAbierto] = useState<string | null>(null);
   // (14/11/2026) El pop up de «Configuración general» (id de la tienda): lo de toda la tienda.
   const [generalAbierta, setGeneralAbierta] = useState<string | null>(null);
   // EL BUSCADOR (09/11/2026, él: «las tiendas salen ordenadas en lista pero no hay un buscador»).
@@ -61843,7 +61878,34 @@ function TiendasDelProyecto({
                     });
                   }}
                   tiendaDeLaFila={tienda.id}
+                  onAbrirProducto={onConfig ? (id) => setProductoAbierto(id) : undefined}
                 />
+                {/* LA FICHA DEL PRODUCTO, LA DE SIEMPRE (16/11/2026): precio por país, entrega, contenido. */}
+                {productoAbierto && onConfig && (
+                  <BibliotecaDeProductos
+                    key={productoAbierto}
+                    soloLaFicha={productoAbierto}
+                    alCerrarLaFicha={() => setProductoAbierto(null)}
+                    cfg={cfg}
+                    productos={cfg.biblioteca_de_productos ?? []}
+                    onProductos={(lista) => {
+                      onSnapshot();
+                      onConfig({ ...cfg, biblioteca_de_productos: lista });
+                    }}
+                    onCfg={onConfig}
+                    pais={(activePreviewCountry ?? "PE") as CountryCode}
+                    modalidad={activeModality(cfg)}
+                    alineacion={(tienda.alineacion ?? {}) as AlineacionEditor}
+                    precioBase={cfg.globals?.course_price_soles ?? 0}
+                    comboPrice={previewComboPriceFromConfig(cfg)}
+                    basicoPrice={previewBasicoPriceFromConfig(cfg)}
+                    previewContext={previewContextFromConfig(cfg)}
+                    onSnapshot={onSnapshot}
+                    onEdit={() => onSnapshot()}
+                    onMarcarPunto={() => {}}
+                    onCancelarVentana={() => {}}
+                  />
+                )}
                 <p className="mt-2 text-[11px] text-tinta-suave">
                   Sin elegir nada, esta tienda juega los productos de la
                   alineación general.
