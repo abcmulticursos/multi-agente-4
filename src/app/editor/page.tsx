@@ -17932,6 +17932,11 @@ export default function EditorPage() {
               // Sin foto legible no se toca nada.
             }
           }}
+          onOlvidarDeshacer={() => {
+            setHistory([]);
+            setRedoHistory([]);
+            lastEditKey.current = null;
+          }}
           onTiendaEnPantalla={(id) => {
             tiendaEnLaPizarra.current = id;
           }}
@@ -27589,6 +27594,7 @@ function VistaPizarra({
   onSave,
   onGuardar,
   onDescartar,
+  onOlvidarDeshacer,
   onTiendaEnPantalla,
   herramientas,
   hayCambios,
@@ -27626,6 +27632,8 @@ function VistaPizarra({
   onGuardar: () => Promise<boolean>;
   /** Descartar lo no guardado: el borrador vuelve a lo último guardado. */
   onDescartar: () => void;
+  /** Vaciar Ctrl+Z / Ctrl+Y al pasar a otra tienda o workflow (ver «EL DESHACER ES DE LA TIENDA ABIERTA»). */
+  onOlvidarDeshacer?: () => void;
   hayCambios: boolean;
   saving: boolean;
   modoEsencial: boolean;
@@ -27690,6 +27698,20 @@ function VistaPizarra({
       : tiendas.find((t) => t.id === tiendaId)?.nombre?.trim() || "esta tienda";
     setSalidaPendiente({ nombre, seguir });
   };
+  // EL DESHACER ES DE LA TIENDA ABIERTA (15/11/2026). Él: «al hacer undo muchas veces, no afecte a la tienda A… que el
+  // undo no se vaya hasta afuera de esa tienda». Cada paso de Ctrl+Z es una foto del borrador ENTERO: en B, retroceder lo
+  // suficiente devolvía fotos de cuando se editaba A (deshacía lo de A, ya guardado, y el tablero de B se volvía a
+  // cargar: «Cargando el tablero de…»). Al pasar a otra tienda o workflow el deshacer empieza de cero. No se pierde nada:
+  // para cambiar, lo de la anterior ya se guardó o se descartó (`cambiarDeTienda`). No hay una pila por tienda a propósito:
+  // volver a una foto de A borraría lo hecho en B mientras tanto.
+  const claveAbierta = workflowAbierto ? `wf:${workflowAbierto}` : tiendaId;
+  const claveDelDeshacer = useRef(claveAbierta);
+  useEffect(() => {
+    if (claveDelDeshacer.current === claveAbierta) return;
+    claveDelDeshacer.current = claveAbierta;
+    onOlvidarDeshacer?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveAbierta]);
   const irA = (p: "tiendas" | "pizarra" | "tablero") => {
     setPantalla(p);
     try {
