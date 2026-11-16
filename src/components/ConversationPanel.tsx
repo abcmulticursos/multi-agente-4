@@ -9,6 +9,7 @@ import ModeToggle from "@/components/ModeToggle";
 import QuickReplies, { type QuickReplyDTO } from "@/components/QuickReplies";
 import EmojiPicker from "@/components/EmojiPicker";
 import ForwardPicker from "@/components/ForwardPicker";
+import RegistrarCompraEnMeta from "@/components/RegistrarCompraEnMeta";
 import { renderWhatsAppFormat } from "@/lib/whatsapp-format";
 import { marcadoDesdeSeleccion } from "@/lib/copiar-con-formato";
 import {
@@ -262,6 +263,8 @@ export default function ConversationPanel({
     explicacion: ExplicacionDeError | null;
   } | null>(null);
   const [reintentandoCapi, setReintentandoCapi] = useState(false);
+  /** La ventana «💰 Registrar compra en Meta» (16/11/2026). */
+  const [compraEnMeta, setCompraEnMeta] = useState(false);
 
   async function abrirAvisoCapi() {
     try {
@@ -1424,6 +1427,9 @@ export default function ConversationPanel({
       onDrop={onDrop}
       onPaste={onPaste}
     >
+      {compraEnMeta ? (
+        <RegistrarCompraEnMeta conversationId={convo.id} onCerrar={() => setCompraEnMeta(false)} />
+      ) : null}
       {avisoCapi ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-lg rounded-lg bg-tarjeta p-5 shadow-xl">
@@ -1719,6 +1725,16 @@ export default function ConversationPanel({
                   type="button"
                   onClick={() => {
                     setMenuChatAbierto(false);
+                    setCompraEnMeta(true);
+                  }}
+                  className="block w-full border-b border-neutral-100 px-4 py-3 text-left text-sm text-neutral-700 hover:bg-neutral-50"
+                >
+                  💰 Registrar compra en Meta
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuChatAbierto(false);
                     void toggleBlock();
                   }}
                   disabled={blockBusy}
@@ -1766,6 +1782,14 @@ export default function ConversationPanel({
             mode={convo.mode}
             onChanged={handleModeChanged}
           />
+          <button
+            type="button"
+            onClick={() => setCompraEnMeta(true)}
+            title="Para un pago que el bot no aprobó y entregaste a mano: le avisa a Meta que este cliente compró"
+            className="whitespace-nowrap rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+          >
+            💰 Compra a Meta
+          </button>
           <a
             href={`/api/logs?dia=hoy&convo=${convo.id}`}
             download

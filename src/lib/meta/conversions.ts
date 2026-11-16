@@ -473,10 +473,10 @@ export function buildPurchasePayload(args: PurchaseEventArgs): CapiEventPayload 
  * antes de enviarlos. Si falta config (Pixel ID + Token) loguea y sigue
  * — no bloquea ni rompe el flujo del bot.
  */
-export async function sendPurchaseEvent(args: PurchaseEventArgs): Promise<void> {
+export async function sendPurchaseEvent(args: PurchaseEventArgs): Promise<CapiPostResult | null> {
   if (isTestConversation(args.conversationId)) {
     console.log(`[test] CAPI Purchase suprimido para convo ${args.conversationId}`);
-    return;
+    return null;
   }
   const payload = buildPurchasePayload(args);
   if (esCompraOrganica(args.userData)) {
@@ -485,7 +485,9 @@ export async function sendPurchaseEvent(args: PurchaseEventArgs): Promise<void> 
         `Purchase enviado como ${payload.action_source}, sin atribuir a ningún anuncio`
     );
   }
-  await postEvent(payload, args.conversationId);
+  // Devuelve cómo le fue (null = sin pixel o sin permiso): lo usa el botón «Registrar compra en Meta».
+  // Los que mandan la compra al aprobar un pago lo ignoran, como siempre.
+  return postEvent(payload, args.conversationId);
 }
 
 export interface ContactEventArgs {

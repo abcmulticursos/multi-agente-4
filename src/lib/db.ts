@@ -312,6 +312,8 @@ export interface ConversationRow {
   /** La tienda que atendió la conversación, por su nombre. */
   capi_last_tienda: string | null;
   capi_last_at: number | null;
+  /** La compra registrada a mano en Meta: JSON {valor, moneda, at}. NULL = nunca. */
+  compra_manual_meta: string | null;
   /** 1 = conversación pineada al top de la lista. */
   pinned: number;
   /** unixepoch del momento en que se pineó (para ordenar las pineadas). */
@@ -816,6 +818,9 @@ const conversationColumns: Array<[string, string]> = [
   // LA ÚLTIMA ENTRADA POR UN ANUNCIO (09/11/2026). Meta abre 72 horas gratis cada vez que el
   // cliente escribe desde un anuncio; las 70 horas del bot cuentan desde la más reciente.
   ["anuncio_at", "INTEGER"],
+  // LA COMPRA REGISTRADA A MANO EN META (16/11/2026). JSON {valor, moneda, at}. NULL = nunca se registró a mano.
+  // Ver `/api/meta/compra-manual`.
+  ["compra_manual_meta", "TEXT"],
 ];
 for (const [name, type] of conversationColumns) {
   try {
@@ -1434,6 +1439,14 @@ export function registrarEventoCapi(
   } catch (err) {
     console.error("[capi] no se pudo anotar el resultado del evento:", err);
   }
+}
+
+/** Anota la compra que el dueño registró a mano en Meta (botón del chat). */
+export function anotarCompraManualEnMeta(conversationId: number, valor: number, moneda: string): void {
+  db.prepare("UPDATE conversations SET compra_manual_meta = ? WHERE id = ?").run(
+    JSON.stringify({ valor, moneda, at: Math.floor(Date.now() / 1000) }),
+    conversationId
+  );
 }
 
 export type TestMessageButton = { id: string; title: string };
