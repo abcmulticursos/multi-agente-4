@@ -5338,6 +5338,31 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: true
 biblioteca_de_productos:
+  - id: pmwir7i3o
+    name: PRODUCTO FICTICIO PARA CONTRIBUCION
+    aliases: []
+    price_soles: 0
+    delivery: []
+    image_gallery: []
+    course_content: ""
+    etiqueta: ""
+    entregas_extra:
+      - id: ent_mwir82by
+        nombre: MUESTRA 1 ANIMALES ABECEDARIO
+        steps:
+          - type: document
+            drive_url: https://drive.google.com/file/d/1kX89Jkf4o1Vk2VIdrQdDbG0u-gOoIU_O/view?usp=drive_link
+            caption_variants:
+              - ""
+            delay_after_sec: 6
+      - id: ent_mwir9b7c
+        nombre: MUESTRA 2 JUEGO Y MAGIA
+        steps:
+          - type: document
+            drive_url: https://drive.google.com/file/d/1I2wXRGiXoGHeTMLpcjdognQzZOmytD7U/view?usp=drive_link
+            caption_variants:
+              - ""
+            delay_after_sec: 6
   - id: pmvxom7h2
     name: MEGA PACK DE RAZONAMIENTO VERBAL
     aliases: []
