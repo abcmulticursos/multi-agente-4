@@ -3,9 +3,9 @@ whatsapp:
   fichas:
     - id: inicio
       tipo: inicio
-      x: 0
-      y: 160
-      pais: AR
+      x: -759
+      y: 550
+      pais: CO
     - id: f-mwjey94x-qrit
       tipo: mensaje
       x: 330
@@ -358,4 +358,37 @@ whatsapp:
                       *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
                   delay_after_sec: 6
           activa_oferta: true
-  cables: []
+    - id: f-mwjv96j2-unv4
+      tipo: reparto
+      x: -308
+      y: 572
+      reparto:
+        - id: r1
+          peso: 1
+        - id: r2
+          peso: 1
+        - id: rmwjv9kvp
+          peso: 1
+        - id: rmwjv9lgs
+          peso: 1
+  cables:
+    - id: c-mwjv9h8c-htw
+      de: inicio
+      salida: siguiente
+      a: f-mwjv96j2-unv4
+    - id: c-mwjv9p4u-83r
+      de: f-mwjv96j2-unv4
+      salida: rep:r1
+      a: f-mwjey94x-qrit
+    - id: c-mwjv9sro-3f8
+      de: f-mwjv96j2-unv4
+      salida: rep:r2
+      a: f-mwjf4dh1-ml9o3
+    - id: c-mwjv9ubg-7tk
+      de: f-mwjv96j2-unv4
+      salida: rep:rmwjv9kvp
+      a: f-mwjf7489-nghqk
+    - id: c-mwjv9w5q-w94
+      de: f-mwjv96j2-unv4
+      salida: rep:rmwjv9lgs
+      a: f-mwjf9vqj-pba9e
