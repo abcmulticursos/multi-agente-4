@@ -61867,6 +61867,12 @@ function AdTagPicker({
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [listaAbierta, setListaAbierta] = useState(false);
+  /** Elegir un AD cierra la lista (16/11/2026); un clic en el campo la vuelve a abrir. */
+  const elegirAd = (key: string) => {
+    toggle(key);
+    setQuery("");
+    setListaAbierta(false);
+  };
   const selected = registry.filter((ad) => selectedKeys.includes(ad.key));
   // LOS VIEJOS SE VEN (19/10/2026): una clave puesta en la ficha que ya no está en la lista importada
   // era invisible, y no se podía quitar. Ahora sale gris, como «anuncio viejo», con su X.
@@ -61929,16 +61935,29 @@ function AdTagPicker({
             <button type="button" onClick={() => toggle(k)} className="ml-1 rounded px-1 font-bold no-underline hover:bg-black/10" title="Quitar este anuncio viejo">X</button>
           </span>
         ))}
+        {/* LA LISTA SE QUEDABA PEGADA (16/11/2026). Él: «a veces se queda pegada y no desaparece… quedan 2 selectores
+            desplegados y no puedo hacer nada». Se abría también con texto escrito, así que con algo escrito y un clic
+            en otro campo, la lista seguía abierta. Ahora manda solo `listaAbierta`: se abre al hacer clic o escribir,
+            y se cierra al elegir un AD, con Escape o al salir del campo. */}
         <input
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setListaAbierta(true);
+          }}
           onFocus={() => setListaAbierta(true)}
+          onClick={() => setListaAbierta(true)}
           onBlur={() => window.setTimeout(() => setListaAbierta(false), 150)}
           onKeyDown={(event) => {
+            if (event.key === "Escape" && listaAbierta) {
+              event.preventDefault();
+              event.stopPropagation();
+              setListaAbierta(false);
+              return;
+            }
             if (event.key === "Enter" && matches[0]) {
               event.preventDefault();
-              toggle(matches[0].key);
-              setQuery("");
+              elegirAd(matches[0].key);
             }
           }}
           placeholder="Escribe un AD, o haz clic para ver la lista"
@@ -61949,7 +61968,7 @@ function AdTagPicker({
         {/* LA LISTA, POR BM Y CAMPAÑA (17/10/2026): «no puedo ver de qué BM es… si me pusieras al
             menos el título del BM y el título de la campaña sería genial… como un separador». Se
             abre con solo hacer clic, sin tener que adivinar el nombre. */}
-        {(query.trim() || listaAbierta) && (
+        {listaAbierta && (
           <div className="absolute left-0 top-full z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-md border border-neutral-300 bg-tarjeta p-1 shadow-lg">
             {matches.length > 0 ? (
               // DOS SEPARADORES (19/10/2026): el BM arriba, y dentro cada campaña.
@@ -61966,13 +61985,26 @@ function AdTagPicker({
                             📣 {campana}
                             {campanaDeLaTienda(bm, campana) && <span className="rounded bg-emerald-100 px-1 text-[10px] font-bold text-emerald-800">la usa esta tienda</span>}
                           </div>
-                          {ads.map((ad) => (
-                            <button key={ad.key} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => { toggle(ad.key); setQuery(""); }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-neutral-100">
-                              <span style={{ backgroundColor: ad.color }} className="h-3 w-3 shrink-0 rounded-sm" />
-                              <span className="truncate">{ad.reference ? `${ad.reference} · ${ad.name}` : ad.name}</span>
-                              {ad.meta?.active === false && <span className="ml-auto text-[10px] font-bold text-neutral-400">apagado en Meta</span>}
-                            </button>
-                          ))}
+                          {ads.map((ad) => {
+                            // LOS APAGADOS EN META, OSCUROS (16/11/2026). Él: «que se oscurezcan para que no se confundan con
+                            // los encendidos». Se pueden elegir igual.
+                            const apagado = ad.meta?.active === false;
+                            return (
+                              <button
+                                key={ad.key}
+                                type="button"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => elegirAd(ad.key)}
+                                className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs ${
+                                  apagado ? "bg-neutral-300 text-neutral-500 hover:bg-neutral-400/60" : "hover:bg-neutral-100"
+                                }`}
+                              >
+                                <span style={{ backgroundColor: ad.color }} className={`h-3 w-3 shrink-0 rounded-sm ${apagado ? "opacity-40 grayscale" : ""}`} />
+                                <span className={`truncate ${apagado ? "line-through decoration-neutral-500/60" : ""}`}>{ad.reference ? `${ad.reference} · ${ad.name}` : ad.name}</span>
+                                {apagado && <span className="ml-auto shrink-0 rounded bg-neutral-600 px-1.5 py-0.5 text-[10px] font-bold text-white">apagado en Meta</span>}
+                              </button>
+                            );
+                          })}
                         </div>
                       ))}
                   </div>
