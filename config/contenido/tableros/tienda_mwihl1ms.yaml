@@ -79,10 +79,14 @@ whatsapp:
       y: 385
     - id: f-mwiqeqzl-epjy
       tipo: entregar
-      x: 1639
-      y: 55
+      x: 1562
+      y: 11
   cables:
     - id: c-mwihsumf-y2i
       de: inicio
       salida: siguiente
       a: f-mwihnbhe-b1z5
+    - id: c-mwir6ob8-ue9
+      de: f-mwihnbhe-b1z5
+      salida: dec:d8e4b406-fe77-4c5b-ad65-2f2930b3d2ef
+      a: f-mwiqeqzl-epjy
