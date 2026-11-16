@@ -61,14 +61,26 @@ whatsapp:
 
               👇 ¿Te gustaría recibir la muestra? Responde SÍ. 💬
           delay_after_sec: 6
+          decisions:
+            - id: d8e4b406-fe77-4c5b-ad65-2f2930b3d2ef
+              title: SI
+              keywords:
+                - sí
+                - si
+                - ssi
+                - siii
+                - sii
+                - sy
+              color: gris
+              steps: []
     - id: f-mwihqdpl-vov7
       tipo: entregar
       x: 1672
       y: 385
     - id: f-mwiqeqzl-epjy
       tipo: entregar
-      x: 1298
-      y: 88
+      x: 1364
+      y: 99
   cables:
     - id: c-mwihsumf-y2i
       de: inicio
