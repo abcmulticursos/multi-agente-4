@@ -9458,6 +9458,9 @@ tiendas:
     nombre: FLORES DE PAPEL
     numero: ""
     pagina: ""
+    por_pais:
+      CO:
+        numero: "1398675606660512"
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani

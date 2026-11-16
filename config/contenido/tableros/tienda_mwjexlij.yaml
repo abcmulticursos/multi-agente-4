@@ -295,8 +295,8 @@ whatsapp:
               steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
-      x: 792
-      y: -176
+      x: 781
+      y: -220
       seguimientos:
         - id: s-mwjfckc0
           minutos: 30
