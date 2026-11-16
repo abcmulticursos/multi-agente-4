@@ -7519,6 +7519,7 @@ whatsapp:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
@@ -13576,6 +13577,7 @@ whatsapp:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
           caption_variants:
@@ -26674,6 +26676,7 @@ messenger:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1Bp2unS69KicsOOORfH-4S5YJc1HvemxY/view?usp=drive_link
           caption_variants:
@@ -32731,6 +32734,7 @@ messenger:
           delay_after_sec: 6
           spintax_ia:
             - "{*Descargá la muestra gratuita* 😊👆️|*Te envío una pequeña muestra gratuita del material* 😊👆️|*Te envío una muestra gratuita para que puedas dar un vistazo* 😊👆️}"
+          enabled: false
         - type: image
           drive_url: https://drive.google.com/file/d/1n69t2cntl5xuBg_DQHf76pl65vAe1k4k/view?usp=drive_link
           caption_variants:
