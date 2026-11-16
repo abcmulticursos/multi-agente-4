@@ -6126,8 +6126,8 @@ biblioteca_de_productos:
         discount_price_soles: 2
         market_price: 12
       CO:
-        price_soles: 10000
-        discount_price_soles: 7000
+        price_soles: 8300
+        discount_price_soles: 6600
         market_price: 50000
   - id: pmuq33w4x
     name: LECTOESCRITURA
@@ -6364,8 +6364,8 @@ biblioteca_de_productos:
         discount_price_soles: 5000
         market_price: 25000
       CO:
-        price_soles: 14000
-        discount_price_soles: 11000
+        price_soles: 13200
+        discount_price_soles: 9900
         market_price: 55000
   - id: pmuq3doxr
     name: SUPER PACK ESPECIALES 2 EN 1
