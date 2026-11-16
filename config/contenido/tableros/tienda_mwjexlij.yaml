@@ -1,0 +1,76 @@
+whatsapp:
+  encendido: false
+  fichas:
+    - id: inicio
+      tipo: inicio
+      x: 0
+      y: 160
+      pais: AR
+    - id: f-mwjey94x-qrit
+      tipo: mensaje
+      x: 330
+      y: -22
+      steps:
+        - type: text
+          body_variants:
+            - |
+              Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+              ⚠️ *¿Te gustaría aprender a hacer flores de papel, 🌸 pero no sabes por dónde empezar o sientes que es muy difícil?*
+
+              ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+              {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          caption_variants:
+            - |-
+              ⭐ {*Con el Kit Esencial de FLORES DE PAPEL* 🌸|*Con nuestro Kit Esencial de FLORES DE PAPEL* 🌸:|*Con el super Kit Esencial de FLORES DE PAPEL* 🌸} *aprenderás a hacer estas bellezas* de manera sencilla. 🤗
+
+              - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+              - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+              - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+              - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+              - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+              - *Rosas de Papel* 🌹
+              - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+              📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
+
+              🟣 *¿COMO FUNCIONA?*
+
+              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+
+              - *2).-* 📲 Envíanos tu comprobante de pago
+
+              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+              (Transferencia)
+          delay_after_sec: 6
+  cables: []

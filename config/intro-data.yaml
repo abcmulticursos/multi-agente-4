@@ -9364,6 +9364,10 @@ tiendas:
       unico: ptcocina_dietas
       complementario: pmu39ill8
       full: pttaller_pack
+  - id: tienda_mwjexlij
+    nombre: FLORES DE PAPEL
+    numero: ""
+    pagina: ""
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -12862,6 +12866,7 @@ tableros:
   tienda_mw91gb6s: "@pieza:tableros/tienda_mw91gb6s.yaml"
   tienda_mwf8wo1h: "@pieza:tableros/tienda_mwf8wo1h.yaml"
   tienda_mwihl1ms: "@pieza:tableros/tienda_mwihl1ms.yaml"
+  tienda_mwjexlij: "@pieza:tableros/tienda_mwjexlij.yaml"
 workflows:
   figurarte2:
     encendido: true
