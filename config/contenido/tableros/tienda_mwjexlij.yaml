@@ -269,10 +269,11 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO COMPRAR?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?|¿CÓMO HACER TU COMPRA?}* *{RESPONDE CON UN MÉTODO DE PAGO|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON LA FORMA DE PAGO QUE PREFIERAS}* 👇🏼
+              🛒 *PUEDES ADQUIRIRLO CON LOS. SIGUIENTES METODOS DE PAGO* 
 
               {{LISTA_METODOS_POR_PAIS}}
-              (Transferencia)
+
+              *DESEAS RECIBIR LOS DATOS DE PAGO* ❓️😊
           delay_after_sec: 6
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
