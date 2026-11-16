@@ -61245,6 +61245,14 @@ instagram:
       de: f-mwdnvrol-efc90
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwdnvrom-c4yne
+    - id: c-mwjl0s54-ctp
+      de: f-mwdbe0qi-mh5tk
+      salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
+      a: f-mwdbe0qi-kojx7
+    - id: c-mwjl0ve7-oij
+      de: f-mwczmr06-i8lx4
+      salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
+      a: f-mwczmr06-4se41
   cajas:
     - id: velo-mwcazaol-0
       x: -869
