@@ -72,6 +72,32 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
+          decisions:
+            - id: 15d92a58-33f0-454e-bdf8-085ea326f33a
+              title: DATOS DE PAGO
+              keywords:
+                - Nequi
+                - daviplata
+                - bre-b
+                - neki
+                - nnequi
+                - nqui
+                - davi
+                - nek
+                - neq
+                - bre
+                - con bre
+                - con nequi
+                - con davi
+                - con daviplata
+                - con bre
+                - tengo bre
+                - tengo nequi
+                - tengo daviplata
+                - tengo davi
+                - tengo neki
+              color: esmeralda
+              steps: []
       presenta:
         - "@tienda:basico"
     - id: f-mwjf4dh1-ml9o3
