@@ -2359,11 +2359,13 @@ whatsapp:
       y: 11594
       reparto:
         - id: r1
-          peso: 1
+          peso: 0
+          peso_antes: 1
           anuncios:
             - meta_52583623807983
         - id: r2
-          peso: 1
+          peso: 0
+          peso_antes: 1
           anuncios:
             - meta_52583623807583
         - id: rmwd4ovya
