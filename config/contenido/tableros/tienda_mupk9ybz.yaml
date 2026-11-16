@@ -7700,12 +7700,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -8695,12 +8690,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -9677,12 +9667,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -10742,12 +10727,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -11723,12 +11703,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -12925,12 +12900,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -13910,10 +13880,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, podés adquirir el Curso así 😊👇|✅ Excelente, para obtener el curso podés hacerlo a través de estos datos 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -14809,10 +14776,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -17742,12 +17706,7 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
+            - "{{METODO_DE_PAGO_1}}"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -17770,12 +17729,8 @@ whatsapp:
             - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *A través de Nequi o Daviplata*
-
+            - |
               {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 😊
           delay_after_sec: 6
         - type: text
           body_variants:
