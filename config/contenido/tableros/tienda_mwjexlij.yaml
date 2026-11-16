@@ -273,8 +273,13 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
 
-              *DESEAS RECIBIR LOS DATOS DE PAGO* ❓️😊
+              *HAZ CLICK EN EL BOTÓN "SI QUIERO" SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
           delay_after_sec: 6
+          buttons:
+            - id: f1a37e13-8baa-4e5c-b8c0-1b8c8d4e9a9b
+              label: SI QUIERO
+              action: send_steps
+              steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
       x: 792
