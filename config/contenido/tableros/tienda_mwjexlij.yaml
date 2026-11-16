@@ -428,6 +428,7 @@ whatsapp:
           delay_after_sec: 6
       cobro:
         modo: producto
+        producto_id: "@tienda:basico"
         metodos: true
     - id: f-mwjw2iuh-6euh
       tipo: regalo
