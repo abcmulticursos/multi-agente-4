@@ -410,8 +410,8 @@ whatsapp:
           peso: 1
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
-      x: 1287
-      y: -275
+      x: 1397
+      y: -341
       steps:
         - type: text
           body_variants:
@@ -425,6 +425,10 @@ whatsapp:
       cobro:
         modo: producto
         metodos: true
+    - id: f-mwjw2iuh-6euh
+      tipo: regalo
+      x: 2255
+      y: -319
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -459,8 +463,17 @@ whatsapp:
       salida: sin_pago
       a: f-mwjfckbz-qeu2
       a_espejo: e-mwjw1bmq-15lw
+    - id: c-mwjw2nay-1dm
+      de: f-mwjvrxxv-a6r9
+      salida: pagado
+      a: f-mwjw2iuh-6euh
+      vista: cable
+    - id: c-mwjw2yuq-tj3
+      de: f-mwjey94x-qrit
+      salida: pagado
+      a: f-mwjw2iuh-6euh
   espejos:
     - id: e-mwjw1bmq-15lw
       ficha: f-mwjfckbz-qeu2
-      x: 1551
-      y: -671
+      x: 1672
+      y: -737
