@@ -23502,6 +23502,15 @@ messenger:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: f347683c-ede7-4e64-a90e-8c2f12901d95
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 1225fe1b-5835-4341-8c5b-621285c40813
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwczmr06-08xfk
               title: SUPER PACK
@@ -24932,6 +24941,15 @@ messenger:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: f8f87c08-4bc2-411d-bcc4-61325b983d03
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: c5c43bb9-007f-44cf-aa2c-1e35723b0db4
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwd56hap-7842n
               title: SUPER PACK
@@ -26354,6 +26372,15 @@ messenger:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: 7287a10d-8614-4a42-a979-e8f75dd006b2
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 21cb3eac-250b-462b-b88d-9fff28b58312
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwdatl63-ua97j
               title: SUPER PACK
@@ -27820,6 +27847,15 @@ messenger:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: 6a205eea-cb6c-4e8e-84d9-b5d9b5948dc4
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 368adec4-c86d-42d3-a394-c64d92f2e310
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwdbe0qi-lbh5y
               title: SUPER PACK
@@ -40843,14 +40879,46 @@ messenger:
       de: f-mwdnvrol-efc90
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwdnvrom-c4yne
-    - id: c-mwjl1a2b-3wu
+    - id: c-mwjl1twi-vlu
       de: f-mwdbe0qi-mh5tk
       salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
       a: f-mwdbe0qi-kojx7
-    - id: c-mwjl1d4s-c2e
+    - id: c-mwjl1yw4-bal
       de: f-mwczmr06-i8lx4
       salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
       a: f-mwczmr06-4se41
+    - id: c-mwjl48ts-h38
+      de: f-mwdbe0qi-kojx7
+      salida: btn:6a205eea-cb6c-4e8e-84d9-b5d9b5948dc4
+      a: f-mwdbe0qi-jw5gv
+    - id: c-mwjl4kza-i83
+      de: f-mwdbe0qi-kojx7
+      salida: btn:368adec4-c86d-42d3-a394-c64d92f2e310
+      a: f-mwdbe0qi-7oizs
+    - id: c-mwjl58iv-s6p
+      de: f-mwczmr06-4se41
+      salida: btn:f347683c-ede7-4e64-a90e-8c2f12901d95
+      a: f-mwczmr06-q3356
+    - id: c-mwjl5at2-f7m
+      de: f-mwczmr06-4se41
+      salida: btn:1225fe1b-5835-4341-8c5b-621285c40813
+      a: f-mwczmr07-ydkeb
+    - id: c-mwjl5rhb-5ry
+      de: f-mwdatl63-96azn
+      salida: btn:7287a10d-8614-4a42-a979-e8f75dd006b2
+      a: f-mwdatl63-yta4b
+    - id: c-mwjl5tfk-5dl
+      de: f-mwdatl63-96azn
+      salida: btn:21cb3eac-250b-462b-b88d-9fff28b58312
+      a: f-mwdatl64-geli1
+    - id: c-mwjl69a6-tg2
+      de: f-mwd56hap-9n5su
+      salida: btn:f8f87c08-4bc2-411d-bcc4-61325b983d03
+      a: f-mwd56hap-cv12m
+    - id: c-mwjl6b56-rwz
+      de: f-mwd56hap-9n5su
+      salida: btn:c5c43bb9-007f-44cf-aa2c-1e35723b0db4
+      a: f-mwd56hap-n7sdq
   cajas:
     - id: velo-mwcazaol-0
       x: -869
@@ -43988,6 +44056,15 @@ instagram:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: f347683c-ede7-4e64-a90e-8c2f12901d95
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 1225fe1b-5835-4341-8c5b-621285c40813
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwczmr06-08xfk
               title: SUPER PACK
@@ -45418,6 +45495,15 @@ instagram:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: f8f87c08-4bc2-411d-bcc4-61325b983d03
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: c5c43bb9-007f-44cf-aa2c-1e35723b0db4
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwd56hap-7842n
               title: SUPER PACK
@@ -46840,6 +46926,15 @@ instagram:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: 7287a10d-8614-4a42-a979-e8f75dd006b2
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 21cb3eac-250b-462b-b88d-9fff28b58312
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwdatl63-ua97j
               title: SUPER PACK
@@ -48306,6 +48401,15 @@ instagram:
 
               🟠 *SOLO {{PRODUCTO_BASE}}* 👉🏼 *{{PRECIO_BASE}}*
           delay_after_sec: 6
+          buttons:
+            - id: 6a205eea-cb6c-4e8e-84d9-b5d9b5948dc4
+              label: SUPER PACK 2 EN 1
+              action: send_steps
+              steps: []
+            - id: 368adec4-c86d-42d3-a394-c64d92f2e310
+              label: SOLO GRAFISMO
+              action: send_steps
+              steps: []
           decisions:
             - id: d-mwdbe0qi-lbh5y
               title: SUPER PACK
@@ -61329,14 +61433,46 @@ instagram:
       de: f-mwdnvrol-efc90
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41
       a: f-mwdnvrom-c4yne
-    - id: c-mwjl0s54-ctp
+    - id: c-mwjl1twi-vlu
       de: f-mwdbe0qi-mh5tk
       salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
       a: f-mwdbe0qi-kojx7
-    - id: c-mwjl0ve7-oij
+    - id: c-mwjl1yw4-bal
       de: f-mwczmr06-i8lx4
       salida: btn:32ad0ca4-fe81-46da-a7e7-8b8febbb502f
       a: f-mwczmr06-4se41
+    - id: c-mwjl48ts-h38
+      de: f-mwdbe0qi-kojx7
+      salida: btn:6a205eea-cb6c-4e8e-84d9-b5d9b5948dc4
+      a: f-mwdbe0qi-jw5gv
+    - id: c-mwjl4kza-i83
+      de: f-mwdbe0qi-kojx7
+      salida: btn:368adec4-c86d-42d3-a394-c64d92f2e310
+      a: f-mwdbe0qi-7oizs
+    - id: c-mwjl58iv-s6p
+      de: f-mwczmr06-4se41
+      salida: btn:f347683c-ede7-4e64-a90e-8c2f12901d95
+      a: f-mwczmr06-q3356
+    - id: c-mwjl5at2-f7m
+      de: f-mwczmr06-4se41
+      salida: btn:1225fe1b-5835-4341-8c5b-621285c40813
+      a: f-mwczmr07-ydkeb
+    - id: c-mwjl5rhb-5ry
+      de: f-mwdatl63-96azn
+      salida: btn:7287a10d-8614-4a42-a979-e8f75dd006b2
+      a: f-mwdatl63-yta4b
+    - id: c-mwjl5tfk-5dl
+      de: f-mwdatl63-96azn
+      salida: btn:21cb3eac-250b-462b-b88d-9fff28b58312
+      a: f-mwdatl64-geli1
+    - id: c-mwjl69a6-tg2
+      de: f-mwd56hap-9n5su
+      salida: btn:f8f87c08-4bc2-411d-bcc4-61325b983d03
+      a: f-mwd56hap-cv12m
+    - id: c-mwjl6b56-rwz
+      de: f-mwd56hap-9n5su
+      salida: btn:c5c43bb9-007f-44cf-aa2c-1e35723b0db4
+      a: f-mwd56hap-n7sdq
   cajas:
     - id: velo-mwcazaol-0
       x: -869
