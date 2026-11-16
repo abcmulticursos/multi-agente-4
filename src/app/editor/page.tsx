@@ -36290,6 +36290,7 @@ function VentanaDeDatosDeTienda({
         abiertaAlInicio={tienda.id}
         alCerrarLaVentana={onCerrar}
         onTiendas={(siguientes) => onConfigChange({ ...cfg, tiendas: conEsta(siguientes) })}
+        onTodasLasTiendas={(todas) => onConfigChange({ ...cfg, tiendas: todas })}
         onSnapshot={onSnapshot}
         onReenganche={(siguientes) =>
           onConfigChange({ ...cfg, tiendas: conEsta(siguientes), globals: { ...cfg.globals, modo_reenganche: true } })
@@ -60823,6 +60824,7 @@ function TiendasDelProyecto({
   cfg,
   tiendas,
   onTiendas,
+  onTodasLasTiendas,
   onSnapshot,
   onReenganche,
   palette,
@@ -60842,6 +60844,8 @@ function TiendasDelProyecto({
   /** Al cerrar la ventana de una tienda (Mis tiendas vuelve a su lista). */
   alCerrarLaVentana?: () => void;
   onTiendas: (siguientes: TiendaEditor[]) => void;
+  /** La lista ENTERA de tiendas, para quitarle un número a otra (ver `conElNumero`). Sin él, `onTiendas` ya es la entera. */
+  onTodasLasTiendas?: (todas: TiendaEditor[]) => void;
   onSnapshot: () => void;
   /** Guarda las tiendas Y enciende el modo reenganche, en UNA sola escritura.
    *
@@ -60860,6 +60864,88 @@ function TiendasDelProyecto({
 }) {
   const parchar = (i: number, parche: Partial<TiendaEditor>) =>
     onTiendas(tiendas.map((t, j) => (j === i ? { ...t, ...parche } : t)));
+  /**
+   * EL NÚMERO QUE YA ESTÁ EN OTRA TIENDA (16/11/2026). Él: «me dice: este número ya está en la tienda figurarte… necesito
+   * que diga… ¿deseas desconectarla de la tienda tal? y al seleccionar que sí: recuerda que esta tienda ya no responderá:
+   * confirmar». Antes solo salía un aviso rojo debajo y las dos tiendas se quedaban con el número.
+   * Paso 1: ¿desconectarlo de la otra? (sí / dejarlo en las dos / cancelar). Paso 2: «ya no responderá» → Confirmar.
+   * Desconectar le quita ese número a la otra (el de toda la tienda y el de cada país que lo tenga). Ctrl+Z lo deshace.
+   */
+  const [choqueDeNumero, setChoqueDeNumero] = useState<null | {
+    paso: 1 | 2;
+    numero: string;
+    destino: string;
+    otras: Array<{ id: string; nombre: string }>;
+    aplicar: (lista: TiendaEditor[]) => TiendaEditor[];
+  }>(null);
+  // Escape cierra la pregunta, no la ventana de la tienda que está debajo.
+  useEffect(() => {
+    if (!choqueDeNumero) return;
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      setChoqueDeNumero(null);
+    };
+    window.addEventListener("keydown", alTeclear, true);
+    return () => window.removeEventListener("keydown", alTeclear, true);
+  }, [choqueDeNumero]);
+  const limpioNum = (v: unknown) => String(v ?? "").trim();
+  /** Pone el número `numero` en la tienda `i` con `aplicar`; si otra tienda encendida ya lo tiene, pregunta antes. */
+  const conElNumero = (i: number, numero: string, aplicar: (lista: TiendaEditor[]) => TiendaEditor[]) => {
+    const n = limpioNum(numero);
+    const yaLoTenia =
+      limpioNum(tiendas[i]?.numero) === n || Object.values(tiendas[i]?.por_pais ?? {}).some((x) => limpioNum(x?.numero) === n);
+    // TODAS LAS TIENDAS, no solo las de esta lista: abierta desde el tablero o la pizarra, la lista trae solo ésta.
+    const idDeEsta = tiendas[i]?.id;
+    const otras = n
+      ? (cfg.tiendas ?? tiendas).filter(
+          (t) =>
+            t.id !== idDeEsta &&
+            t.enabled !== false &&
+            (limpioNum(t.numero) === n || Object.values(t.por_pais ?? {}).some((x) => limpioNum(x?.numero) === n))
+        )
+      : [];
+    if (!n || yaLoTenia || otras.length === 0) {
+      onTiendas(aplicar(tiendas));
+      return;
+    }
+    setChoqueDeNumero({
+      paso: 1,
+      numero: n,
+      destino: tiendas[i]?.nombre?.trim() || "esta tienda",
+      otras: otras.map((t) => ({ id: t.id, nombre: t.nombre?.trim() || "otra tienda" })),
+      aplicar,
+    });
+  };
+  const desconectarDeLasOtras = () => {
+    const c = choqueDeNumero;
+    if (!c) return;
+    const ids = new Set(c.otras.map((o) => o.id));
+    const todas = cfg.tiendas ?? tiendas;
+    const sinElNumero = todas.map((t) => {
+      if (!ids.has(t.id)) return t;
+      const por = { ...(t.por_pais ?? {}) };
+      for (const [pais, g] of Object.entries(por)) {
+        if (limpioNum(g?.numero) !== c.numero) continue;
+        const { numero: _numero, ...resto } = g ?? {};
+        if (Object.keys(resto).length) por[pais] = resto;
+        else delete por[pais];
+      }
+      return {
+        ...t,
+        numero: limpioNum(t.numero) === c.numero ? "" : t.numero,
+        por_pais: Object.keys(por).length ? por : undefined,
+      };
+    });
+    // Lo de esta lista (la tienda que recibe el número) se aplica sobre la lista de aquí; lo demás sale de `sinElNumero`.
+    const deAqui = new Map(c.aplicar(tiendas).map((t) => [t.id, t] as const));
+    const final = sinElNumero.map((t) => deAqui.get(t.id) ?? t);
+    for (const t of deAqui.values()) if (!final.some((x) => x.id === t.id)) final.push(t);
+    if (onTodasLasTiendas) onTodasLasTiendas(final);
+    else onTiendas(final);
+    setChoqueDeNumero(null);
+  };
   /** Cuál está abierta en su ventana. `null` = todas cerradas, solo sus filas.
    *
    *  SE GUARDA EL ID, NO LA POSICIÓN: si él borra una tienda de arriba, la posición
@@ -61463,7 +61549,7 @@ function TiendasDelProyecto({
                 <ElegirConexion
                   valor={tienda.numero ?? ""}
                   opciones={conexiones.numeros}
-                  onCambio={(v) => parchar(i, { numero: v })}
+                  onCambio={(v) => conElNumero(i, v, (lista) => lista.map((t, j) => (j === i ? { ...t, numero: v } : t)))}
                   onSnapshot={onSnapshot}
                   vacio="Vacío = preparada, todavía no vende"
                   sinLista="No hay ningún número conectado todavía. Conéctalo en Meta Connect, o escribe su ID aquí."
@@ -61788,12 +61874,19 @@ function TiendasDelProyecto({
                 onCerrar={() => setPaisAbierto(null)}
                 onGrupo={(parche) => {
                   const pais = paisAbierto.slice(tienda.id.length + 1);
-                  const por = { ...(tienda.por_pais ?? {}) };
-                  const nuevo = { ...(por[pais] ?? {}), ...parche };
-                  for (const k of Object.keys(nuevo) as Array<keyof typeof nuevo>) if (!String(nuevo[k] ?? "").trim()) delete nuevo[k];
-                  if (Object.keys(nuevo).length) por[pais] = nuevo;
-                  else delete por[pais];
-                  parchar(i, { por_pais: Object.keys(por).length ? por : undefined });
+                  // Se aplica sobre la lista que llegue (con el número ya quitado de la otra tienda, si se eligió eso).
+                  const aplicar = (lista: TiendaEditor[]) =>
+                    lista.map((t, j) => {
+                      if (j !== i) return t;
+                      const por = { ...(t.por_pais ?? {}) };
+                      const nuevo = { ...(por[pais] ?? {}), ...parche };
+                      for (const k of Object.keys(nuevo) as Array<keyof typeof nuevo>) if (!String(nuevo[k] ?? "").trim()) delete nuevo[k];
+                      if (Object.keys(nuevo).length) por[pais] = nuevo;
+                      else delete por[pais];
+                      return { ...t, por_pais: Object.keys(por).length ? por : undefined };
+                    });
+                  if (parche.numero !== undefined) conElNumero(i, parche.numero, aplicar);
+                  else onTiendas(aplicar(tiendas));
                 }}
                 onCobrador={(pais, id) => {
                   onSnapshot();
@@ -61808,6 +61901,77 @@ function TiendasDelProyecto({
           </div>
         );
       })}
+
+      {/* LA PREGUNTA DEL NÚMERO QUE YA ESTÁ EN OTRA TIENDA (16/11/2026). Ver `conElNumero`. */}
+      {choqueDeNumero && (() => {
+        const otras = choqueDeNumero.otras.map((o) => `«${o.nombre}»`).join(", ");
+        const una = choqueDeNumero.otras.length === 1;
+        return (
+          <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-md rounded-xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl">
+              {choqueDeNumero.paso === 1 ? (
+                <>
+                  <p className="text-base font-bold">📱 Este número ya está en {una ? "la tienda" : "las tiendas"} {otras}</p>
+                  <p className="mt-2 text-sm text-tinta-suave">
+                    Si lo dejas en {una ? "las dos" : "todas"}, cada cliente de este número entra a una sola (por su palabra activadora, o a la
+                    primera de la lista).
+                  </p>
+                  <p className="mt-3 text-sm font-semibold">¿Deseas desconectarlo de {otras} y dejarlo solo en «{choqueDeNumero.destino}»?</p>
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setChoqueDeNumero(null)}
+                      className="rounded-md border border-borde px-3 py-1.5 text-sm font-semibold hover:bg-relleno"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onTiendas(choqueDeNumero.aplicar(tiendas));
+                        setChoqueDeNumero(null);
+                      }}
+                      className="rounded-md border border-borde px-3 py-1.5 text-sm font-semibold hover:bg-relleno"
+                    >
+                      No, dejarlo en {una ? "las dos" : "todas"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setChoqueDeNumero({ ...choqueDeNumero, paso: 2 })}
+                      className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-emerald-700"
+                    >
+                      Sí, desconectarlo
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-base font-bold">⚠ Recuerda</p>
+                  <p className="mt-2 text-sm">
+                    {una ? "La tienda" : "Las tiendas"} {otras} ya no {una ? "responderá" : "responderán"} a los clientes que escriban a este número.
+                  </p>
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setChoqueDeNumero({ ...choqueDeNumero, paso: 1 })}
+                      className="rounded-md border border-borde px-3 py-1.5 text-sm font-semibold hover:bg-relleno"
+                    >
+                      Volver
+                    </button>
+                    <button
+                      type="button"
+                      onClick={desconectarDeLasOtras}
+                      className="rounded-md bg-rose-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-rose-700"
+                    >
+                      Confirmar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <button
         type="button"
