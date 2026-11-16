@@ -2459,14 +2459,14 @@ whatsapp:
               📚️ *6 Libros completos*
               🎁 *+6 Regalos especiales*
 
-              🖨️ Todo en formato PDF listo para descargar e imprimir
+              🖨️ *Todo en formato PDF *listo para descargar e imprimir
 
-              🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
+              🔥 Todo POR SOLO *{{PRECIO_BASE}}* (único pago)
 
-              * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realiza un solo pago*
               * 2.- 📲 Y envianos tu comprobante de pago
 
-              *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
+              *! {Al instante recibe tu Material + Bonos en segundos* 😊⚡|De inmediato obtén tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -3889,14 +3889,14 @@ whatsapp:
               📚️ *6 Libros completos*
               🎁 *+6 Regalos especiales*
 
-              🖨️ Todo en formato PDF listo para descargar e imprimir
+              🖨️ *Todo en formato PDF *listo para descargar e imprimir
 
-              🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
+              🔥 Todo POR SOLO *{{PRECIO_BASE}}* (único pago)
 
-              * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realiza un solo pago*
               * 2.- 📲 Y envianos tu comprobante de pago
 
-              *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
+              *! {Al instante recibe tu Material + Bonos en segundos* 😊⚡|De inmediato obtén tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -5311,14 +5311,14 @@ whatsapp:
               📚️ *6 Libros completos*
               🎁 *+6 Regalos especiales*
 
-              🖨️ Todo en formato PDF listo para descargar e imprimir
+              🖨️ *Todo en formato PDF *listo para descargar e imprimir
 
-              🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
+              🔥 Todo POR SOLO *{{PRECIO_BASE}}* (único pago)
 
-              * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realiza un solo pago*
               * 2.- 📲 Y envianos tu comprobante de pago
 
-              *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
+              *! {Al instante recibe tu Material + Bonos en segundos* 😊⚡|De inmediato obtén tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -6735,14 +6735,14 @@ whatsapp:
               📚️ *6 Libros completos*
               🎁 *+6 Regalos especiales*
 
-              🖨️ Todo en formato PDF listo para descargar e imprimir
+              🖨️ *Todo en formato PDF *listo para descargar e imprimir
 
-              🔥 Todo POR SOLO {{PRECIO_BASE}} (único pago)
+              🔥 Todo POR SOLO *{{PRECIO_BASE}}* (único pago)
 
-              * 1.- 💴 Realizá un solo pago de {{PRECIO_BASE}}*
+              * 1.- 💴 Realiza un solo pago*
               * 2.- 📲 Y envianos tu comprobante de pago
 
-              *! {Al instante recibís tu Material + Bonos en segundos* 😊⚡|De inmediato obtenés tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibís tu Material y Bonos al instante 😊⚡}
+              *! {Al instante recibe tu Material + Bonos en segundos* 😊⚡|De inmediato obtén tu Material y Bonos en cuestión de segundos 😊⚡|En ese mismo momento recibes tu Material y Bonos al instante 😊⚡}
           delay_after_sec: 6
         - type: document
           drive_url: https://drive.google.com/file/d/1GtXfDDGmzahL6ZR2S3kqgJFC5x_HGKoI/view?usp=drive_link
