@@ -2361,20 +2361,19 @@ whatsapp:
         - id: r1
           peso: 1
           anuncios:
-            - meta_52583315359383
+            - meta_52583623807983
         - id: r2
           peso: 1
           anuncios:
-            - meta_52583315358783
+            - meta_52583623807583
         - id: rmwd4ovya
           peso: 1
           anuncios:
-            - meta_52583315359983
+            - meta_52583623808583
         - id: rmwd56uqa
           peso: 1
           anuncios:
-            - meta_52583315358183
-            - meta_52583315358583
+            - meta_52583623807983
     - id: f-mwczmr06-i8lx4
       tipo: mensaje
       x: -572
@@ -8196,23 +8195,24 @@ whatsapp:
         - id: r1
           peso: 0
           peso_antes: 1
+          anuncios:
+            - meta_52583628162183
         - id: r2
           peso: 1
           anuncios:
-            - meta_52583313909783
+            - meta_52583628162583
         - id: rmwd4ovya
           peso: 1
           anuncios:
-            - meta_52583313910183
+            - meta_52583628162183
         - id: rmwd56uqa
           peso: 1
           anuncios:
-            - meta_52583313911183
+            - meta_52583628162583
         - id: rmwetuaux
           peso: 1
           anuncios:
-            - meta_52583313909583
-            - meta_52583313910383
+            - meta_52583628162183
     - id: f-mwdnvrol-efc90
       tipo: mensaje
       x: -550
@@ -20385,10 +20385,10 @@ whatsapp:
       alto: 3609
       titulo: 🇵🇪 PERÚ · doble oferta (armada desde tu pizarra; revísala y enciéndela)
     - id: manta-inicio-CO-mwczj2jz
-      x: -814
+      x: -803
       y: 8580
-      ancho: 4708
-      alto: 7139
+      ancho: 4697
+      alto: 8448
       titulo: ""
       inicio: inicio-CO-mwczj2jz
     - id: k-mwczlmua
