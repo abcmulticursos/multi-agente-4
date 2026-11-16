@@ -3,13 +3,13 @@ whatsapp:
   fichas:
     - id: inicio
       tipo: inicio
-      x: -759
-      y: 550
+      x: -1045
+      y: 462
       pais: CO
     - id: f-mwjey94x-qrit
       tipo: mensaje
-      x: 330
-      y: -22
+      x: 352
+      y: -308
       steps:
         - type: text
           body_variants:
@@ -72,10 +72,12 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
+      presenta:
+        - "@tienda:basico"
     - id: f-mwjf4dh1-ml9o3
       tipo: mensaje
-      x: 330
-      y: 385
+      x: 352
+      y: 682
       steps:
         - type: text
           body_variants:
@@ -140,8 +142,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwjf7489-nghqk
       tipo: mensaje
-      x: 330
-      y: 803
+      x: 352
+      y: 1078
       steps:
         - type: text
           body_variants:
@@ -222,8 +224,8 @@ whatsapp:
               steps: []
     - id: f-mwjf9vqj-pba9e
       tipo: mensaje
-      x: 330
-      y: 1243
+      x: 352
+      y: 1518
       steps:
         - type: text
           body_variants:
@@ -295,8 +297,8 @@ whatsapp:
               steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
-      x: 781
-      y: -220
+      x: 616
+      y: -671
       seguimientos:
         - id: s-mwjfckc0
           minutos: 30
@@ -360,8 +362,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwjv96j2-unv4
       tipo: reparto
-      x: -308
-      y: 572
+      x: -594
+      y: 484
       reparto:
         - id: r1
           peso: 1
@@ -392,3 +394,7 @@ whatsapp:
       de: f-mwjv96j2-unv4
       salida: rep:rmwjv9lgs
       a: f-mwjf9vqj-pba9e
+    - id: c-mwjvohzo-lz5
+      de: f-mwjey94x-qrit
+      salida: siguiente
+      a: f-mwjfckbz-qeu2
