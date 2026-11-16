@@ -71,7 +71,6 @@ whatsapp:
               🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
-              (Transferencia)
           delay_after_sec: 6
     - id: f-mwjf4dh1-ml9o3
       tipo: mensaje
@@ -138,7 +137,6 @@ whatsapp:
               🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
-              (Transferencia)
           delay_after_sec: 6
     - id: f-mwjf7489-nghqk
       tipo: mensaje
