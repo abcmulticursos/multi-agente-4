@@ -9521,6 +9521,11 @@ tiendas:
     nombre: BORRAR
     numero: ""
     pagina: ""
+    alineacion:
+      basico: ptcocina_dietas
+      unico: ptcocina_dietas
+      complementario: pmu39ill8
+      full: pttaller_pack
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
