@@ -81,6 +81,11 @@ whatsapp:
       tipo: entregar
       x: 1562
       y: 11
+      titulo: Entrega · PRODUCTO FICTICIO PARA CONTRIBUCION
+      producto_id: pmwir7i3o
+      entregas:
+        - pmwir7i3o#ent_mwir82by
+        - pmwir7i3o#ent_mwir9b7c
   cables:
     - id: c-mwihsumf-y2i
       de: inicio
