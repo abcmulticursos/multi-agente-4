@@ -5338,6 +5338,85 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: true
 biblioteca_de_productos:
+  - id: pmwjfhu1r
+    name: FLORES DE PAPEL
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |
+            ✅ *{¡PAGO APROBADO!|¡PAGO CONFIRMADO!|¡PAGO VERIFICADO!}* 🥳🎉
+
+            👉🏼 *{Ya puedes acceder|Ahora ya puedes acceder|Ya tienes acceso}* al material de *{{PRODUCTO}}* 📚 ✨ 🙌
+
+            🔴 *{TOCA EL ENLACE PARA DESCARGARLO|TOCA EL ENLACE PARA ACCEDER A TU MATERIAL|TOCA EL ENLACE PARA OBTENER TU MATERIAL}* "Y NO OLVIDES" *{VER EL VIDEO INSTRUCTIVO|MIRAR EL VIDEO INSTRUCTIVO|REVISAR EL VIDEO INSTRUCTIVO}*
+
+            *CONTENIDO QUE RECIBES* 🥳
+
+            🌸 *FLORES DE PAPEL*
+            🟠 *BASES Y MOLDES DE ROSAS*
+
+            🍰 *MINI FLORES PARA PASTELES Y PISTILOS*
+
+            🦋 *COMO HACER MARIPOSAS DE PAPEL Y FLORES CON GLOBOS* 🎈 🎁
+
+
+
+            *{TOCA TU ENLACE AQUI|TOCA AQUÍ PARA ACCEDER A TU ENLACE|INGRESA AQUÍ A TU ENLACE}* 😊⬇️
+            https://drive.google.com/file/d/1Hh6ukEy2taaLggjWoO5A2I1KfHiHHb21/view?usp=sharing
+
+
+            *AQUI TU TUTORIAL DE YOUTUBE 7 VIDEOS OCULTOS DE FLORES AMARILLAS* 😊👇
+            https://www.youtube.com/playlist?list=PLRdw0yCWZ8RQ
+
+
+
+            *{¡Muchas Gracias por tu compra|¡Muchas gracias por adquirirlo|¡Gracias por tu compra}*, disfruta de tu acceso *{y avísanos si pudiste entrar todo ok|y nos avisas si pudiste ingresar correctamente|y cuéntanos si pudiste ingresar sin problemas}*. 🤗
+        delay_after_sec: 6
+    image_gallery: []
+    course_content: |-
+      📚 Kit Completo de FLORES DE PAPEL
+      Contiene:
+      🌸 55 modelos de flores de papel. 
+      Vienen, traen e incluyen 55 PDF de petalos.
+      📒 PDF descargable e imprimible.
+      🎥 más de 30 videos indicando como armar las flores.
+      🎁 Bonos de Obsequio: Mini flores para pasteles, Flores y Pistilos y Hojas.
+      🎁 Bono especial sorpresa: aprender a hacer Mariposas de papel y un video para hacer flores de globos.
+      Hemos Incluído 3 PDF de pétalos de Rosas 🌹.
+
+      7 Videos Tutoriales para aprender a hacer Flores Amarillas, infaltables para esta temporada que se acerca de Flores Amarillas para sorprender a la persona que mas quieres.
+
+      💾 Todo en Google Drive, acceso de por vida, sin mensualidades, un único pago.
+
+      PRIORIDAD: El producto principal son las flores de papel, lo demás es contenido secundario.
+
+      El Material está pensado en enseñar a hacer flores de papel, no importa el nivel, puede ser principiantes o intermedios.
+      El  Proceso de armado es sencillo, abres el PDF, eliges tu flor favorita, imprimes los pétalos y las bases de las flores en hojas en tamaño A4, se calca sobre la cartulina o el material con el cual harás la flor, recortas y pegas según las instrucciones del video hasta formar hermosas flores con bonito acabado y técnica fácil.
+
+      LÍMITE IMPORTANTE: este producto solo enseña a hacer lo antes descrito. Otras funciones no deben atribuirse a este producto.
+
+      PARA QUIÉN ES: el material sirve tanto trabajarlo en CASA: como pasatiempo. Para NEGOCIO: flores de adorno, eventos especiales, ESCUELAS: En curso de arte etc.
+
+      SI PREGUNTA POR EL TAMAÑO DE LOS PETALOS: Los Pétalos son para impresión un un poco mas pequeñas que tamaño A4, pero si desea hacer una flor mas grande puede pedir que lo impriman ampliado en tamaño A3. El molde puede ampliarse e imprimirse a cualquier tamaño que desee.
+
+      EN QUE MATERIAL SE HACEN LAS FLORES: 
+      Lo recomendable es:
+      *Papel bond mayor de 90 gr — ideal para flores más delicadas y ligeras y pequeñas.
+      - Cartulina opalina o cartulina de 120-180 gr* — da más cuerpo y firmeza a los pétalos.
+
+      Las personas usan mas la cartulina ya tiene diversidad de colores en cambio el papel bond por lo general se usa como practica.
+    etiqueta: ""
+    precios_por_pais:
+      AR:
+        price_soles: 4700
+        discount_price_soles: 3600
+        market_price: 23200
+      CO:
+        price_soles: 4700
+        discount_price_soles: 3400
+        market_price: 23300
   - id: pmwir7i3o
     name: PRODUCTO FICTICIO PARA CONTRIBUCION
     aliases: []
