@@ -2895,7 +2895,7 @@ payment_profiles_by_country:
     discount_price_soles: 0
     market_price: 0
     payment_validation:
-      yape_recipient_name_starts_with: Franko Robles
+      yape_recipient_name_starts_with: Franco Robles
       require_receipt_date: false
     payment_text: "[Referencia Argentina] Puedes pagar por transferencia bancaria, Mercado Pago o Uala. Cambia este texto por tus datos reales de Argentina."
     direct_payment_steps: []
@@ -2967,7 +2967,7 @@ payment_profiles_by_country:
       💰 *Monto: {precio}*
     numero_de_cuenta: "1430001713024677890018"
     cuentas_por_metodo: {}
-    nombre_completo: Franko Robles
+    nombre_completo: Franco Robles
     foto: /avatares/avatar-46.png
     color_etiqueta: "#75ddff"
   CO:
@@ -3763,7 +3763,7 @@ modality_payment_profiles:
       discount_price_soles: 0
       market_price: 0
       payment_validation:
-        yape_recipient_name_starts_with: Franko Robles
+        yape_recipient_name_starts_with: Franco Robles
         require_receipt_date: false
       payment_text: "[Referencia Argentina] Puedes pagar por transferencia bancaria, Mercado Pago o Uala. Cambia este texto por tus datos reales de Argentina."
       direct_payment_steps: []
@@ -3836,7 +3836,7 @@ modality_payment_profiles:
         💰 *Monto: {precio}*
       numero_de_cuenta: "1430001713024677890018"
       cuentas_por_metodo: {}
-      nombre_completo: Franko Robles
+      nombre_completo: Franco Robles
       foto: /avatares/avatar-46.png
       color_etiqueta: "#75ddff"
     CO:
@@ -4311,7 +4311,7 @@ modality_payment_profiles:
       discount_price_soles: 0
       market_price: 10000
       payment_validation:
-        yape_recipient_name_starts_with: Franko Robles
+        yape_recipient_name_starts_with: Franco Robles
         require_receipt_date: false
       payment_text: |-
         Que bueno que elegiste esta opción puedes pagar a esta cuenta
@@ -4390,7 +4390,7 @@ modality_payment_profiles:
         💰 *Monto: {precio}*
       numero_de_cuenta: "1430001713024677890018"
       cuentas_por_metodo: {}
-      nombre_completo: Franko Robles
+      nombre_completo: Franco Robles
       foto: /avatares/avatar-46.png
       color_etiqueta: "#75ddff"
     PE:
