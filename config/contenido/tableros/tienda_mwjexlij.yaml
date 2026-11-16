@@ -323,7 +323,7 @@ whatsapp:
               steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
-      x: 616
+      x: 627
       y: -671
       seguimientos:
         - id: s-mwjfckc0
@@ -400,8 +400,8 @@ whatsapp:
           peso: 1
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
-      x: 1309
-      y: -429
+      x: 1287
+      y: -286
       steps:
         - type: text
           body_variants:
@@ -417,8 +417,8 @@ whatsapp:
         metodos: true
     - id: f-mwjvy3uq-dkpne
       tipo: seguimientos
-      x: 1606
-      y: -781
+      x: 1562
+      y: -660
       seguimientos:
         - id: s-mwjvy3uq-vow8p
           minutos: 30
