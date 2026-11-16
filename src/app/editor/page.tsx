@@ -19714,11 +19714,11 @@ function PreciosDelProductoPorPais({
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-tarjeta p-4">
-      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-neutral-500">
+      <p className="mb-1 text-sm font-bold uppercase tracking-wide text-neutral-500">
         Precios de {info?.label ?? pais}{" "}
         <span className="text-neutral-400">({info?.currency ?? ""})</span>
       </p>
-      <p className="mb-3 text-[11px] leading-snug text-tinta-suave">
+      <p className="mb-3 text-xs leading-snug text-tinta-suave">
         Estos precios son <strong>de este producto</strong> y mandan sobre
         Precios y pagos. Le siguen cuando lo pongas de básico, de full o de
         upsell. Cambia la bandera de arriba para editar otro país;{" "}
@@ -19732,7 +19732,7 @@ function PreciosDelProductoPorPais({
               : 0;
           return (
             <label key={campo} className="block">
-              <span className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+              <span className="text-sm font-bold uppercase tracking-wide text-neutral-500">
                 {etiqueta}
               </span>
               <input
@@ -20630,6 +20630,7 @@ function PresentacionComoUpsellDelProducto({
 
   return (
     <Collapsible
+      grande
       title="🛒 Presentación como upsell"
       titleKey={`bib_up_${producto.id}_cajon`}
       subtitulo="Lo que se le dice cuando este producto se ofrece en una fila de upsells, después de otra compra"
@@ -20852,11 +20853,47 @@ function BibliotecaDeProductos({
     return i < 0 ? SIN_PUESTO : i;
   };
 
+  /**
+   * ORDENAR LA LISTA (16/11/2026). Él: «que se pueda ordenar por orden alfabético, fecha de creación». Solo cambia lo
+   * que se VE, como el orden por puesto. Se recuerda en este navegador.
+   */
+  const [orden, setOrden] = useState<"puesto" | "az" | "nuevos">(() => {
+    try {
+      const g = window.localStorage.getItem("productos-orden");
+      return g === "az" || g === "nuevos" ? g : "puesto";
+    } catch {
+      return "puesto";
+    }
+  });
+  const cambiarOrden = (siguiente: "puesto" | "az" | "nuevos") => {
+    setOrden(siguiente);
+    try {
+      window.localStorage.setItem("productos-orden", siguiente);
+    } catch {}
+  };
+  /** Cuándo se creó: el id de un producto nuevo es «p» + la hora en base 36 (ver `agregar`). Los demás, como los más viejos. */
+  const creadoEn = (id: string): number => {
+    const m = /^p([0-9a-z]{6,})$/.exec(id);
+    if (!m) return 0;
+    const t = parseInt(m[1], 36);
+    return t > 1.6e12 && t < Date.now() + 864e5 ? t : 0;
+  };
   /** La lista tal y como se pinta: los que juegan arriba por su puesto, y
-   *  debajo los demás en el orden en que estén guardados. */
+   *  debajo los demás en el orden en que estén guardados. O, si él lo elige, de la A a la Z o los más nuevos primero.
+   *  EL RECIÉN CREADO VA PRIMERO (16/11/2026, él: «al agregar un producto… que quede arriba»), hasta cerrar su ficha. */
   const enPantalla = productos
     .map((producto, indice) => ({ producto, indice, rango: rangoDe(producto.id) }))
-    .sort((a, b) => a.rango - b.rango || a.indice - b.indice);
+    .sort((a, b) => {
+      if (recienCreado && (a.producto.id === recienCreado) !== (b.producto.id === recienCreado)) return a.producto.id === recienCreado ? -1 : 1;
+      if (orden === "az") {
+        const na = a.producto.name?.trim() ?? "";
+        const nb = b.producto.name?.trim() ?? "";
+        if (!na !== !nb) return na ? -1 : 1;
+        return na.localeCompare(nb, "es", { sensitivity: "base", numeric: true }) || a.indice - b.indice;
+      }
+      if (orden === "nuevos") return creadoEn(b.producto.id) - creadoEn(a.producto.id) || a.indice - b.indice;
+      return a.rango - b.rango || a.indice - b.indice;
+    });
 
   const sinTildes = (texto: string): string =>
     texto
@@ -21024,10 +21061,11 @@ function BibliotecaDeProductos({
             guardado y no sale por ningún lado.
           </p>
         </div>
+        {/* CON COLOR Y MÁS GRANDE (16/11/2026). Él: «hazlo un poco más grande y ponle color… para que no se vea imperceptible». */}
         <button
           type="button"
           onClick={agregar}
-          className="rounded-full border border-acento bg-tarjeta px-4 py-1.5 text-xs font-bold text-acento transition-colors hover:bg-acento-suave"
+          className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
         >
           + Agregar producto
         </button>
@@ -21080,6 +21118,18 @@ function BibliotecaDeProductos({
               ))}
             </span>
           )}
+          <label className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-tinta-suave">
+            Ordenar
+            <select
+              value={orden}
+              onChange={(e) => cambiarOrden(e.target.value as "puesto" | "az" | "nuevos")}
+              className="rounded-full border border-borde bg-tarjeta px-3 py-1.5 text-xs font-semibold text-tinta"
+            >
+              <option value="puesto">Por puesto</option>
+              <option value="az">A → Z</option>
+              <option value="nuevos">Más nuevos primero</option>
+            </select>
+          </label>
           {filtro && (
             <span className="shrink-0 text-xs font-semibold text-tinta-suave">
               {visibles.length} de {productos.length}
@@ -21127,13 +21177,15 @@ function BibliotecaDeProductos({
             const sinPuesto = rango === SIN_PUESTO;
             // Igual con «Solo esta tienda»: la lista también está a medio filtrar.
             const filtrada = !!filtro || (soloDeLaTienda && !!deLaTienda);
+            // Y con otro orden elegido (A-Z, más nuevos): las flechas mueven el orden guardado, que ahí no se ve.
             const puedeSubir =
+              orden === "puesto" &&
               !filtrada &&
               sinPuesto &&
               fila > 0 &&
               visibles[fila - 1].rango === SIN_PUESTO;
             const puedeBajar =
-              !filtrada && sinPuesto && fila < visibles.length - 1;
+              orden === "puesto" && !filtrada && sinPuesto && fila < visibles.length - 1;
             // DÓNDE ESTÁ JUGANDO ESTE PRODUCTO, si es que juega. Se lee de la
             // alineación de la modalidad, que es quien decide. Aquí solo se
             // ENSEÑA: repartir los puestos se hace arriba.
@@ -21155,7 +21207,7 @@ function BibliotecaDeProductos({
                   {papel?.icono ?? "📄"}
                 </FichaDeIcono>
                 <span className="min-w-0 flex-1">
-                  <span className="font-titulo flex items-center gap-2 text-base font-extrabold tracking-tight text-tinta">
+                  <span className="font-titulo flex items-center gap-2 text-lg font-extrabold tracking-tight text-tinta">
                     {nombre || "Sin nombre"}
                     {/* UN PUNTO Y NADA MÁS. Lo que falta se lee al pasar el
                         mouse, o al abrir la ficha. */}
@@ -21258,7 +21310,7 @@ function BibliotecaDeProductos({
                     onMarcarPunto();
                     setAbierto(producto.id);
                   }}
-                  className="rounded-full bg-relleno px-4 py-1.5 text-xs font-bold text-tinta-suave hover:bg-borde"
+                  className="rounded-full bg-sky-100 px-5 py-2 text-sm font-bold text-sky-800 hover:bg-sky-200"
                 >
                   Abrir
                 </button>
@@ -21324,6 +21376,9 @@ function BibliotecaDeProductos({
               "Sin usar"
             } · ${producto.name?.trim() || "Sin nombre"}`}
             colorPorDefecto="blanco"
+            // MÁS ANCHA (16/11/2026). Él: «el cajón editor lo veo muy apretado… pero no quiero que crezca el visor». El
+            // ancho de más se lo lleva el editor: el visor queda en sus 382 px, los mismos de las demás ventanas.
+            ancho="max-w-[1040px]"
             onCerrar={() => {
               setRecienCreado(null);
               setAbierto(null);
@@ -21394,7 +21449,7 @@ function BibliotecaDeProductos({
               })()}
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <span className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                  <span className="text-sm font-bold uppercase tracking-wide text-neutral-500">
                     Nombre
                   </span>
                   {/* AL CREAR O DUPLICAR, EL CURSOR YA ESTÁ AQUÍ.
@@ -21418,7 +21473,7 @@ function BibliotecaDeProductos({
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                  <span className="text-sm font-bold uppercase tracking-wide text-neutral-500">
                     Otras formas de pedirlo
                   </span>
                   <input
@@ -21435,7 +21490,7 @@ function BibliotecaDeProductos({
                     placeholder="el completo, el grande, el pack"
                     className="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-tarjeta px-3 py-2 text-sm text-neutral-900"
                   />
-                  <span className="mt-1 block text-[11px] text-neutral-500">
+                  <span className="mt-1 block text-xs text-neutral-500">
                     Separadas por coma. Es como el bot reconoce que se refiere a
                     éste y no al otro.
                   </span>
@@ -21485,7 +21540,7 @@ function BibliotecaDeProductos({
                   atrás. Lo que se va es pedirlos. */}
 
               <label className="block">
-                <span className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                <span className="text-sm font-bold uppercase tracking-wide text-neutral-500">
                   Qué incluye / cómo se estudia
                 </span>
                 {/* CON EMOJIS, COMO EL MISMO CAMPO DEL UPSELL.
@@ -21508,10 +21563,12 @@ function BibliotecaDeProductos({
               </label>
 
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">
+                <p className="mb-2 text-sm font-bold uppercase tracking-wide text-neutral-500">
                   Lo que recibe al pagar
                 </p>
                 <StepEditorPreviewPair
+                  // El visor en sus 382 px de siempre; el ancho de más es del editor (16/11/2026).
+                  className="lg:grid-cols-[minmax(0,1fr)_382px]"
                   steps={producto.delivery ?? []}
                   onChange={(pasos) => parchar(producto.id, { delivery: pasos })}
                   onSnapshot={onSnapshot}
@@ -21533,8 +21590,8 @@ function BibliotecaDeProductos({
                   momento (muestras gratis, un nivel de contribución…). No son productos: viven aquí y
                   las elige la ficha «Entregar» del tablero. La venta de siempre no las usa. */}
               <div className="rounded-xl border border-dashed border-borde p-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">📦 Entregas extra</p>
-                <p className="mb-2 mt-0.5 text-[11px] text-neutral-500">
+                <p className="text-sm font-bold uppercase tracking-wide text-neutral-500">📦 Entregas extra</p>
+                <p className="mb-2 mt-0.5 text-xs text-neutral-500">
                   Otras partes de este producto que se envían en otro momento: muestras gratis, un nivel de contribución, un bono… Se eligen en la
                   ficha «Entregar» del tablero. La venta automática no las usa.
                 </p>
@@ -21568,6 +21625,7 @@ function BibliotecaDeProductos({
                         </button>
                       </div>
                       <StepEditorPreviewPair
+                        className="lg:grid-cols-[minmax(0,1fr)_382px]"
                         steps={e.steps ?? []}
                         onChange={(pasos) => cambiar({ steps: pasos })}
                         onSnapshot={onSnapshot}
@@ -21591,7 +21649,7 @@ function BibliotecaDeProductos({
                       entregas_extra: [...(producto.entregas_extra ?? []), { id: `ent_${Date.now().toString(36)}`, nombre: "", steps: [emptyStep()] }],
                     });
                   }}
-                  className="rounded-md border border-borde bg-tarjeta px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-relleno"
+                  className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-bold text-sky-800 hover:bg-sky-100"
                 >
                   + Agregar entrega extra
                 </button>
@@ -21607,7 +21665,7 @@ function BibliotecaDeProductos({
                     onEdit("biblioteca");
                     parchar(producto.id, { ofrecer_imagenes: producto.ofrecer_imagenes === false ? undefined : false });
                   }}
-                  className={`rounded px-2 py-1 text-xs font-bold text-white ${producto.ofrecer_imagenes === false ? "bg-slate-400" : "bg-emerald-600"}`}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-bold text-white ${producto.ofrecer_imagenes === false ? "bg-slate-400" : "bg-emerald-600"}`}
                   title={
                     producto.ofrecer_imagenes === false
                       ? "Apagado: las imágenes quedan guardadas, pero el bot no las ofrece ni las manda. Clic para encender."
@@ -23057,8 +23115,11 @@ function Collapsible({
    *
    *  El título tiene que ser TEXTO, porque también es el de la ventana. */
   enVentana = false,
+  grande = false,
   children,
 }: {
+  /** Título y «Abrir» un punto más grandes (16/11/2026, la ficha del producto). Sin él, como siempre. */
+  grande?: boolean;
   title: ReactNode;
   icono?: string;
   tituloDeRelleno?: boolean;
@@ -23344,14 +23405,14 @@ function Collapsible({
               vacío de verdad y la barra pide el nombre. En rojo porque es algo
               que hay que hacer, no un dato. */}
           <span
-            className={`font-titulo block text-base font-extrabold tracking-tight ${
+            className={`font-titulo block ${grande ? "text-lg" : "text-base"} font-extrabold tracking-tight ${
               tituloDeRelleno ? "text-red-600" : "text-tinta"
             }`}
           >
             {texto}
           </span>
           {subtitulo && (
-            <span className="mt-0.5 block text-xs leading-snug text-tinta-suave">
+            <span className={`mt-0.5 block ${grande ? "text-sm" : "text-xs"} leading-snug text-tinta-suave`}>
               {subtitulo}
             </span>
           )}
@@ -23365,7 +23426,7 @@ function Collapsible({
           <button
             type="button"
             onClick={toggle}
-            className="rounded-full bg-relleno px-3 py-1.5 text-xs font-bold text-tinta-suave hover:bg-borde"
+            className={`rounded-full ${grande ? "bg-sky-100 px-5 py-2 text-sm text-sky-800 hover:bg-sky-200" : "bg-relleno px-3 py-1.5 text-xs text-tinta-suave hover:bg-borde"} font-bold`}
           >
             {desplegado || (enVentana && open) ? "Cerrar" : "Abrir"}
           </button>
@@ -51726,9 +51787,12 @@ function VentanaDeProducto({
   onCancelar,
   children,
   zoom,
+  ancho,
 }: {
   /** Tamaño de la ventana y sus letras (14/11/2026). Sin él, como siempre. */
   zoom?: number;
+  /** Otro ancho máximo (clase de Tailwind), solo para quien lo pida. Sin él, los 820 px de siempre. */
+  ancho?: string;
   titulo: string;
   /** El color guardado del botón que la abrió. */
   color?: string;
@@ -51808,7 +51872,7 @@ function VentanaDeProducto({
       {/* EL DISEÑO DE LAS VENTANAS DE BURBUJAS (02/11/2026). Él: «entré a la configuración de la tienda y sigue con el diseño
           feo… necesito que el aspecto de la tienda también tenga esa mejora visual». Todas las ventanas de la casa a la vez. */}
       <div
-        className="burbujas-nuevo prolijo my-8 w-full max-w-[820px] rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl"
+        className={`burbujas-nuevo prolijo my-8 w-full ${ancho ?? "max-w-[820px]"} rounded-xl border border-neutral-300 bg-tarjeta shadow-2xl`}
         style={zoom ? { zoom } : undefined}
         onClick={(evento) => evento.stopPropagation()}
       >
