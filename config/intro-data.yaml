@@ -8984,15 +8984,13 @@ tiendas:
   - id: tienda_muq67lks
     nombre: LECTO ESCRITURA
     numero: ""
-    pagina: "1242582362271632"
+    pagina: ""
     alineacion:
       basico: pmuq33w4x
       unico: pmuq33w4x
       complementario: pmuq3a33s
       full: pmuq3doxr
       upsell: pmty6azbx
-    cobrador: cobra_mupawqae
-    pixel: "2212070602975989"
     color: "#70ffee"
   - id: tienda_mve7qmyl
     nombre: QUIMICA EN ACCION
@@ -9001,8 +8999,6 @@ tiendas:
     alineacion:
       basico: pmty12nvf
       unico: pmty12nvf
-    cobrador: cobra_murah2f0
-    pixel: "1531395968272568"
   - id: tienda_tcocina
     nombre: TIENDA COCINA FÁCIL
     numero: ""
@@ -9016,7 +9012,6 @@ tiendas:
       full: ptcocina_pack
       complementario: ptcocina_postres
       upsell: ptcocina_peruanas
-    cobrador: cobra_mupawqae
     color: "#f97316"
     regalo:
       consent_sequence:
@@ -9051,7 +9046,6 @@ tiendas:
       full: ptninos_pack
       complementario: ptninos_pantallas
       upsell: ptninos_navidad
-    cobrador: cobra_mupawqae
     color: "#ec4899"
     regalo:
       consent_sequence:
@@ -9086,7 +9080,6 @@ tiendas:
       full: pttaller_pack
       complementario: pttaller_metalica
       upsell: pttaller_madera
-    cobrador: cobra_mupawqae
     color: "#64748b"
     regalo:
       consent_sequence:
@@ -9122,7 +9115,6 @@ tiendas:
       full: ptmascotas_pack
       complementario: ptmascotas_ropa
       upsell: ptmascotas_citas
-    cobrador: cobra_mupawqae
     color: "#22c55e"
     regalo:
       consent_sequence:
@@ -9154,7 +9146,6 @@ tiendas:
     alineacion:
       basico: ptestilista_moldes
       unico: ptestilista_moldes
-    cobrador: cobra_mupawqae
     color: "#a855f7"
     regalo:
       consent_sequence:
@@ -9238,7 +9229,6 @@ tiendas:
       full: ptpla_pack
       complementario: ptpla_extra
       upsell: ptpla_upsell
-    cobrador: cobra_mupawqae
     color: "#0ea5e9"
     regalo:
       consent_sequence:
@@ -9274,7 +9264,6 @@ tiendas:
       full: ptpla_pack
       complementario: ptpla_extra
       upsell: ptpla_upsell
-    cobrador: cobra_mupawqae
     color: "#0ea5e9"
     regalo:
       consent_sequence:
@@ -9310,7 +9299,6 @@ tiendas:
       full: ptpla_pack
       complementario: ptpla_extra
       upsell: ptpla_upsell
-    cobrador: cobra_mupawqae
     color: "#0ea5e9"
     regalo:
       consent_sequence:
@@ -9342,8 +9330,6 @@ tiendas:
       basico: pmvxl0fp8
       unico: pmvxl0fp8
     upsell_apagado: pmtxy45s7
-    cobrador: cobra_murah2f0
-    pixel: "904898786014909"
     color: "#ea580c"
     regalo:
       consent_sequence:
@@ -9409,7 +9395,6 @@ tiendas:
     alineacion:
       basico: ptfig_figurarte
       unico: ptfig_figurarte
-    pixel: "1099242126440992"
     color: "#f97316"
     regalo:
       consent_sequence:
