@@ -485,8 +485,8 @@ whatsapp:
       y: -924
     - id: f-mwk0rxzk-ngxkz
       tipo: cobro
-      x: 1595
-      y: 33
+      x: 1562
+      y: -11
       steps:
         - type: text
           body_variants:
@@ -599,8 +599,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwk1cif2-lk9nb
       tipo: seguimientos
-      x: 737
-      y: 693
+      x: 770
+      y: 627
       seguimientos:
         - id: s-mwk1cif3-jbvl7
           minutos: 30
