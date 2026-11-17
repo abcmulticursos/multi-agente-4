@@ -3562,7 +3562,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
 
               {{METODO_DE_PAGO_1}}
 
@@ -3586,9 +3586,9 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* contame un poquito sobre vos 😊
 
-              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+              *¿Ya tenés experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
           decisions:
             - id: d-mwl9m8ad-3bqna
@@ -3648,9 +3648,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+              *Entiendo que no tenés experiencia pero no hay de que preocuparse!* 😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -3668,14 +3668,14 @@ whatsapp:
             - |
               *Hola es un gusto saludarte!* 👋🏼😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
 
               *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
-               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
+               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y harar que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
           delay_after_sec: 5
           spintax_ia:
-            - "{📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}"
+            - "{📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y harar que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}"
     - id: f-mwl9m8ad-kbn4m
       tipo: seguimientos
       x: 2134
@@ -3691,21 +3691,21 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
                   caption_variants:
                     - |-
-                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovechá esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
                       🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
 
-                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                      ⭐ *{Y Empezá a crear tus primeras obras de arte hoy!|Y comenzá a crear tus primeras obras de arte hoy!|Y empezá a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
                   enabled: false
                 - type: text
@@ -3739,12 +3739,12 @@ whatsapp:
                     - |-
                       🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
 
-                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llevátelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
                       __________
 
-                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovechalo antes de que se agote!|¡aprovechá esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -3762,12 +3762,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
           ignora_silencio: true
@@ -3805,7 +3805,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
           caption_variants:
             - |-
-              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+              *{Además|Y además|Como extra|Adicionalmente} recibí {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
 
               - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
               - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
@@ -3822,16 +3822,16 @@ whatsapp:
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
 
               - *2).-* 📲 Envíanos tu comprobante de pago
 
-              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+              {*! Y Recibí tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibí inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO LO ADQUIRÍS?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDÉ CON EL METODO DE PAGO QUE PREFIERAS|ELEGÍ UN MÉTODO DE PAGO|INDICANOS TU MÉTODO DE PAGO|RESPONDÉ CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -3871,7 +3871,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
 
               {{METODO_DE_PAGO_1}}
 
@@ -3895,9 +3895,9 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* contame un poquito sobre vos 😊
 
-              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+              *¿Ya tenés experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
           decisions:
             - id: d-mwl9m8ad-wxxhg
@@ -3955,9 +3955,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+              *Entiendo que no tenés experiencia pero no hay de que preocuparse!* 😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -3973,11 +3973,11 @@ whatsapp:
             - |
               *Hola es un gusto saludarte!* 👋🏼😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
 
               *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
-               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
+               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y harar que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
           delay_after_sec: 5
     - id: f-mwl9m8ad-std7r
       tipo: seguimientos
@@ -3994,21 +3994,21 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
                   caption_variants:
                     - |-
-                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovechá esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
                       🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
 
-                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                      ⭐ *{Y Empezá a crear tus primeras obras de arte hoy!|Y comenzá a crear tus primeras obras de arte hoy!|Y empezá a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
                   enabled: false
                 - type: text
@@ -4042,12 +4042,12 @@ whatsapp:
                     - |-
                       🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
 
-                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llevátelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
                       __________
 
-                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovechalo antes de que se agote!|¡aprovechá esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -4065,12 +4065,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
           ignora_silencio: true
@@ -4108,7 +4108,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
           caption_variants:
             - |-
-              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+              *{Además|Y además|Como extra|Adicionalmente} recibí {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
 
               - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
               - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
@@ -4125,16 +4125,16 @@ whatsapp:
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
 
               - *2).-* 📲 Envíanos tu comprobante de pago
 
-              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+              {*! Y Recibí tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibí inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO LO ADQUIRÍS?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDÉ CON EL METODO DE PAGO QUE PREFIERAS|ELEGÍ UN MÉTODO DE PAGO|INDICANOS TU MÉTODO DE PAGO|RESPONDÉ CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -4174,7 +4174,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
 
               {{METODO_DE_PAGO_1}}
 
@@ -4198,9 +4198,9 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* contame un poquito sobre vos 😊
 
-              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+              *¿Ya tenés experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
           decisions:
             - id: d-mwl9m8ad-ancmd
@@ -4258,9 +4258,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+              *Entiendo que no tenés experiencia pero no hay de que preocuparse!* 😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -4276,11 +4276,11 @@ whatsapp:
             - |
               *Hola es un gusto saludarte!* 👋🏼😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
 
               *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
-               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
+               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y harar que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
           delay_after_sec: 5
     - id: f-mwl9m8ad-ng8a4
       tipo: seguimientos
@@ -4297,21 +4297,21 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
                   caption_variants:
                     - |-
-                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovechá esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
                       🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
 
-                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                      ⭐ *{Y Empezá a crear tus primeras obras de arte hoy!|Y comenzá a crear tus primeras obras de arte hoy!|Y empezá a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
                   enabled: false
                 - type: text
@@ -4345,12 +4345,12 @@ whatsapp:
                     - |-
                       🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
 
-                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llevátelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
                       __________
 
-                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovechalo antes de que se agote!|¡aprovechá esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -4368,12 +4368,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
           ignora_silencio: true
@@ -4411,7 +4411,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
           caption_variants:
             - |-
-              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+              *{Además|Y además|Como extra|Adicionalmente} recibí {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
 
               - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
               - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
@@ -4428,16 +4428,16 @@ whatsapp:
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
 
               - *2).-* 📲 Envíanos tu comprobante de pago
 
-              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+              {*! Y Recibí tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibí inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO LO ADQUIRÍS?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDÉ CON EL METODO DE PAGO QUE PREFIERAS|ELEGÍ UN MÉTODO DE PAGO|INDICANOS TU MÉTODO DE PAGO|RESPONDÉ CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -4471,7 +4471,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+              🛒 *PODÉS ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
 
               {{LISTA_METODOS_POR_PAIS}}
 
@@ -4492,7 +4492,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
 
               {{METODO_DE_PAGO_1}}
 
@@ -4516,9 +4516,9 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* contame un poquito sobre vos 😊
 
-              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+              *¿Ya tenés experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
           decisions:
             - id: d-mwl9m8ad-z43us
@@ -4576,9 +4576,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+              *Entiendo que no tenés experiencia pero no hay de que preocuparse!* 😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -4594,11 +4594,11 @@ whatsapp:
             - |
               *Hola es un gusto saludarte!* 👋🏼😊
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+              ⚠️ *¿Querés a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
 
               *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
-               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
+               {📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te va a ayudar a crear tus primeros proyectos y harar que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un kit digital increíble que *te permitirá hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}
           delay_after_sec: 5
     - id: f-mwl9m8ae-d3zyq
       tipo: seguimientos
@@ -4615,21 +4615,21 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
                   caption_variants:
                     - |-
-                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovechá esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
                       🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
 
-                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                      ⭐ *{Y Empezá a crear tus primeras obras de arte hoy!|Y comenzá a crear tus primeras obras de arte hoy!|Y empezá a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
                   enabled: false
                 - type: text
@@ -4663,12 +4663,12 @@ whatsapp:
                     - |-
                       🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
 
-                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llevátelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
                       __________
 
-                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovechalo antes de que se agote!|¡aprovechá esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -4686,12 +4686,12 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Respondé el método de pago que prefieras|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}} respondé con el método de pago que prefieras|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}! respondé con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
                       __________
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
           ignora_silencio: true
@@ -4729,7 +4729,7 @@ whatsapp:
           drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
           caption_variants:
             - |-
-              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+              *{Además|Y además|Como extra|Adicionalmente} recibí {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
 
               - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
               - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
@@ -4746,16 +4746,16 @@ whatsapp:
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
 
               - *2).-* 📲 Envíanos tu comprobante de pago
 
-              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+              {*! Y Recibí tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibí inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
           delay_after_sec: 6
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO LO ADQUIRÍS?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDÉ CON EL METODO DE PAGO QUE PREFIERAS|ELEGÍ UN MÉTODO DE PAGO|INDICANOS TU MÉTODO DE PAGO|RESPONDÉ CON TU METODO DE PAGO FAVORITO}* 👇🏼
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
@@ -4789,7 +4789,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+              🛒 *PODÉS ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
 
               {{LISTA_METODOS_POR_PAIS}}
 
