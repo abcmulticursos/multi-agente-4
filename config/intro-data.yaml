@@ -9765,7 +9765,11 @@ tiendas:
       unico: pmwjfhu1r
     por_pais:
       CO:
-        numero: "1398675606660512"
+        numero: "1362914293573019"
+        pagina: "1265196766679188"
+        pixel: "2272017317055405"
+      AR:
+        numero: "1362914293573019"
         pagina: "1265196766679188"
         pixel: "2272017317055405"
 cobradores:
