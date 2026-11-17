@@ -5749,7 +5749,7 @@ biblioteca_de_productos:
     precios_por_pais:
       AR:
         price_soles: 4700
-        discount_price_soles: 3600
+        discount_price_soles: 3100
         market_price: 23300
       CO:
         price_soles: 9900
