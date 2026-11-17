@@ -1684,12 +1684,17 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -1706,12 +1711,17 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -1884,12 +1894,17 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -1906,12 +1921,17 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
           delay_after_sec: 6
       cobro:
         modo: producto
