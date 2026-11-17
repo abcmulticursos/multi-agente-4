@@ -1224,7 +1224,7 @@ whatsapp:
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *{{PRECIO_BASE}}*
 
               - *2).-* 📲 Envianos tu comprobante de pago
 
@@ -1435,11 +1435,11 @@ whatsapp:
           body_variants:
             - |-
               ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
-              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
+              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}:  {{PRECIO_BASE}}* ‼️
 
               🟣 *¿COMO FUNCIONA?*
 
-              - *1).-* 💵 Realizá un único pago de *S/. {precio} SOLES*
+              - *1).-* 💵 Realizá un único pago de *{{PRECIO_BASE}}*
 
               - *2).-* 📲 Envianos tu comprobante de pago
 
