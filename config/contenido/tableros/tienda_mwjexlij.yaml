@@ -2524,8 +2524,8 @@ whatsapp:
                   delay_after_sec: 6
     - id: f-mwl18nl4-1idy
       tipo: mensaje
-      x: 1001
-      y: 3069
+      x: 858
+      y: 3091
       steps:
         - type: text
           body_variants:
@@ -2535,11 +2535,11 @@ whatsapp:
 
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
-               Un super Kit digital que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️🤗
+               📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️🤗
           delay_after_sec: 5
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
-      x: 1012
+      x: 858
       y: 3289
       steps:
         - type: text
@@ -2552,24 +2552,25 @@ whatsapp:
 
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
-               Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
           delay_after_sec: 5
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
-      x: 1012
-      y: 3520
+      x: 858
+      y: 3487
       steps:
         - type: text
           body_variants:
             - |
               *Hola es un gusto saludarte!* 👋🏼😊
-              Quiero darte una muy buena noticia que te va a gustar:
 
-              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+
+              *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
-               Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
           delay_after_sec: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
