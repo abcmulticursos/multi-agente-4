@@ -3056,6 +3056,10 @@ whatsapp:
       salida: sin_pago
       a: f-mwl1i41z-6kqdb
       a_espejo: e-mwl1o9ri-fcos
+    - id: c-mwl8nfdj-2th
+      de: f-mwl100qj-8r1g
+      salida: sin_respuesta
+      a: f-mwl1fjxr-fn4j
   cajas:
     - id: k-mwk1ex30
       x: 385
