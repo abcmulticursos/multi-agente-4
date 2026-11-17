@@ -2554,6 +2554,23 @@ whatsapp:
 
                Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
           delay_after_sec: 6
+    - id: f-mwl1fjxr-fn4j
+      tipo: mensaje
+      x: 1276
+      y: 3476
+      steps:
+        - type: text
+          body_variants:
+            - |
+              *Hola es un gusto saludarte!* 👋🏼😊
+              Quiero darte una muy buena noticia que te va a gustar:
+
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+
+              ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
+
+               Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
+          delay_after_sec: 6
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
