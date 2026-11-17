@@ -927,7 +927,7 @@ async function irA(
       if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && !cobraEnLaFicha(f, t)) {
         // SU TIEMPO TAMBIÉN SIN BOTONES (17/11/2026). Él, fichas 20-22 de FLORES CO: «⏰ Si no responde en 5 minutos» puesto
         // y la presentación salía a los 5 segundos. «El tiempo que pongas ahí se respeta, con botones o sin botones.» Sin
-        // opciones, ese tiempo es una pausa antes de seguir por «→»; si escribe en medio no se reinicia (`esPausa`).
+        // opciones, ese tiempo es una pausa antes de seguir por «→»; si escribe en medio, sigue ya (paso 7-bis del turno).
         if (f.sin_respuesta_min && cableDeLaSalida(t, f.id, "siguiente")) {
           programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "siguiente", vuelta }, ahora() + f.sin_respuesta_min * 60);
           console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» sigue por «→» en ${f.sin_respuesta_min} min`);
@@ -5220,6 +5220,14 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
     if (conRespuesta && ficha && (await seguirPor(convo.id, t, ficha.id, "otra", 0))) return true;
   }
 
+  // 7-bis. ESCRIBIÓ DURANTE LA PAUSA DE UNA FICHA SIN BOTONES (17/11/2026). Él: «si cliente escribe ya no tiene que esperar
+  // los 5 minutos… ¿acaso los 5 minutos son para que el cliente se ponga a escribir?». Sale ya lo que sigue por su «→»
+  // (eso le contesta), sin la IA encima.
+  if (ficha && esPausa(ficha, t)) {
+    console.log(`[tablero] convo ${convo.id}: escribió durante la pausa de «${ficha.titulo || ficha.id}» → sigue ya por «→»`);
+    if (await seguirPor(convo.id, t, ficha.id, "siguiente", 0)) return true;
+  }
+
   // 8. LO DEMÁS LO CONTESTA LA IA, y el cliente sigue en su ficha. Como respondió, el reloj de
   // «no respondió» vuelve a contar desde ahora, y el seguimiento 1 también (colgado o en su caja).
   if (ficha) respondio(convo, t);
@@ -5254,7 +5262,8 @@ function respondio(convo: ConversationRow, t: Tablero): void {
   const e0 = estadoEnElTablero(convo.id);
   const f0 = e0 ? t.fichas.find((x) => x.id === e0.ficha_id) : undefined;
   // Una ficha «Esperar» cuenta su tiempo aunque el cliente escriba: su reloj no se toca. Tampoco la pausa de una ficha sin
-  // botones con su tiempo puesto (17/11/2026): lo que sigue sale a sus minutos aunque escriba en medio.
+  // botones con su tiempo puesto (17/11/2026): si lo atendió otro paso del turno (reenvío, galería…), lo que sigue sale a sus
+  // minutos; un mensaje cualquiera lo hace seguir en el acto (paso 7-bis).
   if (f0?.tipo !== "esperar" && !(f0 && esPausa(f0, t))) tocarVuelta(convo.id);
   const e = estadoEnElTablero(convo.id);
   const f = e ? t.fichas.find((x) => x.id === e.ficha_id) : undefined;
@@ -5267,7 +5276,7 @@ function respondio(convo: ConversationRow, t: Tablero): void {
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
   // SUS SEGUIMIENTOS (en la caja o colgados de esta ficha): el 1 vuelve a contar desde ahora.
   const seg = e?.seg_ficha ? t.fichas.find((x) => x.id === e.seg_ficha) : undefined;
-  if (seg) reprogramarSeguimiento(convo, seg, f && f.id !== seg.id ? f : undefined);
+  if (seg) reprogramarSeguimiento(convo, seg);
 }
 
 /** ¿Ficha sin botones, cuadritos ni elección, con su tiempo puesto y su «→» conectado? Entonces su tiempo es una pausa. */
@@ -5287,7 +5296,7 @@ function rearmarEspera(convo: ConversationRow, f: FichaDelTablero): void {
 }
 
 /** El cliente escribió estando en la caja «Seguimientos»: el que tocaba vuelve a contar desde ahora. */
-function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero, colgadosDe?: FichaDelTablero): void {
+function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero): void {
   const e = estadoEnElTablero(convo.id);
   const segs = ficha.seguimientos ?? [];
   if (!e || e.seg_ficha !== ficha.id || e.seg_idx >= segs.length) return;
@@ -5301,10 +5310,10 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero, 
   const token = ponerSeguimiento(convo.id, ficha.id, e.seg_idx);
   // EL RELOJ VUELVE A CERO, como `renovarEsperaDeLosSeguimientos` del motor de siempre: los que
   // faltan cuentan sus minutos desde ahora.
-  // (17/11/2026) Antes del 1, otra vez el tiempo de la ficha de la que cuelgan (ver `colgarSeguimientos`).
-  const desde = ahora() + (e.seg_idx === 0 ? (colgadosDe?.sin_respuesta_min ?? 0) * 60 : 0);
-  contarSeguimientosDesde(convo.id, desde);
-  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[e.seg_idx], e.seg_idx, desde);
+  // (17/11/2026) El tiempo de la ficha ya se cumplió una vez al salir: si escribe, solo cuentan los minutos del
+  // seguimiento. Él: «¿para qué se contarían los 5 minutos de la ficha si ya salió?».
+  contarSeguimientosDesde(convo.id, ahora());
+  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[e.seg_idx], e.seg_idx, ahora());
   programar(convo, ACCION_SEGUIMIENTO, { ficha: ficha.id, idx: e.seg_idx, token }, cuando, sinSilencio);
 }
 
