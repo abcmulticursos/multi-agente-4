@@ -3824,7 +3824,29 @@ export default function LienzoDelTablero({
       !espejosCopiados.some((e) => (actual.espejos ?? []).some((x) => x.id === e.id));
     portapapeles.cortado = false;
     const paso = 40 * ((portapapeles.pegadas ?? 0) + 1);
-    const desplazar = donde ? { x: donde.x - minX, y: donde.y - minY } : mismas ? { x: 0, y: 0 } : { x: paso, y: paso };
+    // SE PEGA DONDE ESTÁ LA VISTA (16/11/2026). Él: «copio una ficha, luego me voy a otro lado del tablero y pego; no
+    // debería pegar por allá lejos al lado de su original que no está en mi vista». Si el sitio de siempre (junto al
+    // original) queda fuera de la pantalla —o se pega en otra tienda—, va al centro de lo que está mirando. Duplicar no
+    // pasa por aquí: sigue al lado de su original.
+    let destino = donde;
+    if (!destino) {
+      const r = raizDelLienzo.current?.getBoundingClientRect();
+      const i = instancia.current;
+      const ancla = mismas ? { x: minX, y: minY } : { x: minX + paso, y: minY + paso };
+      if (r && i) {
+        const a = i.screenToFlowPosition({ x: r.left, y: r.top });
+        const b = i.screenToFlowPosition({ x: r.right, y: r.bottom });
+        const seVe = ancla.x >= a.x && ancla.x <= b.x - 100 && ancla.y >= a.y && ancla.y <= b.y - 60;
+        if (!seVe) {
+          const maxX = Math.max(...portapapeles.fichas.map((f) => f.x + 250), ...espejosCopiados.map((e) => e.x + 250), ...cajasCopiadas.map((c) => c.x + c.ancho));
+          const maxY = Math.max(...portapapeles.fichas.map((f) => f.y + 150), ...espejosCopiados.map((e) => e.y + 150), ...cajasCopiadas.map((c) => c.y + c.alto));
+          const extra = 40 * (portapapeles.pegadas ?? 0);
+          destino = { x: (a.x + b.x) / 2 - (maxX - minX) / 2 + extra, y: (a.y + b.y) / 2 - (maxY - minY) / 2 + extra };
+        }
+      }
+    }
+    const enLaVista = !donde && !!destino;
+    const desplazar = destino ? { x: destino.x - minX, y: destino.y - minY } : mismas ? { x: 0, y: 0 } : { x: paso, y: paso };
     if (!donde && !mismas) portapapeles.pegadas = (portapapeles.pegadas ?? 0) + 1;
     const mover = <T extends { x: number; y: number }>(o: T): T => ({ ...o, x: Math.round(o.x + desplazar.x), y: Math.round(o.y + desplazar.y) });
     const copia = mismas
@@ -3847,7 +3869,7 @@ export default function LienzoDelTablero({
     ]
       .filter(Boolean)
       .join(" y ");
-    setAviso(`${partes} pegado(s)${donde ? "" : " junto al original"}, con su forma${copia.fichas.length ? " y sus cables de dentro. Quedan sin conectar" : ""}.`);
+    setAviso(`${partes} pegado(s)${donde ? "" : enLaVista ? " en tu vista" : " junto al original"}, con su forma${copia.fichas.length ? " y sus cables de dentro. Quedan sin conectar" : ""}.`);
     // (La vista ya no viaja: lo pegado cae junto al original, que es donde él está mirando.)
     // LO PEGADO QUEDA ELEGIDO (28/10/2026: «al pegar se deseleccionan… al arrastrar jaló solo una»):
     // sale el grupo pegado entero, velos y espejos incluidos, listo para moverlo junto.
