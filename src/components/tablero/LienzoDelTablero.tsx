@@ -2469,7 +2469,7 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
 function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: string }>>) {
   const t = TEMA[data.tema];
   const zoom = useStore((s) => s.transform[2]);
-  const { screenToFlowPosition, updateNode } = useReactFlow();
+  const { screenToFlowPosition, updateNode, getViewport, setViewport } = useReactFlow();
   const lado = 28 / (zoom || 1);
   const empezar = (esquina: (typeof ESQUINAS)[number], e: React.PointerEvent) => {
     if (e.button !== 0) return;
@@ -2478,8 +2478,14 @@ function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: s
     const c = data.caja;
     const fijo = { x: esquina.endsWith("left") ? c.x + c.ancho : c.x, y: esquina.startsWith("top") ? c.y + c.alto : c.y };
     let ultimo = { x: c.x, y: c.y, ancho: c.ancho, alto: c.alto };
-    const mover = (ev: PointerEvent) => {
-      const p = screenToFlowPosition({ x: ev.clientX, y: ev.clientY });
+    // LA VISTA SIGUE A LA ESQUINA (16/11/2026), como a una ficha que se arrastra. Él: «arrastro fuera del área visible y
+    // nada, no se mueve». Cerca del borde del tablero (o fuera), la vista se corre en cada cuadro y el velo sigue al ratón.
+    const marco = (e.currentTarget as HTMLElement).closest(".react-flow")?.getBoundingClientRect();
+    let raton = { x: e.clientX, y: e.clientY };
+    let arrastrando = true;
+    const mover = (ev?: PointerEvent) => {
+      if (ev) raton = { x: ev.clientX, y: ev.clientY };
+      const p = screenToFlowPosition(raton);
       ultimo = {
         x: Math.round(Math.min(p.x, fijo.x)),
         y: Math.round(Math.min(p.y, fijo.y)),
@@ -2493,12 +2499,30 @@ function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: s
         style: { width: ultimo.ancho, height: ultimo.alto, pointerEvents: "none" },
       });
     };
+    const correrLaVista = () => {
+      if (!arrastrando) return;
+      if (marco) {
+        const borde = 40;
+        const paso = 15;
+        const dx = raton.x < marco.left + borde ? paso : raton.x > marco.right - borde ? -paso : 0;
+        const dy = raton.y < marco.top + borde ? paso : raton.y > marco.bottom - borde ? -paso : 0;
+        if (dx || dy) {
+          const v = getViewport();
+          void setViewport({ x: v.x + dx, y: v.y + dy, zoom: v.zoom });
+          mover();
+        }
+      }
+      requestAnimationFrame(correrLaVista);
+    };
+    requestAnimationFrame(correrLaVista);
+    const alMover = (ev: PointerEvent) => mover(ev);
     const soltar = () => {
-      window.removeEventListener("pointermove", mover);
+      arrastrando = false;
+      window.removeEventListener("pointermove", alMover);
       window.removeEventListener("pointerup", soltar);
       if (ultimo.x !== c.x || ultimo.y !== c.y || ultimo.ancho !== c.ancho || ultimo.alto !== c.alto) data.alCambiar({ ...c, ...ultimo });
     };
-    window.addEventListener("pointermove", mover);
+    window.addEventListener("pointermove", alMover);
     window.addEventListener("pointerup", soltar);
   };
   return (
@@ -2952,6 +2976,27 @@ export default function LienzoDelTablero({
   selectorDeColor?: (valor: string, alElegir: (color: string) => void) => ReactNode;
 }) {
   const instancia = useRef<ReactFlowInstance<Node, Edge> | null>(null);
+  // NADIE DESPLAZA LAS CAJAS DEL TABLERO (16/11/2026). Él: «el minimapa se subió hasta la mitad de la pantalla… hacia abajo
+  // no se puede». El navegador corrió una caja de AFUERA del lienzo (las de la pantalla son `overflow-hidden`, y aun así se
+  // desplazan si algo enfocado queda fuera de la vista): el tablero subía media pantalla. El `onScroll` de abajo solo
+  // vigilaba la caja del lienzo. Ahora cualquier caja escondida (`hidden`/`clip`) que lo contenga, o que esté dentro de él,
+  // vuelve a su sitio; las que sí se desplazan (listas, menús) no se tocan.
+  const raizDelLienzo = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const alDesplazar = (e: Event) => {
+      const el = e.target;
+      const raiz = raizDelLienzo.current;
+      if (!(el instanceof HTMLElement) || !raiz || !(el.contains(raiz) || raiz.contains(el))) return;
+      if (!el.scrollTop && !el.scrollLeft) return;
+      const estilo = getComputedStyle(el);
+      const fijo = (v: string) => v === "hidden" || v === "clip";
+      if (!fijo(estilo.overflowY) || !fijo(estilo.overflowX)) return;
+      el.scrollTop = 0;
+      el.scrollLeft = 0;
+    };
+    document.addEventListener("scroll", alDesplazar, true);
+    return () => document.removeEventListener("scroll", alDesplazar, true);
+  }, []);
   const vivo = useRef(tablero);
   vivo.current = tablero;
   const [menu, setMenu] = useState<{ x: number; y: number; m: Menu } | null>(null);
@@ -3665,11 +3710,14 @@ export default function LienzoDelTablero({
     const pb = aFlujo(b);
     const esPais = d.pais !== undefined;
     // Un clic suelto (o un trazo muy chico): el tamaño de siempre, con su esquina donde hizo clic.
-    const chico = Math.abs(b.x - a.x) < 30 || Math.abs(b.y - a.y) < 30;
-    const x = Math.round(chico ? pa.x : Math.min(pa.x, pb.x));
-    const y = Math.round(chico ? pa.y : Math.min(pa.y, pb.y));
-    const ancho = Math.round(chico ? (esPais ? 1280 : 600) : Math.abs(pb.x - pa.x));
-    const alto = Math.round(chico ? (esPais ? 620 : 400) : Math.abs(pb.y - pa.y));
+    // EL INICIO DE UN PAÍS, CON UN CLIC (16/11/2026). Él: «que no agregue cuadro, que diga haz clic para agregar el país…
+    // y el área de país que también se agregue pero pequeña para que no invada nada del resto». El Inicio cae donde hizo
+    // clic, y su área justo alrededor (se estira después por la esquina).
+    const chico = esPais || Math.abs(b.x - a.x) < 30 || Math.abs(b.y - a.y) < 30;
+    const x = Math.round(esPais ? pa.x - 40 : chico ? pa.x : Math.min(pa.x, pb.x));
+    const y = Math.round(esPais ? pa.y - 70 : chico ? pa.y : Math.min(pa.y, pb.y));
+    const ancho = Math.round(chico ? (esPais ? 340 : 600) : Math.abs(pb.x - pa.x));
+    const alto = Math.round(chico ? (esPais ? 240 : 400) : Math.abs(pb.y - pa.y));
     const actual = vivo.current;
     if (!esPais) {
       cambiar({ ...actual, cajas: [...(actual.cajas ?? []), { id: `k-${Date.now().toString(36)}`, x, y, ancho, alto, titulo: "Nueva caja" }] });
@@ -4021,6 +4069,7 @@ export default function LienzoDelTablero({
       {/* SIN SELECCIONAR TEXTO (27/10/2026): Shift + arrastrar elegía también el texto de las fichas y
           Edge sacaba su lupa de búsqueda, que no dejaba mover nada. Los campos siguen escribiéndose. */}
       <div
+        ref={raizDelLienzo}
         className="lienzo-del-tablero relative h-full w-full select-none overflow-hidden"
         style={{ background: t.fondo }}
         onClick={() => setMenu(null)}
@@ -4265,9 +4314,11 @@ export default function LienzoDelTablero({
             }}
           >
             <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
-              ✏️ Arrastra para dibujar {dibujando.pais === undefined ? "la caja" : `el área de ${paisConNombre(dibujando.pais)}`}, o haz un clic · Esc cancela
+              {dibujando.pais === undefined
+                ? "✏️ Arrastra para dibujar la caja, o haz un clic · Esc cancela"
+                : `👆 Haz clic en el tablero para agregar el Inicio de ${paisConNombre(dibujando.pais)} · Esc cancela`}
             </div>
-            {trazo && (
+            {trazo && dibujando.pais === undefined && (
               <div
                 className="pointer-events-none absolute rounded-2xl border-2 border-dashed border-violet-500 bg-violet-500/10"
                 style={{
@@ -4306,8 +4357,9 @@ export default function LienzoDelTablero({
               // El relleno de arriba (pt-2) es parte del menú: el puntero baja del «+» al menú sin salir de él.
               <div className="absolute left-0 top-full z-50 pt-2">
               <div className="max-h-[75vh] w-72 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-2xl">
-                {/* EL ÁREA DE UN PAÍS, PRIMERO (16/11/2026, él: «que el país para elegir esté primero»), con el nombre completo. */}
-                <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">🌎 Área de un país</div>
+                {/* EL INICIO DE UN PAÍS, PRIMERO (16/11/2026, él: «que el país para elegir esté primero»), con el nombre completo.
+                    Se llamaba «Área de un país»; él: «confunde, mejor pon Agregar INICIO». */}
+                <div className="px-3 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">🌎 Agregar INICIO</div>
                 <div className="max-h-40 overflow-y-auto">
                   {[...paisesDisponibles.filter((p) => !paisesConInicio.has(p)), ...(paisesConInicio.has("") ? [] : [""])].map((p) => (
                     <button
