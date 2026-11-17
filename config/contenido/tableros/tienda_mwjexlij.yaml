@@ -336,7 +336,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *PUEDES ADQUIRIRLO CON LOS. SIGUIENTES METODOS DE PAGO* 
+              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
 
               {{LISTA_METODOS_POR_PAIS}}
 
