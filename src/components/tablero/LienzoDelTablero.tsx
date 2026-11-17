@@ -487,7 +487,11 @@ function faltasDelTablero(t: TableroEnElEditor, paisVisto: string, nombres: Reco
         // EL COBRO ENTREGA SOLO (06/11/2026): con su producto elegido no le falta nada. Solo falta si no tiene producto.
         const producto = s.clave === "pagado" ? f.cobro?.producto_id : s.clave.slice(5);
         if (!producto) faltas.push({ ficha: f.id, salida: s.clave, motivo: `${s.etiqueta}: este Cobro no tiene producto elegido, así que no hay nada que entregar.` });
-      } else if (
+      } else if (f.tipo === "cobro" && s.clave === "sin_pago")
+        // (17/11/2026, conv 742-743 de FLORES: eligió Nequi, recibió los datos y nunca más le llegó nada.) Él: «lo que me
+        // faltó fue algo en la ficha de cobro que me indique que falta seguimiento».
+        faltas.push({ ficha: f.id, salida: s.clave, motivo: "«⏳ Si no paga» sin conectar: si recibe los datos y no paga, no le llega ningún seguimiento." });
+      else if (
         s.clave === "sin_respuesta" &&
         (f.tipo === "mensaje" || f.tipo === "intro_ob") &&
         trasUnaEntrega.has(f.id) &&
