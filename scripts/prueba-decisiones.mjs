@@ -82,12 +82,14 @@ comprobar(
   /\.normalize\("NFD"\)\s*\r?\n\s*\.replace\(\/\\p\{Mn\}\/gu, ""\)/.test(config),
   "sí"
 );
+// (17/11/2026) Si varias aciertan, gana la frase más larga («no tengo» le gana a «tengo»); con el
+// mismo largo, la primera en pantalla, como antes (`>` estricto: la de después no la desplaza).
 comprobar(
-  "si dos comparten palabra, gana la primera",
-  /for \(const decision of decisiones\) \{[\s\S]{0,300}?return decision;/.test(
+  "si varias aciertan, gana la frase más larga; a igual largo, la primera",
+  /for \(const decision of decisiones\) \{[\s\S]{0,300}?clave\.length > largo && dicho\.includes/.test(
     config
   ),
-  "por orden"
+  "más larga, y por orden"
 );
 comprobar(
   "el título NO se usa para reconocer",

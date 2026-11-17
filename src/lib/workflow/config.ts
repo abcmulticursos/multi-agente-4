@@ -6112,8 +6112,10 @@ export function decisionesEncendidas(
  * trozo suelto haría que "no" acertara dentro de "nota" o de "no sé cuánto
  * cuesta", y ahí el cliente estaría preguntando, no eligiendo.
  *
- * Si dos cuadritos comparten una palabra, gana el primero: el orden en pantalla
- * es el orden de prioridad, que es lo que uno espera al verlos en fila.
+ * SI VARIOS CUADRITOS ACIERTAN, GANA LA FRASE MÁS LARGA (17/11/2026). Él, con su ficha del saludo de FLORES: el
+ * cuadrito SI tenía «tengo» y el NO «no tengo»; «no tengo» acertaba en los dos y ganaba SI por ir primero. «No puedo
+ * quitar eso… ¿y si la persona escribe no tengo?». La frase más larga es la más precisa. Solo con el MISMO largo
+ * desempata el orden en pantalla, como antes.
  */
 export function decisionQueCoincide(
   msg: string,
@@ -6132,11 +6134,17 @@ export function decisionQueCoincide(
   if (dicho.trim().length === 0) return null;
   const palabrasDe = (decision: BubbleDecision): string[] =>
     (decision.keywords ?? []).map(limpiar).filter(Boolean);
+  let mejor: BubbleDecision | null = null;
+  let largo = 0;
   for (const decision of decisiones) {
     for (const clave of palabrasDe(decision)) {
-      if (dicho.includes(` ${clave} `)) return decision;
+      if (clave.length > largo && dicho.includes(` ${clave} `)) {
+        mejor = decision;
+        largo = clave.length;
+      }
     }
   }
+  if (mejor) return mejor;
   // EL COMODÍN: un cuadrito SIN palabras es el de "cualquier otra respuesta".
   //
   // Sin él, quien no contesta con las palabras previstas no recibe ninguna
