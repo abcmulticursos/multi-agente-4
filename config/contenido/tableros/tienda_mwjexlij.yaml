@@ -2514,7 +2514,7 @@ whatsapp:
               color: violeta
               steps: []
             - id: d4b1e948-7eba-4802-ad6f-78a97fc7724c
-              title: OTRO
+              title: N / A
               keywords: []
               color: ambar
               steps:
@@ -2539,8 +2539,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
-      x: 1210
-      y: 3267
+      x: 1012
+      y: 3289
       steps:
         - type: text
           body_variants:
@@ -2556,8 +2556,8 @@ whatsapp:
           delay_after_sec: 6
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
-      x: 1276
-      y: 3476
+      x: 1012
+      y: 3520
       steps:
         - type: text
           body_variants:
@@ -2838,6 +2838,18 @@ whatsapp:
       de: f-mwjv96j2-unv4
       salida: rep:rmwl16ea7
       a: f-mwl100qj-8r1g
+    - id: c-mwl1gyh1-iwq
+      de: f-mwl100qj-8r1g
+      salida: dec:a4afbf20-4125-4e4f-91a7-2b568a1c9cdb
+      a: f-mwl18nl4-1idy
+    - id: c-mwl1gzts-0nt
+      de: f-mwl100qj-8r1g
+      salida: dec:da16f5c1-0f14-4659-972a-cbf19496de64
+      a: f-mwl1bzja-hp8v
+    - id: c-mwl1h259-9lb
+      de: f-mwl100qj-8r1g
+      salida: dec:d4b1e948-7eba-4802-ad6f-78a97fc7724c
+      a: f-mwl1fjxr-fn4j
   cajas:
     - id: k-mwk1ex30
       x: 385
