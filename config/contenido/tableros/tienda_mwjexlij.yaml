@@ -2251,16 +2251,21 @@ whatsapp:
           peso: 1
           anuncios:
             - meta_120250840781450336
+            - meta_120250840781360336
         - id: r2
           peso: 1
           anuncios:
             - meta_120250840781370336
+            - meta_120250840781460336
+            - meta_120250840781380336
         - id: rmwk1t1l6
-          peso: 1
+          peso: 0
+          peso_antes: 1
           anuncios:
             - meta_120250840781460336
         - id: rmwk1t24a
-          peso: 1
+          peso: 0
+          peso_antes: 1
           anuncios:
             - meta_120250840781360336
             - meta_120250840781380336
