@@ -2272,22 +2272,25 @@ async function atenderComprobante(
   // Colombia (Nequi) se entregó solo por el monto, porque el nombre se revisaba SOLO en Yape/Plin. Ahora: en Yape/Plin,
   // lo de siempre (sin nombre visible no vale); en los demás, si se ve OTRO nombre no vale, y sin nombre visible vale
   // como antes (muchos bancos no lo muestran). Basta el primer nombre (`titularCoincide`).
+  // EN CUALQUIER NOMBRE DEL COMPROBANTE (17/11/2026). Conv 703: Mercado Pago lista «Origen y destino» y el lector anotó a
+  // la que pagó; el receptor (Franco) estaba debajo y se rechazó un pago bueno. Él: «no importa quién paga o cobra, con tal
+  // que diga» el receptor. Vale si CUALQUIER nombre visible coincide; el riesgo (un comprador con su mismo nombre) lo aceptó.
   {
     const esYapeOPlin = lectura.metodo === "yape" || lectura.metodo === "plin";
     const esperado = elCobroDelPais(pais as never, config).titular;
-    const falla = esYapeOPlin
-      ? !lectura.titular || !titularCoincide(esperado, lectura.titular)
-      : !!lectura.titular && !titularCoincide(esperado, lectura.titular);
+    const vistos = [...new Set([lectura.titular, ...(lectura.nombres ?? [])].filter((n): n is string => !!n))];
+    const coincide = vistos.some((n) => titularCoincide(esperado, n));
+    const falla = esYapeOPlin ? !coincide : vistos.length > 0 && !coincide;
     if (esperado && falla) {
       console.warn(`[tablero] convo ${convo.id}: comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}» → no se cuenta`);
       fallo(`comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}»`);
       // CON TEXTO FIJO (28/10/2026, ronda 3 en la copia: con esta nota la IA contestó «¿me compartes la foto de
       // tu comprobante?», sin decirle por qué no valía). Como el pago de menos y el «¿fue una confusión?».
-      if (lectura.titular)
+      if (lectura.titular || vistos[0])
         await sendConfiguredSteps(convo, [
           {
             type: "text",
-            body: `Recibí tu comprobante 🙏, pero está a nombre de *${lectura.titular}*.\n\nPara validarlo debe estar a nombre de *${esperado}*. ¿Me envías el comprobante correcto, por favor? 😊`,
+            body: `Recibí tu comprobante 🙏, pero está a nombre de *${lectura.titular || vistos[0]}*.\n\nPara validarlo debe estar a nombre de *${esperado}*. ¿Me envías el comprobante correcto, por favor? 😊`,
           },
         ] as never);
       else await contestarConIA(convo, t, SIN_PISTAS);

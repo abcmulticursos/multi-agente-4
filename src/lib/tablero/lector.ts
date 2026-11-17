@@ -15,6 +15,8 @@ export interface LecturaDelComprobante {
   fecha?: string;
   operacion?: string;
   titular?: string;
+  /** TODOS los nombres que se ven en el comprobante (quien paga y quien recibe). */
+  nombres?: string[];
   metodo?: string;
 }
 
@@ -61,6 +63,13 @@ const HERRAMIENTA = {
           // (12/11/2026) Quien RECIBE el dinero, nunca quien paga: desde ese día el nombre se revisa en todos los métodos.
           description:
             "Name of who RECEIVED the money (the destination: «Para», «Destinatario», «Enviado a», «Beneficiario»), exactly as printed (may be masked). NEVER the payer/sender («De», «Origen», «Desde»). Empty if no recipient name is visible.",
+        },
+        // (17/11/2026) Mercado Pago pone los dos nombres bajo «Origen y destino» y el lector anotó al que pagó: se rechazó un
+        // pago bueno. Con todos los nombres, el motor busca al receptor entre ellos sin depender de quién es quién.
+        nombres: {
+          type: "array",
+          items: { type: "string" },
+          description: "EVERY person or business name printed on the receipt (payer AND recipient, origin AND destination), each exactly as printed. Empty array if none.",
         },
         metodo: {
           type: "string",
@@ -159,10 +168,11 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
       fecha: limpio(args.fecha),
       operacion: limpio(args.operacion),
       titular: limpio(args.titular),
+      nombres: Array.isArray(args.nombres) ? args.nombres.map(limpio).filter((n): n is string => !!n).slice(0, 6) : [],
       metodo: limpio(args.metodo)?.toLowerCase(),
     };
     console.log(
-      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"} titular=${lectura.titular ?? "-"} método=${lectura.metodo ?? "-"}`
+      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"} titular=${lectura.titular ?? "-"} nombres=${lectura.nombres?.join(" / ") || "-"} método=${lectura.metodo ?? "-"}`
     );
     return lectura;
   } catch (err) {
