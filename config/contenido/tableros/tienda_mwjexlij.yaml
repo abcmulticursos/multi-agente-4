@@ -2269,8 +2269,8 @@ whatsapp:
             - meta_120250840781380336
     - id: f-mwl0zt1d-8soxc
       tipo: mensaje
-      x: 1991
-      y: 3564
+      x: 3377
+      y: 3454
       steps:
         - type: text
           body_variants:
@@ -2363,8 +2363,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwl0zt1e-iq1eq
       tipo: seguimientos
-      x: 2255
-      y: 3212
+      x: 3641
+      y: 3102
       seguimientos:
         - id: s-mwl0zt1e-wq2xx
           minutos: 30
@@ -2455,8 +2455,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwl0zt1e-er7t4
       tipo: cobro
-      x: 3025
-      y: 3531
+      x: 4411
+      y: 3421
       steps:
         - type: text
           body_variants:
@@ -2473,8 +2473,8 @@ whatsapp:
         metodos: true
     - id: f-mwl0zt1e-09xkc
       tipo: regalo
-      x: 3883
-      y: 3553
+      x: 5269
+      y: 3443
     - id: f-mwl100qj-8r1g
       tipo: mensaje
       x: 66
@@ -2536,7 +2536,7 @@ whatsapp:
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
                Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil* ‼️🤗
-          delay_after_sec: 6
+          delay_after_sec: 5
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
       x: 1012
@@ -2553,7 +2553,7 @@ whatsapp:
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
                Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
-          delay_after_sec: 6
+          delay_after_sec: 5
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
       x: 1012
@@ -2570,14 +2570,14 @@ whatsapp:
               ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
 
                Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
-          delay_after_sec: 6
+          delay_after_sec: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
       x: 407
       y: 2761
       seguimientos:
         - id: s-mwl1i41z-2vqiq
-          minutos: 30
+          minutos: 3
           variantes:
             - id: v-mwl1i41z-2igag
               peso: 1
@@ -2620,8 +2620,10 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
+          ignora_silencio: true
+          ignora_tardio: true
         - id: s-mwl1i41z-etf49
-          minutos: 480
+          minutos: 5
           variantes:
             - id: v-mwl1i420-16ql0
               peso: 1
@@ -2663,6 +2665,99 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mwl1jnq7-v9g3p
+      tipo: mensaje
+      x: 1540
+      y: 3201
+      steps:
+        - type: text
+          body_variants:
+            - |
+              ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+              {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+          delay_after_sec: 6
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1bnkaL6tRWZkRV_tpqqZwyOb6cQPPklvF/view?usp=drive_link
+          caption_variants:
+            - |-
+              ⭐ {*Con el Kit Esencial de FLORES DE PAPEL* 🌸|*Con nuestro Kit Esencial de FLORES DE PAPEL* 🌸:|*Con el super Kit Esencial de FLORES DE PAPEL* 🌸} *aprenderás a hacer estas bellezas* de manera sencilla. 🤗
+
+              - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+              - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+              - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+              - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+              - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+              - *Rosas de Papel* 🌹
+              - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+              📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
+
+              🟣 *¿COMO FUNCIONA?*
+
+              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+
+              - *2).-* 📲 Envíanos tu comprobante de pago
+
+              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwl1jnq8-6o12b
+              title: DATOS DE PAGO
+              keywords:
+                - Nequi
+                - daviplata
+                - bre-b
+                - neki
+                - nnequi
+                - nqui
+                - davi
+                - nek
+                - neq
+                - bre
+                - con bre
+                - con nequi
+                - con davi
+                - con daviplata
+                - con bre
+                - tengo bre
+                - tengo nequi
+                - tengo daviplata
+                - tengo davi
+                - tengo neki
+              color: esmeralda
+              steps: []
+      presenta:
+        - "@tienda:basico"
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -2926,6 +3021,7 @@ whatsapp:
       de: f-mwl0zt1e-iq1eq
       salida: btn:b-mwl0zt1e-brsr3
       a: f-mwl0zt1e-er7t4
+      vista: colita
     - id: c-mwl16jjr-ssk
       de: f-mwjv96j2-unv4
       salida: rep:rmwl16ea7
@@ -2946,6 +3042,18 @@ whatsapp:
       de: f-mwl100qj-8r1g
       salida: siguiente
       a: f-mwl1i41z-6kqdb
+    - id: c-mwl1jv5j-our
+      de: f-mwl18nl4-1idy
+      salida: siguiente
+      a: f-mwl1jnq7-v9g3p
+    - id: c-mwl1jxlp-xcw
+      de: f-mwl1bzja-hp8v
+      salida: siguiente
+      a: f-mwl1jnq7-v9g3p
+    - id: c-mwl1jyto-aa1
+      de: f-mwl1fjxr-fn4j
+      salida: siguiente
+      a: f-mwl1jnq7-v9g3p
   cajas:
     - id: k-mwk1ex30
       x: 385
@@ -3044,8 +3152,8 @@ whatsapp:
       y: 9702
     - id: esp-mwl0zt1e-3iu03
       ficha: f-mwl0zt1e-iq1eq
-      x: 3300
-      y: 3135
+      x: 4686
+      y: 3025
 messenger:
   encendido: true
   fichas:
