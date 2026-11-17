@@ -209,7 +209,7 @@ whatsapp:
               {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
           delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/1J4zwiDF11t-SBr7VEeR6DDde9OuPt-dQ/view?usp=drive_link
+          drive_url: https://drive.google.com/file/d/1bnkaL6tRWZkRV_tpqqZwyOb6cQPPklvF/view?usp=drive_link
           caption_variants:
             - |-
               ⭐ {*Con el Kit Esencial de FLORES DE PAPEL* 🌸|*Con nuestro Kit Esencial de FLORES DE PAPEL* 🌸:|*Con el super Kit Esencial de FLORES DE PAPEL* 🌸} *aprenderás a hacer estas bellezas* de manera sencilla. 🤗
@@ -291,7 +291,7 @@ whatsapp:
               {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
           delay_after_sec: 6
         - type: image
-          drive_url: https://drive.google.com/file/d/1W9EB00_FLrgYRwqPwj7eef09Gn2yfqQU/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
           caption_variants:
             - |-
               {*Con el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:|*Esto es lo que incluye el Kit Esencial de FLORES DE PAPEL* 🌸:|*Al adquirir el Kit Esencial de FLORES DE PAPEL* 🌸 recibirás:}
@@ -2250,22 +2250,17 @@ whatsapp:
         - id: r1
           peso: 1
           anuncios:
-            - meta_120250840781450336
             - meta_120250840781360336
         - id: r2
           peso: 1
           anuncios:
             - meta_120250840781370336
-            - meta_120250840781460336
-            - meta_120250840781380336
         - id: rmwk1t1l6
-          peso: 0
-          peso_antes: 1
+          peso: 1
           anuncios:
             - meta_120250840781460336
         - id: rmwk1t24a
-          peso: 0
-          peso_antes: 1
+          peso: 1
           anuncios:
             - meta_120250840781360336
             - meta_120250840781380336
