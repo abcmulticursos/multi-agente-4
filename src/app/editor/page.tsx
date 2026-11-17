@@ -37021,17 +37021,28 @@ function PortadaDeLaTienda({
         subtitulo={productos.length ? productos.join(" · ") : "Sin elegir: juega los productos de la alineación general"}
         onAbrir={onProductos}
       />
-      <TarjetaDeLaPortada
-        icono="⚙️"
-        fondo="bg-slate-100"
-        titulo="Configuración general"
-        subtitulo="Nombre, color, número, página, pixel y quién cobra de toda la tienda, y cómo presenta"
-        estado={pendientes ? <span className="shrink-0 rounded-md bg-amber-500 px-2.5 py-1 text-xs font-black text-white shadow-sm">⚠ {pendientes}</span> : undefined}
-        onAbrir={onGeneral}
-      />
+      {/* (16/11/2026) OCULTA. Él: «configuración general déjala oculta y sin nada siempre; otro día diré muéstralo». */}
+      {MOSTRAR_LO_GENERAL && (
+        <TarjetaDeLaPortada
+          icono="⚙️"
+          fondo="bg-slate-100"
+          titulo="Configuración general"
+          subtitulo="Nombre, color, número, página, pixel y quién cobra de toda la tienda, y cómo presenta"
+          estado={pendientes ? <span className="shrink-0 rounded-md bg-amber-500 px-2.5 py-1 text-xs font-black text-white shadow-sm">⚠ {pendientes}</span> : undefined}
+          onAbrir={onGeneral}
+        />
+      )}
     </div>
   );
 }
+
+/**
+ * «CONFIGURACIÓN GENERAL» OCULTA (16/11/2026). Él: «necesito que esté oculto y que el bot no los use… cuando yo trabaje
+ * con varios países tendré que llenarlos de uno en uno… otro día diré muéstralo». El número, la página, el pixel y quién
+ * cobra de toda la tienda ni se ven ni cuentan (ver `sinLoGeneralDeLasTiendas` en config.ts). Para volver a enseñarla:
+ * `true` aquí, y quitar ese filtro del bot y de la ruta de guardado.
+ */
+const MOSTRAR_LO_GENERAL: boolean = false;
 
 function VentanaDelCobro({
   cfg,
@@ -60638,21 +60649,27 @@ function revisarTienda(
     }
   }
 
-  if (!String(tienda.pagina ?? "").trim()) {
+  // (16/11/2026) PÁGINA, PIXEL Y QUIÉN COBRA, PAÍS POR PAÍS: lo de toda la tienda ya no cuenta (`MOSTRAR_LO_GENERAL`).
+  const susPaises = paisesDeLaTienda(cfg, tienda);
+  const nombresDe = (lista: string[]) => lista.map((p) => COUNTRIES[p as CountryCode]?.label ?? p).join(", ");
+  const sinPagina = susPaises.filter((p) => !String(tienda.por_pais?.[p]?.pagina ?? "").trim());
+  const sinPixel = susPaises.filter((p) => !String(tienda.por_pais?.[p]?.pixel ?? "").trim());
+  const sinCobrador = susPaises.filter((p) => !String(tienda.cobradores_por_pais?.[p] ?? "").trim());
+  if (sinPagina.length) {
     avisos.push({
       clave: "sin_pagina",
       grave: true,
-      queFalta: "No tiene página de Facebook",
+      queFalta: `Sin página de Facebook en ${nombresDe(sinPagina)}`,
       queOcurre:
-        "Las compras no se registran en Meta y Messenger no vende lo de esta tienda.",
+        "Ahí las compras no se registran en Meta y Messenger no vende lo de esta tienda.",
     });
   }
-  if (!String(tienda.pixel ?? "").trim()) {
+  if (sinPixel.length) {
     avisos.push({
       clave: "sin_pixel",
       grave: false,
-      queFalta: "No tiene su conjunto de datos",
-      queOcurre: "Sus compras se miden en el de Meta Connect, junto con las demás.",
+      queFalta: `Sin conjunto de datos en ${nombresDe(sinPixel)}`,
+      queOcurre: "Ahí sus compras se miden en el de Meta Connect, junto con las demás.",
     });
   }
   if (Object.values(tienda.alineacion ?? {}).filter(Boolean).length === 0) {
@@ -60663,12 +60680,12 @@ function revisarTienda(
       queOcurre: "Vende los de la alineación general.",
     });
   }
-  if (!String(tienda.cobrador ?? "").trim()) {
+  if (sinCobrador.length) {
     avisos.push({
       clave: "sin_cobrador",
       grave: false,
-      queFalta: "No tiene quien cobre",
-      queOcurre: "Cobra la cuenta de cada país, como siempre.",
+      queFalta: `Sin quien cobre en ${nombresDe(sinCobrador)}`,
+      queOcurre: "Ahí cobra la cuenta del país, como siempre.",
     });
   }
 
@@ -61580,6 +61597,7 @@ function TiendasDelProyecto({
                   «Quién cobra» sigue siendo <label> porque dentro lleva un <select>
                   nativo, que sí se lleva bien con él. */}
               <div className="block text-xs font-medium text-tinta-suave">
+                {MOSTRAR_LO_GENERAL && (<>
                 Número de WhatsApp
                 <ElegirConexion
                   valor={tienda.numero ?? ""}
@@ -61622,6 +61640,7 @@ function TiendasDelProyecto({
                       </span>
                     );
                   })()}
+                </>)}
                 {/* LAS FRASES DE ENTRADA — opcionales. Lo pidió el 12/10/2026: «un solo
                     número pueda atender a más de 2 tiendas… en cada campaña cambiaría la
                     frase de entrada». Se escriben con comas y se limpian al guardar. */}
@@ -61648,6 +61667,8 @@ function TiendasDelProyecto({
                   responden whatsapp y messenger». Sin esto, Messenger no encontraba
                   la tienda —se buscaba solo por el número— y todas las páginas
                   vendían el contenido general. */}
+              {/* (16/11/2026) Página, pixel y quién cobra de toda la tienda: ocultos y sin uso. Van por país. */}
+              {MOSTRAR_LO_GENERAL && (<>
               <div className="block text-xs font-medium text-tinta-suave">
                 Página de Facebook
                 <ElegirConexion
@@ -61757,6 +61778,7 @@ function TiendasDelProyecto({
                 </select>
                 </span>
               </label>
+              </>)}
               <label className="block text-xs font-medium text-tinta-suave">
                 Cómo presenta esta tienda
                 <select

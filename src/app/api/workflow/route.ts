@@ -566,11 +566,10 @@ function leeTiendas(
       return {
         id: String(t.id).trim(),
         nombre: str(t?.nombre),
-        // Vacío = tienda preparada pero sin número: no la elige nadie.
-        numero: str(t?.numero).trim(),
-        // SU PÁGINA DE FACEBOOK, para que Messenger venda lo mismo que su WhatsApp.
-        // Vacío = esta tienda no atiende Messenger.
-        pagina: str(t?.pagina).trim(),
+        // SIN «CONFIGURACIÓN GENERAL» (16/11/2026): el número, la página, el pixel y quién cobra de TODA la tienda ya
+        // no se leen ni se guardan; van por país (`por_pais`, `cobradores_por_pais`). Ver `sinLoGeneralDeLasTiendas`.
+        numero: "",
+        pagina: "",
         // SUS FRASES DE ENTRADA (12/10/2026), para que un número atienda varias tiendas.
         // Solo se escriben si hay alguna: vacío = la tienda sale del número, como siempre.
         ...(strListLimpia(t?.frases_de_entrada).length > 0
@@ -585,9 +584,6 @@ function leeTiendas(
         // EL UPSELL 1 APAGADO (19/10/2026): su producto guardado mientras está apagado. Solo la
         // pizarra lo lee; el bot no. Lo que no se nombra aquí se pierde al guardar.
         ...(str(t?.upsell_apagado).trim() ? { upsell_apagado: str(t.upsell_apagado).trim() } : {}),
-        // QUIÉN COBRA en esta tienda, por id del almacén de usuarios. Vacío =
-        // cobra la cuenta del país, que es lo de siempre.
-        ...(str(t?.cobrador).trim() ? { cobrador: str(t.cobrador).trim() } : {}),
         // QUIÉN COBRA EN CADA PAÍS (29/10/2026): país → id del almacén de usuarios. Solo los elegidos.
         ...(() => {
           const crudo = t?.cobradores_por_pais && typeof t.cobradores_por_pais === "object" ? (t.cobradores_por_pais as Record<string, unknown>) : {};
@@ -616,11 +612,6 @@ function leeTiendas(
           }
           return Object.keys(por).length ? { por_pais: por } : {};
         })(),
-        // SU CONJUNTO DE DATOS de Meta —él lo llama «el pixel»—, donde se marcan las
-        // compras de esta tienda. Vacío = el elegido en Meta Connect, que es lo de
-        // siempre. Lo pidió el 01/10/2026: «para marcar la compra se necesita waba,
-        // numero, pagina y pixel». Ver `Tienda.pixel` en `config.ts`.
-        ...(str(t?.pixel).trim() ? { pixel: str(t.pixel).trim() } : {}),
         // SU COLOR, para reconocerla en las fachadas. Lo pidió el 05/10/2026:
         // «si yo les pongo un color en la sección tiendas, ese color debería
         // aparecer en la fachada». Solo se escribe si es un color de verdad:

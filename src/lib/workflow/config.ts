@@ -3643,6 +3643,20 @@ export function grupoDelPais(
   return p ? tienda?.por_pais?.[p] : undefined;
 }
 
+/**
+ * SIN «CONFIGURACIÓN GENERAL» (16/11/2026). Él: «necesito que esté oculto y que el bot no los use… cuando yo trabaje
+ * con varios países tendré que llenarlos de uno en uno». El número, la página, el pixel y quién cobra de TODA la tienda
+ * no cuentan: solo los de cada país (`por_pais`, `cobradores_por_pais`). Lo demás de la tienda (nombre, frases,
+ * productos, semimodalidad…) sigue igual. Se aplica al leer el archivo, así ninguna ruta del bot los ve.
+ */
+export function sinLoGeneralDeLasTiendas<T extends { tiendas?: Tienda[] } | null>(config: T): T {
+  if (!config || !Array.isArray(config.tiendas)) return config;
+  return {
+    ...config,
+    tiendas: config.tiendas.map((t) => (t ? { ...t, numero: "", pagina: "", pixel: undefined, cobrador: undefined } : t)),
+  };
+}
+
 /** TODOS LOS NÚMEROS DE UNA TIENDA (14/11/2026): el suyo y el de cada país que tenga uno propio. */
 export function numerosDeLaTienda(tienda: Pick<Tienda, "numero" | "por_pais"> | null | undefined): string[] {
   if (!tienda) return [];
@@ -5270,8 +5284,10 @@ export function loadWorkflowConfig(): WorkflowConfig | null {
   ) {
     return cached.byChannel[clave] ?? null;
   }
-  const config =
-    cached && cached.mtime === mtime ? cached.rawConfig : readConfigFromDisk().config;
+  // (16/11/2026) Sin el número, la página, el pixel ni quién cobra de toda la tienda: ver `sinLoGeneralDeLasTiendas`.
+  const config = sinLoGeneralDeLasTiendas(
+    cached && cached.mtime === mtime ? cached.rawConfig : readConfigFromDisk().config
+  );
   if (!config) return null;
   // Solo desactivamos el workflow si las secciones REQUERIDAS aún tienen
   // placeholders. Secciones opcionales (payment_approved_sequence) se
