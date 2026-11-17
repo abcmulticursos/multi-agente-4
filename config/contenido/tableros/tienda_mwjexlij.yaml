@@ -2530,12 +2530,11 @@ whatsapp:
         - type: text
           body_variants:
             - |
-              *Excelente que tengas experiencia!* 👋🏼😊
-              Quiero darte una noticia que te va a gustar:
+              *Excelente que tengas experiencia!* 🤗
 
-              ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
-               📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️🤗
+               📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️ 😊👇️
           delay_after_sec: 5
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
@@ -2546,13 +2545,12 @@ whatsapp:
           body_variants:
             - |-
               *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
-              Quiero darte una noticia que te va a gustar:
 
               ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
 
-              ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
-               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
           delay_after_sec: 5
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
@@ -2568,9 +2566,7 @@ whatsapp:
 
               *Quiero darte una muy buena noticia que te va a gustar:* 🧡
 
-              ✨ Te presentamos nuestro *Super Kit {{PRODUCTO_BASE}}* 🌸🌿
-
-               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
           delay_after_sec: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
