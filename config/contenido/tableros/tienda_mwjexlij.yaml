@@ -8,8 +8,8 @@ whatsapp:
       pais: CO
     - id: f-mwjey94x-qrit
       tipo: mensaje
-      x: 462
-      y: -913
+      x: 858
+      y: -3641
       steps:
         - type: text
           body_variants:
@@ -102,8 +102,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwjf4dh1-ml9o3
       tipo: mensaje
-      x: 473
-      y: 22
+      x: 869
+      y: -2706
       steps:
         - type: text
           body_variants:
@@ -194,8 +194,8 @@ whatsapp:
               steps: []
     - id: f-mwjf7489-nghqk
       tipo: mensaje
-      x: 506
-      y: 1056
+      x: 902
+      y: -1672
       steps:
         - type: text
           body_variants:
@@ -276,8 +276,8 @@ whatsapp:
               steps: []
     - id: f-mwjf9vqj-pba9e
       tipo: mensaje
-      x: 517
-      y: 2068
+      x: 913
+      y: -660
       steps:
         - type: text
           body_variants:
@@ -349,8 +349,8 @@ whatsapp:
               steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
-      x: 726
-      y: -1265
+      x: 1122
+      y: -3993
       seguimientos:
         - id: s-mwjfckc0
           minutos: 30
@@ -466,8 +466,8 @@ whatsapp:
           peso_antes: 1
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
-      x: 1496
-      y: -946
+      x: 1892
+      y: -3674
       steps:
         - type: text
           body_variants:
@@ -484,12 +484,12 @@ whatsapp:
         metodos: true
     - id: f-mwjw2iuh-6euh
       tipo: regalo
-      x: 2354
-      y: -924
+      x: 2750
+      y: -3652
     - id: f-mwk0rxzk-ngxkz
       tipo: cobro
-      x: 1562
-      y: -11
+      x: 1958
+      y: -2739
       steps:
         - type: text
           body_variants:
@@ -506,12 +506,12 @@ whatsapp:
         metodos: true
     - id: f-mwk0rxzk-o6vf4
       tipo: regalo
-      x: 2453
-      y: 55
+      x: 2849
+      y: -2673
     - id: f-mwk0tgv5-40vw2
       tipo: seguimientos
-      x: 748
-      y: -308
+      x: 1144
+      y: -3036
       seguimientos:
         - id: s-mwk0tgv5-y4xio
           minutos: 30
@@ -602,8 +602,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwk1cif2-lk9nb
       tipo: seguimientos
-      x: 770
-      y: 627
+      x: 1166
+      y: -2101
       seguimientos:
         - id: s-mwk1cif3-jbvl7
           minutos: 30
@@ -676,8 +676,8 @@ whatsapp:
           activa_oferta: true
     - id: f-mwk1cz12-p48ae
       tipo: cobro
-      x: 1551
-      y: 1012
+      x: 1947
+      y: -1716
       steps:
         - type: text
           body_variants:
@@ -694,12 +694,12 @@ whatsapp:
         metodos: true
     - id: f-mwk1cz12-499x1
       tipo: regalo
-      x: 2409
-      y: 1034
+      x: 2805
+      y: -1694
     - id: f-mwk1dglx-tnwxm
       tipo: cobro
-      x: 1485
-      y: 1980
+      x: 1881
+      y: -748
       steps:
         - type: text
           body_variants:
@@ -716,12 +716,12 @@ whatsapp:
         metodos: true
     - id: f-mwk1dgly-frl9y
       tipo: regalo
-      x: 2343
-      y: 2002
+      x: 2739
+      y: -726
     - id: f-mwk1dk38-b5sd9
       tipo: seguimientos
-      x: 792
-      y: 1782
+      x: 1188
+      y: -946
       seguimientos:
         - id: s-mwk1dk38-wkn2y
           minutos: 30
@@ -2269,8 +2269,8 @@ whatsapp:
             - meta_120250840781380336
     - id: f-mwl0zt1e-er7t4
       tipo: cobro
-      x: 2827
-      y: 3245
+      x: 2871
+      y: 1287
       steps:
         - type: text
           body_variants:
@@ -2287,12 +2287,12 @@ whatsapp:
         metodos: true
     - id: f-mwl0zt1e-09xkc
       tipo: regalo
-      x: 3861
-      y: 3465
+      x: 3905
+      y: 1507
     - id: f-mwl100qj-8r1g
       tipo: mensaje
-      x: 341
-      y: 3168
+      x: 385
+      y: 1210
       steps:
         - type: text
           body_variants:
@@ -2339,8 +2339,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl18nl4-1idy
       tipo: mensaje
-      x: 1133
-      y: 2981
+      x: 1177
+      y: 1023
       steps:
         - type: text
           body_variants:
@@ -2353,8 +2353,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
-      x: 1133
-      y: 3179
+      x: 1177
+      y: 1221
       steps:
         - type: text
           body_variants:
@@ -2369,8 +2369,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
-      x: 1133
-      y: 3377
+      x: 1177
+      y: 1419
       steps:
         - type: text
           body_variants:
@@ -2385,8 +2385,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
-      x: 2090
-      y: 3003
+      x: 2134
+      y: 1045
       seguimientos:
         - id: s-mwl1i41z-2vqiq
           minutos: 3
@@ -2481,8 +2481,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwl1jnq7-v9g3p
       tipo: mensaje
-      x: 1804
-      y: 3366
+      x: 1848
+      y: 1408
       steps:
         - type: text
           body_variants:
@@ -2572,8 +2572,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwl97xpi-cnvhv
       tipo: cobro
-      x: 2805
-      y: 4455
+      x: 2849
+      y: 2497
       steps:
         - type: text
           body_variants:
@@ -2590,12 +2590,12 @@ whatsapp:
         metodos: true
     - id: f-mwl97xpi-uhi0k
       tipo: regalo
-      x: 3839
-      y: 4675
+      x: 3883
+      y: 2717
     - id: f-mwl97xpi-wyp4p
       tipo: mensaje
-      x: 319
-      y: 4378
+      x: 363
+      y: 2420
       steps:
         - type: text
           body_variants:
@@ -2642,8 +2642,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl97xpi-ladn5
       tipo: mensaje
-      x: 1111
-      y: 4191
+      x: 1155
+      y: 2233
       steps:
         - type: text
           body_variants:
@@ -2656,8 +2656,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl97xpi-ercvg
       tipo: mensaje
-      x: 1111
-      y: 4389
+      x: 1155
+      y: 2431
       steps:
         - type: text
           body_variants:
@@ -2672,8 +2672,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl97xpj-cnfm9
       tipo: mensaje
-      x: 1111
-      y: 4587
+      x: 1155
+      y: 2629
       steps:
         - type: text
           body_variants:
@@ -2688,8 +2688,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl97xpj-oep7j
       tipo: seguimientos
-      x: 2068
-      y: 4213
+      x: 2112
+      y: 2255
       seguimientos:
         - id: s-mwl97xpj-lsgwy
           minutos: 3
@@ -2784,8 +2784,8 @@ whatsapp:
           ignora_tardio: true
     - id: f-mwl97xpj-29nrp
       tipo: mensaje
-      x: 1782
-      y: 4576
+      x: 1826
+      y: 2618
       steps:
         - type: text
           body_variants:
@@ -2870,6 +2870,642 @@ whatsapp:
                 - tengo davi
                 - tengo neki
               color: esmeralda
+              steps: []
+      presenta:
+        - "@tienda:basico"
+    - id: f-mwl9b586-u2mbf
+      tipo: cobro
+      x: 2838
+      y: 3784
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+
+              {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwl9b586-pnnay
+      tipo: regalo
+      x: 3872
+      y: 4004
+    - id: f-mwl9b586-qqka6
+      tipo: mensaje
+      x: 352
+      y: 3707
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+
+              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwl9b586-qtnan
+              title: SI
+              keywords:
+                - Si
+                - sí
+                - si tengo
+                - un poco
+                - poco
+                - algo
+                - tengo
+              color: esmeralda
+              steps: []
+            - id: d-mwl9b586-n4z44
+              title: NO
+              keywords:
+                - No
+                - no tengo
+                - nada
+                - nunca hice flores
+                - no tengo experiencia
+                - no nada
+              color: violeta
+              steps: []
+            - id: d-mwl9b586-tikax
+              title: N / A
+              keywords: []
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - ""
+                  delay_after_sec: 6
+      sin_respuesta_min: 5
+    - id: f-mwl9b586-5ipiq
+      tipo: mensaje
+      x: 1144
+      y: 3520
+      steps:
+        - type: text
+          body_variants:
+            - |
+              *Excelente que tengas experiencia!* 🤗
+
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-5p3ss
+      tipo: mensaje
+      x: 1144
+      y: 3718
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-iq76e
+      tipo: mensaje
+      x: 1144
+      y: 3916
+      steps:
+        - type: text
+          body_variants:
+            - |
+              *Hola es un gusto saludarte!* 👋🏼😊
+
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+
+              *Quiero darte una muy buena noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-wbddz
+      tipo: seguimientos
+      x: 2101
+      y: 3542
+      seguimientos:
+        - id: s-mwl9b586-xaidl
+          minutos: 3
+          variantes:
+            - id: v-mwl9b586-ar02q
+              peso: 1
+              steps:
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+
+                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      __________
+
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwl9b586-3zj4c
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mwl9b586-0b2l8
+          minutos: 5
+          variantes:
+            - id: v-mwl9b586-909gn
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Dn_SbjccMS_eRQvc2kcNUq14s04iuAEr/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
+
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      __________
+
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+
+                      *EN RESUMEN RECIBIRAS:*
+
+                      Nuestro *{{PRODUCTO}}* 📚 incluye:
+
+                      - 🌸 *50 modelos de Flores de Papel*,
+                      - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
+                      - 🌹 *Molde para hacer Rosas*
+                      - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                      - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                      - 🦋 Mariposas de Papel
+
+                      💛 *7 VIDEOS TUTORIALES PARA QUE APRENDAS A HACER FLORES AMARILLAS* 🫶
+
+                      *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mwl9b586-v72s5
+      tipo: mensaje
+      x: 1815
+      y: 3905
+      steps:
+        - type: text
+          body_variants:
+            - |
+              ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+              {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+          delay_after_sec: 6
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1bnkaL6tRWZkRV_tpqqZwyOb6cQPPklvF/view?usp=drive_link
+          caption_variants:
+            - |-
+              ⭐ {*Con el Kit Esencial de FLORES DE PAPEL* 🌸|*Con nuestro Kit Esencial de FLORES DE PAPEL* 🌸:|*Con el super Kit Esencial de FLORES DE PAPEL* 🌸} *aprenderás a hacer estas bellezas* de manera sencilla. 🤗
+
+              - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+              - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+              - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+              - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+              - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+              - *Rosas de Papel* 🌹
+              - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+              📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
+
+              🟣 *¿COMO FUNCIONA?*
+
+              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+
+              - *2).-* 📲 Envíanos tu comprobante de pago
+
+              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwl9b586-qc7gg
+              title: DATOS DE PAGO
+              keywords:
+                - Nequi
+                - daviplata
+                - bre-b
+                - neki
+                - nnequi
+                - nqui
+                - davi
+                - nek
+                - neq
+                - bre
+                - con bre
+                - con nequi
+                - con davi
+                - con daviplata
+                - con bre
+                - tengo bre
+                - tengo nequi
+                - tengo daviplata
+                - tengo davi
+                - tengo neki
+              color: esmeralda
+              steps: []
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              *HAZ CLICK EN EL BOTÓN "SI QUIERO" SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
+          delay_after_sec: 6
+          buttons:
+            - id: f1a37e13-8baa-4e5c-b8c0-1b8c8d4e9a9b
+              label: SI QUIERO
+              action: send_steps
+              steps: []
+      presenta:
+        - "@tienda:basico"
+    - id: f-mwl9b586-9pyxz
+      tipo: cobro
+      x: 2816
+      y: 4994
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+
+              {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwl9b586-xy1rb
+      tipo: regalo
+      x: 3850
+      y: 5214
+    - id: f-mwl9b586-yhhd5
+      tipo: mensaje
+      x: 330
+      y: 4917
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
+
+              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+
+              *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwl9b586-xyxv7
+              title: SI
+              keywords:
+                - Si
+                - sí
+                - si tengo
+                - un poco
+                - poco
+                - algo
+                - tengo
+              color: esmeralda
+              steps: []
+            - id: d-mwl9b586-vmsbd
+              title: NO
+              keywords:
+                - No
+                - no tengo
+                - nada
+                - nunca hice flores
+                - no tengo experiencia
+                - no nada
+              color: violeta
+              steps: []
+            - id: d-mwl9b586-geywx
+              title: N / A
+              keywords: []
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - ""
+                  delay_after_sec: 6
+      sin_respuesta_min: 5
+    - id: f-mwl9b586-tevqu
+      tipo: mensaje
+      x: 1122
+      y: 4730
+      steps:
+        - type: text
+          body_variants:
+            - |
+              *Excelente que tengas experiencia!* 🤗
+
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-22czf
+      tipo: mensaje
+      x: 1122
+      y: 4928
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              *Entiendo que no tienes experiencia pero no hay de que preocuparse!* 😊
+
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 🌸🌺🌿
+
+              ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-qvj6y
+      tipo: mensaje
+      x: 1122
+      y: 5126
+      steps:
+        - type: text
+          body_variants:
+            - |
+              *Hola es un gusto saludarte!* 👋🏼😊
+
+              ⚠️ *¿Quieres a aprender a hacer tus primeras flores de papel desde Cero sin Experiencia?* 
+
+              *Quiero darte una muy buena noticia que te va a gustar:* 🧡
+
+               📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
+          delay_after_sec: 5
+    - id: f-mwl9b586-j3yp9
+      tipo: seguimientos
+      x: 2079
+      y: 4752
+      seguimientos:
+        - id: s-mwl9b586-23n0v
+          minutos: 3
+          variantes:
+            - id: v-mwl9b586-4iazz
+              peso: 1
+              steps:
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+
+                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      __________
+
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwl9b586-vyhyv
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mwl9b586-ufgow
+          minutos: 5
+          variantes:
+            - id: v-mwl9b586-hwycs
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Dn_SbjccMS_eRQvc2kcNUq14s04iuAEr/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
+
+                      *{Sólo {{PRECIO_BASE}}|Por sólo {{PRECIO_BASE}}|Llévatelo por sólo {{PRECIO_BASE}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      __________
+
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+
+                      *EN RESUMEN RECIBIRAS:*
+
+                      Nuestro *{{PRODUCTO}}* 📚 incluye:
+
+                      - 🌸 *50 modelos de Flores de Papel*,
+                      - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
+                      - 🌹 *Molde para hacer Rosas*
+                      - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                      - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                      - 🦋 Mariposas de Papel
+
+                      💛 *7 VIDEOS TUTORIALES PARA QUE APRENDAS A HACER FLORES AMARILLAS* 🫶
+
+                      *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
+    - id: f-mwl9b586-d6uew
+      tipo: mensaje
+      x: 1793
+      y: 5115
+      steps:
+        - type: text
+          body_variants:
+            - |
+              ✨ *Con la técnica correcta y los moldes adecuados*, podrás crear flores hermosas de forma fácil, desde casa y a tu propio ritmo. 🤗
+
+              {*Por eso hoy* quiero mostrarte cómo lograrlo. ⬇️|*Por eso,* hoy quiero mostrarte cómo lograrlo. ⬇️|*Así que hoy* quiero mostrarte cómo lograrlo. ⬇️}
+          delay_after_sec: 6
+          enabled: false
+        - type: image
+          drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
+          caption_variants:
+            - |-
+              ⭐ {*Con el Kit Esencial de FLORES DE PAPEL* 🌸|*Con nuestro Kit Esencial de FLORES DE PAPEL* 🌸:|*Con el super Kit Esencial de FLORES DE PAPEL* 🌸} *aprenderás a hacer estas bellezas* de manera sencilla. 🤗
+
+              - 📚 {*PDF con 55 páginas* de pétalos recortables.|*PDF de 55 páginas* con pétalos recortables.|*55 páginas en PDF* de pétalos recortables.}
+              - 🎥 {*32 Videos instructivos* del armado de las flores paso a paso.|*35 Videos* con el paso a paso para armar las flores.|*32 Videos instructivos* para aprender el armado de las flores paso a paso.}
+              - ⚪️ {*Bases* para armar las flores.|*Bases* para el armado de las flores.|*Bases* listas para armar las flores.}
+              - 🍃 {*Acceso Permanente* al material.|*Acceso Permanente* al material.|*Acceso permanente* a todo el material.}
+              - 🎁 {Bonos de Obsequio*|Bonos de regalo*|Bonos incluidos*}
+              - *Rosas de Papel* 🌹
+              - 🖨️ {Formato *PDF para descargar e Imprimir*|En formato *PDF para descargar e Imprimir*|*PDF* listo para descargar e imprimir.}
+
+              📲 {*Se envía directamente a tu Whatsapp o correo* 💌|*Lo recibirás directamente en tu WhatsApp o correo* 💌|*Envío inmediato a tu WhatsApp o correo electrónico.* 💌}
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1J2_KJ3LrsIXo-00AyLRwpgmBRVqSt3Un/view?usp=drive_link
+          caption_variants:
+            - |-
+              *{Además|Y además|Como extra|Adicionalmente} recibe {GRATIS|TOTALMENTE GRATIS|SIN COSTO|DE REGALO} estos {obsequios complementarios|bonos complementarios|regalos complementarios|obsequios adicionales}* ‼️ 😱👇🏼
+
+              - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+              - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+              - 🌹 *Molde para hacer Rosas*
+              - 🦋 Mariposas de Papel
+
+              *Bonitos Complementos para tus creaciones* 🤗
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
+              ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
+
+              🟣 *¿COMO FUNCIONA?*
+
+              - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
+
+              - *2).-* 📲 Envíanos tu comprobante de pago
+
+              {*! Y Recibe tu enlace de Descarga + Bonos en segundos* 😊⚡|*! Y recibe inmediatamente tu enlace de descarga + Bonos* 😊⚡|*! En segundos recibirás tu enlace de descarga + Bonos* 😊⚡|*! Te enviaremos tu enlace de descarga + Bonos en segundos* 😊⚡}
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+
+              {{LISTA_METODOS_POR_PAIS}}
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwl9b587-rss79
+              title: DATOS DE PAGO
+              keywords:
+                - Nequi
+                - daviplata
+                - bre-b
+                - neki
+                - nnequi
+                - nqui
+                - davi
+                - nek
+                - neq
+                - bre
+                - con bre
+                - con nequi
+                - con davi
+                - con daviplata
+                - con bre
+                - tengo bre
+                - tengo nequi
+                - tengo daviplata
+                - tengo davi
+                - tengo neki
+              color: esmeralda
+              steps: []
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+
+              {{LISTA_METODOS_POR_PAIS}}
+
+              *HAZ CLICK EN EL BOTÓN "SI QUIERO" SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
+          delay_after_sec: 6
+          buttons:
+            - id: f1a37e13-8baa-4e5c-b8c0-1b8c8d4e9a9b
+              label: SI QUIERO
+              action: send_steps
               steps: []
       presenta:
         - "@tienda:basico"
@@ -3224,34 +3860,144 @@ whatsapp:
       de: f-mwl97xpi-wyp4p
       salida: sin_respuesta
       a: f-mwl97xpj-cnfm9
+    - id: c-mwl9b587-u66sa
+      de: f-mwl9b586-u2mbf
+      salida: pagado
+      a: f-mwl9b586-pnnay
+      vista: cable
+    - id: c-mwl9b587-kr77n
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-qtnan
+      a: f-mwl9b586-5ipiq
+    - id: c-mwl9b587-bf94y
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-n4z44
+      a: f-mwl9b586-5p3ss
+    - id: c-mwl9b587-d6yds
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-tikax
+      a: f-mwl9b586-iq76e
+    - id: c-mwl9b587-eixpo
+      de: f-mwl9b586-5ipiq
+      salida: siguiente
+      a: f-mwl9b586-v72s5
+    - id: c-mwl9b587-pkq1k
+      de: f-mwl9b586-5p3ss
+      salida: siguiente
+      a: f-mwl9b586-v72s5
+    - id: c-mwl9b587-jbsjq
+      de: f-mwl9b586-iq76e
+      salida: siguiente
+      a: f-mwl9b586-v72s5
+    - id: c-mwl9b587-887we
+      de: f-mwl9b586-v72s5
+      salida: dec:d-mwl9b586-qc7gg
+      a: f-mwl9b586-u2mbf
+    - id: c-mwl9b587-ax6jb
+      de: f-mwl9b586-v72s5
+      salida: pagado
+      a: f-mwl9b586-pnnay
+    - id: c-mwl9b587-rw6is
+      de: f-mwl9b586-wbddz
+      salida: btn:b-mwl9b586-3zj4c
+      a: f-mwl9b586-u2mbf
+      vista: colita
+    - id: c-mwl9b587-a64lj
+      de: f-mwl9b586-v72s5
+      salida: siguiente
+      a: f-mwl9b586-wbddz
+    - id: c-mwl9b587-1z3g8
+      de: f-mwl9b586-u2mbf
+      salida: sin_pago
+      a: f-mwl9b586-wbddz
+      a_espejo: esp-mwl9b587-7ni3u
+    - id: c-mwl9b587-8xn3g
+      de: f-mwl9b586-qqka6
+      salida: sin_respuesta
+      a: f-mwl9b586-iq76e
+    - id: c-mwl9b587-0llb0
+      de: f-mwl9b586-9pyxz
+      salida: pagado
+      a: f-mwl9b586-xy1rb
+      vista: cable
+    - id: c-mwl9b587-pbq1l
+      de: f-mwl9b586-yhhd5
+      salida: dec:d-mwl9b586-xyxv7
+      a: f-mwl9b586-tevqu
+    - id: c-mwl9b587-vsarp
+      de: f-mwl9b586-yhhd5
+      salida: dec:d-mwl9b586-vmsbd
+      a: f-mwl9b586-22czf
+    - id: c-mwl9b587-mnhzf
+      de: f-mwl9b586-yhhd5
+      salida: dec:d-mwl9b586-geywx
+      a: f-mwl9b586-qvj6y
+    - id: c-mwl9b587-9guwf
+      de: f-mwl9b586-tevqu
+      salida: siguiente
+      a: f-mwl9b586-d6uew
+    - id: c-mwl9b587-96g0y
+      de: f-mwl9b586-22czf
+      salida: siguiente
+      a: f-mwl9b586-d6uew
+    - id: c-mwl9b587-vzck4
+      de: f-mwl9b586-qvj6y
+      salida: siguiente
+      a: f-mwl9b586-d6uew
+    - id: c-mwl9b587-rbfvz
+      de: f-mwl9b586-d6uew
+      salida: dec:d-mwl9b587-rss79
+      a: f-mwl9b586-9pyxz
+    - id: c-mwl9b587-6kf5e
+      de: f-mwl9b586-d6uew
+      salida: pagado
+      a: f-mwl9b586-xy1rb
+    - id: c-mwl9b587-mkv9n
+      de: f-mwl9b586-j3yp9
+      salida: btn:b-mwl9b586-vyhyv
+      a: f-mwl9b586-9pyxz
+      vista: colita
+    - id: c-mwl9b587-n2vwd
+      de: f-mwl9b586-d6uew
+      salida: siguiente
+      a: f-mwl9b586-j3yp9
+    - id: c-mwl9b587-qeu3e
+      de: f-mwl9b586-9pyxz
+      salida: sin_pago
+      a: f-mwl9b586-j3yp9
+      a_espejo: esp-mwl9b587-0tiic
+    - id: c-mwl9b587-lroqf
+      de: f-mwl9b586-yhhd5
+      salida: sin_respuesta
+      a: f-mwl9b586-qvj6y
   cajas:
     - id: k-mwk1ex30
-      x: 385
-      y: -1452
+      x: 781
+      y: -4180
       ancho: 2354
       alto: 935
       titulo: Nueva caja
     - id: k-mwk1f0vo
-      x: 385
-      y: -440
+      x: 781
+      y: -3168
       ancho: 2365
       alto: 847
       titulo: Nueva caja
     - id: k-mwk1f2zg
-      x: 385
-      y: 473
+      x: 781
+      y: -2255
       ancho: 2464
       alto: 946
       titulo: Nueva caja
     - id: velo-mwk1fck5-0
-      x: 385
-      y: 1551
+      x: 781
+      y: -1177
       ancho: 2464
       alto: 946
       titulo: Nueva caja
     - id: manta-inicio
-      x: 209
-      y: -1584
+      x: 605
+      y: -4312
       ancho: 2805
       alto: 4191
       titulo: ""
@@ -3288,34 +4034,46 @@ whatsapp:
       titulo: ""
       inicio: inicio-AR-mwk1hzkk
     - id: k-mwl97rz9
-      x: 242
-      y: 2706
+      x: 286
+      y: 748
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
     - id: velo-mwl97xpj-0
-      x: 220
-      y: 3916
+      x: 264
+      y: 1958
+      ancho: 3960
+      alto: 1111
+      titulo: Nueva caja
+    - id: velo-mwl9b587-0
+      x: 253
+      y: 3245
+      ancho: 3960
+      alto: 1111
+      titulo: Nueva caja
+    - id: velo-mwl9b587-1
+      x: 231
+      y: 4455
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
   espejos:
     - id: e-mwjw1bmq-15lw
       ficha: f-mwjfckbz-qeu2
-      x: 1771
-      y: -1342
+      x: 2167
+      y: -4070
     - id: e-mwk0tmnk-992l
       ficha: f-mwk0tgv5-40vw2
-      x: 1837
-      y: -330
+      x: 2233
+      y: -3058
     - id: e-mwk1d6yu-2oen
       ficha: f-mwk1cif2-lk9nb
-      x: 1815
-      y: 693
+      x: 2211
+      y: -2035
     - id: e-mwk1dp04-46kb
       ficha: f-mwk1dk38-b5sd9
-      x: 1782
-      y: 1628
+      x: 2178
+      y: -1100
     - id: esp-mwk1gbso-d8n8x
       ficha: f-mwk1gbso-q0hw8
       x: 1705
@@ -3334,12 +4092,20 @@ whatsapp:
       y: 9702
     - id: e-mwl1o9ri-fcos
       ficha: f-mwl1i41z-6kqdb
-      x: 3091
-      y: 2871
+      x: 3135
+      y: 913
     - id: esp-mwl97xpj-ao6i8
       ficha: f-mwl97xpj-oep7j
-      x: 3069
-      y: 4081
+      x: 3113
+      y: 2123
+    - id: esp-mwl9b587-7ni3u
+      ficha: f-mwl9b586-wbddz
+      x: 3102
+      y: 3410
+    - id: esp-mwl9b587-0tiic
+      ficha: f-mwl9b586-j3yp9
+      x: 3080
+      y: 4620
 messenger:
   encendido: true
   fichas:
