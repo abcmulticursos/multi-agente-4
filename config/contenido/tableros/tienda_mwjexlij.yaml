@@ -447,24 +447,15 @@ whatsapp:
         - id: r1
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250841173490336
         - id: r2
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250841173460336
         - id: rmwjv9kvp
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250841173430336
         - id: rmwjv9lgs
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250841173470336
-            - meta_120250841173450336
         - id: rmwl16ea7
           peso: 1
           anuncios:
@@ -2271,24 +2262,15 @@ whatsapp:
         - id: r1
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250840781360336
         - id: r2
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250840781370336
         - id: rmwk1t1l6
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250840781460336
         - id: rmwk1t24a
           peso: 0
           peso_antes: 1
-          anuncios:
-            - meta_120250840781360336
-            - meta_120250840781380336
         - id: rmwl9mnwj
           peso: 1
           anuncios:
