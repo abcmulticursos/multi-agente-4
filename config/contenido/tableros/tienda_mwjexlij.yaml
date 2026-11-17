@@ -5667,7 +5667,7 @@ instagram:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              {⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo a través de estos datos con Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo por Nequi o Daviplata a través de los siguientes datos* 😊👇️}
 
               {{METODO_DE_PAGO_1}}
 
@@ -5689,7 +5689,7 @@ instagram:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              {⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo a través de estos datos con Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo por Nequi o Daviplata a través de los siguientes datos* 😊👇️}
 
               {{METODO_DE_PAGO_1}}
 
@@ -5877,7 +5877,7 @@ instagram:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              {⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo a través de estos datos con Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo por Nequi o Daviplata a través de los siguientes datos* 😊👇️}
 
               {{METODO_DE_PAGO_1}}
 
@@ -5899,12 +5899,14 @@ instagram:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              {⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo a través de estos datos con Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo por Nequi o Daviplata a través de los siguientes datos* 😊👇️}
 
               {{METODO_DE_PAGO_1}}
 
               También podemos ayudarte a través de *Llave Bre-B* 🔑
           delay_after_sec: 6
+          spintax_ia:
+            - "{⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo a través de estos datos con Nequi o Daviplata* 😊👇️|⚡💳 *Puedes adquirirlo por Nequi o Daviplata a través de los siguientes datos* 😊👇️}"
       cobro:
         modo: producto
         producto_id: "@tienda:basico"
