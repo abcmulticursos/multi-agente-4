@@ -350,10 +350,10 @@ whatsapp:
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
       x: 726
-      y: -1276
+      y: -1265
       seguimientos:
         - id: s-mwjfckc0
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwjfckc0
               peso: 1
@@ -378,10 +378,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwjfe71j-uax
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwjfe71j-9r8
               peso: 1
@@ -423,8 +421,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwjv96j2-unv4
       tipo: reparto
       x: -594
@@ -485,10 +481,10 @@ whatsapp:
     - id: f-mwk0tgv5-40vw2
       tipo: seguimientos
       x: 748
-      y: -319
+      y: -308
       seguimientos:
         - id: s-mwk0tgv5-y4xio
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk0tgv5-u6bty
               peso: 1
@@ -513,10 +509,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk0tgv5-a7uks
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk0tgv5-lhask
               peso: 1
@@ -558,15 +552,13 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1cif2-lk9nb
       tipo: seguimientos
       x: 737
-      y: 682
+      y: 693
       seguimientos:
         - id: s-mwk1cif3-jbvl7
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1cif3-sftlb
               peso: 1
@@ -591,10 +583,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1cif3-u94o4
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1cif3-kjmzg
               peso: 1
@@ -636,8 +626,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1cz12-p48ae
       tipo: cobro
       x: 1551
@@ -685,10 +673,10 @@ whatsapp:
     - id: f-mwk1dk38-b5sd9
       tipo: seguimientos
       x: 792
-      y: 1771
+      y: 1782
       seguimientos:
         - id: s-mwk1dk38-wkn2y
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1dk38-uog4w
               peso: 1
@@ -713,10 +701,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1dk38-d3zg6
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1dk38-lotqk
               peso: 1
@@ -758,8 +744,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1gbsn-hfaz8
       tipo: mensaje
       x: 473
@@ -1602,10 +1586,10 @@ whatsapp:
     - id: f-mwk1gbso-q0hw8
       tipo: seguimientos
       x: 737
-      y: 3333
+      y: 3344
       seguimientos:
         - id: s-mwk1gbso-hod36
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1gbso-ekagh
               peso: 1
@@ -1630,10 +1614,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1gbso-qdoyi
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1gbso-lid4r
               peso: 1
@@ -1675,8 +1657,6 @@ whatsapp:
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1gbso-mtd0w
       tipo: cobro
       x: 1507
@@ -1734,10 +1714,10 @@ whatsapp:
     - id: f-mwk1gbso-6sp92
       tipo: seguimientos
       x: 759
-      y: 4290
+      y: 4301
       seguimientos:
         - id: s-mwk1gbso-kay25
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1gbso-ojra0
               peso: 1
@@ -1762,10 +1742,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1gbso-5x8j3
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1gbso-zftut
               peso: 1
@@ -1807,15 +1785,13 @@ whatsapp:
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1gbso-5kpmz
       tipo: seguimientos
       x: 748
       y: 5291
       seguimientos:
         - id: s-mwk1gbso-xmyrq
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1gbso-al213
               peso: 1
@@ -1840,10 +1816,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1gbso-56tek
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1gbso-w6zc8
               peso: 1
@@ -1885,8 +1859,6 @@ whatsapp:
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwk1gbso-k7yaj
       tipo: cobro
       x: 1562
@@ -1947,7 +1919,7 @@ whatsapp:
       y: 6380
       seguimientos:
         - id: s-mwk1gbso-9c1hp
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwk1gbso-xjgxf
               peso: 1
@@ -1972,10 +1944,8 @@ whatsapp:
 
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwk1gbso-f5qoh
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwk1gbso-r4jtp
               peso: 1
@@ -2017,8 +1987,6 @@ whatsapp:
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: inicio-AR-mwk1hzkk
       tipo: inicio
       x: -825
