@@ -33644,7 +33644,10 @@ function GestorDeVersiones({
     >
       <div data-ventana-del-tablero className="bn-cuerpo grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         {/* (02/11/2026: el separador que él marcó con una flecha, entre la lista y el editor: `bn-lista-gestor`.) */}
-        <div className="bn-lista-gestor flex flex-col gap-1.5">
+        <div className="bn-lista-gestor">
+        {/* LA LISTA BAJA CON LA VENTANA (17/11/2026). Él: «que esto baje al scrollear y suba al volver». El separador sigue
+            de alto completo; lo que se pega arriba es la lista. */}
+        <div className="flex flex-col gap-1.5 md:sticky md:top-0">
           {esSeg ? (
             <>
               {segs.map((x, i) => (
@@ -33701,6 +33704,7 @@ function GestorDeVersiones({
               ))}
             </>
           )}
+        </div>
         </div>
         <div className="flex min-w-0 flex-col gap-3">
           {enGrupo && (
@@ -35571,25 +35575,29 @@ function AjustesDeLaFicha({
                     Quien vino de uno de estos anuncios va por esta ruta; el sorteo por peso ya no la usa para los demás. */}
                 {/* (05/11/2026, él: «yo quiero poder escribir AD1, AD2… y que aparezca para seleccionar», como en los menús.)
                     El mismo selector de etiquetas de anuncio de las intros y seguimientos. */}
-                <div className="text-[11px] font-semibold text-tinta-suave">📣 Anuncios de esta ruta</div>
+                <div className="text-[11px] font-semibold text-tinta-suave">📣 Anuncios de esta ruta{o.peso > 0 ? "" : " · 💤 dormidos mientras está apagada"}</div>
                 {registroDeAnuncios && onRegistroDeAnuncios ? (
+                  // DORMIDOS, CON SU COLOR (17/11/2026). Él: «cada ad viene de un color… atenuados con color, no grises».
+                  <div className={o.peso > 0 ? undefined : "opacity-50"}>
                   <AdTagPicker
                     registry={registroDeAnuncios}
                     selectedKeys={o.anuncios ?? []}
                     onChange={(lista) => setB({ ...b, reparto: (b.reparto ?? []).map((x) => (x.id === o.id ? { ...x, anuncios: lista.length ? lista : undefined } : x)) })}
                     onRegistryChange={onRegistroDeAnuncios}
                   />
+                  </div>
                 ) : null}
                 </div>
               ))}
               <button
                 type="button"
-                onClick={() => setB({ ...b, reparto: [...(b.reparto ?? []), { id: `r${Date.now().toString(36)}`, peso: 1 }] })}
+                // NACE APAGADA (17/11/2026). Él: «cuando yo agregue caminos nuevos, que aparezcan apagados». Al prenderla, peso 1.
+                onClick={() => setB({ ...b, reparto: [...(b.reparto ?? []), { id: `r${Date.now().toString(36)}`, peso: 0, peso_antes: 1 }] })}
                 className="rounded-md border border-borde bg-relleno px-2 py-1 text-xs font-semibold"
               >
                 + Ruta
               </button>
-              <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Si una ruta tiene anuncios, quien vino de ellos va por ella (aunque esté en OFF) y el sorteo ya no la usa para los demás.</span>
+              <span className={ayuda}>Cada cliente sale por una ruta al azar, según su peso. Si una ruta tiene anuncios, quien vino de ellos va por ella. Una ruta en OFF no recibe a nadie, ni por sus anuncios (quedan dormidos). Las rutas nuevas nacen en OFF.</span>
             </div>
           ))}
           {ficha.tipo === "condicion" && comun(["condicion"], (

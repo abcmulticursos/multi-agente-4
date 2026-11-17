@@ -867,7 +867,7 @@ async function irA(
           console.log(`[tablero] convo ${convoId}: vuelve a «${f.titulo || f.id}», que ya vio → no se repite`);
           const colgadosOtraVez = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
           if (colgadosOtraVez) colgarSeguimientos(convo, colgadosOtraVez, t, f);
-          else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+          else if (cableDeLaSalida(t, f.id, "sin_respuesta") || f.sin_respuesta_min)
             programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
           const nombres = [...ya.botones.map((b) => b.label), ...ya.cuadritos.map((d) => d.title), ...eligeYa].filter(Boolean).join(", ");
           await contestarConIA(
@@ -918,7 +918,7 @@ async function irA(
       if (pideElNombre(f)) {
         const colgadosDelNombre = fichaDeSeguimientos(t, f.id, "sin_respuesta");
         if (colgadosDelNombre) colgarSeguimientos(convo, colgadosDelNombre, t, f);
-        else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+        else if (cableDeLaSalida(t, f.id, "sin_respuesta") || f.sin_respuesta_min)
           programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
         console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» pregunta su nombre y espera`);
         return;
@@ -928,7 +928,7 @@ async function irA(
         // SU TIEMPO TAMBIÉN SIN BOTONES (17/11/2026). Él, fichas 20-22 de FLORES CO: «⏰ Si no responde en 5 minutos» puesto
         // y la presentación salía a los 5 segundos. «El tiempo que pongas ahí se respeta, con botones o sin botones.» Sin
         // opciones, ese tiempo es una pausa antes de seguir por «→»; si escribe en medio, sigue ya (paso 7-bis del turno).
-        if (f.sin_respuesta_min && cableDeLaSalida(t, f.id, "siguiente")) {
+        if (f.sin_respuesta_min) {
           programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "siguiente", vuelta }, ahora() + f.sin_respuesta_min * 60);
           console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» sigue por «→» en ${f.sin_respuesta_min} min`);
           return;
@@ -943,7 +943,9 @@ async function irA(
       // «SI NO RESPONDE» hacia otra ficha (el Regalo tras un upsell): a sus minutos, o al silencio del
       // regalo si no tiene (26/10/2026: la salida siempre se ve, también sin minutos). Con seguimientos
       // colgados, mandan ellos.
-      else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
+      // CON SU TIEMPO PUESTO, LA ALARMA SE PONE AUNQUE AÚN NO HAYA CABLE (17/11/2026, conv 762-764 de FLORES): conectó «Si no
+      // responde» con las pruebas ya empezadas y nunca salió nada. Al sonar se mira el cable de ese momento; sin cable, nada.
+      else if (cableDeLaSalida(t, f.id, "sin_respuesta") || f.sin_respuesta_min)
         programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
       return;
     }
@@ -1208,7 +1210,12 @@ async function irA(
         if (!ad || ad.enabled === false) return [limpio(a)];
         return [limpio(a), ...(ad.ids ?? []).flatMap((x) => String(x).split(/[\s,;]+/)).map((x) => x.trim()).filter(Boolean)];
       };
-      const porSuAnuncio = suAnuncio ? conectadas.find((r) => (r.anuncios ?? []).some((a) => idsDe(a).includes(suAnuncio))) : undefined;
+      // APAGADO ES APAGADO (17/11/2026). Él apagó los caminos 1-4 de FLORES y encendió 5-8 con los mismos anuncios: el anuncio
+      // seguía yendo al 2 (apagado, primero en la lista). «Cuando un camino esté apagado que se desactive automáticamente.»
+      // Solo los caminos encendidos reciben por su anuncio. (El simulador sí puede elegir uno apagado: ver arriba.)
+      const porSuAnuncio = suAnuncio
+        ? conectadas.find((r) => r.peso > 0 && (r.anuncios ?? []).some((a) => idsDe(a).includes(suAnuncio)))
+        : undefined;
       if (porSuAnuncio) {
         console.log(`[tablero] convo ${convoId}: vino del anuncio ${suAnuncio} → ruta «${porSuAnuncio.nombre || porSuAnuncio.id}» del Ruteador`);
         await seguir(`rep:${porSuAnuncio.id}`);
@@ -4832,6 +4839,18 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
         respondio(convo, t);
         if (await mandarDatosDelMetodo(convo, metodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
       }
+      // «¿A DÓNDE PAGO?» CON EL MÉTODO YA ELEGIDO (17/11/2026, conv 758 de FLORES): eligió Bre-B, el seguimiento bajó el precio
+      // a 6.600 y a «a donde pago» la IA escribió de memoria la llave y el titular. Los datos los manda el bot: sus burbujas
+      // de ese método, con el precio vigente del cobro. Solo con el cobro sin pagar y un mensaje corto que pide los datos.
+      const elMetodo = (getConversationById(convo.id) ?? convo).selected_payment_method?.trim();
+      const pideDondePagar =
+        /\b(cuenta|datos|cbu|alias|llave|donde (te |le |les )?(pago|deposito|transfiero|yapeo|envio)|como (te |le )?(pago|deposito|transfiero))\b/.test(normal) &&
+        normal.split(" ").length <= 8;
+      if (!metodo && elMetodo && estado.cobro_pagado <= 0 && pideDondePagar) {
+        respondio(convo, t);
+        console.log(`[tablero] convo ${convo.id}: «${contenido.slice(0, 30)}» pide los datos → reenvío los de «${elMetodo}»`);
+        if (await mandarDatosDelMetodo(convo, elMetodo, elegidoId ? precios[elegidoId] : undefined, producto(config, elegidoId)?.name)) return true;
+      }
       // Solo entre los que ya se le presentaron: el que sigue oculto no se elige por aquí.
       const vistos = new Set(presentadosDe(estado));
       const opciones = Object.keys(precios).filter((id) => vistos.has(id));
@@ -5270,7 +5289,7 @@ function respondio(convo: ConversationRow, t: Tablero): void {
   // «SI NO RESPONDE» vuelve a contar desde ahora (en Mensaje y Order bump, también sin minutos: el
   // silencio del regalo). Con seguimientos colgados de esta ficha no hay ese reloj: mandan ellos.
   const conColgados = !!f && !!(fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta"));
-  if (e && f && (f.tipo === "mensaje" || f.tipo === "intro_ob") && !conColgados && cableDeLaSalida(t, f.id, "sin_respuesta"))
+  if (e && f && (f.tipo === "mensaje" || f.tipo === "intro_ob") && !conColgados && (cableDeLaSalida(t, f.id, "sin_respuesta") || f.sin_respuesta_min))
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + minutosSinRespuesta(f) * 60);
   else if (e && f?.sin_respuesta_min && f.tipo === "correo")
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
@@ -5281,7 +5300,8 @@ function respondio(convo: ConversationRow, t: Tablero): void {
 
 /** ¿Ficha sin botones, cuadritos ni elección, con su tiempo puesto y su «→» conectado? Entonces su tiempo es una pausa. */
 function esPausa(f: FichaDelTablero, t: Tablero): boolean {
-  if ((f.tipo !== "mensaje" && f.tipo !== "intro_ob") || !f.sin_respuesta_min || !cableDeLaSalida(t, f.id, "siguiente")) return false;
+  // (Sin exigir el cable: la alarma se pone igual y, al sonar, mira el cable de ese momento.)
+  if ((f.tipo !== "mensaje" && f.tipo !== "intro_ob") || !f.sin_respuesta_min) return false;
   const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
   return botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && !cobraEnLaFicha(f, t) && !pideElNombre(f);
 }

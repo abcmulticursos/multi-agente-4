@@ -778,8 +778,9 @@ export function salidasDeLaFicha(
       const total = opciones.filter((o) => !(o.anuncios ?? []).length).reduce((s, o) => s + o.peso, 0) || 1;
       return opciones.map((o, i) => ({
         clave: `rep:${o.id}`,
+        // (17/11/2026) Apagada se dice aunque tenga anuncios: apagada ya no recibe ni por su anuncio.
         etiqueta: (o.anuncios ?? []).length
-          ? `${o.nombre || `Ruta ${i + 1}`} · 📣 ${(o.anuncios ?? []).length} anuncio${(o.anuncios ?? []).length === 1 ? "" : "s"}`
+          ? `${o.nombre || `Ruta ${i + 1}`} · 📣 ${(o.anuncios ?? []).length} anuncio${(o.anuncios ?? []).length === 1 ? "" : "s"}${o.peso > 0 ? "" : " · apagada"}`
           : o.peso > 0 ? `${o.nombre || `Ruta ${i + 1}`} · ${Math.round((o.peso / total) * 100)}%` : `${o.nombre || `Ruta ${i + 1}`} · apagada`,
       }));
     }

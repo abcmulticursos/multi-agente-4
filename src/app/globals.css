@@ -887,7 +887,9 @@ input,
   background: var(--bn-fondo);
   border-color: transparent;
   border-radius: 18px;
-  overflow: hidden;
+  /* CLIP, NO HIDDEN (17/11/2026): recorta igual las esquinas, pero no rompe lo «sticky» de adentro (la lista de
+     Seguimientos que baja al scrollear). `hidden` lo volvía la caja del scroll y la lista se iba con todo. */
+  overflow: clip;
 }
 .burbujas-nuevo .bn-cabecera {
   background: var(--bn-cabecera);
