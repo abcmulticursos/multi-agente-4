@@ -3951,28 +3951,10 @@ whatsapp:
                   enabled: false
       presenta:
         - "@tienda:basico"
-    - id: f-mwl9m8ad-99rsb
-      tipo: cobro
-      x: 4675
-      y: 13079
-      steps:
-        - type: text
-          body_variants:
-            - |-
-              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        producto_id: "@tienda:basico"
-        metodos: true
     - id: f-mwl9m8ad-2rzla
       tipo: regalo
-      x: 3960
-      y: 13343
+      x: 4081
+      y: 13288
     - id: f-mwl9m8ad-770lh
       tipo: mensaje
       x: 363
@@ -4798,8 +4780,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwl9m8ad-vcb0w
       tipo: regalo
-      x: 3850
-      y: 15862
+      x: 4004
+      y: 15807
     - id: f-mwl9m8ad-uvozo
       tipo: mensaje
       x: 330
@@ -5246,8 +5228,8 @@ whatsapp:
         metodos: true
     - id: f-mwlagx7u-0mtsw
       tipo: cobro
-      x: 3003
-      y: 13343
+      x: 3014
+      y: 13255
       steps:
         - type: text
           body_variants:
@@ -5269,8 +5251,8 @@ whatsapp:
         metodos: true
     - id: f-mwlah4cj-rma9i
       tipo: cobro
-      x: 2904
-      y: 14608
+      x: 2893
+      y: 14509
       steps:
         - type: text
           body_variants:
@@ -5854,11 +5836,6 @@ whatsapp:
       de: f-mwl9m8ad-6nb0i
       salida: siguiente
       a: f-mwl9m8ad-std7r
-    - id: c-mwl9m8ae-ihidf
-      de: f-mwl9m8ad-99rsb
-      salida: sin_pago
-      a: f-mwl9m8ad-std7r
-      a_espejo: esp-mwl9m8ae-4n5aj
     - id: c-mwl9m8ae-aen2w
       de: f-mwl9m8ad-770lh
       salida: sin_respuesta
@@ -6008,6 +5985,14 @@ whatsapp:
       de: f-mwlahco0-q6m5i
       salida: pagado
       a: f-mwl9m8ad-vcb0w
+    - id: c-mwlaliv4-u53
+      de: f-mwl9b586-v72s5
+      salida: btn:f1a37e13-8baa-4e5c-b8c0-1b8c8d4e9a9b
+      a: f-mwl9b586-u2mbf
+    - id: c-mwlals0g-fvk
+      de: f-mwl9b586-d6uew
+      salida: btn:f1a37e13-8baa-4e5c-b8c0-1b8c8d4e9a9b
+      a: f-mwl9b586-9pyxz
   cajas:
     - id: k-mwk1ex30
       x: 781
@@ -6172,10 +6157,6 @@ whatsapp:
       ficha: f-mwl9m8ad-kbn4m
       x: 3234
       y: 11660
-    - id: esp-mwl9m8ae-4n5aj
-      ficha: f-mwl9m8ad-std7r
-      x: 4939
-      y: 12705
     - id: esp-mwlagx7u-f44i5
       ficha: f-mwl9m8ad-kbn4m
       x: 3278
