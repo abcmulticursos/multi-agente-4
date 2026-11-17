@@ -7708,24 +7708,28 @@ instagram:
       ancho: 2354
       alto: 935
       titulo: Nueva caja
+      color: "#2563eb"
     - id: k-mwk1f0vo
       x: 385
       y: -440
       ancho: 2365
       alto: 847
       titulo: Nueva caja
+      color: "#2563eb"
     - id: k-mwk1f2zg
       x: 385
       y: 473
       ancho: 2464
       alto: 946
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwk1fck5-0
       x: 385
       y: 1551
       ancho: 2464
       alto: 946
       titulo: Nueva caja
+      color: "#2563eb"
     - id: manta-inicio
       x: 209
       y: -1584
