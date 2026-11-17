@@ -35311,7 +35311,7 @@ function AjustesDeLaFicha({
                 <span className={ayuda}>
                   {ficha.tipo === "correo"
                     ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
-                    : "Con botones o cuadritos: si nadie contesta en ese tiempo, pasa a la ficha conectada en «⏳ Si no responde» (vacío = el tiempo del regalo de tus Ajustes). Sin botones: espera ese tiempo y sigue por «→» (vacío = sigue enseguida)."}
+                    : "Si no contesta en ese tiempo, sigue: con Seguimientos conectados, empiezan a contar después de este tiempo (sus botones y cuadritos siguen valiendo); con «⏳ Si no responde» conectado, pasa a esa ficha; sin botones, sigue por «→». Vacío = enseguida (o el tiempo del regalo de tus Ajustes en «Si no responde»)."}
                 </span>
               </div>
             )}

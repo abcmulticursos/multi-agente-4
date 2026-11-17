@@ -715,7 +715,7 @@ function siguienteSinEnviar(convoId: number, segs: NonNullable<FichaDelTablero["
  * quedan marcados por su texto y no se repiten, aunque vuelva a caer en éstos o en un duplicado. Si
  * ya recibió todos, no se cuelga nada. Al comprar se vacía la marca (el upsell es otra venta).
  */
-function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero, t?: Tablero): void {
+function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero, t?: Tablero, desdeLaFicha?: FichaDelTablero): void {
   const segs = seg.seguimientos ?? [];
   if (segs.length === 0) return;
   const idx = siguienteSinEnviar(convo.id, segs, 0);
@@ -734,11 +734,14 @@ function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero, t?: Ta
   // esperan 5 min y luego sale la presentación, que cuelga los seguimientos; contando desde el mensaje del cliente, el
   // seguimiento 1 (3 min en sus pruebas) ya estaba vencido y salía pegado a la presentación. «Que el primer seguimiento no
   // pise esa pausa». Se cuelgan al terminar de salir la ficha, así que «ahora» es ese momento. Si escribe, vuelve a contar.
-  const desde = Math.max(getLastUserMessageTime(convo.id) ?? 0, ahora());
+  // Y PRIMERO EL TIEMPO DE LA FICHA (17/11/2026). Él, ficha 6 de FLORES (3 cuadritos, «→» a Seguimientos, 5 min): «si no
+  // contesta en el tiempo configurado en la ficha, tiene que continuar». Antes, con Seguimientos colgados, ese tiempo se
+  // ignoraba (25/10: un solo reloj). Ahora van uno detrás del otro: el tiempo de la ficha y después los Seguimientos.
+  const desde = Math.max(getLastUserMessageTime(convo.id) ?? 0, ahora()) + (desdeLaFicha?.sin_respuesta_min ?? 0) * 60;
   contarSeguimientosDesde(convo.id, desde);
   const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[idx], idx, desde);
   programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx, token }, cuando, sinSilencio);
-  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (sigue con el ${idx + 1}, a ${segs[idx].minutos} min desde ahora)`);
+  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (sigue con el ${idx + 1}, a ${segs[idx].minutos} min${desdeLaFicha?.sin_respuesta_min ? ` tras los ${desdeLaFicha.sin_respuesta_min} min de la ficha` : " desde ahora"})`);
 }
 
 /**
@@ -863,7 +866,7 @@ async function irA(
         if (ya.botones.length + ya.cuadritos.length + eligeYa.length > 0) {
           console.log(`[tablero] convo ${convoId}: vuelve a «${f.titulo || f.id}», que ya vio → no se repite`);
           const colgadosOtraVez = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
-          if (colgadosOtraVez) colgarSeguimientos(convo, colgadosOtraVez, t);
+          if (colgadosOtraVez) colgarSeguimientos(convo, colgadosOtraVez, t, f);
           else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
             programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
           const nombres = [...ya.botones.map((b) => b.label), ...ya.cuadritos.map((d) => d.title), ...eligeYa].filter(Boolean).join(", ");
@@ -914,7 +917,7 @@ async function irA(
       // por «⏳ Si no responde» (o sus Seguimientos colgados ahí). Su «→» es «al dar su nombre».
       if (pideElNombre(f)) {
         const colgadosDelNombre = fichaDeSeguimientos(t, f.id, "sin_respuesta");
-        if (colgadosDelNombre) colgarSeguimientos(convo, colgadosDelNombre, t);
+        if (colgadosDelNombre) colgarSeguimientos(convo, colgadosDelNombre, t, f);
         else if (cableDeLaSalida(t, f.id, "sin_respuesta"))
           programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta }, ahora() + minutosSinRespuesta(f) * 60);
         console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» pregunta su nombre y espera`);
@@ -936,7 +939,7 @@ async function irA(
       // CON OPCIONES: espera la respuesta, con sus Seguimientos colgados si su «→» (o su «no respondió»)
       // va a ellos. Un «no respondió» hacia otra ficha sigue funcionando como siempre.
       const colgados = fichaDeSeguimientos(t, f.id, "siguiente") ?? fichaDeSeguimientos(t, f.id, "sin_respuesta");
-      if (colgados) colgarSeguimientos(convo, colgados, t);
+      if (colgados) colgarSeguimientos(convo, colgados, t, f);
       // «SI NO RESPONDE» hacia otra ficha (el Regalo tras un upsell): a sus minutos, o al silencio del
       // regalo si no tiene (26/10/2026: la salida siempre se ve, también sin minutos). Con seguimientos
       // colgados, mandan ellos.
@@ -5264,7 +5267,7 @@ function respondio(convo: ConversationRow, t: Tablero): void {
     programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "sin_respuesta", vuelta: e.vuelta }, ahora() + f.sin_respuesta_min * 60);
   // SUS SEGUIMIENTOS (en la caja o colgados de esta ficha): el 1 vuelve a contar desde ahora.
   const seg = e?.seg_ficha ? t.fichas.find((x) => x.id === e.seg_ficha) : undefined;
-  if (seg) reprogramarSeguimiento(convo, seg);
+  if (seg) reprogramarSeguimiento(convo, seg, f && f.id !== seg.id ? f : undefined);
 }
 
 /** ¿Ficha sin botones, cuadritos ni elección, con su tiempo puesto y su «→» conectado? Entonces su tiempo es una pausa. */
@@ -5284,7 +5287,7 @@ function rearmarEspera(convo: ConversationRow, f: FichaDelTablero): void {
 }
 
 /** El cliente escribió estando en la caja «Seguimientos»: el que tocaba vuelve a contar desde ahora. */
-function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero): void {
+function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero, colgadosDe?: FichaDelTablero): void {
   const e = estadoEnElTablero(convo.id);
   const segs = ficha.seguimientos ?? [];
   if (!e || e.seg_ficha !== ficha.id || e.seg_idx >= segs.length) return;
@@ -5298,8 +5301,10 @@ function reprogramarSeguimiento(convo: ConversationRow, ficha: FichaDelTablero):
   const token = ponerSeguimiento(convo.id, ficha.id, e.seg_idx);
   // EL RELOJ VUELVE A CERO, como `renovarEsperaDeLosSeguimientos` del motor de siempre: los que
   // faltan cuentan sus minutos desde ahora.
-  contarSeguimientosDesde(convo.id, ahora());
-  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[e.seg_idx], e.seg_idx, ahora());
+  // (17/11/2026) Antes del 1, otra vez el tiempo de la ficha de la que cuelgan (ver `colgarSeguimientos`).
+  const desde = ahora() + (e.seg_idx === 0 ? (colgadosDe?.sin_respuesta_min ?? 0) * 60 : 0);
+  contarSeguimientosDesde(convo.id, desde);
+  const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[e.seg_idx], e.seg_idx, desde);
   programar(convo, ACCION_SEGUIMIENTO, { ficha: ficha.id, idx: e.seg_idx, token }, cuando, sinSilencio);
 }
 

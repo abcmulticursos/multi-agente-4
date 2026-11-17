@@ -823,7 +823,8 @@ export function salidasDeLaFicha(
       // «💰 SI PAGA» TAMBIÉN CON OPCIONES (02/11/2026): su intro con cuadritos o la del order bump.
       salidas.push(...salidasDePago(f, t, nombres));
       // 27/10/2026: «"si no elige seguimientos" confunde»: se llama como lo que es, sus Seguimientos.
-      salidas.push({ clave: "siguiente", etiqueta: "⏳ Seguimientos" });
+      // (17/11/2026) Con tiempo en la ficha, los Seguimientos empiezan a contar después de ese tiempo.
+      salidas.push({ clave: "siguiente", etiqueta: f.sin_respuesta_min ? `⏳ Seguimientos (tras ${minutosLegibles(f.sin_respuesta_min)})` : "⏳ Seguimientos" });
       salidas.push({
         clave: "sin_respuesta",
         etiqueta: f.sin_respuesta_min ? `⏳ Si no responde en ${minutosLegibles(f.sin_respuesta_min)}` : "⏳ Si no responde",
