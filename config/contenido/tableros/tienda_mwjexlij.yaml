@@ -1506,7 +1506,6 @@ whatsapp:
       x: -825
       y: 4631
       pais: AR
-      sin_venta: true
     - id: f-mwk1sr4j-wdaz
       tipo: reparto
       x: -264
