@@ -30108,7 +30108,9 @@ function VistaPizarra({
         </button>
       </div>
       {salidaPendiente && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4" onClick={() => !guardandoAlSalir && setSalidaPendiente(null)}>
+        // `data-ventana-del-tablero` (16/11/2026): con este aviso abierto el tablero de detrás NO atiende el teclado. Él pegó
+        // con Ctrl+V creyendo estar en FLORES DE PAPEL y la ficha cayó en GRAFISMO, que seguía detrás del aviso.
+        <div data-ventana-del-tablero data-aviso-de-salida className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4" onClick={() => !guardandoAlSalir && setSalidaPendiente(null)}>
           <div className="w-full max-w-md rounded-xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-base font-bold">Tienes cambios sin guardar en {salidaPendiente.nombre}</div>
             <div className="mt-2 text-sm text-tinta-suave">
@@ -37043,6 +37045,26 @@ function PortadaDeLaTienda({
  * `true` aquí, y quitar ese filtro del bot y de la ruta de guardado.
  */
 const MOSTRAR_LO_GENERAL: boolean = false;
+
+/**
+ * CON EL AVISO «TIENES CAMBIOS SIN GUARDAR» ABIERTO, NINGUNA TECLA LLEGA AL EDITOR (16/11/2026). Él copió una ficha,
+ * eligió FLORES DE PAPEL, salió el aviso y su Ctrl+V cayó en GRAFISMO, que seguía detrás. «Bloquéalo cuando esté ese
+ * aviso». Se registra al cargar el archivo —antes que cualquier otro oyente del teclado— y frena todo lo que no vaya a
+ * los botones del propio aviso (Escape pasa, como siempre). El ratón ya lo frena el fondo del aviso.
+ */
+if (typeof window !== "undefined") {
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      const aviso = document.querySelector("[data-aviso-de-salida]");
+      if (!aviso || e.key === "Escape") return;
+      if (e.target instanceof Node && aviso.contains(e.target)) return;
+      e.stopImmediatePropagation();
+      if (e.ctrlKey || e.metaKey) e.preventDefault();
+    },
+    true
+  );
+}
 
 function VentanaDelCobro({
   cfg,
