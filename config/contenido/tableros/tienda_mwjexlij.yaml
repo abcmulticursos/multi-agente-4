@@ -1623,6 +1623,24 @@ whatsapp:
 
                       ⚠️ *{Si lo adquirís en los próximos 10 minutos|Si completás tu compra en los próximos 10 minutos|Si realizás tu pago en los próximos 10 minutos|Si comprás dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      __________
+
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+
+                      🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                  delay_after_sec: 6
+                  buttons:
+                    - id: 56c4e3e8-aad4-4038-9818-979ca4a784b9
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
         - id: s-mwk1gbso-qdoyi
           minutos: 480
           variantes:
