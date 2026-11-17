@@ -8,8 +8,8 @@ whatsapp:
       pais: CO
     - id: f-mwjey94x-qrit
       tipo: mensaje
-      x: 352
-      y: -308
+      x: 429
+      y: -781
       steps:
         - type: text
           body_variants:
@@ -102,8 +102,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwjf4dh1-ml9o3
       tipo: mensaje
-      x: 352
-      y: 682
+      x: 407
+      y: 187
       steps:
         - type: text
           body_variants:
@@ -166,10 +166,36 @@ whatsapp:
 
               {{LISTA_METODOS_POR_PAIS}}
           delay_after_sec: 6
+          decisions:
+            - id: 944c1582-a206-4090-bebe-741db3bd618c
+              title: DATOS DE PAGO
+              keywords:
+                - Nequi
+                - daviplata
+                - bre-b
+                - neki
+                - nnequi
+                - nqui
+                - davi
+                - nek
+                - neq
+                - bre
+                - con bre
+                - con nequi
+                - con davi
+                - con daviplata
+                - con bre
+                - tengo bre
+                - tengo nequi
+                - tengo daviplata
+                - tengo davi
+                - tengo neki
+              color: esmeralda
+              steps: []
     - id: f-mwjf7489-nghqk
       tipo: mensaje
-      x: 352
-      y: 1078
+      x: 396
+      y: 1804
       steps:
         - type: text
           body_variants:
@@ -250,8 +276,8 @@ whatsapp:
               steps: []
     - id: f-mwjf9vqj-pba9e
       tipo: mensaje
-      x: 352
-      y: 1518
+      x: 396
+      y: 2244
       steps:
         - type: text
           body_variants:
@@ -323,8 +349,8 @@ whatsapp:
               steps: []
     - id: f-mwjfckbz-qeu2
       tipo: seguimientos
-      x: 627
-      y: -671
+      x: 693
+      y: -1144
       seguimientos:
         - id: s-mwjfckc0
           minutos: 3
@@ -414,8 +440,8 @@ whatsapp:
           peso: 1
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
-      x: 1397
-      y: -341
+      x: 1463
+      y: -814
       steps:
         - type: text
           body_variants:
@@ -432,8 +458,108 @@ whatsapp:
         metodos: true
     - id: f-mwjw2iuh-6euh
       tipo: regalo
-      x: 2255
-      y: -319
+      x: 2321
+      y: -792
+    - id: f-mwk0rxzk-ngxkz
+      tipo: cobro
+      x: 1529
+      y: 198
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+
+              {{METODO_DE_PAGO_1}}
+
+              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwk0rxzk-o6vf4
+      tipo: regalo
+      x: 2387
+      y: 220
+    - id: f-mwk0tgv5-40vw2
+      tipo: seguimientos
+      x: 682
+      y: -154
+      seguimientos:
+        - id: s-mwk0tgv5-y4xio
+          minutos: 3
+          variantes:
+            - id: v-mwk0tgv5-u6bty
+              peso: 1
+              steps:
+                - type: video
+                  drive_url: https://drive.google.com/file/d/1t56KguKotujaQ2BuBLQ1aT_F7mbupsFw/view?usp=sharing
+                  caption_variants:
+                    - |-
+                      *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
+
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+
+                      ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+          ignora_silencio: true
+          ignora_tardio: true
+        - id: s-mwk0tgv5-a7uks
+          minutos: 5
+          variantes:
+            - id: v-mwk0tgv5-lhask
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Dn_SbjccMS_eRQvc2kcNUq14s04iuAEr/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      🔥 *{!Mamita, última oferta flash!|¡Mamita, última oferta flash!|¡Mamita, tenemos una última oferta flash!}* 📣
+
+                      *{Sólo {{PRECIO_COMPLETO_MAYUSCULAS}}|Por sólo {{PRECIO_COMPLETO_MAYUSCULAS}}|Llévatelo por sólo {{PRECIO_COMPLETO_MAYUSCULAS}}}* ❗ {por tiempo limitado!!|por tiempo limitado solamente|por tiempo limitado‼️}📉 😱
+                      __________
+
+                      🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
+
+                      *EN RESUMEN RECIBIRAS:*
+
+                      Nuestro *{{PRODUCTO}}* 📚 incluye:
+
+                      - 🌸 *50 modelos de Flores de Papel*,
+                      - 🎥 Más de 30 videos instructivos para que puedas hacerlos como una profesional. 😍
+                      - 🌹 *Molde para hacer Rosas*
+                      - 🎁 *{Moldes de Mini Flores para pasteles|Moldes para Mini Flores de pasteles|Plantillas de Mini Flores para pasteles}* 🎂.
+                      - 🎁 *{Hojas y Pistilos|Moldes de Hojas y Pistilos|Plantillas de Hojas y Pistilos}* 🍃
+                      - 🦋 Mariposas de Papel
+
+                      💛 *7 VIDEOS TUTORIALES PARA QUE APRENDAS A HACER FLORES AMARILLAS* 🫶
+
+                      *{Regalos adicionales al llevarte el Super Kit!!|Obsequios adicionales al llevarte el Super Kit!!|Además, regalos adicionales al llevarte el Super Kit!!}* 🤗
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_COMPLETO_MAYUSCULAS}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      __________
+
+                      {{LISTA_METODOS_POR_PAIS}}
+
+                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                  delay_after_sec: 6
+          activa_oferta: true
+          ignora_silencio: true
+          ignora_tardio: true
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -477,8 +603,34 @@ whatsapp:
       de: f-mwjey94x-qrit
       salida: pagado
       a: f-mwjw2iuh-6euh
+    - id: c-mwk0rxzk-imbif
+      de: f-mwk0rxzk-ngxkz
+      salida: pagado
+      a: f-mwk0rxzk-o6vf4
+      vista: cable
+    - id: c-mwk0s32w-4rv
+      de: f-mwjf4dh1-ml9o3
+      salida: dec:944c1582-a206-4090-bebe-741db3bd618c
+      a: f-mwk0rxzk-ngxkz
+    - id: c-mwk0s8jy-dwf
+      de: f-mwjf4dh1-ml9o3
+      salida: pagado
+      a: f-mwk0rxzk-o6vf4
+    - id: c-mwk0tkl4-0zj
+      de: f-mwjf4dh1-ml9o3
+      salida: siguiente
+      a: f-mwk0tgv5-40vw2
+    - id: c-mwk0tpa7-w3x
+      de: f-mwk0rxzk-ngxkz
+      salida: sin_pago
+      a: f-mwk0tgv5-40vw2
+      a_espejo: e-mwk0tmnk-992l
   espejos:
     - id: e-mwjw1bmq-15lw
       ficha: f-mwjfckbz-qeu2
-      x: 1672
-      y: -737
+      x: 1738
+      y: -1210
+    - id: e-mwk0tmnk-992l
+      ficha: f-mwk0tgv5-40vw2
+      x: 1771
+      y: -165
