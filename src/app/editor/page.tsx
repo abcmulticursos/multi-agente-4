@@ -35310,13 +35310,18 @@ function AjustesDeLaFicha({
           {(ficha.tipo === "mensaje" || ficha.tipo === "intro_ob" || ficha.tipo === "correo") &&
             comun(
               ["sin_respuesta_min"],
-              <div className={etiqueta}>
-                ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
-                <span className={ayuda}>
-                  {ficha.tipo === "correo"
+              // CON COLOR Y LA EXPLICACIÓN AL PASAR EL RATÓN (17/11/2026). Él: «quiero que tenga un color… ese texto es tan
+              // largo que ni lo leeré, al menos un hint al pasar por encima».
+              <div
+                className={`${etiqueta} rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950`}
+                title={
+                  ficha.tipo === "correo"
                     ? "Aparece la salida «No dio su correo», contada desde su último mensaje. Vacío = sin esa salida."
-                    : "Si no contesta en ese tiempo, sigue: con Seguimientos conectados, empiezan a contar después de este tiempo (sus botones y cuadritos siguen valiendo); con «⏳ Si no responde» conectado, pasa a esa ficha; sin botones, sigue por «→». Vacío = enseguida (o el tiempo del regalo de tus Ajustes en «Si no responde»)."}
-                </span>
+                    : "Si no contesta en este tiempo, pasa a lo que conectaste (Seguimientos, «⏳ Si no responde» o, sin botones, «→»).\nSin nada conectado, no se le manda nada: espera su respuesta.\nSi contesta antes, sigue en ese momento."
+                }
+              >
+                ⏰ Si no responde en <span className="ml-2"><CampoDeTiempoDelTablero valor={b.sin_respuesta_min} onCambio={(m) => setB({ ...b, sin_respuesta_min: m })} /></span>
+                <span className="ml-2 cursor-help text-amber-700" aria-hidden>ⓘ</span>
               </div>
             )}
           {ficha.tipo === "correo" && comun(["correo_asunto", "correo_texto"], (
@@ -37699,15 +37704,14 @@ function VentanaDelCajon({
     setBorradorDirecto(steps);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firmaDeAfuera]);
-  // LA BURBUJA DEL BOTÓN O CUADRITO QUE SE TOCÓ, a la vista y marcada un momento.
+  // LA BURBUJA DEL BOTÓN O CUADRITO QUE SE TOCÓ, a la vista. (17/11/2026: sin el aro naranja que se encendía y se
+  // apagaba. Él: «automáticamente aparece un borde anaranjado, eso no me gusta, quítalo».)
   useEffect(() => {
     if (burbuja == null) return;
     const t = window.setTimeout(() => {
       const el = document.getElementById(`editor-step-${idPrefix}-${burbuja}`);
       if (!el) return;
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("ring-4", "ring-amber-400");
-      window.setTimeout(() => el.classList.remove("ring-4", "ring-amber-400"), 2200);
     }, 250);
     return () => window.clearTimeout(t);
   }, [burbuja, idPrefix]);
