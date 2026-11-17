@@ -2522,6 +2522,7 @@ whatsapp:
                   body_variants:
                     - ""
                   delay_after_sec: 6
+      sin_respuesta_min: 5
     - id: f-mwl18nl4-1idy
       tipo: mensaje
       x: 858
