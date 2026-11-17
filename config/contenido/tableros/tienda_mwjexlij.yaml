@@ -464,6 +464,24 @@ whatsapp:
         - id: rmwl16ea7
           peso: 0
           peso_antes: 1
+          anuncios:
+            - meta_120250841173490336
+        - id: rmwl9cy9h
+          peso: 0
+          peso_antes: 1
+          anuncios:
+            - meta_120250841173460336
+        - id: rmwl9cz4d
+          peso: 0
+          peso_antes: 1
+          anuncios:
+            - meta_120250841173430336
+        - id: rmwl9czwc
+          peso: 0
+          peso_antes: 1
+          anuncios:
+            - meta_120250841173470336
+            - meta_120250841173450336
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
       x: 1892
@@ -3970,6 +3988,18 @@ whatsapp:
       de: f-mwl9b586-yhhd5
       salida: sin_respuesta
       a: f-mwl9b586-qvj6y
+    - id: c-mwl9eht8-b72
+      de: f-mwjv96j2-unv4
+      salida: rep:rmwl9cy9h
+      a: f-mwl97xpi-wyp4p
+    - id: c-mwl9em2e-tks
+      de: f-mwjv96j2-unv4
+      salida: rep:rmwl9cz4d
+      a: f-mwl9b586-qqka6
+    - id: c-mwl9f1f0-94h
+      de: f-mwjv96j2-unv4
+      salida: rep:rmwl9czwc
+      a: f-mwl9b586-yhhd5
   cajas:
     - id: k-mwk1ex30
       x: 781
