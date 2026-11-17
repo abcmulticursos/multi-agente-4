@@ -730,11 +730,15 @@ function colgarSeguimientos(convo: ConversationRow, seg: FichaDelTablero, t?: Ta
     return;
   }
   const token = ponerSeguimiento(convo.id, seg.id, idx);
-  const desde = getLastUserMessageTime(convo.id) ?? ahora();
+  // DESDE LO ÚLTIMO QUE PASÓ: SU MENSAJE O LA FICHA QUE LOS CUELGA (17/11/2026). Él, ruta 5 de FLORES CO: las fichas 20-22
+  // esperan 5 min y luego sale la presentación, que cuelga los seguimientos; contando desde el mensaje del cliente, el
+  // seguimiento 1 (3 min en sus pruebas) ya estaba vencido y salía pegado a la presentación. «Que el primer seguimiento no
+  // pise esa pausa». Se cuelgan al terminar de salir la ficha, así que «ahora» es ese momento. Si escribe, vuelve a contar.
+  const desde = Math.max(getLastUserMessageTime(convo.id) ?? 0, ahora());
   contarSeguimientosDesde(convo.id, desde);
   const { cuando, sinSilencio } = cuandoSaleElSeguimiento(convo, segs[idx], idx, desde);
   programar(convo, ACCION_SEGUIMIENTO, { ficha: seg.id, idx, token }, cuando, sinSilencio);
-  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (sigue con el ${idx + 1}, a ${segs[idx].minutos} min de su último mensaje)`);
+  console.log(`[tablero] convo ${convo.id}: cuelga los seguimientos «${seg.titulo || seg.id}» (sigue con el ${idx + 1}, a ${segs[idx].minutos} min desde ahora)`);
 }
 
 /**
