@@ -5750,11 +5750,11 @@ biblioteca_de_productos:
       AR:
         price_soles: 4700
         discount_price_soles: 3600
-        market_price: 23200
-      CO:
-        price_soles: 4700
-        discount_price_soles: 3400
         market_price: 23300
+      CO:
+        price_soles: 9900
+        discount_price_soles: 6600
+        market_price: 49500
     ofrecer_imagenes: false
   - id: pmwir7i3o
     name: PRODUCTO FICTICIO PARA CONTRIBUCION
