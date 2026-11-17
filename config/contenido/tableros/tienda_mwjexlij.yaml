@@ -3554,24 +3554,6 @@ whatsapp:
               steps: []
       presenta:
         - "@tienda:basico"
-    - id: f-mwl9m8ad-3k1z3
-      tipo: cobro
-      x: 2871
-      y: 11935
-      steps:
-        - type: text
-          body_variants:
-            - |-
-              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        producto_id: "@tienda:basico"
-        metodos: true
     - id: f-mwl9m8ad-r9vay
       tipo: regalo
       x: 3905
@@ -3971,8 +3953,8 @@ whatsapp:
         - "@tienda:basico"
     - id: f-mwl9m8ad-99rsb
       tipo: cobro
-      x: 2849
-      y: 13145
+      x: 4675
+      y: 13079
       steps:
         - type: text
           body_variants:
@@ -3989,8 +3971,8 @@ whatsapp:
         metodos: true
     - id: f-mwl9m8ad-2rzla
       tipo: regalo
-      x: 3883
-      y: 13365
+      x: 3960
+      y: 13343
     - id: f-mwl9m8ad-770lh
       tipo: mensaje
       x: 363
@@ -4389,24 +4371,6 @@ whatsapp:
                   enabled: false
       presenta:
         - "@tienda:basico"
-    - id: f-mwl9m8ad-p85bj
-      tipo: cobro
-      x: 2838
-      y: 14432
-      steps:
-        - type: text
-          body_variants:
-            - |-
-              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        producto_id: "@tienda:basico"
-        metodos: true
     - id: f-mwl9m8ad-tty65
       tipo: regalo
       x: 3872
@@ -4832,24 +4796,6 @@ whatsapp:
                   enabled: false
       presenta:
         - "@tienda:basico"
-    - id: f-mwl9m8ad-gufvu
-      tipo: cobro
-      x: 2816
-      y: 15642
-      steps:
-        - type: text
-          body_variants:
-            - |-
-              ⚡💳 *Podés pagar por Nequi o Daviplata* 😊👇️
-
-              {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
-          delay_after_sec: 6
-      cobro:
-        modo: producto
-        producto_id: "@tienda:basico"
-        metodos: true
     - id: f-mwl9m8ad-vcb0w
       tipo: regalo
       x: 3850
@@ -5275,6 +5221,98 @@ whatsapp:
                   enabled: false
       presenta:
         - "@tienda:basico"
+    - id: f-mwlaetww-ozo19
+      tipo: cobro
+      x: 2937
+      y: 12034
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwlagx7u-0mtsw
+      tipo: cobro
+      x: 3003
+      y: 13343
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwlah4cj-rma9i
+      tipo: cobro
+      x: 2904
+      y: 14608
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
+    - id: f-mwlahco0-q6m5i
+      tipo: cobro
+      x: 2904
+      y: 15763
+      steps:
+        - type: text
+          body_variants:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+          delay_after_sec: 6
+          spintax_ia:
+            - "{✅ Genial, podés adquirir el Curso de la siguiente Manera 😊👇|✅ Perfecto, tenés la opción de comprar el Curso así 😊👇|✅ Excelente, podés obtener el Curso de esta forma 😊👇}"
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{*Luego de eso nos enviás una foto o imagen de tu comprobante* para verificar tu pago y darte acceso inmediato 🤳🏼|*Después de eso, mandanos una foto o captura de tu comprobante* para confirmar tu pago y darte acceso al instante 🤳🏼|*Cuando termines, envianos una imagen de tu comprobante* para revisar tu pago y darte acceso al instante 🤳🏼}"
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        producto_id: "@tienda:basico"
+        metodos: true
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -5748,11 +5786,6 @@ whatsapp:
       de: f-mwjv96j2-unv4
       salida: rep:rmwl9czwc
       a: f-mwl9b586-yhhd5
-    - id: c-mwl9m8ae-qtqmm
-      de: f-mwl9m8ad-3k1z3
-      salida: pagado
-      a: f-mwl9m8ad-r9vay
-      vista: cable
     - id: c-mwl9m8ae-h5e5c
       de: f-mwl9m8ad-ltehw
       salida: dec:d-mwl9m8ad-3bqna
@@ -5785,20 +5818,10 @@ whatsapp:
       de: f-mwl9m8ad-km90f
       salida: siguiente
       a: f-mwl9m8ad-kbn4m
-    - id: c-mwl9m8ae-pctwy
-      de: f-mwl9m8ad-3k1z3
-      salida: sin_pago
-      a: f-mwl9m8ad-kbn4m
-      a_espejo: esp-mwl9m8ae-bqub5
     - id: c-mwl9m8ae-bvmo0
       de: f-mwl9m8ad-ltehw
       salida: sin_respuesta
       a: f-mwl9m8ad-179gs
-    - id: c-mwl9m8ae-u2zj2
-      de: f-mwl9m8ad-99rsb
-      salida: pagado
-      a: f-mwl9m8ad-2rzla
-      vista: cable
     - id: c-mwl9m8ae-1zjkh
       de: f-mwl9m8ad-770lh
       salida: dec:d-mwl9m8ad-wxxhg
@@ -5840,11 +5863,6 @@ whatsapp:
       de: f-mwl9m8ad-770lh
       salida: sin_respuesta
       a: f-mwl9m8ad-4igih
-    - id: c-mwl9m8ae-v7w0f
-      de: f-mwl9m8ad-p85bj
-      salida: pagado
-      a: f-mwl9m8ad-tty65
-      vista: cable
     - id: c-mwl9m8ae-gatb5
       de: f-mwl9m8ad-ku2ze
       salida: dec:d-mwl9m8ad-ancmd
@@ -5869,10 +5887,6 @@ whatsapp:
       de: f-mwl9m8ad-nbrxl
       salida: siguiente
       a: f-mwl9m8ad-l3tga
-    - id: c-mwl9m8ae-w4oxh
-      de: f-mwl9m8ad-l3tga
-      salida: dec:d-mwl9m8ad-8umy9
-      a: f-mwl9m8ad-p85bj
     - id: c-mwl9m8ae-oerdq
       de: f-mwl9m8ad-l3tga
       salida: pagado
@@ -5881,20 +5895,10 @@ whatsapp:
       de: f-mwl9m8ad-l3tga
       salida: siguiente
       a: f-mwl9m8ad-ng8a4
-    - id: c-mwl9m8ae-koma5
-      de: f-mwl9m8ad-p85bj
-      salida: sin_pago
-      a: f-mwl9m8ad-ng8a4
-      a_espejo: esp-mwl9m8ae-ywgei
     - id: c-mwl9m8ae-6qff8
       de: f-mwl9m8ad-ku2ze
       salida: sin_respuesta
       a: f-mwl9m8ad-nbrxl
-    - id: c-mwl9m8ae-66169
-      de: f-mwl9m8ad-gufvu
-      salida: pagado
-      a: f-mwl9m8ad-vcb0w
-      vista: cable
     - id: c-mwl9m8ae-kzdiv
       de: f-mwl9m8ad-uvozo
       salida: dec:d-mwl9m8ad-z43us
@@ -5919,10 +5923,6 @@ whatsapp:
       de: f-mwl9m8ae-my39k
       salida: siguiente
       a: f-mwl9m8ae-t02hc
-    - id: c-mwl9m8ae-b2slv
-      de: f-mwl9m8ae-t02hc
-      salida: dec:d-mwl9m8ae-e9f7l
-      a: f-mwl9m8ad-gufvu
     - id: c-mwl9m8ae-3exxf
       de: f-mwl9m8ae-t02hc
       salida: pagado
@@ -5931,11 +5931,6 @@ whatsapp:
       de: f-mwl9m8ae-t02hc
       salida: siguiente
       a: f-mwl9m8ae-d3zyq
-    - id: c-mwl9m8ae-qjbj7
-      de: f-mwl9m8ad-gufvu
-      salida: sin_pago
-      a: f-mwl9m8ae-d3zyq
-      a_espejo: esp-mwl9m8ae-ngtez
     - id: c-mwl9o96r-ess
       de: f-mwk1sr4j-wdaz
       salida: rep:rmwl9mnwj
@@ -5956,6 +5951,63 @@ whatsapp:
       de: f-mwl9m8ad-uvozo
       salida: sin_respuesta
       a: f-mwl9m8ae-my39k
+    - id: c-mwlafr7k-57f
+      de: f-mwl9m8ad-kbn4m
+      salida: btn:56c4e3e8-aad4-4038-9818-979ca4a784b9~cmwk6e8eu0
+      a: f-mwlaetww-ozo19
+      vista: colita
+    - id: c-mwlag65t-jzp
+      de: f-mwlaetww-ozo19
+      salida: sin_pago
+      a: f-mwl9m8ad-kbn4m
+      a_espejo: esp-mwl9m8ae-bqub5
+    - id: c-mwlahmuw-1hl
+      de: f-mwl9m8ad-km90f
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+      a: f-mwlaetww-ozo19
+    - id: c-mwlahtzs-jn2
+      de: f-mwl9m8ad-6nb0i
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+      a: f-mwlagx7u-0mtsw
+    - id: c-mwlahzrs-bra
+      de: f-mwlagx7u-0mtsw
+      salida: sin_pago
+      a: f-mwl9m8ad-kbn4m
+      a_espejo: esp-mwlagx7u-f44i5
+    - id: c-mwlai52n-7r4
+      de: f-mwlagx7u-0mtsw
+      salida: pagado
+      a: f-mwl9m8ad-2rzla
+    - id: c-mwlaia6f-ms1
+      de: f-mwlaetww-ozo19
+      salida: pagado
+      a: f-mwl9m8ad-r9vay
+    - id: c-mwlaigpz-hdd
+      de: f-mwl9m8ad-l3tga
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+      a: f-mwlah4cj-rma9i
+    - id: c-mwlaij6o-ocm
+      de: f-mwlah4cj-rma9i
+      salida: sin_pago
+      a: f-mwl9m8ad-kbn4m
+      a_espejo: esp-mwlah4ck-5ptik
+    - id: c-mwlaim7t-lmo
+      de: f-mwlah4cj-rma9i
+      salida: pagado
+      a: f-mwl9m8ad-tty65
+    - id: c-mwlaitq9-eci
+      de: f-mwl9m8ae-t02hc
+      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+      a: f-mwlahco0-q6m5i
+    - id: c-mwlaivtb-0ft
+      de: f-mwlahco0-q6m5i
+      salida: sin_pago
+      a: f-mwl9m8ad-kbn4m
+      a_espejo: esp-mwlahco0-8tedo
+    - id: c-mwlaix9b-wkx
+      de: f-mwlahco0-q6m5i
+      salida: pagado
+      a: f-mwl9m8ad-vcb0w
   cajas:
     - id: k-mwk1ex30
       x: 781
@@ -6118,20 +6170,24 @@ whatsapp:
       y: 4620
     - id: esp-mwl9m8ae-bqub5
       ficha: f-mwl9m8ad-kbn4m
-      x: 3135
-      y: 11561
+      x: 3234
+      y: 11660
     - id: esp-mwl9m8ae-4n5aj
       ficha: f-mwl9m8ad-std7r
-      x: 3113
-      y: 12771
-    - id: esp-mwl9m8ae-ywgei
-      ficha: f-mwl9m8ad-ng8a4
-      x: 3102
-      y: 14058
-    - id: esp-mwl9m8ae-ngtez
-      ficha: f-mwl9m8ae-d3zyq
-      x: 3080
-      y: 15268
+      x: 4939
+      y: 12705
+    - id: esp-mwlagx7u-f44i5
+      ficha: f-mwl9m8ad-kbn4m
+      x: 3278
+      y: 12837
+    - id: esp-mwlah4ck-5ptik
+      ficha: f-mwl9m8ad-kbn4m
+      x: 3168
+      y: 14146
+    - id: esp-mwlahco0-8tedo
+      ficha: f-mwl9m8ad-kbn4m
+      x: 3201
+      y: 15389
 messenger:
   encendido: true
   fichas:
