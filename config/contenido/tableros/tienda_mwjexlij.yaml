@@ -2536,7 +2536,6 @@ whatsapp:
 
                📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️ 😊👇️
           delay_after_sec: 5
-      sin_respuesta_min: 5
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
       x: 858
@@ -2553,7 +2552,6 @@ whatsapp:
 
                📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
           delay_after_sec: 5
-      sin_respuesta_min: 5
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
       x: 858
@@ -2570,7 +2568,6 @@ whatsapp:
 
                📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️
           delay_after_sec: 5
-      sin_respuesta_min: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
       x: 341
