@@ -951,7 +951,9 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
     const x = a.negocioId ? activos[a.negocioId] : undefined;
     return {
       numeros: x?.numeros.length ?? null,
-      paginas: x ? x.paginas.filter((p) => !p.endsWith("(detectada)")).length : null,
+      // (16/11/2026) TODAS las páginas de su negocio, también las solo detectadas. Él: «yo tengo teléfonos, páginas y
+      // pixeles… las páginas salen en cero». Sus páginas nunca pasaron por «Agregar y usar» y aun así las usa.
+      paginas: x?.paginas.length ?? null,
       pixels: x?.pixels.length ?? null,
     };
   };
