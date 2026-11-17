@@ -2571,8 +2571,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl1i41z-6kqdb
       tipo: seguimientos
-      x: 341
-      y: 2750
+      x: 1881
+      y: 2695
       seguimientos:
         - id: s-mwl1i41z-2vqiq
           minutos: 3
@@ -3022,10 +3022,6 @@ whatsapp:
       de: f-mwl100qj-8r1g
       salida: dec:d4b1e948-7eba-4802-ad6f-78a97fc7724c
       a: f-mwl1fjxr-fn4j
-    - id: c-mwl1ih6e-3tg
-      de: f-mwl100qj-8r1g
-      salida: siguiente
-      a: f-mwl1i41z-6kqdb
     - id: c-mwl1jv5j-our
       de: f-mwl18nl4-1idy
       salida: siguiente
@@ -3046,16 +3042,20 @@ whatsapp:
       de: f-mwl1jnq7-v9g3p
       salida: pagado
       a: f-mwl0zt1e-09xkc
-    - id: c-mwl1ohau-kbt
-      de: f-mwl1jnq7-v9g3p
-      salida: siguiente
-      a: f-mwl1i41z-6kqdb
-      a_espejo: e-mwl1o9ri-fcos
     - id: c-mwl1otc8-vnh
       de: f-mwl1i41z-6kqdb
       salida: btn:b-mwl1i41z-u8uik
       a: f-mwl0zt1e-er7t4
       vista: colita
+    - id: c-mwl8gi2n-nsh
+      de: f-mwl1jnq7-v9g3p
+      salida: siguiente
+      a: f-mwl1i41z-6kqdb
+    - id: c-mwl8gkih-uiy
+      de: f-mwl0zt1e-er7t4
+      salida: sin_pago
+      a: f-mwl1i41z-6kqdb
+      a_espejo: e-mwl1o9ri-fcos
   cajas:
     - id: k-mwk1ex30
       x: 385
@@ -3154,8 +3154,8 @@ whatsapp:
       y: 9702
     - id: e-mwl1o9ri-fcos
       ficha: f-mwl1i41z-6kqdb
-      x: 1793
-      y: 2816
+      x: 2816
+      y: 2585
 messenger:
   encendido: true
   fichas:
