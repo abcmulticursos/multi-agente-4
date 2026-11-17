@@ -32637,7 +32637,7 @@ function PantallaDelTableroCargada({
           <button
             type="button"
             onClick={() => guardar({ ...tablero, encendido: !tablero.encendido })}
-            className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-500 hover:bg-slate-600"}`}
+            className={`rounded-md px-3 py-1 text-xs font-bold text-white ${tablero.encendido ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"}`}
             title="Encendido: los clientes NUEVOS de esta tienda, en este canal, van por el tablero. Apagado: el bot no les contesta."
           >
             {tablero.encendido ? "● Encendido" : "○ Apagado"}
@@ -40975,11 +40975,12 @@ function VentanaDeSpintax({
   const hayPropuestas = Object.keys(propuestas).length > 0;
   return (
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/40 p-4" onMouseDown={EL_CLIC_FUERA_CIERRA_LA_VENTANA ? onCerrar : undefined} data-ventana-del-tablero>
-      {/* MÁS GRANDE (12/11/2026, «bonitos pero muy pequeños»): dentro del visor todo va al 90 %, y esta ventana también. */}
-      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: 1.25 }} onMouseDown={(e) => e.stopPropagation()}>
+      {/* MÁS GRANDE (12/11/2026, «bonitos pero muy pequeños»): dentro del visor todo va al 90 %, y esta ventana también.
+          AL 85 % DE ESO (17/11/2026, «es demasiado»): 1.25 × 0.85. Los botones de abajo se quedan como estaban. */}
+      <div className="my-10 w-full max-w-3xl rounded-xl border border-borde bg-tarjeta p-5 shadow-2xl" style={{ zoom: ZOOM_DEL_SPINTAX }} onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-base font-bold text-tinta">🔀 Spintax {seleccion ? "del trozo seleccionado" : "de las frases que marques"}</h3>
-          <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" title="Cerrar (Esc)">
+          <button type="button" onClick={onCerrar} className="rounded px-2 text-sm text-tinta-suave hover:bg-relleno" style={{ zoom: 1.25 / ZOOM_DEL_SPINTAX }} title="Cerrar (Esc)">
             ✕
           </button>
         </div>
@@ -41037,7 +41038,7 @@ function VentanaDeSpintax({
           })}
         </div>
         {error && <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>}
-        <div className="mt-3 flex items-center justify-end gap-2">
+        <div className="mt-3 flex items-center justify-end gap-2" style={{ zoom: 1.25 / ZOOM_DEL_SPINTAX }}>
           {costo && <span className="mr-auto text-[11px] text-tinta-suave">{costo}</span>}
           <button type="button" onClick={onCerrar} className="rounded-md border border-borde px-3 py-1.5 text-xs font-semibold text-tinta hover:bg-relleno">
             Cancelar
@@ -41078,6 +41079,8 @@ function VentanaDeSpintax({
     </div>
   );
 }
+
+const ZOOM_DEL_SPINTAX = 1.25 * 0.85;
 
 /**
  * «✨ VARIAR CON IA», TODA LA FICHA DE UNA VEZ (12/11/2026). Él: «solo 2 más, el original y 2 spintax, y solo 2 frases por

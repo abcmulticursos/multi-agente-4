@@ -12,7 +12,7 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -967,6 +967,7 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
         {/* (14/11/2026) FINO. Él: «te dije que debían ser delgados». 2 px, del color de su ficha. */}
         <span style={{ width: 22, borderTop: `2px ${solo ? "dashed" : "solid"} ${colorDeLaFicha}` }} />
         <span
+          data-punta-de-colita=""
           className="whitespace-nowrap rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
           style={{ borderColor: ASPECTO[d.tipo].trazo, borderStyle: solo ? "dashed" : "solid" }}
         >
@@ -976,8 +977,13 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
     );
   };
   /** La línea hasta su destino, del color de ESTA ficha, desde el puntito de su fila (al pasar el ratón). */
+  // DESDE LA PUNTA DE LA COLITA (17/11/2026). Él: «que empiecen desde la punta de la colita, no desde atrás». Con
+  // colita en la fila, la línea nace en su borde derecho; sin colita, en el puntito, como antes.
   const verLaLinea = (el: HTMLElement, d: FichaEnElEditor) => {
-    const punto = el.closest("[data-fila-salida]")?.querySelector<HTMLElement>(".react-flow__handle") ?? el;
+    const fila = el.closest("[data-fila-salida]");
+    const punta = fila?.querySelector<HTMLElement>("[data-punta-de-colita]");
+    if (punta) return ponerLineaAlDestino({ el: punta, a: d.id, color: ASPECTO[f.tipo].trazo, desdeLaPunta: true });
+    const punto = fila?.querySelector<HTMLElement>(".react-flow__handle") ?? el;
     ponerLineaAlDestino({ el: punto, a: d.id, color: ASPECTO[f.tipo].trazo });
   };
   /** ¿El cable de esta salida se dibuja desde ESTE nodo? (Conectado desde un espejo, sale del espejo; si no, de la original.) */
@@ -1502,7 +1508,7 @@ function ZonaDeLaSeleccion() {
  * y desaparecen». Con el ratón sobre la pastilla «💰 cobro 85» de una opción sin cable dibujado ahí, se ve la línea hasta
  * su ficha, como la de una colita. Fuera del contexto del lienzo a propósito: pasar el ratón no vuelve a dibujar las fichas.
  */
-type LineaAlDestino = { el: HTMLElement; a: string; color: string } | null;
+type LineaAlDestino = { el: HTMLElement; a: string; color: string; desdeLaPunta?: boolean } | null;
 let lineaAlDestino: LineaAlDestino = null;
 const oyentesDeLaLinea = new Set<() => void>();
 const ponerLineaAlDestino = (v: LineaAlDestino) => {
@@ -1523,8 +1529,8 @@ function LineaAlDestinoVisible() {
   const nodo = useInternalNode(v?.a ?? "");
   if (!v || !nodo || !v.el.isConnected) return null;
   const r = v.el.getBoundingClientRect();
-  // Desde el centro del puntito (o de lo que se señaló).
-  const s = screenToFlowPosition({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+  // Desde el centro del puntito, o desde la punta de su colita (su borde derecho).
+  const s = screenToFlowPosition({ x: v.desdeLaPunta ? r.right : r.left + r.width / 2, y: r.top + r.height / 2 });
   const tx = nodo.internals.positionAbsolute.x;
   const ty = nodo.internals.positionAbsolute.y + (nodo.measured?.height ?? 200) / 2;
   const [camino] = getBezierPath({ sourceX: s.x, sourceY: s.y, sourcePosition: Position.Right, targetX: tx, targetY: ty, targetPosition: Position.Left });
@@ -1577,6 +1583,8 @@ type DatosDeCaja = {
   /** Con Shift/Ctrl se suma a lo elegido; sin, queda solo el velo. */
   alElegir: (sumar?: boolean) => void;
   alCambiar: (c: NonNullable<Tablero["cajas"]>[number]) => void;
+  /** Pinta este velo Y todos los velos elegidos con él (vacío = sin color). */
+  alPintar: (color: string) => void;
   /** Borrar la caja (las fichas de encima se quedan). */
   alBorrar: () => void;
   /** LA MANTA DE UN PAÍS (24/10/2026): su bandera de título y «▶ Ver recorrido», como en la pizarra. */
@@ -1847,7 +1855,8 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             🗑 Borrar
           </button>
         )}
-        {data.elegida && data.selectorDeColor && (
+        {/* EL BOTÓN DE COLOR EN TODO VELO ELEGIDO (17/11/2026), también el de un país elegido con el recuadro. */}
+        {marcada && data.selectorDeColor && (
           <button
             type="button"
             onClick={(e) => {
@@ -1880,11 +1889,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
                   ✕
                 </button>
               </div>
-              {data.selectorDeColor(color, (c) => {
-                const { color: _quitado, ...sinColor } = data.caja;
-                void _quitado;
-                data.alCambiar(c ? { ...data.caja, color: c } : sinColor);
-              })}
+              {data.selectorDeColor(color, (c) => data.alPintar(c))}
             </div>,
             document.body
           )}
@@ -1946,11 +1951,17 @@ function CableComoEtiqueta({
   const ctx = useContext(Contexto);
   const [encima, setEncima] = useState(false);
   const zoom = useStore((s) => s.transform[2]);
-  const [completo] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
-  const corto = `M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`;
   // LA LÍNEA DE LA COLITA (al pasar el ratón, o por el «← 3» de su destino): del MISMO GROSOR en la
   // pantalla, cerca o lejos (27/10/2026: «si se adelgaza con la distancia, no veo a dónde conecta»).
   const verLinea = encima || ctx?.verEntrantes === target;
+  // Y NACE EN LA PUNTA DE LA COLITA (17/11/2026), no detrás de ella: en el borde derecho del letrero.
+  const letrero = useRef<HTMLDivElement>(null);
+  const [ancho, setAncho] = useState(0);
+  useLayoutEffect(() => {
+    if (verLinea && letrero.current) setAncho(letrero.current.offsetWidth);
+  }, [verLinea, encima, etiqueta]);
+  const [completo] = getBezierPath({ sourceX: verLinea && ancho ? sourceX + 28 + ancho : sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  const corto = `M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`;
   const grosor = 3.5 / Math.max(zoom, 0.05);
   return (
     <>
@@ -1965,6 +1976,7 @@ function CableComoEtiqueta({
       )}
       <EdgeLabelRenderer>
         <div
+          ref={letrero}
           className="nodrag nopan absolute flex max-w-[230px] cursor-pointer items-center gap-1 rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
           style={{
             transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`,
@@ -2110,6 +2122,13 @@ function CaminoDeCompra({ id, target, sourceX, sourceY, targetX, targetY, source
   const zoom = useStore((s) => s.transform[2]);
   const d = data as { seg: string; llave: string; colita: boolean; etiqueta: string; colorDestino?: string };
   const [camino] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  // La colita: su línea nace en la punta del letrero (17/11/2026), como en CableComoEtiqueta.
+  const letrero = useRef<HTMLDivElement>(null);
+  const [ancho, setAncho] = useState(0);
+  useLayoutEffect(() => {
+    if (d.colita && encima && letrero.current) setAncho(letrero.current.offsetWidth);
+  }, [d.colita, encima, d.etiqueta]);
+  const [desdeLaPunta] = getBezierPath({ sourceX: ancho ? sourceX + 28 + ancho : sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   const alternar = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -2125,9 +2144,10 @@ function CaminoDeCompra({ id, target, sourceX, sourceY, targetX, targetY, source
     return (
       <>
         <BaseEdge id={id} path={`M ${sourceX} ${sourceY} L ${sourceX + 26} ${sourceY}`} interactionWidth={0} style={{ stroke: "#10b981", strokeWidth: 2.5 }} />
-        {encima && <BaseEdge id={`${id}-completo`} path={camino} interactionWidth={0} style={{ ...estilo, strokeWidth: 3 / Math.max(zoom, 0.05), opacity: 0.8 }} />}
+        {encima && <BaseEdge id={`${id}-completo`} path={desdeLaPunta} interactionWidth={0} style={{ ...estilo, strokeWidth: 3 / Math.max(zoom, 0.05), opacity: 0.8 }} />}
         <EdgeLabelRenderer>
           <div
+            ref={letrero}
             className="nodrag nopan absolute flex max-w-[230px] cursor-pointer items-center gap-1 rounded-full border-2 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow"
             style={{ transform: `translate(0, -50%) translate(${sourceX + 28}px, ${sourceY}px)`, pointerEvents: "all", borderColor: d.colorDestino ?? "#10b981" }}
             onMouseEnter={() => setEncima(true)}
@@ -3252,6 +3272,21 @@ export default function LienzoDelTablero({
             setNodos((ns) => ns.map((n) => (n.id === `caja:${c.id}` ? { ...n, selected: true } : sumar || !n.selected ? n : { ...n, selected: false })));
           },
           alCambiar: (n: typeof c) => cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).map((x) => (x.id === c.id ? n : x)) }),
+          // VARIOS VELOS DE UN GOLPE (17/11/2026). Él: «agarro un grupo donde hay 4 mantas y 30 fichas… ese color debe
+          // afectar a todas las mantas que estén seleccionadas». Las fichas elegidas no se tocan.
+          alPintar: (color: string) => {
+            const elegidos = new Set(nodosVivos.current.filter((n) => n.selected && n.type === "caja").map((n) => n.id.slice(5)));
+            elegidos.add(c.id);
+            cambiar({
+              ...vivo.current,
+              cajas: (vivo.current.cajas ?? []).map((x) => {
+                if (!elegidos.has(x.id)) return x;
+                const { color: _quitado, ...sinColor } = x;
+                void _quitado;
+                return color ? { ...x, color } : sinColor;
+              }),
+            });
+          },
           selectorDeColor,
           alBorrar: () => {
             cambiar({ ...vivo.current, cajas: (vivo.current.cajas ?? []).filter((x) => x.id !== c.id) });
