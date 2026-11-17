@@ -58126,6 +58126,8 @@ function AdColorSelect({
   onSavePalette,
   onDeletePalette,
   sinElegir,
+  abierto,
+  onCerrar,
 }: {
   value: string;
   onChange: (color: string) => void;
@@ -58134,11 +58136,17 @@ function AdColorSelect({
   onDeletePalette?: (color: string) => void;
   /** Si viene, el color se puede dejar SIN ELEGIR (vacío) y este es su nombre («Automático»). Sin él, lo de siempre. */
   sinElegir?: string;
+  /** Nace con la paleta abierta, y avisa al cerrarla (el cuadrito de la campaña). */
+  abierto?: boolean;
+  onCerrar?: () => void;
 }) {
   const elegido = /^#[0-9a-fA-F]{6}$/.test(value);
   const current = elegido ? value.toLowerCase() : AD_COLORS[0].value;
   const [customName, setCustomName] = useState("");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!abierto);
+  useEffect(() => {
+    if (abierto && !open) onCerrar?.();
+  }, [abierto, open, onCerrar]);
   const pickerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -58203,6 +58211,52 @@ function AdColorSelect({
       )}
       </div>}
     </div>
+  );
+}
+
+/**
+ * EL CUADRITO DE COLOR DE UNA CAMPAÑA, QUE SE PUEDE TOCAR (17/11/2026). Él: «normalmente tengo que expandir la ficha,
+ * seleccionar al lado del ad y seleccionar el color… aquí necesito que se pueda cambiar sin abrir la ficha». Clic → la
+ * misma paleta de «Color etiqueta»; el color nuevo va a los anuncios de la campaña que tenían ESE color.
+ */
+function CuadritoDeColorDeCampana({
+  color,
+  onChange,
+  palette,
+  onSavePalette,
+  onDeletePalette,
+}: {
+  color: string;
+  onChange: (color: string) => void;
+  palette: AdColorPaletteEntry[];
+  onSavePalette: (entry: AdColorPaletteEntry) => void;
+  onDeletePalette: (color: string) => void;
+}) {
+  const [donde, setDonde] = useState<{ x: number; y: number } | null>(null);
+  const cerrar = useCallback(() => setDonde(null), []);
+  return (
+    <>
+      <button
+        type="button"
+        title="Clic para cambiar el color de los anuncios de esta campaña"
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          setDonde(donde ? null : { x: r.left, y: r.bottom + 6 });
+        }}
+        className="inline-block h-5 w-8 cursor-pointer rounded-[4px] border border-black/15 shadow-sm transition hover:scale-110"
+        style={{ backgroundColor: color }}
+      />
+      {donde && (
+        <div
+          className="fixed z-[70] rounded-md border border-neutral-300 bg-tarjeta p-2 shadow-xl"
+          ref={(el) => encajarEnLaPantalla(el)}
+          style={{ left: donde.x, top: donde.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <AdColorSelect value={color} onChange={onChange} palette={palette} onSavePalette={onSavePalette} onDeletePalette={onDeletePalette} abierto onCerrar={cerrar} />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -58506,7 +58560,8 @@ function AdRegistryManager({
           <div className="space-y-2 border-l-2 border-neutral-200 pl-3">{Object.entries(campaigns).map(([campaign, ads]) => <Collapsible key={campaign} title={`Campaña: ${campaign}`} titleKey={`import_campaign_${bm}_${account}_${campaign}`}
             // (15/11/2026) EL COLOR DE SUS ADS, AL LADO DE «ABRIR». Él: «que el desplegable tenga al lado… un rectángulo de color
             // con las esquinas un poquitito redondeadas». Uno por cada color distinto que tengan sus anuncios.
-            headerActions={(() => { const colores = [...new Set(ads.map((ad) => ad.color).filter((c): c is string => !!c))]; return colores.length ? <span className="flex items-center gap-1">{colores.map((c) => <span key={c} title="El color de los anuncios de esta campaña" className="inline-block h-5 w-8 rounded-[4px] border border-black/15 shadow-sm" style={{ backgroundColor: c }} />)}</span> : null; })()}>
+            // (17/11/2026) Y SE TOCA: clic → la paleta, sin abrir la campaña.
+            headerActions={(() => { const colores = [...new Set(ads.map((ad) => ad.color).filter((c): c is string => !!c))]; return colores.length ? <span className="flex items-center gap-1">{colores.map((c) => <CuadritoDeColorDeCampana key={c} color={c} onChange={(nuevo) => onChange(entries.map((entry) => entry.color === c && ads.some((ad) => ad.key === entry.key) ? { ...entry, color: nuevo } : entry))} palette={palette} onSavePalette={(color) => onPaletteChange(palette.some((item) => item.value.toLowerCase() === color.value.toLowerCase()) ? palette : [...palette, color])} onDeletePalette={(color) => onPaletteChange(palette.filter((item) => item.value.toLowerCase() !== color.toLowerCase()))} />)}</span> : null; })()}>
             <div className="space-y-3 border-t border-neutral-200 bg-neutral-50 p-3">
               <div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const enabled = ads.some((ad) => ad.enabled !== false); onChange(entries.map((entry) => ads.some((ad) => ad.key === entry.key) ? { ...entry, enabled: !enabled } : entry)); }} className="rounded border border-neutral-300 bg-tarjeta px-2 py-1 text-xs font-semibold text-neutral-700">{ads.some((ad) => ad.enabled !== false) ? "Apagar campaña" : "Encender campaña"}</button><button type="button" onClick={() => { if (confirm(`Se quitarán del gestor los ${ads.length} Ads de la campaña \"${campaign}\". Esto no modifica Meta. ¿Continuar?`)) onChange(entries.filter((entry) => !ads.some((ad) => ad.key === entry.key))); }} className="rounded border border-red-200 bg-tarjeta px-2 py-1 text-xs font-semibold text-red-600">Eliminar campaña</button>{(() => { const apagados = ads.filter((ad) => ad.enabled === false || ad.meta?.active === false); if (apagados.length === 0) return null; return <button type="button" onClick={() => { if (confirm(`Se quitarán del gestor los ${apagados.length} Ads APAGADOS de la campaña \"${campaign}\", con sus cajones de regalo.\n\nLos encendidos se quedan. Esto no modifica Meta.\n\n¿Continuar?`)) onChange(entries.filter((entry) => !apagados.some((ad) => ad.key === entry.key))); }} title="Al importar, Meta trae también los anuncios apagados. Esto los quita de golpe." className="rounded border border-amber-300 bg-tarjeta px-2 py-1 text-xs font-semibold text-amber-700">Quitar los {apagados.length} apagados</button>; })()}</div>
               <div className="flex flex-wrap gap-2">{ads.map((ad) => <span key={ad.key} onContextMenu={(event) => { setAdDelMenu(ad); menuDeAds.abrir(event); }} title="Click derecho para quitar este AD del gestor" style={{ borderColor: ad.color, backgroundColor: ad.color, color: adTagTextColor(ad.color) }} className="cursor-context-menu rounded border px-2 py-1 text-xs font-semibold">{ad.reference || ad.name} {ad.enabled === false || ad.meta?.active === false ? "OFF" : "ON"}</span>)}</div>
