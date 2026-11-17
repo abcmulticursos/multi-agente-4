@@ -1700,7 +1700,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504405423600
       registry_ad_id: "120250841173490336"
       registry_ad_key: meta_120250841173490336
-      registry_color: "#dc2626"
+      registry_color: "#ddd72c"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1721,7 +1721,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504351423600
       registry_ad_id: "120250841173450336"
       registry_ad_key: meta_120250841173450336
-      registry_color: "#dc2626"
+      registry_color: "#ddd72c"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1742,7 +1742,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504363423600
       registry_ad_id: "120250841173470336"
       registry_ad_key: meta_120250841173470336
-      registry_color: "#dc2626"
+      registry_color: "#ddd72c"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1763,7 +1763,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504339423600
       registry_ad_id: "120250841173430336"
       registry_ad_key: meta_120250841173430336
-      registry_color: "#dc2626"
+      registry_color: "#ddd72c"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1784,7 +1784,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504327423600
       registry_ad_id: "120250841173460336"
       registry_ad_key: meta_120250841173460336
-      registry_color: "#dc2626"
+      registry_color: "#ddd72c"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1805,7 +1805,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504363423600
       registry_ad_id: "120250840781360336"
       registry_ad_key: meta_120250840781360336
-      registry_color: "#db2777"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1826,7 +1826,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127506403423600
       registry_ad_id: "120250840781450336"
       registry_ad_key: meta_120250840781450336
-      registry_color: "#db2777"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1847,7 +1847,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504327423600
       registry_ad_id: "120250840781370336"
       registry_ad_key: meta_120250840781370336
-      registry_color: "#db2777"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1868,7 +1868,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504339423600
       registry_ad_id: "120250840781460336"
       registry_ad_key: meta_120250840781460336
-      registry_color: "#db2777"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1889,7 +1889,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1265196766679188/posts/122127504351423600
       registry_ad_id: "120250840781380336"
       registry_ad_key: meta_120250840781380336
-      registry_color: "#db2777"
+      registry_color: "#00aaff"
 
   # 3) Respuesta cuando el cliente escribe "comentado" / "comenté" / etc.
   reward_message: |-
@@ -3600,7 +3600,7 @@ ad_registry:
     name: COL | AD 1 - 17 Nov 26
     ids:
       - "120250841173490336"
-    color: "#dc2626"
+    color: "#ddd72c"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504405423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3611,7 +3611,7 @@ ad_registry:
     name: COL | AD 5 - 17 Nov 26
     ids:
       - "120250841173450336"
-    color: "#dc2626"
+    color: "#ddd72c"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504351423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3622,7 +3622,7 @@ ad_registry:
     name: COL | AD 4 - 17 Nov 26
     ids:
       - "120250841173470336"
-    color: "#dc2626"
+    color: "#ddd72c"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504363423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3633,7 +3633,7 @@ ad_registry:
     name: COL | AD 3 - 17 Nov 26
     ids:
       - "120250841173430336"
-    color: "#dc2626"
+    color: "#ddd72c"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504339423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3644,7 +3644,7 @@ ad_registry:
     name: COL | AD 2 - 17 Nov 26
     ids:
       - "120250841173460336"
-    color: "#dc2626"
+    color: "#ddd72c"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504327423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3655,7 +3655,7 @@ ad_registry:
     name: ARG | AD 4 - 17 Nov 26
     ids:
       - "120250840781360336"
-    color: "#db2777"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504363423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3666,7 +3666,7 @@ ad_registry:
     name: ARG | AD 1 - 17 Nov 26
     ids:
       - "120250840781450336"
-    color: "#db2777"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127506403423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3677,7 +3677,7 @@ ad_registry:
     name: ARG | AD 2 - 17 Nov 26
     ids:
       - "120250840781370336"
-    color: "#db2777"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504327423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3688,7 +3688,7 @@ ad_registry:
     name: ARG | AD 3 - 17 Nov 26
     ids:
       - "120250840781460336"
-    color: "#db2777"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504339423600
     meta:
       business_name: Premium Academy Turquesa
@@ -3699,7 +3699,7 @@ ad_registry:
     name: ARG | AD 5 - 17 Nov 26
     ids:
       - "120250840781380336"
-    color: "#db2777"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1265196766679188/posts/122127504351423600
     meta:
       business_name: Premium Academy Turquesa
@@ -5064,6 +5064,8 @@ ad_color_palette:
     value: "#96d7f8"
   - label: "#598FA1"
     value: "#598fa1"
+  - label: "#DDD72C"
+    value: "#ddd72c"
 comment_automation:
   enabled: true
   accept_any: false
