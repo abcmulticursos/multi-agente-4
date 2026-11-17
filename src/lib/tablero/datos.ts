@@ -816,7 +816,8 @@ export function salidasDeLaFicha(
         }
         // Con su «→» conectado (sigue de largo): sus «💰 Si paga» también, por si paga antes de seguir.
         salidas.push(...salidasDePago(f, t, nombres));
-        salidas.push({ clave: "siguiente", etiqueta: "→ Sigue sin esperar" });
+        // (17/11/2026) Con su tiempo puesto, espera ese tiempo antes de seguir (el motor: «su tiempo también sin botones»).
+        salidas.push({ clave: "siguiente", etiqueta: f.sin_respuesta_min ? `→ Sigue a los ${minutosLegibles(f.sin_respuesta_min)}` : "→ Sigue sin esperar" });
         return salidas;
       }
       // «💰 SI PAGA» TAMBIÉN CON OPCIONES (02/11/2026): su intro con cuadritos o la del order bump.

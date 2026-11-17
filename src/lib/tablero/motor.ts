@@ -922,6 +922,14 @@ async function irA(
       }
       // Sin opciones sigue de largo… salvo que elija de palabra («✍️ Si elige X»): entonces espera.
       if (botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && !cobraEnLaFicha(f, t)) {
+        // SU TIEMPO TAMBIÉN SIN BOTONES (17/11/2026). Él, fichas 20-22 de FLORES CO: «⏰ Si no responde en 5 minutos» puesto
+        // y la presentación salía a los 5 segundos. «El tiempo que pongas ahí se respeta, con botones o sin botones.» Sin
+        // opciones, ese tiempo es una pausa antes de seguir por «→»; si escribe en medio no se reinicia (`esPausa`).
+        if (f.sin_respuesta_min && cableDeLaSalida(t, f.id, "siguiente")) {
+          programar(convo, ACCION_RELOJ, { ficha: f.id, salida: "siguiente", vuelta }, ahora() + f.sin_respuesta_min * 60);
+          console.log(`[tablero] convo ${convoId}: «${f.titulo || f.id}» sigue por «→» en ${f.sin_respuesta_min} min`);
+          return;
+        }
         await seguir("siguiente");
         return;
       }
@@ -5242,8 +5250,9 @@ async function actuarCuadrito(convo: ConversationRow, t: Tablero, ficha: FichaDe
 function respondio(convo: ConversationRow, t: Tablero): void {
   const e0 = estadoEnElTablero(convo.id);
   const f0 = e0 ? t.fichas.find((x) => x.id === e0.ficha_id) : undefined;
-  // Una ficha «Esperar» cuenta su tiempo aunque el cliente escriba: su reloj no se toca.
-  if (f0?.tipo !== "esperar") tocarVuelta(convo.id);
+  // Una ficha «Esperar» cuenta su tiempo aunque el cliente escriba: su reloj no se toca. Tampoco la pausa de una ficha sin
+  // botones con su tiempo puesto (17/11/2026): lo que sigue sale a sus minutos aunque escriba en medio.
+  if (f0?.tipo !== "esperar" && !(f0 && esPausa(f0, t))) tocarVuelta(convo.id);
   const e = estadoEnElTablero(convo.id);
   const f = e ? t.fichas.find((x) => x.id === e.ficha_id) : undefined;
   // «SI NO RESPONDE» vuelve a contar desde ahora (en Mensaje y Order bump, también sin minutos: el
@@ -5256,6 +5265,13 @@ function respondio(convo: ConversationRow, t: Tablero): void {
   // SUS SEGUIMIENTOS (en la caja o colgados de esta ficha): el 1 vuelve a contar desde ahora.
   const seg = e?.seg_ficha ? t.fichas.find((x) => x.id === e.seg_ficha) : undefined;
   if (seg) reprogramarSeguimiento(convo, seg);
+}
+
+/** ¿Ficha sin botones, cuadritos ni elección, con su tiempo puesto y su «→» conectado? Entonces su tiempo es una pausa. */
+function esPausa(f: FichaDelTablero, t: Tablero): boolean {
+  if ((f.tipo !== "mensaje" && f.tipo !== "intro_ob") || !f.sin_respuesta_min || !cableDeLaSalida(t, f.id, "siguiente")) return false;
+  const { botones, cuadritos } = opcionesDe(pasosDeLaFicha(f));
+  return botones.length + cuadritos.length === 0 && eligeDeLaFicha(f).length === 0 && !cobraEnLaFicha(f, t) && !pideElNombre(f);
 }
 
 /** EL UPSELL QUE ESPERA SU TIEMPO Y EL CLIENTE ESCRIBE: la espera vuelve a contar desde ahora. */
