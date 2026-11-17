@@ -36,6 +36,19 @@ interface Props {
   placement?: "above" | "below";
 }
 
+// LOS RECIENTES, COMO EN WHATSAPP (17/11/2026). Él: «así como en WhatsApp los emojis quedan los últimos para escoger».
+// Los últimos usados, el más nuevo primero, en este navegador (si el navegador no deja guardar, no salen y nada falla).
+const CLAVE_RECIENTES = "emojis:recientes";
+const MAX_RECIENTES = 24;
+function leerRecientes(): string[] {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(CLAVE_RECIENTES) ?? "[]");
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, MAX_RECIENTES) : [];
+  } catch {
+    return [];
+  }
+}
+
 function normalizeSearch(value: string): string {
   return value
     .normalize("NFD")
@@ -53,6 +66,21 @@ export default function EmojiPicker({
   const [query, setQuery] = useState("");
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [catActiva, setCatActiva] = useState(0);
+  const [recientes, setRecientes] = useState<string[]>([]);
+  useEffect(() => {
+    if (open) setRecientes(leerRecientes());
+  }, [open]);
+  // Se guarda al elegir, pero la fila se reordena al volver a abrir (como WhatsApp): si se moviera
+  // en el acto, el siguiente clic caería en otro emoji.
+  const elegir = (emoji: string) => {
+    onPick(emoji);
+    const nuevos = [emoji, ...leerRecientes().filter((r) => r !== emoji)].slice(0, MAX_RECIENTES);
+    try {
+      window.localStorage.setItem(CLAVE_RECIENTES, JSON.stringify(nuevos));
+    } catch {
+      /* sin guardar: el selector sigue igual */
+    }
+  };
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -156,11 +184,17 @@ export default function EmojiPicker({
   // Emojis agrupados por categoria, para el scroll continuo.
   const porCategoria = useMemo(() => {
     if (!catalogo) return [];
-    return catalogo.categorias.map((nombre, i) => ({
+    const todas = catalogo.categorias.map((nombre, i) => ({
       nombre,
       emojis: catalogo.emojis.filter((x) => x.g === i),
     }));
-  }, [catalogo]);
+    if (recientes.length === 0) return todas;
+    const delCatalogo = new Map(catalogo.emojis.map((x) => [x.e, x]));
+    return [
+      { nombre: "🕘 Recientes", emojis: recientes.map((e) => delCatalogo.get(e) ?? { e, l: e, k: "", g: -1 }) },
+      ...todas,
+    ];
+  }, [catalogo, recientes]);
 
   function irACategoria(i: number) {
     setQuery("");
@@ -189,7 +223,7 @@ export default function EmojiPicker({
       key={key}
       type="button"
       title={x.l}
-      onClick={() => onPick(x.e)}
+      onClick={() => elegir(x.e)}
       className="flex h-[45px] w-[45px] items-center justify-center rounded text-2xl hover:bg-neutral-100"
     >
       <TwemojiGlyph emoji={x.e} className="h-[30px] w-[30px]" />
@@ -240,7 +274,7 @@ export default function EmojiPicker({
 
           {/* Pestañas horizontales: saltan a su seccion, no filtran. */}
           <div className="flex overflow-x-auto border-b border-neutral-100">
-            {(catalogo?.categorias ?? []).map((nombre, i) => (
+            {porCategoria.map(({ nombre }, i) => (
               <button
                 key={nombre}
                 type="button"
