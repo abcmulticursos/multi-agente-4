@@ -5509,7 +5509,7 @@ whatsapp:
             - |-
               🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
+              🔴 🏦  *PAGO MOVIL 🤳* ✨️ 
 
               *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
@@ -5907,7 +5907,7 @@ whatsapp:
             - |-
               🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
+              🔴 🏦  *PAGO MOVIL 🤳* ✨️ 
 
               *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
@@ -6328,7 +6328,7 @@ whatsapp:
             - |-
               🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
+              🔴 🏦  *PAGO MOVIL 🤳* ✨️ 
 
               *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
@@ -6749,7 +6749,7 @@ whatsapp:
             - |-
               🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              🔴 🏦  *TRANSFERENCIA (ALIAS o CBU).* ✨️ 
+              🔴 🏦  *PAGO MOVIL 🤳* ✨️ 
 
               *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
@@ -7639,11 +7639,6 @@ whatsapp:
       de: f-mwl9m8ad-6nb0i
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
       a: f-mwlagx7u-0mtsw
-    - id: c-mwlahzrs-bra
-      de: f-mwlagx7u-0mtsw
-      salida: sin_pago
-      a: f-mwl9m8ad-kbn4m
-      a_espejo: esp-mwlagx7u-f44i5
     - id: c-mwlai52n-7r4
       de: f-mwlagx7u-0mtsw
       salida: pagado
@@ -7656,11 +7651,6 @@ whatsapp:
       de: f-mwl9m8ad-l3tga
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
       a: f-mwlah4cj-rma9i
-    - id: c-mwlaij6o-ocm
-      de: f-mwlah4cj-rma9i
-      salida: sin_pago
-      a: f-mwl9m8ad-kbn4m
-      a_espejo: esp-mwlah4ck-5ptik
     - id: c-mwlaim7t-lmo
       de: f-mwlah4cj-rma9i
       salida: pagado
@@ -7669,11 +7659,6 @@ whatsapp:
       de: f-mwl9m8ae-t02hc
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
       a: f-mwlahco0-q6m5i
-    - id: c-mwlaivtb-0ft
-      de: f-mwlahco0-q6m5i
-      salida: sin_pago
-      a: f-mwl9m8ad-kbn4m
-      a_espejo: esp-mwlahco0-8tedo
     - id: c-mwlaix9b-wkx
       de: f-mwlahco0-q6m5i
       salida: pagado
@@ -7835,11 +7820,6 @@ whatsapp:
       salida: btn:b-mwle4v0y-b3mex
       a: f-mwle4v0z-vankb
       vista: colita
-    - id: c-mwle4v0z-71ixj
-      de: f-mwle4v0z-vankb
-      salida: sin_pago
-      a: f-mwle4v0y-w5t22
-      a_espejo: esp-mwle4v0z-fkpd9
     - id: c-mwle4v0z-6431s
       de: f-mwle4v0y-udbj7
       salida: btn:b-mwle4v0y-s6nvy
@@ -7907,6 +7887,21 @@ whatsapp:
       de: f-mwle60go-ut2i
       salida: rep:rmwle63u3
       a: f-mwle4v0z-up5zl
+    - id: c-mwlee6v1-pcy
+      de: f-mwlagx7u-0mtsw
+      salida: sin_pago
+      a: f-mwl9m8ad-std7r
+      a_espejo: e-mwlee3t3-xa62
+    - id: c-mwlef6lj-hxn
+      de: f-mwlah4cj-rma9i
+      salida: sin_pago
+      a: f-mwl9m8ad-ng8a4
+      a_espejo: e-mwlef192-hgil
+    - id: c-mwlefd05-o0t
+      de: f-mwlahco0-q6m5i
+      salida: sin_pago
+      a: f-mwl9m8ae-d3zyq
+      a_espejo: e-mwlefait-3h38
   cajas:
     - id: k-mwk1ex30
       x: 781
@@ -8035,23 +8030,23 @@ whatsapp:
       color: "#00aaff"
     - id: velo-mwle4v0z-1
       x: 242
-      y: 18403
-      ancho: 4158
-      alto: 1122
+      y: 18414
+      ancho: 4202
+      alto: 1111
       titulo: Nueva caja
       color: "#00aaff"
     - id: velo-mwle4v0z-2
       x: 231
-      y: 19701
-      ancho: 3960
-      alto: 1111
+      y: 19734
+      ancho: 4191
+      alto: 1078
       titulo: Nueva caja
       color: "#00aaff"
     - id: velo-mwle4v0z-3
       x: 209
-      y: 20911
-      ancho: 3960
-      alto: 1111
+      y: 20878
+      ancho: 4290
+      alto: 1144
       titulo: Nueva caja
       color: "#00aaff"
     - id: manta-inicio-VE-mwle58tv
@@ -8114,22 +8109,6 @@ whatsapp:
       ficha: f-mwl9m8ad-kbn4m
       x: 3234
       y: 11660
-    - id: esp-mwlagx7u-f44i5
-      ficha: f-mwl9m8ad-kbn4m
-      x: 3278
-      y: 12837
-    - id: esp-mwlah4ck-5ptik
-      ficha: f-mwl9m8ad-kbn4m
-      x: 3168
-      y: 14146
-    - id: esp-mwlahco0-8tedo
-      ficha: f-mwl9m8ad-kbn4m
-      x: 3201
-      y: 15389
-    - id: esp-mwle4v0z-fkpd9
-      ficha: f-mwle4v0y-w5t22
-      x: 3212
-      y: 17468
     - id: esp-mwle4v0z-hodqv
       ficha: f-mwle4v0y-w5t22
       x: 3256
@@ -8142,6 +8121,18 @@ whatsapp:
       ficha: f-mwle4v0y-w5t22
       x: 3179
       y: 21197
+    - id: e-mwlee3t3-xa62
+      ficha: f-mwl9m8ad-std7r
+      x: 3300
+      y: 12782
+    - id: e-mwlef192-hgil
+      ficha: f-mwl9m8ad-ng8a4
+      x: 3157
+      y: 14124
+    - id: e-mwlefait-3h38
+      ficha: f-mwl9m8ae-d3zyq
+      x: 3179
+      y: 15312
 messenger:
   encendido: true
   fichas:
