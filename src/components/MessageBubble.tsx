@@ -71,7 +71,8 @@ export function ReproductorDeAudio({ src, duracionGuardada }: { src: string; dur
   }, []);
   const tope = duracion > 0 ? duracion : Math.max(actual, 1);
   return (
-    <div className="flex w-[min(420px,72vw)] min-w-[220px] items-center gap-2">
+    // (18/11/2026, más tarde) Más corta: «la línea de tiempo del audio está muy larga, no se ve bien». ~200 px de línea.
+    <div className="flex w-[min(300px,64vw)] min-w-[220px] items-center gap-2">
       <audio
         ref={audio}
         preload="metadata"

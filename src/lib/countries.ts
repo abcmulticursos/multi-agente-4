@@ -143,7 +143,10 @@ export function countryOfConversation(convo: {
   phone: string;
   channel?: string | null;
   country_code?: string | null;
+  /** El país que eligió el cliente en el tablero (18/11/2026): manda, como en `getEffectiveCountryCode`. */
+  pais_elegido?: string | null;
 }): CountryCode {
+  if ((convo.pais_elegido ?? "").trim()) return resolveCountry(convo.pais_elegido);
   const guardado = (convo.country_code ?? "").trim();
   const canal = String(convo.channel ?? "");
   const sinTelefono = canal === "messenger" || canal === "test";

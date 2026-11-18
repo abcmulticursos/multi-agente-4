@@ -339,6 +339,12 @@ export interface ConversationRow {
   country_code: string | null;
   /** Evita repetir la pregunta editable de país en Messenger. */
   messenger_country_prompted: number;
+  /** El país que eligió el cliente (18/11/2026): manda sobre la lada. Ver `pais_elegido` en la migración. */
+  pais_elegido?: string | null;
+  /** El país que se le propuso y espera su «sí» o «no». */
+  pais_propuesto?: string | null;
+  /** 1 = ya se le preguntó por otro país (una sola vez por conversación). */
+  pais_preguntado?: number;
   /** Canal que reproduce el simulador sin salir a Meta. */
   test_channel: "whatsapp" | "messenger" | null;
   /**
@@ -521,6 +527,8 @@ export interface ConversationListRow extends ConversationRow {
   last_user_message_at: number | null;
   /** Cantidad total de mensajes del cliente (para etiqueta hot/warm). */
   user_msg_count: number;
+  /** unixepoch de la última IMAGEN (o PDF) que mandó el cliente (18/11/2026, la etiqueta «📷 imagen»). */
+  ultima_imagen_at: number | null;
 }
 
 export interface MessageRow {
@@ -783,6 +791,12 @@ const conversationColumns: Array<[string, string]> = [
   ["channel", "TEXT NOT NULL DEFAULT 'whatsapp'"],
   ["country_code", "TEXT"],
   ["messenger_country_prompted", "INTEGER NOT NULL DEFAULT 0"],
+  // EL PAÍS QUE ELIGIÓ EL CLIENTE (18/11/2026): la venezolana que escribe desde Colombia y paga con Pago Móvil. Lo pone
+  // el tablero tras su «sí» y manda sobre la lada en todo (`getEffectiveCountryCode`). El propuesto espera su respuesta;
+  // `pais_preguntado` = ya se le preguntó (una sola vez por conversación).
+  ["pais_elegido", "TEXT"],
+  ["pais_propuesto", "TEXT"],
+  ["pais_preguntado", "INTEGER NOT NULL DEFAULT 0"],
   ["test_channel", "TEXT"],
   // Modalidad del simulador. NULL en toda conversación real: el modo testeador
   // no puede alcanzarlas ni por error.
@@ -1016,6 +1030,21 @@ const stmtGetConvoByPhone = db.prepare<[string], ConversationRow>(
 const stmtSetConversationCountry = db.prepare<[string, number]>(
   "UPDATE conversations SET country_code = ?, messenger_country_prompted = 0 WHERE id = ?"
 );
+/** OTRO PAÍS (18/11/2026): se le pregunta (una vez) y, con su «sí», queda elegido. Ver `pais_elegido`. */
+export function proponerPaisAlCliente(conversationId: number, pais: string): void {
+  db.prepare("UPDATE conversations SET pais_propuesto = ?, pais_preguntado = 1 WHERE id = ?").run(pais, conversationId);
+}
+export function responderPaisPropuesto(conversationId: number, acepta: boolean): void {
+  db.prepare(
+    acepta
+      ? "UPDATE conversations SET pais_elegido = pais_propuesto, pais_propuesto = NULL, pais_preguntado = 1 WHERE id = ?"
+      : "UPDATE conversations SET pais_propuesto = NULL, pais_preguntado = 1 WHERE id = ?"
+  ).run(conversationId);
+}
+/** Elegido de frente (nombró un método que solo existe en ese país): sin pregunta, y no se vuelve a preguntar. */
+export function elegirPaisDelCliente(conversationId: number, pais: string): void {
+  db.prepare("UPDATE conversations SET pais_elegido = ?, pais_propuesto = NULL, pais_preguntado = 1 WHERE id = ?").run(pais, conversationId);
+}
 const stmtSetMessengerCountryPrompted = db.prepare<[number]>(
   "UPDATE conversations SET messenger_country_prompted = 1 WHERE id = ?"
 );
@@ -1182,7 +1211,11 @@ const stmtListConvos = db.prepare<[], ConversationListRow>(`
          AND m.role = 'user') AS last_user_message_at,
     (SELECT COUNT(*) FROM messages m
        WHERE m.conversation_id = c.id
-         AND m.role = 'user') AS user_msg_count
+         AND m.role = 'user') AS user_msg_count,
+    (SELECT MAX(m.created_at) FROM messages m
+       WHERE m.conversation_id = c.id
+         AND m.role = 'user'
+         AND m.media_type IN ('image', 'document')) AS ultima_imagen_at
   FROM conversations c
   WHERE c.channel != 'test'
   ORDER BY
@@ -1205,7 +1238,11 @@ const stmtListConvosLimit = db.prepare<[number], ConversationListRow>(`
          AND m.role = 'user') AS last_user_message_at,
     (SELECT COUNT(*) FROM messages m
        WHERE m.conversation_id = c.id
-         AND m.role = 'user') AS user_msg_count
+         AND m.role = 'user') AS user_msg_count,
+    (SELECT MAX(m.created_at) FROM messages m
+       WHERE m.conversation_id = c.id
+         AND m.role = 'user'
+         AND m.media_type IN ('image', 'document')) AS ultima_imagen_at
   FROM conversations c
   WHERE c.channel != 'test'
   ORDER BY

@@ -33,10 +33,14 @@ import {
   setMode,
   setPaidAt,
   setSelectedPaymentMethod,
+  elegirPaisDelCliente,
+  proponerPaisAlCliente,
+  responderPaisPropuesto,
   type ConversationRow,
   type ScheduledActionRow,
 } from "@/lib/db";
-import { formatCurrencyAmount, getCountryInfo } from "@/lib/countries";
+import { nombreDelPais, otroPaisQueMenciona, paisDelMetodoQueNombra, respuestaAlPais } from "./otro-pais";
+import { formatCurrencyAmount, getCountryInfo, resolveCountry, type CountryCode } from "@/lib/countries";
 import { sendEmail } from "@/lib/email";
 import { syncLeadStatus } from "@/lib/leads-sync";
 import {
@@ -3735,6 +3739,134 @@ function clienteDeOtroPais(convo: ConversationRow): boolean {
   return paisDeLaRuta(convo, tienda, pais) !== pais;
 }
 
+/**
+ * EL CLIENTE DE OTRO PAÍS (18/11/2026, ver otro-pais.ts). Él: «si dice soy venezolana pero vivo en Colombia… que le
+ * pregunte ¿deseas recibir la información para Venezuela?… solo una vez por conversación, siempre y cuando haga notar que es
+ * de otro país». Con su «sí», el país elegido manda en todo (`getEffectiveCountryCode`): precio, métodos, quién cobra y la
+ * revisión del comprobante. Si nombra un método que solo está en otro país (Pago Móvil), ese país sin preguntar.
+ *   «listo»    = se atendió aquí (se preguntó, o se contestó y ya se le mandó lo suyo).
+ *   «otra_vez» = cambió de país sin preguntar: el turno se vuelve a leer ya con el país nuevo.
+ *   null       = nada que ver con esto: sigue el turno de siempre.
+ */
+const BOTON_PAIS_SI = "pais_si";
+const BOTON_PAIS_NO = "pais_no";
+async function atenderOtroPais(
+  convo: ConversationRow,
+  t: Tablero,
+  contenido: string,
+  pais: CountryCode,
+  config: WorkflowConfig | null
+): Promise<"listo" | "otra_vez" | null> {
+  const c = getConversationById(convo.id) ?? convo;
+  const estado = estadoEnElTablero(convo.id);
+  if (!estado) return null;
+  const dondeEsta = t.fichas.find((f) => f.id === estado.ficha_id);
+  const sinEmpezar = dondeEsta?.tipo === "inicio";
+  const bandera = (p: string) => (/^[A-Z]{2}$/.test(p) ? String.fromCodePoint(...[...p].map((l) => 0x1f1e6 + l.charCodeAt(0) - 65)) : "");
+  // EN EL COBRO, SE VUELVE A ABRIR CON SU PAÍS: el precio congelado era el del otro país (un comprobante de Bs 2.500 contra
+  // un cobro de pesos salía «pagaste de menos»). Y se le dice el monto: sus burbujas de datos de ese país no lo llevan.
+  const reabrirElCobro = async (nuevo: CountryCode): Promise<boolean> => {
+    if (!estado.cobro_ficha_id || (estado.cobro_pagado ?? 0) > 0) return false;
+    const cobro = t.fichas.find((f) => f.id === estado.cobro_ficha_id);
+    const elegido = estado.cobro_elegido ?? cobro?.cobro?.producto_id ?? null;
+    const especial = cobro?.cobro?.producto_id === elegido ? cobro?.cobro?.precio_por_pais?.[nuevo] : undefined;
+    const monto = especial ?? (elegido ? precioDelProducto(producto(config, elegido), nuevo, enOferta(estado, [elegido])) : null);
+    await sendConfiguredSteps(
+      c,
+      [{ type: "text", body: `¡Perfecto! ${bandera(nuevo)} Te paso los datos para *${nombreDelPais(nuevo)}* 😊${monto ? `\n\nEl monto es *${formatCurrencyAmount(monto, nuevo as never)}*.` : ""}` }] as never
+    );
+    await irA(convo.id, t, estado.cobro_ficha_id);
+    return true;
+  };
+
+  // ESPERA SU RESPUESTA a «¿deseas recibir la información para X?».
+  if (c.pais_propuesto) {
+    const propuesto = resolveCountry(c.pais_propuesto);
+    let acepta = respuestaAlPais(contenido, BOTON_PAIS_SI, BOTON_PAIS_NO);
+    if (acepta === null) {
+      // Contesta con el país: el propuesto es «sí»; el suyo, «no».
+      if (otroPaisQueMenciona(contenido, pais, config) === propuesto) acepta = true;
+      else if (otroPaisQueMenciona(contenido, propuesto, config) === pais) acepta = false;
+    }
+    if (acepta === null) {
+      // No contestó eso: la pregunta se da por cerrada (una sola vez) y sigue con su país, como siempre.
+      responderPaisPropuesto(convo.id, false);
+      console.log(`[tablero] convo ${convo.id}: no contestó la pregunta de ${propuesto} → sigue con ${pais}`);
+      if (sinEmpezar && dondeEsta) {
+        await irA(convo.id, t, dondeEsta.id);
+        return "listo";
+      }
+      return null;
+    }
+    responderPaisPropuesto(convo.id, acepta);
+    console.log(`[tablero] convo ${convo.id}: ${acepta ? `«sí» → desde ahora es de ${propuesto}` : `«no» → sigue con ${pais}`}`);
+    if (acepta) setSelectedPaymentMethod(convo.id, null);
+    const nuevo = acepta ? propuesto : pais;
+    // Sin empezar: ahora sí la intro, ya con los precios de su país.
+    if (sinEmpezar && dondeEsta) {
+      await irA(convo.id, t, dondeEsta.id);
+      return "listo";
+    }
+    if (!acepta) {
+      await sendConfiguredSteps(c, [{ type: "text", body: "¡Perfecto! 😊" }] as never);
+      return "listo";
+    }
+    // En el cobro: se vuelve a abrir con el país nuevo (precio de su país y sus métodos de pago).
+    if (await reabrirElCobro(nuevo)) return "listo";
+    // A mitad del camino: el precio de su país de lo que ya se le presentó.
+    const presentados = presentadosDe(estado);
+    const lineas = presentados
+      .map((id) => {
+        const p = producto(config, id);
+        const v = precioDelProducto(p, nuevo, enOferta(estado, [id]));
+        return p && v !== null ? `*${p.name}*: *${formatCurrencyAmount(v, nuevo as never)}*` : null;
+      })
+      .filter(Boolean);
+    await sendConfiguredSteps(
+      c,
+      [
+        {
+          type: "text",
+          body: `¡Perfecto! ${bandera(nuevo)} Te atiendo con la información para *${nombreDelPais(nuevo)}* 😊${lineas.length ? `\n\n${lineas.length === 1 ? "El precio para " + nombreDelPais(nuevo) + " es" : "Los precios para " + nombreDelPais(nuevo) + ":"} ${lineas.join(" · ")}` : ""}`,
+        },
+      ] as never
+    );
+    return "listo";
+  }
+
+  // UNA SOLA VEZ POR CONVERSACIÓN, y nunca con algo ya pagado (cambiar de moneda a mitad de un pago lo enreda).
+  if (c.pais_preguntado || c.pais_elegido) return null;
+  if (comprasDelCliente(convo.id).length > 0 || (estado.cobro_pagado ?? 0) > 0) return null;
+  const porSuMetodo = paisDelMetodoQueNombra(contenido, pais, config);
+  if (porSuMetodo) {
+    elegirPaisDelCliente(convo.id, porSuMetodo);
+    setSelectedPaymentMethod(convo.id, null);
+    console.log(`[tablero] convo ${convo.id}: nombró un método que solo está en ${porSuMetodo} → desde ahora es de ${porSuMetodo}, sin preguntar`);
+    if (await reabrirElCobro(porSuMetodo)) return "listo";
+    return "otra_vez";
+  }
+  const otro = otroPaisQueMenciona(contenido, pais, config);
+  if (!otro) return null;
+  proponerPaisAlCliente(convo.id, otro);
+  console.log(`[tablero] convo ${convo.id}: deja ver que es de ${otro} (su número es de ${pais}) → se le pregunta`);
+  await sendConfiguredSteps(
+    c,
+    [
+      {
+        type: "text",
+        body: estado.cobro_ficha_id
+          ? `¿Deseas recibir los datos de pago para *${nombreDelPais(otro)}*? ${bandera(otro)}`
+          : `¡Ah, perfecto! 😊 ¿Deseas recibir la información para *${nombreDelPais(otro)}*? ${bandera(otro)}`,
+        buttons: [
+          { id: BOTON_PAIS_SI, label: "Sí", action: "send_steps" },
+          { id: BOTON_PAIS_NO, label: "No", action: "send_steps" },
+        ],
+      },
+    ] as never
+  );
+  return "listo";
+}
+
 async function turnoDelTablero(convo: ConversationRow, contenido: string, tiendaDelCanal?: Tienda | null): Promise<boolean> {
   let estado = estadoEnElTablero(convo.id);
   const config = loadWorkflowConfig();
@@ -3785,6 +3917,10 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
       if (entregasDelCliente(convo.id).length > 0) return true;
       console.log(`[tablero] convo ${convo.id}: su comprobante no encajó con ningún producto → se le manda la intro`);
     }
+    // DE OTRO PAÍS DESDE EL SALUDO (18/11/2026): «hola, soy venezolana pero vivo en Colombia» → primero la pregunta, y
+    // con su respuesta la intro ya sale con los precios de su país (ver `atenderOtroPais`).
+    if (!hayComprobantePendiente(convo.id, null) && (await atenderOtroPais(getConversationById(convo.id) ?? convo, t, contenido, pais, config)) === "listo")
+      return true;
     await irA(convo.id, t, inicio.id);
     // SU PRIMER MENSAJE ES UN COMPROBANTE (28/10/2026, su caso real: dos números con el mismo embudo; la
     // clienta recibió los datos en uno y pagó por el otro, donde nunca había escrito, y no se le entregó).
@@ -3797,6 +3933,14 @@ async function turnoDelTablero(convo: ConversationRow, contenido: string, tienda
   }
 
   const t = tableroDe(config, estado.tienda_id, (estado.canal as CanalDelTablero) || "whatsapp");
+
+  // EL CLIENTE DE OTRO PAÍS (18/11/2026): su respuesta a «¿deseas la información para X?», o la primera vez que deja ver que
+  // es de otro país. Un comprobante va antes (se lee con el país que tenga), y el regalo es del motor de siempre.
+  if (t && !ESTADOS_DEL_REGALO.has(convo.state ?? "") && !hayComprobantePendiente(convo.id, estado.comprobante_leido ?? null)) {
+    const otroPais = await atenderOtroPais(convo, t, contenido, pais, config);
+    if (otroPais === "listo") return true;
+    if (otroPais === "otra_vez") return turnoDelTablero(getConversationById(convo.id) ?? convo, contenido, tiendaDelCanal);
+  }
 
   // EL BOTÓN DE UN SEGUIMIENTO SIN CABLE VALE COMO ESCRIBIR SU TEXTO (13/11/2026). Él: «¿por qué no puede elegir sin
   // conectar? si ya está escrito el nombre en el botón». Tocar «SUPER PACK 2 EN 1» sin cable no hacía nada; escribirlo,

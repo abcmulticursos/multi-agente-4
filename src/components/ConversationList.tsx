@@ -44,6 +44,18 @@ export interface ConversationListItem {
   /** LA RUTA POR LA QUE ENTRÓ (20/10/2026): el camino de la intro que recibió. Vacío = la
    *  principal («Ruta A»). La anota el bot al mandar la intro; aquí solo se enseña. */
   camino?: string | null;
+  /** Cuándo leíste el chat por última vez, y la última imagen (o PDF) del cliente (18/11/2026, «📷 imagen»). */
+  last_read_at?: number | null;
+  ultima_imagen_at?: number | null;
+}
+
+/**
+ * «📷 IMAGEN» (18/11/2026). Él: «cuando una persona haya enviado una imagen, sea cual sea, aparezca un aviso… puede que haya
+ * habido un problema con el comprobante; revisaría cada conversación nueva con imagen». Mandó una imagen o un PDF que todavía
+ * no viste: llegó después de la última vez que abriste el chat. Al abrirlo se quita; con otra imagen, vuelve.
+ */
+export function tieneImagenSinVer(c: ConversationListItem): boolean {
+  return (c.ultima_imagen_at ?? 0) > (c.last_read_at ?? 0);
 }
 
 /** «Ruta A» (la principal) o la letra de su camino. Solo si ya recibió su intro. */
@@ -55,6 +67,7 @@ function rutaDe(c: ConversationListItem): string | null {
 type LabelFilter =
   | "todos"
   | "no leídos"
+  | "📷 imagen"
   | "hot"
   | "warm"
   | "pago"
@@ -92,6 +105,7 @@ function countryForConversation(c: ConversationListItem): CountryCode | null {
 
 const LABEL_PILL_STYLES: Record<Exclude<LabelFilter, "todos">, string> = {
   "no leídos": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "📷 imagen": "bg-violet-100 text-violet-700 border-violet-200",
   hot: "bg-rose-100 text-rose-700 border-rose-200",
   warm: "bg-yellow-100 text-yellow-700 border-yellow-200",
   pago: "bg-sky-100 text-sky-700 border-sky-200",
@@ -102,6 +116,7 @@ const LABEL_PILL_STYLES: Record<Exclude<LabelFilter, "todos">, string> = {
 const LABEL_OPTIONS: LabelFilter[] = [
   "todos",
   "no leídos",
+  "📷 imagen",
   "hot",
   "warm",
   "pago",
@@ -257,6 +272,7 @@ export default function ConversationList({
         if (labelFilter === "todos") return true;
         if (labelFilter === "no leídos")
           return (c.unread_count ?? 0) > 0 || c.manually_unread === 1;
+        if (labelFilter === "📷 imagen") return tieneImagenSinVer(c);
         return c.nocodb_label === labelFilter;
       }),
     [conversations, search, labelFilter, channelFilter, countryFilter, rutaFilter]
@@ -320,6 +336,7 @@ export default function ConversationList({
     const counts: Record<LabelFilter, number> = {
       todos: 0,
       "no leídos": 0,
+      "📷 imagen": 0,
       hot: 0,
       warm: 0,
       pago: 0,
@@ -338,6 +355,7 @@ export default function ConversationList({
       counts.todos += 1;
       if ((c.unread_count ?? 0) > 0 || c.manually_unread === 1)
         counts["no leídos"] += 1;
+      if (tieneImagenSinVer(c)) counts["📷 imagen"] += 1;
       if (
         c.nocodb_label &&
         Object.prototype.hasOwnProperty.call(counts, c.nocodb_label)
@@ -885,6 +903,14 @@ export default function ConversationList({
                               }`}
                           >
                             {c.nocodb_label}
+                          </span>
+                        )}
+                        {tieneImagenSinVer(c) && (
+                          <span
+                            title="Mandó una imagen o un PDF que todavía no viste: revisa si el bot leyó bien el comprobante"
+                            className={`shrink-0 rounded-full border px-1.5 py-0 text-[9px] font-medium ${LABEL_PILL_STYLES["📷 imagen"]}`}
+                          >
+                            📷 imagen
                           </span>
                         )}
                         {typeof c.intro_variant_sent === "number" &&

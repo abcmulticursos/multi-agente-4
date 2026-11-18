@@ -5352,6 +5352,10 @@ export function getEffectiveCountryCode(
   config = loadWorkflowConfig()
 ): CountryCode {
   const conversation = phone ? getConversationByPhone(phone) : undefined;
+  // EL PAÍS QUE ELIGIÓ EL CLIENTE MANDA SOBRE TODO (18/11/2026): la venezolana que escribe desde Colombia dijo «sí» a los
+  // datos de Venezuela (o pidió Pago Móvil). Desde ahí, precios, métodos, quién cobra y la revisión del comprobante son de
+  // Venezuela. Solo lo pone el tablero; vacío, todo como siempre.
+  if (conversation?.pais_elegido) return resolveCountry(conversation.pais_elegido);
   const savedCountry = conversation?.country_code;
   // Messenger y el simulador reciben una selección explícita de país. En
   // WhatsApp, cuando se eligió detectar por lada, una selección antigua no
