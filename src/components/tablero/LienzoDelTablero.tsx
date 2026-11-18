@@ -1586,6 +1586,10 @@ type DatosDeCaja = {
   elegida: boolean;
   /** Con Shift/Ctrl se suma a lo elegido; sin, queda solo el velo. */
   alElegir: (sumar?: boolean) => void;
+  /** En la capa de arriba (`NodoDeEsquinas`): si el velo de abajo está elegido (con clic o con el recuadro). */
+  cajaElegida?: boolean;
+  /** En la capa de arriba: el id del nodo del velo (para pasarle el arrastre desde el nombre). */
+  nodoDeLaCaja?: string;
   alCambiar: (c: NonNullable<Tablero["cajas"]>[number]) => void;
   /** Pinta este velo Y todos los velos elegidos con él (vacío = sin color). */
   alPintar: (color: string) => void;
@@ -1721,7 +1725,12 @@ function useUnaSolaPaleta(): [{ x: number; y: number } | null, (p: { x: number; 
   return [pintando, poner];
 }
 
-function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
+// EL NOMBRE DE LA MANTA, ENCIMA DE TODO (17/11/2026). Él: «no puedo agarrar más de 2 mantas con shift click… cuando voy
+// para la tercera se deselecciona». La lógica de sumar estaba bien: el clic no llegaba al nombre. El velo vive debajo de
+// las fichas y los cables, y su nombre con él: la ficha Inicio, un cable o la esquina de estirar (al alejarse) lo tapaban,
+// y el clic caía en ellos. Ahora el nodo del velo dibuja solo el velo (`capa` «velo»), y el nombre con sus botones se
+// dibuja en la capa de las esquinas (`capa` «titulo»), que va encima de todo.
+function NodoDeCaja({ data, selected, capa = "velo" }: NodeProps<Node<DatosDeCaja>> & { capa?: "velo" | "titulo" }) {
   const t = TEMA[data.tema];
   const manta = data.manta;
   const [eligiendoPais, setEligiendoPais] = useState<{ x: number; y: number } | null>(null);
@@ -1738,14 +1747,29 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
       {/* Sus cuatro esquinas viven en `NodoDeEsquinas`, ENCIMA de las fichas. */}
       <div
         className="h-full w-full rounded-2xl"
-        style={{
-          background: color ? conTransparencia(color, data.tema === "oscuro" ? 0.24 : 0.16) : t.caja,
-          boxShadow: color ? `inset 0 0 0 4px ${conTransparencia(color, 0.75)}` : undefined,
-          outline: marcada ? `3px solid ${t.tituloCaja}` : "none",
-          pointerEvents: "none",
-        }}
+        style={
+          capa === "titulo"
+            ? { pointerEvents: "none" }
+            : {
+                background: color ? conTransparencia(color, data.tema === "oscuro" ? 0.24 : 0.16) : t.caja,
+                boxShadow: color ? `inset 0 0 0 4px ${conTransparencia(color, 0.75)}` : undefined,
+                outline: marcada ? `3px solid ${t.tituloCaja}` : "none",
+                pointerEvents: "none",
+              }
+        }
       >
+        {capa === "titulo" && (<>
         <div
+          // ARRASTRAR DESDE EL NOMBRE SIGUE MOVIENDO LA MANTA: el nombre está en la capa de arriba, así que el «apretar»
+          // se le pasa al velo de abajo, que es el que React Flow arrastra (con su grupo, como siempre).
+          onMouseDown={(e) => {
+            if (e.button !== 0 || !data.nodoDeLaCaja) return;
+            e.stopPropagation();
+            const velo = (e.currentTarget.closest(".react-flow") ?? document).querySelector(`.react-flow__node[data-id="${CSS.escape(data.nodoDeLaCaja)}"]`);
+            velo?.dispatchEvent(
+              new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, button: 0, buttons: 1, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey })
+            );
+          }}
           onClick={(e) => {
             e.stopPropagation();
             data.alElegir(e.shiftKey || e.ctrlKey || e.metaKey);
@@ -1757,7 +1781,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             const r = e.currentTarget.getBoundingClientRect();
             setEligiendoPais({ x: r.left, y: r.bottom + 6 });
           }}
-          className={`ml-5 mt-3 inline-block cursor-pointer rounded-md px-1 text-sm font-bold uppercase tracking-wide ${data.elegida ? "underline" : ""}`}
+          className={`nopan ml-5 mt-3 inline-block cursor-pointer rounded-md px-1 text-sm font-bold uppercase tracking-wide ${data.elegida ? "underline" : ""}`}
           style={{ color: t.tituloCaja, pointerEvents: "all" }}
           title={
             manta
@@ -1914,6 +1938,7 @@ function NodoDeCaja({ data, selected }: NodeProps<Node<DatosDeCaja>>) {
             {manta.mirando ? "✕ Ver todo" : "▶ Ver recorrido"}
           </button>
         )}
+        </>)}
       </div>
     </div>
   );
@@ -2570,6 +2595,10 @@ function NodoDeEsquinas({ data }: NodeProps<Node<DatosDeCaja & { nodoDeLaCaja: s
           }}
         />
       ))}
+      {/* El nombre del velo y sus botones, encima de fichas, cables y esquinas (ver `NodoDeCaja`). */}
+      <div className="absolute inset-0" style={{ pointerEvents: "none" }}>
+        <NodoDeCaja {...({ data, selected: !!data.cajaElegida } as unknown as NodeProps<Node<DatosDeCaja>>)} capa="titulo" />
+      </div>
     </div>
   );
 }
@@ -3621,7 +3650,7 @@ export default function LienzoDelTablero({
           focusable: false,
           deletable: false,
           connectable: false,
-          data: { ...(n.data as DatosDeCaja), nodoDeLaCaja: n.id },
+          data: { ...(n.data as DatosDeCaja), nodoDeLaCaja: n.id, cajaElegida: !!n.selected },
         };
       }),
   ];
