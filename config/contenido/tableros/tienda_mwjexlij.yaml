@@ -5297,7 +5297,7 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* cuéntame un poquito sobre ti 😊
 
               *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
@@ -5343,7 +5343,7 @@ whatsapp:
         - type: text
           body_variants:
             - |
-              *Excelente que tengas experiencia!* 🤗
+              *¡Excelente que tengas experiencia!* 🤗
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -5404,7 +5404,7 @@ whatsapp:
                     - |-
                       *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
-                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automáticamente los bonos de obsequio* 🎁😱
 
                       ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
@@ -5422,7 +5422,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
                       🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
@@ -5439,7 +5439,7 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+                      🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
                       🔴  *PAGO MÓVIL* 📲 ✨️ 
 
@@ -5585,7 +5585,7 @@ whatsapp:
 
                       🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -5659,7 +5659,7 @@ whatsapp:
               ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
               ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
 
-              🟣 *¿COMO FUNCIONA?*
+              🟣 *¿CÓMO FUNCIONA?*
 
               - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
 
@@ -5670,7 +5670,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
@@ -5835,7 +5835,7 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* cuéntame un poquito sobre ti 😊
 
               *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
@@ -5881,7 +5881,7 @@ whatsapp:
         - type: text
           body_variants:
             - |
-              *Excelente que tengas experiencia!* 🤗
+              *¡Excelente que tengas experiencia!* 🤗
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -5936,7 +5936,7 @@ whatsapp:
                     - |-
                       *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
-                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automáticamente los bonos de obsequio* 🎁😱
 
                       ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
@@ -5954,14 +5954,14 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b-mwlehzqq-anv31
@@ -5985,7 +5985,7 @@ whatsapp:
 
                       🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -6059,7 +6059,7 @@ whatsapp:
               ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
               ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
 
-              🟣 *¿COMO FUNCIONA?*
+              🟣 *¿CÓMO FUNCIONA?*
 
               - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
 
@@ -6070,7 +6070,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
@@ -6235,7 +6235,7 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* cuéntame un poquito sobre ti 😊
 
               *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
@@ -6281,7 +6281,7 @@ whatsapp:
         - type: text
           body_variants:
             - |
-              *Excelente que tengas experiencia!* 🤗
+              *¡Excelente que tengas experiencia!* 🤗
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -6336,7 +6336,7 @@ whatsapp:
                     - |-
                       *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
-                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automáticamente los bonos de obsequio* 🎁😱
 
                       ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
@@ -6354,14 +6354,14 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b-mwlehzqr-w11yd
@@ -6385,7 +6385,7 @@ whatsapp:
 
                       🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -6459,7 +6459,7 @@ whatsapp:
               ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
               ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
 
-              🟣 *¿COMO FUNCIONA?*
+              🟣 *¿CÓMO FUNCIONA?*
 
               - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
 
@@ -6504,7 +6504,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
@@ -6669,7 +6669,7 @@ whatsapp:
             - |-
               Hola! *{¡Hola! Te saluda Tania|¡Hola! Soy Tania|¡Bienvenido(a)! Te saluda Tania|¡Mucho gusto! Mi nombre es Tania}* y soy parte del equipo de *AbcMulticlases* un gusto saludarte 👋🏼😊
 
-              ⚠️ *Antes de brindarte la información* cuentame un  poquito sobre tí 😊
+              ⚠️ *Antes de brindarte la información* cuéntame un poquito sobre ti 😊
 
               *¿Ya tienes experiencia en este bonito Arte de las Flores de Papel?* 🌸🌺🌿
           delay_after_sec: 6
@@ -6715,7 +6715,7 @@ whatsapp:
         - type: text
           body_variants:
             - |
-              *Excelente que tengas experiencia!* 🤗
+              *¡Excelente que tengas experiencia!* 🤗
 
               ✅️ *Quiero darte una noticia que te va a gustar:* 🧡
 
@@ -6770,7 +6770,7 @@ whatsapp:
                     - |-
                       *{No dejes pasar la oportunidad de recibir más por menos|Aprovecha esta oportunidad para obtener más por menos|No pierdas la oportunidad de llevarte más por menos|Esta es tu oportunidad de recibir más por menos}.* 💫
 
-                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automaticamente los bonos de obsequio* 🎁😱
+                      🌸 *Al adquirir* el *{{PRODUCTO}} llévate automáticamente los bonos de obsequio* 🎁😱
 
                       ⭐ *{Y Empieza a crear tus primeras obras de arte hoy!|Y comienza a crear tus primeras obras de arte hoy!|Y empieza a elaborar tus primeras obras de arte hoy!|Y da inicio a la creación de tus primeras obras de arte hoy!}* 🌹
                   delay_after_sec: 6
@@ -6788,14 +6788,14 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseás obtenerlo* podés adquirirlo a tan solo *{{PRECIO_BASE}}|Podés adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
                       {{LISTA_METODOS_POR_PAIS}}
 
-                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
                     - id: b-mwlehzqr-182q7
@@ -6819,7 +6819,7 @@ whatsapp:
 
                       🚨 *{Descuento exclusivo válido solo por Hoy!|¡Descuento exclusivo válido únicamente por Hoy!|¡Descuento especial válido solo por Hoy!}*, {aprovéchalo antes de que se agote!|¡aprovecha esta oportunidad antes de que se agote!|¡no dejes pasar esta oportunidad!} ⏳
 
-                      *EN RESUMEN RECIBIRAS:*
+                      *EN RESUMEN RECIBIRÁS:*
 
                       Nuestro *{{PRODUCTO}}* 📚 incluye:
 
@@ -6893,7 +6893,7 @@ whatsapp:
               ❌*({antes|Antes|Precio anterior|Precio regular})* ~{{PRECIO_MERCADO}}~
               ✅ 🚀 *{HOY|AHORA|SOLO POR HOY|PRECIO DE HOY}: S/. {precio} SOLES* ‼️
 
-              🟣 *¿COMO FUNCIONA?*
+              🟣 *¿CÓMO FUNCIONA?*
 
               - *1).-* 💵 Realiza un único pago de *S/. {precio} SOLES*
 
@@ -6938,7 +6938,7 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
