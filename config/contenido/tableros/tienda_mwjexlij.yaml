@@ -2363,8 +2363,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl18nl4-1idy
       tipo: mensaje
-      x: 1177
-      y: 1023
+      x: 748
+      y: 517
       steps:
         - type: text
           body_variants:
@@ -2379,8 +2379,8 @@ whatsapp:
             - "{📚️ Un super Kit que *te ayudará a perfeccionar tu técnica y ampliará tu conocimiento en este bello arte* ‼️ 😊👇️|📚️ Un súper combo que *te permitirá mejorar tu técnica y expandir tus conocimientos en esta bella disciplina* ‼️ 😊👇️|📚️ Un kit muy completo que *te servirá para afinar tu técnica y enriquecer tu aprendizaje en este arte tan lindo* ‼️ 😊👇️}"
     - id: f-mwl1bzja-hp8v
       tipo: mensaje
-      x: 1177
-      y: 1221
+      x: 748
+      y: 715
       steps:
         - type: text
           body_variants:
@@ -2397,8 +2397,8 @@ whatsapp:
             - "{📚️ Un super Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido y fácil y divertido* ‼️ 😊👇️|📚️ Un súper Kit digital que *te ayudará a crear tus primeros proyectos y hará que aprender sea rápido, fácil y divertido* ‼️ 😊👇️|📚️ Un Kit digital increíble que *te ayudará a hacer tus primeros proyectos y hará que aprender sea veloz, sencillo y entretenido* ‼️ 😊👇️}"
     - id: f-mwl1fjxr-fn4j
       tipo: mensaje
-      x: 1177
-      y: 1419
+      x: 748
+      y: 913
       steps:
         - type: text
           body_variants:
@@ -2668,8 +2668,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl97xpi-ladn5
       tipo: mensaje
-      x: 1155
-      y: 2233
+      x: 671
+      y: 2101
       steps:
         - type: text
           body_variants:
@@ -2682,8 +2682,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl97xpi-ercvg
       tipo: mensaje
-      x: 1155
-      y: 2431
+      x: 770
+      y: 2134
       steps:
         - type: text
           body_variants:
@@ -2698,8 +2698,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl97xpj-cnfm9
       tipo: mensaje
-      x: 1155
-      y: 2629
+      x: 869
+      y: 2167
       steps:
         - type: text
           body_variants:
@@ -2967,8 +2967,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl9b586-5ipiq
       tipo: mensaje
-      x: 1144
-      y: 3520
+      x: 759
+      y: 3344
       steps:
         - type: text
           body_variants:
@@ -2981,8 +2981,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9b586-5p3ss
       tipo: mensaje
-      x: 1144
-      y: 3718
+      x: 869
+      y: 3399
       steps:
         - type: text
           body_variants:
@@ -2997,8 +2997,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9b586-iq76e
       tipo: mensaje
-      x: 1144
-      y: 3916
+      x: 990
+      y: 3443
       steps:
         - type: text
           body_variants:
@@ -8014,6 +8014,36 @@ whatsapp:
           caption_variants:
             - ""
           delay_after_sec: 5
+    - id: f-mwmbt6q6-orbn6
+      tipo: mensaje
+      x: 1276
+      y: 1199
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1mTC59GvZHTzBG_OQSzjXoCAFJ6A2MCYd/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
+    - id: f-mwmbtur1-lsb9c
+      tipo: mensaje
+      x: 1199
+      y: 2453
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1mTC59GvZHTzBG_OQSzjXoCAFJ6A2MCYd/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
+    - id: f-mwmbukfp-wyqe7
+      tipo: mensaje
+      x: 1243
+      y: 3707
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1mTC59GvZHTzBG_OQSzjXoCAFJ6A2MCYd/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -8260,30 +8290,6 @@ whatsapp:
       de: f-mwjv96j2-unv4
       salida: rep:rmwl16ea7
       a: f-mwl100qj-8r1g
-    - id: c-mwl1gyh1-iwq
-      de: f-mwl100qj-8r1g
-      salida: dec:a4afbf20-4125-4e4f-91a7-2b568a1c9cdb
-      a: f-mwl18nl4-1idy
-    - id: c-mwl1gzts-0nt
-      de: f-mwl100qj-8r1g
-      salida: dec:da16f5c1-0f14-4659-972a-cbf19496de64
-      a: f-mwl1bzja-hp8v
-    - id: c-mwl1h259-9lb
-      de: f-mwl100qj-8r1g
-      salida: dec:d4b1e948-7eba-4802-ad6f-78a97fc7724c
-      a: f-mwl1fjxr-fn4j
-    - id: c-mwl1jv5j-our
-      de: f-mwl18nl4-1idy
-      salida: siguiente
-      a: f-mwl1jnq7-v9g3p
-    - id: c-mwl1jxlp-xcw
-      de: f-mwl1bzja-hp8v
-      salida: siguiente
-      a: f-mwl1jnq7-v9g3p
-    - id: c-mwl1jyto-aa1
-      de: f-mwl1fjxr-fn4j
-      salida: siguiente
-      a: f-mwl1jnq7-v9g3p
     - id: c-mwl1nscc-38m
       de: f-mwl1jnq7-v9g3p
       salida: dec:d-mwl1jnq8-6o12b
@@ -8306,39 +8312,11 @@ whatsapp:
       salida: sin_pago
       a: f-mwl1i41z-6kqdb
       a_espejo: e-mwl1o9ri-fcos
-    - id: c-mwl8nfdj-2th
-      de: f-mwl100qj-8r1g
-      salida: sin_respuesta
-      a: f-mwl1fjxr-fn4j
     - id: c-mwl97xpj-tz5sr
       de: f-mwl97xpi-cnvhv
       salida: pagado
       a: f-mwl97xpi-uhi0k
       vista: cable
-    - id: c-mwl97xpj-pqreb
-      de: f-mwl97xpi-wyp4p
-      salida: dec:d-mwl97xpi-zd1k0
-      a: f-mwl97xpi-ladn5
-    - id: c-mwl97xpj-mi8si
-      de: f-mwl97xpi-wyp4p
-      salida: dec:d-mwl97xpi-5s7jl
-      a: f-mwl97xpi-ercvg
-    - id: c-mwl97xpj-6l54a
-      de: f-mwl97xpi-wyp4p
-      salida: dec:d-mwl97xpi-7z7il
-      a: f-mwl97xpj-cnfm9
-    - id: c-mwl97xpj-kmpeg
-      de: f-mwl97xpi-ladn5
-      salida: siguiente
-      a: f-mwl97xpj-29nrp
-    - id: c-mwl97xpj-2hflg
-      de: f-mwl97xpi-ercvg
-      salida: siguiente
-      a: f-mwl97xpj-29nrp
-    - id: c-mwl97xpj-0ayoi
-      de: f-mwl97xpj-cnfm9
-      salida: siguiente
-      a: f-mwl97xpj-29nrp
     - id: c-mwl97xpj-u9ax0
       de: f-mwl97xpj-29nrp
       salida: dec:d-mwl97xpj-1lf0m
@@ -8361,39 +8339,11 @@ whatsapp:
       salida: sin_pago
       a: f-mwl97xpj-oep7j
       a_espejo: esp-mwl97xpj-ao6i8
-    - id: c-mwl97xpj-atg4d
-      de: f-mwl97xpi-wyp4p
-      salida: sin_respuesta
-      a: f-mwl97xpj-cnfm9
     - id: c-mwl9b587-u66sa
       de: f-mwl9b586-u2mbf
       salida: pagado
       a: f-mwl9b586-pnnay
       vista: cable
-    - id: c-mwl9b587-kr77n
-      de: f-mwl9b586-qqka6
-      salida: dec:d-mwl9b586-qtnan
-      a: f-mwl9b586-5ipiq
-    - id: c-mwl9b587-bf94y
-      de: f-mwl9b586-qqka6
-      salida: dec:d-mwl9b586-n4z44
-      a: f-mwl9b586-5p3ss
-    - id: c-mwl9b587-d6yds
-      de: f-mwl9b586-qqka6
-      salida: dec:d-mwl9b586-tikax
-      a: f-mwl9b586-iq76e
-    - id: c-mwl9b587-eixpo
-      de: f-mwl9b586-5ipiq
-      salida: siguiente
-      a: f-mwl9b586-v72s5
-    - id: c-mwl9b587-pkq1k
-      de: f-mwl9b586-5p3ss
-      salida: siguiente
-      a: f-mwl9b586-v72s5
-    - id: c-mwl9b587-jbsjq
-      de: f-mwl9b586-iq76e
-      salida: siguiente
-      a: f-mwl9b586-v72s5
     - id: c-mwl9b587-887we
       de: f-mwl9b586-v72s5
       salida: dec:d-mwl9b586-qc7gg
@@ -8416,10 +8366,6 @@ whatsapp:
       salida: sin_pago
       a: f-mwl9b586-wbddz
       a_espejo: esp-mwl9b587-7ni3u
-    - id: c-mwl9b587-8xn3g
-      de: f-mwl9b586-qqka6
-      salida: sin_respuesta
-      a: f-mwl9b586-iq76e
     - id: c-mwl9b587-0llb0
       de: f-mwl9b586-9pyxz
       salida: pagado
@@ -9045,6 +8991,66 @@ whatsapp:
       de: f-mwmado3w-7dzpz
       salida: siguiente
       a: f-mwl9m8ad-6nb0i
+    - id: c-mwmbtdh9-o67
+      de: f-mwl100qj-8r1g
+      salida: dec:a4afbf20-4125-4e4f-91a7-2b568a1c9cdb
+      a: f-mwmbt6q6-orbn6
+    - id: c-mwmbtegt-nxq
+      de: f-mwl100qj-8r1g
+      salida: dec:da16f5c1-0f14-4659-972a-cbf19496de64
+      a: f-mwmbt6q6-orbn6
+    - id: c-mwmbtfel-g1b
+      de: f-mwl100qj-8r1g
+      salida: dec:d4b1e948-7eba-4802-ad6f-78a97fc7724c
+      a: f-mwmbt6q6-orbn6
+    - id: c-mwmbtgfy-6u1
+      de: f-mwl100qj-8r1g
+      salida: sin_respuesta
+      a: f-mwmbt6q6-orbn6
+    - id: c-mwmbtilq-unq
+      de: f-mwmbt6q6-orbn6
+      salida: siguiente
+      a: f-mwl1jnq7-v9g3p
+    - id: c-mwmbua5h-1pd
+      de: f-mwl97xpi-wyp4p
+      salida: dec:d-mwl97xpi-zd1k0
+      a: f-mwmbtur1-lsb9c
+    - id: c-mwmbub19-i7i
+      de: f-mwl97xpi-wyp4p
+      salida: dec:d-mwl97xpi-5s7jl
+      a: f-mwmbtur1-lsb9c
+    - id: c-mwmbubwd-8c7
+      de: f-mwl97xpi-wyp4p
+      salida: dec:d-mwl97xpi-7z7il
+      a: f-mwmbtur1-lsb9c
+    - id: c-mwmbucrx-4nh
+      de: f-mwl97xpi-wyp4p
+      salida: sin_respuesta
+      a: f-mwmbtur1-lsb9c
+    - id: c-mwmbue1h-dqu
+      de: f-mwmbtur1-lsb9c
+      salida: siguiente
+      a: f-mwl97xpj-29nrp
+    - id: c-mwmbuz7q-xcx
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-qtnan
+      a: f-mwmbukfp-wyqe7
+    - id: c-mwmbv1w5-rm0
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-n4z44
+      a: f-mwmbukfp-wyqe7
+    - id: c-mwmbv2ph-pg7
+      de: f-mwl9b586-qqka6
+      salida: dec:d-mwl9b586-tikax
+      a: f-mwmbukfp-wyqe7
+    - id: c-mwmbv3qt-k6z
+      de: f-mwl9b586-qqka6
+      salida: sin_respuesta
+      a: f-mwmbukfp-wyqe7
+    - id: c-mwmbv5lh-8xv
+      de: f-mwmbukfp-wyqe7
+      salida: siguiente
+      a: f-mwl9b586-v72s5
   cajas:
     - id: k-mwk1ex30
       x: 781
