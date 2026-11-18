@@ -5538,36 +5538,135 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              {{LISTA_METODOS_POR_PAIS}}
+              🔴  *PAGO MÓVIL* 📲 ✨️ 
+
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
-          decisions:
-            - id: d-mwlehzqq-qqi3s
-              title: DATOS DE PAGO
-              keywords:
-                - Nequi
-                - daviplata
-                - bre-b
-                - neki
-                - nnequi
-                - nqui
-                - davi
-                - nek
-                - neq
-                - bre
-                - con bre
-                - con nequi
-                - con davi
-                - con daviplata
-                - con bre
-                - tengo bre
-                - tengo nequi
-                - tengo daviplata
-                - tengo davi
-                - tengo neki
-              color: esmeralda
+          buttons:
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+              label: SI QUIERO
+              action: send_steps
               steps: []
+          decisions:
+            - id: d-mweg7vsd-r3noo
+              enabled: false
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-95jss
+              enabled: false
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-54xhg
+              enabled: false
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-wvgfl
+              enabled: false
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
       presenta:
         - "@tienda:basico"
     - id: f-mwlehzqq-ajv19
@@ -5839,36 +5938,135 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *{¿CÓMO LO ADQUIERES?|¿CÓMO ADQUIRIRLO?|¿CÓMO ADQUIRIRLO?|¿CÓMO OBTENERLO?}* *{RESPONDE CON EL METODO DE PAGO QUE PREFIERAS|ELIGE UN MÉTODO DE PAGO|INDÍCANOS TU MÉTODO DE PAGO|RESPONDE CON TU METODO DE PAGO FAVORITO}* 👇🏼
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              {{LISTA_METODOS_POR_PAIS}}
+              🔴  *PAGO MÓVIL* 📲 ✨️ 
+
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
-          decisions:
-            - id: d-mwlehzqq-jzels
-              title: DATOS DE PAGO
-              keywords:
-                - Nequi
-                - daviplata
-                - bre-b
-                - neki
-                - nnequi
-                - nqui
-                - davi
-                - nek
-                - neq
-                - bre
-                - con bre
-                - con nequi
-                - con davi
-                - con daviplata
-                - con bre
-                - tengo bre
-                - tengo nequi
-                - tengo daviplata
-                - tengo davi
-                - tengo neki
-              color: esmeralda
+          buttons:
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+              label: SI QUIERO
+              action: send_steps
               steps: []
+          decisions:
+            - id: d-mweg7vsd-r3noo
+              enabled: false
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-95jss
+              enabled: false
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-54xhg
+              enabled: false
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-wvgfl
+              enabled: false
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
       presenta:
         - "@tienda:basico"
     - id: f-mwlehzqq-qc41b
@@ -6174,17 +6372,135 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              {{LISTA_METODOS_POR_PAIS}}
+              🔴  *PAGO MÓVIL* 📲 ✨️ 
 
-              *HAZ CLICK EN EL BOTÓN "SI QUIERO" SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
           buttons:
-            - id: b-mwlehzqr-svo68
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
               label: SI QUIERO
               action: send_steps
               steps: []
+          decisions:
+            - id: d-mweg7vsd-r3noo
+              enabled: false
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-95jss
+              enabled: false
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-54xhg
+              enabled: false
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-wvgfl
+              enabled: false
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
       presenta:
         - "@tienda:basico"
     - id: f-mwlehzqr-duyp1
@@ -6490,17 +6806,135 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              🛒 *PUEDES ADQUIRIRLO CON LOS SIGUIENTES METODOS DE PAGO* 
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Podés realizar tu pago mediante: 🛍️👇️
 
-              {{LISTA_METODOS_POR_PAIS}}
+              🔴  *PAGO MÓVIL* 📲 ✨️ 
 
-              *HAZ CLICK EN EL BOTÓN "SI QUIERO" SI DESEÁS CONOCER LOS DATOS DE PAGO* 😊👇️
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONÁ EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUERÉS VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
           delay_after_sec: 6
           buttons:
-            - id: b-mwlehzqr-ayp81
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
               label: SI QUIERO
               action: send_steps
               steps: []
+          decisions:
+            - id: d-mweg7vsd-r3noo
+              enabled: false
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-95jss
+              enabled: false
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-54xhg
+              enabled: false
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-wvgfl
+              enabled: false
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
       presenta:
         - "@tienda:basico"
   cables:
@@ -7234,10 +7668,6 @@ whatsapp:
       de: f-mwlehzqp-bfnc4
       salida: siguiente
       a: f-mwlehzqq-yuob8
-    - id: c-mwlehzqr-qhxxl
-      de: f-mwlehzqq-yuob8
-      salida: dec:d-mwlehzqq-qqi3s
-      a: f-mwlehzqo-cockf
     - id: c-mwlehzqr-x8z3n
       de: f-mwlehzqq-yuob8
       salida: pagado
@@ -7289,10 +7719,6 @@ whatsapp:
       de: f-mwlehzqq-1y9mh
       salida: siguiente
       a: f-mwlehzqq-3owap
-    - id: c-mwlehzqr-cq07h
-      de: f-mwlehzqq-3owap
-      salida: dec:d-mwlehzqq-jzels
-      a: f-mwlehzqq-ajv19
     - id: c-mwlehzqr-pmtn4
       de: f-mwlehzqq-3owap
       salida: pagado
@@ -7425,14 +7851,6 @@ whatsapp:
       de: f-mwlehzqr-ry1f4
       salida: sin_respuesta
       a: f-mwlehzqr-vlpb0
-    - id: c-mwlehzqr-zm7gb
-      de: f-mwlehzqr-pr22n
-      salida: btn:b-mwlehzqr-svo68
-      a: f-mwlehzqq-qc41b
-    - id: c-mwlehzqr-v9wi5
-      de: f-mwlehzqr-pqwyf
-      salida: btn:b-mwlehzqr-ayp81
-      a: f-mwlehzqr-duyp1
     - id: c-mwlek1th-5he
       de: f-mwle60go-ut2i
       salida: rep:r1
