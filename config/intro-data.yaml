@@ -5739,6 +5739,8 @@ biblioteca_de_productos:
       *Papel bond mayor de 90 gr — ideal para flores más delicadas y ligeras y pequeñas.
       - Cartulina opalina o cartulina de 120-180 gr* — da más cuerpo y firmeza a los pétalos.
 
+      INCLUYE VIDEOS INSTRUCTIVOS 🎬️
+
       Las personas usan mas la cartulina ya tiene diversidad de colores en cambio el papel bond por lo general se usa como practica.
     etiqueta: ""
     precios_por_pais:
@@ -5750,6 +5752,10 @@ biblioteca_de_productos:
         price_soles: 9900
         discount_price_soles: 6600
         market_price: 49500
+      VE:
+        price_soles: 3000
+        discount_price_soles: 2000
+        market_price: 15000
     ofrecer_imagenes: false
   - id: pmwir7i3o
     name: PRODUCTO FICTICIO PARA CONTRIBUCION
