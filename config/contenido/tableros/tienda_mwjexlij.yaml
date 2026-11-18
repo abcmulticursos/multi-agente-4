@@ -2416,7 +2416,7 @@ whatsapp:
       y: 1045
       seguimientos:
         - id: s-mwl1i41z-2vqiq
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl1i41z-2igag
               peso: 1
@@ -2459,10 +2459,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl1i41z-etf49
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl1i420-16ql0
               peso: 1
@@ -2504,8 +2502,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl1jnq7-v9g3p
       tipo: mensaje
       x: 1848
@@ -2719,7 +2715,7 @@ whatsapp:
       y: 2255
       seguimientos:
         - id: s-mwl97xpj-lsgwy
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl97xpj-7i5pw
               peso: 1
@@ -2762,10 +2758,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl97xpj-9qa0k
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl97xpj-ly5cv
               peso: 1
@@ -2807,8 +2801,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl97xpj-29nrp
       tipo: mensaje
       x: 1826
@@ -3022,7 +3014,7 @@ whatsapp:
       y: 3542
       seguimientos:
         - id: s-mwl9b586-xaidl
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9b586-ar02q
               peso: 1
@@ -3065,10 +3057,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9b586-0b2l8
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9b586-909gn
               peso: 1
@@ -3110,8 +3100,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9b586-v72s5
       tipo: mensaje
       x: 1815
@@ -3340,7 +3328,7 @@ whatsapp:
       y: 4752
       seguimientos:
         - id: s-mwl9b586-23n0v
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9b586-4iazz
               peso: 1
@@ -3383,10 +3371,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9b586-ufgow
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9b586-hwycs
               peso: 1
@@ -3428,8 +3414,6 @@ whatsapp:
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9b586-d6uew
       tipo: mensaje
       x: 1793
@@ -3646,7 +3630,7 @@ whatsapp:
       y: 11693
       seguimientos:
         - id: s-mwl9m8ad-ruowx
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9m8ad-n0gvs
               peso: 1
@@ -3689,10 +3673,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9m8ad-1pwz0
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9m8ad-t8mm8
               peso: 1
@@ -3741,8 +3723,6 @@ whatsapp:
                       action: send_steps
                       steps: []
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9m8ad-km90f
       tipo: mensaje
       x: 1848
@@ -4037,7 +4017,7 @@ whatsapp:
       y: 12903
       seguimientos:
         - id: s-mwl9m8ad-jxa4p
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9m8ad-fwxx4
               peso: 1
@@ -4080,10 +4060,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9m8ad-25421
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9m8ad-pdu7u
               peso: 1
@@ -4143,8 +4121,6 @@ whatsapp:
                       action: send_steps
                       steps: []
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9m8ad-6nb0i
       tipo: mensaje
       x: 1826
@@ -4439,7 +4415,7 @@ whatsapp:
       y: 14190
       seguimientos:
         - id: s-mwl9m8ad-m9xy5
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9m8ad-c59u2
               peso: 1
@@ -4482,10 +4458,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9m8ad-iu9c7
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9m8ad-4nlrp
               peso: 1
@@ -4534,8 +4508,6 @@ whatsapp:
                       action: send_steps
                       steps: []
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9m8ad-l3tga
       tipo: mensaje
       x: 1815
@@ -4864,7 +4836,7 @@ whatsapp:
       y: 15400
       seguimientos:
         - id: s-mwl9m8ae-wkx8p
-          minutos: 3
+          minutos: 30
           variantes:
             - id: v-mwl9m8ae-1v3nm
               peso: 1
@@ -4907,10 +4879,8 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-          ignora_silencio: true
-          ignora_tardio: true
         - id: s-mwl9m8ae-vkao3
-          minutos: 5
+          minutos: 480
           variantes:
             - id: v-mwl9m8ae-8pkwa
               peso: 1
@@ -4959,8 +4929,6 @@ whatsapp:
                       action: send_steps
                       steps: []
           activa_oferta: true
-          ignora_silencio: true
-          ignora_tardio: true
     - id: f-mwl9m8ae-t02hc
       tipo: mensaje
       x: 1793
