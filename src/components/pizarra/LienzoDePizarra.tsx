@@ -35,7 +35,6 @@ import {
   SelectionMode,
   BaseEdge,
   Controls,
-  EdgeLabelRenderer,
   getBezierPath,
   Handle,
   MiniMap,
@@ -46,7 +45,6 @@ import {
   useNodes,
   useNodesState,
   useStore,
-  ViewportPortal,
   type Edge,
   type EdgeProps,
   type Node,
@@ -55,6 +53,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { leerCorte, type CorteDeRuta } from "@/lib/editor/lee-pizarra";
+// Los mismos portales de React Flow, sin buscar la capa en todo el lienzo en cada cambio (ver capa-de-react-flow.tsx).
+import { EnLaCapaDeEtiquetas as EdgeLabelRenderer, EnLaCapaDelLienzo as ViewportPortal } from "@/components/capa-de-react-flow";
 
 // ══ EL MODELO: lo único que este archivo sabe del bot ═══════════════════════════
 
@@ -1721,8 +1721,16 @@ function ZonaDeLaSeleccion() {
   // EL ZOOM, PARA LA ELEVACIÓN (19/10/2026): 3 píxeles de pantalla con cualquier zoom. Ver
   // `--zoom-pizarra` en globals.css.
   const zoom = useStore((s) => s.transform[2]);
+  // (18/11/2026) Solo en lo que lo usa y sin heredarse (`inherits: false`, globals.css): puesto en la raíz, cada paso del
+  // zoom recalculaba la página entera, como pasaba en el tablero.
   useEffect(() => {
-    document.documentElement.style.setProperty("--zoom-pizarra", String(zoom || 1));
+    let regla = document.getElementById("zoom-de-la-pizarra") as HTMLStyleElement | null;
+    if (!regla) {
+      regla = document.createElement("style");
+      regla.id = "zoom-de-la-pizarra";
+      document.head.appendChild(regla);
+    }
+    regla.textContent = `.react-flow__node > *{--zoom-pizarra:${zoom || 1}}`;
   }, [zoom]);
   const nodos = useNodes();
   const laSuya = useStore((s) => s.nodesSelectionActive || s.userSelectionActive);

@@ -675,6 +675,12 @@ input,
 /* EL EFECTO DE ELEVACIÓN (19/10/2026): «cuando coloco el mouse sobre esa ficha, se mueve hacia
    arriba ligeramente… casi nada, pero se ve». 2 píxeles DE PANTALLA, con cualquier zoom: se
    compensa con --zoom-pizarra, que pone la pizarra. Sin sombra: solo el levantamiento. */
+/* (18/11/2026) Sin heredarse: la pizarra lo pone solo en `.react-flow__node > *`, que es donde se usa. */
+@property --zoom-pizarra {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
 .react-flow__node:not(.react-flow__node-caja):not(.react-flow__node-etiqueta) > * {
   /* Un poco más lenta y un píxel menos (19/10/2026): «en Sendy es un poquito más lenta, y
      parece que tiene un píxel menos». */
@@ -1589,6 +1595,20 @@ input,
 /* EL GESTOR DE SEGUIMIENTOS, EN EL MISMO DISEÑO: su lista de la izquierda sobre el fondo del tema. */
 .burbujas-nuevo .bn-cuerpo {
   padding: 18px 20px;
+}
+
+/* LA FICHA QUE SE ARRASTRA, EN SU PROPIA CAPA (18/11/2026): sin esto, cada paso del arrastre volvía a pintar el lienzo
+   entero (en FLORES, 3,3 s de pintado en 10 pasos). Solo mientras se arrastra: muchas capas fijas gastan memoria. */
+.lienzo-del-tablero .react-flow__node.dragging {
+  will-change: transform;
+}
+
+/* EL ZOOM DEL TABLERO NO SE HEREDA (18/11/2026): lo usan solo las fichas (su borde), y heredado obligaba a recalcular
+   los 25.000 elementos de un tablero grande en cada paso del zoom. El lienzo lo pone en `.react-flow__node`. */
+@property --zoom-tablero {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
 }
 
 /* 🪞 LA FAMILIA DE ESPEJOS (12/11/2026): al tocar la original o un espejo, todos se marcan. */

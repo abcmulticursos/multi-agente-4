@@ -12,13 +12,12 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
   BaseEdge,
   Controls,
-  EdgeLabelRenderer,
   getBezierPath,
   Handle,
   MiniMap,
@@ -31,7 +30,6 @@ import {
   useReactFlow,
   useStore,
   useStoreApi,
-  ViewportPortal,
   type ConnectionLineComponentProps,
   type Edge,
   type EdgeProps,
@@ -41,6 +39,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { createPortal } from "react-dom";
+// Los mismos portales de React Flow, sin buscar la capa en todo el lienzo en cada cambio (ver capa-de-react-flow.tsx).
+import { EnLaCapaDeEtiquetas as EdgeLabelRenderer, EnLaCapaDelLienzo as ViewportPortal } from "@/components/capa-de-react-flow";
 import { avisosDeLaFicha, BASICO_DE_LA_TIENDA, cobraEnLaFicha, conCablesPorElNombre, eligeDeLaFicha, entregasDeLaFicha, FULL_DE_LA_TIENDA, minutosLegibles, opcionesDe, pasosDeLaFicha, pideElNombre, productosQueCobraLaFicha, salidasDeLaFicha, unaEntregaLoEspera } from "@/lib/tablero/datos";
 import type { CableDelTablero, FichaDelTablero, Tablero, TipoDeFicha } from "@/lib/tablero/tipos";
 import { pasarAVoseo, pasosConVoseo, textosDeLosPasos, type ModoDeVoseo } from "@/lib/voseo";
@@ -525,10 +525,20 @@ function CableQueSeTira({ fromX, fromY, toX, toY, fromPosition, toPosition, from
 
 /** EL ZOOM DEL TABLERO EN CSS (`--zoom-tablero`), para que el borde de la familia del espejo tenga el mismo grosor
  *  en pantalla con cualquier zoom (13/11/2026). Solo pantalla. */
+// (18/11/2026) SOLO EN LAS FICHAS, Y SIN HEREDARSE: puesto en la raíz de la página, cada paso del zoom obligaba al
+// navegador a recalcular los 25.000 elementos de FLORES (y el editor entero), porque una variable de CSS se hereda a todo
+// lo de dentro. Ahora va en una regla para `.react-flow__node` y es `inherits: false` (globals.css): cambia solo en las
+// fichas, que son las únicas que la usan (el borde de elegida y el de la familia del espejo).
 function ZoomDelTablero() {
   const zoom = useStore((s) => s.transform[2]);
   useEffect(() => {
-    document.documentElement.style.setProperty("--zoom-tablero", String(zoom || 1));
+    let regla = document.getElementById("zoom-del-tablero") as HTMLStyleElement | null;
+    if (!regla) {
+      regla = document.createElement("style");
+      regla.id = "zoom-del-tablero";
+      document.head.appendChild(regla);
+    }
+    regla.textContent = `.lienzo-del-tablero .react-flow__node{--zoom-tablero:${zoom || 1}}`;
   }, [zoom]);
   return null;
 }
@@ -2773,7 +2783,10 @@ function NodoDeTexto({ data, selected }: NodeProps<Node<DatosDeTexto>>) {
   );
 }
 
-const TIPOS_DE_NODO = { inicio: NodoDeInicio, ficha: NodoDeFicha, caja: NodoDeCaja, esquinas: NodoDeEsquinas, texto: NodoDeTexto };
+// CADA FICHA SE REDIBUJA SOLO SI LE CAMBIÓ ALGO (18/11/2026). Él: «el movimiento es lento… cuando corto un cable se demora
+// más de medio segundo». Medido en FLORES (212 fichas): en 10 pasos de arrastre las fichas se redibujaron 8.372 veces, casi
+// todas sin que les cambiara nada; React Flow las vuelve a dibujar en cada paso. Con `memo` se saltan ese redibujo.
+const TIPOS_DE_NODO = { inicio: memo(NodoDeInicio), ficha: memo(NodoDeFicha), caja: memo(NodoDeCaja), esquinas: memo(NodoDeEsquinas), texto: memo(NodoDeTexto) };
 const TIPOS_DE_CABLE = { cable: CableDelTablero, compra: CaminoDeCompra };
 
 /**
@@ -3628,13 +3641,18 @@ export default function LienzoDelTablero({
   // (27/10/2026: al tirar un cable ya NO se ponen tenues las fichas: «no debería ser así». El cable
   // sigue sin ponerse donde no encaja, con su aviso.)
   // Las esquinas de cada velo, encima de las fichas (ver `NodoDeEsquinas`): mismo sitio y tamaño que el velo AHORA.
-  const nodosAlTirar: Node[] = [
+  // (18/11/2026) LAS MISMAS ESQUINAS MIENTRAS SU VELO NO CAMBIE: se armaban nuevas en cada dibujo (5 por paso de arrastre),
+  // y React Flow las volvía a procesar y dibujar todas. Ahora se reusa la de ese velo mientras su nodo sea el mismo.
+  const esquinasRecordadas = useRef(new WeakMap<Node, Node>());
+  const nodosAlTirar: Node[] = useMemo(() => [
     ...nodosVistos,
     ...nodosVistos
       .filter((n) => n.type === "caja")
       .map((n) => {
+        const ya = esquinasRecordadas.current.get(n);
+        if (ya) return ya;
         const s = n.style as { width?: number; height?: number } | undefined;
-        return {
+        const nuevo: Node = {
           id: `esquinas:${n.id}`,
           type: "esquinas",
           position: n.position,
@@ -3652,8 +3670,10 @@ export default function LienzoDelTablero({
           connectable: false,
           data: { ...(n.data as DatosDeCaja), nodoDeLaCaja: n.id, cajaElegida: !!n.selected },
         };
+        esquinasRecordadas.current.set(n, nuevo);
+        return nuevo;
       }),
-  ];
+  ], [nodosVistos]);
 
   // EL CAMINO «🛒 SI COMPRA» DE CADA CAJA DE SEGUIMIENTOS (31/10/2026): se dibuja solo; no está en
   // `tablero.cables` (no es un cable suyo ni lo lee el bot). Ver `caminosDeCompra`.
