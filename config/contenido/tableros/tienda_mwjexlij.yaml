@@ -8131,28 +8131,28 @@ whatsapp:
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#2563eb"
+      color: "#16a34a"
     - id: velo-mwlehzqr-1
       x: 275
       y: 18502
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#2563eb"
+      color: "#16a34a"
     - id: velo-mwlehzqr-2
       x: 264
       y: 19789
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#2563eb"
+      color: "#16a34a"
     - id: velo-mwlehzqr-3
       x: 242
       y: 20999
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#2563eb"
+      color: "#16a34a"
   espejos:
     - id: e-mwjw1bmq-15lw
       ficha: f-mwjfckbz-qeu2
