@@ -3415,6 +3415,12 @@ export default function LienzoDelTablero({
   const [familiaEspejo, setFamiliaEspejo] = useState<Set<string> | null>(null);
   const familiaViva = useRef<Set<string> | null>(null);
   familiaViva.current = familiaEspejo;
+  /** La ficha tocada (o un 🪞 espejo suyo) marca a su familia; sin espejos, no queda ninguna marcada. */
+  const marcarSuFamilia = (nodoId: string) => {
+    const ficha = fichaDelNodo(nodoId);
+    const suyos = (vivo.current.espejos ?? []).filter((e) => e.ficha === ficha);
+    setFamiliaEspejo(suyos.length ? new Set([ficha, `est:${ficha}`, ...suyos.map((e) => `esp:${e.id}`)]) : null);
+  };
   const conLaFamilia = (n: Node): Node =>
     familiaViva.current?.has(n.id) ? { ...n, className: "tablero-familia" } : n.className === "tablero-familia" ? { ...n, className: undefined } : n;
   // LO QUE APARECE QUEDA ELEGIDO (13/11/2026). Él: «la ficha o fichas duplicadas deben estar automáticamente
@@ -4278,10 +4284,12 @@ export default function LienzoDelTablero({
             // 🪞 LA FAMILIA DE ESPEJOS SE ILUMINA (12/11/2026). Él: «cuando clickee la ficha original los espejos se
             // resalten unos segundos… y al tocar el espejo, todos los vinculados». La original y todos sus espejos
             // quedan con el borde magenta fijo (13/11/2026; antes latían unos segundos) hasta tocar otra cosa.
-            const ficha = fichaDelNodo(n.id);
-            const suyos = (vivo.current.espejos ?? []).filter((e) => e.ficha === ficha);
-            setFamiliaEspejo(suyos.length ? new Set([ficha, `est:${ficha}`, ...suyos.map((e) => `esp:${e.id}`)]) : null);
+            marcarSuFamilia(n.id);
           }}
+          // UN CLIC CON EL RATÓN UN PELÍN MOVIDO (17/11/2026). Él: «toco otra ficha con espejo, aparece seleccionada pero no
+          // se desselecciona la de antes… es como si se trabara». Si el ratón se mueve 1 px al hacer clic, React Flow lo
+          // toma como arrastre: elige la ficha pero NO llama a onNodeClick, y el magenta se quedaba en la familia anterior.
+          onNodeDragStart={(_, n) => marcarSuFamilia(n.id)}
           connectionLineComponent={CableQueSeTira}
           // El clic en un puntito abre la lista «Conectar a…» (no el modo de conectar con dos clics).
           connectOnClick={false}
