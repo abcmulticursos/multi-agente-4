@@ -199,17 +199,29 @@ export async function GET(req: NextRequest) {
       bandeja: suya ? bandejaDeLaTienda(suya, fila.wa_phone_number_id) : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
     };
   });
-  return NextResponse.json(
-    {
-      conversations: conSuTienda,
-      introVariants: getConfiguredIntroVariants(),
-      parcial: Number.isFinite(limite) && limite > 0,
-      // Solo con la lista entera: con las 30 primeras faltarían las bandejas de chats más viejos.
-      bandejas:
-        Number.isFinite(limite) && limite > 0
-          ? undefined
-          : bandejasDelChat(new Set(conSuTienda.map((c) => c.bandeja).filter((b): b is string => !!b))),
-    },
-    { headers: { "Cache-Control": "no-store" } }
-  );
+  return jsonComprimido(req, {
+    conversations: conSuTienda,
+    introVariants: getConfiguredIntroVariants(),
+    parcial: Number.isFinite(limite) && limite > 0,
+    // Solo con la lista entera: con las 30 primeras faltarían las bandejas de chats más viejos.
+    bandejas:
+      Number.isFinite(limite) && limite > 0
+        ? undefined
+        : bandejasDelChat(new Set(conSuTienda.map((c) => c.bandeja).filter((b): b is string => !!b))),
+  });
+}
+
+/**
+ * LA LISTA COMPRIMIDA (18/11/2026). Él: «el chat se está poniendo súper lento». Medido en su bot: la lista entera
+ * (cada 20 s) pesaba 1,2 MB y las 30 primeras (cada 2 s) 84 KB, las dos SIN comprimir. Es el mismo JSON de siempre
+ * en gzip (como `/api/workflow` desde el 11/11); el navegador lo descomprime solo. Sin «gzip» en la petición, tal cual.
+ */
+async function jsonComprimido(req: NextRequest, data: unknown): Promise<NextResponse> {
+  const texto = JSON.stringify(data);
+  const cabeceras: Record<string, string> = { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Accept-Encoding" };
+  if (texto.length < 8_000 || !/\bgzip\b/.test(req.headers.get("accept-encoding") ?? "")) {
+    return new NextResponse(texto, { headers: cabeceras });
+  }
+  const { gzipSync } = await import("node:zlib");
+  return new NextResponse(new Uint8Array(gzipSync(texto)), { headers: { ...cabeceras, "Content-Encoding": "gzip" } });
 }
