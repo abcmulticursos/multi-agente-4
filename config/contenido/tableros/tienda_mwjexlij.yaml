@@ -3970,8 +3970,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl9m8ad-a49wl
       tipo: mensaje
-      x: 1155
-      y: 12881
+      x: 550
+      y: 12705
       steps:
         - type: text
           body_variants:
@@ -3984,8 +3984,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ad-9x65r
       tipo: mensaje
-      x: 1155
-      y: 13079
+      x: 781
+      y: 12749
       steps:
         - type: text
           body_variants:
@@ -4000,8 +4000,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ad-4igih
       tipo: mensaje
-      x: 1155
-      y: 13277
+      x: 891
+      y: 12771
       steps:
         - type: text
           body_variants:
@@ -4368,8 +4368,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl9m8ad-qonym
       tipo: mensaje
-      x: 1144
-      y: 14168
+      x: 792
+      y: 13981
       steps:
         - type: text
           body_variants:
@@ -4382,8 +4382,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ad-h37nj
       tipo: mensaje
-      x: 1144
-      y: 14366
+      x: 891
+      y: 13992
       steps:
         - type: text
           body_variants:
@@ -4398,8 +4398,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ad-nbrxl
       tipo: mensaje
-      x: 1144
-      y: 14564
+      x: 946
+      y: 14003
       steps:
         - type: text
           body_variants:
@@ -4789,8 +4789,8 @@ whatsapp:
       sin_respuesta_min: 5
     - id: f-mwl9m8ad-gixpe
       tipo: mensaje
-      x: 1122
-      y: 15378
+      x: 682
+      y: 15279
       steps:
         - type: text
           body_variants:
@@ -4803,8 +4803,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ad-xilld
       tipo: mensaje
-      x: 1122
-      y: 15576
+      x: 858
+      y: 15312
       steps:
         - type: text
           body_variants:
@@ -4819,8 +4819,8 @@ whatsapp:
           delay_after_sec: 5
     - id: f-mwl9m8ae-my39k
       tipo: mensaje
-      x: 1122
-      y: 15774
+      x: 1012
+      y: 15345
       steps:
         - type: text
           body_variants:
@@ -7984,6 +7984,36 @@ whatsapp:
         modo: producto
         producto_id: "@tienda:basico"
         metodos: true
+    - id: f-mwmabrgt-ildtv
+      tipo: mensaje
+      x: 1155
+      y: 15598
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
+    - id: f-mwmad3yt-3veym
+      tipo: mensaje
+      x: 1243
+      y: 14388
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
+    - id: f-mwmado3w-7dzpz
+      tipo: mensaje
+      x: 1232
+      y: 13090
+      steps:
+        - type: audio
+          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          caption_variants:
+            - ""
+          delay_after_sec: 5
   cables:
     - id: c-mwjv9h8c-htw
       de: inicio
@@ -8493,30 +8523,6 @@ whatsapp:
       de: f-mwl9m8ad-ltehw
       salida: sin_respuesta
       a: f-mwl9m8ad-179gs
-    - id: c-mwl9m8ae-1zjkh
-      de: f-mwl9m8ad-770lh
-      salida: dec:d-mwl9m8ad-wxxhg
-      a: f-mwl9m8ad-a49wl
-    - id: c-mwl9m8ae-lo21a
-      de: f-mwl9m8ad-770lh
-      salida: dec:d-mwl9m8ad-mjy04
-      a: f-mwl9m8ad-9x65r
-    - id: c-mwl9m8ae-4ugmq
-      de: f-mwl9m8ad-770lh
-      salida: dec:d-mwl9m8ad-ccjbt
-      a: f-mwl9m8ad-4igih
-    - id: c-mwl9m8ae-kaf5s
-      de: f-mwl9m8ad-a49wl
-      salida: siguiente
-      a: f-mwl9m8ad-6nb0i
-    - id: c-mwl9m8ae-luiao
-      de: f-mwl9m8ad-9x65r
-      salida: siguiente
-      a: f-mwl9m8ad-6nb0i
-    - id: c-mwl9m8ae-zxfyn
-      de: f-mwl9m8ad-4igih
-      salida: siguiente
-      a: f-mwl9m8ad-6nb0i
     - id: c-mwl9m8ae-h7wjx
       de: f-mwl9m8ad-6nb0i
       salida: pagado
@@ -8525,34 +8531,6 @@ whatsapp:
       de: f-mwl9m8ad-6nb0i
       salida: siguiente
       a: f-mwl9m8ad-std7r
-    - id: c-mwl9m8ae-aen2w
-      de: f-mwl9m8ad-770lh
-      salida: sin_respuesta
-      a: f-mwl9m8ad-4igih
-    - id: c-mwl9m8ae-gatb5
-      de: f-mwl9m8ad-ku2ze
-      salida: dec:d-mwl9m8ad-ancmd
-      a: f-mwl9m8ad-qonym
-    - id: c-mwl9m8ae-r4jlb
-      de: f-mwl9m8ad-ku2ze
-      salida: dec:d-mwl9m8ad-wlj8m
-      a: f-mwl9m8ad-h37nj
-    - id: c-mwl9m8ae-fgp1w
-      de: f-mwl9m8ad-ku2ze
-      salida: dec:d-mwl9m8ad-n5ngd
-      a: f-mwl9m8ad-nbrxl
-    - id: c-mwl9m8ae-jzc93
-      de: f-mwl9m8ad-qonym
-      salida: siguiente
-      a: f-mwl9m8ad-l3tga
-    - id: c-mwl9m8ae-89r47
-      de: f-mwl9m8ad-h37nj
-      salida: siguiente
-      a: f-mwl9m8ad-l3tga
-    - id: c-mwl9m8ae-d4tvb
-      de: f-mwl9m8ad-nbrxl
-      salida: siguiente
-      a: f-mwl9m8ad-l3tga
     - id: c-mwl9m8ae-oerdq
       de: f-mwl9m8ad-l3tga
       salida: pagado
@@ -8561,34 +8539,6 @@ whatsapp:
       de: f-mwl9m8ad-l3tga
       salida: siguiente
       a: f-mwl9m8ad-ng8a4
-    - id: c-mwl9m8ae-6qff8
-      de: f-mwl9m8ad-ku2ze
-      salida: sin_respuesta
-      a: f-mwl9m8ad-nbrxl
-    - id: c-mwl9m8ae-kzdiv
-      de: f-mwl9m8ad-uvozo
-      salida: dec:d-mwl9m8ad-z43us
-      a: f-mwl9m8ad-gixpe
-    - id: c-mwl9m8ae-v8bvx
-      de: f-mwl9m8ad-uvozo
-      salida: dec:d-mwl9m8ad-024rc
-      a: f-mwl9m8ad-xilld
-    - id: c-mwl9m8ae-51vix
-      de: f-mwl9m8ad-uvozo
-      salida: dec:d-mwl9m8ad-mkg7n
-      a: f-mwl9m8ae-my39k
-    - id: c-mwl9m8ae-ksfwp
-      de: f-mwl9m8ad-gixpe
-      salida: siguiente
-      a: f-mwl9m8ae-t02hc
-    - id: c-mwl9m8ae-bi9p4
-      de: f-mwl9m8ad-xilld
-      salida: siguiente
-      a: f-mwl9m8ae-t02hc
-    - id: c-mwl9m8ae-v7gc7
-      de: f-mwl9m8ae-my39k
-      salida: siguiente
-      a: f-mwl9m8ae-t02hc
     - id: c-mwl9m8ae-3exxf
       de: f-mwl9m8ae-t02hc
       salida: pagado
@@ -8613,10 +8563,6 @@ whatsapp:
       de: f-mwk1sr4j-wdaz
       salida: rep:rmwl9mq0z
       a: f-mwl9m8ad-uvozo
-    - id: c-mwla6u7l-h3r
-      de: f-mwl9m8ad-uvozo
-      salida: sin_respuesta
-      a: f-mwl9m8ae-my39k
     - id: c-mwlafr7k-57f
       de: f-mwl9m8ad-kbn4m
       salida: btn:56c4e3e8-aad4-4038-9818-979ca4a784b9~cmwk6e8eu0
@@ -9039,6 +8985,66 @@ whatsapp:
       de: f-mwk1sr4j-wdaz
       salida: rep:rmwm9ykw5
       a: f-mwma16da-b62r5
+    - id: c-mwmacf9n-36l
+      de: f-mwl9m8ad-uvozo
+      salida: dec:d-mwl9m8ad-z43us
+      a: f-mwmabrgt-ildtv
+    - id: c-mwmacg3f-cqu
+      de: f-mwl9m8ad-uvozo
+      salida: dec:d-mwl9m8ad-024rc
+      a: f-mwmabrgt-ildtv
+    - id: c-mwmachsj-wmh
+      de: f-mwl9m8ad-uvozo
+      salida: dec:d-mwl9m8ad-mkg7n
+      a: f-mwmabrgt-ildtv
+    - id: c-mwmaciuz-45b
+      de: f-mwl9m8ad-uvozo
+      salida: sin_respuesta
+      a: f-mwmabrgt-ildtv
+    - id: c-mwmacl1f-9xa
+      de: f-mwmabrgt-ildtv
+      salida: siguiente
+      a: f-mwl9m8ae-t02hc
+    - id: c-mwmad6n7-7cm
+      de: f-mwl9m8ad-ku2ze
+      salida: dec:d-mwl9m8ad-ancmd
+      a: f-mwmad3yt-3veym
+    - id: c-mwmad7kb-npj
+      de: f-mwl9m8ad-ku2ze
+      salida: dec:d-mwl9m8ad-wlj8m
+      a: f-mwmad3yt-3veym
+    - id: c-mwmad8gr-wf8
+      de: f-mwl9m8ad-ku2ze
+      salida: dec:d-mwl9m8ad-n5ngd
+      a: f-mwmad3yt-3veym
+    - id: c-mwmad9jo-dvs
+      de: f-mwl9m8ad-ku2ze
+      salida: sin_respuesta
+      a: f-mwmad3yt-3veym
+    - id: c-mwmadb4r-ox0
+      de: f-mwmad3yt-3veym
+      salida: siguiente
+      a: f-mwl9m8ad-l3tga
+    - id: c-mwmadr0s-m5x
+      de: f-mwl9m8ad-770lh
+      salida: dec:d-mwl9m8ad-wxxhg
+      a: f-mwmado3w-7dzpz
+    - id: c-mwmadrul-8d1
+      de: f-mwl9m8ad-770lh
+      salida: dec:d-mwl9m8ad-mjy04
+      a: f-mwmado3w-7dzpz
+    - id: c-mwmadsob-0cd
+      de: f-mwl9m8ad-770lh
+      salida: dec:d-mwl9m8ad-ccjbt
+      a: f-mwmado3w-7dzpz
+    - id: c-mwmadtnf-19j
+      de: f-mwl9m8ad-770lh
+      salida: sin_respuesta
+      a: f-mwmado3w-7dzpz
+    - id: c-mwmae04b-69s
+      de: f-mwmado3w-7dzpz
+      salida: siguiente
+      a: f-mwl9m8ad-6nb0i
   cajas:
     - id: k-mwk1ex30
       x: 781
