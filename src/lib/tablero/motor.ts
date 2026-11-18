@@ -172,7 +172,7 @@ import {
   varianteVista,
   type EstadoEnElTablero,
 } from "./estado";
-import { hayComprobantePendiente, huellaDelPago, idDelComprobantePendiente, leerComprobante, titularCoincide, ultimosMensajes } from "./lector";
+import { destinoCoincide, hayComprobantePendiente, huellaDelPago, idDelComprobantePendiente, leerComprobante, numerosQueLeDimos, titularCoincide, ultimosMensajes } from "./lector";
 import { reenviarLoDelTablero } from "./reenvio";
 import type { CanalDelTablero, FichaDelTablero, Tablero, VarianteDeFicha } from "./tipos";
 
@@ -2301,7 +2301,16 @@ async function atenderComprobante(
     const esYapeOPlin = lectura.metodo === "yape" || lectura.metodo === "plin";
     const esperado = elCobroDelPais(pais as never, config).titular;
     const vistos = [...new Set([lectura.titular, ...(lectura.nombres ?? [])].filter((n): n is string => !!n))];
-    const coincide = vistos.some((n) => titularCoincide(esperado, n));
+    // O POR EL NÚMERO DE QUIEN RECIBE (18/11/2026, sus conversaciones 857 y 966 de Venezuela): el Pago Móvil no imprime el
+    // nombre, solo el teléfono y la cédula de destino, y se rechazaban pagos buenos («¿cuál es el juego?», 4 rechazos). Vale
+    // si un número de destino es uno de los que el bot le dio en este chat o la cuenta guardada del país. Un titular que es
+    // solo un número (el lector puso ahí el teléfono) cuenta como número, no como nombre.
+    const porNumero = destinoCoincide(
+      [...(lectura.destino ?? []), ...(lectura.titular && !/\p{L}/u.test(lectura.titular) ? [lectura.titular] : [])],
+      [...numerosQueLeDimos(convo.id), elCobroDelPais(pais as never, config).numero_de_cuenta, elCobroDelPais(pais as never, config, getConversationById(convo.id)?.selected_payment_method).numero_de_cuenta]
+    );
+    if (porNumero) console.log(`[tablero] convo ${convo.id}: el número de destino (${(lectura.destino ?? []).join(" / ") || lectura.titular}) es uno de los que le dimos → el receptor coincide`);
+    const coincide = porNumero || vistos.some((n) => titularCoincide(esperado, n));
     const falla = esYapeOPlin ? !coincide : vistos.length > 0 && !coincide;
     if (esperado && falla) {
       console.warn(`[tablero] convo ${convo.id}: comprobante a nombre de «${lectura.titular ?? "?"}», se esperaba «${esperado}» → no se cuenta`);

@@ -17,6 +17,8 @@ export interface LecturaDelComprobante {
   titular?: string;
   /** TODOS los nombres que se ven en el comprobante (quien paga y quien recibe). */
   nombres?: string[];
+  /** Los números de quien RECIBE: teléfono, cuenta o cédula de destino (18/11/2026, Pago Móvil sin nombre). */
+  destino?: string[];
   metodo?: string;
 }
 
@@ -39,6 +41,26 @@ export function titularCoincide(esperado: string, recibido: string): boolean {
       return corta.length >= 3 && larga.startsWith(corta);
     })
   );
+}
+
+/**
+ * ¿EL DINERO LLEGÓ A UNO DE LOS NÚMEROS QUE EL BOT LE DIO? (18/11/2026, Venezuela). Él: «en los tickets no aparece el
+ * nombre de Ormidas». El Pago Móvil solo imprime el teléfono y la cédula de quien recibe. Se compara cada número de destino
+ * del comprobante (7 cifras o más, sin enmascarar) con los números que el BOT le mandó en este chat y con la cuenta guardada:
+ * por las últimas 7 cifras, así «V13523509» y «13523509», o «0426 417 2313» y «04264172313», son el mismo.
+ */
+export function destinoCoincide(numerosDelComprobante: string[], conocidos: string[]): boolean {
+  const cifras = (s: string) => (/[*•x]{2,}/i.test(s) ? "" : s.replace(/\D/g, ""));
+  const suyos = numerosDelComprobante.map(cifras).filter((d) => d.length >= 7);
+  const nuestros = conocidos.map(cifras).filter((d) => d.length >= 7);
+  return suyos.some((d) => nuestros.some((k) => d.slice(-7) === k.slice(-7)));
+}
+
+/** Los números que el bot (o el asesor) le escribió a este cliente: los datos de pago que recibió, tal cual. */
+export function numerosQueLeDimos(conversationId: number): string[] {
+  return ultimosMensajes(conversationId, 200)
+    .filter((m) => m.role !== "user")
+    .flatMap((m) => String(m.content ?? "").match(/\d[\d .-]{5,}\d/g) ?? []);
 }
 
 const HERRAMIENTA = {
@@ -70,6 +92,14 @@ const HERRAMIENTA = {
           type: "array",
           items: { type: "string" },
           description: "EVERY person or business name printed on the receipt (payer AND recipient, origin AND destination), each exactly as printed. Empty array if none.",
+        },
+        // (18/11/2026) El Pago Móvil de Venezuela no imprime el nombre de quien recibe: solo su teléfono («Destino») y su
+        // cédula («Identificación»). El lector ponía el teléfono como titular y el motor rechazaba un pago bueno.
+        destino: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Every number that identifies who RECEIVED the money, exactly as printed: destination phone, destination account, CBU/CVU/alias number, and the recipient's ID/cédula («Destino», «Para», «Cuenta destino», «Identificación» of the beneficiary). NEVER the payer's origin account. Empty array if none.",
         },
         metodo: {
           type: "string",
@@ -169,10 +199,11 @@ export async function leerComprobante(conversationId: number): Promise<LecturaDe
       operacion: limpio(args.operacion),
       titular: limpio(args.titular),
       nombres: Array.isArray(args.nombres) ? args.nombres.map(limpio).filter((n): n is string => !!n).slice(0, 6) : [],
+      destino: Array.isArray(args.destino) ? args.destino.map(limpio).filter((n): n is string => !!n).slice(0, 6) : [],
       metodo: limpio(args.metodo)?.toLowerCase(),
     };
     console.log(
-      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"} titular=${lectura.titular ?? "-"} nombres=${lectura.nombres?.join(" / ") || "-"} método=${lectura.metodo ?? "-"}`
+      `[tablero:lector] convo ${conversationId}: monto=${lectura.monto} operación=${lectura.operacion ?? "-"} fecha=${lectura.fecha ?? "-"} titular=${lectura.titular ?? "-"} nombres=${lectura.nombres?.join(" / ") || "-"} destino=${lectura.destino?.join(" / ") || "-"} método=${lectura.metodo ?? "-"}`
     );
     return lectura;
   } catch (err) {
