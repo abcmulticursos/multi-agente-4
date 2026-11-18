@@ -7899,6 +7899,26 @@ whatsapp:
       de: f-mwle60go-ut2i
       salida: rep:rmwle63u3
       a: f-mwlehzqr-ry1f4
+    - id: c-mwljrvly-q9u
+      de: f-mwlehzqr-1ilbx
+      salida: btn:b-mwlehzqp-8ig8b
+      a: f-mwlehzqr-duyp1
+      vista: colita
+    - id: c-mwljs8w5-od7
+      de: f-mwlehzqq-idwvo
+      salida: btn:b-mwlehzqp-8ig8b
+      a: f-mwlehzqq-qc41b
+      vista: colita
+    - id: c-mwljslsd-r8p
+      de: f-mwlehzqq-ogt5u
+      salida: btn:b-mwlehzqp-8ig8b
+      a: f-mwlehzqq-ajv19
+      vista: colita
+    - id: c-mwljt1f1-1t2
+      de: f-mwlehzqp-8ee8t
+      salida: btn:b-mwlehzqp-8ig8b~cmwljql6l0
+      a: f-mwlehzqo-cockf
+      vista: colita
   cajas:
     - id: k-mwk1ex30
       x: 781
