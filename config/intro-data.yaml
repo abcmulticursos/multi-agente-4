@@ -3398,26 +3398,45 @@ payment_profiles_by_country:
     direct_payment_steps: []
     direct_payment_cta: ""
     payment_buttons:
-      - label: Pago Movil
+      - label: PAGO MOVIL
         method: pago_movil
         aliases:
           - pago movil
           - pagomovil
+          - con pago movil
+          - pago móvil
+          - pagomóvil
+          - con móvil
+          - con movil
       - label: Transferencia
         method: transferencia_bancaria
         aliases:
           - transferencia
           - banco
+        enabled: false
       - label: Binance
         method: binance
         aliases:
           - binance
+        enabled: false
     payment_responses:
       pago_movil:
         - type: text
           body_variants:
-            - "[Referencia 🇻🇪 Venezuela] Escribe aqui los datos reales para Pago Movil. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+            - Excelente! adquirirlo a través de estos datos 👇️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              👤 Titular: {{nombre_receptor}}
+              🏦 Banco: BANCO PROVINCIAL
+              🪪 Cédula: V13523509
+              📱 Pago Móvil: 04264172313
           delay_after_sec: 0
+        - type: text
+          body_variants:
+            - Luego de eso nos envías la imagen de tu comprobante y recibirás tu enlace al instante 🤳😊
+          delay_after_sec: 6
       transferencia_bancaria:
         - type: text
           body_variants:
@@ -3441,11 +3460,23 @@ payment_profiles_by_country:
       price_soles: 0
       discount_price_soles: 0
       market_price: 0
-    metodo_pago_1: ""
-    metodo_pago_2: ""
-    metodo_pago_3: ""
+    metodo_pago_1: |-
+      👤 Titular: Ormidas Rodríguez
+      🏦 Banco: BANCO PROVINCIAL
+      🪪 Cédula: V13523509
+      📱 Pago Móvil: 04264172313
+    metodo_pago_2: |-
+      👤 Titular: Ormidas Rodríguez
+      🏦 Banco: BANCO PROVINCIAL
+      🪪 Cédula: V13523509
+      📱 Pago Móvil: 04264172313
+    metodo_pago_3: |-
+      👤 Titular: Ormidas Rodríguez
+      🏦 Banco: BANCO PROVINCIAL
+      🪪 Cédula: V13523509
+      📱 Pago Móvil: 04264172313
     metodo_pago_principal: ""
-    numero_de_cuenta: "13523509"
+    numero_de_cuenta: ""
     cuentas_por_metodo:
       pago_movil: "13523509"
     nombre_completo: Ormidas Rodriguez
