@@ -5271,11 +5271,13 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por PAGO MOVIL a los siguientes datos* 😊👇️
+              ⚡💳 *Puedes pagar por PAGO MOVIL a través de los siguientes datos* 😊👇️
 
               {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Luego nos envías la imagen de tu comprobante y recibirás el enlace al instante 🤳😊
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -5576,11 +5578,13 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Puedes pagar por PAGO MOVIL a través de los siguientes datos* 😊👇️
 
               {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Luego nos envías la imagen de tu comprobante y recibirás el enlace al instante 🤳😊
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -5875,11 +5879,13 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Puedes pagar por PAGO MOVIL a través de los siguientes datos* 😊👇️
 
               {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Luego nos envías la imagen de tu comprobante y recibirás el enlace al instante 🤳😊
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -6189,11 +6195,13 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              ⚡💳 *Puedes pagar por Nequi o Daviplata* 😊👇️
+              ⚡💳 *Puedes pagar por PAGO MOVIL a través de los siguientes datos* 😊👇️
 
               {{METODO_DE_PAGO_1}}
-
-              También podemos ayudarte a través de *Llave Bre-B* 🔑
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Luego nos envías la imagen de tu comprobante y recibirás el enlace al instante 🤳😊
           delay_after_sec: 6
       cobro:
         modo: producto
