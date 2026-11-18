@@ -24,6 +24,115 @@ export interface MessageDTO {
   wa_status: WaStatus | null;
 }
 
+/** «1:05» */
+const minutosYSegundos = (s: number) => {
+  const t = Math.max(0, Math.floor(Number.isFinite(s) ? s : 0));
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+};
+
+/**
+ * EL REPRODUCTOR DE AUDIO, CON SU LÍNEA LARGA (18/11/2026). Él, en el simulador: «la línea de tiempo es tan pequeña que
+ * no puedo arrastrar el puntito… que sea más larga y que pueda avanzar y retroceder». El del navegador mete play, tiempo,
+ * volumen y menú en 260 px y la línea quedaba mínima. Aquí: ▶/⏸, la línea a todo el ancho y el tiempo. Un audio grabado
+ * en el navegador (webm) no trae su duración (Infinity) y no se deja adelantar: se averigua saltando al final una vez.
+ */
+export function ReproductorDeAudio({ src, duracionGuardada }: { src: string; duracionGuardada: number | null }) {
+  const audio = useRef<HTMLAudioElement>(null);
+  const [sonando, setSonando] = useState(false);
+  const [actual, setActual] = useState(0);
+  const [duracion, setDuracion] = useState(duracionGuardada && duracionGuardada > 0 ? duracionGuardada : 0);
+  const averiguando = useRef(false);
+  const alCargar = () => {
+    const a = audio.current;
+    if (!a) return;
+    if (Number.isFinite(a.duration) && a.duration > 0) setDuracion(a.duration);
+    else {
+      averiguando.current = true;
+      a.currentTime = 1e7;
+    }
+  };
+  const alAvanzar = () => {
+    const a = audio.current;
+    if (!a) return;
+    if (averiguando.current) {
+      if (Number.isFinite(a.duration) && a.duration > 0) {
+        averiguando.current = false;
+        setDuracion(a.duration);
+        a.currentTime = 0;
+      }
+      return;
+    }
+    setActual(a.currentTime);
+  };
+  // Si el audio ya cargó sus datos antes de que React se enganchara (pasa con el caché), su aviso se perdió.
+  useEffect(() => {
+    if ((audio.current?.readyState ?? 0) >= 1) alCargar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const tope = duracion > 0 ? duracion : Math.max(actual, 1);
+  return (
+    <div className="flex w-[min(420px,72vw)] min-w-[220px] items-center gap-2">
+      <audio
+        ref={audio}
+        preload="metadata"
+        src={src}
+        onLoadedMetadata={alCargar}
+        onDurationChange={() => {
+          const a = audio.current;
+          if (a && !averiguando.current && Number.isFinite(a.duration) && a.duration > 0) setDuracion(a.duration);
+        }}
+        onTimeUpdate={alAvanzar}
+        onPlay={() => setSonando(true)}
+        onPause={() => setSonando(false)}
+        onEnded={() => {
+          setSonando(false);
+          setActual(0);
+          if (audio.current) audio.current.currentTime = 0;
+        }}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => {
+          const a = audio.current;
+          if (!a) return;
+          if (a.paused) void a.play().catch(() => {});
+          else a.pause();
+        }}
+        title={sonando ? "Pausar" : "Reproducir"}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
+      >
+        {sonando ? (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+            <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-4 w-4">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+      <input
+        type="range"
+        min={0}
+        max={tope}
+        step={0.05}
+        value={Math.min(actual, tope)}
+        onChange={(e) => {
+          const v = Number(e.target.value);
+          setActual(v);
+          if (audio.current) audio.current.currentTime = v;
+        }}
+        aria-label="Avanzar o retroceder el audio"
+        className="h-2 min-w-0 flex-1 cursor-pointer accent-emerald-600"
+      />
+      <span className="shrink-0 text-[11px] tabular-nums text-neutral-500">
+        {minutosYSegundos(actual)} / {minutosYSegundos(duracion)}
+      </span>
+    </div>
+  );
+}
+
 // Palomita simple gris (✓): mensaje aceptado por servidores de Meta.
 function CheckSingle({ className }: { className: string }) {
   return (
@@ -368,12 +477,7 @@ export default function MessageBubble({
         )}
         {isAudio ? (
           <div className="flex flex-col gap-2">
-            <audio
-              controls
-              preload="metadata"
-              src={`/api/media/${message.id}`}
-              className="w-full max-w-[260px]"
-            />
+            <ReproductorDeAudio src={`/api/media/${message.id}`} duracionGuardada={message.duration_sec} />
             {message.transcription ? (
               <div className="border-t border-neutral-200/60 pt-2 text-base md:text-sm italic leading-relaxed text-neutral-700">
                 <span className="mr-1">📝</span>
