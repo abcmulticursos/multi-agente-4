@@ -5845,8 +5845,8 @@ biblioteca_de_productos:
         discount_price_soles: 3100
         market_price: 23300
       CO:
-        price_soles: 9900
-        discount_price_soles: 6600
+        price_soles: 7000
+        discount_price_soles: 5000
         market_price: 49500
       VE:
         price_soles: 2500
