@@ -7572,7 +7572,7 @@ whatsapp:
       y: 29656
       steps:
         - type: audio
-          drive_url: https://drive.google.com/file/d/1_094x3qgufVJUWR0EdCFRySNcZMf6El8/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 6
@@ -8070,7 +8070,7 @@ whatsapp:
       y: 25773
       steps:
         - type: audio
-          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 5
@@ -8080,7 +8080,7 @@ whatsapp:
       y: 27005
       steps:
         - type: audio
-          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 5
@@ -8090,7 +8090,7 @@ whatsapp:
       y: 28226
       steps:
         - type: audio
-          drive_url: https://drive.google.com/file/d/1Y97q2K9-FfFPd4qmr5VwXeH21QA-R6FI/view?usp=sharing
+          drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
           caption_variants:
             - ""
           delay_after_sec: 5
