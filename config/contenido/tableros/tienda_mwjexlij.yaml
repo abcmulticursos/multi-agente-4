@@ -7425,6 +7425,22 @@ whatsapp:
       de: f-mwlehzqr-pqwyf
       salida: btn:b-mwlehzqr-ayp81
       a: f-mwlehzqr-duyp1
+    - id: c-mwlek1th-5he
+      de: f-mwle60go-ut2i
+      salida: rep:r1
+      a: f-mwlehzqp-7ij1o
+    - id: c-mwlek4lr-8lt
+      de: f-mwle60go-ut2i
+      salida: rep:r2
+      a: f-mwlehzqq-wma6l
+    - id: c-mwlek7bq-ji4
+      de: f-mwle60go-ut2i
+      salida: rep:rmwle6329
+      a: f-mwlehzqq-putia
+    - id: c-mwlekb45-gp9
+      de: f-mwle60go-ut2i
+      salida: rep:rmwle63u3
+      a: f-mwlehzqr-ry1f4
   cajas:
     - id: k-mwk1ex30
       x: 781
