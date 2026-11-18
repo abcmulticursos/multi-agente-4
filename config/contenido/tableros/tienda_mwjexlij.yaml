@@ -5436,138 +5436,6 @@ whatsapp:
                       label: SI QUIERO
                       action: send_steps
                       steps: []
-                - type: text
-                  body_variants:
-                    - |-
-                      🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
-
-                      🔴  *PAGO MÓVIL* 📲 ✨️ 
-
-                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS RECIBIR LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
-                  delay_after_sec: 6
-                  buttons:
-                    - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
-                      label: SI QUIERO
-                      action: send_steps
-                      steps: []
-                  decisions:
-                    - id: d-mweg7vsd-r3noo
-                      enabled: false
-                      title: Nequi
-                      keywords:
-                        - nequi
-                        - neki
-                        - neqi
-                        - nek
-                        - nnequi
-                        - neequi
-                        - nqui
-                        - neki
-                        - neqi
-                        - con nequi
-                      color: esmeralda
-                      steps:
-                        - type: text
-                          body_variants:
-                            - "Genial puees pagar al siguiente número:"
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - "{{LISTA_METODOS_POR_PAIS}}"
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - Luego nos envías tu comprobante y tu acceso será al instante
-                          delay_after_sec: 6
-                          enabled: false
-                    - id: d-mweg7vsd-95jss
-                      enabled: false
-                      title: DAVIPLATA
-                      keywords:
-                        - Daviplata
-                        - daviplta
-                        - dvipla
-                        - dviplata
-                        - daiplata
-                        - daviplaa
-                        - davi
-                        - con davipla
-                        - davipla
-                      color: ambar
-                      steps:
-                        - type: text
-                          body_variants:
-                            - Chevere puedes pagar al siguiente enlace
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - "{{LISTA_METODOS_POR_PAIS}}"
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - Luego nos envias tu comprobante y recibirás tu acceso en segundos
-                          delay_after_sec: 6
-                          enabled: false
-                    - id: d-mweg7vsd-54xhg
-                      enabled: false
-                      title: Bre-B
-                      keywords:
-                        - bre
-                        - bre-b
-                        - breb
-                        - bre b
-                        - brebe
-                        - reb-b
-                        - bbre
-                        - breebb
-                        - breb
-                      color: violeta
-                      steps:
-                        - type: text
-                          body_variants:
-                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - "{{METODO_DE_PAGO_1}}"
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - luego nos envias tu comprobante y tendrás acceso al instante.
-                          delay_after_sec: 6
-                          enabled: false
-                    - id: d-mweg7vsd-wvgfl
-                      enabled: false
-                      title: QUIERE COMPRAR
-                      keywords:
-                        - quiero comprar
-                        - como pago
-                        - voy a pagar
-                        - a donde pago
-                        - quiero pagar
-                      color: azul
-                      steps:
-                        - type: text
-                          body_variants:
-                            - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - "{{METODO_DE_PAGO_1}}"
-                          delay_after_sec: 6
-                          enabled: false
-                        - type: text
-                          body_variants:
-                            - luego nos envias tu comprobante y tendrás acceso al instante.
-                          delay_after_sec: 6
-                          enabled: false
         - id: s-mwlehzqq-s6di7
           minutos: 480
           variantes:
@@ -5603,13 +5471,22 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
+
+                      ⏰ *SI LO LLEVAS ANTES DE LOS 10 MINUTOS RECIBIRAS UN REGALITO EXTRA* 🎁
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
+                  buttons:
+                    - id: b-mwlehzqp-8ig8b~cmwljql6l0
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
           activa_oferta: true
     - id: f-mwlehzqq-yuob8
       tipo: mensaje
@@ -5959,12 +5836,12 @@ whatsapp:
 
                       🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
 
                       *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
-                    - id: b-mwlehzqq-anv31
+                    - id: b-mwlehzqp-8ig8b
                       label: SI QUIERO
                       action: send_steps
                       steps: []
@@ -6010,6 +5887,26 @@ whatsapp:
 
                       ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
                   delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - |-
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
+                      __________
+
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
+
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
+
+                      ⏰ *SI LO LLEVAS ANTES DE LOS 10 MINUTOS RECIBIRAS UN REGALITO EXTRA* 🎁
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwlehzqp-8ig8b
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
           activa_oferta: true
     - id: f-mwlehzqq-3owap
       tipo: mensaje
@@ -6359,12 +6256,12 @@ whatsapp:
 
                       🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
 
                       *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
-                    - id: b-mwlehzqr-w11yd
+                    - id: b-mwlehzqp-8ig8b
                       label: SI QUIERO
                       action: send_steps
                       steps: []
@@ -6403,13 +6300,22 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
+
+                      ⏰ *SI LO LLEVAS ANTES DE LOS 10 MINUTOS RECIBIRAS UN REGALITO EXTRA* 🎁
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
+                  buttons:
+                    - id: b-mwlehzqp-8ig8b
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
           activa_oferta: true
     - id: f-mwlehzqr-pr22n
       tipo: mensaje
@@ -6793,12 +6699,12 @@ whatsapp:
 
                       🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
 
                       *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
                   buttons:
-                    - id: b-mwlehzqr-182q7
+                    - id: b-mwlehzqp-8ig8b
                       label: SI QUIERO
                       action: send_steps
                       steps: []
@@ -6837,13 +6743,22 @@ whatsapp:
                 - type: text
                   body_variants:
                     - |-
-                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}. Responde el método de pago que prefieras|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}} responde con el método de pago que prefieras|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}! responde con el método de pago que prefieras}* y te envío los datos de pago 😊👇🏼
+                      🔴 *{Para adquirirlo* es muy sencillo, a tan solo *{{PRECIO_BASE}}|Si deseas obtenerlo* puedes adquirirlo a tan solo *{{PRECIO_BASE}}|Puedes adquirirlo* a tan solo *{{PRECIO_BASE}}!}*
                       __________
 
-                      {{LISTA_METODOS_POR_PAIS}}
+                      🛒 *{¿CÓMO COMPRO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
 
-                      ⚠️ *{Si lo adquieres en los próximos 10 minutos|Si completas tu compra en los próximos 10 minutos|Si realizas tu pago en los próximos 10 minutos|Si compras dentro de los próximos 10 minutos}* ⏰ {recibirás|te llevarás|obtendrás} un *{"Regalo Sorpresa EN PDF, !GRATIS!"|"Regalo Sorpresa en PDF, ¡TOTALMENTE GRATIS!"|"Obsequio Sorpresa en PDF, ¡GRATIS!"|"Regalo Sorpresa en PDF sin costo adicional"}* 🎁✨
+                      🔴 {{LISTA_METODOS_POR_PAIS}} 📲 ✨️
+
+                      ⏰ *SI LO LLEVAS ANTES DE LOS 10 MINUTOS RECIBIRAS UN REGALITO EXTRA* 🎁
+
+                      *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEAS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCA EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
                   delay_after_sec: 6
+                  buttons:
+                    - id: b-mwlehzqp-8ig8b
+                      label: SI QUIERO
+                      action: send_steps
+                      steps: []
           activa_oferta: true
     - id: f-mwlehzqr-pqwyf
       tipo: mensaje
@@ -7855,11 +7770,6 @@ whatsapp:
       de: f-mwlehzqq-3owap
       salida: pagado
       a: f-mwlehzqq-5fx4c
-    - id: c-mwlehzqr-9wqxl
-      de: f-mwlehzqq-ogt5u
-      salida: btn:b-mwlehzqq-anv31
-      a: f-mwlehzqq-ajv19
-      vista: colita
     - id: c-mwlehzqr-zthfh
       de: f-mwlehzqq-3owap
       salida: siguiente
@@ -7910,11 +7820,6 @@ whatsapp:
       de: f-mwlehzqr-pr22n
       salida: pagado
       a: f-mwlehzqq-g97k9
-    - id: c-mwlehzqr-ngp2k
-      de: f-mwlehzqq-idwvo
-      salida: btn:b-mwlehzqr-w11yd
-      a: f-mwlehzqq-qc41b
-      vista: colita
     - id: c-mwlehzqr-u6lz6
       de: f-mwlehzqr-pr22n
       salida: siguiente
@@ -7965,11 +7870,6 @@ whatsapp:
       de: f-mwlehzqr-pqwyf
       salida: pagado
       a: f-mwlehzqr-fysqk
-    - id: c-mwlehzqr-lizpd
-      de: f-mwlehzqr-1ilbx
-      salida: btn:b-mwlehzqr-182q7
-      a: f-mwlehzqr-duyp1
-      vista: colita
     - id: c-mwlehzqr-wlssr
       de: f-mwlehzqr-pqwyf
       salida: siguiente
