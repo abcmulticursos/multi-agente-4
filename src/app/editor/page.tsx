@@ -954,7 +954,6 @@ const BASE_PLACEHOLDER_OPTIONS: PlaceholderOption[] = [
   },
   {
     token: "{{NOMBRE_RECEPTOR}}",
-    oculto: true,
     label: "Nombre del receptor de pago",
     description:
       "Nombre configurado para validar el comprobante del país seleccionado.",
@@ -54881,6 +54880,7 @@ function PestanaDeUsuario({
         <VentanaDeProducto
           titulo={`Métodos de pago · ${paisLabel}`}
           colorPorDefecto="blanco"
+          ancho="max-w-[960px]"
           onCerrar={() => setAbierta(null)}
           onCancelar={cancelar}
         >
@@ -55027,7 +55027,7 @@ function PestanaDeUsuario({
                           aliases={boton.aliases ?? []}
                           onChange={(aliases) => cambiarBoton(i, { aliases })}
                           placeholder="Ej.: yape, yapeo, yae, llape"
-                          className="mt-1.5 block w-full resize-y rounded-lg border border-neutral-300 bg-tarjeta px-3 py-2 text-xs font-normal normal-case tracking-normal leading-relaxed text-neutral-900"
+                          className="mt-1.5 block w-full resize-y rounded-lg border border-neutral-300 bg-tarjeta px-3 py-2 text-sm font-normal normal-case tracking-normal leading-relaxed text-neutral-900"
                         />
                       </label>
                       {/* SIN PALABRAS, EL BOTÓN SE ENCIENDE IGUAL — pero solo
