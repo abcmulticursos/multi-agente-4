@@ -2659,6 +2659,7 @@ country_sales_enabled:
   AR: true
   CO: false
   BO: false
+  VE: false
 payment_profiles_by_country:
   EC:
     enabled: true
@@ -3385,6 +3386,70 @@ payment_profiles_by_country:
     numero_de_cuenta: ""
     cuentas_por_metodo: {}
     nombre_completo: ""
+  VE:
+    enabled: false
+    course_price_soles: 0
+    discount_price_soles: 0
+    market_price: 0
+    payment_validation:
+      yape_recipient_name_starts_with: Ormidas Rodriguez
+      require_receipt_date: false
+    payment_text: "[Referencia Venezuela] Puedes pagar por Pago Movil, transferencia bancaria o Binance. Cambia este texto por tus datos reales de Venezuela."
+    direct_payment_steps: []
+    direct_payment_cta: ""
+    payment_buttons:
+      - label: Pago Movil
+        method: pago_movil
+        aliases:
+          - pago movil
+          - pagomovil
+      - label: Transferencia
+        method: transferencia_bancaria
+        aliases:
+          - transferencia
+          - banco
+      - label: Binance
+        method: binance
+        aliases:
+          - binance
+    payment_responses:
+      pago_movil:
+        - type: text
+          body_variants:
+            - "[Referencia 🇻🇪 Venezuela] Escribe aqui los datos reales para Pago Movil. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+          delay_after_sec: 0
+      transferencia_bancaria:
+        - type: text
+          body_variants:
+            - "[Referencia 🇻🇪 Venezuela] Escribe aqui los datos reales para Transferencia. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+          delay_after_sec: 0
+      binance:
+        - type: text
+          body_variants:
+            - "[Referencia 🇻🇪 Venezuela] Escribe aqui los datos reales para Binance. Incluye titular, banco/cuenta/enlace y el monto {{precio}}."
+          delay_after_sec: 0
+    order_bump:
+      combo_price_soles: 0
+      combo_discount_price_soles: 0
+      basico_price_soles: 0
+      basico_discount_price_soles: 0
+      combo_market_price: 0
+    bioferta:
+      pack_price_soles: 0
+      pack_discount_price_soles: 0
+    upsell:
+      price_soles: 0
+      discount_price_soles: 0
+      market_price: 0
+    metodo_pago_1: ""
+    metodo_pago_2: ""
+    metodo_pago_3: ""
+    metodo_pago_principal: ""
+    numero_de_cuenta: "13523509"
+    cuentas_por_metodo:
+      pago_movil: "13523509"
+    nombre_completo: Ormidas Rodriguez
+    foto: /avatares/avatar-45.png
 customer_survey_auto_human_enabled: false
 post_gift_comment_auto_human_delay_minutes: 60
 order_bump_option_presentation_rule: "Presenta ambas opciones con buen valor. El combo debe sentirse como la opción más completa porque incluye el complemento adicional configurado. La segunda opción también debe sonar atractiva y completa: usa su nombre y resume su contenido con 2 detalles concretos tomado del contenido editable, como ejemplos, categorías, uso, formato, beneficio o audiencia. Si hay regalos configurados, menciónalos brevemente en la opción correspondiente. Al cerrar la comparación, remata en una frase breve que ambas opciones son buenas, pero que el combo conviene más si desea recibir también el complemento adicional."
