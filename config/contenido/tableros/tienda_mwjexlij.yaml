@@ -5551,10 +5551,10 @@ whatsapp:
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
-              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS RECIBIR LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN PARA CONOCER LOS DATOS DE PAGO}* 😊👇️
           delay_after_sec: 6
           buttons:
-            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwljy2t90
               label: SI QUIERO
               action: send_steps
               steps: []
@@ -5971,10 +5971,10 @@ whatsapp:
 
               🔴  *PAGO MÓVIL* 📲 ✨️ 
 
-              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS RECIBIR LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN DE ABAJO SI QUIERES VER LOS DATOS PARA REALIZAR TU PAGO}* 😊👇️
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN PARA CONOCER LOS DATOS DE PAGO}* 😊👇️
           delay_after_sec: 6
           buttons:
-            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwljxroe0
               label: SI QUIERO
               action: send_steps
               steps: []
@@ -6418,6 +6418,139 @@ whatsapp:
           delay_after_sec: 6
           buttons:
             - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
+              label: SI QUIERO
+              action: send_steps
+              steps: []
+          decisions:
+            - id: d-mweg7vsd-r3noo
+              enabled: false
+              title: Nequi
+              keywords:
+                - nequi
+                - neki
+                - neqi
+                - nek
+                - nnequi
+                - neequi
+                - nqui
+                - neki
+                - neqi
+                - con nequi
+              color: esmeralda
+              steps:
+                - type: text
+                  body_variants:
+                    - "Genial puees pagar al siguiente número:"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envías tu comprobante y tu acceso será al instante
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-95jss
+              enabled: false
+              title: DAVIPLATA
+              keywords:
+                - Daviplata
+                - daviplta
+                - dvipla
+                - dviplata
+                - daiplata
+                - daviplaa
+                - davi
+                - con davipla
+                - davipla
+              color: ambar
+              steps:
+                - type: text
+                  body_variants:
+                    - Chevere puedes pagar al siguiente enlace
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{LISTA_METODOS_POR_PAIS}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - Luego nos envias tu comprobante y recibirás tu acceso en segundos
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-54xhg
+              enabled: false
+              title: Bre-B
+              keywords:
+                - bre
+                - bre-b
+                - breb
+                - bre b
+                - brebe
+                - reb-b
+                - bbre
+                - breebb
+                - breb
+              color: violeta
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+            - id: d-mweg7vsd-wvgfl
+              enabled: false
+              title: QUIERE COMPRAR
+              keywords:
+                - quiero comprar
+                - como pago
+                - voy a pagar
+                - a donde pago
+                - quiero pagar
+              color: azul
+              steps:
+                - type: text
+                  body_variants:
+                    - para pagar con bcp puedes hacerlo a través de la siguiente cuenta
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - "{{METODO_DE_PAGO_1}}"
+                  delay_after_sec: 6
+                  enabled: false
+                - type: text
+                  body_variants:
+                    - luego nos envias tu comprobante y tendrás acceso al instante.
+                  delay_after_sec: 6
+                  enabled: false
+          enabled: false
+        - type: text
+          body_variants:
+            - |-
+              🛒 *{¿CÓMO HAGO PARA ADQUIRIRLO? FÁCIL!|¡ADQUIRIRLO ES MUY FÁCIL! ¿CÓMO LO HAGO?|¿CÓMO LO ADQUIERO? ¡ES MUY SENCILLO!}*, Puedes realizar tu pago mediante: 🛍️👇️
+
+              🔴  *PAGO MÓVIL* 📲 ✨️ 
+
+              *{HAZ CLICK EN EL BOTÓN DE ABAJO SI DESEÁS CONOCER LOS DATOS DE PAGO|PRESIONA EL BOTÓN DE ABAJO PARA CONSULTAR LOS DATOS DE PAGO|TOCÁ EL BOTÓN PARA CONOCER LOS DATOS DE PAGO}* 😊👇️
+          delay_after_sec: 6
+          buttons:
+            - id: b1a048e8-b935-4f60-a368-a074dd707f41~cmwljxc8d0
               label: SI QUIERO
               action: send_steps
               steps: []
@@ -7919,14 +8052,6 @@ whatsapp:
       salida: btn:b-mwlehzqp-8ig8b~cmwljql6l0
       a: f-mwlehzqo-cockf
       vista: colita
-    - id: c-mwljtjwd-k7m
-      de: f-mwlehzqq-yuob8
-      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
-      a: f-mwlehzqo-cockf
-    - id: c-mwljto2m-etf
-      de: f-mwlehzqq-3owap
-      salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
-      a: f-mwlehzqq-ajv19
     - id: c-mwljts19-23v
       de: f-mwlehzqr-pr22n
       salida: btn:b1a048e8-b935-4f60-a368-a074dd707f41~cmwjkhi2b0
