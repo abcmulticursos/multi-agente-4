@@ -801,9 +801,13 @@ export default function ConversationList({
                   // a la normalidad sola en cuanto el evento pase.
                   c.capi_last_ok === 0
                     ? "border-l-4 border-red-500 bg-red-50/60"
-                    : "border-l-4 border-transparent",
+                    : active && !selectionMode
+                      ? "border-l-4 border-emerald-600"
+                      : "border-l-4 border-transparent",
+                  // EL CHAT ABIERTO SE NOTA (18/11/2026). Él: «este verde es muy tenue, no me permite distinguir qué
+                  // chat estoy seleccionando». Más oscuro y con su raya a la izquierda.
                   active && !selectionMode
-                    ? "bg-emerald-50"
+                    ? "bg-emerald-200"
                     : "hover:bg-neutral-50",
                 ].join(" ")}
               >
@@ -846,6 +850,9 @@ export default function ConversationList({
                             title={`Pais detectado por numero: ${COUNTRY_FILTER_OPTIONS.find((item) => item.code === country)?.label ?? country}`}
                             className="shrink-0 text-sm leading-none"
                           >
+                            {/* CO y VE CON SUS LETRAS (18/11/2026). Él: «las banderas de Venezuela y Colombia son tan
+                                parecidas que en el chat no distingo cuál es cuál… CO (bandera), VE (bandera)». */}
+                            {country === "CO" || country === "VE" ? `${country} ` : ""}
                             {COUNTRY_FLAG_BY_CODE[country]}
                           </span>
                         )}

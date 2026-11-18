@@ -2374,28 +2374,10 @@ async function atenderComprobante(
         ] as never);
         console.log(`[tablero] convo ${convo.id}: pagó el precio de «${nombreMejor}» (eligió otro) → se lo digo antes de entregar`);
       }
-      // PAGÓ DE MÁS (03/11/2026, la batería: pagó S/30 por el de S/15 y a su «pagué de más» la IA contestó «ese
-      // monto es correcto, no pagaste de más»). Lo que sobra por encima del que se le entrega se le dice con los
-      // montos exactos, y el dueño recibe el aviso para devolverlo a mano. La entrega no cambia.
-      const sobra = Math.round((total - (precios[mejor] ?? total)) * 100) / 100;
-      if (sobra > 0.009) {
-        const plata = (v: number) => formatCurrencyAmount(v, pais as never);
-        const nombre = producto(config, mejor)?.name ?? "tu producto";
-        // (En un upgrade lo que se cobra es la diferencia: «completar X» y no «X cuesta S/3» —su 191 corrida otra vez.)
-        const entero = precioDelProducto(producto(config, mejor), pais, enOferta(estadoEnElTablero(convo.id), [mejor])) ?? precios[mejor];
-        const loQueCuesta = entero > precios[mejor] + 0.009 ? `Para completar *${nombre}* faltaban *${plata(precios[mejor])}*` : `*${nombre}* cuesta *${plata(precios[mejor])}*`;
-        await sendConfiguredSteps(convo, [
-          {
-            type: "text",
-            body: `Recibí tu pago de *${plata(total)}* 🙏\n\n${loQueCuesta}: te sobran *${plata(sobra)}*. Un asesor te escribe por aquí para devolvértelos 😊`,
-          },
-        ] as never);
-        console.log(`[tablero] convo ${convo.id}: pagó ${total} por «${nombre}» (${precios[mejor]}) → le sobran ${sobra}, aviso al dueño`);
-        if (convo.channel !== "test")
-          void notifyAdmin(
-            `💸 *Pagó de más:* ${convo.client_name ?? convo.name ?? convo.phone} pagó ${plata(total)} por ${nombre} (${plata(precios[mejor])}). Le sobran ${plata(sobra)}: devuélveselos o acuerda con él.`
-          ).catch(() => {});
-      }
+      // PAGÓ DE MÁS: SE ENTREGA Y PUNTO (18/11/2026). El 03/11 se le decía «te sobran $X, un asesor te escribe para
+      // devolvértelos» y al dueño «devuélveselos», con CUALQUIER sobrante: pagó 10.100 por un curso de 10.000 y le
+      // prometieron devolverle 100. Él: «nadie va a llamar a devolverle 100… nada de avisos por las puras». Como la
+      // venta de siempre: alcanza para lo elegido (o para el más caro) → se entrega, sin mensaje ni aviso.
     } else if (alcanza && alcanza[0] !== elegidoId) {
       proponerProducto(convo.id, alcanza[0]);
       const nombre = producto(config, alcanza[0])?.name ?? "el otro producto";
