@@ -5849,7 +5849,7 @@ biblioteca_de_productos:
         discount_price_soles: 6600
         market_price: 49500
       VE:
-        price_soles: 3000
+        price_soles: 2500
         discount_price_soles: 2000
         market_price: 15000
     ofrecer_imagenes: false
