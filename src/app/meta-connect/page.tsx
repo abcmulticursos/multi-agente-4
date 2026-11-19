@@ -862,7 +862,8 @@ function MedicionPorCuenta() {
 function SaludDeLosNumeros() {
   type Error_ = { codigo: number | null; descripcion: string; solucion: string };
   type Entidad = { tipo: string; id: string | null; puedeEnviar: string | null; errores: Error_[]; info: string[] };
-  type Numero = { phoneNumberId: string; wabaId: string; negocio: string | null; numero: string | null; nombre: string | null; calidad: string | null; estado: string | null; puedeEnviar: string | null; entidades: Entidad[]; error: string | null };
+  type Puerta = { appId: string; nombre: string | null; negocio: string | null; deSuNegocio: boolean | null };
+  type Numero = { phoneNumberId: string; wabaId: string; negocio: string | null; numero: string | null; nombre: string | null; calidad: string | null; estado: string | null; puedeEnviar: string | null; entidades: Entidad[]; error: string | null; puertas?: Puerta[] | null };
   const [numeros, setNumeros] = useState<Numero[] | null>(null);
   const [cargando, setCargando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -921,6 +922,9 @@ function SaludDeLosNumeros() {
   // Meta»: «Calidad de la cuenta». Una tarjeta por negocio (ícono en su cuadro de color, nombre, una línea, su estado y
   // «Abrir»), su pop up con una tarjeta por número (el NOMBRE grande), y el pop up del número con el detalle.
   const prohibidos = (numeros ?? []).filter(prohibido).sort((a, b) => (a.negocio ?? "").localeCompare(b.negocio ?? "", "es"));
+  /** (19/11/2026) Entra por la app (la «puerta») de OTRO negocio: eso une los negocios ante Meta. */
+  const puertaAjena = (n: Numero) => (n.puertas ?? []).some((p) => p.deSuNegocio === false);
+  const conPuertaAjena = (numeros ?? []).filter(puertaAjena);
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
   useEffect(() => {
     if (!negocioAbierto || abierto) return;
@@ -1002,6 +1006,20 @@ function SaludDeLosNumeros() {
         </button>
       )}
 
+      {conPuertaAjena.length > 0 && (
+        <div className="mt-3 flex w-full items-center gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 px-5 py-3">
+          <span aria-hidden className="text-2xl">🚪</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-extrabold text-amber-900">
+              {conPuertaAjena.length === 1 ? "1 número entra" : `${conPuertaAjena.length} números entran`} por la app de otro negocio
+            </span>
+            <span className="block text-xs text-amber-800">
+              Eso une tus negocios ante Meta: si castiga a uno, puede castigar al otro. Ábrelos para ver cuál es su puerta.
+            </span>
+          </span>
+        </div>
+      )}
+
       {numeros && numeros.length > 0 && (
         <div className="mt-4 space-y-3">
           {negocios.map(([negocio, lista]) => {
@@ -1012,6 +1030,8 @@ function SaludDeLosNumeros() {
             if (malos) partes.push(malos === 1 ? "1 prohibido" : `${malos} prohibidos`);
             if (revisar) partes.push(revisar === 1 ? "1 por revisar" : `${revisar} por revisar`);
             if (!malos && !revisar) partes.push(lista.length === 1 ? "responde normal" : "todos responden");
+            const ajenas = lista.filter(puertaAjena).length;
+            if (ajenas) partes.push(`🚪 ${ajenas} por la app de otro negocio`);
             return (
               <Tarjeta
                 key={negocio}
@@ -1137,6 +1157,29 @@ function SaludDeLosNumeros() {
                     </div>
                   );
                 })}
+                {/* 🚪 LA PUERTA: por qué app le llegan los mensajes al bot, y si es de su propio negocio. */}
+                <div className={`rounded-lg border p-3 ${puertaAjena(abierto) ? "border-amber-300 bg-amber-50" : "border-borde bg-relleno"}`}>
+                  <p className="text-sm font-extrabold text-tinta">🚪 Por qué app entra</p>
+                  {abierto.puertas == null ? (
+                    <p className="mt-1 text-sm text-tinta-suave">No pude leerlo en Meta.</p>
+                  ) : abierto.puertas.length === 0 ? (
+                    <p className="mt-1 text-sm font-bold text-rose-700">No está conectado a ninguna app: el bot no recibe sus mensajes.</p>
+                  ) : (
+                    abierto.puertas.map((p) => (
+                      <p key={p.appId} className="mt-1 text-sm text-tinta">
+                        <b>{p.nombre ?? `App ${p.appId}`}</b>
+                        {p.negocio ? ` · de ${p.negocio}` : ""}{" "}
+                        {p.deSuNegocio === true ? (
+                          <span className="font-bold text-emerald-700">✅ su propio negocio</span>
+                        ) : p.deSuNegocio === false ? (
+                          <span className="font-bold text-amber-800">⚠️ de otro negocio: une los dos negocios ante Meta</span>
+                        ) : (
+                          <span className="text-tinta-suave">(no sé de qué negocio es esta app)</span>
+                        )}
+                      </p>
+                    ))
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {prohibido(abierto) && (
                     <a

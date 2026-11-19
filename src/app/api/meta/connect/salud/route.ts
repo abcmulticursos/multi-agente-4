@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { listMetaWhatsAppConnections } from "@/lib/db";
-import { graphVersion } from "@/lib/meta/connect";
+import { getMetaAppId, graphVersion } from "@/lib/meta/connect";
 import { fetchMeta } from "@/lib/meta/freno";
+import { otrasApps } from "@/lib/meta/apps-de-meta";
+import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
 import { permisosConocidos } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
@@ -44,17 +46,55 @@ async function leer(phoneNumberId: string, token: string): Promise<Respuesta> {
   }
 }
 
+/**
+ * POR QUÉ PUERTA ENTRA CADA NÚMERO (19/11/2026). Él: «arréglalo» — que cada número entre por la app de su propio negocio.
+ * Antes de mover nada hay que verlo: la cuenta de WhatsApp de un número está SUSCRITA a una o varias apps (por ahí le
+ * llegan los mensajes al bot). Una app de OTRO negocio une los dos negocios ante Meta. Solo lee: `{waba}/subscribed_apps`.
+ */
+async function appsSuscritas(wabaId: string, tokens: string[]): Promise<Array<{ id: string; nombre: string | null }> | null> {
+  for (const token of tokens) {
+    try {
+      const url = new URL(`https://graph.facebook.com/${graphVersion()}/${wabaId}/subscribed_apps`);
+      url.searchParams.set("access_token", token);
+      const res = await fetchMeta(url, { method: "GET" });
+      const d = (await res.json().catch(() => ({}))) as { data?: Array<{ whatsapp_business_api_data?: { id?: string; name?: string } }>; error?: unknown };
+      if (Array.isArray(d.data))
+        return d.data.map((x) => ({ id: String(x.whatsapp_business_api_data?.id ?? ""), nombre: x.whatsapp_business_api_data?.name ?? null })).filter((x) => x.id);
+    } catch {
+      // se prueba con el siguiente permiso
+    }
+  }
+  return null;
+}
+
 export async function GET() {
   const conexiones = listMetaWhatsAppConnections();
   const otros = permisosConocidos();
+  // De qué negocio es cada app que conoce el bot (la principal y las otras de Meta Connect).
+  const negocioDeApp = new Map<string, { id: string | null; nombre: string | null }>();
+  const principal = getMetaAppId();
+  const suNegocio = negocioDeLaPrincipal();
+  if (principal) negocioDeApp.set(principal, { id: suNegocio?.id ?? null, nombre: suNegocio?.nombre ?? null });
+  for (const a of otrasApps()) negocioDeApp.set(a.appId, { id: a.negocioId ?? null, nombre: a.negocio ?? null });
   const numeros = [];
   for (const c of conexiones) {
     let r: Respuesta = {};
-    for (const token of [c.access_token, ...otros.filter((t) => t !== c.access_token)]) {
-      if (!token) continue;
+    const tokens = [c.access_token, ...otros.filter((t) => t !== c.access_token)].filter((t): t is string => !!t);
+    for (const token of tokens) {
       r = await leer(c.phone_number_id, token);
       if (r.health_status || !r.error) break;
     }
+    const suscritas = await appsSuscritas(c.waba_id, tokens);
+    const puertas = (suscritas ?? []).map((a) => {
+      const dueño = negocioDeApp.get(a.id);
+      return {
+        appId: a.id,
+        nombre: a.nombre,
+        negocio: dueño?.nombre ?? null,
+        // true = la app es del mismo negocio que el número; false = de otro; null = no se sabe (app que el bot no conoce).
+        deSuNegocio: dueño?.id && c.business_id ? dueño.id === c.business_id : null,
+      };
+    });
     numeros.push({
       phoneNumberId: c.phone_number_id,
       wabaId: c.waba_id,
@@ -72,6 +112,7 @@ export async function GET() {
         info: e.additional_info ?? [],
       })),
       error: r.health_status ? null : r.error?.message ?? null,
+      puertas: suscritas ? puertas : null,
     });
   }
   return NextResponse.json({ numeros });
