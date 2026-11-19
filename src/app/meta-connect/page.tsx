@@ -861,6 +861,13 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
   type Activos = { numeros: string[]; paginas: string[]; pixels: string[]; facebook: string | null };
   const [activos, setActivos] = useState<Record<string, Activos>>({});
   const [cuentasFb, setCuentasFb] = useState<string[]>([]);
+  // (18/11/2026) Él: «al presionar no se sabe si está cargando… me gustaría que diga actualizando…».
+  const [actualizando, setActualizando] = useState(false);
+  useEffect(() => {
+    const alCambiar = (e: Event) => setActualizando(!!(e as CustomEvent<boolean>).detail);
+    window.addEventListener("meta-connect:actualizando", alCambiar);
+    return () => window.removeEventListener("meta-connect:actualizando", alCambiar);
+  }, []);
   useEffect(() => {
     void fetch("/api/meta/connect/cuentas", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -1075,10 +1082,18 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
         <button
           type="button"
           onClick={() => window.dispatchEvent(new Event("meta-connect:actualizar"))}
+          disabled={actualizando}
           title="Vuelve a leer de Meta tus páginas, números, negocios y píxeles con el permiso que ya diste, sin abrir Facebook"
-          className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100"
+          className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100 disabled:cursor-wait disabled:opacity-70"
         >
-          ↻ Actualizar desde Meta
+          {actualizando ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-300 border-t-sky-700" />
+              Actualizando… no cierres ni vuelvas a tocar
+            </span>
+          ) : (
+            "↻ Actualizar desde Meta"
+          )}
         </button>
         <a
           href="/api/meta/connect/start?nueva=1"
@@ -1212,7 +1227,13 @@ function DiferenciacionPorNegocio() {
   // quiero». Al terminar se recarga la página entera: así todas las secciones de Meta Connect leen lo nuevo.
   const [actualizando, setActualizando] = useState(false);
   const [resultadoDeActualizar, setResultadoDeActualizar] = useState<string[] | null>(null);
+  const enCurso = useRef(false);
+  // (18/11/2026) El botón de arriba no veía este «actualizando»: se avisa con un evento, y un segundo clic no hace nada.
+  const avisarAlBoton = (si: boolean) => window.dispatchEvent(new CustomEvent("meta-connect:actualizando", { detail: si }));
   const actualizar = async () => {
+    if (enCurso.current) return;
+    enCurso.current = true;
+    avisarAlBoton(true);
     setActualizando(true);
     setResultadoDeActualizar(null);
     try {
@@ -1238,6 +1259,8 @@ function DiferenciacionPorNegocio() {
       setResultadoDeActualizar(["✗ No pude hablar con el servidor. Vuelve a intentarlo."]);
     }
     setActualizando(false);
+    enCurso.current = false;
+    avisarAlBoton(false);
   };
   // (15/11/2026) El botón vive ahora arriba, en «Tus apps» (`AppsDelBot`): lo pide con este aviso y aquí se hace lo de siempre.
   const actualizarRef = useRef(actualizar);
