@@ -987,10 +987,56 @@ export async function estaSuscritaAEstaApp(input: {
   }
 }
 
+/**
+ * SIN CRUCES ENTRE NEGOCIOS (19/11/2026, aprobado por él: «deja la app sin cruces»). Medido ese día: los números de
+ * Violeta estaban conectados también a la app de Turquesa (y viceversa), porque al conectar un número se lo suscribía
+ * a la app del permiso con que se pedía —la «principal» de ese momento—, fuera del negocio que fuera. Eso une los
+ * negocios ante Meta: cayó Turquesa y al día siguiente Violeta. Ahora, antes de suscribir, se compara el negocio
+ * DUEÑO de la cuenta de WhatsApp con el negocio de la app del permiso; si son distintos, no se conecta. Si alguno de
+ * los dos no se puede saber, se deja pasar como siempre (no se bloquea a ciegas). Devuelve el aviso, o null.
+ */
+export async function cruceDeNegocios(wabaId: string, accessToken: string): Promise<string | null> {
+  try {
+    const leer = async (ruta: string, campos: string) => {
+      const url = new URL(`https://graph.facebook.com/${graphVersion()}/${ruta}`);
+      url.searchParams.set("fields", campos);
+      url.searchParams.set("access_token", accessToken);
+      const res = await fetch(url, { signal: AbortSignal.timeout(LIMITE_CONSULTA_MS), cache: "no-store" });
+      return (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    };
+    const app = (await leer("app", "id,name")) as { id?: string; name?: string };
+    const waba = (await leer(wabaId, "name,owner_business_info")) as { name?: string; owner_business_info?: { id?: string; name?: string } };
+    const negocioDelNumero = waba.owner_business_info?.id ?? null;
+    if (!app.id || !negocioDelNumero) return null;
+    const { negocioDeLaPrincipal } = await import("@/lib/meta/negocio-de-la-app");
+    const { otrasApps } = await import("@/lib/meta/apps-de-meta");
+    const deLaApp =
+      app.id === getMetaAppId()
+        ? negocioDeLaPrincipal()
+        : (() => {
+            const o = otrasApps().find((a) => a.appId === app.id);
+            return o?.negocioId ? { id: o.negocioId, nombre: o.negocio ?? o.negocioId } : null;
+          })();
+    if (!deLaApp?.id || deLaApp.id === negocioDelNumero) return null;
+    return (
+      `No lo conecto: este número es del negocio «${waba.owner_business_info?.name ?? negocioDelNumero}» y la app ` +
+      `«${app.name ?? app.id}» es del negocio «${deLaApp.nombre}». Conectarlo uniría los dos negocios ante Meta. ` +
+      `Conéctalo con la app de su propio negocio (si no tiene, crea una y agrégala en Meta Connect).`
+    );
+  } catch {
+    return null;
+  }
+}
+
 export async function subscribeWhatsAppToWebhooks(input: {
   wabaId: string;
   accessToken: string;
 }): Promise<PageSubscriptionResult> {
+  const cruce = await cruceDeNegocios(input.wabaId, input.accessToken);
+  if (cruce) {
+    console.warn(`[meta-connect] cuenta de WhatsApp ${input.wabaId}: ${cruce}`);
+    return { ok: false, fields: ["messages"], status: 409, message: cruce };
+  }
   const url = new URL(
     `https://graph.facebook.com/${graphVersion()}/${input.wabaId}/subscribed_apps`
   );

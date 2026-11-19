@@ -925,6 +925,21 @@ function SaludDeLosNumeros() {
   /** (19/11/2026) Entra por la app (la «puerta») de OTRO negocio: eso une los negocios ante Meta. */
   const puertaAjena = (n: Numero) => (n.puertas ?? []).some((p) => p.deSuNegocio === false);
   const conPuertaAjena = (numeros ?? []).filter(puertaAjena);
+  // QUITAR LA APP DE OTRO NEGOCIO (19/11/2026). El servidor solo la quita si el número sigue con la app de SU negocio.
+  const [quitandoApp, setQuitandoApp] = useState<string | null>(null);
+  const quitarApp = async (n: Numero, appId: string, nombreApp: string) => {
+    if (!window.confirm(`¿Quitar «${nombreApp}» de ${n.nombre ?? n.numero ?? "este número"}? Seguirá recibiendo mensajes por la app de su propio negocio.`)) return;
+    setQuitandoApp(appId);
+    try {
+      const r = await fetch("/api/meta/connect/salud", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phoneNumberId: n.phoneNumberId, appId }) });
+      const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      if (!d?.ok) window.alert(d?.error ?? "No se pudo quitar.");
+      setAbierto(null);
+      await consultar();
+    } finally {
+      setQuitandoApp(null);
+    }
+  };
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
   useEffect(() => {
     if (!negocioAbierto || abierto) return;
@@ -1172,9 +1187,21 @@ function SaludDeLosNumeros() {
                         {p.deSuNegocio === true ? (
                           <span className="font-bold text-emerald-700">✅ su propio negocio</span>
                         ) : p.deSuNegocio === false ? (
-                          <span className="font-bold text-amber-800">⚠️ de otro negocio: une los dos negocios ante Meta</span>
+                          <>
+                            <span className="font-bold text-amber-800">⚠️ de otro negocio: une los dos negocios ante Meta</span>{" "}
+                            <button
+                              type="button"
+                              disabled={quitandoApp !== null}
+                              onClick={() => void quitarApp(abierto, p.appId, p.nombre ?? p.appId)}
+                              className="ml-1 rounded-lg border border-amber-400 bg-tarjeta px-3 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 disabled:cursor-wait disabled:opacity-60"
+                            >
+                              {quitandoApp === p.appId ? "Quitando…" : "Quitar esta app"}
+                            </button>
+                          </>
                         ) : (
-                          <span className="text-tinta-suave">(no sé de qué negocio es esta app)</span>
+                          <span className="text-tinta-suave">
+                            (app que este bot no conoce: si no la usas, bórrala en developers.facebook.com)
+                          </span>
                         )}
                       </p>
                     ))

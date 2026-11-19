@@ -61341,6 +61341,33 @@ function TiendasDelProyecto({
           </button>
         );
       })()}
+      {/* DEJAR COMO PLANTILLA (19/11/2026, él: «al clonar… que toda la información de números anteriores desaparezca, ya
+          que este proyecto lo usaré como plantilla»). Borra de TODAS las tiendas su número, su página y su píxel (y los
+          de cada país); el contenido de venta queda intacto. Como cualquier edición suya: Ctrl+Z la deshace, Ctrl+S la
+          guarda. Los números, permisos y apps de Meta viven en la base de datos, que no viaja al clonar. */}
+      {(() => {
+        const conMeta = tiendas.filter((t) => t.numero || t.pagina || t.pixel || (t.por_pais && Object.keys(t.por_pais).length));
+        if (conMeta.length === 0) return null;
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                !window.confirm(
+                  `Vas a borrar el número, la página y el píxel de ${conMeta.length} ${conMeta.length === 1 ? "tienda" : "tiendas"} (también los de cada país). El contenido de venta no se toca. Se deshace con Ctrl+Z y solo queda si guardas. ¿Seguir?`
+                )
+              )
+                return;
+              onSnapshot();
+              onTiendas(tiendas.map((t) => ({ ...t, numero: undefined, pagina: undefined, pixel: undefined, por_pais: undefined })));
+            }}
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+            title="Para usar este proyecto como plantilla: quita los datos de Meta de las tiendas, sin tocar el contenido"
+          >
+            🧹 Dejar como plantilla (quitar números, páginas y píxeles)
+          </button>
+        );
+      })()}
 
       {tiendas.length > 1 && (
         <input

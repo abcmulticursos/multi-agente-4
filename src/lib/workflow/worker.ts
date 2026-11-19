@@ -48,6 +48,50 @@ const G = globalThis as unknown as {
 const corriendo = (G.__wfCorriendo ??= new Map());
 const reintentos = (G.__wfReintentos ??= new Map());
 
+/**
+ * LO ACUMULADO EN UN DEPLOY SALE ESCALONADO (19/11/2026, aprobado por él: «20 o 25 segundos por persona»).
+ * Mientras el servidor se reinicia, lo programado se acumula y al volver salía TODO junto: 29 mensajes a 10 clientes
+ * en 10 minutos, justo antes de que Meta le bloqueara el número. Ahora, durante los primeros `MINUTOS_TRAS_ARRANCAR`,
+ * lo que se acumuló (su hora era ANTERIOR al arranque) y es programado (seguimientos, recordatorios, relojes del
+ * tablero) sale con 20–25 s entre una persona y otra del MISMO número. NO se cancela nada: todo sale, escalonado.
+ * Lo que un cliente pide después del arranque sale como siempre, y dentro de una conversación el orden y los
+ * tiempos entre burbujas no cambian.
+ */
+const MINUTOS_TRAS_ARRANCAR = 15;
+const ESCALON_MIN_S = 20;
+const ESCALON_MAX_S = 25;
+const PROGRAMADOS = new Set([
+  "start_followup",
+  "send_followup_step",
+  "upsell_recordatorio",
+  "send_email_reminder",
+  "send_customer_survey",
+  "messenger_country_reminder",
+  "tablero_seguimiento",
+  "tablero_sin_pago",
+  "tablero_reloj",
+]);
+const G3 = globalThis as unknown as { __wfArranque?: number; __wfEscalon?: Map<string, { t: number; convo: number }> };
+const arranque = (G3.__wfArranque ??= Math.floor(Date.now() / 1000));
+const escalon = (G3.__wfEscalon ??= new Map());
+
+/** true = esta acción acumulada se aplazó unos segundos para no salir en tanda. */
+function escalonarSiToca(action: ScheduledActionRow, now: number): boolean {
+  if (now - arranque > MINUTOS_TRAS_ARRANCAR * 60) return false;
+  if (action.run_at > arranque || !PROGRAMADOS.has(action.action_type)) return false;
+  const numero = String(getConversationById(action.conversation_id)?.wa_phone_number_id ?? "") || "sin-numero";
+  const ultimo = escalon.get(numero);
+  if (ultimo && ultimo.convo !== action.conversation_id && now < ultimo.t + ESCALON_MIN_S) {
+    const nuevo = ultimo.t + ESCALON_MIN_S + Math.floor(Math.random() * (ESCALON_MAX_S - ESCALON_MIN_S + 1));
+    reprogramarAccion(action.id, nuevo);
+    escalon.set(numero, { t: nuevo, convo: action.conversation_id });
+    console.log(`[wf:worker] convo ${action.conversation_id}: ${action.action_type} acumulado en el reinicio → sale en ${nuevo - now} s (escalonado, sin tanda)`);
+    return true;
+  }
+  if (!ultimo || ultimo.convo !== action.conversation_id) escalon.set(numero, { t: now, convo: action.conversation_id });
+  return false;
+}
+
 let intervalHandle: ReturnType<typeof setInterval> | null = null;
 let inFlight = false;
 // EL LATIDO (05/11/2026): solo anota. Deja escrito en el log si el servidor se quedó trabado y si una acción
@@ -171,6 +215,11 @@ export async function tick(): Promise<void> {
     );
     for (const action of toProcess) {
       if (corriendo.size >= MAX_A_LA_VEZ) break; // las demás, en el siguiente tick
+      try {
+        if (escalonarSiToca(action, now)) continue;
+      } catch (err) {
+        console.error(`[wf:worker] no se pudo escalonar la acción ${action.id}; sale como siempre:`, err);
+      }
       try {
         if (!claimScheduledAction(action.id, now)) {
           console.log(

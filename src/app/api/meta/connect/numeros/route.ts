@@ -4,7 +4,7 @@ import {
   listMetaWhatsAppConnections,
   saveMetaWhatsAppConnection,
 } from "@/lib/db";
-import { graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
+import { cruceDeNegocios, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
 import { getMetaAppId } from "@/lib/meta/runtime-config";
 import { cuandoSeLeyo, MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta, MetaFrenada, metaFrenada, minutosDeFreno } from "@/lib/meta/freno";
@@ -292,6 +292,13 @@ export async function POST(req: NextRequest) {
     const id = texto(c?.phoneNumberId);
     const token = id ? await permisoPara(id) : null;
     if (!token) return NextResponse.json({ ok: false, error: "No encuentro ese número en tus negocios." });
+    // SIN CRUCES (19/11/2026): antes de registrar o traer, que el número sea del mismo negocio que la app del permiso.
+    // Ver `cruceDeNegocios` en connect.ts. Si no se puede saber, sigue como siempre.
+    const wabaDelNumero = cuentaDe.get(id);
+    if (wabaDelNumero) {
+      const cruce = await cruceDeNegocios(wabaDelNumero, token);
+      if (cruce) return NextResponse.json({ ok: false, error: cruce });
+    }
     // «traer»: un número que YA está activo en Meta y todavía no está en Meta Connect.
     if (accion === "activar") {
       const pin = texto(c?.pin).replace(/\D/g, "");
