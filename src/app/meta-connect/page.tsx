@@ -878,15 +878,33 @@ function SaludDeLosNumeros() {
     }
     setCargando(false);
   };
+  /** Prohibido de verdad (141014): el borde rojo y arriba de la lista. Lo demás, ámbar. */
+  const prohibido = (n: Numero) => n.entidades.some((e) => e.errores.some((x) => x.codigo === 141014));
   const QUE_ES: Record<string, string> = { PHONE_NUMBER: "El número", WABA: "La cuenta de WhatsApp", BUSINESS: "El negocio (BM)", APP: "La app" };
   const ESTADO: Record<string, { texto: string; clase: string }> = {
     AVAILABLE: { texto: "✅ Puede enviar", clase: "bg-emerald-100 text-emerald-800 border-emerald-300" },
     LIMITED: { texto: "⚠️ Limitado", clase: "bg-amber-100 text-amber-900 border-amber-300" },
     BLOCKED: { texto: "⛔ Bloqueado", clase: "bg-rose-100 text-rose-800 border-rose-300" },
   };
-  const chapa = (v: string | null) => {
+  // EL MOTIVO, NO SOLO «BLOQUEADO» (19/11/2026). Él: «no le pongas bloqueado, ponle "sin método de pago"». Meta marca
+  // BLOCKED también cuando solo falla la tarjeta (141006), que frena las plantillas que inicia el negocio pero no las
+  // respuestas. Se nombra la causa más grave que haya; las llamadas por SIP (138024/138025) no cuentan.
+  const MOTIVOS: Array<{ codigos: number[]; texto: string; clase: string }> = [
+    { codigos: [141014], texto: "⛔ Prohibido por Meta", clase: ESTADO.BLOCKED.clase },
+    { codigos: [141007], texto: "🕒 Falta la zona horaria", clase: ESTADO.LIMITED.clase },
+    { codigos: [141012, 141015], texto: "⚠️ Llegó al límite de conversaciones", clase: ESTADO.LIMITED.clase },
+    { codigos: [141006], texto: "💳 Sin método de pago (responde normal)", clase: ESTADO.LIMITED.clase },
+    { codigos: [141010], texto: "⚠️ Negocio sin verificar", clase: ESTADO.LIMITED.clase },
+  ];
+  const chapa = (v: string | null, errores: Error_[] = []) => {
+    const codigos = new Set(errores.map((x) => x.codigo ?? 0));
+    const motivo = v && v !== "AVAILABLE" ? MOTIVOS.find((m) => m.codigos.some((c) => codigos.has(c))) : undefined;
     const e = v ? ESTADO[v] : undefined;
-    return <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${e?.clase ?? "border-borde bg-relleno text-tinta-suave"}`}>{e?.texto ?? v ?? "Sin dato"}</span>;
+    return (
+      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${motivo?.clase ?? e?.clase ?? "border-borde bg-relleno text-tinta-suave"}`}>
+        {motivo?.texto ?? e?.texto ?? v ?? "Sin dato"}
+      </span>
+    );
   };
   return (
     <div className="rounded-2xl border border-borde bg-panel p-5 shadow-sm">
@@ -909,13 +927,13 @@ function SaludDeLosNumeros() {
       {numeros && numeros.length > 0 && (
         <div className="mt-4 space-y-3">
           {[...numeros]
-            .sort((a, b) => Number(b.puedeEnviar === "BLOCKED") - Number(a.puedeEnviar === "BLOCKED"))
+            .sort((a, b) => Number(prohibido(b)) - Number(prohibido(a)))
             .map((n) => (
-              <div key={n.phoneNumberId} className={`rounded-xl border-2 p-4 ${n.puedeEnviar === "BLOCKED" ? "border-rose-400" : n.puedeEnviar === "LIMITED" ? "border-amber-400" : "border-borde"} bg-tarjeta`}>
+              <div key={n.phoneNumberId} className={`rounded-xl border-2 p-4 ${prohibido(n) ? "border-rose-400" : n.puedeEnviar !== "AVAILABLE" ? "border-amber-400" : "border-borde"} bg-tarjeta`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-base font-black">{n.numero ?? n.phoneNumberId}</span>
                   {n.nombre && <span className="text-sm text-tinta-suave">· {n.nombre}</span>}
-                  {chapa(n.puedeEnviar)}
+                  {chapa(n.puedeEnviar, n.entidades.flatMap((e) => e.errores))}
                   {n.calidad && <span className="rounded-full border border-borde px-2 py-0.5 text-xs">Calidad: {n.calidad}</span>}
                 </div>
                 <p className="mt-1 text-xs text-tinta-suave">
@@ -925,7 +943,7 @@ function SaludDeLosNumeros() {
                 {n.entidades.filter((e) => e.puedeEnviar !== "AVAILABLE" || e.errores.length).map((e, i) => (
                   <div key={i} className="mt-3 rounded-lg border border-borde bg-relleno p-3 text-sm">
                     <div className="flex flex-wrap items-center gap-2 font-bold">
-                      {QUE_ES[e.tipo] ?? e.tipo} {e.id ? <span className="font-normal text-tinta-suave">({e.id})</span> : null} {chapa(e.puedeEnviar)}
+                      {QUE_ES[e.tipo] ?? e.tipo} {e.id ? <span className="font-normal text-tinta-suave">({e.id})</span> : null} {chapa(e.puedeEnviar, e.errores)}
                     </div>
                     {e.errores.map((x, k) => (
                       <div key={k} className="mt-2">
