@@ -920,7 +920,7 @@ function SaludDeLosNumeros() {
   // tienes pop ups bonitos», con las filas Intro / Seguimientos / Regalos por anuncio de ejemplo. Y el nombre «como en
   // Meta»: «Calidad de la cuenta». Una tarjeta por negocio (ícono en su cuadro de color, nombre, una línea, su estado y
   // «Abrir»), su pop up con una tarjeta por número (el NOMBRE grande), y el pop up del número con el detalle.
-  const prohibidos = (numeros ?? []).filter(prohibido);
+  const prohibidos = (numeros ?? []).filter(prohibido).sort((a, b) => (a.negocio ?? "").localeCompare(b.negocio ?? "", "es"));
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
   useEffect(() => {
     if (!negocioAbierto || abierto) return;
@@ -959,7 +959,11 @@ function SaludDeLosNumeros() {
       </span>
     </button>
   );
-  const listaDelNegocio = negocioAbierto ? porNegocio.get(negocioAbierto) ?? [] : [];
+  // (19/11/2026) El aviso rojo cuenta los prohibidos de TODOS los negocios; «Ver» abría solo el primero (él: «dice que
+  // hay 4… al abrir solo hay 2»). Ahora abre este mismo pop up con TODOS los prohibidos, cada uno con su negocio.
+  const PROHIBIDOS = "\u0000prohibidos";
+  const verProhibidos = negocioAbierto === PROHIBIDOS;
+  const listaDelNegocio = verProhibidos ? prohibidos : negocioAbierto ? porNegocio.get(negocioAbierto) ?? [] : [];
   return (
     <div className="rounded-2xl border border-borde bg-panel p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -984,7 +988,7 @@ function SaludDeLosNumeros() {
       {prohibidos.length > 0 && (
         <button
           type="button"
-          onClick={() => setNegocioAbierto(prohibidos[0].negocio ?? "Sin negocio identificado")}
+          onClick={() => setNegocioAbierto(PROHIBIDOS)}
           className="mt-4 flex w-full items-center gap-3 rounded-2xl border-2 border-rose-300 bg-rose-50 px-5 py-3 text-left hover:bg-rose-100"
         >
           <span aria-hidden className="text-2xl">⛔</span>
@@ -1030,7 +1034,7 @@ function SaludDeLosNumeros() {
           className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
           role="dialog"
           aria-modal="true"
-          aria-label={negocioAbierto}
+          aria-label={verProhibidos ? "Números prohibidos por Meta" : negocioAbierto}
           onClick={(e) => {
             if (e.target === e.currentTarget) setNegocioAbierto(null);
           }}
@@ -1039,10 +1043,15 @@ function SaludDeLosNumeros() {
             <div className="my-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-borde bg-panel shadow-2xl">
               <div className="flex items-center justify-between gap-3 border-b border-borde bg-tarjeta px-5 py-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-xl">🏢</span>
+                  <span aria-hidden className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl ${verProhibidos ? "bg-rose-100" : "bg-sky-100"}`}>
+                    {verProhibidos ? "⛔" : "🏢"}
+                  </span>
                   <div className="min-w-0">
-                    <h3 className="truncate text-base font-black text-tinta">{negocioAbierto}</h3>
-                    <p className="text-xs text-tinta-suave">{listaDelNegocio.length === 1 ? "1 número" : `${listaDelNegocio.length} números`} de WhatsApp</p>
+                    <h3 className="truncate text-base font-black text-tinta">{verProhibidos ? "Números prohibidos por Meta" : negocioAbierto}</h3>
+                    <p className="text-xs text-tinta-suave">
+                      {listaDelNegocio.length === 1 ? "1 número" : `${listaDelNegocio.length} números`} de WhatsApp
+                      {verProhibidos ? " · no les pongas anuncios; toca uno para apelar" : ""}
+                    </p>
                   </div>
                 </div>
                 <button type="button" onClick={() => setNegocioAbierto(null)} className="shrink-0 rounded-xl border border-borde bg-tarjeta px-4 py-2 text-sm font-bold text-tinta hover:bg-relleno">
@@ -1056,7 +1065,7 @@ function SaludDeLosNumeros() {
                     icono="📱"
                     tono={tonoDe(n)}
                     titulo={n.nombre ?? n.numero ?? n.phoneNumberId}
-                    detalle={`${n.numero ?? n.phoneNumberId} · ${resumen(n).texto}`}
+                    detalle={verProhibidos ? `${n.numero ?? n.phoneNumberId} · 🏢 ${n.negocio ?? "Sin negocio identificado"}` : `${n.numero ?? n.phoneNumberId} · ${resumen(n).texto}`}
                     estado={estadoCorto(n)}
                     chapa="Ver"
                     onAbrir={() => setAbierto(n)}
