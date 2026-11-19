@@ -9858,13 +9858,17 @@ tiendas:
       unico: pmwjfhu1r
     por_pais:
       CO:
-        numero: "1362914293573019"
-        pagina: "1265196766679188"
-        pixel: "2272017317055405"
+        numero: "1428202673707739"
+        pagina: "1199766179893210"
+        pixel: "1512990431889624"
       AR:
-        numero: "1362914293573019"
-        pagina: "1265196766679188"
-        pixel: "2272017317055405"
+        numero: "1428202673707739"
+        pagina: "1199766179893210"
+        pixel: "1512990431889624"
+      VE:
+        numero: "1428202673707739"
+        pagina: "1199766179893210"
+        pixel: "1512990431889624"
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
