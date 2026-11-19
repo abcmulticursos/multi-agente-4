@@ -25774,8 +25774,8 @@ instagram:
         - "@tienda:basico"
     - id: f-mwm829b9-0rdeg
       tipo: cobro
-      x: 2662
-      y: 30635
+      x: 2739
+      y: 29766
       steps:
         - type: text
           body_variants:
@@ -25794,12 +25794,12 @@ instagram:
         metodos: true
     - id: f-mwm829b9-cf70s
       tipo: regalo
-      x: 3696
-      y: 30855
+      x: 3773
+      y: 29986
     - id: f-mwm829b9-gvb0y
       tipo: mensaje
-      x: 22
-      y: 30525
+      x: 99
+      y: 29656
       steps:
         - type: text
           body_variants:
@@ -25892,8 +25892,8 @@ instagram:
           delay_after_sec: 5
     - id: f-mwm829b9-3uqow
       tipo: seguimientos
-      x: 1925
-      y: 30393
+      x: 2002
+      y: 29524
       seguimientos:
         - id: s-mwm829b9-f2q9g
           minutos: 30
@@ -25993,8 +25993,8 @@ instagram:
           activa_oferta: true
     - id: f-mwm829b9-41wqo
       tipo: mensaje
-      x: 1639
-      y: 30756
+      x: 1716
+      y: 29887
       steps:
         - type: text
           body_variants:
@@ -26217,8 +26217,8 @@ instagram:
         - "@tienda:basico"
     - id: f-mwm8e651-69hv
       tipo: mensaje
-      x: 1045
-      y: 30525
+      x: 1122
+      y: 29656
       steps:
         - type: audio
           drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
@@ -27441,6 +27441,10 @@ instagram:
       de: f-mwm8e651-69hv
       salida: siguiente
       a: f-mwm829b9-41wqo
+    - id: c-mwm8fnl1-k97
+      de: f-mwle60go-ut2i
+      salida: rep:rmwm8ffz1
+      a: f-mwm829b9-gvb0y
     - id: c-mwma16da-bjjzm
       de: f-mwma16da-b62r5
       salida: dec:d-mwma16da-nv4r5
@@ -27861,8 +27865,8 @@ instagram:
       titulo: Nueva caja
       color: "#16a34a"
     - id: velo-mwm829b9-0
-      x: 77
-      y: 30096
+      x: 154
+      y: 29227
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
@@ -27957,8 +27961,8 @@ instagram:
       y: 27885
     - id: esp-mwm829b9-37m01
       ficha: f-mwm829b9-3uqow
-      x: 2926
-      y: 30261
+      x: 3003
+      y: 29392
     - id: esp-mwma16da-ti48b
       ficha: f-mwma16da-gjdim
       x: 3190
