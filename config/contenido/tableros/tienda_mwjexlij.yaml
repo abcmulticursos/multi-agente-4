@@ -19099,20 +19099,20 @@ instagram:
         - id: rmwl16ea7
           peso: 1
           anuncios:
-            - meta_120250841173490336
+            - meta_120256716222700226
         - id: rmwl9cy9h
           peso: 1
           anuncios:
-            - meta_120250841173460336
+            - meta_120256716222740226
         - id: rmwl9cz4d
           peso: 1
           anuncios:
-            - meta_120250841173430336
+            - meta_120256716222750226
         - id: rmwl9czwc
           peso: 1
           anuncios:
-            - meta_120250841173470336
-            - meta_120250841173450336
+            - meta_120256716222690226
+            - meta_120256716222760226
     - id: f-mwjvrxxv-a6r9
       tipo: cobro
       x: 1892
@@ -23900,12 +23900,21 @@ instagram:
       reparto:
         - id: r1
           peso: 1
+          anuncios:
+            - meta_120256717565960226
         - id: r2
           peso: 1
+          anuncios:
+            - meta_120256717565910226
         - id: rmwle6329
           peso: 1
+          anuncios:
+            - meta_120256717565970226
         - id: rmwle63u3
           peso: 1
+          anuncios:
+            - meta_120256717565920226
+            - meta_120256717565950226
         - id: rmwm8ffz1
           peso: 0
           peso_antes: 1
@@ -25765,8 +25774,8 @@ instagram:
         - "@tienda:basico"
     - id: f-mwm829b9-0rdeg
       tipo: cobro
-      x: 2739
-      y: 29766
+      x: 2662
+      y: 30635
       steps:
         - type: text
           body_variants:
@@ -25785,12 +25794,12 @@ instagram:
         metodos: true
     - id: f-mwm829b9-cf70s
       tipo: regalo
-      x: 3773
-      y: 29986
+      x: 3696
+      y: 30855
     - id: f-mwm829b9-gvb0y
       tipo: mensaje
-      x: 99
-      y: 29656
+      x: 22
+      y: 30525
       steps:
         - type: text
           body_variants:
@@ -25883,8 +25892,8 @@ instagram:
           delay_after_sec: 5
     - id: f-mwm829b9-3uqow
       tipo: seguimientos
-      x: 2002
-      y: 29524
+      x: 1925
+      y: 30393
       seguimientos:
         - id: s-mwm829b9-f2q9g
           minutos: 30
@@ -25984,8 +25993,8 @@ instagram:
           activa_oferta: true
     - id: f-mwm829b9-41wqo
       tipo: mensaje
-      x: 1716
-      y: 29887
+      x: 1639
+      y: 30756
       steps:
         - type: text
           body_variants:
@@ -26208,8 +26217,8 @@ instagram:
         - "@tienda:basico"
     - id: f-mwm8e651-69hv
       tipo: mensaje
-      x: 1122
-      y: 29656
+      x: 1045
+      y: 30525
       steps:
         - type: audio
           drive_url: https://drive.google.com/file/d/1HF1dWLBely5iw4VJ4j1M-HQXo0M-1HpT/view?usp=drive_link
@@ -27432,10 +27441,6 @@ instagram:
       de: f-mwm8e651-69hv
       salida: siguiente
       a: f-mwm829b9-41wqo
-    - id: c-mwm8fnl1-k97
-      de: f-mwle60go-ut2i
-      salida: rep:rmwm8ffz1
-      a: f-mwm829b9-gvb0y
     - id: c-mwma16da-bjjzm
       de: f-mwma16da-b62r5
       salida: dec:d-mwma16da-nv4r5
@@ -27856,8 +27861,8 @@ instagram:
       titulo: Nueva caja
       color: "#16a34a"
     - id: velo-mwm829b9-0
-      x: 154
-      y: 29227
+      x: 77
+      y: 30096
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
@@ -27952,8 +27957,8 @@ instagram:
       y: 27885
     - id: esp-mwm829b9-37m01
       ficha: f-mwm829b9-3uqow
-      x: 3003
-      y: 29392
+      x: 2926
+      y: 30261
     - id: esp-mwma16da-ti48b
       ficha: f-mwma16da-gjdim
       x: 3190
