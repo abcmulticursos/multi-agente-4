@@ -6,6 +6,7 @@ import { guardarOtraApp, otrasApps, quitarOtraApp, secretoDeOtraApp } from "@/li
 import { fetchMeta } from "@/lib/meta/freno";
 import { olvidar } from "@/lib/meta/recuerdo";
 import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
+import { permisosConocidos } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,8 +72,10 @@ export async function POST(req: NextRequest) {
   //    cuenta no ve el negocio de la app, queda sin identificar (y no se esconde nada).
   let negocio: string | null = null;
   let negocioId: string | null = null;
-  const token = getTokenDeLaConexion();
-  if (token) {
+  // (19/11/2026) Con TODAS las cuentas de Facebook conectadas, no solo la de la conexión: el BM de la app puede estar
+  // solo en otra (ver `app/route.ts`, su caso de BM Paginas 2).
+  for (const token of [...new Set([getTokenDeLaConexion(), ...permisosConocidos()].filter((t): t is string => !!t))]) {
+    if (negocioId) break;
     const r = (await fetchMeta(
       new URL(`https://graph.facebook.com/${graphVersion()}/me/businesses?fields=id,name,owned_apps.limit(200){id}&limit=200&access_token=${encodeURIComponent(token)}`)
     )

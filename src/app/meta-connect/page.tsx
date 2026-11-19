@@ -1168,6 +1168,7 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
   type Activos = { numeros: string[]; paginas: string[]; pixels: string[]; facebook: string | null };
   const [activos, setActivos] = useState<Record<string, Activos>>({});
   const [cuentasFb, setCuentasFb] = useState<string[]>([]);
+  const [cuentaDelNegocio, setCuentaDelNegocio] = useState<Record<string, string>>({});
   // (18/11/2026) Él: «al presionar no se sabe si está cargando… me gustaría que diga actualizando…».
   const [actualizando, setActualizando] = useState(false);
   useEffect(() => {
@@ -1182,6 +1183,11 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
         if (!d?.cuentas) return;
         setActivos(Object.fromEntries(d.cuentas.map((c) => [c.id, { numeros: c.numeros, paginas: c.paginas, pixels: c.pixels, facebook: c.facebookNombre }])));
         setCuentasFb([...new Set([...(d.conectadas ?? []).map((c) => c.nombre), ...d.cuentas.map((c) => c.facebookNombre)].filter((x): x is string => !!x))]);
+        // (19/11/2026) Y los BM de cada cuenta aunque todavía no tengan números conectados (su BM Paginas 2): sin
+        // esto, la app de ese BM quedaba en «Cuenta sin conectar» aunque la cuenta que lo maneja sí estuviera.
+        const deCadaCuenta: Record<string, string> = {};
+        for (const c of d.conectadas ?? []) for (const n of c.negocios ?? []) if (c.nombre && !deCadaCuenta[n]) deCadaCuenta[n] = c.nombre;
+        setCuentaDelNegocio(deCadaCuenta);
       })
       .catch(() => {});
   }, [datos]);
@@ -1252,7 +1258,7 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
     ...(datos.principal ? [{ ...datos.principal, nombre: status.appName ?? nombreDeLaPrincipal, principal: true }] : []),
     ...datos.otras.map((o) => ({ ...o, principal: false })),
   ];
-  const cuentaDe = (a: AppEnFila) => (a.negocioId ? activos[a.negocioId]?.facebook ?? null : null);
+  const cuentaDe = (a: AppEnFila) => (a.negocioId ? activos[a.negocioId]?.facebook ?? cuentaDelNegocio[a.negocioId] ?? null : null);
   // Una caja por cuenta conectada (aunque no sea dueña de ninguna app), y al final las apps cuya cuenta no está conectada.
   const grupos: Array<{ cuenta: string | null; apps: AppEnFila[] }> = cuentasFb.map((c) => ({ cuenta: c, apps: apps.filter((a) => cuentaDe(a) === c) }));
   if (!grupos.length && status.cuentaDeFacebook) grupos.push({ cuenta: status.cuentaDeFacebook, apps: [] });

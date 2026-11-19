@@ -8,6 +8,7 @@ import {
 } from "@/lib/meta/runtime-config";
 import { MEDIA_HORA, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta } from "@/lib/meta/freno";
+import { permisosConocidos } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -64,7 +65,10 @@ async function leerApp(appId: string, appSecret: string) {
 
   // A qué negocio pertenece. Se recorren los negocios del login buscando la app
   // entre las suyas y entre las que le compartieron.
-  const token = getTokenDeLaConexion();
+  // (19/11/2026) CON TODAS LAS CUENTAS DE FACEBOOK CONECTADAS, no solo la de la conexión. Su app «FLORES DE PAPEL BM 2»
+  // es de BM Paginas 2, que está en la cuenta Alberto Salinas y no en la de Claudio: buscando solo con Claudio quedaba
+  // «Cuenta sin conectar» y sin números, páginas ni píxeles. Una pregunta por cuenta y el resultado se guarda.
+  const tokens = [...new Set([getTokenDeLaConexion(), ...permisosConocidos()].filter((t): t is string => !!t))];
   let negocio: string | null = null;
   let avisoNegocio: string | null = null;
 
@@ -74,9 +78,10 @@ async function leerApp(appId: string, appSecret: string) {
   const guardado = getMetaRuntimeSetting(`app_negocio_${appId}`);
   if (guardado) return { configurada: true, appId, nombre, negocio: guardado, avisoNombre, avisoNegocio };
 
-  // Primero en UNA pregunta: los BM con sus apps propias dentro. Si Meta no la acepta, se
+  // Primero en UNA pregunta por cuenta: los BM con sus apps propias dentro. Si Meta no la acepta, se
   // recorren los BM uno por uno, como antes.
-  if (token) {
+  for (const token of tokens) {
+    if (negocio) break;
     try {
       const url = new URL(`https://graph.facebook.com/${graphVersion()}/me/businesses`);
       url.searchParams.set("fields", "id,name,owned_apps.limit(200){id}");
@@ -99,9 +104,11 @@ async function leerApp(appId: string, appSecret: string) {
 
   if (negocio) {
     setMetaRuntimeSettings({ [`app_negocio_${appId}`]: negocio });
-  } else if (!token) {
+  } else if (!tokens.length) {
     avisoNegocio = "Conecta con Meta para poder comprobar el negocio.";
   } else {
+    for (const token of tokens) {
+    if (negocio) break;
     try {
       const url = new URL(
         `https://graph.facebook.com/${graphVersion()}/me/businesses`
@@ -136,12 +143,14 @@ async function leerApp(appId: string, appSecret: string) {
         }
       }
       if (negocio) setMetaRuntimeSettings({ [`app_negocio_${appId}`]: negocio });
-      if (!negocio) {
-        avisoNegocio =
-          "No pude ver a qué negocio pertenece la app. Puede ser que el login no tenga permiso para listar las apps de tus negocios, o que la app no esté en ninguno.";
-      }
     } catch {
       avisoNegocio = "No se pudo consultar a Meta.";
+    }
+    }
+    if (negocio) avisoNegocio = null;
+    else if (!avisoNegocio) {
+      avisoNegocio =
+        "No pude ver a qué negocio pertenece la app. Puede ser que el login no tenga permiso para listar las apps de tus negocios, o que la app no esté en ninguno.";
     }
   }
 
