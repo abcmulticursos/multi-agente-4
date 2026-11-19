@@ -1485,7 +1485,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
       registry_ad_id: "120256716193620226"
       registry_ad_key: meta_120256716193620226
-      registry_color: "#dc2626"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1506,7 +1506,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
       registry_ad_id: "120256716166750226"
       registry_ad_key: meta_120256716166750226
-      registry_color: "#dc2626"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1527,7 +1527,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
       registry_ad_id: "120256716179660226"
       registry_ad_key: meta_120256716179660226
-      registry_color: "#dc2626"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1548,7 +1548,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
       registry_ad_id: "120256715814600226"
       registry_ad_key: meta_120256715814600226
-      registry_color: "#dc2626"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1569,7 +1569,217 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
       registry_ad_id: "120256716187170226"
       registry_ad_key: meta_120256716187170226
-      registry_color: "#dc2626"
+      registry_color: "#00aaff"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129457285423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: COL | PF | AD 5
+      ad_ids:
+        - "120256716222760226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+      registry_ad_id: "120256716222760226"
+      registry_ad_key: meta_120256716222760226
+      registry_color: "#e5ef4d"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449047423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: COL | PF | AD 2
+      ad_ids:
+        - "120256716222740226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
+      registry_ad_id: "120256716222740226"
+      registry_ad_key: meta_120256716222740226
+      registry_color: "#e5ef4d"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449083423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: COL | PF | AD 3
+      ad_ids:
+        - "120256716222750226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
+      registry_ad_id: "120256716222750226"
+      registry_ad_key: meta_120256716222750226
+      registry_color: "#e5ef4d"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449101423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: COL | PF | AD 4
+      ad_ids:
+        - "120256716222690226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
+      registry_ad_id: "120256716222690226"
+      registry_ad_key: meta_120256716222690226
+      registry_color: "#e5ef4d"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449077423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: COL | PF | AD 1
+      ad_ids:
+        - "120256716222700226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
+      registry_ad_id: "120256716222700226"
+      registry_ad_key: meta_120256716222700226
+      registry_color: "#e5ef4d"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449083423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: VE | PF | AD 3
+      ad_ids:
+        - "120256717565970226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
+      registry_ad_id: "120256717565970226"
+      registry_ad_key: meta_120256717565970226
+      registry_color: "#2563eb"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449077423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: VE | PF | AD 1
+      ad_ids:
+        - "120256717565960226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
+      registry_ad_id: "120256717565960226"
+      registry_ad_key: meta_120256717565960226
+      registry_color: "#2563eb"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449047423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: VE | PF | AD 2
+      ad_ids:
+        - "120256717565910226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
+      registry_ad_id: "120256717565910226"
+      registry_ad_key: meta_120256717565910226
+      registry_color: "#2563eb"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129449101423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: VE | PF | AD 4
+      ad_ids:
+        - "120256717565920226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
+      registry_ad_id: "120256717565920226"
+      registry_ad_key: meta_120256717565920226
+      registry_color: "#2563eb"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
+        https://www.facebook.com/1199766179893210/posts/122129457285423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: VE | PF | AD 5
+      ad_ids:
+        - "120256717565950226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+      registry_ad_id: "120256717565950226"
+      registry_ad_key: meta_120256717565950226
+      registry_color: "#2563eb"
 
   # 3) Respuesta cuando el cliente escribe "comentado" / "comenté" / etc.
   reward_message: |-
@@ -3262,7 +3472,7 @@ ad_registry:
     name: ARG | PF | AD 5
     ids:
       - "120256716193620226"
-    color: "#dc2626"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
     meta:
       business_name: Premium Academy Violeta
@@ -3273,7 +3483,7 @@ ad_registry:
     name: ARG | PF | AD 2
     ids:
       - "120256716166750226"
-    color: "#dc2626"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
     meta:
       business_name: Premium Academy Violeta
@@ -3284,7 +3494,7 @@ ad_registry:
     name: ARG | PF | AD 3
     ids:
       - "120256716179660226"
-    color: "#dc2626"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
     meta:
       business_name: Premium Academy Violeta
@@ -3295,7 +3505,7 @@ ad_registry:
     name: ARG | PF | AD 1
     ids:
       - "120256715814600226"
-    color: "#dc2626"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
     meta:
       business_name: Premium Academy Violeta
@@ -3306,13 +3516,123 @@ ad_registry:
     name: ARG | PF | AD 4
     ids:
       - "120256716187170226"
-    color: "#dc2626"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
     meta:
       business_name: Premium Academy Violeta
       ad_account_name: Premium Academy Cuenta 2
       campaign_name: ARG | PF | 19 Noviembre 2026
       ad_name: ARG | PF | AD 4
+  - key: meta_120256716222760226
+    name: COL | PF | AD 5
+    ids:
+      - "120256716222760226"
+    color: "#e5ef4d"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: COL | PF | 19 Noviembre 2026
+      ad_name: COL | PF | AD 5
+  - key: meta_120256716222740226
+    name: COL | PF | AD 2
+    ids:
+      - "120256716222740226"
+    color: "#e5ef4d"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: COL | PF | 19 Noviembre 2026
+      ad_name: COL | PF | AD 2
+  - key: meta_120256716222750226
+    name: COL | PF | AD 3
+    ids:
+      - "120256716222750226"
+    color: "#e5ef4d"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: COL | PF | 19 Noviembre 2026
+      ad_name: COL | PF | AD 3
+  - key: meta_120256716222690226
+    name: COL | PF | AD 4
+    ids:
+      - "120256716222690226"
+    color: "#e5ef4d"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: COL | PF | 19 Noviembre 2026
+      ad_name: COL | PF | AD 4
+  - key: meta_120256716222700226
+    name: COL | PF | AD 1
+    ids:
+      - "120256716222700226"
+    color: "#e5ef4d"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: COL | PF | 19 Noviembre 2026
+      ad_name: COL | PF | AD 1
+  - key: meta_120256717565970226
+    name: VE | PF | AD 3
+    ids:
+      - "120256717565970226"
+    color: "#2563eb"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: VE | PF | 19 Noviembre 2026
+      ad_name: VE | PF | AD 3
+  - key: meta_120256717565960226
+    name: VE | PF | AD 1
+    ids:
+      - "120256717565960226"
+    color: "#2563eb"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: VE | PF | 19 Noviembre 2026
+      ad_name: VE | PF | AD 1
+  - key: meta_120256717565910226
+    name: VE | PF | AD 2
+    ids:
+      - "120256717565910226"
+    color: "#2563eb"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: VE | PF | 19 Noviembre 2026
+      ad_name: VE | PF | AD 2
+  - key: meta_120256717565920226
+    name: VE | PF | AD 4
+    ids:
+      - "120256717565920226"
+    color: "#2563eb"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: VE | PF | 19 Noviembre 2026
+      ad_name: VE | PF | AD 4
+  - key: meta_120256717565950226
+    name: VE | PF | AD 5
+    ids:
+      - "120256717565950226"
+    color: "#2563eb"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: VE | PF | 19 Noviembre 2026
+      ad_name: VE | PF | AD 5
 samples_after_sequence:
   # Paso 1 — texto
   - type: text
