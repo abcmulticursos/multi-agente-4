@@ -1,5 +1,5 @@
 whatsapp:
-  encendido: true
+  encendido: false
   fichas:
     - id: inicio
       tipo: inicio
@@ -9319,7 +9319,7 @@ whatsapp:
       x: 3190
       y: 16962
 messenger:
-  encendido: true
+  encendido: false
   fichas:
     - id: inicio
       tipo: inicio
@@ -18639,7 +18639,7 @@ messenger:
       x: 3190
       y: 16962
 instagram:
-  encendido: true
+  encendido: false
   fichas:
     - id: inicio
       tipo: inicio
