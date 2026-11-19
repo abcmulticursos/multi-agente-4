@@ -854,6 +854,104 @@ function MedicionPorCuenta() {
  * Facebook. SOLO PANTALLA: los botones llaman a lo que ya existía (asistente «app» / «cerrar», DELETE de apps, actualizar,
  * conectar otra cuenta, el pop up del negocio).
  */
+/**
+ * 🩺 ¿POR QUÉ ESTÁ BLOQUEADO? (19/11/2026). Él: «lo que quiero saber es por qué se me ha bloqueado». Le pregunta a Meta
+ * el «estado de salud» de cada número guardado (`/api/meta/connect/salud`): si puede enviar y, si no, qué lo bloquea y
+ * por qué, con la solución que sugiere Meta. Solo lee.
+ */
+function SaludDeLosNumeros() {
+  type Error_ = { codigo: number | null; descripcion: string; solucion: string };
+  type Entidad = { tipo: string; id: string | null; puedeEnviar: string | null; errores: Error_[]; info: string[] };
+  type Numero = { phoneNumberId: string; wabaId: string; negocio: string | null; numero: string | null; nombre: string | null; calidad: string | null; estado: string | null; puedeEnviar: string | null; entidades: Entidad[]; error: string | null };
+  const [numeros, setNumeros] = useState<Numero[] | null>(null);
+  const [cargando, setCargando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
+  const consultar = async () => {
+    setCargando(true);
+    setFallo(null);
+    try {
+      const r = await fetch("/api/meta/connect/salud", { cache: "no-store" });
+      const d = (await r.json()) as { numeros?: Numero[] };
+      setNumeros(d.numeros ?? []);
+    } catch {
+      setFallo("No pude hablar con el servidor. Vuelve a intentarlo.");
+    }
+    setCargando(false);
+  };
+  const QUE_ES: Record<string, string> = { PHONE_NUMBER: "El número", WABA: "La cuenta de WhatsApp", BUSINESS: "El negocio (BM)", APP: "La app" };
+  const ESTADO: Record<string, { texto: string; clase: string }> = {
+    AVAILABLE: { texto: "✅ Puede enviar", clase: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+    LIMITED: { texto: "⚠️ Limitado", clase: "bg-amber-100 text-amber-900 border-amber-300" },
+    BLOCKED: { texto: "⛔ Bloqueado", clase: "bg-rose-100 text-rose-800 border-rose-300" },
+  };
+  const chapa = (v: string | null) => {
+    const e = v ? ESTADO[v] : undefined;
+    return <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${e?.clase ?? "border-borde bg-relleno text-tinta-suave"}`}>{e?.texto ?? v ?? "Sin dato"}</span>;
+  };
+  return (
+    <div className="rounded-2xl border border-borde bg-panel p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-base font-black">🩺 ¿Por qué está bloqueado?</p>
+          <p className="text-sm text-tinta-suave">Le pregunta a Meta el estado de cada número guardado y el motivo si no puede enviar. Solo lee: no cambia nada.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void consultar()}
+          disabled={cargando}
+          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 disabled:cursor-wait disabled:opacity-70"
+        >
+          {cargando ? "Preguntando a Meta…" : numeros ? "↻ Volver a preguntar" : "🩺 Ver el estado de mis números"}
+        </button>
+      </div>
+      {fallo && <p className="mt-3 text-sm font-semibold text-rose-700">{fallo}</p>}
+      {numeros && numeros.length === 0 && <p className="mt-3 text-sm text-tinta-suave">No hay números guardados en Meta Connect.</p>}
+      {numeros && numeros.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {[...numeros]
+            .sort((a, b) => Number(b.puedeEnviar === "BLOCKED") - Number(a.puedeEnviar === "BLOCKED"))
+            .map((n) => (
+              <div key={n.phoneNumberId} className={`rounded-xl border-2 p-4 ${n.puedeEnviar === "BLOCKED" ? "border-rose-400" : n.puedeEnviar === "LIMITED" ? "border-amber-400" : "border-borde"} bg-tarjeta`}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-base font-black">{n.numero ?? n.phoneNumberId}</span>
+                  {n.nombre && <span className="text-sm text-tinta-suave">· {n.nombre}</span>}
+                  {chapa(n.puedeEnviar)}
+                  {n.calidad && <span className="rounded-full border border-borde px-2 py-0.5 text-xs">Calidad: {n.calidad}</span>}
+                </div>
+                <p className="mt-1 text-xs text-tinta-suave">
+                  {n.negocio ? `BM: ${n.negocio} · ` : ""}cuenta de WhatsApp {n.wabaId} · id {n.phoneNumberId}
+                </p>
+                {n.error && <p className="mt-2 text-sm text-rose-700">No pude leerlo: {n.error}</p>}
+                {n.entidades.filter((e) => e.puedeEnviar !== "AVAILABLE" || e.errores.length).map((e, i) => (
+                  <div key={i} className="mt-3 rounded-lg border border-borde bg-relleno p-3 text-sm">
+                    <div className="flex flex-wrap items-center gap-2 font-bold">
+                      {QUE_ES[e.tipo] ?? e.tipo} {e.id ? <span className="font-normal text-tinta-suave">({e.id})</span> : null} {chapa(e.puedeEnviar)}
+                    </div>
+                    {e.errores.map((x, k) => (
+                      <div key={k} className="mt-2">
+                        <p>
+                          <b>Motivo{x.codigo ? ` (${x.codigo})` : ""}:</b> {x.descripcion || "Meta no da la descripción."}
+                        </p>
+                        {x.solucion && (
+                          <p className="mt-1">
+                            <b>Qué sugiere Meta:</b> {x.solucion}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                    {e.info.map((t, k) => (
+                      <p key={k} className="mt-1 text-tinta-suave">{t}</p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AppsDelBot({ status }: { status: MetaStatus }) {
   type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null };
   const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null; negocioId: string | null } | null; otras: Otra[] } | null>(null);
@@ -3962,6 +4060,10 @@ export default function MetaConnectPage() {
           sigue igual, como siempre. Ver `asistente.tsx`. */}
       <div className="mt-5">
         <AsistenteDeConexion />
+      </div>
+
+      <div className="mt-5">
+        <SaludDeLosNumeros />
       </div>
 
       {/* UNA COLUMNA CON ORDEN, y no `space-y`, para que el modo esencial pueda poner

@@ -35211,12 +35211,17 @@ function AjustesDeLaFicha({
         // EL RUTEADOR, AL 115 % (05/11/2026, él: «pop up del ruteador al 115%»): todo un poco más grande; el alto se
         // compensa para que no se salga de la pantalla.
         className={`prolijo ${ficha.tipo === "reparto" ? "max-h-[78vh]" : "max-h-[90vh]"} w-full max-w-lg overflow-y-auto rounded-2xl border border-borde bg-tarjeta p-5 text-tinta shadow-2xl`}
-        style={ficha.tipo === "reparto" ? { zoom: 1.15 } : undefined}
+        // EL FONDO GRIS AZULADO (19/11/2026, él: «como la ventana de Mensaje… no el visor, el fondo»): las rutas quedan como
+        // tarjetas encima. Se mezcla con el color de la tarjeta del tema, así sirve en claro y en oscuro.
+        style={ficha.tipo === "reparto" ? { zoom: 1.15, background: FONDO_DEL_RUTEADOR } : undefined}
         onClick={(e) => e.stopPropagation()}
       >
         {/* LOS BOTONES ARRIBA A LA DERECHA (13/11/2026). Él: «el botoncito de guardar/cancelar/cerrar, estén arriba… a la
             derecha como las demás fichas para mantener la armonía». La cabecera se queda pegada arriba al desplazar. */}
-        <div className="sticky -top-5 z-10 -mx-5 -mt-5 mb-1 flex items-center justify-between gap-3 border-b border-borde bg-tarjeta px-5 py-3">
+        <div
+          className="sticky -top-5 z-10 -mx-5 -mt-5 mb-1 flex items-center justify-between gap-3 border-b border-borde bg-tarjeta px-5 py-3"
+          style={ficha.tipo === "reparto" ? { background: FONDO_DEL_RUTEADOR } : undefined}
+        >
           <p className="text-sm font-black">
             {a.icono} {a.nombre}
           </p>
@@ -35540,10 +35545,24 @@ function AjustesDeLaFicha({
             </label>
           ))}
           {ficha.tipo === "reparto" && comun(["reparto"], (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <span className={etiqueta}>Rutas y su peso</span>
               {(b.reparto ?? []).map((o, i) => (
-                <div key={o.id} className="space-y-1 rounded-lg border border-borde p-2">
+                // CADA RUTA CON SU MARCO (19/11/2026). Él: «está complicado ubicar cuál es la ruta 1, 2, 3… el marco es tan
+                // tenue que no parece que fuesen separados». Marco grueso (verde si vende, gris si está apagada) y su número.
+                <div
+                  key={o.id}
+                  // APAGADA = OTRO MARCO, NO SOLO «OFF» (19/11/2026, él: «que se vea que está apagado»): punteado y gris.
+                  className={`space-y-1.5 rounded-xl border-2 p-3 shadow-sm ${o.peso > 0 ? "border-emerald-500 bg-tarjeta" : "border-dashed border-neutral-500 bg-neutral-500/20"}`}
+                >
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-black uppercase tracking-wide ${o.peso > 0 ? "text-emerald-700" : "text-neutral-600"}`}>Ruta {i + 1}</span>
+                  {o.peso > 0 ? (
+                    <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-black text-white">VENDE</span>
+                  ) : (
+                    <span className="rounded-full bg-neutral-600 px-2 py-0.5 text-[10px] font-black text-white">💤 APAGADA · no recibe a nadie</span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 text-xs">
                   <input
                     value={o.nombre ?? ""}
@@ -51650,6 +51669,8 @@ const GuardadoDelEditor = createContext<{
  * tal cual, sin tocar nada más.
  */
 const EL_CLIC_FUERA_CIERRA_LA_VENTANA = false;
+/** El fondo de la ventana del Ruteador (19/11/2026): gris azulado como la de Mensaje, en claro y en oscuro. */
+const FONDO_DEL_RUTEADOR = "color-mix(in srgb, var(--tema-tarjeta) 80%, #6b86b3)";
 
 /**
  * «AÚN NO HAS GUARDADO TUS CAMBIOS» — EL AVISO PEGADO AL GUARDAR DE LA BARRA.
@@ -62325,7 +62346,8 @@ function AdTagPicker({
           <span
             key={k}
             title={`${k}\nYa no está en tu lista importada: nadie llega por él. Quítalo con la X.`}
-            className="inline-flex items-center gap-1 rounded border border-dashed border-neutral-400 bg-neutral-100 px-2 py-1 text-xs font-semibold text-neutral-500 line-through decoration-neutral-400"
+            // (19/11/2026) Él: «que no se vean plomos tan claros… algo así como los cuadritos de decisión apagados».
+            className="inline-flex items-center gap-1 rounded border border-neutral-400 bg-neutral-300 px-2 py-1 text-xs font-semibold text-neutral-700 line-through decoration-neutral-700"
           >
             anuncio viejo
             <button type="button" onClick={() => toggle(k)} className="ml-1 rounded px-1 font-bold no-underline hover:bg-black/10" title="Quitar este anuncio viejo">X</button>
