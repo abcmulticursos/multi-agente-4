@@ -1485,7 +1485,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
       registry_ad_id: "120256716193620226"
       registry_ad_key: meta_120256716193620226
-      registry_color: "#00aaff"
+      registry_color: "#dc2626"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1506,7 +1506,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
       registry_ad_id: "120256716166750226"
       registry_ad_key: meta_120256716166750226
-      registry_color: "#00aaff"
+      registry_color: "#dc2626"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1527,7 +1527,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
       registry_ad_id: "120256716179660226"
       registry_ad_key: meta_120256716179660226
-      registry_color: "#00aaff"
+      registry_color: "#dc2626"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1548,7 +1548,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
       registry_ad_id: "120256715814600226"
       registry_ad_key: meta_120256715814600226
-      registry_color: "#00aaff"
+      registry_color: "#dc2626"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1569,7 +1569,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
       registry_ad_id: "120256716187170226"
       registry_ad_key: meta_120256716187170226
-      registry_color: "#00aaff"
+      registry_color: "#dc2626"
 
   # 3) Respuesta cuando el cliente escribe "comentado" / "comenté" / etc.
   reward_message: |-
@@ -3262,7 +3262,7 @@ ad_registry:
     name: ARG | PF | AD 5
     ids:
       - "120256716193620226"
-    color: "#00aaff"
+    color: "#dc2626"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
     meta:
       business_name: Premium Academy Violeta
@@ -3273,7 +3273,7 @@ ad_registry:
     name: ARG | PF | AD 2
     ids:
       - "120256716166750226"
-    color: "#00aaff"
+    color: "#dc2626"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
     meta:
       business_name: Premium Academy Violeta
@@ -3284,7 +3284,7 @@ ad_registry:
     name: ARG | PF | AD 3
     ids:
       - "120256716179660226"
-    color: "#00aaff"
+    color: "#dc2626"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
     meta:
       business_name: Premium Academy Violeta
@@ -3295,7 +3295,7 @@ ad_registry:
     name: ARG | PF | AD 1
     ids:
       - "120256715814600226"
-    color: "#00aaff"
+    color: "#dc2626"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
     meta:
       business_name: Premium Academy Violeta
@@ -3306,7 +3306,7 @@ ad_registry:
     name: ARG | PF | AD 4
     ids:
       - "120256716187170226"
-    color: "#00aaff"
+    color: "#dc2626"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
     meta:
       business_name: Premium Academy Violeta
