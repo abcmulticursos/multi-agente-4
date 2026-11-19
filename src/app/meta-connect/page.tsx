@@ -903,13 +903,6 @@ function SaludDeLosNumeros() {
     if (cods.has(141007)) return { texto: "Falta la zona horaria · no envía hasta ponerla", clase: "text-amber-800", punto: "bg-amber-500" };
     return { texto: "Puede responder a tus clientes", clase: "text-emerald-700", punto: "bg-emerald-500" };
   };
-  /** Lo que falta configurar, en chapitas cortas (no impide responder). */
-  const faltas = (n: Numero) => {
-    const cods = new Set(erroresDe(n).map((x) => x.codigo ?? 0));
-    return [cods.has(141006) && "💳 sin tarjeta", cods.has(141010) && "🪪 negocio sin verificar", (cods.has(141012) || cods.has(141015)) && "⏳ tope de 24 h"].filter(
-      (x): x is string => !!x
-    );
-  };
   const [abierto, setAbierto] = useState<Numero | null>(null);
   useEffect(() => {
     if (!abierto) return;
@@ -923,67 +916,157 @@ function SaludDeLosNumeros() {
     porNegocio.set(k, [...(porNegocio.get(k) ?? []), n]);
   }
   const negocios = [...porNegocio.entries()].sort(([, a], [, b]) => Number(b.some(prohibido)) - Number(a.some(prohibido)));
+  // EL ESTILO DE LAS TARJETAS DEL EDITOR (19/11/2026, tercera vuelta). Él: «no le veo nada… es la misma lista larga… tú
+  // tienes pop ups bonitos», con las filas Intro / Seguimientos / Regalos por anuncio de ejemplo. Y el nombre «como en
+  // Meta»: «Calidad de la cuenta». Una tarjeta por negocio (ícono en su cuadro de color, nombre, una línea, su estado y
+  // «Abrir»), su pop up con una tarjeta por número (el NOMBRE grande), y el pop up del número con el detalle.
+  const prohibidos = (numeros ?? []).filter(prohibido);
+  const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
+  useEffect(() => {
+    if (!negocioAbierto || abierto) return;
+    const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && setNegocioAbierto(null);
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
+  }, [negocioAbierto, abierto]);
+  const TONO = {
+    rojo: { ficha: "bg-rose-100 text-rose-700", punto: "border-rose-600 bg-rose-400", texto: "text-rose-600" },
+    ambar: { ficha: "bg-amber-100 text-amber-700", punto: "border-amber-600 bg-amber-400", texto: "text-amber-700" },
+    verde: { ficha: "bg-emerald-100 text-emerald-700", punto: "border-emerald-600 bg-emerald-400", texto: "text-emerald-600" },
+    gris: { ficha: "bg-neutral-200 text-neutral-600", punto: "border-neutral-500 bg-neutral-400", texto: "text-tinta-suave" },
+  };
+  const tonoDe = (n: Numero) => (n.error ? TONO.gris : prohibido(n) ? TONO.rojo : resumen(n).punto.includes("amber") ? TONO.ambar : TONO.verde);
+  const estadoCorto = (n: Numero) => (n.error ? "Sin datos" : prohibido(n) ? "Prohibido" : resumen(n).punto.includes("amber") ? "Revisar" : "Activo");
+  /** Una tarjeta, como las del editor (`FilaDeSeccion`). */
+  const Tarjeta = (p: { icono: string; tono: (typeof TONO)["verde"]; titulo: string; detalle: string; estado: string; chapa: string; onAbrir: () => void }) => (
+    <button
+      type="button"
+      onClick={p.onAbrir}
+      className="group flex w-full items-center gap-4 rounded-2xl border border-borde bg-tarjeta px-5 py-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <span aria-hidden className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-sm ${p.tono.ficha}`}>
+        {p.icono}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-base font-extrabold tracking-tight text-tinta">{p.titulo}</span>
+        <span className="mt-0.5 block text-xs leading-snug text-tinta-suave">{p.detalle}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-2">
+        <span aria-hidden className={`h-3.5 w-3.5 rounded-full border ${p.tono.punto}`} />
+        <span className={`text-xs font-bold ${p.tono.texto}`}>{p.estado}</span>
+      </span>
+      <span className="shrink-0 rounded-full bg-relleno px-4 py-1.5 text-xs font-bold text-tinta-suave transition-colors group-hover:bg-sky-100 group-hover:text-sky-700">
+        {p.chapa}
+      </span>
+    </button>
+  );
+  const listaDelNegocio = negocioAbierto ? porNegocio.get(negocioAbierto) ?? [] : [];
   return (
     <div className="rounded-2xl border border-borde bg-panel p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-base font-black">🩺 ¿Por qué está bloqueado?</p>
-          <p className="text-sm text-tinta-suave">Le pregunta a Meta el estado de cada número guardado y el motivo si no puede enviar. Solo lee: no cambia nada.</p>
+          <p className="text-lg font-black tracking-tight">📊 Calidad de la cuenta</p>
+          <p className="text-sm text-tinta-suave">El estado de tus números de WhatsApp en Meta. Solo lee: no cambia nada.</p>
         </div>
         <button
           type="button"
           onClick={() => void consultar()}
           disabled={cargando}
-          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 disabled:cursor-wait disabled:opacity-70"
+          className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 disabled:cursor-wait disabled:opacity-70"
         >
-          {cargando ? "Preguntando a Meta…" : numeros ? "↻ Volver a preguntar" : "🩺 Ver el estado de mis números"}
+          {cargando ? "Consultando a Meta…" : numeros ? "↻ Volver a consultar estado" : "Consultar estado"}
         </button>
       </div>
       {fallo && <p className="mt-3 text-sm font-semibold text-rose-700">{fallo}</p>}
       {numeros && numeros.length === 0 && <p className="mt-3 text-sm text-tinta-suave">No hay números guardados en Meta Connect.</p>}
-      {numeros && numeros.length > 0 && (
-        <>
-          <p className="mt-4 text-sm text-tinta-suave">
-            🟢 puede responder · 🟡 le falta algo para enviar · 🔴 prohibido por Meta. Toca un número para ver qué tiene y qué hacer.
-          </p>
-          <div className="mt-3 space-y-4">
-            {negocios.map(([negocio, lista]) => (
-              <div key={negocio} className="overflow-hidden rounded-xl border border-borde bg-tarjeta">
-                <div className="flex items-center justify-between gap-3 border-b border-borde bg-relleno px-4 py-2.5">
-                  <p className="text-sm font-extrabold uppercase tracking-wide text-tinta">🏢 {negocio}</p>
-                  <p className="text-xs text-tinta-suave">{lista.length === 1 ? "1 número" : `${lista.length} números`}</p>
-                </div>
-                <div className="divide-y divide-borde">
-                  {lista.map((n) => {
-                    const r = resumen(n);
-                    return (
-                      <button
-                        key={n.phoneNumberId}
-                        type="button"
-                        onClick={() => setAbierto(n)}
-                        className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-left hover:bg-relleno"
-                      >
-                        <span className={`h-3 w-3 shrink-0 rounded-full ${r.punto}`} />
-                        <span className="text-base font-black text-tinta">{n.numero ?? n.phoneNumberId}</span>
-                        {n.nombre && <span className="text-sm text-tinta-suave">{n.nombre}</span>}
-                        <span className={`text-sm font-bold ${r.clase}`}>{r.texto}</span>
-                        <span className="ml-auto flex flex-wrap items-center gap-1.5">
-                          {faltas(n).map((f) => (
-                            <span key={f} className="rounded-full border border-borde bg-relleno px-2 py-0.5 text-xs text-tinta-suave">
-                              {f}
-                            </span>
-                          ))}
-                          <span className="text-sm font-semibold text-sky-700">Ver ›</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+
+      {/* EL AVISO ROJO, solo si hay algo prohibido (él: «cuando haya errores, que salga un aviso rojo… yo toco y que
+          aparezca eso en un pop up»). Lleva al negocio del primero. */}
+      {prohibidos.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setNegocioAbierto(prohibidos[0].negocio ?? "Sin negocio identificado")}
+          className="mt-4 flex w-full items-center gap-3 rounded-2xl border-2 border-rose-300 bg-rose-50 px-5 py-3 text-left hover:bg-rose-100"
+        >
+          <span aria-hidden className="text-2xl">⛔</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-extrabold text-rose-800">
+              WhatsApp: {prohibidos.length === 1 ? "1 número prohibido" : `${prohibidos.length} números prohibidos`} por Meta
+            </span>
+            <span className="block text-xs text-rose-700">No les pongas anuncios. Toca para ver cuáles y apelar.</span>
+          </span>
+          <span className="shrink-0 rounded-full bg-rose-600 px-4 py-1.5 text-xs font-bold text-white">Ver</span>
+        </button>
       )}
+
+      {numeros && numeros.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {negocios.map(([negocio, lista]) => {
+            const malos = lista.filter(prohibido).length;
+            const revisar = lista.filter((n) => !prohibido(n) && tonoDe(n) === TONO.ambar).length;
+            const tono = malos ? TONO.rojo : revisar ? TONO.ambar : TONO.verde;
+            const partes = [lista.length === 1 ? "1 número" : `${lista.length} números`];
+            if (malos) partes.push(malos === 1 ? "1 prohibido" : `${malos} prohibidos`);
+            if (revisar) partes.push(revisar === 1 ? "1 por revisar" : `${revisar} por revisar`);
+            if (!malos && !revisar) partes.push(lista.length === 1 ? "responde normal" : "todos responden");
+            return (
+              <Tarjeta
+                key={negocio}
+                icono="🏢"
+                tono={tono}
+                titulo={negocio}
+                detalle={partes.join(" · ")}
+                estado={malos ? "Prohibido" : revisar ? "Revisar" : "Activo"}
+                chapa="Abrir"
+                onAbrir={() => setNegocioAbierto(negocio)}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* EL POP UP DE UN NEGOCIO: sus números, cada uno una tarjeta con su NOMBRE grande. */}
+      {negocioAbierto ? (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={negocioAbierto}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setNegocioAbierto(null);
+          }}
+        >
+          <div className="flex min-h-full items-start justify-center">
+            <div className="my-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-borde bg-panel shadow-2xl">
+              <div className="flex items-center justify-between gap-3 border-b border-borde bg-tarjeta px-5 py-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-xl">🏢</span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-black text-tinta">{negocioAbierto}</h3>
+                    <p className="text-xs text-tinta-suave">{listaDelNegocio.length === 1 ? "1 número" : `${listaDelNegocio.length} números`} de WhatsApp</p>
+                  </div>
+                </div>
+                <button type="button" onClick={() => setNegocioAbierto(null)} className="shrink-0 rounded-xl border border-borde bg-tarjeta px-4 py-2 text-sm font-bold text-tinta hover:bg-relleno">
+                  Cerrar
+                </button>
+              </div>
+              <div className="space-y-3 p-5">
+                {listaDelNegocio.map((n) => (
+                  <Tarjeta
+                    key={n.phoneNumberId}
+                    icono="📱"
+                    tono={tonoDe(n)}
+                    titulo={n.nombre ?? n.numero ?? n.phoneNumberId}
+                    detalle={`${n.numero ?? n.phoneNumberId} · ${resumen(n).texto}`}
+                    estado={estadoCorto(n)}
+                    chapa="Ver"
+                    onAbrir={() => setAbierto(n)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* EL POP UP DE UN NÚMERO: qué tiene cada parte, en palabras simples, y qué hacer. */}
       {abierto ? (
@@ -1000,10 +1083,9 @@ function SaludDeLosNumeros() {
             <div className="my-8 w-full max-w-xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
               <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
                 <div className="min-w-0">
-                  <h3 className="truncate text-base font-black text-tinta">{abierto.numero ?? abierto.phoneNumberId}</h3>
-                  <p className="text-xs text-tinta-suave">
-                    {abierto.nombre ? `${abierto.nombre} · ` : ""}
-                    {abierto.negocio ?? "Sin negocio identificado"}
+                  <h3 className="truncate text-lg font-black text-tinta">{abierto.nombre ?? abierto.numero ?? abierto.phoneNumberId}</h3>
+                  <p className="text-sm text-tinta-suave">
+                    {abierto.numero ?? abierto.phoneNumberId} · {abierto.negocio ?? "Sin negocio identificado"}
                   </p>
                 </div>
                 <button type="button" onClick={() => setAbierto(null)} className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno">
