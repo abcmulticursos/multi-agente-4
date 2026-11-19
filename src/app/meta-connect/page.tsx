@@ -878,34 +878,51 @@ function SaludDeLosNumeros() {
     }
     setCargando(false);
   };
-  /** Prohibido de verdad (141014): el borde rojo y arriba de la lista. Lo demás, ámbar. */
-  const prohibido = (n: Numero) => n.entidades.some((e) => e.errores.some((x) => x.codigo === 141014));
-  const QUE_ES: Record<string, string> = { PHONE_NUMBER: "El número", WABA: "La cuenta de WhatsApp", BUSINESS: "El negocio (BM)", APP: "La app" };
-  const ESTADO: Record<string, { texto: string; clase: string }> = {
-    AVAILABLE: { texto: "✅ Puede enviar", clase: "bg-emerald-100 text-emerald-800 border-emerald-300" },
-    LIMITED: { texto: "⚠️ Limitado", clase: "bg-amber-100 text-amber-900 border-amber-300" },
-    BLOCKED: { texto: "⛔ Bloqueado", clase: "bg-rose-100 text-rose-800 border-rose-300" },
-  };
   // EL MOTIVO, NO SOLO «BLOQUEADO» (19/11/2026). Él: «no le pongas bloqueado, ponle "sin método de pago"». Meta marca
   // BLOCKED también cuando solo falla la tarjeta (141006), que frena las plantillas que inicia el negocio pero no las
-  // respuestas. Se nombra la causa más grave que haya; las llamadas por SIP (138024/138025) no cuentan.
-  const MOTIVOS: Array<{ codigos: number[]; texto: string; clase: string }> = [
-    { codigos: [141014], texto: "⛔ Prohibido por Meta", clase: ESTADO.BLOCKED.clase },
-    { codigos: [141007], texto: "🕒 Falta la zona horaria", clase: ESTADO.LIMITED.clase },
-    { codigos: [141012, 141015], texto: "⚠️ Llegó al límite de conversaciones", clase: ESTADO.LIMITED.clase },
-    { codigos: [141006], texto: "💳 Sin método de pago (responde normal)", clase: ESTADO.LIMITED.clase },
-    { codigos: [141010], texto: "⚠️ Negocio sin verificar", clase: ESTADO.LIMITED.clase },
-  ];
-  const chapa = (v: string | null, errores: Error_[] = []) => {
-    const codigos = new Set(errores.map((x) => x.codigo ?? 0));
-    const motivo = v && v !== "AVAILABLE" ? MOTIVOS.find((m) => m.codigos.some((c) => codigos.has(c))) : undefined;
-    const e = v ? ESTADO[v] : undefined;
-    return (
-      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${motivo?.clase ?? e?.clase ?? "border-borde bg-relleno text-tinta-suave"}`}>
-        {motivo?.texto ?? e?.texto ?? v ?? "Sin dato"}
-      </span>
+  // respuestas. Y «una sola lista es indescifrable… mejor un pop up por cada número, y ojo con su negocio»: aquí va
+  // agrupado por negocio, una fila por número con UNA frase, y el detalle en palabras simples en su pop up.
+  // Las llamadas por SIP (138024/138025) no se muestran: él no usa llamadas y no afectan a los mensajes.
+  const OCULTOS = new Set([138024, 138025]);
+  const EXPLICACION: Record<number, { que: string; hacer: string; frena: boolean }> = {
+    141014: { que: "Meta prohibió esta cuenta de WhatsApp por sus reglas.", hacer: "Apelar (botón «Apelar» de abajo). No le pongas anuncios hasta que la devuelvan.", frena: true },
+    141007: { que: "La cuenta de WhatsApp no tiene zona horaria.", hacer: "Ponla en el Administrador de WhatsApp → Configuración → Zona horaria.", frena: true },
+    141012: { que: "El número llegó al tope de conversaciones que inicias tú en 24 h.", hacer: "Nada: se libera solo. Las respuestas a quien te escribe no tienen tope.", frena: false },
+    141015: { que: "El negocio llegó al tope de conversaciones que inicias tú en 24 h.", hacer: "Nada: se libera solo. Las respuestas a quien te escribe no tienen tope.", frena: false },
+    141006: { que: "La cuenta de WhatsApp no tiene una tarjeta que funcione.", hacer: "Agrega una tarjeta en el Administrador de WhatsApp → Configuración de pago. El bot igual responde a quien le escribe.", frena: false },
+    141010: { que: "El negocio (BM) no está verificado.", hacer: "Verifícalo en Configuración del negocio → Centro de seguridad. Te da más confianza ante Meta.", frena: false },
+  };
+  const QUE_ES: Record<string, string> = { PHONE_NUMBER: "El número", WABA: "La cuenta de WhatsApp", BUSINESS: "El negocio", APP: "La app del bot" };
+  const erroresDe = (n: Numero) => n.entidades.flatMap((e) => e.errores.filter((x) => !OCULTOS.has(x.codigo ?? 0)));
+  const prohibido = (n: Numero) => erroresDe(n).some((x) => x.codigo === 141014);
+  /** UNA frase por número: lo único que hay que mirar. */
+  const resumen = (n: Numero): { texto: string; clase: string; punto: string } => {
+    const cods = new Set(erroresDe(n).map((x) => x.codigo ?? 0));
+    if (n.error) return { texto: "No pude leerlo", clase: "text-tinta-suave", punto: "bg-neutral-400" };
+    if (cods.has(141014)) return { texto: "Prohibido por Meta · no le pongas anuncios", clase: "text-rose-700", punto: "bg-rose-500" };
+    if (cods.has(141007)) return { texto: "Falta la zona horaria · no envía hasta ponerla", clase: "text-amber-800", punto: "bg-amber-500" };
+    return { texto: "Puede responder a tus clientes", clase: "text-emerald-700", punto: "bg-emerald-500" };
+  };
+  /** Lo que falta configurar, en chapitas cortas (no impide responder). */
+  const faltas = (n: Numero) => {
+    const cods = new Set(erroresDe(n).map((x) => x.codigo ?? 0));
+    return [cods.has(141006) && "💳 sin tarjeta", cods.has(141010) && "🪪 negocio sin verificar", (cods.has(141012) || cods.has(141015)) && "⏳ tope de 24 h"].filter(
+      (x): x is string => !!x
     );
   };
+  const [abierto, setAbierto] = useState<Numero | null>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const alTeclear = (e: KeyboardEvent) => e.key === "Escape" && setAbierto(null);
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
+  }, [abierto]);
+  const porNegocio = new Map<string, Numero[]>();
+  for (const n of numeros ?? []) {
+    const k = n.negocio ?? "Sin negocio identificado";
+    porNegocio.set(k, [...(porNegocio.get(k) ?? []), n]);
+  }
+  const negocios = [...porNegocio.entries()].sort(([, a], [, b]) => Number(b.some(prohibido)) - Number(a.some(prohibido)));
   return (
     <div className="rounded-2xl border border-borde bg-panel p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -925,47 +942,139 @@ function SaludDeLosNumeros() {
       {fallo && <p className="mt-3 text-sm font-semibold text-rose-700">{fallo}</p>}
       {numeros && numeros.length === 0 && <p className="mt-3 text-sm text-tinta-suave">No hay números guardados en Meta Connect.</p>}
       {numeros && numeros.length > 0 && (
-        <div className="mt-4 space-y-3">
-          {[...numeros]
-            .sort((a, b) => Number(prohibido(b)) - Number(prohibido(a)))
-            .map((n) => (
-              <div key={n.phoneNumberId} className={`rounded-xl border-2 p-4 ${prohibido(n) ? "border-rose-400" : n.puedeEnviar !== "AVAILABLE" ? "border-amber-400" : "border-borde"} bg-tarjeta`}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-base font-black">{n.numero ?? n.phoneNumberId}</span>
-                  {n.nombre && <span className="text-sm text-tinta-suave">· {n.nombre}</span>}
-                  {chapa(n.puedeEnviar, n.entidades.flatMap((e) => e.errores))}
-                  {n.calidad && <span className="rounded-full border border-borde px-2 py-0.5 text-xs">Calidad: {n.calidad}</span>}
+        <>
+          <p className="mt-4 text-sm text-tinta-suave">
+            🟢 puede responder · 🟡 le falta algo para enviar · 🔴 prohibido por Meta. Toca un número para ver qué tiene y qué hacer.
+          </p>
+          <div className="mt-3 space-y-4">
+            {negocios.map(([negocio, lista]) => (
+              <div key={negocio} className="overflow-hidden rounded-xl border border-borde bg-tarjeta">
+                <div className="flex items-center justify-between gap-3 border-b border-borde bg-relleno px-4 py-2.5">
+                  <p className="text-sm font-extrabold uppercase tracking-wide text-tinta">🏢 {negocio}</p>
+                  <p className="text-xs text-tinta-suave">{lista.length === 1 ? "1 número" : `${lista.length} números`}</p>
                 </div>
-                <p className="mt-1 text-xs text-tinta-suave">
-                  {n.negocio ? `BM: ${n.negocio} · ` : ""}cuenta de WhatsApp {n.wabaId} · id {n.phoneNumberId}
-                </p>
-                {n.error && <p className="mt-2 text-sm text-rose-700">No pude leerlo: {n.error}</p>}
-                {n.entidades.filter((e) => e.puedeEnviar !== "AVAILABLE" || e.errores.length).map((e, i) => (
-                  <div key={i} className="mt-3 rounded-lg border border-borde bg-relleno p-3 text-sm">
-                    <div className="flex flex-wrap items-center gap-2 font-bold">
-                      {QUE_ES[e.tipo] ?? e.tipo} {e.id ? <span className="font-normal text-tinta-suave">({e.id})</span> : null} {chapa(e.puedeEnviar, e.errores)}
-                    </div>
-                    {e.errores.map((x, k) => (
-                      <div key={k} className="mt-2">
-                        <p>
-                          <b>Motivo{x.codigo ? ` (${x.codigo})` : ""}:</b> {x.descripcion || "Meta no da la descripción."}
-                        </p>
-                        {x.solucion && (
-                          <p className="mt-1">
-                            <b>Qué sugiere Meta:</b> {x.solucion}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                    {e.info.map((t, k) => (
-                      <p key={k} className="mt-1 text-tinta-suave">{t}</p>
-                    ))}
-                  </div>
-                ))}
+                <div className="divide-y divide-borde">
+                  {lista.map((n) => {
+                    const r = resumen(n);
+                    return (
+                      <button
+                        key={n.phoneNumberId}
+                        type="button"
+                        onClick={() => setAbierto(n)}
+                        className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-left hover:bg-relleno"
+                      >
+                        <span className={`h-3 w-3 shrink-0 rounded-full ${r.punto}`} />
+                        <span className="text-base font-black text-tinta">{n.numero ?? n.phoneNumberId}</span>
+                        {n.nombre && <span className="text-sm text-tinta-suave">{n.nombre}</span>}
+                        <span className={`text-sm font-bold ${r.clase}`}>{r.texto}</span>
+                        <span className="ml-auto flex flex-wrap items-center gap-1.5">
+                          {faltas(n).map((f) => (
+                            <span key={f} className="rounded-full border border-borde bg-relleno px-2 py-0.5 text-xs text-tinta-suave">
+                              {f}
+                            </span>
+                          ))}
+                          <span className="text-sm font-semibold text-sky-700">Ver ›</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             ))}
-        </div>
+          </div>
+        </>
       )}
+
+      {/* EL POP UP DE UN NÚMERO: qué tiene cada parte, en palabras simples, y qué hacer. */}
+      {abierto ? (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={abierto.numero ?? "Número"}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAbierto(null);
+          }}
+        >
+          <div className="flex min-h-full items-start justify-center">
+            <div className="my-8 w-full max-w-xl overflow-hidden rounded-xl border border-borde bg-tarjeta shadow-2xl">
+              <div className="flex items-center justify-between gap-3 border-b border-borde px-5 py-3">
+                <div className="min-w-0">
+                  <h3 className="truncate text-base font-black text-tinta">{abierto.numero ?? abierto.phoneNumberId}</h3>
+                  <p className="text-xs text-tinta-suave">
+                    {abierto.nombre ? `${abierto.nombre} · ` : ""}
+                    {abierto.negocio ?? "Sin negocio identificado"}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setAbierto(null)} className="shrink-0 rounded-md border border-borde bg-tarjeta px-4 py-1.5 text-xs font-bold text-tinta hover:bg-relleno">
+                  Cerrar
+                </button>
+              </div>
+              <div className="space-y-3 p-5">
+                {(() => {
+                  const r = resumen(abierto);
+                  return (
+                    <p className={`flex items-center gap-2 text-base font-bold ${r.clase}`}>
+                      <span className={`h-3 w-3 rounded-full ${r.punto}`} /> {r.texto}
+                    </p>
+                  );
+                })()}
+                {abierto.error && <p className="text-sm text-rose-700">No pude leerlo en Meta: {abierto.error}</p>}
+                {erroresDe(abierto).length === 0 && !abierto.error && (
+                  <p className="rounded-lg border border-borde bg-relleno p-3 text-sm text-tinta">Todo en orden: no le falta nada.</p>
+                )}
+                {abierto.entidades.map((e, i) => {
+                  // Lo que frena (prohibido, zona horaria) va primero; lo que solo falta configurar, después.
+                  const propios = e.errores
+                    .filter((x) => !OCULTOS.has(x.codigo ?? 0))
+                    .sort((a, b) => Number(!!EXPLICACION[b.codigo ?? 0]?.frena) - Number(!!EXPLICACION[a.codigo ?? 0]?.frena));
+                  if (!propios.length) return null;
+                  return (
+                    <div key={i} className="rounded-lg border border-borde bg-relleno p-3">
+                      <p className="text-sm font-extrabold text-tinta">{QUE_ES[e.tipo] ?? e.tipo}</p>
+                      {propios.map((x, k) => {
+                        const ex = x.codigo ? EXPLICACION[x.codigo] : undefined;
+                        return (
+                          <div key={k} className="mt-2 text-sm">
+                            <p className={ex?.frena ? "font-bold text-rose-700" : "text-tinta"}>{ex ? ex.que : x.descripcion || "Meta no da la descripción."}</p>
+                            <p className="mt-0.5 text-tinta-suave">
+                              <b>Qué hacer:</b> {ex ? ex.hacer : x.solucion || "Meta no dice qué hacer."}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {prohibido(abierto) && (
+                    <a
+                      href="https://business.facebook.com/accountquality"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700"
+                    >
+                      ⚖️ Apelar en Meta ↗
+                    </a>
+                  )}
+                  <a
+                    href={`https://business.facebook.com/wa/manage/home/?waba_id=${abierto.wabaId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-borde bg-tarjeta px-4 py-2 text-sm font-bold text-tinta hover:bg-relleno"
+                  >
+                    Abrir su Administrador de WhatsApp ↗
+                  </a>
+                </div>
+                <p className="text-xs text-tinta-suave">
+                  Cuenta de WhatsApp {abierto.wabaId} · número {abierto.phoneNumberId}
+                  {abierto.calidad ? ` · calidad ${abierto.calidad}` : ""}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
