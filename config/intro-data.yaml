@@ -1473,6 +1473,27 @@ gift_mechanic:
 
         1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
 
+        https://www.facebook.com/1199766179893210/posts/122129457285423987
+
+        2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+        3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+      label: ARG | PF | AD 5
+      ad_ids:
+        - "120256716193620226"
+      ads_reader_id: 2
+      ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+      registry_ad_id: "120256716193620226"
+      registry_ad_key: meta_120256716193620226
+      registry_color: "#00aaff"
+    - weight: 20
+      text: |-
+        🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+        🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+        1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
         https://www.facebook.com/1199766179893210/posts/122129449047423987
 
         2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
@@ -1485,7 +1506,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
       registry_ad_id: "120256716166750226"
       registry_ad_key: meta_120256716166750226
-      registry_color: "#ca8a04"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1506,7 +1527,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
       registry_ad_id: "120256716179660226"
       registry_ad_key: meta_120256716179660226
-      registry_color: "#ca8a04"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1527,7 +1548,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
       registry_ad_id: "120256715814600226"
       registry_ad_key: meta_120256715814600226
-      registry_color: "#ca8a04"
+      registry_color: "#00aaff"
     - weight: 20
       text: |-
         🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1548,7 +1569,7 @@ gift_mechanic:
       ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
       registry_ad_id: "120256716187170226"
       registry_ad_key: meta_120256716187170226
-      registry_color: "#ca8a04"
+      registry_color: "#00aaff"
 
   # 3) Respuesta cuando el cliente escribe "comentado" / "comenté" / etc.
   reward_message: |-
@@ -3237,11 +3258,22 @@ notification_settings:
       telegram_chat_id: "5508161687"
 intro_ad_keys: []
 ad_registry:
+  - key: meta_120256716193620226
+    name: ARG | PF | AD 5
+    ids:
+      - "120256716193620226"
+    color: "#00aaff"
+    ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+    meta:
+      business_name: Premium Academy Violeta
+      ad_account_name: Premium Academy Cuenta 2
+      campaign_name: ARG | PF | 19 Noviembre 2026
+      ad_name: ARG | PF | AD 5
   - key: meta_120256716166750226
     name: ARG | PF | AD 2
     ids:
       - "120256716166750226"
-    color: "#ca8a04"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
     meta:
       business_name: Premium Academy Violeta
@@ -3252,7 +3284,7 @@ ad_registry:
     name: ARG | PF | AD 3
     ids:
       - "120256716179660226"
-    color: "#ca8a04"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
     meta:
       business_name: Premium Academy Violeta
@@ -3263,7 +3295,7 @@ ad_registry:
     name: ARG | PF | AD 1
     ids:
       - "120256715814600226"
-    color: "#ca8a04"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
     meta:
       business_name: Premium Academy Violeta
@@ -3274,7 +3306,7 @@ ad_registry:
     name: ARG | PF | AD 4
     ids:
       - "120256716187170226"
-    color: "#ca8a04"
+    color: "#00aaff"
     ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
     meta:
       business_name: Premium Academy Violeta

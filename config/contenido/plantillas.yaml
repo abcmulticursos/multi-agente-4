@@ -1086,6 +1086,28 @@ lineal:
 
           1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
 
+          https://www.facebook.com/1199766179893210/posts/122129457285423987
+
+          2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
+
+          3️⃣ 📝 Regresa aquí y escribe *"COMENTADO"* y te envío el enlace de obsequio al instante 🎁
+        label: ARG | PF | AD 5
+        enabled: true
+        ad_ids:
+          - "120256716193620226"
+        ads_reader_id: 2
+        ad_link: https://www.facebook.com/1199766179893210/posts/122129457285423987
+        registry_ad_id: "120256716193620226"
+        registry_ad_key: meta_120256716193620226
+        registry_color: "#00aaff"
+      - weight: 20
+        text: |-
+          🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
+
+          🙏 Si disfrutaste nuestro contenido, *déjanos un comentario positivo* en el video para ayudarnos a llegar a más personas 🌎
+
+          1️⃣  📲 *Ingresa al Siguiente enlace*: 👇🏼
+
           https://www.facebook.com/1199766179893210/posts/122129449047423987
 
           2️⃣ ✍️ *Escríbenos un comentario positivo o recomendación* 😊
@@ -1099,7 +1121,7 @@ lineal:
         ad_link: https://www.facebook.com/1199766179893210/posts/122129449047423987
         registry_ad_id: "120256716166750226"
         registry_ad_key: meta_120256716166750226
-        registry_color: "#ca8a04"
+        registry_color: "#00aaff"
       - weight: 20
         text: |-
           🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1121,7 +1143,7 @@ lineal:
         ad_link: https://www.facebook.com/1199766179893210/posts/122129449083423987
         registry_ad_id: "120256716179660226"
         registry_ad_key: meta_120256716179660226
-        registry_color: "#ca8a04"
+        registry_color: "#00aaff"
       - weight: 20
         text: |-
           🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1143,7 +1165,7 @@ lineal:
         ad_link: https://www.facebook.com/1199766179893210/posts/122129449077423987
         registry_ad_id: "120256715814600226"
         registry_ad_key: meta_120256715814600226
-        registry_color: "#ca8a04"
+        registry_color: "#00aaff"
       - weight: 20
         text: |-
           🎁 *COMPARTE EXPERIENCIA Y GANA* 🎁
@@ -1165,7 +1187,7 @@ lineal:
         ad_link: https://www.facebook.com/1199766179893210/posts/122129449101423987
         registry_ad_id: "120256716187170226"
         registry_ad_key: meta_120256716187170226
-        registry_color: "#ca8a04"
+        registry_color: "#00aaff"
   title: Lineal
   product_info_topics:
     - IMAGEN SUPER KIT FLORES DE PAPEL
