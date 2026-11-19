@@ -44,6 +44,7 @@ import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { atenderNoQuiero } from "@/lib/workflow/no-quiero";
 import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import { registrarComentario } from "@/lib/meta/comments";
 import {
@@ -389,7 +390,7 @@ async function processMessengerPayload(payload: MessengerPayload): Promise<void>
         conElTurnoDe({ messenger_page_id: entry.id ?? null }, () =>
           withWorkflowChannel("messenger", () =>
             conLaHoraDelCliente(`messenger:${psid}`, () =>
-              handleMessengerMessage(psid, messageId, content, attachment, referral, visible)
+              handleMessengerMessage(psid, messageId, content, attachment, referral, visible, pulsado || (postback ? String(postback) : null))
             )
           )
         )
@@ -426,7 +427,9 @@ async function handleMessengerMessage(
   attachment?: { type?: string; payload?: { url?: string } },
   referral?: MessengerReferral,
   /** Lo que queda escrito en el chat cuando no es lo que se enruta (un botón del editor). */
-  visible: string | null = null
+  visible: string | null = null,
+  /** (18/11/2026) El id del botón pulsado (respuesta rápida o postback); null si lo escribió. Ver «no quiero». */
+  botonPulsado: string | null = null
 ): Promise<void> {
   if (wasMessageProcessed(messageId)) {
     console.log(`[messenger] mensaje ${messageId} ya procesado, ignoro`);
@@ -519,6 +522,22 @@ async function handleMessengerMessage(
   const countryReady = getConversationById(convo.id) ?? fresh;
   freezePricesForConvo(countryReady);
   if (gateHandled) return;
+
+  // «NO QUIERO» (18/11/2026), la misma puerta que WhatsApp (handler.ts). Ver workflow/no-quiero.ts.
+  try {
+    const esBoton = !!botonPulsado;
+    const bloque = !attachment && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
+    if (
+      await atenderNoQuiero(getConversationById(convo.id) ?? countryReady, esBoton ? content : bloque, {
+        esBoton,
+        idBoton: botonPulsado,
+        esTextoOAudio: !attachment || (media?.media_type === "audio" && !!media.transcription),
+      })
+    )
+      return;
+  } catch (err) {
+    console.error("[no-quiero] falló (messenger); sigue la venta como siempre:", err);
+  }
 
   // EL TABLERO, también en Messenger (22/10/2026, solo ALBERTO 4). Va DESPUÉS de la pregunta del
   // país —aquí el país se pregunta primero— y antes del motor de siempre, igual que en WhatsApp

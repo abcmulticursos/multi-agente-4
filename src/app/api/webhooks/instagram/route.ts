@@ -39,6 +39,7 @@ import {
 import { resendApprovedMaterial } from "@/lib/workflow/payment";
 import { handleMessengerCountryGate } from "@/lib/workflow/messenger-country";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero } from "@/lib/tablero/motor";
+import { atenderNoQuiero } from "@/lib/workflow/no-quiero";
 import { conLaHoraDelCliente } from "@/lib/workflow/quiet-hours";
 import { tiendaDeLaPagina } from "@/lib/workflow/config";
 import { downloadMessengerAttachment } from "@/lib/messenger/media";
@@ -346,6 +347,15 @@ async function handleInstagramMessage(
   const countryReady = getConversationById(convo.id) ?? fresh;
   freezePricesForConvo(countryReady);
   if (gateHandled) return;
+
+  // «NO QUIERO» (18/11/2026), la misma puerta que WhatsApp (handler.ts). Aquí no hay botones: la pregunta sale
+  // como lista y «1» / «2» la contestan. Ver workflow/no-quiero.ts.
+  try {
+    const bloque = !attachment && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
+    if (await atenderNoQuiero(getConversationById(convo.id) ?? countryReady, bloque, { esBoton: false, esTextoOAudio: !attachment })) return;
+  } catch (err) {
+    console.error("[no-quiero] falló (instagram); sigue la venta como siempre:", err);
+  }
 
   // EL TABLERO, también en Instagram (22/10/2026, solo ALBERTO 4). Igual que en Messenger:
   // después de la pregunta del país y antes del motor de siempre. Su tienda es la de la página

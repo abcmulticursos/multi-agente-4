@@ -1,13 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   deleteConversation,
+  ETIQUETAS_A_MANO,
   getConversationById,
   markConversationRead,
   markConversationUnread,
+  ponerEtiquetaManual,
   setConversationPinned,
   setConversationState,
 } from "@/lib/db";
-import { deleteLeadForConversation } from "@/lib/leads-sync";
+import { deleteLeadForConversation, syncLeadStatus } from "@/lib/leads-sync";
 
 const VALID_STATES = new Set([
   "new",
@@ -39,12 +41,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
-  let body: { pinned?: unknown; read?: unknown; state?: unknown };
+  let body: { pinned?: unknown; read?: unknown; state?: unknown; etiqueta?: unknown };
   try {
     body = (await req.json()) as {
       pinned?: unknown;
       read?: unknown;
       state?: unknown;
+      etiqueta?: unknown;
     };
   } catch {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
@@ -69,6 +72,14 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     // mueve a un estado terminal (payment_approved, etc.) el bot deja
     // de programar seguimientos automaticamente.
     setConversationState(id, body.state as Parameters<typeof setConversationState>[1]);
+    updated = true;
+  }
+
+  // LA ETIQUETA A MANO (18/11/2026): una de las de siempre, o "" / null para volver a la automática. Solo etiqueta: no
+  // cambia el estado del bot ni le avisa a Meta (eso es «💰 Registrar compra en Meta»).
+  if (body.etiqueta === null || body.etiqueta === "" || (typeof body.etiqueta === "string" && (ETIQUETAS_A_MANO as readonly string[]).includes(body.etiqueta))) {
+    ponerEtiquetaManual(id, (body.etiqueta as string | null) || null);
+    void syncLeadStatus(id).catch(() => {});
     updated = true;
   }
 

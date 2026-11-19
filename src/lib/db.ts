@@ -345,6 +345,15 @@ export interface ConversationRow {
   pais_propuesto?: string | null;
   /** 1 = ya se le preguntó por otro país (una sola vez por conversación). */
   pais_preguntado?: number;
+  /** La etiqueta que él le puso a mano (18/11/2026): manda sobre la calculada. NULL = la automática. */
+  etiqueta_manual?: string | null;
+  /**
+   * «NO QUIERO» (18/11/2026): null = nada; «preguntado» = se le preguntó si quiere seguir recibiendo información
+   * (lo programado espera); «sigue» = dijo «Sí quiero»; «fuera» = dijo «Ya no» (bot apagado en ese chat).
+   */
+  no_quiero?: string | null;
+  /** Cuándo se le preguntó (para correr lo programado lo mismo que estuvo en pausa). */
+  no_quiero_at?: number | null;
   /** Canal que reproduce el simulador sin salir a Meta. */
   test_channel: "whatsapp" | "messenger" | null;
   /**
@@ -797,6 +806,11 @@ const conversationColumns: Array<[string, string]> = [
   ["pais_elegido", "TEXT"],
   ["pais_propuesto", "TEXT"],
   ["pais_preguntado", "INTEGER NOT NULL DEFAULT 0"],
+  // LA ETIQUETA PUESTA A MANO (18/11/2026). Él: «pagaron 3 de manera manual… no los puedo etiquetar como pagadores».
+  // NULL = la de siempre (la calculada). Ver `listConversations`.
+  ["etiqueta_manual", "TEXT"],
+  ["no_quiero", "TEXT"],
+  ["no_quiero_at", "INTEGER"],
   ["test_channel", "TEXT"],
   // Modalidad del simulador. NULL en toda conversación real: el modo testeador
   // no puede alcanzarlas ni por error.
@@ -1557,12 +1571,66 @@ export function listConversations(limite?: number): ConversationListRow[] {
     typeof limite === "number" && limite > 0
       ? stmtListConvosLimit.all(limite)
       : stmtListConvos.all();
+  const delTablero = compradoresDelTablero();
   for (const r of rows) {
+    // LA PUESTA A MANO MANDA (18/11/2026), y después lo que pagó por fuera de la venta de siempre: una compra del
+    // tablero o una registrada a mano en Meta. Esas dos no cambian el estado ni `paid_total_cents`, así que antes
+    // salían como «warm» o «hot» aunque hubieran pagado.
+    const manual = r.etiqueta_manual?.trim();
+    if (manual) {
+      r.nocodb_label = manual;
+      continue;
+    }
+    if (r.no_quiero === "fuera") {
+      r.nocodb_label = "🚫 no quiere";
+      continue;
+    }
+    if (delTablero.has(r.id) || !!r.compra_manual_meta) {
+      r.nocodb_label = r.had_emergency ? "pago-reclamo" : "pago";
+      continue;
+    }
     // Solo rellena si NocoDB no proporcionó etiqueta — así no pisamos la
     // sincronizada y las etiquetas funcionan también SIN NocoDB.
     if (!r.nocodb_label) r.nocodb_label = deriveLeadLabel(r);
   }
   return rows;
+}
+
+/**
+ * Las conversaciones que compraron algo en el TABLERO (con monto). La tabla la crea el tablero (`tablero/estado.ts`),
+ * así que se pregunta al usarla: si todavía no existe, nadie compró ahí.
+ */
+let stmtCompradoresDelTablero: { all(): Array<{ id: number }> } | null = null;
+export function compradoresDelTablero(): Set<number> {
+  try {
+    stmtCompradoresDelTablero ??= db.prepare<[], { id: number }>("SELECT DISTINCT conversation_id AS id FROM tablero_compras WHERE monto > 0");
+    return new Set(stmtCompradoresDelTablero.all().map((x) => x.id));
+  } catch {
+    return new Set();
+  }
+}
+
+/** Las etiquetas que él puede poner a mano: las mismas que salen solas. */
+export const ETIQUETAS_A_MANO = ["warm", "hot", "pago", "pago-reclamo", "reclamo"] as const;
+/** Pone (o quita, con null) la etiqueta a mano. */
+export function ponerEtiquetaManual(conversationId: number, etiqueta: string | null): void {
+  db.prepare("UPDATE conversations SET etiqueta_manual = ? WHERE id = ?").run(etiqueta, conversationId);
+}
+
+/** «No quiero» (18/11/2026): anota en qué punto está; al preguntar, también cuándo. Ver `workflow/no-quiero.ts`. */
+export function ponerNoQuiero(conversationId: number, estado: "preguntado" | "sigue" | "fuera" | null): void {
+  if (estado === "preguntado") {
+    db.prepare("UPDATE conversations SET no_quiero = ?, no_quiero_at = unixepoch() WHERE id = ?").run(estado, conversationId);
+  } else {
+    db.prepare("UPDATE conversations SET no_quiero = ? WHERE id = ?").run(estado, conversationId);
+  }
+}
+/** Lo programado de una conversación se corre `segundos` (lo que estuvo en pausa), sin perder sus tiempos. */
+export function correrLoProgramado(conversationId: number, segundos: number): void {
+  if (!(segundos > 0)) return;
+  db.prepare(
+    "UPDATE scheduled_actions SET run_at = run_at + ?, claimed_at = NULL WHERE conversation_id = ? AND status = 'pending'"
+  ).run(Math.round(segundos), conversationId);
 }
 
 const stmtGetMessageMediaUrlsForConvo = db.prepare<
@@ -2015,6 +2083,7 @@ const stmtGetDueActions = db.prepare<[number, number, number], ScheduledActionRo
    WHERE status = 'pending'
      AND run_at <= ?
      AND (claimed_at IS NULL OR claimed_at <= ?)
+     AND conversation_id NOT IN (SELECT id FROM conversations WHERE no_quiero = 'preguntado')
    ORDER BY run_at ASC
    LIMIT ?`
 );

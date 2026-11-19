@@ -72,7 +72,8 @@ type LabelFilter =
   | "warm"
   | "pago"
   | "pago-reclamo"
-  | "reclamo";
+  | "reclamo"
+  | "🚫 no quiere";
 type ChannelFilter = "todos" | "whatsapp" | "messenger" | "instagram" | "tiktok";
 type CountryFilter = "todos" | "sin_pais" | CountryCode;
 
@@ -111,6 +112,7 @@ const LABEL_PILL_STYLES: Record<Exclude<LabelFilter, "todos">, string> = {
   pago: "bg-sky-100 text-sky-700 border-sky-200",
   "pago-reclamo": "bg-orange-100 text-orange-700 border-orange-200",
   reclamo: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+  "🚫 no quiere": "bg-neutral-100 text-neutral-600 border-neutral-300",
 };
 
 const LABEL_OPTIONS: LabelFilter[] = [
@@ -122,6 +124,7 @@ const LABEL_OPTIONS: LabelFilter[] = [
   "pago",
   "pago-reclamo",
   "reclamo",
+  "🚫 no quiere",
 ];
 
 interface Props {
@@ -342,6 +345,7 @@ export default function ConversationList({
       pago: 0,
       "pago-reclamo": 0,
       reclamo: 0,
+      "🚫 no quiere": 0,
     };
     for (const c of conversations) {
       if (!matchesSearch(c, search)) continue;
@@ -869,8 +873,10 @@ export default function ConversationList({
                             className="shrink-0 text-sm leading-none"
                           >
                             {/* CO y VE CON SUS LETRAS (18/11/2026). Él: «las banderas de Venezuela y Colombia son tan
-                                parecidas que en el chat no distingo cuál es cuál… CO (bandera), VE (bandera)». */}
-                            {country === "CO" || country === "VE" ? `${country} ` : ""}
+                                parecidas que en el chat no distingo cuál es cuál… CO (bandera), VE (bandera)».
+                                TODOS CON SUS LETRAS (18/11/2026, más tarde): «a los países hay que ponerles el nombre al lado,
+                                AR, PE, etc., porque si no, no los veo». */}
+                            {`${country} `}
                             {COUNTRY_FLAG_BY_CODE[country]}
                           </span>
                         )}

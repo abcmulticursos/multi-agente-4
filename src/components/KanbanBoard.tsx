@@ -281,8 +281,8 @@ function Card({
         </span>
         {showMoney && (
           <span className="shrink-0 font-semibold text-emerald-700">
-            {/* CO y VE con sus letras: sus banderas se confunden (18/11/2026, como en la lista del chat). */}
-            {paisDe(convo) === "CO" || paisDe(convo) === "VE" ? `${paisDe(convo)} ` : ""}
+            {/* Cada país con sus letras al lado de la bandera (18/11/2026, como en la lista del chat). */}
+            {paisDe(convo) ? `${paisDe(convo)} ` : ""}
             {bandera(paisDe(convo))}{" "}
             {fmtMoney(convo.paid_total_cents ?? 0, monedaDe(convo))}
           </span>

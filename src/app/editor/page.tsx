@@ -7645,11 +7645,22 @@ export default function EditorPage() {
   // es lo que usan las ventanas para saber si el cambio se hizo DENTRO de ellas
   // — ver `BotonesDeLaVentana`. Calcularla dos veces en cada pintada de una
   // configuración de este tamaño se nota.
-  const huellaDelBorrador = useMemo(
-    () => (cfg ? JSON.stringify(cfg) : ""),
-    [cfg]
-  );
-  const isDirty = cfg !== null && huellaDelBorrador !== baseline;
+  //
+  // SIN LA FOTO DE 11 MB EN CADA CAMBIO (18/11/2026). Él: «muevo una ficha y se demora en "estabilizarse"… lo mismo
+  // con el cable». La huella era `JSON.stringify` del borrador entero en cada cambio: medido en la copia con su
+  // contenido, una de las cuatro partes de la pausa al soltar una ficha. Ahora la huella ES el borrador (cada cambio
+  // es un objeto nuevo, igual que lo que guarda Deshacer) y «¿cambió?» se pregunta con `mismoEnJson`: la MISMA regla
+  // que comparar los dos textos, pero salta lo que no se tocó (la misma referencia), así que cuesta solo lo tocado.
+  const huellaDelBorrador: HuellaDelBorrador = cfg ?? "";
+  const loGuardado = useMemo(() => {
+    if (!baseline) return undefined;
+    try {
+      return JSON.parse(baseline) as unknown;
+    } catch {
+      return undefined;
+    }
+  }, [baseline]);
+  const isDirty = cfg !== null && !mismoEnJson(cfg, loGuardado);
   // UNA SOLA VENTANA EDITANDO (12/11/2026), como WhatsApp Web (ver `/api/editor-activo`). Él: «abro otra ventana en
   // otro navegador y a veces me confundo y grabo en la otra». Manda la última que se abrió; las demás quedan en gris y
   // no guardan. «Usar aquí» le devuelve el control (y recarga si no tenía nada sin guardar, para ver lo último).
@@ -11426,12 +11437,10 @@ export default function EditorPage() {
               // estas ventanas son modales: mientras una está abierta no se
               // puede tocar nada de fuera, así que lo único que se deshace es lo
               // que se escribió dentro.
-              try {
-                setCfg(JSON.parse(huella) as FullConfig);
-              } catch {
-                /* Una huella ilegible no puede tirar la pantalla: se deja el
-                   borrador como está, que es lo que había antes de esto. */
-              }
+              const vuelto = borradorDeLaHuella(huella);
+              /* Una huella ilegible no puede tirar la pantalla: se deja el
+                 borrador como está, que es lo que había antes de esto. */
+              if (vuelto) setCfg(vuelto);
             },
           }}
         >
@@ -17901,11 +17910,9 @@ export default function EditorPage() {
             guardar: save,
             huella: huellaDelBorrador,
             restaurar: (huella) => {
-              try {
-                setCfg(JSON.parse(huella) as FullConfig);
-              } catch {
-                /* Una huella ilegible no puede tirar la pantalla. */
-              }
+              /* Una huella ilegible no puede tirar la pantalla. */
+              const vuelto = borradorDeLaHuella(huella);
+              if (vuelto) setCfg(vuelto);
             },
             textoDeListo: "✓ Listo",
           }}
@@ -27849,7 +27856,7 @@ function VistaPizarra({
   const guardadoDeLaPizarra = useContext(GuardadoDelEditor);
   const guardadoVivo = useRef(guardadoDeLaPizarra);
   guardadoVivo.current = guardadoDeLaPizarra;
-  const alAbrirElGestor = useRef<{ huella: string; copias: Record<string, string> } | null>(null);
+  const alAbrirElGestor = useRef<{ huella: HuellaDelBorrador; copias: Record<string, string> } | null>(null);
   const descartarDelGestor = useRef(false);
   const [derechaDelGestorSucia, setDerechaDelGestorSucia] = useState(false);
   const abrirElGestor = (g: NonNullable<typeof gestorAbierto>) => {
@@ -27871,7 +27878,7 @@ function VistaPizarra({
   };
   const gestorConCambios =
     derechaDelGestorSucia ||
-    (!!guardadoDeLaPizarra && guardadoDeLaPizarra.sucio && guardadoDeLaPizarra.huella !== (alAbrirElGestor.current?.huella ?? guardadoDeLaPizarra.huella));
+    (!!gestorAbierto && !!guardadoDeLaPizarra && guardadoDeLaPizarra.sucio && !mismoEnJson(guardadoDeLaPizarra.huella, alAbrirElGestor.current?.huella ?? guardadoDeLaPizarra.huella));
   const refDeHerramientas = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!menuHerramientas) return;
@@ -34044,7 +34051,7 @@ function GestorDelRegaloDelTablero({
   const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
   const descartarAlIrse = useRef(false);
   const [derechaSucia, setDerechaSucia] = useState(false);
-  const cambioAplicado = !!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir;
+  const cambioAplicado = !!guardado && guardado.sucio && !mismoEnJson(guardado.huella, huellaAlAbrir);
   const cancelar = () => {
     descartarAlIrse.current = true;
     // Siempre, no solo con `cambioAplicado`: los minutos se aplican al salir de su casilla, en el mismo clic de
@@ -36732,7 +36739,7 @@ function VentanaConListo({ titulo, detalle, onCerrar, children, ancho, zoom }: {
   const guardado = useContext(GuardadoDelEditor);
   const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
   const cancelar = () => {
-    if (guardado && huellaAlAbrir && guardado.sucio && guardado.huella !== huellaAlAbrir) guardado.restaurar(huellaAlAbrir);
+    if (guardado && huellaAlAbrir && guardado.sucio && !mismoEnJson(guardado.huella, huellaAlAbrir)) guardado.restaurar(huellaAlAbrir);
     onCerrar();
   };
   return (
@@ -36744,7 +36751,7 @@ function VentanaConListo({ titulo, detalle, onCerrar, children, ancho, zoom }: {
       onCerrar={cancelar}
       onListo={onCerrar}
       onCancelar={cancelar}
-      hayCambios={!!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir}
+      hayCambios={!!guardado && guardado.sucio && !mismoEnJson(guardado.huella, huellaAlAbrir)}
     >
       {children}
     </VentanaFlotante>
@@ -51555,6 +51562,55 @@ function BotonDeProducto({
  *   CANCELAR  devuelve el borrador a como estaba al abrir ESTA ventana.
  *   GUARDAR   deja lo escrito puesto y cierra. Sube el de la barra, o Ctrl+S.
  */
+/** El borrador tal como estaba (el objeto mismo; "" sin borrador). Una huella vieja en texto se sigue leyendo. */
+type HuellaDelBorrador = FullConfig | string;
+
+/** El borrador que guarda una huella, o null si no se puede leer. */
+function borradorDeLaHuella(huella: HuellaDelBorrador): FullConfig | null {
+  if (typeof huella !== "string") return huella;
+  try {
+    return JSON.parse(huella) as FullConfig;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * ¿DICEN LO MISMO? (18/11/2026) La misma respuesta que `JSON.stringify(a) === JSON.stringify(b)` —el orden de las
+ * claves cuenta, `undefined` y las funciones no existen, en una lista valen `null`— sin escribir los 11 MB. Lo que es la
+ * misma referencia se da por igual sin entrar, y lo que ya salió igual se recuerda (`IGUALES_EN_JSON`): como cada
+ * cambio del editor crea objetos nuevos solo en lo tocado, comparar el borrador cuesta lo que cambió. Ver `isDirty`.
+ */
+const IGUALES_EN_JSON = new WeakMap<object, unknown>();
+function mismoEnJson(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  const objA = a !== null && typeof a === "object";
+  const objB = b !== null && typeof b === "object";
+  if (!objA || !objB) return objA === objB && JSON.stringify(a) === JSON.stringify(b);
+  if (IGUALES_EN_JSON.get(a as object) === b) return true;
+  const conToJson = (x: object) => typeof (x as { toJSON?: unknown }).toJSON === "function";
+  let igual: boolean;
+  if (conToJson(a as object) || conToJson(b as object)) igual = JSON.stringify(a) === JSON.stringify(b);
+  else if (Array.isArray(a) !== Array.isArray(b)) igual = false;
+  else if (Array.isArray(a)) {
+    const x = a as unknown[];
+    const y = b as unknown[];
+    const enLista = (v: unknown) => (vaEnJson(v) ? v : null);
+    igual = x.length === y.length && x.every((v, i) => mismoEnJson(enLista(v), enLista(y[i])));
+  } else {
+    const x = a as Record<string, unknown>;
+    const y = b as Record<string, unknown>;
+    const kx = Object.keys(x).filter((k) => vaEnJson(x[k]));
+    const ky = Object.keys(y).filter((k) => vaEnJson(y[k]));
+    igual = kx.length === ky.length && kx.every((k, i) => k === ky[i] && mismoEnJson(x[k], y[k]));
+  }
+  if (igual) IGUALES_EN_JSON.set(a as object, b);
+  return igual;
+}
+function vaEnJson(v: unknown): boolean {
+  return v !== undefined && typeof v !== "function" && typeof v !== "symbol";
+}
+
 const GuardadoDelEditor = createContext<{
   sucio: boolean;
   guardando: boolean;
@@ -51564,13 +51620,13 @@ const GuardadoDelEditor = createContext<{
    *  miraba el «hay cambios» de TODO el editor, así que una ventana recién
    *  abierta ya ofrecía guardar por algo escrito media hora antes en otra
    *  pestaña. */
-  huella: string;
+  huella: HuellaDelBorrador;
   /** Devuelve el borrador a una huella guardada. Es lo que hace que Cancelar
    *  DESHAGA de verdad: la ventana se queda con la huella de cuando se abrió y,
    *  al cancelar, la devuelve. Sin esto, Cancelar solo cerraba y lo escrito se
    *  quedaba en el borrador — así que al guardar más tarde subía igual, que es
    *  lo contrario de lo que significa cancelar. */
-  restaurar: (huella: string) => void;
+  restaurar: (huella: HuellaDelBorrador) => void;
   /** El texto del botón verde. Sin esto, «Guardar» (los menús); en la pizarra, «✓ Listo». Hace lo mismo: deja lo escrito y cierra. */
   textoDeListo?: string;
 } | null>(null);
@@ -51765,7 +51821,7 @@ function BotonesDeLaVentana({
   // en otra pestaña—; la segunda es el estado real del borrador, que el editor ya
   // sabe y las ventanas no consultaban.
   const sucio = guardado?.sucio ?? false;
-  const cambioAqui = sucio && (guardado?.huella ?? "") !== huellaAlAbrir;
+  const cambioAqui = sucio && !mismoEnJson(guardado?.huella ?? "", huellaAlAbrir);
   // SIN CAMBIOS, UN SOLO BOTÓN: «Cerrar».
   //
   // No hay nada que guardar ni nada que cancelar, así que dos botones son dos
@@ -51840,7 +51896,7 @@ function VentanaDeProductosYPrecios({ onCerrar, children }: { onCerrar: () => vo
   const guardado = useContext(GuardadoDelEditor);
   const [huellaAlAbrir] = useState(() => guardado?.huella ?? "");
   const cancelar = () => {
-    if (guardado && huellaAlAbrir && guardado.sucio && guardado.huella !== huellaAlAbrir) guardado.restaurar(huellaAlAbrir);
+    if (guardado && huellaAlAbrir && guardado.sucio && !mismoEnJson(guardado.huella, huellaAlAbrir)) guardado.restaurar(huellaAlAbrir);
     onCerrar();
   };
   return (
@@ -51850,7 +51906,7 @@ function VentanaDeProductosYPrecios({ onCerrar, children }: { onCerrar: () => vo
       onCerrar={cancelar}
       onListo={onCerrar}
       onCancelar={cancelar}
-      hayCambios={!!guardado && guardado.sucio && guardado.huella !== huellaAlAbrir}
+      hayCambios={!!guardado && guardado.sucio && !mismoEnJson(guardado.huella, huellaAlAbrir)}
     >
       {children}
     </VentanaFlotante>

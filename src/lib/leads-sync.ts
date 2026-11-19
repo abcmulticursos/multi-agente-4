@@ -1,5 +1,7 @@
 import {
+  compradoresDelTablero,
   countUserMessages,
+  ETIQUETAS_A_MANO,
   getConversationById,
   setNocodbLabel,
   setNocodbResumen,
@@ -58,11 +60,17 @@ const HOT_THRESHOLD = 5;
  *  - warm: default
  */
 function computeLabel(convo: ConversationRow): LeadLabel {
+  // La puesta a mano manda (18/11/2026), igual que en la lista del chat (`listConversations`).
+  const manual = convo.etiqueta_manual?.trim();
+  if (manual && (ETIQUETAS_A_MANO as readonly string[]).includes(manual)) return manual as LeadLabel;
   const isPaid =
     convo.state === "payment_approved" ||
     convo.state === "awaiting_email" ||
     convo.state === "awaiting_gift_consent" ||
-    convo.state === "awaiting_facebook_comment";
+    convo.state === "awaiting_facebook_comment" ||
+    // Lo que pagó por fuera de la venta de siempre: en el tablero o registrado a mano en Meta.
+    !!convo.compra_manual_meta ||
+    compradoresDelTablero().has(convo.id);
   if (isPaid && convo.had_emergency) return "pago-reclamo";
   if (isPaid) return "pago";
   if (convo.had_emergency) return "reclamo";

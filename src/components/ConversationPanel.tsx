@@ -160,7 +160,19 @@ interface ConversationDTO {
   capi_last_pixel: string | null;
   capi_last_pagina: string | null;
   capi_last_tienda: string | null;
+  /** La etiqueta puesta a mano (18/11/2026); null = la automática. */
+  etiqueta_manual?: string | null;
 }
+
+/** Las etiquetas que se pueden poner a mano, con su nombre de siempre en la lista. */
+const ETIQUETAS_DEL_MENU: Array<{ valor: string; texto: string }> = [
+  { valor: "", texto: "Automática" },
+  { valor: "warm", texto: "warm" },
+  { valor: "hot", texto: "hot" },
+  { valor: "pago", texto: "pago" },
+  { valor: "pago-reclamo", texto: "pago-reclamo" },
+  { valor: "reclamo", texto: "reclamo" },
+];
 
 interface Props {
   conversationId: number;
@@ -586,6 +598,20 @@ export default function ConversationPanel({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pinned: nextPinned }),
+      });
+    } catch {
+      // el polling corrige
+    }
+  }
+
+  /** LA ETIQUETA A MANO (18/11/2026). Él: «necesito poder etiquetar a los leads… pagaron 3 de manera manual». */
+  async function ponerEtiqueta(etiqueta: string) {
+    setState((s) => (s.conversation ? { ...s, conversation: { ...s.conversation, etiqueta_manual: etiqueta || null } } : s));
+    try {
+      await fetch(`/api/conversations/${conversationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ etiqueta: etiqueta || null }),
       });
     } catch {
       // el polling corrige
@@ -1721,6 +1747,22 @@ export default function ConversationPanel({
                 >
                   {convo.pinned === 1 ? "Dejar de fijar" : "Fijar arriba"}
                 </button>
+                {/* LA ETIQUETA A MANO (18/11/2026): «Automática» es la de siempre (y ahí ya sale «pago» con una compra del
+                    tablero o registrada a mano en Meta). */}
+                <label className="flex items-center justify-between gap-2 border-b border-neutral-100 px-4 py-3 text-sm text-neutral-700">
+                  <span>Etiqueta</span>
+                  <select
+                    value={convo.etiqueta_manual ?? ""}
+                    onChange={(e) => void ponerEtiqueta(e.target.value)}
+                    className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm text-neutral-800"
+                  >
+                    {ETIQUETAS_DEL_MENU.map((x) => (
+                      <option key={x.valor} value={x.valor}>
+                        {x.texto}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <button
                   type="button"
                   onClick={() => {

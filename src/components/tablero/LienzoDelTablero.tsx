@@ -12,7 +12,7 @@
  * Este archivo no guarda nada: cada cambio se lo pide al editor por `onCambiar`, que escribe en el
  * mismo borrador que los menús (Ctrl+S guarda, Ctrl+Z deshace).
  */
-import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, memo, useCallback, useContext, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -2077,14 +2077,18 @@ function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition,
   const [camino] = corrimiento ? caminoDeGoma(sourceX, sourceY, targetX, targetY, corrimiento) : [recto, xRecto, yRecto];
   const medidor = useRef<SVGPathElement>(null);
   const [punto, setPunto] = useState({ x: xRecto, y: yRecto });
-  useEffect(() => {
+  // LA ✕ SE MIDE AL PASAR EL RATÓN (18/11/2026). Él: «cuando corto un cable se demora… muevo una ficha y se demora en
+  // estabilizarse». Medida en cada cambio, los 182 cables de FLORES llamaban a getTotalLength y se volvían a dibujar.
+  // La ✕ solo se ve con el ratón encima: se mide entonces (antes de pintar, sin salto), en el mismo punto de siempre.
+  useLayoutEffect(() => {
+    if (!encima) return;
     const p = medidor.current;
     if (!p) return;
     try {
       const q = p.getPointAtLength(p.getTotalLength() / 3);
-      if (Number.isFinite(q.x) && Number.isFinite(q.y)) setPunto({ x: q.x, y: q.y });
+      if (Number.isFinite(q.x) && Number.isFinite(q.y)) setPunto((antes) => (antes.x === q.x && antes.y === q.y ? antes : { x: q.x, y: q.y }));
     } catch {}
-  }, [camino]);
+  }, [camino, encima]);
   const alJalar = (e: React.PointerEvent) => {
     if (e.button !== 0 || !ctx) return;
     e.stopPropagation();
@@ -3477,9 +3481,19 @@ export default function LienzoDelTablero({
     idsAntes.current = ahora;
     const aparecieron = antes && antes.size > 0 ? new Set([...ahora].filter((id) => !antes.has(id))) : new Set<string>();
     setNodos((previos) => {
-      if (aparecieron.size) return nodosDesdeProps.map((n) => (aparecieron.has(n.id) ? { ...n, selected: true } : n)).map(conLaFamilia);
+      // CADA FICHA CONSERVA SU MEDIDA AL REDIBUJAR (18/11/2026). Él: «muevo una ficha y se demora en estabilizarse… lo
+      // mismo con el cable». Las fichas rehechas llegaban sin medida, y React Flow dibuja TODA ficha sin medida (para
+      // medirla), aunque esté fuera de la pantalla: en cada soltar o cortar se montaban las 175 fichas de FLORES que no se
+      // veían, se medían y se quitaban. Con la medida de antes, solo se dibuja lo que está a la vista; las que están en
+      // pantalla se vuelven a medir solas si cambian de tamaño.
+      const medidas = new Map(previos.map((n) => [n.id, n.measured]));
+      const conSuMedida = (n: Node): Node => {
+        const m = medidas.get(n.id);
+        return m && !n.measured ? { ...n, measured: m } : n;
+      };
+      if (aparecieron.size) return nodosDesdeProps.map((n) => (aparecieron.has(n.id) ? { ...n, selected: true } : n)).map(conLaFamilia).map(conSuMedida);
       const elegidos = new Set(previos.filter((n) => n.selected).map((n) => n.id));
-      return (elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps).map(conLaFamilia);
+      return (elegidos.size ? nodosDesdeProps.map((n) => (elegidos.has(n.id) ? { ...n, selected: true } : n)) : nodosDesdeProps).map(conLaFamilia).map(conSuMedida);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodosDesdeProps, setNodos]);
@@ -3577,7 +3591,10 @@ export default function LienzoDelTablero({
   // SIEMPRE A LA VISTA (14/11/2026). Él: «no hay un indicador claro que me diga "falta"… puedo lanzar un workflow sin cosas
   // sin conectar y nada me asegura que esté bien». Se calcula siempre (la MISMA cuenta de «Qué falta conectar», que ya usa
   // la regla del bot): lo suelto sale en rojo en su ficha y arriba el aviso «⚠ N sin conectar». La lista, al tocarlo.
-  const faltasDeTodo = useMemo(() => faltasDelTablero(tablero, paisVisto, nombres), [tablero, paisVisto, nombres]);
+  // DESPUÉS DE PINTAR EL CAMBIO (18/11/2026): al cortar un cable, esta cuenta del tablero entero iba antes de que se viera
+  // el corte. Ahora se ve el corte primero y la cuenta llega un instante después (los rojos y el «⚠ N sin conectar»).
+  const tableroParaLasFaltas = useDeferredValue(tablero);
+  const faltasDeTodo = useMemo(() => faltasDelTablero(tableroParaLasFaltas, paisVisto, nombres), [tableroParaLasFaltas, paisVisto, nombres]);
   // REVISAR UNA SOLA RUTA (13/11/2026). Él: «esa lupa me muestra todo… yo normalmente hago una ruta y luego la copio».
   // Se elige un país o una ruta de su Ruteador y solo cuenta lo que se alcanza desde ahí. "" = todo el tablero.
   const [alcance, setAlcance] = useState("");
@@ -3661,6 +3678,11 @@ export default function LienzoDelTablero({
           // «sin medir» y lo deja oculto (visibility: hidden): sus esquinas no se podían agarrar.
           width: n.width ?? s?.width,
           height: n.height ?? s?.height,
+          // (18/11/2026) Y SU MEDIDA: sin ella React Flow las montaba todas en cada cambio, también las de fuera de la
+          // pantalla, para medirlas (ver «cada ficha conserva su medida»). Miden lo mismo que su velo.
+          ...(typeof (n.width ?? s?.width) === "number" && typeof (n.height ?? s?.height) === "number"
+            ? { measured: { width: (n.width ?? s?.width) as number, height: (n.height ?? s?.height) as number } }
+            : {}),
           style: { width: n.width ?? s?.width, height: n.height ?? s?.height, pointerEvents: "none" as const },
           zIndex: 5000,
           selectable: false,

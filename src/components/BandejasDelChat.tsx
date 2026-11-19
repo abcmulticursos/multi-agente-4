@@ -50,7 +50,8 @@ export const TODAS = "todas";
 export const TE_NECESITAN = "atencion";
 
 export function teNecesita(c: ChatDeBandeja): boolean {
-  return c.mode === "HUMAN" || c.nocodb_label === "reclamo" || c.nocodb_label === "pago-reclamo";
+  // (18/11/2026) Quien dijo «Ya no» queda en modo humano pero no necesita nada: no entra aquí.
+  return (c.mode === "HUMAN" && c.nocodb_label !== "🚫 no quiere") || c.nocodb_label === "reclamo" || c.nocodb_label === "pago-reclamo";
 }
 
 export function enLaBandeja(c: ChatDeBandeja, elegida: string): boolean {

@@ -98,6 +98,7 @@ import {
   topeDeOrganicos,
 } from "@/lib/workflow/config";
 import { alRecibirMensaje, contestarEnElRegalo, esDelTablero, retomarLoProgramado } from "@/lib/tablero/motor";
+import { atenderNoQuiero } from "@/lib/workflow/no-quiero";
 import { leerComprobante, ultimosMensajes } from "@/lib/tablero/lector";
 import { avisarQueLaIANoRespondio } from "@/lib/notifications";
 import { estadoEnElTablero } from "@/lib/tablero/estado";
@@ -1818,6 +1819,23 @@ async function handleIncomingMessage(
     const withCountry = getConversationById(fresh.id);
     if (withCountry) freezePricesForConvo(withCountry);
     if (gateHandled) return;
+  }
+
+  // «NO QUIERO» (18/11/2026): quien dice que no quiere nada recibe la pregunta [Sí quiero] [Ya no] y, con «Ya no», la
+  // despedida y el bot apagado en su chat. Antes del tablero y de la venta de siempre. Ver workflow/no-quiero.ts.
+  try {
+    const esBoton = msg.type === "interactive" || msg.type === "button";
+    const bloque = msg.type === "text" && gateContent.endsWith(`\n${content.trim()}`) ? gateContent : content;
+    if (
+      await atenderNoQuiero(getConversationById(fresh.id) ?? fresh, esBoton ? content : bloque, {
+        esBoton,
+        idBoton: msg.interactive?.button_reply?.id ?? null,
+        esTextoOAudio: msg.type === "text" || (msg.type === "audio" && !!media?.transcription),
+      })
+    )
+      return;
+  } catch (err) {
+    console.error("[no-quiero] falló; sigue la venta como siempre:", err);
   }
 
   // EL TABLERO (22/10/2026, solo ALBERTO 4). Atiende SOLO las conversaciones que nacieron en una
