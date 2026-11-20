@@ -5642,6 +5642,10 @@ biblioteca_de_productos:
         price_soles: 7300
         discount_price_soles: 6000
         market_price: 25000
+      AR:
+        price_soles: 4000
+        discount_price_soles: 3000
+        market_price: 20000
   - id: pmwjfhu1r
     name: FLORES DE PAPEL
     aliases: []
