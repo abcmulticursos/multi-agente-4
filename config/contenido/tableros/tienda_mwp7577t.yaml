@@ -675,6 +675,680 @@ whatsapp:
                       color: ambar
                       steps: []
           activa_oferta: true
+    - id: f-mwp8nokx-7f8dc
+      tipo: mensaje
+      x: 1089
+      y: 5379
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+
+              Tienes problemas para confeccionar
+              no te quedan las prendas como quieres?
+
+              No te preocupes tenemos algo que te va a encantar
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/1RCBkZMyeUSt7iRAmn3pn7LJc8q3jdWhb/view?usp=sharing
+          caption_variants:
+            - Con nuestro super pack de 600 moldes podrás elegir, descargar, imprimir y confeccionar
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |+
+              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+
+              recibes
+
+              600 moldes
+              - blusas
+              - faldas
+              - vestidos
+              - pantalones
+               y mucho mas
+
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Ademas recibiras regalos portu compra si lo adquieres dentro de los primeros 15 minutos ⏰️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              como compro solo haz un deposito de *{{precio_base}}* 
+
+              Deseas que te brinde los datos de pago?
+          delay_after_sec: 6
+          buttons:
+            - id: b-mwp8nokx-7vq1e
+              label: SI QUIERO
+              action: send_steps
+              steps: []
+            - id: b-mwp8nokx-720kj
+              label: NO GRACIAS
+              action: send_steps
+              steps: []
+    - id: f-mwp8nokx-jugfu
+      tipo: cobro
+      x: 2035
+      y: 5236
+      steps:
+        - type: text
+          body_variants:
+            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        metodos: true
+    - id: f-mwp8nokx-qixo9
+      tipo: mensaje
+      x: 1980
+      y: 5566
+      steps:
+        - type: text
+          body_variants:
+            - No te preocupes que tengas un excelente día y gracias por escribir
+          delay_after_sec: 6
+    - id: f-mwp8nokx-ci6q4
+      tipo: entregar
+      x: 2728
+      y: 5236
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mwp8nokx-udx9v
+      tipo: regalo
+      x: 3311
+      y: 5335
+    - id: f-mwp8nokx-fdv8s
+      tipo: seguimientos
+      x: 1353
+      y: 4851
+      seguimientos:
+        - id: s-mwp8nokx-6fl71
+          minutos: 30
+          variantes:
+            - id: v-mwp8nokx-h83ln
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - HOLA PASABA POR AQUI Y PREGUNTARE SI RECIBISTE LA INFORMACION
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
+                  caption_variants:
+                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+
+                      NEQUI
+                      DAVIPLATA
+                      BRE-B
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwp8nokx-mhcel
+                      label: NEQUI
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-bv7kl
+                      label: DAVIPLATA
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-vq7s1
+                      label: BRE
+                      action: send_steps
+                      steps: []
+        - id: s-mwp8nokx-g2ls4
+          minutos: 480
+          variantes:
+            - id: v-mwp8nokx-v6uhr
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+
+                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+
+                      AHORA CUESTA *{{PRECIO_BASE}}*
+
+                      APRESURATE ANTES QUE TERMINE LA OFERTA
+
+                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+
+                      - *NEQUI*
+                      - *DAVIPLATA*
+                      - *BRE*
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwp8nokx-4gyh7
+                      title: NEQUI
+                      keywords:
+                        - NEQUI
+                        - nequi
+                        - neki
+                        - nek
+                        - nei
+                        - con nequi
+                      color: esmeralda
+                      steps: []
+                    - id: d-mwp8nokx-jhi52
+                      title: DAVIPLATA
+                      keywords:
+                        - daviplata
+                        - con daviplata
+                        - davi
+                        - con davi
+                        - tengo davi
+                        - tengo daviplata
+                      color: azul
+                      steps: []
+                    - id: d-mwp8nokx-df006
+                      title: BRE
+                      keywords:
+                        - bre
+                        - con bre
+                        - tengo bre
+                        - tengo llave bre
+                        - llave bre
+                        - con llave bre
+                      color: ambar
+                      steps: []
+          activa_oferta: true
+    - id: f-mwp8nokx-g6irt
+      tipo: mensaje
+      x: 1144
+      y: 6996
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+
+              Tienes problemas para confeccionar
+              no te quedan las prendas como quieres?
+
+              No te preocupes tenemos algo que te va a encantar
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/137IkXJ3jKZkXgxMKF6hBWLhx7-SjrzeG/view?usp=drive_link
+          caption_variants:
+            - Con nuestro super pack de 600 moldes podrás elegir, descargar, imprimir y confeccionar
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |+
+              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+
+              recibes
+
+              600 moldes
+              - blusas
+              - faldas
+              - vestidos
+              - pantalones
+               y mucho mas
+
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Ademas recibiras regalos portu compra si lo adquieres dentro de los primeros 15 minutos ⏰️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              como compro solo haz un deposito de *{{precio_base}}* 
+
+              Deseas que te brinde los datos de pago?
+
+              ELIGE UNA OPCIONA
+
+              NEQUI
+              DAVIPLATA
+              BRE
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwp8nokx-e7iry
+              title: NEQUI
+              keywords:
+                - NEQUI
+                - nequi
+                - neki
+                - nek
+                - nei
+                - con nequi
+              color: esmeralda
+              steps: []
+            - id: d-mwp8nokx-cbl7n
+              title: DAVIPLATA
+              keywords:
+                - daviplata
+                - con daviplata
+                - davi
+                - con davi
+                - tengo davi
+                - tengo daviplata
+              color: azul
+              steps: []
+            - id: d-mwp8nokx-bra9l
+              title: BRE
+              keywords:
+                - bre
+                - con bre
+                - tengo bre
+                - tengo llave bre
+                - llave bre
+                - con llave bre
+              color: ambar
+              steps: []
+    - id: f-mwp8nokx-0jx4i
+      tipo: cobro
+      x: 2090
+      y: 6853
+      steps:
+        - type: text
+          body_variants:
+            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        metodos: true
+    - id: f-mwp8nokx-h8m87
+      tipo: mensaje
+      x: 2222
+      y: 7359
+      steps:
+        - type: text
+          body_variants:
+            - No te preocupes que tengas un excelente día y gracias por escribir
+          delay_after_sec: 6
+    - id: f-mwp8nokx-a6mny
+      tipo: entregar
+      x: 2783
+      y: 6853
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mwp8nokx-yld1j
+      tipo: regalo
+      x: 3366
+      y: 6952
+    - id: f-mwp8nokx-t874x
+      tipo: seguimientos
+      x: 1408
+      y: 6468
+      seguimientos:
+        - id: s-mwp8nokx-ppeao
+          minutos: 30
+          variantes:
+            - id: v-mwp8nokx-1hjik
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - HOLA PASABA POR AQUI Y PREGUNTARE SI RECIBISTE LA INFORMACION
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
+                  caption_variants:
+                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+
+                      NEQUI
+                      DAVIPLATA
+                      BRE-B
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwp8nokx-m6wbz
+                      label: NEQUI
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-e5axu
+                      label: DAVIPLATA
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-gqsnf
+                      label: BRE
+                      action: send_steps
+                      steps: []
+        - id: s-mwp8nokx-oec3f
+          minutos: 480
+          variantes:
+            - id: v-mwp8nokx-dm22v
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+
+                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+
+                      AHORA CUESTA *{{PRECIO_BASE}}*
+
+                      APRESURATE ANTES QUE TERMINE LA OFERTA
+
+                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+
+                      - *NEQUI*
+                      - *DAVIPLATA*
+                      - *BRE*
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwp8nokx-nxv33
+                      title: NEQUI
+                      keywords:
+                        - NEQUI
+                        - nequi
+                        - neki
+                        - nek
+                        - nei
+                        - con nequi
+                      color: esmeralda
+                      steps: []
+                    - id: d-mwp8nokx-kcml6
+                      title: DAVIPLATA
+                      keywords:
+                        - daviplata
+                        - con daviplata
+                        - davi
+                        - con davi
+                        - tengo davi
+                        - tengo daviplata
+                      color: azul
+                      steps: []
+                    - id: d-mwp8nokx-3v7qi
+                      title: BRE
+                      keywords:
+                        - bre
+                        - con bre
+                        - tengo bre
+                        - tengo llave bre
+                        - llave bre
+                        - con llave bre
+                      color: ambar
+                      steps: []
+          activa_oferta: true
+    - id: f-mwp8nokx-vas24
+      tipo: reparto
+      x: 132
+      y: 6391
+      reparto:
+        - id: r1
+          peso: 1
+          anuncios:
+            - meta_120256717565960226
+            - meta_120256717565910226
+        - id: r2
+          peso: 1
+          anuncios:
+            - meta_120256717565970226
+        - id: rmwp8isa1
+          peso: 1
+          anuncios:
+            - meta_120256717565920226
+            - meta_120256717565950226
+    - id: f-mwp8nokx-916jt
+      tipo: mensaje
+      x: 1155
+      y: 8778
+      steps:
+        - type: text
+          body_variants:
+            - |-
+              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+
+              Tienes problemas para confeccionar
+              no te quedan las prendas como quieres?
+
+              No te preocupes tenemos algo que te va a encantar
+          delay_after_sec: 6
+        - type: image
+          drive_url: https://drive.google.com/file/d/137IkXJ3jKZkXgxMKF6hBWLhx7-SjrzeG/view?usp=drive_link
+          caption_variants:
+            - Con nuestro super pack de 600 moldes podrás elegir, descargar, imprimir y confeccionar
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |+
+              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+
+              recibes
+
+              600 moldes
+              - blusas
+              - faldas
+              - vestidos
+              - pantalones
+               y mucho mas
+
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Ademas recibiras regalos portu compra si lo adquieres dentro de los primeros 15 minutos ⏰️
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - |-
+              como compro solo haz un deposito de *{{precio_base}}* 
+
+              Deseas que te brinde los datos de pago?
+
+              ELIGE UNA OPCIONA
+
+              NEQUI
+              DAVIPLATA
+              BRE
+          delay_after_sec: 6
+          decisions:
+            - id: d-mwp8nokx-9qcio
+              title: NEQUI
+              keywords:
+                - NEQUI
+                - nequi
+                - neki
+                - nek
+                - nei
+                - con nequi
+              color: esmeralda
+              steps: []
+            - id: d-mwp8nokx-xy9wt
+              title: DAVIPLATA
+              keywords:
+                - daviplata
+                - con daviplata
+                - davi
+                - con davi
+                - tengo davi
+                - tengo daviplata
+              color: azul
+              steps: []
+            - id: d-mwp8nokx-b6tie
+              title: BRE
+              keywords:
+                - bre
+                - con bre
+                - tengo bre
+                - tengo llave bre
+                - llave bre
+                - con llave bre
+              color: ambar
+              steps: []
+    - id: f-mwp8nokx-p8u02
+      tipo: cobro
+      x: 2101
+      y: 8635
+      steps:
+        - type: text
+          body_variants:
+            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - "{{METODO_DE_PAGO_1}}"
+          delay_after_sec: 6
+        - type: text
+          body_variants:
+            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+          delay_after_sec: 6
+      cobro:
+        modo: producto
+        metodos: true
+    - id: f-mwp8nokx-r3fxo
+      tipo: mensaje
+      x: 2233
+      y: 9141
+      steps:
+        - type: text
+          body_variants:
+            - No te preocupes que tengas un excelente día y gracias por escribir
+          delay_after_sec: 6
+    - id: f-mwp8nokx-bgby5
+      tipo: entregar
+      x: 2794
+      y: 8635
+      producto_id: "@tienda:basico"
+      entregas:
+        - "@tienda:basico"
+    - id: f-mwp8nokx-7frpq
+      tipo: regalo
+      x: 3377
+      y: 8734
+    - id: f-mwp8nokx-eyji7
+      tipo: seguimientos
+      x: 1419
+      y: 8250
+      seguimientos:
+        - id: s-mwp8nokx-6vmn1
+          minutos: 30
+          variantes:
+            - id: v-mwp8nokx-hmu16
+              peso: 1
+              steps:
+                - type: text
+                  body_variants:
+                    - HOLA PASABA POR AQUI Y PREGUNTARE SI RECIBISTE LA INFORMACION
+                  delay_after_sec: 6
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
+                  caption_variants:
+                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                  delay_after_sec: 6
+                - type: text
+                  body_variants:
+                    - |-
+                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+
+                      NEQUI
+                      DAVIPLATA
+                      BRE-B
+                  delay_after_sec: 6
+                  buttons:
+                    - id: b-mwp8nokx-fduce
+                      label: NEQUI
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-lr1hi
+                      label: DAVIPLATA
+                      action: send_steps
+                      steps: []
+                    - id: b-mwp8nokx-svp4e
+                      label: BRE
+                      action: send_steps
+                      steps: []
+        - id: s-mwp8nokx-smex3
+          minutos: 480
+          variantes:
+            - id: v-mwp8nokx-f69s6
+              peso: 1
+              steps:
+                - type: image
+                  drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
+                  caption_variants:
+                    - |-
+                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+
+                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+
+                      AHORA CUESTA *{{PRECIO_BASE}}*
+
+                      APRESURATE ANTES QUE TERMINE LA OFERTA
+
+                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+
+                      - *NEQUI*
+                      - *DAVIPLATA*
+                      - *BRE*
+                  delay_after_sec: 6
+                  decisions:
+                    - id: d-mwp8nokx-280go
+                      title: NEQUI
+                      keywords:
+                        - NEQUI
+                        - nequi
+                        - neki
+                        - nek
+                        - nei
+                        - con nequi
+                      color: esmeralda
+                      steps: []
+                    - id: d-mwp8nokx-kltuy
+                      title: DAVIPLATA
+                      keywords:
+                        - daviplata
+                        - con daviplata
+                        - davi
+                        - con davi
+                        - tengo davi
+                        - tengo daviplata
+                      color: azul
+                      steps: []
+                    - id: d-mwp8nokx-bqaf1
+                      title: BRE
+                      keywords:
+                        - bre
+                        - con bre
+                        - tengo bre
+                        - tengo llave bre
+                        - llave bre
+                        - con llave bre
+                      color: ambar
+                      steps: []
+          activa_oferta: true
+    - id: inicio-AR-mwp8phao
+      tipo: inicio
+      x: -374
+      y: 6446
+      pais: AR
   cables:
     - id: c-mwp7nd8m-fz6
       de: f-mwp7ejnb-ce16
@@ -868,6 +1542,198 @@ whatsapp:
       de: f-mwp8hjfd-lb6l
       salida: rep:rmwp8isa1
       a: f-mwp8imdm-sauiq
+    - id: c-mwp8noky-u7noa
+      de: f-mwp8nokx-7f8dc
+      salida: btn:b-mwp8nokx-7vq1e
+      a: f-mwp8nokx-jugfu
+    - id: c-mwp8noky-e7bpz
+      de: f-mwp8nokx-7f8dc
+      salida: btn:b-mwp8nokx-720kj
+      a: f-mwp8nokx-qixo9
+    - id: c-mwp8noky-2uxjs
+      de: f-mwp8nokx-jugfu
+      salida: pagado
+      a: f-mwp8nokx-ci6q4
+    - id: c-mwp8noky-1e610
+      de: f-mwp8nokx-ci6q4
+      salida: siguiente
+      a: f-mwp8nokx-udx9v
+      vista: cable
+    - id: c-mwp8noky-rccwn
+      de: f-mwp8nokx-7f8dc
+      salida: siguiente
+      a: f-mwp8nokx-fdv8s
+    - id: c-mwp8noky-ydkvu
+      de: f-mwp8nokx-fdv8s
+      salida: btn:b-mwp8nokx-mhcel
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-zpxhf
+      de: f-mwp8nokx-fdv8s
+      salida: btn:b-mwp8nokx-bv7kl
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-asihk
+      de: f-mwp8nokx-fdv8s
+      salida: btn:b-mwp8nokx-vq7s1
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-1rr4j
+      de: f-mwp8nokx-fdv8s
+      salida: dec:d-mwp8nokx-4gyh7
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-rnhx9
+      de: f-mwp8nokx-fdv8s
+      salida: dec:d-mwp8nokx-jhi52
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-dl7m0
+      de: f-mwp8nokx-fdv8s
+      salida: dec:d-mwp8nokx-df006
+      a: f-mwp8nokx-jugfu
+      vista: colita
+    - id: c-mwp8noky-9jn7w
+      de: f-mwp8nokx-jugfu
+      salida: sin_pago
+      a: f-mwp8nokx-fdv8s
+      a_espejo: esp-mwp8nokx-fpg7g
+    - id: c-mwp8noky-hekh5
+      de: f-mwp8nokx-0jx4i
+      salida: pagado
+      a: f-mwp8nokx-a6mny
+    - id: c-mwp8noky-l6hup
+      de: f-mwp8nokx-a6mny
+      salida: siguiente
+      a: f-mwp8nokx-yld1j
+      vista: cable
+    - id: c-mwp8noky-7t65k
+      de: f-mwp8nokx-g6irt
+      salida: siguiente
+      a: f-mwp8nokx-t874x
+    - id: c-mwp8noky-ooor1
+      de: f-mwp8nokx-t874x
+      salida: btn:b-mwp8nokx-m6wbz
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-fse2m
+      de: f-mwp8nokx-t874x
+      salida: btn:b-mwp8nokx-e5axu
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-fnwk0
+      de: f-mwp8nokx-t874x
+      salida: btn:b-mwp8nokx-gqsnf
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-9m15v
+      de: f-mwp8nokx-t874x
+      salida: dec:d-mwp8nokx-nxv33
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-51i4p
+      de: f-mwp8nokx-t874x
+      salida: dec:d-mwp8nokx-kcml6
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-xo5pc
+      de: f-mwp8nokx-t874x
+      salida: dec:d-mwp8nokx-3v7qi
+      a: f-mwp8nokx-0jx4i
+      vista: colita
+    - id: c-mwp8noky-adk5q
+      de: f-mwp8nokx-0jx4i
+      salida: sin_pago
+      a: f-mwp8nokx-t874x
+      a_espejo: esp-mwp8nokx-mgjtl
+    - id: c-mwp8noky-ui1jj
+      de: f-mwp8nokx-g6irt
+      salida: dec:d-mwp8nokx-e7iry
+      a: f-mwp8nokx-0jx4i
+    - id: c-mwp8noky-ngam6
+      de: f-mwp8nokx-g6irt
+      salida: dec:d-mwp8nokx-cbl7n
+      a: f-mwp8nokx-0jx4i
+    - id: c-mwp8noky-0qr1e
+      de: f-mwp8nokx-g6irt
+      salida: dec:d-mwp8nokx-bra9l
+      a: f-mwp8nokx-0jx4i
+    - id: c-mwp8noky-7m2kx
+      de: f-mwp8nokx-vas24
+      salida: rep:r1
+      a: f-mwp8nokx-7f8dc
+    - id: c-mwp8noky-majh1
+      de: f-mwp8nokx-vas24
+      salida: rep:r2
+      a: f-mwp8nokx-g6irt
+    - id: c-mwp8noky-9o3hl
+      de: f-mwp8nokx-p8u02
+      salida: pagado
+      a: f-mwp8nokx-bgby5
+    - id: c-mwp8noky-17gww
+      de: f-mwp8nokx-bgby5
+      salida: siguiente
+      a: f-mwp8nokx-7frpq
+      vista: cable
+    - id: c-mwp8noky-z52j4
+      de: f-mwp8nokx-916jt
+      salida: siguiente
+      a: f-mwp8nokx-eyji7
+    - id: c-mwp8noky-8bmwy
+      de: f-mwp8nokx-eyji7
+      salida: btn:b-mwp8nokx-fduce
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-1y0cz
+      de: f-mwp8nokx-eyji7
+      salida: btn:b-mwp8nokx-lr1hi
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-anuso
+      de: f-mwp8nokx-eyji7
+      salida: btn:b-mwp8nokx-svp4e
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-3evho
+      de: f-mwp8nokx-eyji7
+      salida: dec:d-mwp8nokx-280go
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-blo4b
+      de: f-mwp8nokx-eyji7
+      salida: dec:d-mwp8nokx-kltuy
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-t5f02
+      de: f-mwp8nokx-eyji7
+      salida: dec:d-mwp8nokx-bqaf1
+      a: f-mwp8nokx-p8u02
+      vista: colita
+    - id: c-mwp8noky-g4z1t
+      de: f-mwp8nokx-p8u02
+      salida: sin_pago
+      a: f-mwp8nokx-eyji7
+      a_espejo: esp-mwp8nokx-e0avg
+    - id: c-mwp8noky-oub6u
+      de: f-mwp8nokx-916jt
+      salida: dec:d-mwp8nokx-9qcio
+      a: f-mwp8nokx-p8u02
+    - id: c-mwp8noky-6snzt
+      de: f-mwp8nokx-916jt
+      salida: dec:d-mwp8nokx-xy9wt
+      a: f-mwp8nokx-p8u02
+    - id: c-mwp8noky-zi5gt
+      de: f-mwp8nokx-916jt
+      salida: dec:d-mwp8nokx-b6tie
+      a: f-mwp8nokx-p8u02
+    - id: c-mwp8noky-nl0yb
+      de: f-mwp8nokx-vas24
+      salida: rep:rmwp8isa1
+      a: f-mwp8nokx-916jt
+    - id: c-mwp8pnvb-31b
+      de: inicio-AR-mwp8phao
+      salida: siguiente
+      a: f-mwp8nokx-vas24
   cajas:
     - id: manta-inicio
       x: 429
@@ -882,18 +1748,49 @@ whatsapp:
       ancho: 2728
       alto: 1155
       titulo: Nueva caja
+      color: "#2563eb"
     - id: k-mwp8ifkh
       x: 858
       y: 550
       ancho: 2728
       alto: 1441
       titulo: Nueva caja
+      color: "#2563eb"
     - id: velo-mwp8imdm-0
       x: 869
       y: 2332
       ancho: 2728
       alto: 1441
       titulo: Nueva caja
+      color: "#2563eb"
+    - id: velo-mwp8noky-0
+      x: 957
+      y: 4631
+      ancho: 2728
+      alto: 1155
+      titulo: Nueva caja
+      color: "#70ffee"
+    - id: velo-mwp8noky-1
+      x: 1034
+      y: 6127
+      ancho: 2728
+      alto: 1441
+      titulo: Nueva caja
+      color: "#70ffee"
+    - id: velo-mwp8noky-2
+      x: 1045
+      y: 7909
+      ancho: 2728
+      alto: 1441
+      titulo: Nueva caja
+      color: "#70ffee"
+    - id: manta-inicio-AR-mwp8phao
+      x: -1166
+      y: 6171
+      ancho: 340
+      alto: 240
+      titulo: ""
+      inicio: inicio-AR-mwp8phao
   espejos:
     - id: e-mwp881ca-01el
       ficha: f-mwp7u7bo-bhc6
@@ -907,3 +1804,15 @@ whatsapp:
       ficha: f-mwp8imdm-d7cwc
       x: 2189
       y: 2541
+    - id: esp-mwp8nokx-fpg7g
+      ficha: f-mwp8nokx-fdv8s
+      x: 2299
+      y: 4719
+    - id: esp-mwp8nokx-mgjtl
+      ficha: f-mwp8nokx-t874x
+      x: 2354
+      y: 6336
+    - id: esp-mwp8nokx-e0avg
+      ficha: f-mwp8nokx-eyji7
+      x: 2365
+      y: 8118
