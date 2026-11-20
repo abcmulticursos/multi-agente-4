@@ -9756,6 +9756,29 @@ tiendas:
         numero: "118809304492658"
         pagina: "1242582362271632"
         pixel: "1551532759713204"
+    regalo:
+      consent_sequence:
+        - type: image
+          drive_url: https://drive.google.com/file/d/1t94_pAcG_2pVj0tQ_ATKmD3XQWjRiyj1/view?usp=sharing
+          caption_variants:
+            - |-
+              🎁 *{¿Deseas recibir un Regalito Adicional extra|¿Te gustaría recibir un Regalito Adicional extra|¿Quieres recibir un Regalito Adicional extra}*
+
+              Es un pequeño cuadernito de *ACTIVIDADES DE ARTETERAPIA* para la relajación mental 🎨🖍️
+
+              ✨ *También 2 PDF de Corazones en Papercraft tipo Origami 3D*  📚✨
+
+              🎁 *{¿Quieres recibir este Plus de manera gratuita?|¿Deseas descargar este Plus de manera gratuita?|¿Te gustaría descargar este Plus de manera gratuita?}* 😊
+          delay_after_sec: 6
+          buttons:
+            - id: 389b4a20-93ed-45a5-9c8a-3265a08e419b
+              label: SI QUIERO
+              action: send_steps
+              steps: []
+            - id: 658303d8-18e2-4160-b81b-a3dfb4f747ae
+              label: NO QUIERO
+              action: send_steps
+              steps: []
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
