@@ -9158,28 +9158,28 @@ whatsapp:
       ancho: 4136
       alto: 1111
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#ddd72c"
     - id: velo-mwl9m8ae-1
       x: 264
       y: 12595
       ancho: 4158
       alto: 1122
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#ddd72c"
     - id: velo-mwl9m8ae-2
       x: 253
       y: 13893
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#ddd72c"
     - id: velo-mwl9m8ae-3
       x: 231
       y: 15103
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#ddd72c"
     - id: manta-inicio-VE-mwle58tv
       x: -220
       y: 23683
@@ -9193,28 +9193,28 @@ whatsapp:
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#e5ef4d"
+      color: "#16a34a"
     - id: velo-mwlehzqr-1
       x: 187
       y: 25223
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#e5ef4d"
+      color: "#16a34a"
     - id: velo-mwlehzqr-2
       x: 176
       y: 26510
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#e5ef4d"
+      color: "#16a34a"
     - id: velo-mwlehzqr-3
       x: 154
       y: 27720
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#e5ef4d"
+      color: "#16a34a"
     - id: velo-mwm829b9-0
       x: 154
       y: 29227
@@ -9228,7 +9228,7 @@ whatsapp:
       ancho: 3960
       alto: 1111
       titulo: Nueva caja
-      color: "#00aaff"
+      color: "#ddd72c"
   espejos:
     - id: e-mwjw1bmq-15lw
       ficha: f-mwjfckbz-qeu2
