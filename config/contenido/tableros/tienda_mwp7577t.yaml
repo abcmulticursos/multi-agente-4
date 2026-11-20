@@ -2001,8 +2001,8 @@ whatsapp:
           activa_oferta: true
     - id: inicio-CO-mwp8so9c
       tipo: inicio
-      x: -121
-      y: 12254
+      x: 55
+      y: 12166
       pais: CO
     - id: f-mwp8szgw-tskf7
       tipo: reparto
@@ -2010,8 +2010,7 @@ whatsapp:
       y: 12210
       reparto:
         - id: r1
-          peso: 0
-          peso_antes: 1
+          peso: 1
           anuncios:
             - meta_120256716222760226
             - meta_120256716222750226
@@ -2596,6 +2595,10 @@ whatsapp:
       de: f-mwp8szgw-tskf7
       salida: rep:rmwp8isa1
       a: f-mwp8shyb-spkwm
+    - id: c-mwp8uhns-6d8
+      de: inicio-CO-mwp8so9c
+      salida: siguiente
+      a: f-mwp8szgw-tskf7
   cajas:
     - id: k-mwp8i9pd
       x: 781
