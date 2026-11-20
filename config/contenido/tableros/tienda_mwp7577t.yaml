@@ -9,8 +9,8 @@ whatsapp:
   cables: []
   cajas:
     - id: manta-inicio
-      x: -88
-      y: -660
+      x: 451
+      y: -1111
       ancho: 1280
       alto: 620
       titulo: ""

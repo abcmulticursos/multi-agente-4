@@ -9748,6 +9748,14 @@ tiendas:
     nombre: MOLDES DE COSTURA
     numero: ""
     pagina: ""
+    alineacion:
+      basico: pmwp75y8x
+      unico: pmwp75y8x
+    por_pais:
+      VE:
+        numero: "118809304492658"
+        pagina: "1242582362271632"
+        pixel: "1551532759713204"
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
