@@ -5597,6 +5597,51 @@ payment_resend_steps:
 prompt_cache_enabled: true
 no_responder_organicos: true
 biblioteca_de_productos:
+  - id: pmwp75y8x
+    name: MOLDES DE COSTURA
+    aliases: []
+    price_soles: 0
+    delivery:
+      - type: text
+        body_variants:
+          - |-
+            ✅️ PAGO APROBADO!! 😊
+
+            *YA PUEDES DESCARGAR TU PACK DE 600 MOLDES*
+
+            Https://googledrive/jfaut9804396jjasdfjljfsfdljasdklfjasdl
+        delay_after_sec: 6
+      - type: text
+        body_variants:
+          - |-
+            🎁 REGALO ADICIONAL POR TU COMPRA 🎁
+
+            Descarga el molde para niños
+
+            htpps:google.drive.3958045j4jl6jl45k6l4j5ninos
+        delay_after_sec: 6
+    image_gallery: []
+    course_content: |-
+      Es un pack que contiene 600 moles de costura todo tipo de prendas
+
+      Faldas 👗
+      vestidos 
+      pantalones 👖
+      blusas 👚
+      camisetas
+      deportivos y mucho mas
+
+      Este producto es PDF descargable e imprimible, no es producto físico
+
+      Se descarga a través de un enlace por google drive.
+
+      No inventar nada de lo que no contenga este producto.
+    etiqueta: ""
+    precios_por_pais:
+      VE:
+        price_soles: 7300
+        discount_price_soles: 6000
+        market_price: 25000
   - id: pmwjfhu1r
     name: FLORES DE PAPEL
     aliases: []
@@ -9699,6 +9744,10 @@ tiendas:
         numero: "1428202673707739"
         pagina: "1199766179893210"
         pixel: "1512990431889624"
+  - id: tienda_mwp7577t
+    nombre: MOLDES DE COSTURA
+    numero: ""
+    pagina: ""
 cobradores:
   - id: cobra_mupasfeb
     nombre: Melissa Mamani
@@ -13198,6 +13247,7 @@ tableros:
   tienda_mwf8wo1h: "@pieza:tableros/tienda_mwf8wo1h.yaml"
   tienda_mwihl1ms: "@pieza:tableros/tienda_mwihl1ms.yaml"
   tienda_mwjexlij: "@pieza:tableros/tienda_mwjexlij.yaml"
+  tienda_mwp7577t: "@pieza:tableros/tienda_mwp7577t.yaml"
 workflows:
   figurarte2:
     encendido: true

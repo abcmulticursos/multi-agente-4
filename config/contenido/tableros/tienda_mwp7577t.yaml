@@ -1,0 +1,17 @@
+whatsapp:
+  encendido: false
+  fichas:
+    - id: inicio
+      tipo: inicio
+      x: 22
+      y: 220
+      pais: VE
+  cables: []
+  cajas:
+    - id: manta-inicio
+      x: -88
+      y: -660
+      ancho: 1280
+      alto: 620
+      titulo: ""
+      inicio: inicio
