@@ -1388,13 +1388,25 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
               </p>
             </div>
             {g.cuenta ? (
-              <button type="button" onClick={() => abrirAsistente("inicio")} className={`${boton} bg-sky-600 text-white hover:bg-sky-700`}>
-                Abrir asistente
-              </button>
-            ) : (
+              <>
+                <button type="button" onClick={() => abrirAsistente("inicio")} className={`${boton} bg-sky-600 text-white hover:bg-sky-700`}>
+                  Abrir asistente
+                </button>
+                {/* (19/11/2026) A la vista: el mismo «Quitar esta cuenta» de la sección de negocios, con su vista previa. */}
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("meta-connect:quitar-cuenta", { detail: g.cuenta }))}
+                  className={`${boton} border border-red-200 bg-tarjeta text-red-700 hover:bg-red-50`}
+                >
+                  Desconectar
+                </button>
+              </>
+            ) : cuentasFb.length === 0 ? (
               <a href="/api/meta/connect/start?nueva=1" className={`${boton} bg-[#1877f2] text-white hover:opacity-90`}>
                 Conectar esa cuenta
               </a>
+            ) : (
+              <span className="max-w-[16rem] text-xs text-tinta-suave">Una sola cuenta de Facebook por bot: esta app es de otra cuenta.</span>
             )}
           </div>
           {g.apps.length > 0 && (
@@ -1487,13 +1499,16 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
             "↻ Actualizar desde Meta"
           )}
         </button>
-        <a
-          href="/api/meta/connect/start?nueva=1"
-          title="Antes, cierra sesión de Facebook en este navegador (o usa una ventana privada) y entra con esa cuenta. No cambia nada de lo que ya tienes."
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700"
-        >
-          + Conectar otra cuenta de Facebook
-        </a>
+        {/* UNA SOLA CUENTA DE FACEBOOK POR BOT (19/11/2026): con una conectada, ya no se ofrece otra (el servidor también lo frena). */}
+        {cuentasFb.length === 0 && (
+          <a
+            href="/api/meta/connect/start?nueva=1"
+            title="Antes, cierra sesión de Facebook en este navegador (o usa una ventana privada) y entra con esa cuenta. No cambia nada de lo que ya tienes."
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-700"
+          >
+            + Conectar otra cuenta de Facebook
+          </a>
+        )}
       </div>
       <details className="text-xs text-tinta-suave">
         <summary className="cursor-pointer text-center">¿Ya estaba preparada? Súmala solo con su ID y su clave ▾</summary>
@@ -1710,6 +1725,20 @@ function DiferenciacionPorNegocio() {
       setQuitando({ id, nombre, fase: "lista", vista: { ok: false, error: "No pude hablar con el servidor. Vuelve a intentarlo." } });
     }
   };
+  // (19/11/2026) El «Desconectar» de cada caja de «Tus apps» pide aquí lo mismo que «🚪 Quitar esta cuenta».
+  const pedirQuitarRef = useRef(pedirQuitar);
+  pedirQuitarRef.current = pedirQuitar;
+  const conectadasRef = useRef<Array<{ id?: string | null; nombre: string | null }>>([]);
+  conectadasRef.current = datos?.conectadas ?? [];
+  useEffect(() => {
+    const alPedir = (e: Event) => {
+      const nombre = String((e as CustomEvent).detail ?? "");
+      const c = conectadasRef.current.find((x) => x.nombre === nombre);
+      void pedirQuitarRef.current(c?.id ?? null, nombre || null, false);
+    };
+    window.addEventListener("meta-connect:quitar-cuenta", alPedir);
+    return () => window.removeEventListener("meta-connect:quitar-cuenta", alPedir);
+  }, []);
 
   async function suscribir(phoneNumberId: string) {
     const otras = otrasApps[phoneNumberId] ?? [];

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { anotarFalloDeMeta } from "@/lib/meta/registro";
+import { cuentasDeFacebookConectadas } from "@/lib/meta/cuentas-de-facebook";
 import {
   META_CONNECT_COOKIE,
   META_CONNECT_INSTAGRAM_COOKIE,
@@ -16,6 +17,13 @@ export async function GET(req: NextRequest) {
   const redirectUri = `${getPublicOrigin(req)}/api/meta/connect/callback`;
   const state = newOAuthState();
   const includeInstagram = new URL(req.url).searchParams.get("instagram") === "1";
+  // UNA SOLA CUENTA DE FACEBOOK POR BOT (19/11/2026, aprobado por él: «hazlo»). Con varias cuentas conectadas, sus
+  // negocios quedaban unidos ante Meta (y las apps se cruzaban). Ya conectada una, «otra cuenta» no se deja empezar:
+  // para cambiar de cuenta, primero se desconecta la actual. Iniciar sesión otra vez con la de siempre sí se puede.
+  if (new URL(req.url).searchParams.get("nueva") === "1" && cuentasDeFacebookConectadas().length >= 1) {
+    const texto = "Este bot trabaja con una sola cuenta de Facebook. Para usar otra, primero desconecta la actual en «Tus apps».";
+    return NextResponse.redirect(new URL(`/meta-connect?error=${encodeURIComponent(texto)}`, getPublicOrigin(req)));
+  }
   try {
     const loginUrl = buildMetaLoginUrl(redirectUri, state, includeInstagram);
     const res = NextResponse.redirect(loginUrl);
