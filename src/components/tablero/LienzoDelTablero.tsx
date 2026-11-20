@@ -2059,7 +2059,15 @@ function CableComoEtiqueta({
   );
 }
 
-function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style }: EdgeProps) {
+/**
+ * EL CABLE TRONCAL SE NOTA DE LEJOS (20/11/2026). Él: «los cables que parten desde el país Inicio hasta el Ruteador y del
+ * Ruteador a las tuberías, al estar lejos, no se adelgacen tanto… que al alejarse se vea un poco más grueso que el resto,
+ * no al mismo grosor de su 100 % sino al menos el doble de lo que se ve el normal». Cerca (zoom ≥ 0,8), igual que los
+ * demás; al alejarse, el doble de grueso que un cable normal, sin pasar nunca del 80 % de cómo se ve de cerca.
+ */
+const factorTroncal = (zoom: number) => (zoom >= 0.8 ? 1 : Math.min(2, 0.8 / Math.max(zoom, 0.05)));
+
+function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, data }: EdgeProps) {
   const ctx = useContext(Contexto);
   const [encima, setEncimaYa] = useState(false);
   const reloj = useRef<number | null>(null);
@@ -2115,7 +2123,17 @@ function CableCompleto({ id, sourceX, sourceY, targetX, targetY, sourcePosition,
     <>
       <g onMouseEnter={() => setEncima(true)} onMouseLeave={() => setEncima(false)}>
         <path ref={medidor} d={camino} fill="none" stroke="none" />
-        <BaseEdge id={id} path={camino} interactionWidth={0} style={{ ...style, strokeWidth: encima ? 6 : 4 }} />
+        {(() => {
+          const k = (data as { troncal?: boolean } | undefined)?.troncal ? factorTroncal(zoom) : 1;
+          return (
+            <BaseEdge
+              id={id}
+              path={camino}
+              interactionWidth={0}
+              style={{ ...style, strokeWidth: (encima ? 6 : 4) * k, ...(k !== 1 ? { strokeDasharray: `${10 * k} ${6 * k}` } : {}) }}
+            />
+          );
+        })()}
         <path
           d={camino}
           fill="none"
@@ -3793,7 +3811,10 @@ export default function LienzoDelTablero({
             deletable: false,
             ...(comoColita && destino
               ? { data: { etiqueta: letreroDeColita(tablero, c, numeroDe), colorDestino: ASPECTO[destino.tipo].trazo, tenue: !!destino.apagada } }
-              : {}),
+              : // (20/11/2026) LOS CABLES TRONCALES: del Inicio al Ruteador y del Ruteador a sus rutas (ver `CableCompleto`).
+                (origen?.tipo === "inicio" && destino?.tipo === "reparto") || origen?.tipo === "reparto"
+                ? { data: { troncal: true } }
+                : {}),
             // PUNTEADOS, QUIETOS Y SIN FLECHA, como en la pizarra. (03/11/2026, él: «engrosar un poquito los cables… y el
             // cable que parte hacia los seguimientos sea de color anaranjado y del mismo grosor que los demás, y el dash
             // también»: todos de 4 con el mismo punteado; el que va a unos Seguimientos, naranja.)
