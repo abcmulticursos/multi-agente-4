@@ -51749,9 +51749,41 @@ function IndicadorDelRespaldo() {
     };
   }, []);
   const pendientes = estado?.pendientes ?? 0;
+  // (20/11/2026) LA REPO EQUIVOCADA SE VE COMO ANTES. Él: «sí me permitió guardar… no salió el aviso, y el botón de
+  // guardar sí funcionó». Desde el 30/10 Guardar no espera a GitHub, así que el candado de identidad solo frenaba la
+  // subida y el único aviso era este «☁» chico. Ahora, si lo que falla es la identidad, sale el recuadro rojo de
+  // arriba —el mismo de cuando un guardado fallaba («ni tan grande que asuste ni tan pequeño que no se vea»)— y se
+  // queda mientras siga sin subir. Lo guardado sigue a salvo en el servidor.
+  const [ocultoElRojo, setOcultoElRojo] = useState<string | null>(null);
+  const errorDeIdentidad = pendientes > 0 && !!estado?.ultimoError && /identidad/i.test(estado.ultimoError) ? estado.ultimoError : null;
+  const rojo =
+    errorDeIdentidad && ocultoElRojo !== errorDeIdentidad ? (
+      <div
+        role="alert"
+        className="fixed left-1/2 top-32 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-center text-base font-semibold text-red-700 shadow-2xl"
+      >
+        <div>⚠️ Tus cambios NO se están subiendo a GitHub: la repo de este bot no coincide con su identidad.</div>
+        <div className="mt-1 text-sm font-normal">
+          {(() => {
+            const m = /declara "([^"]*)" pero este deploy espera "([^"]*)"/.exec(errorDeIdentidad);
+            return m ? `La identidad dice «${m[1]}» y este bot es «${m[2]}».` : errorDeIdentidad;
+          })()}{" "}
+          Arréglalo en Ajustes → Identidad del proyecto. Lo guardado sigue en el servidor y sube solo cuando coincida.
+        </div>
+        <button
+          type="button"
+          onClick={() => setOcultoElRojo(errorDeIdentidad)}
+          className="mt-3 rounded-lg border border-red-300 bg-white px-4 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-100"
+        >
+          Entendido
+        </button>
+      </div>
+    ) : null;
   if (!pendientes && !listo) return null;
   const conError = pendientes > 0 && !!estado?.ultimoError;
   return (
+    <>
+    {rojo}
     <div
       className={`fixed bottom-3 left-3 z-[60] flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold shadow ${
         conError ? "border-amber-400 bg-amber-50 text-amber-900" : "border-borde bg-tarjeta text-tinta-suave"
@@ -51777,6 +51809,7 @@ function IndicadorDelRespaldo() {
         </button>
       )}
     </div>
+    </>
   );
 }
 
