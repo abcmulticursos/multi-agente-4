@@ -436,10 +436,18 @@ whatsapp:
       reparto:
         - id: r1
           peso: 1
+          anuncios:
+            - meta_120256717565960226
+            - meta_120256717565910226
         - id: r2
           peso: 1
+          anuncios:
+            - meta_120256717565970226
         - id: rmwp8isa1
           peso: 1
+          anuncios:
+            - meta_120256717565920226
+            - meta_120256717565950226
     - id: f-mwp8imdm-sauiq
       tipo: mensaje
       x: 979
