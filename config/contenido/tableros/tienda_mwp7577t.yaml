@@ -683,12 +683,12 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+              Hola qué tal, me llamo Claudia, soy parte del equipo de Premium Academy 🙋‍♀️
 
-              Tienes problemas para confeccionar
-              no te quedan las prendas como quieres?
+              ¿Tenés problemas para confeccionar?
+              ¿no te quedan las prendas como querés?
 
-              No te preocupes tenemos algo que te va a encantar
+              No te preocupes, tenemos algo que te va a encantar
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/1RCBkZMyeUSt7iRAmn3pn7LJc8q3jdWhb/view?usp=sharing
@@ -698,16 +698,16 @@ whatsapp:
         - type: text
           body_variants:
             - |+
-              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+              ¿cómo compro? es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
 
-              recibes
+              recibís
 
               600 moldes
               - blusas
               - faldas
               - vestidos
               - pantalones
-               y mucho mas
+               y mucho más
 
           delay_after_sec: 6
         - type: text
@@ -717,9 +717,9 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              como compro solo haz un deposito de *{{precio_base}}* 
+              ¿cómo compro? solo haz un depósito de *{{precio_base}}* 
 
-              Deseas que te brinde los datos de pago?
+              ¿Deseás que te brinde los datos de pago?
           delay_after_sec: 6
           buttons:
             - id: b-mwp8nokx-7vq1e
@@ -737,7 +737,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+            - "Excelente, podés adquirirlo a los siguientes datos: 😊👇️"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -745,7 +745,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+            - Una vez realizado tu pago, nos enviás la imagen de tu comprobante para que tengas acceso inmediato 🤳
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -788,12 +788,12 @@ whatsapp:
                 - type: image
                   drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
                   caption_variants:
-                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                    - "QUIERO COMENTARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRÁS HACER MCUHAS PRENDAS. "
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+                      DESEÁS ADQUIRIRLO ELEGÍ UNA OPCIÓN TENEMOS 
 
                       NEQUI
                       DAVIPLATA
@@ -822,15 +822,15 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
                   caption_variants:
                     - |-
-                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+                      ÚLTIMA OPORTUNIDAD OFERTA FLASH!!!
 
-                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+                      POR CIERRE DE PROMOCIÓN TENEMOS UN SUPER PRECIO
 
                       AHORA CUESTA *{{PRECIO_BASE}}*
 
                       APRESURATE ANTES QUE TERMINE LA OFERTA
 
-                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+                      ESCRIBÍ LA OPCIÓN QUE MÁS TE GUSTE
 
                       - *NEQUI*
                       - *DAVIPLATA*
@@ -879,12 +879,12 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+              Hola qué tal, me llamo Claudia, soy parte del equipo de Premium Academy 🙋‍♀️
 
-              Tienes problemas para confeccionar
-              no te quedan las prendas como quieres?
+              ¿Tenés problemas para confeccionar?
+              ¿no te quedan las prendas como querés?
 
-              No te preocupes tenemos algo que te va a encantar
+              No te preocupes, tenemos algo que te va a encantar
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/137IkXJ3jKZkXgxMKF6hBWLhx7-SjrzeG/view?usp=drive_link
@@ -894,16 +894,16 @@ whatsapp:
         - type: text
           body_variants:
             - |+
-              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+              ¿cómo compro? es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
 
-              recibes
+              recibís
 
               600 moldes
               - blusas
               - faldas
               - vestidos
               - pantalones
-               y mucho mas
+               y mucho más
 
           delay_after_sec: 6
         - type: text
@@ -913,11 +913,11 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              como compro solo haz un deposito de *{{precio_base}}* 
+              cómo compro solo haz un depósito de *{{precio_base}}* 
 
-              Deseas que te brinde los datos de pago?
+              ¿Deseás que te brinde los datos de pago?
 
-              ELIGE UNA OPCIONA
+              ELEGÍ UNA OPCIONA
 
               NEQUI
               DAVIPLATA
@@ -964,7 +964,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+            - "Excelente, podés adquirirlo a los siguientes datos: 😊👇️"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -972,7 +972,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+            - Una vez realizado tu pago, nos enviás la imagen de tu comprobante para que tengas acceso inmediato 🤳
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -1015,12 +1015,12 @@ whatsapp:
                 - type: image
                   drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
                   caption_variants:
-                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                    - "QUIERO COMENTARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRÁS HACER MCUHAS PRENDAS. "
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+                      DESEÁS ADQUIRIRLO ELEGÍ UNA OPCIÓN TENEMOS 
 
                       NEQUI
                       DAVIPLATA
@@ -1049,15 +1049,15 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
                   caption_variants:
                     - |-
-                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+                      ÚLTIMA OPORTUNIDAD OFERTA FLASH!!!
 
-                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+                      POR CIERRE DE PROMOCIÓN TENEMOS UN SUPER PRECIO
 
                       AHORA CUESTA *{{PRECIO_BASE}}*
 
                       APRESURATE ANTES QUE TERMINE LA OFERTA
 
-                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+                      ESCRIBÍ LA OPCIÓN QUE MÁS TE GUSTE
 
                       - *NEQUI*
                       - *DAVIPLATA*
@@ -1125,12 +1125,12 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              Hola que tal me llamo Claudia soy parte del equipo de Premium Academy 🙋‍♀️
+              Hola qué tal, me llamo Claudia, soy parte del equipo de Premium Academy 🙋‍♀️
 
-              Tienes problemas para confeccionar
-              no te quedan las prendas como quieres?
+              ¿Tenés problemas para confeccionar?
+              ¿no te quedan las prendas como querés?
 
-              No te preocupes tenemos algo que te va a encantar
+              No te preocupes, tenemos algo que te va a encantar
           delay_after_sec: 6
         - type: image
           drive_url: https://drive.google.com/file/d/137IkXJ3jKZkXgxMKF6hBWLhx7-SjrzeG/view?usp=drive_link
@@ -1140,16 +1140,16 @@ whatsapp:
         - type: text
           body_variants:
             - |+
-              como compro es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
+              ¿cómo compro? es muy sencillo, solamente cuesta *{{PRECIO_BASE}}*
 
-              recibes
+              recibís
 
               600 moldes
               - blusas
               - faldas
               - vestidos
               - pantalones
-               y mucho mas
+               y mucho más
 
           delay_after_sec: 6
         - type: text
@@ -1159,11 +1159,11 @@ whatsapp:
         - type: text
           body_variants:
             - |-
-              como compro solo haz un deposito de *{{precio_base}}* 
+              cómo compro solo haz un depósito de *{{precio_base}}* 
 
-              Deseas que te brinde los datos de pago?
+              ¿Deseás que te brinde los datos de pago?
 
-              ELIGE UNA OPCIONA
+              ELEGÍ UNA OPCIONA
 
               NEQUI
               DAVIPLATA
@@ -1210,7 +1210,7 @@ whatsapp:
       steps:
         - type: text
           body_variants:
-            - "Excelente puedes adquirirlo a los siguientes datos: 😊👇️"
+            - "Excelente, podés adquirirlo a los siguientes datos: 😊👇️"
           delay_after_sec: 6
         - type: text
           body_variants:
@@ -1218,7 +1218,7 @@ whatsapp:
           delay_after_sec: 6
         - type: text
           body_variants:
-            - Una vez realizado tu pago, nos envias la imagen de tu comprobante para que tengas acceso inmediato 🤳
+            - Una vez realizado tu pago, nos enviás la imagen de tu comprobante para que tengas acceso inmediato 🤳
           delay_after_sec: 6
       cobro:
         modo: producto
@@ -1261,12 +1261,12 @@ whatsapp:
                 - type: image
                   drive_url: https://drive.google.com/file/d/1bVvxaKbJv6hjIfUyIE3ilciKDX14RAa2/view?usp=drive_link
                   caption_variants:
-                    - "QUIERO COMENARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRAS HACER MCUHAS PRENDAS. "
+                    - "QUIERO COMENTARTE QUE NUESTRO PRODUCTO ES MUY BUENO Y PODRÁS HACER MCUHAS PRENDAS. "
                   delay_after_sec: 6
                 - type: text
                   body_variants:
                     - |-
-                      DESEAS ADQUIRIRLO ELIGE UNA OPCION TENEMOS 
+                      DESEÁS ADQUIRIRLO ELEGÍ UNA OPCIÓN TENEMOS 
 
                       NEQUI
                       DAVIPLATA
@@ -1295,15 +1295,15 @@ whatsapp:
                   drive_url: https://drive.google.com/file/d/1Sa0of7UTZCbBOnph6LXaOhwoV_Uysbli/view?usp=drive_link
                   caption_variants:
                     - |-
-                      ULTIMA OPORTUNIDAD OFERTA FLASH!!!
+                      ÚLTIMA OPORTUNIDAD OFERTA FLASH!!!
 
-                      POR CIERRE DE PROMOCION TENEMOS UN SUPER PRECIO
+                      POR CIERRE DE PROMOCIÓN TENEMOS UN SUPER PRECIO
 
                       AHORA CUESTA *{{PRECIO_BASE}}*
 
                       APRESURATE ANTES QUE TERMINE LA OFERTA
 
-                      ESCRIBE LA OPCION QUE MAS TE GUSTE
+                      ESCRIBÍ LA OPCIÓN QUE MÁS TE GUSTE
 
                       - *NEQUI*
                       - *DAVIPLATA*
