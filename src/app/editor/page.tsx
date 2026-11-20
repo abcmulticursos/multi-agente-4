@@ -38686,6 +38686,20 @@ function duplicarTienda(cfg: FullConfig, tiendaId: string, nombre?: string): { c
  * del bot entero y no viajan) y su pizarra. Se lee con `importarTienda`.
  */
 const FORMATO_DE_TIENDA = "tienda-del-bot";
+/**
+ * LA TIENDA SIN NADA DE META (19/11/2026). Él: «exportar json y que se pueda cargar como tienda», para su clon «limpio sin
+ * nada que pueda comprometer cosas de Meta». Fuera el número, la página y el píxel, también los de cada país; el resto
+ * de lo de cada país (precios, cuentas, etc.) se queda.
+ */
+function tiendaSinDatosDeMeta(t: TiendaEditor): TiendaEditor {
+  const por: NonNullable<TiendaEditor["por_pais"]> = {};
+  for (const [pais, g] of Object.entries(t.por_pais ?? {})) {
+    if (!g) continue;
+    const { numero: _n, pagina: _p, pixel: _x, ...resto } = g as Record<string, unknown>;
+    if (Object.keys(resto).length) por[pais] = resto as NonNullable<TiendaEditor["por_pais"]>[string];
+  }
+  return { ...t, numero: "", pagina: "", pixel: undefined, por_pais: Object.keys(por).length ? por : undefined };
+}
 function exportarTienda(cfg: FullConfig, tiendaId: string): Record<string, unknown> | null {
   const tienda = (cfg.tiendas ?? []).find((t) => t.id === tiendaId);
   if (!tienda) return null;
@@ -38737,7 +38751,7 @@ function exportarTienda(cfg: FullConfig, tiendaId: string): Record<string, unkno
     version: 1,
     exportada: new Date().toISOString(),
     modalidad: mode,
-    tienda: JSON.parse(JSON.stringify(tienda)),
+    tienda: JSON.parse(JSON.stringify(tiendaSinDatosDeMeta(tienda))),
     productos: JSON.parse(JSON.stringify(productos)),
     ...(fila ? { filaDeUpsell: JSON.parse(JSON.stringify(fila)) } : {}),
     fichas,
@@ -38780,7 +38794,8 @@ function importarTienda(cfg: FullConfig, datos: unknown): { cfg: FullConfig; id:
     ...cfg,
     tiendas: [
       ...(cfg.tiendas ?? []),
-      { ...d.tienda, id, nombre: `${d.tienda.nombre?.trim() || "Tienda"} (importada)`, numero: "", pagina: "" },
+      // (19/11/2026) Sin nada de Meta, también el píxel y lo de cada país (`tiendaSinDatosDeMeta`).
+      { ...tiendaSinDatosDeMeta(d.tienda), id, nombre: `${d.tienda.nombre?.trim() || "Tienda"} (importada)` },
     ],
   };
   // Los productos que faltan.
@@ -61368,6 +61383,40 @@ function TiendasDelProyecto({
           </button>
         );
       })()}
+      {/* CARGAR UNA TIENDA DE UN JSON (19/11/2026). La de «⬇ JSON» de cada fila (o la de la pizarra): entra como tienda
+          NUEVA, sin número, página ni píxel y con su tablero apagado (`importarTienda`). Ctrl+S la guarda. */}
+      {onConfig && !abiertaAlInicio && (
+        <label className="inline-block cursor-pointer rounded-md border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100">
+          ⬆ Cargar una tienda (JSON)
+          <input
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={async (e) => {
+              const archivo = e.target.files?.[0];
+              e.target.value = "";
+              if (!archivo) return;
+              let datos: unknown;
+              try {
+                datos = JSON.parse(await archivo.text());
+              } catch {
+                window.alert("Ese archivo no es un JSON válido.");
+                return;
+              }
+              const r = importarTienda(cfg, datos);
+              if ("error" in r) {
+                window.alert(r.error);
+                return;
+              }
+              onSnapshot();
+              onConfig(r.cfg);
+              window.alert(
+                `Tienda cargada como nueva, sin número, página ni píxel. Guarda (Ctrl+S) para que quede.${r.avisos.length > 0 ? `\n\n${r.avisos.join("\n")}` : ""}`
+              );
+            }}
+          />
+        </label>
+      )}
 
       {tiendas.length > 1 && (
         <input
@@ -61543,6 +61592,25 @@ function TiendasDelProyecto({
                 </button>
               );
             })()}
+            {/* EXPORTAR JSON (19/11/2026, él: «que pueda exportar json y que ese json se pueda cargar como tienda»).
+                Lo mismo que «⇅ Exportar» de la pizarra (`exportarTienda`), sin número, página ni píxel. */}
+            <button
+              type="button"
+              onClick={() => {
+                const datos = exportarTienda(cfg, tienda.id);
+                if (!datos) return;
+                const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = `tienda-${(comoSeLlama || tienda.id).replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.json`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+              }}
+              title="Descargar esta tienda en un archivo JSON (sin número, página ni píxel)"
+              className="shrink-0 rounded-md border border-borde bg-relleno px-3 py-1.5 text-xs font-bold text-tinta hover:bg-tarjeta"
+            >
+              ⬇ JSON
+            </button>
             <button
               type="button"
               onClick={() => setTiendaAbierta(tienda.id)}
