@@ -1304,7 +1304,7 @@ function SaludDeLosNumeros() {
 }
 
 function AppsDelBot({ status }: { status: MetaStatus }) {
-  type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null };
+  type Otra = { appId: string; nombre: string | null; negocio: string | null; negocioId: string | null; conToken?: boolean };
   const [datos, setDatos] = useState<{ principal: { appId: string; negocio: string | null; negocioId: string | null } | null; otras: Otra[] } | null>(null);
   // LOS ACTIVOS DE CADA APP: los del negocio dueño de cada app (`/api/meta/connect/cuentas`), y de qué cuenta de Facebook es.
   type Activos = { numeros: string[]; paginas: string[]; pixels: string[]; facebook: string | null };
@@ -1521,6 +1521,21 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
                       Cambiar app
                     </button>
                   )}
+                  {/* SU TOKEN (19/11/2026): sin él, los números de su BM no se pueden conectar a ella (y conectarlos a la
+                      principal los cruzaría). Abre el asistente del token en SU BM. */}
+                  {!a.principal &&
+                    ("conToken" in a && a.conToken ? (
+                      <span className="inline-flex items-center rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800">🔐 Con su token</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent("meta-connect:asistente", { detail: { paso: "token", bm: a.negocioId ?? undefined } }))}
+                        title="Sin su token, los números de su BM no se pueden conectar a esta app"
+                        className={`${boton} border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100`}
+                      >
+                        🔐 Crear su token
+                      </button>
+                    ))}
                   <button
                     type="button"
                     disabled={quitando === a.appId}

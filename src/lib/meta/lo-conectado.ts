@@ -7,7 +7,7 @@ import {
 } from "@/lib/db";
 import type { MetaPixelOption } from "@/lib/meta/connect";
 import { getCapiPixelId } from "@/lib/meta/runtime-config";
-import { esDeLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
+import { esDeLaApp, loPuedeUsarLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
 
 /**
  * LO QUE YA ESTÁ CONECTADO, PARA ELEGIRLO EN UNA LISTA EN VEZ DE COPIAR IDS.
@@ -157,11 +157,13 @@ export function loConectado() {
   // los tengan puestos los sueltan (un id escrito a mano que no se conoce NO está aquí y no se toca).
   const negocio = negociosDeLasApps();
   const suyo = <T extends { cuenta: string | null }>(x: T) => esDeLaApp(negocio, x.cuenta);
-  const ajenos = [...numeros, ...paginas, ...pixels].filter((x) => !suyo(x)).map((x) => x.id);
+  // (19/11/2026) Páginas y píxeles: también los COMPARTIDOS con el negocio de una app (`loPuedeUsarLaApp`).
+  const usable = <T extends { cuenta: string | null; accesoDe: Array<{ id?: string | null }> }>(x: T) => loPuedeUsarLaApp(negocio, x.cuenta, x.accesoDe);
+  const ajenos = [...numeros.filter((x) => !suyo(x)), ...paginas.filter((x) => !usable(x)), ...pixels.filter((x) => !usable(x))].map((x) => x.id);
   return {
     numeros: numeros.filter(suyo),
-    paginas: paginas.filter(suyo),
-    pixels: pixels.filter(suyo),
+    paginas: paginas.filter(usable),
+    pixels: pixels.filter(usable),
     pixelGeneral,
     negociosDeLasApps: negocio,
     ajenos,

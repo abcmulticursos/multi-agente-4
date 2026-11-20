@@ -1533,7 +1533,8 @@ interface EstadoDelToken {
   loginVencido?: boolean;
   appId: string | null;
   /** `conLaApp` y `usuarioAdmin` vienen solo en el BM pedido; en los demás, sin revisar. */
-  negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean }>;
+  /** `appId`/`appNombre` (19/11/2026): la app de ESE BM si el bot tiene una; el token se crea para ella. */
+  negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean; appId?: string | null; appNombre?: string | null }>;
   frenado?: boolean;
 }
 
@@ -1740,11 +1741,11 @@ function PasoToken({ volver, seguir, bmInicial = null }: { volver: () => void; s
           )}
           {bm && bm.conLaApp !== undefined && (
             <>
-              <PasoDeLista ok={!!bm.conLaApp} n={1} titulo={`¿Agregaste tu app al BM «${bm.nombre}»?`}>
+              <PasoDeLista ok={!!bm.conLaApp} n={1} titulo={`¿Agregaste ${bm.appNombre ? `la app «${bm.appNombre}»` : "tu app"} al BM «${bm.nombre}»?`}>
                 <div>
                   En la página que se abre: <b>Agregar → Conectar un identificador de app</b>, pega este ID y confirma.
                 </div>
-                {e.appId && <Copiar texto={e.appId} />}
+                {(bm.appId ?? e.appId) && <Copiar texto={(bm.appId ?? e.appId) as string} />}
                 <a href={`https://business.facebook.com/settings/apps?business_id=${bm.id}`} target="_blank" rel="noreferrer" className={`${boton} bg-[#1877f2] text-white hover:bg-[#166fe0]`}>
                   Abrir «Apps» de {bm.nombre} ↗
                 </a>

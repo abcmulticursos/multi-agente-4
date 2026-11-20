@@ -11,6 +11,8 @@ import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por
 import { olvidar } from "@/lib/meta/recuerdo";
 import { anotarFalloDeMeta } from "@/lib/meta/registro";
 import { graphVersion } from "@/lib/meta/connect";
+import { guardarTokenDeLaApp, secretoDeLaApp } from "@/lib/meta/apps-de-meta";
+import { appDelNegocio } from "@/lib/meta/negocio-de-la-app";
 import {
   getMetaAppId,
   getMetaOAuthAppSecret,
@@ -73,9 +75,20 @@ const ESCALERA_DE_PERMISOS = [
 ].map((lista) => lista.join(","));
 
 async function guardarPegado(pegado: string) {
-  const appId = getMetaAppId();
-  const appSecret = getMetaOAuthAppSecret();
-  if (!appId || !appSecret) return NextResponse.json({ ok: false, error: "Faltan el ID de la app o su clave secreta." });
+  const principal = getMetaAppId();
+  // (19/11/2026) DE CUALQUIERA DE NUESTRAS APPS: el de la app de otro BM conecta los números de ese BM a SU app, sin
+  // cruces (ver `tokenDeLaApp`). De qué app es lo dice Meta con el propio token.
+  const suApp = await fetch(`https://graph.facebook.com/${graphVersion()}/app?fields=id&access_token=${encodeURIComponent(pegado)}`, { cache: "no-store" })
+    .then((r) => r.json().catch(() => null))
+    .catch(() => null) as { id?: string } | null;
+  const appId = String(suApp?.id ?? "") || principal;
+  const appSecret = appId ? secretoDeLaApp(appId) : null;
+  if (!appId || !appSecret)
+    return NextResponse.json({
+      ok: false,
+      error: suApp?.id ? "Ese token es de una app que este bot no tiene. Agrégala primero en «Tus apps» o crea el token con una de tus apps." : "Faltan el ID de la app o su clave secreta.",
+    });
+  const esOtra = appId !== principal;
   // ¿Es de verdad un token, de esta app, y no caduca? Lo dice Meta.
   const info = await graph("debug_token", `${appId}|${appSecret}`, appSecret, { input_token: pegado });
   const d = (info.cuerpo?.data ?? null) as { is_valid?: boolean; app_id?: string; expires_at?: number; type?: string } | null;
@@ -86,6 +99,17 @@ async function guardarPegado(pegado: string) {
   if (d.app_id && d.app_id !== appId)
     return NextResponse.json({ ok: false, error: "Ese token es de otra app. Créalo eligiendo la misma app que usa Meta Connect." });
   const caduca = !!d.expires_at && d.expires_at > 0;
+
+  if (esOtra) {
+    guardarTokenDeLaApp(appId, pegado);
+    const deEsaApp = await repartirTokenPermanente(pegado, true, appSecret);
+    olvidar("token-estado");
+    return NextResponse.json({
+      ok: true,
+      numeros: deEsaApp.map((c) => c.display_phone_number ?? c.phone_number_id),
+      aviso: caduca ? "Ojo: este token SÍ caduca. Al crearlo en Meta, elige «Nunca» en la caducidad." : null,
+    });
+  }
 
   const alcanzados = await repartirTokenPermanente(pegado, true);
   if (!alcanzados.length)
@@ -170,6 +194,12 @@ export async function POST(req: NextRequest) {
   // EN UN BM CONCRETO (20/10/2026): el asistente lo pide en el BM de los números, para que el
   // token pueda usarlos. Se guarda igual que el de siempre; solo se elige dónde se crea.
   const negocioPedido = typeof cuerpoPedido?.negocio === "string" ? cuerpoPedido.negocio.trim() : "";
+  // (19/11/2026) LA APP DE ESE BM: si el bot tiene una app de ese negocio (otra que la principal), el token se crea
+  // para ELLA, y con él sus números se conectan a su propia app (`tokenDeLaApp`). Las llamadas se siguen haciendo
+  // con el inicio de sesión, que es de la principal (su prueba de secreto va con la clave de la principal).
+  const deEseBm = !cuenta && negocioPedido ? appDelNegocio(negocioPedido) : null;
+  const appParaElToken = deEseBm && !deEseBm.principal ? deEseBm.appId : null;
+  const secretoParaElToken = appParaElToken ? secretoDeLaApp(appParaElToken) : null;
   const appId = getMetaAppId();
   const appSecret = getMetaOAuthAppSecret();
   let token = cuenta ? permisoDeConexionDeLaCuenta(cuenta) : getTokenDeLaConexion();
@@ -265,7 +295,7 @@ export async function POST(req: NextRequest) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            business_app: appId,
+            business_app: appParaElToken ?? appId,
             access_token: token,
             appsecret_proof: pruebaDeSecreto(token, appSecret),
           }),
@@ -289,33 +319,54 @@ export async function POST(req: NextRequest) {
         null;
       let res: Response | null = null;
       let permisosLogrados = "";
-      for (const permisos of ESCALERA_DE_PERMISOS) {
-        res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            business_app: appId,
-            scope: permisos,
-            // false = sin fecha de caducidad, que es justo lo que se busca.
-            set_token_expires_in_60_days: false,
-            access_token: token,
-            appsecret_proof: pruebaDeSecreto(token, appSecret),
-          }),
-        });
-        cuerpo = (await res.json().catch(() => null)) as {
-          access_token?: string;
-          error?: { message?: string };
-        } | null;
-        if (res.ok && typeof cuerpo?.access_token === "string") {
-          permisosLogrados = permisos;
-          break;
+      // (19/11/2026) Para la app de otro BM se prueba la firma con la clave de la principal (la del inicio de sesión)
+      // y, si Meta la rechaza, con la de esa app.
+      const firmas = [appSecret, ...(secretoParaElToken && secretoParaElToken !== appSecret ? [secretoParaElToken] : [])];
+      for (const firma of firmas) {
+        for (const permisos of ESCALERA_DE_PERMISOS) {
+          res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              business_app: appParaElToken ?? appId,
+              scope: permisos,
+              // false = sin fecha de caducidad, que es justo lo que se busca.
+              set_token_expires_in_60_days: false,
+              access_token: token,
+              appsecret_proof: pruebaDeSecreto(token, firma),
+            }),
+          });
+          cuerpo = (await res.json().catch(() => null)) as {
+            access_token?: string;
+            error?: { message?: string };
+          } | null;
+          if (res.ok && typeof cuerpo?.access_token === "string") {
+            permisosLogrados = permisos;
+            break;
+          }
         }
+        if (permisosLogrados) break;
       }
 
       if (res?.ok && typeof cuerpo?.access_token === "string") {
         if (cuenta) {
           // El de una cuenta va SOLO a su cuenta. Ver el comentario de arriba.
           guardarPermisoPermanenteDeCuenta(cuenta, cuerpo.access_token);
+        } else if (appParaElToken) {
+          // (19/11/2026) El de la app de otro BM: se guarda en esa app y va solo a los números que alcanza (los de su
+          // BM). No toca los permisos generales, que son de la principal.
+          guardarTokenDeLaApp(appParaElToken, cuerpo.access_token);
+          const alcanzados = await repartirTokenPermanente(cuerpo.access_token, true, secretoParaElToken);
+          olvidar("token-estado");
+          olvidar("suscribir");
+          return NextResponse.json({
+            ok: true,
+            negocio: negocio.name ?? negocio.id,
+            usuario: usuario.name ?? usuario.id,
+            app: deEseBm?.nombre ?? appParaElToken,
+            permisos: permisosLogrados.split(","),
+            numeros: alcanzados.map((c) => c.display_phone_number ?? c.phone_number_id),
+          });
         } else {
           // CADA NÚMERO CON EL TOKEN DE SU BM (21/10/2026): «para usar los números del otro
           // usuario… crear el token permanente, que no reemplazará al tuyo». Se le pregunta a

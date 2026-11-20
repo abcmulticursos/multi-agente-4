@@ -1,5 +1,5 @@
 import { deleteMetaRuntimeSettings, getMetaRuntimeSetting, setMetaRuntimeSettings } from "@/lib/db";
-import { getMetaAppId, getWebhookSecretCandidates } from "@/lib/meta/runtime-config";
+import { getMetaAppId, getMetaOAuthAppSecret, getWebhookSecretCandidates } from "@/lib/meta/runtime-config";
 
 /**
  * MULTI APP (15/11/2026). Él: «hazlo multi app y que funcione en el mismo chat que ya existe».
@@ -51,7 +51,32 @@ export function guardarOtraApp(app: OtraApp, secreto: string): void {
 
 export function quitarOtraApp(appId: string): void {
   setMetaRuntimeSettings({ [LISTA]: JSON.stringify(otrasApps().filter((a) => a.appId !== appId)) || "[]" });
-  deleteMetaRuntimeSettings([secretoDe(appId)]);
+  deleteMetaRuntimeSettings([secretoDe(appId), tokenDe(appId)]);
+}
+
+/**
+ * EL PERMISO PERMANENTE DE CADA APP (19/11/2026). Él: números en el BM B y en el BM C, cada uno con la app de su BM y
+ * sin cruces. Meta conecta una cuenta de WhatsApp a la app DUEÑA del permiso con que se pide; el del inicio de sesión
+ * es de la app principal, así que para conectar un número de B a la app de B hace falta un permiso DE la app de B: un
+ * token de usuario del sistema del BM B creado para esa app (asistente → 🔐 Token permanente, o pegado). Se guarda
+ * aquí, cifrado, para poder conectar sus números aunque todavía no estén en Meta Connect.
+ */
+const tokenDe = (appId: string) => `token_de_app__${appId}`;
+export function tokenDeLaApp(appId: string): string | null {
+  return getMetaRuntimeSetting(tokenDe(appId))?.trim() || null;
+}
+export function guardarTokenDeLaApp(appId: string, token: string): void {
+  setMetaRuntimeSettings({ [tokenDe(appId)]: token });
+}
+/** Los permisos de todas las otras apps que ya lo tienen. */
+export function tokensDeLasApps(): string[] {
+  return otrasApps()
+    .map((a) => tokenDeLaApp(a.appId))
+    .filter((t): t is string => !!t);
+}
+/** La clave secreta de una de nuestras apps (la principal o una otra). */
+export function secretoDeLaApp(appId: string): string | null {
+  return appId === getMetaAppId() ? getMetaOAuthAppSecret() : secretoDeOtraApp(appId);
 }
 
 /** Los ids de TODAS nuestras apps: la principal y las otras. */

@@ -9,6 +9,7 @@ import {
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
 import { fetchMeta } from "@/lib/meta/freno";
+import { tokensDeLasApps } from "@/lib/meta/apps-de-meta";
 
 /**
  * CADA NÚMERO CON EL TOKEN PERMANENTE DE SU BM (21/10/2026).
@@ -19,8 +20,10 @@ import { fetchMeta } from "@/lib/meta/freno";
  * ese token, por los números de cada cuenta de WhatsApp Business, y se le pone solo a los que
  * alcanza. El de otro BM no pisa el tuyo.
  */
-export async function numerosQueAlcanza(token: string): Promise<MetaWhatsAppConnectionRow[]> {
-  const secreto = getMetaOAuthAppSecret();
+export async function numerosQueAlcanza(token: string, secretoDeSuApp?: string | null): Promise<MetaWhatsAppConnectionRow[]> {
+  // (19/11/2026) La prueba del secreto va con la clave de la app DUEÑA del token: el de otra app (`tokenDeLaApp`) se
+  // firma con la suya, o Meta lo rechaza.
+  const secreto = secretoDeSuApp === undefined ? getMetaOAuthAppSecret() : secretoDeSuApp;
   const conexiones = listMetaWhatsAppConnections();
   const porCuenta = new Map<string, Promise<string[]>>();
   for (const c of conexiones) {
@@ -51,8 +54,8 @@ async function idsDeLaCuenta(wabaId: string, token: string, secreto: string | nu
 }
 
 /** Le pone `token` a los números que alcanza y que todavía no tienen uno permanente. */
-export async function repartirTokenPermanente(token: string, tambienLosQueYaTienen = false) {
-  const alcanzados = await numerosQueAlcanza(token);
+export async function repartirTokenPermanente(token: string, tambienLosQueYaTienen = false, secretoDeSuApp?: string | null) {
+  const alcanzados = await numerosQueAlcanza(token, secretoDeSuApp);
   for (const c of alcanzados) {
     if (tambienLosQueYaTienen || c.token_permanente !== 1) ponerTokenPermanenteAlNumero(c.phone_number_id, token);
   }
@@ -76,6 +79,8 @@ export function tokensPermanentes(): string[] {
     ...listMetaWhatsAppConnections()
       .filter((c) => c.token_permanente === 1)
       .map((c) => c.access_token),
+    // (19/11/2026) Y el de cada otra app (`tokenDeLaApp`).
+    ...tokensDeLasApps(),
   ];
   return [...new Set(todos.filter((t): t is string => !!t))];
 }

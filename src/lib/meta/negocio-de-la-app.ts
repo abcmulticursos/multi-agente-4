@@ -44,6 +44,35 @@ export function negociosDeLasApps(): NegociosDeLasApps | null {
   };
 }
 
+/**
+ * LA APP DE UN NEGOCIO (19/11/2026): la nuestra cuyo negocio dueño es ése (la principal o una otra). Con ella se
+ * crea el permiso permanente de ese BM y se conectan sus números, sin cruzarlos con la app de otro negocio.
+ */
+export function appDelNegocio(businessId: string | null | undefined): { appId: string; nombre: string | null; principal: boolean } | null {
+  const id = String(businessId ?? "").trim();
+  if (!id) return null;
+  const principal = negocioDeLaPrincipal();
+  const appId = getMetaAppId();
+  if (appId && principal?.id === id) return { appId, nombre: null, principal: true };
+  const otra = otrasApps().find((a) => a.negocioId === id);
+  return otra ? { appId: otra.appId, nombre: otra.nombre, principal: false } : null;
+}
+
+/**
+ * ¿LO PUEDE USAR UNO DE LOS NEGOCIOS DE NUESTRAS APPS? (19/11/2026) Para páginas y píxeles: los suyos Y los que otro BM
+ * les comparte. Su plan: la página y el píxel viven en el BM A y se comparten con B y C, que tienen los números y sus
+ * apps. Contando solo al dueño, la página de A no se ofrecía y las tiendas la soltaban solas. Los NÚMEROS no pasan por
+ * aquí: un número va solo con la app de su propio negocio (`esDeLaApp`), o se cruzan.
+ */
+export function loPuedeUsarLaApp(
+  negocios: NegociosDeLasApps | null,
+  businessId: string | null | undefined,
+  accesoDe: Array<{ id?: string | null }> | null | undefined
+): boolean {
+  if (esDeLaApp(negocios, businessId)) return true;
+  return (accesoDe ?? []).some((c) => !!c?.id && negocios!.ids.includes(String(c.id)));
+}
+
 /** ¿Es de uno de los negocios de nuestras apps? Sin saberlo, todo vale (ver arriba). */
 export function esDeLaApp(negocios: NegociosDeLasApps | null, businessId: string | null | undefined): boolean {
   if (!negocios) return true;

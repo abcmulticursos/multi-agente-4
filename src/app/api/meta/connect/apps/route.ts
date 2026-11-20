@@ -3,7 +3,7 @@ import { deleteMetaRuntimeSettings, getMetaRuntimeSetting, listMetaWhatsAppConne
 import { appsSuscritas, desenchufar, loQueNoSePudo, permisosPorApp, todosLosPermisos } from "@/lib/meta/desenchufar";
 import { getPublicOrigin, graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getTokenDeLaConexion, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
-import { guardarOtraApp, otrasApps, quitarOtraApp, secretoDeOtraApp } from "@/lib/meta/apps-de-meta";
+import { guardarOtraApp, otrasApps, quitarOtraApp, secretoDeOtraApp, tokenDeLaApp } from "@/lib/meta/apps-de-meta";
 import { fetchMeta } from "@/lib/meta/freno";
 import { olvidar } from "@/lib/meta/recuerdo";
 import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
@@ -29,7 +29,9 @@ export async function GET() {
           negocioId: suNegocio?.id ?? null,
         }
       : null,
-    otras: otrasApps(),
+    // (19/11/2026) `conToken`: si ya tiene su permiso permanente (`tokenDeLaApp`), sin el cual sus números no se pueden
+    // conectar a ella.
+    otras: otrasApps().map((a) => ({ ...a, conToken: !!tokenDeLaApp(a.appId) })),
   });
 }
 

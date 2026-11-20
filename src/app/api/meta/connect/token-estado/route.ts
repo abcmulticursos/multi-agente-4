@@ -3,6 +3,7 @@ import { getMetaRuntimeSetting, listMetaWhatsAppConnections } from "@/lib/db";
 import { loadWorkflowConfig, numerosDeLaTienda } from "@/lib/workflow/config";
 import { graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getMetaOAuthAppSecret, getTokenDeLaConexion } from "@/lib/meta/runtime-config";
+import { appDelNegocio } from "@/lib/meta/negocio-de-la-app";
 import { permisosConocidos, repartirTokenPermanente } from "@/lib/meta/token-por-numero";
 import { MEDIA_HORA, MINUTOS, olvidar, recordar } from "@/lib/meta/recuerdo";
 import { fetchMeta, metaFrenada } from "@/lib/meta/freno";
@@ -49,8 +50,11 @@ async function leerBms(): Promise<Array<{ id: string; nombre: string; token: str
 }
 
 /** UN BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? 3 preguntas, a la vez. */
-async function revisarBm(b: { id: string; token: string }): Promise<{ conLaApp: boolean; usuarioAdmin: boolean }> {
-  const appId = getMetaAppId();
+async function revisarBm(b: { id: string; token: string }): Promise<{ conLaApp: boolean; usuarioAdmin: boolean; appId: string | null; appNombre: string | null }> {
+  // (19/11/2026) La app de ESE BM si el bot tiene una (el token se crea para ella: ver `token-permanente`); si no, la
+  // principal, como siempre.
+  const suya = appDelNegocio(b.id);
+  const appId = suya?.appId ?? getMetaAppId();
   const [propias, deClientes, usuarios] = await Promise.all([
     graph<{ data?: Array<{ id?: string }> }>(`${b.id}/owned_apps`, b.token, { fields: "id", limit: "200" }),
     graph<{ data?: Array<{ id?: string }> }>(`${b.id}/client_apps`, b.token, { fields: "id", limit: "200" }),
@@ -59,6 +63,8 @@ async function revisarBm(b: { id: string; token: string }): Promise<{ conLaApp: 
   return {
     conLaApp: !!appId && [...(propias?.data ?? []), ...(deClientes?.data ?? [])].some((x) => x.id === appId),
     usuarioAdmin: (usuarios?.data ?? []).some((u) => String(u.role ?? "").toUpperCase() === "ADMIN"),
+    appId,
+    appNombre: suya && !suya.principal ? suya.nombre : null,
   };
 }
 
@@ -112,12 +118,12 @@ export async function GET(req: Request) {
   // Por cada BM: ¿tiene la app? ¿tiene un usuario del sistema administrador? Todos a la vez.
   // La lista de BM (recordada media hora) y, solo del BM pedido con «?bm=», sus dos requisitos.
   // «?fresco=1» («Ya lo hice, revisar de nuevo») relee ese BM, porque él acaba de cambiar algo.
-  let negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean }> = [];
+  let negocios: Array<{ id: string; nombre: string; conLaApp?: boolean; usuarioAdmin?: boolean; appId?: string | null; appNombre?: string | null }> = [];
   if (!ligero) {
     const p = new URL(req.url).searchParams;
     const bms = await recordar("token-estado:bms", MEDIA_HORA, leerBms);
     const pedido = bms.find((b) => b.id === p.get("bm"));
-    let revisado: { conLaApp: boolean; usuarioAdmin: boolean } | null = null;
+    let revisado: Awaited<ReturnType<typeof revisarBm>> | null = null;
     if (pedido) {
       if (p.get("fresco") === "1") olvidar(`token-estado:bm:${pedido.id}`);
       revisado = await recordar(`token-estado:bm:${pedido.id}`, MEDIA_HORA, () => revisarBm(pedido));

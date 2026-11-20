@@ -6,7 +6,7 @@ import {
 } from "@/lib/db";
 import { getCapiPixelId } from "@/lib/meta/runtime-config";
 import type { MetaPixelOption } from "@/lib/meta/connect";
-import { esDeLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
+import { loPuedeUsarLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -32,7 +32,8 @@ export async function GET() {
   return NextResponse.json(
     {
       // (15/11/2026) Solo los del negocio de la app (`negociosDeLasApps`).
-      pixels: pixelsDetectados().filter((p) => esDeLaApp(negociosDeLasApps(), p.businessId)),
+      // (19/11/2026) Y los COMPARTIDOS con el negocio de una app (`loPuedeUsarLaApp`).
+      pixels: pixelsDetectados().filter((p) => loPuedeUsarLaApp(negociosDeLasApps(), p.businessId, p.accesoDe)),
       // El elegido a mano, y el que de verdad va a usar el motor — que puede
       // venir de una variable de entorno si nadie eligió nada.
       elegido,

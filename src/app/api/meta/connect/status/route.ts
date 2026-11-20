@@ -14,7 +14,7 @@ import {
   getPublicOrigin,
 } from "@/lib/meta/connect";
 import { getWebhookVerifyToken } from "@/lib/meta/runtime-config";
-import { esDeLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
+import { esDeLaApp, loPuedeUsarLaApp, negociosDeLasApps } from "@/lib/meta/negocio-de-la-app";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,8 +46,10 @@ export async function GET(req: NextRequest) {
   });
   // (15/11/2026) Solo lo del negocio de la app: lo de otros no recibe mensajes (`negociosDeLasApps`).
   const negocio = negociosDeLasApps();
-  const connections = pageRows.filter((row) => row.selected === 1 && esDeLaApp(negocio, row.business_id)).map(serializePage);
-  const detectedPages = pageRows.filter((row) => row.selected !== 1 && esDeLaApp(negocio, row.business_id)).map(serializePage);
+  // (19/11/2026) Las páginas, también las COMPARTIDAS con el negocio de una app (`loPuedeUsarLaApp`).
+  const usable = (row: (typeof pageRows)[number]) => loPuedeUsarLaApp(negocio, row.business_id, leerListaDeAcceso(row.compartido_con));
+  const connections = pageRows.filter((row) => row.selected === 1 && usable(row)).map(serializePage);
+  const detectedPages = pageRows.filter((row) => row.selected !== 1 && usable(row)).map(serializePage);
   const whatsAppConnections = listMetaWhatsAppConnections()
     .filter((row) => {
       const name = row.verified_name?.trim().toLowerCase() ?? "";

@@ -2,8 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   getMetaWhatsAppConnection,
   listMetaWhatsAppConnections,
+  ponerTokenPermanenteAlNumero,
   saveMetaWhatsAppConnection,
 } from "@/lib/db";
+import { tokenDeLaApp } from "@/lib/meta/apps-de-meta";
+import { appDelNegocio } from "@/lib/meta/negocio-de-la-app";
 import { cruceDeNegocios, graphVersion, subscribeWhatsAppToWebhooks } from "@/lib/meta/connect";
 import { getMetaAppId } from "@/lib/meta/runtime-config";
 import { cuandoSeLeyo, MEDIA_HORA, olvidar, recordar } from "@/lib/meta/recuerdo";
@@ -295,9 +298,29 @@ export async function POST(req: NextRequest) {
     // SIN CRUCES (19/11/2026): antes de registrar o traer, que el número sea del mismo negocio que la app del permiso.
     // Ver `cruceDeNegocios` en connect.ts. Si no se puede saber, sigue como siempre.
     const wabaDelNumero = cuentaDe.get(id);
+    // (19/11/2026) CON LA APP DE SU PROPIO BM. El permiso del inicio de sesión es de la app principal; si el número es
+    // de otro BM, se usa el de la app de ESE BM (`tokenDeLaApp`): así queda conectado a su app y no a la principal.
+    let permisoDeSuApp = token;
     if (wabaDelNumero) {
       const cruce = await cruceDeNegocios(wabaDelNumero, token);
-      if (cruce) return NextResponse.json({ ok: false, error: cruce });
+      if (cruce) {
+        const negocio = negocioDeLaCuenta.get(wabaDelNumero) ?? null;
+        const suApp = appDelNegocio(negocio?.id);
+        const suyo = suApp ? tokenDeLaApp(suApp.appId) : null;
+        if (!suApp)
+          return NextResponse.json({
+            ok: false,
+            error: `${cruce}\n\nEl bot todavía no tiene una app de «${negocio?.nombre ?? "ese BM"}»: agrégala en «Tus apps» → «Conectar otra app».`,
+          });
+        if (!suyo)
+          return NextResponse.json({
+            ok: false,
+            error: `Este número es de «${negocio?.nombre ?? "otro BM"}» y se conecta con su app «${suApp.nombre ?? suApp.appId}». Primero crea el token de esa app: Abrir asistente → 🔐 Token permanente → elige «${negocio?.nombre ?? "ese BM"}».`,
+          });
+        const otraVez = await cruceDeNegocios(wabaDelNumero, suyo);
+        if (otraVez) return NextResponse.json({ ok: false, error: otraVez });
+        permisoDeSuApp = suyo;
+      }
     }
     // «traer»: un número que YA está activo en Meta y todavía no está en Meta Connect.
     if (accion === "activar") {
@@ -313,20 +336,24 @@ export async function POST(req: NextRequest) {
     const wabaId = cuentaDe.get(id) ?? "";
     const negocio = wabaId ? negocioDeLaCuenta.get(wabaId) ?? null : null;
     if (wabaId) {
-      await subscribeWhatsAppToWebhooks({ wabaId, accessToken: token });
+      // (19/11/2026) Si Meta no lo suscribe, no se da por conectado: se diría «listo» y no le llegaría ningún mensaje.
+      const suscrito = await subscribeWhatsAppToWebhooks({ wabaId, accessToken: permisoDeSuApp });
+      if (!suscrito.ok) return NextResponse.json({ ok: false, error: suscrito.message || "Meta no lo conectó a la app." });
       saveMetaWhatsAppConnection({
         phoneNumberId: id,
         wabaId,
         displayPhoneNumber: datos.display_phone_number ?? null,
         verifiedName: datos.verified_name ?? null,
         profilePictureUrl: null,
-        accessToken: token,
+        accessToken: permisoDeSuApp,
         active: false,
         businessId: negocio?.id ?? null,
         businessName: negocio?.nombre ?? null,
         // (Uno que ya estaba guardado conserva con quién está compartido.)
         compartidoCon: getMetaWhatsAppConnection(id) ? null : negocio ? [negocio] : null,
       });
+      // El de su app es permanente: que un nuevo inicio de sesión no lo cambie por el de la principal.
+      if (permisoDeSuApp !== token) ponerTokenPermanenteAlNumero(id, permisoDeSuApp);
       olvidarElBmDe(id);
       // Un número nuevo en el CRM: el paso del token y «qué app lo atiende» deben verlo.
       olvidar("token-estado");

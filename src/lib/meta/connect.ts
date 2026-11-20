@@ -1021,7 +1021,8 @@ export async function cruceDeNegocios(wabaId: string, accessToken: string): Prom
     return (
       `No lo conecto: este número es del negocio «${waba.owner_business_info?.name ?? negocioDelNumero}» y la app ` +
       `«${app.name ?? app.id}» es del negocio «${deLaApp.nombre}». Conectarlo uniría los dos negocios ante Meta. ` +
-      `Conéctalo con la app de su propio negocio (si no tiene, crea una y agrégala en Meta Connect).`
+      `Conéctalo con la app de su propio negocio: si no tiene, crea una y agrégala en «Tus apps»; después crea su token ` +
+      `(Abrir asistente → 🔐 Token permanente → ese BM) y vuelve a conectarlo.`
     );
   } catch {
     return null;
