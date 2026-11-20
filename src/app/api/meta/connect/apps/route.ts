@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { deleteMetaRuntimeSettings, getMetaRuntimeSetting, setMetaRuntimeSettings } from "@/lib/db";
+import { deleteMetaRuntimeSettings, getMetaRuntimeSetting, listMetaWhatsAppConnections, setMetaRuntimeSettings } from "@/lib/db";
+import { appsSuscritas, desenchufar, loQueNoSePudo, permisosPorApp, todosLosPermisos } from "@/lib/meta/desenchufar";
 import { getPublicOrigin, graphVersion } from "@/lib/meta/connect";
 import { getMetaAppId, getTokenDeLaConexion, getWebhookVerifyToken } from "@/lib/meta/runtime-config";
 import { guardarOtraApp, otrasApps, quitarOtraApp, secretoDeOtraApp } from "@/lib/meta/apps-de-meta";
@@ -124,6 +125,32 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const appId = req.nextUrl.searchParams.get("appId")?.trim() ?? "";
   if (!appId) return NextResponse.json({ ok: false, error: "Falta el ID de la app." }, { status: 400 });
+  if (appId === getMetaAppId() && !otrasApps().some((a) => secretoDeOtraApp(a.appId))) {
+    return NextResponse.json({
+      ok: false,
+      error: "Es tu única app. Para quitarla, usa «Cerrar sesión de Meta» en el asistente (deja Meta Connect vacío).",
+    });
+  }
+  // (19/11/2026) DESCONECTAR DE VERDAD: primero se quita en Meta de cada cuenta de WhatsApp a la que está suscrita
+  // (`desenchufar.ts`); antes solo se olvidaba en el bot y en Meta seguía conectada a sus números. Si Meta no deja, no
+  // se olvida a medias: se dice qué falta. `forzar=1` = él decidió olvidarla igual, sabiendo lo que queda en Meta.
+  if (req.nextUrl.searchParams.get("forzar") !== "1") {
+    const permisos = todosLosPermisos();
+    const porApp = await permisosPorApp(permisos);
+    const pares: Array<{ wabaId: string; appId: string; nombreApp: string | null }> = [];
+    for (const w of [...new Set(listMetaWhatsAppConnections().map((c) => c.waba_id))]) {
+      const suscrita = ((await appsSuscritas(w, permisos)) ?? []).find((a) => a.id === appId);
+      if (suscrita) pares.push({ wabaId: w, appId, nombreApp: suscrita.nombre });
+    }
+    const hechos = await desenchufar(pares, porApp);
+    if (hechos.some((h) => !h.ok)) {
+      return NextResponse.json({
+        ok: false,
+        enMeta: true,
+        error: `No pude desconectarla en Meta de todo:\n${loQueNoSePudo(hechos)}\n\nPara quitarla del todo: developers.facebook.com → esa app → WhatsApp → Configuración, o borra la app.`,
+      });
+    }
+  }
   // LA PRINCIPAL (15/11/2026): otra de las apps pasa a ser la principal. Si es la única, no se puede desde aquí.
   if (appId === getMetaAppId()) {
     const siguiente = otrasApps().find((a) => secretoDeOtraApp(a.appId));

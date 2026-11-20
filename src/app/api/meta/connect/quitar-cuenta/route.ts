@@ -7,6 +7,8 @@ import {
   quitarCuentaDeFacebookDeLaBase,
 } from "@/lib/db";
 import { actualizarCuentas } from "@/lib/meta/actualizar-cuentas";
+import { idsDeNuestrasApps } from "@/lib/meta/apps-de-meta";
+import { desenchufarCuentasQueSeDejan, loQueNoSePudo } from "@/lib/meta/desenchufar";
 import { cuentasDeFacebookConectadas, quitarCuentaDeLaLista } from "@/lib/meta/cuentas-de-facebook";
 import { olvidarPaginasSinAcceso } from "@/lib/meta/procesar-permiso";
 import { olvidar } from "@/lib/meta/recuerdo";
@@ -28,7 +30,8 @@ export const runtime = "nodejs";
  *      píxeles— se enseña, con las tiendas que los usan. Con `confirmar`, se borra eso y la cuenta de la lista.
  *
  * La cuenta principal no se quita aquí: es la que mide las compras. Primero se entra con otra como principal.
- * No toca nada en Meta (la cuenta, sus números y sus páginas siguen allá), ni el contenido, ni los chats.
+ * (19/11/2026) En Meta solo se desconectan las apps del bot de las cuentas de WhatsApp de esos números; la cuenta, sus
+ * números y sus páginas siguen allá. No toca el contenido ni los chats.
  */
 export async function POST(req: NextRequest) {
   const cuerpo = (await req.json().catch(() => null)) as { id?: unknown; nombre?: unknown; confirmar?: unknown } | null;
@@ -113,6 +116,15 @@ export async function POST(req: NextRequest) {
   };
   if (!confirmar) return NextResponse.json({ ok: true, vistaPrevia: true, ...resumen });
 
+  // (19/11/2026) Antes de borrar, las apps del bot se desconectan EN META de las cuentas de WhatsApp de esos números
+  // (`desenchufar.ts`), mientras todavía están sus permisos. Antes solo se borraban del bot. Si Meta no deja, no se
+  // quita a medias.
+  if ((cuerpo as { forzar?: unknown } | null)?.forzar !== true) {
+    const hechos = await desenchufarCuentasQueSeDejan([...idsNumeros], idsDeNuestrasApps());
+    if (hechos.some((h) => !h.ok)) {
+      return NextResponse.json({ ok: false, enMeta: true, error: `No pude desconectar sus números en Meta:\n${loQueNoSePudo(hechos)}\n\nNo quité la cuenta.` });
+    }
+  }
   quitarCuentaDeFacebookDeLaBase({ numeros: [...idsNumeros], paginas: [...idsPaginas], negocios: [...susNegocios], pixeles: [...idsPixeles] });
   quitarCuentaDeLaLista(cuenta.id, cuenta.nombre);
   olvidarPaginasSinAcceso(cuenta.id ?? cuenta.nombre ?? "");

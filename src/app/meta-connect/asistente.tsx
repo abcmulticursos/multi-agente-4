@@ -1886,9 +1886,13 @@ function PasoCerrarSesion({ volver }: { volver: () => void }) {
     setOcupado(true);
     setError(null);
     try {
-      const d = await (
-        await fetch("/api/meta/connect/cerrar-sesion", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clave, palabra }) })
-      ).json();
+      const pedir = async (forzar: boolean) =>
+        (await (
+          await fetch("/api/meta/connect/cerrar-sesion", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clave, palabra, forzar }) })
+        ).json()) as { ok?: boolean; error?: string; enMeta?: boolean };
+      let d = await pedir(false);
+      // (19/11/2026) Meta no dejó desconectar las apps de todo: él decide si cierra igual solo en el bot.
+      if (!d.ok && d.enMeta && window.confirm(`${d.error ?? ""}\n\n¿Cerrar igual SOLO en el bot? En Meta quedará conectado lo de arriba.`)) d = await pedir(true);
       if (!d.ok) setError(d.error ?? "No se pudo cerrar la sesión.");
       else {
         try {

@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { checkPassword } from "@/lib/auth";
-import { vaciarMetaConnect } from "@/lib/db";
+import { listMetaWhatsAppConnections, vaciarMetaConnect } from "@/lib/db";
+import { idsDeNuestrasApps } from "@/lib/meta/apps-de-meta";
+import { desenchufarCuentasQueSeDejan, loQueNoSePudo } from "@/lib/meta/desenchufar";
 import { olvidar } from "@/lib/meta/recuerdo";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +20,17 @@ export async function POST(req: NextRequest) {
   const palabra = typeof cuerpo?.palabra === "string" ? cuerpo.palabra.trim().toUpperCase() : "";
   if (palabra !== "CERRAR") return NextResponse.json({ ok: false, error: "Escribe CERRAR para confirmar." });
   if (!checkPassword(clave)) return NextResponse.json({ ok: false, error: "La contraseña del CRM no es correcta." });
+  // (19/11/2026) Antes de vaciar, las apps del bot se desconectan EN META de todas sus cuentas de WhatsApp
+  // (`desenchufar.ts`): vaciar solo el bot las dejaba conectadas allá. Si Meta no deja, no se vacía a medias.
+  if (cuerpo && (cuerpo as { forzar?: unknown }).forzar !== true) {
+    const hechos = await desenchufarCuentasQueSeDejan(
+      listMetaWhatsAppConnections().map((c) => c.phone_number_id),
+      idsDeNuestrasApps()
+    );
+    if (hechos.some((h) => !h.ok)) {
+      return NextResponse.json({ ok: false, enMeta: true, error: `No pude desconectar en Meta:\n${loQueNoSePudo(hechos)}\n\nNo cerré la sesión.` });
+    }
+  }
   vaciarMetaConnect();
   olvidar();
   console.log("[meta-connect] sesión de Meta cerrada: Meta Connect quedó vacío");

@@ -5,6 +5,7 @@ import { fetchMeta } from "@/lib/meta/freno";
 import { otrasApps } from "@/lib/meta/apps-de-meta";
 import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
 import { numerosDeLaApp } from "@/lib/meta/numeros-de-la-app";
+import { appsSuscritas as appsSuscritasEnMeta, desenchufar, loQueNoSePudo, negocioDeUnaApp, todosLosPermisos } from "@/lib/meta/desenchufar";
 import { permisosConocidos, tokensPermanentes } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
@@ -85,7 +86,8 @@ function negociosDeLasAppsDelBot(): Map<string, { id: string | null; nombre: str
  * número tiene que seguir conectado a la app de SU negocio (si no, dejaría de recibir mensajes).
  */
 export async function POST(req: Request) {
-  const cuerpo = (await req.json().catch(() => null)) as { phoneNumberId?: unknown; appId?: unknown } | null;
+  const cuerpo = (await req.json().catch(() => null)) as { phoneNumberId?: unknown; appId?: unknown; limpiar?: unknown; confirmar?: unknown } | null;
+  if (cuerpo?.limpiar === true) return limpiarCruces(cuerpo.confirmar === true);
   const phoneNumberId = String(cuerpo?.phoneNumberId ?? "").trim();
   const appId = String(cuerpo?.appId ?? "").trim();
   const c = listMetaWhatsAppConnections().find((x) => x.phone_number_id === phoneNumberId);
@@ -121,6 +123,64 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: false,
     error: "No tengo un permiso de esa app para quitarla. Hazlo en developers.facebook.com: abre esa app → WhatsApp → Configuración y quita esta cuenta de WhatsApp.",
+  });
+}
+
+/**
+ * 🧹 QUITAR LOS CRUCES QUE YA QUEDARON EN META (19/11/2026). Él: «¿hiciste una desconexión cosmética?». Lo que se
+ * desconectó antes de `desenchufar.ts` siguió conectado en Meta: la app de un negocio suscrita a la cuenta de WhatsApp
+ * de OTRO negocio, lo que los une ante Meta. Recorre TODAS las cuentas de WhatsApp guardadas (también las que ya no
+ * se muestran) y quita cada app cuyo negocio no es el de esa cuenta. Sin `confirmar` solo dice qué haría, y qué
+ * números quedarían sin ninguna app (dejan de recibir mensajes en cualquier bot).
+ */
+async function limpiarCruces(confirmar: boolean) {
+  const todas = listMetaWhatsAppConnections();
+  const permisos = todosLosPermisos();
+  const negocioDeApp = negociosDeLasAppsDelBot();
+  const otroNegocio = new Map<string, { id: string; nombre: string | null } | null>();
+  const pares: Array<{ wabaId: string; appId: string; nombreApp: string | null; negocioApp: string | null }> = [];
+  const sinApp: string[] = [];
+  const sinLeer: string[] = [];
+  for (const wabaId of [...new Set(todas.map((c) => c.waba_id))]) {
+    const susNumeros = todas.filter((c) => c.waba_id === wabaId);
+    const negocio = susNumeros.find((c) => c.business_id)?.business_id ?? null;
+    const nombres = susNumeros.map((c) => c.display_phone_number ?? c.phone_number_id).join(", ");
+    if (!negocio) continue;
+    const suscritas = await appsSuscritasEnMeta(wabaId, permisos);
+    if (!suscritas) {
+      sinLeer.push(nombres);
+      continue;
+    }
+    let quedan = suscritas.length;
+    for (const a of suscritas) {
+      let dueño = negocioDeApp.get(a.id)?.id ? { id: negocioDeApp.get(a.id)!.id as string, nombre: negocioDeApp.get(a.id)!.nombre } : null;
+      if (!dueño) {
+        if (!otroNegocio.has(a.id)) otroNegocio.set(a.id, await negocioDeUnaApp(a.id));
+        dueño = otroNegocio.get(a.id) ?? null;
+      }
+      // Sin saber de qué negocio es la app, no se toca.
+      if (!dueño || dueño.id === negocio) continue;
+      pares.push({ wabaId, appId: a.id, nombreApp: a.nombre, negocioApp: dueño.nombre });
+      quedan--;
+    }
+    if (quedan === 0 && suscritas.length > 0) sinApp.push(nombres);
+  }
+  const plan = pares.map((p) => {
+    const nums = todas.filter((c) => c.waba_id === p.wabaId);
+    return {
+      app: p.nombreApp ?? p.appId,
+      deNegocio: p.negocioApp,
+      numeros: nums.map((c) => c.display_phone_number ?? c.phone_number_id),
+      negocio: nums.find((c) => c.business_name)?.business_name ?? null,
+    };
+  });
+  if (!confirmar) return NextResponse.json({ ok: true, vistaPrevia: true, plan, sinApp, sinLeer });
+  const hechos = await desenchufar(pares);
+  return NextResponse.json({
+    ok: hechos.every((h) => h.ok),
+    hechos: hechos.length,
+    quitados: hechos.filter((h) => h.ok).length,
+    error: hechos.some((h) => !h.ok) ? loQueNoSePudo(hechos) : undefined,
   });
 }
 

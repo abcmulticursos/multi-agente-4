@@ -855,6 +855,23 @@ function MedicionPorCuenta() {
  * conectar otra cuenta, el pop up del negocio).
  */
 /**
+ * DESCONECTAR UNA APP, TAMBIÉN EN META (19/11/2026). El servidor la desconecta en Meta de tus números antes de olvidarla;
+ * si Meta no deja (sin permiso de esa app), él decide si la olvida igual solo en el bot (`forzar=1`).
+ */
+async function quitarAppDelBot(appId: string): Promise<{ ok?: boolean; error?: string } | null> {
+  const pedir = async (forzar: boolean) =>
+    (await (await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(appId)}${forzar ? "&forzar=1" : ""}`, { method: "DELETE" }))
+      .json()
+      .catch(() => null)) as { ok?: boolean; error?: string; enMeta?: boolean } | null;
+  const d = await pedir(false);
+  if (!d?.ok && d?.enMeta) {
+    if (!window.confirm(`${d.error ?? ""}\n\n¿Desconectarla igual SOLO del bot? En Meta quedará conectada a lo de arriba.`)) return { ok: false, error: "No se desconectó." };
+    return pedir(true);
+  }
+  return d;
+}
+
+/**
  * 🩺 ¿POR QUÉ ESTÁ BLOQUEADO? (19/11/2026). Él: «lo que quiero saber es por qué se me ha bloqueado». Le pregunta a Meta
  * el «estado de salud» de cada número guardado (`/api/meta/connect/salud`): si puede enviar y, si no, qué lo bloquea y
  * por qué, con la solución que sugiere Meta. Solo lee.
@@ -940,6 +957,40 @@ function SaludDeLosNumeros() {
       setQuitandoApp(null);
     }
   };
+  // 🧹 QUITAR LOS CRUCES QUE YA QUEDARON EN META (19/11/2026). Primero dice qué quitaría; con su «Aceptar», lo quita.
+  const [limpiando, setLimpiando] = useState(false);
+  const limpiarCruces = async () => {
+    setLimpiando(true);
+    try {
+      const pedir = async (confirmar: boolean) =>
+        (await (
+          await fetch("/api/meta/connect/salud", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ limpiar: true, confirmar }) })
+        ).json()) as {
+          ok?: boolean;
+          plan?: Array<{ app: string; deNegocio: string | null; numeros: string[]; negocio: string | null }>;
+          sinApp?: string[];
+          sinLeer?: string[];
+          quitados?: number;
+          error?: string;
+        };
+      const v = await pedir(false);
+      const sinLeer = v.sinLeer?.length ? `\n\nNo pude leer en Meta: ${v.sinLeer.join(" · ")}` : "";
+      if (!v.plan?.length) {
+        window.alert(`✓ No hay cruces: cada número está solo con apps de su propio negocio.${sinLeer}`);
+        return;
+      }
+      const lista = v.plan.map((p) => `• Quitar «${p.app}»${p.deNegocio ? ` (de ${p.deNegocio})` : ""} de ${p.numeros.join(", ")}${p.negocio ? ` (${p.negocio})` : ""}`).join("\n");
+      const sinApp = v.sinApp?.length ? `\n\n⚠️ Quedan SIN NINGUNA APP (dejan de recibir mensajes en cualquier bot): ${v.sinApp.join(" · ")}` : "";
+      if (!window.confirm(`Esto se quita en Meta:\n\n${lista}${sinApp}${sinLeer}\n\n¿Lo quito?`)) return;
+      const d = await pedir(true);
+      window.alert(d.ok ? `✓ Listo: ${d.quitados ?? 0} conexión(es) quitada(s) en Meta.` : `Quité ${d.quitados ?? 0}. No pude:\n${d.error ?? ""}\n\nEsas se quitan en developers.facebook.com → la app → WhatsApp → Configuración, o borrando la app.`);
+      await consultar();
+    } catch {
+      window.alert("No pude hablar con el servidor. Vuelve a intentarlo.");
+    } finally {
+      setLimpiando(false);
+    }
+  };
   const [negocioAbierto, setNegocioAbierto] = useState<string | null>(null);
   useEffect(() => {
     if (!negocioAbierto || abierto) return;
@@ -988,16 +1039,27 @@ function SaludDeLosNumeros() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-lg font-black tracking-tight">📊 Calidad de la cuenta</p>
-          <p className="text-sm text-tinta-suave">El estado de tus números de WhatsApp en Meta. Solo lee: no cambia nada.</p>
+          <p className="text-sm text-tinta-suave">El estado de los números de tu app en Meta.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => void consultar()}
-          disabled={cargando}
-          className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 disabled:cursor-wait disabled:opacity-70"
-        >
-          {cargando ? "Consultando a Meta…" : numeros ? "↻ Volver a consultar estado" : "Consultar estado"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void limpiarCruces()}
+            disabled={limpiando}
+            title="Quita en Meta las apps de un negocio que quedaron conectadas a números de otro negocio"
+            className="rounded-xl border border-borde bg-tarjeta px-4 py-2 text-sm font-bold text-tinta shadow-sm hover:bg-relleno disabled:cursor-wait disabled:opacity-70"
+          >
+            {limpiando ? "Revisando en Meta…" : "🧹 Quitar cruces en Meta"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void consultar()}
+            disabled={cargando}
+            className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-sky-700 disabled:cursor-wait disabled:opacity-70"
+          >
+            {cargando ? "Consultando a Meta…" : numeros ? "↻ Volver a consultar estado" : "Consultar estado"}
+          </button>
+        </div>
       </div>
       {fallo && <p className="mt-3 text-sm font-semibold text-rose-700">{fallo}</p>}
       {numeros && numeros.length === 0 && <p className="mt-3 text-sm text-tinta-suave">No hay números guardados en Meta Connect.</p>}
@@ -1276,11 +1338,10 @@ function AppsDelBot({ status }: { status: MetaStatus }) {
     // Su única app: como siempre, el asistente («Cerrar sesión de Meta»).
     if (principal && (datos?.otras.length ?? 0) === 0) return abrirAsistente("cerrar");
     const nombre = app.nombre ?? app.appId;
-    if (!window.confirm(`¿Desconectar la app «${nombre}»? Sus números dejarán de llegar a este bot.${principal ? " Otra de tus apps pasa a ser la principal." : ""}`)) return;
+    if (!window.confirm(`¿Desconectar la app «${nombre}»? Se desconecta también en Meta de tus números: dejan de recibir mensajes por esta app.${principal ? " Otra de tus apps pasa a ser la principal." : ""}`)) return;
     setQuitando(app.appId);
     try {
-      const r = await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(app.appId)}`, { method: "DELETE" });
-      const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      const d = await quitarAppDelBot(app.appId);
       if (!d?.ok) window.alert(d?.error ?? "No se pudo desconectar.");
       else window.location.reload();
     } finally {
@@ -1564,11 +1625,10 @@ function DiferenciacionPorNegocio() {
   }, []);
   async function desconectarApp(a: AppDelNegocio) {
     const aviso = a.principal
-      ? `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nEs la app principal: otra de tus apps pasa a ser la principal. Sus números dejan de recibir mensajes en este bot. En Meta no se toca nada.`
-      : `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nSus números dejan de recibir mensajes en este bot. En Meta no se toca nada.`;
+      ? `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nEs la app principal: otra de tus apps pasa a ser la principal. Se desconecta también en Meta de tus números: dejan de recibir mensajes por esta app.`
+      : `¿Desconectar «${a.nombre ?? a.negocio ?? a.appId}»?\n\nSe desconecta también en Meta de tus números: dejan de recibir mensajes por esta app.`;
     if (!window.confirm(aviso)) return;
-    const r = await fetch(`/api/meta/connect/apps?appId=${encodeURIComponent(a.appId)}`, { method: "DELETE" });
-    const d = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+    const d = await quitarAppDelBot(a.appId);
     if (!d?.ok) {
       window.alert(d?.error ?? "No se pudo desconectar.");
       return;
@@ -1705,12 +1765,17 @@ function DiferenciacionPorNegocio() {
   const pedirQuitar = async (id: string | null, nombre: string | null, confirmar: boolean) => {
     setQuitando((q) => ({ id, nombre, fase: confirmar ? "quitando" : "revisando", vista: q?.vista }));
     try {
-      const r = await fetch("/api/meta/connect/quitar-cuenta", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, nombre, confirmar }),
-      });
-      const d = (await r.json()) as VistaPreviaDeQuitar & { hecho?: boolean };
+      const pedir = async (forzar: boolean) =>
+        (await (
+          await fetch("/api/meta/connect/quitar-cuenta", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, nombre, confirmar, forzar }),
+          })
+        ).json()) as VistaPreviaDeQuitar & { hecho?: boolean; enMeta?: boolean };
+      let d = await pedir(false);
+      // (19/11/2026) Meta no dejó desconectar algo: él decide si la quita igual solo del bot.
+      if (!d.ok && d.enMeta && window.confirm(`${d.error ?? ""}\n\n¿Quitarla igual SOLO del bot? En Meta quedará conectado lo de arriba.`)) d = await pedir(true);
       if (d.ok && d.hecho) {
         try {
           window.sessionStorage.setItem("meta-connect-actualizado", JSON.stringify([`✓ ${d.cuenta ?? "La cuenta"} ya no está en Meta Connect.`]));
@@ -4161,17 +4226,26 @@ export default function MetaConnectPage() {
   }
 
   async function removeConnection(type: "page" | "whatsapp", id: string, label: string) {
-    if (!window.confirm(`Deseas desconectar ${label} de este agente? No se eliminara ni desconectara en Meta.`)) {
+    const aviso =
+      type === "whatsapp"
+        ? `¿Desconectar ${label} de este bot? También se desconecta en Meta (si su cuenta de WhatsApp no tiene otro número tuyo en el bot): deja de recibir mensajes aquí.`
+        : `Deseas desconectar ${label} de este agente? No se eliminara ni desconectara en Meta.`;
+    if (!window.confirm(aviso)) {
       return;
     }
     setRemovingConnectionId(`${type}:${id}`);
     try {
-      const res = await fetch("/api/meta/connect/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, id }),
-      });
-      const result = (await res.json()) as { ok?: boolean; error?: string };
+      const pedir = async (forzar: boolean) =>
+        (await (
+          await fetch("/api/meta/connect/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, id, forzar }),
+          })
+        ).json()) as { ok?: boolean; error?: string; enMeta?: boolean };
+      let result = await pedir(false);
+      // (19/11/2026) Meta no dejó desconectarlo: él decide si lo quita igual solo del bot.
+      if (!result.ok && result.enMeta && window.confirm(`${result.error ?? ""}\n\n¿Quitarlo igual SOLO del bot? En Meta quedará conectado.`)) result = await pedir(true);
       setPageMessage(result.ok ? `${label} fue desconectado de este agente.` : result.error ?? "No se pudo desconectar la conexion.");
       await loadStatus();
     } finally {
