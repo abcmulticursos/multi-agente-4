@@ -1224,7 +1224,8 @@ function SaludDeLosNumeros() {
                         const ex = x.codigo ? EXPLICACION[x.codigo] : undefined;
                         return (
                           <div key={k} className="mt-2 text-sm">
-                            <p className={ex?.frena ? "font-bold text-rose-700" : "text-tinta"}>{ex ? ex.que : x.descripcion || "Meta no da la descripción."}</p>
+                            {/* (19/11/2026) Él: «rojo cuando el negocio no está verificado», como la zona horaria. */}
+                            <p className={ex?.frena || x.codigo === 141010 ? "font-bold text-rose-700" : "text-tinta"}>{ex ? ex.que : x.descripcion || "Meta no da la descripción."}</p>
                             <p className="mt-0.5 text-tinta-suave">
                               <b>Qué hacer:</b> {ex ? ex.hacer : x.solucion || "Meta no dice qué hacer."}
                             </p>
