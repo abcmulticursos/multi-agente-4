@@ -4,6 +4,7 @@ import { getMetaAppId, graphVersion } from "@/lib/meta/connect";
 import { fetchMeta } from "@/lib/meta/freno";
 import { otrasApps } from "@/lib/meta/apps-de-meta";
 import { negocioDeLaPrincipal } from "@/lib/meta/negocio-de-la-app";
+import { numerosDeLaApp } from "@/lib/meta/numeros-de-la-app";
 import { permisosConocidos, tokensPermanentes } from "@/lib/meta/token-por-numero";
 
 export const dynamic = "force-dynamic";
@@ -124,7 +125,8 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const conexiones = listMetaWhatsAppConnections();
+  // (19/11/2026) Solo los números de la app: ver `numeros-de-la-app.ts`.
+  const conexiones = numerosDeLaApp();
   const otros = permisosConocidos();
   const negocioDeApp = negociosDeLasAppsDelBot();
   const numeros = [];

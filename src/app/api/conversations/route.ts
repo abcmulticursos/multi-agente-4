@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { listConversations, listMetaWhatsAppConnections } from "@/lib/db";
+import { listConversations } from "@/lib/db";
+import { numerosDeLaApp } from "@/lib/meta/numeros-de-la-app";
 import { COUNTRIES, type CountryCode } from "@/lib/countries";
 import {
   laTiendaDeLaConversacion,
@@ -71,8 +72,13 @@ function numerosConSusPaises(t: { numero?: string; por_pais?: Record<string, { n
 }
 
 /** La bandeja de una conversación de una tienda: la de su número si la tienda tiene varios; si no, la de la tienda. */
-function bandejaDeLaTienda(t: { id: string; numero?: string; por_pais?: Record<string, { numero?: string } | undefined> }, suNumero: string | null | undefined): string {
-  const nums = numerosConSusPaises(t);
+function bandejaDeLaTienda(
+  t: { id: string; numero?: string; por_pais?: Record<string, { numero?: string } | undefined> },
+  suNumero: string | null | undefined,
+  /** (19/11/2026) Los números de la app: la tienda se reparte solo entre ésos, igual que sus bandejas. */
+  deLaApp?: Set<string>
+): string {
+  const nums = numerosConSusPaises(t).filter((x) => !deLaApp || deLaApp.has(x.numero));
   if (nums.length < 2) return `t:${t.id}`;
   const n = String(suNumero ?? "").trim();
   // Entró por otro sitio (su página, una frase de entrada en otro número): a la bandeja del número de la tienda.
@@ -80,23 +86,23 @@ function bandejaDeLaTienda(t: { id: string; numero?: string; por_pais?: Record<s
 }
 
 function bandejasDelChat(enUso: Set<string>): BandejaDelChat[] {
-  const numeros = listMetaWhatsAppConnections();
+  // (19/11/2026) SOLO LOS NÚMEROS DE LA APP. Él: «en el chat que aparezca la tienda, y si tuviese un número que muestre
+  // un número y si tuviese 2 que muestre 2». Una tienda sale solo con sus números de la app; sin ninguno, no sale. Los
+  // números que ya no son de la app (cuenta o app desconectada) no salen. Sus chats viejos siguen en «Todas».
+  const numeros = numerosDeLaApp();
+  const deLaApp = new Set(numeros.map((x) => x.phone_number_id));
   const deTiendas = new Set<string>();
   const bandejas: BandejaDelChat[] = [];
   for (const t of loadWorkflowConfig()?.tiendas ?? []) {
     if (!t || t.enabled === false) continue;
-    // (15/11/2026) Su número: el de la tienda o, si lo dejó vacío, el primero de sus países. Él vació la «Configuración
-    // general» de GRAFISMO (sus números solo en las tarjetas de Colombia y Argentina) y la tienda desapareció del chat.
-    const numero = String(t.numero ?? "").trim() || numerosConSusPaises(t)[0]?.numero || "";
-    const tienePagina = !!String(t.pagina ?? "").trim() || Object.values(t.por_pais ?? {}).some((g) => String(g?.pagina ?? "").trim());
-    // Una tienda sin número ni página (solo por frase de entrada) sale si ya tiene chats.
-    if (!numero && !tienePagina && ![...enUso].some((b) => b === `t:${t.id}` || b.startsWith(`t:${t.id}#`))) continue;
-    if (numero) deTiendas.add(numero);
-    // (14/11/2026) Y los números de sus países (`Tienda.por_pais`): sus chats van en la bandeja de la tienda.
-    for (const g of Object.values(t.por_pais ?? {})) if (String(g?.numero ?? "").trim()) deTiendas.add(String(g.numero).trim());
-    const n = numeros.find((x) => x.phone_number_id === numero);
+    // (14/11/2026) Los números de la tienda y de sus países (`Tienda.por_pais`) cuentan como «de tienda» aunque no
+    // salgan: así no reaparecen sueltos más abajo.
+    for (const sn of numerosConSusPaises(t)) deTiendas.add(sn.numero);
     // (15/11/2026) UNA BANDEJA POR NÚMERO cuando la tienda tiene varios (los de sus países): cada una solo con sus chats.
-    const susNumeros = numerosConSusPaises(t);
+    const susNumeros = numerosConSusPaises(t).filter((sn) => deLaApp.has(sn.numero));
+    if (susNumeros.length === 0) continue;
+    const numero = susNumeros[0].numero;
+    const n = numeros.find((x) => x.phone_number_id === numero);
     if (susNumeros.length >= 2) {
       // (15/11/2026) UN SOLO CHAT CON SUS NÚMEROS DENTRO. Él: «se está mostrando como 2 tiendas… debe ser un chat con el
       // nombre de la tienda y ahí los 2 números». Tocar la tienda enseña los chats de todos sus números; cada número, los suyos.
@@ -188,6 +194,7 @@ export async function GET(req: NextRequest) {
    * nombre y pinta con el color. Mandar solo el id obligaria al panel a pedir las tiendas
    * aparte para traducirlo, que es una llamada mas para nada.
    */
+  const deLaApp = new Set(numerosDeLaApp().map((x) => x.phone_number_id));
   const conSuTienda = rows.map((fila) => {
     const suya = laTiendaDeLaConversacion(fila);
     return {
@@ -196,7 +203,7 @@ export async function GET(req: NextRequest) {
       tienda_color: suya?.color?.trim() || null,
       // SU BANDEJA EN LA BARRA DEL CHAT (21/10/2026): su tienda, o su número si no tiene tienda.
       // (15/11/2026) Con varios números en la tienda, la bandeja de SU número (`bandejaDeLaTienda`).
-      bandeja: suya ? bandejaDeLaTienda(suya, fila.wa_phone_number_id) : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
+      bandeja: suya ? bandejaDeLaTienda(suya, fila.wa_phone_number_id, deLaApp) : fila.wa_phone_number_id ? `n:${fila.wa_phone_number_id}` : null,
     };
   });
   return jsonComprimido(req, {
