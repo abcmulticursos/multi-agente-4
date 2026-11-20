@@ -1214,16 +1214,16 @@ function NodoDeFicha({ data, selected }: NodeProps<Node<{ ficha: FichaEnElEditor
           // SUS IMÁGENES (05/11/2026): la bolsa del básico, la caja VIP del full y el carrito del upsell, en la Entrega y en el Cobro.
           const sello = esFull ? "/tablero/cobro-full.png" : esOtro ? "/tablero/cobro-upsell.png" : "/tablero/cobro-basico.png";
           const queEs = esFull ? "el full de la tienda" : esOtro ? "otro producto (upsell)" : "el básico de la tienda";
+          // (20/11/2026) EN EL COBRO, LOS MISMOS ÍCONOS DE SU «PAGÓ». Él: «en vez de la bolsita… para básico el logo de los
+          // libros y para el full el paquete… ahí encima de la ficha de cobro para saber cuál es cuál». (La Entrega sigue igual.)
           if (f.tipo === "cobro")
             return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={sello}
-                alt=""
-                draggable={false}
+              <span
                 title={`Cobra ${queEs}`}
-                className="pointer-events-none absolute -top-[62px] left-1/2 h-[60px] w-[60px] -translate-x-1/2 select-none rounded-full border-[5px] border-teal-500 bg-white object-cover shadow-md"
-              />
+                className="pointer-events-none absolute -top-[62px] left-1/2 flex h-[60px] w-[60px] -translate-x-1/2 select-none items-center justify-center rounded-full border-[5px] border-teal-500 bg-white text-[30px] leading-none shadow-md"
+              >
+                {esFull ? "📦" : esOtro ? "🛍️" : "📚"}
+              </span>
             );
           return (
             <>
@@ -2288,6 +2288,30 @@ function InterruptorDeRuta({ f, clave }: { f: FichaEnElEditor; clave: string }) 
   );
 }
 
+/** LA MANITO COBRANDO (20/11/2026, su montaje del Cobro): un billete con «$» sobre una mano abierta. Solo dibujo. */
+function ManoCobrando() {
+  return (
+    <svg viewBox="0 0 100 78" className="mb-1 h-[58px] w-[74px] drop-shadow" aria-hidden="true">
+      {/* El billete */}
+      <rect x="18" y="4" width="64" height="34" rx="4" fill="#bbf7d0" stroke="#052e16" strokeWidth="3.5" />
+      <rect x="24" y="10" width="52" height="22" rx="2" fill="none" stroke="#052e16" strokeWidth="2" />
+      <circle cx="50" cy="21" r="9" fill="#86efac" stroke="#052e16" strokeWidth="2.5" />
+      <text x="50" y="26.5" textAnchor="middle" fontSize="15" fontWeight="900" fill="#052e16" fontFamily="Arial, sans-serif">
+        $
+      </text>
+      {/* La mano abierta, con la palma hacia arriba */}
+      <path
+        d="M6 66 L24 56 C30 52 36 51 44 52 L62 54 C67 55 67 62 62 62 L46 61 M46 61 L68 60 L86 47 C91 44 96 50 92 54 L72 70 C68 73 63 74 58 74 L28 74 L14 76 Z"
+        fill="#ffffff"
+        stroke="#052e16"
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** La estación de una ficha, DENTRO de su mismo bloque (se mueve con ella). Sus salidas son las de la ficha. */
 function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f: FichaEnElEditor; soloLogo?: boolean; elegida?: boolean; espejo?: string }) {
   const ctx = useContext(Contexto)!;
@@ -2440,9 +2464,24 @@ function EstacionDeLaFicha({ f, soloLogo = false, elegida = false, espejo }: { f
               )}
             </>
           ) : (
+            // (20/11/2026) SIN EL TREN. Él, con su montaje: «quitar ese tren, y poner solo estas palabras en el centro del
+            // círculo verde» (IA AGENT) y en el Cobro «esa manito cobrando». Las de upsell/upgrade dicen lo suyo.
             <>
-              <span className="text-5xl leading-none">🚉</span>
-              <span className="text-[11px] font-bold uppercase tracking-widest opacity-90">Estación</span>
+              {f.tipo === "cobro" ? (
+                <>
+                  <ManoCobrando />
+                  <span className="text-[19px] font-black uppercase leading-none tracking-wide drop-shadow">Cobro</span>
+                </>
+              ) : (
+                <>
+                  <span className={`${nUpsell !== undefined ? "text-[28px]" : "text-[46px]"} font-black leading-none tracking-tight drop-shadow`}>
+                    {nUpsell !== undefined ? "UPSELL" : ctx.upgradeDe.has(f.id) ? "UP" : "IA"}
+                  </span>
+                  <span className="text-[13px] font-extrabold uppercase leading-none tracking-[0.25em] opacity-95">
+                    {nUpsell !== undefined ? `N.º ${nUpsell}` : ctx.upgradeDe.has(f.id) ? "GRADE" : "AGENT"}
+                  </span>
+                </>
+              )}
             </>
           )}
         </div>
@@ -3174,11 +3213,13 @@ export default function LienzoDelTablero({
 
   const visibles = tablero.fichas.filter((f) => !f.guardada);
   // EL MODO ESTACIONES (01/11/2026), recordado en este navegador. Solo dibujo.
+  // (20/11/2026) ENCENDIDO DE ENTRADA. Él: «cuando uno crea una pizarra no salen las estaciones… necesito que aparezca
+  // modo estación directamente, no que tengan que ir y cambiarlo». Solo queda apagado si él lo apagó en este navegador.
   const [estaciones, setEstaciones] = useState<boolean>(() => {
     try {
-      return window.localStorage.getItem("tablero-estaciones") === "1";
+      return window.localStorage.getItem("tablero-estaciones") !== "0";
     } catch {
-      return false;
+      return true;
     }
   });
   const cambiarEstaciones = (v: boolean) => {
@@ -3187,13 +3228,14 @@ export default function LienzoDelTablero({
       window.localStorage.setItem("tablero-estaciones", v ? "1" : "0");
     } catch {}
   };
-  // CÓMO SE VE LA ESTACIÓN (01/11/2026): su robot «Agente IA» o la bolita 🚉, a su gusto («si no me gusta, lo
-  // dejamos en estación»). Recordado en este navegador; por defecto el agente.
+  // CÓMO SE VE LA ESTACIÓN (01/11/2026): su robot «Agente IA» o la bolita, a su gusto («si no me gusta, lo
+  // dejamos en estación»). Recordado en este navegador.
+  // (20/11/2026) Por defecto la BOLITA VERDE («IA AGENT» / «COBRO», su montaje): el robot solo si él lo eligió.
   const [comoAgente, setComoAgente] = useState<boolean>(() => {
     try {
-      return window.localStorage.getItem("tablero-estacion-aspecto") !== "estacion";
+      return window.localStorage.getItem("tablero-estacion-aspecto") === "agente";
     } catch {
-      return true;
+      return false;
     }
   });
   const cambiarComoAgente = (v: boolean) => {
