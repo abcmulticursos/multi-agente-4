@@ -36988,11 +36988,14 @@ function PortadaDeLaTienda({
   onPais,
   onProductos,
   onGeneral,
+  onRenombrar,
 }: {
   cfg: FullConfig;
   tienda: TiendaEditor;
   conexiones: ConexionesDelProyecto;
   nombre: string;
+  /** (23/11/2026) «✏️» junto al nombre. Sin él, no sale. */
+  onRenombrar?: () => void;
   /** Cuántas cosas quedan por revisar (las de `revisarTienda` sin ignorar). */
   pendientes: number;
   onPais: (pais: string) => void;
@@ -37020,7 +37023,19 @@ function PortadaDeLaTienda({
         <div className="min-w-0 flex-1">
           <div className="text-[11px] font-black uppercase tracking-[0.35em] text-tinta">Tienda</div>
           {/* (15/11/2026) Él: «el nombre está un poco grande… bájale unos punticos». */}
-          <div className="font-titulo truncate text-xl font-extrabold leading-tight text-tinta">{nombre}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="font-titulo truncate text-xl font-extrabold leading-tight text-tinta">{nombre}</div>
+            {onRenombrar && (
+              <button
+                type="button"
+                onClick={onRenombrar}
+                title="Cambiarle el nombre a esta tienda"
+                className="shrink-0 rounded-md border border-borde bg-relleno px-2 py-0.5 text-xs font-bold text-tinta hover:bg-tarjeta"
+              >
+                ✏️ Renombrar
+              </button>
+            )}
+          </div>
           <div className="text-xs text-tinta-suave">Sus países, con su número y quién cobra, y los productos que vende.</div>
         </div>
         <button
@@ -61132,6 +61147,20 @@ function TiendasDelProyecto({
   const parchar = (i: number, parche: Partial<TiendaEditor>) =>
     onTiendas(tiendas.map((t, j) => (j === i ? { ...t, ...parche } : t)));
   /**
+   * RENOMBRAR (23/11/2026). Él: «las tiendas no se pueden renombrar». Se podía, pero la casilla estaba escondida dentro de
+   * «Configuración general». Ahora «✏️» en su fila y junto al nombre en su ventana. Todo lo de la tienda va por su id
+   * (tablero, pizarra, piezas), así que cambiar el nombre no suelta nada. Como cualquier edición: Ctrl+Z y Guardar.
+   */
+  const renombrar = (i: number) => {
+    const actual = tiendas[i]?.nombre?.trim() ?? "";
+    const nuevo = window.prompt("Nuevo nombre de la tienda:", actual);
+    if (nuevo == null) return;
+    const limpio = nuevo.trim();
+    if (!limpio || limpio === actual) return;
+    onSnapshot();
+    parchar(i, { nombre: limpio });
+  };
+  /**
    * EL NÚMERO QUE YA ESTÁ EN OTRA TIENDA (16/11/2026). Él: «me dice: este número ya está en la tienda figurarte… necesito
    * que diga… ¿deseas desconectarla de la tienda tal? y al seleccionar que sí: recuerda que esta tienda ya no responderá:
    * confirmar». Antes solo salía un aviso rojo debajo y las dos tiendas se quedaban con el número.
@@ -61589,6 +61618,15 @@ function TiendasDelProyecto({
                   : `Número ${tienda.numero}`}
               </span>
             </button>
+            <button
+              type="button"
+              onClick={() => renombrar(i)}
+              title="Cambiarle el nombre a esta tienda"
+              aria-label="Renombrar esta tienda"
+              className="shrink-0 rounded border border-borde bg-tarjeta px-2 py-1 text-xs hover:bg-relleno"
+            >
+              ✏️
+            </button>
             {/* EL ESTADO DE LA TIENDA, DE UN VISTAZO.
 
                 Antes aquí había dos pastillas sueltas —«número repetido» y «sin
@@ -61703,6 +61741,7 @@ function TiendasDelProyecto({
             onPais={(pais) => setPaisAbierto(`${tienda.id}|${pais}`)}
             onProductos={() => setProductosAbiertos(tienda.id)}
             onGeneral={() => setGeneralAbierta(tienda.id)}
+            onRenombrar={() => renombrar(i)}
           />
           {generalAbierta === tienda.id && (
           <VentanaConListo
