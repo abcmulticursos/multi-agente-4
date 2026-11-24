@@ -7004,14 +7004,9 @@ export default function EditorPage() {
    *
    * Se recuerda en este navegador, igual que la vista y el país que se edita.
    */
+  // (23/11/2026) SOLO EL PROFESIONAL. Él: «donde dice Modo esencial y Modo profesional hay que quitarlo, solo va a quedar
+  // el modo profesional». Ya no se lee lo recordado: quien lo tenía en esencial entra al profesional.
   const [modoEsencial, setModoEsencial] = useState(false);
-  useEffect(() => {
-    try {
-      setModoEsencial(localStorage.getItem(EDITOR_MODO_STORAGE_KEY) === "esencial");
-    } catch {
-      // Sin localStorage se entra al profesional, que es el de siempre.
-    }
-  }, []);
   /** Las pestañas base se ven solo si están encendidas Y no se está en el esencial. El
    *  botón que las enciende no existe en el esencial, pero su estado no se toca: al
    *  volver al profesional, siguen como las dejó. */
@@ -10936,51 +10931,7 @@ export default function EditorPage() {
             >
               ☰ Menú lateral
             </button>
-            {/* MODO ESENCIAL · MODO PROFESIONAL. Ver `modoEsencial`. Va en la cabecera,
-                que se ve en las dos vistas: en la barra de pestañas se perdería con el
-                menú lateral puesto. Solo cambia lo que se ve, nada de lo guardado. */}
-            <span
-              className="inline-flex items-center overflow-hidden rounded-lg border border-borde text-xs"
-              role="group"
-              aria-label="Modo del editor"
-            >
-              {([
-                [true, "Modo esencial"],
-                [false, "Modo profesional"],
-              ] as const).map(([esencial, nombre]) => (
-                <button
-                  key={nombre}
-                  type="button"
-                  aria-pressed={modoEsencial === esencial}
-                  onClick={() => {
-                    if (
-                      esencial &&
-                      (tab === "intro" || tab === "seguimientos" || tab === "salesbot")
-                    ) {
-                      // En el esencial esas pestañas no se ven: se sale a Canales,
-                      // igual que al ocultar las bases.
-                      changeTab("canales");
-                    }
-                    setModoEsencial(esencial);
-                    try {
-                      localStorage.setItem(
-                        EDITOR_MODO_STORAGE_KEY,
-                        esencial ? "esencial" : "profesional"
-                      );
-                    } catch {
-                      // Que no se recuerde no es motivo para no cambiarlo ahora.
-                    }
-                  }}
-                  className={`px-3 py-2 font-semibold ${
-                    modoEsencial === esencial
-                      ? "bg-carbon-fuerte text-white"
-                      : "bg-tarjeta text-tinta-suave hover:bg-relleno"
-                  }`}
-                >
-                  {nombre}
-                </button>
-              ))}
-            </span>
+            {/* (23/11/2026) Aquí estaba «Modo esencial · Modo profesional». Él: «solo va a quedar el modo profesional». */}
             {/* CLARO U OSCURO. Es el COLOR, no la forma de navegar: la vista
                 clásica y el menú lateral son el otro eje, y cada uno se ve en
                 los dos temas. Metidos en una sola lista de tres no se podría
@@ -30037,18 +29988,88 @@ function VistaPizarra({
             🧩 Tablero
           </button>
         </span>
-        <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Modo del editor">
-          {([[true, "Modo esencial"], [false, "Modo profesional"]] as const).map(([esencial, nombre]) => (
-            <button
-              key={nombre}
-              type="button"
-              aria-pressed={modoEsencial === esencial}
-              onClick={() => onModoEsencial(esencial)}
-              className={`px-3 py-1.5 font-semibold ${modoEsencial === esencial ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
-            >
-              {nombre}
-            </button>
-          ))}
+        {/* (23/11/2026) TIENDAS · IMPORTAR · EXPORTAR, donde estaba «Modo esencial · Modo profesional». Él: «solo va a quedar
+            el modo profesional; en ese lugar pones TIENDAS, al lado importar con un logo de subir a la nube y exportar al
+            ordenador». Importar / exportar son los mismos de «⇅ Exportar / importar tienda» (`importarTienda` /
+            `exportarTienda`): el archivo lleva la tienda con su tablero y entra como tienda NUEVA, sin número ni página. */}
+        <span className="inline-flex overflow-hidden rounded-lg border border-borde text-xs" role="group" aria-label="Tiendas">
+          <button
+            type="button"
+            aria-pressed={pantalla === "tiendas"}
+            onClick={() => {
+              setWorkflowAbierto(null);
+              irA("tiendas");
+            }}
+            title="Mis tiendas"
+            className={`px-3 py-1.5 font-semibold ${pantalla === "tiendas" ? "bg-carbon-fuerte text-white" : "bg-tarjeta text-tinta-suave hover:bg-relleno"}`}
+          >
+            🏪 TIENDAS
+          </button>
+          <label
+            title="Cargar una tienda desde un archivo JSON: entra como tienda nueva, sin número ni página, con su tablero apagado"
+            className="inline-flex cursor-pointer items-center gap-1.5 border-l border-borde bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2" />
+              <path d="M12 12v9" />
+              <path d="m16 16-4-4-4 4" />
+            </svg>
+            Importar
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={async (e) => {
+                const archivo = e.target.files?.[0];
+                e.target.value = "";
+                if (!archivo) return;
+                let datos: unknown;
+                try {
+                  datos = JSON.parse(await archivo.text());
+                } catch {
+                  window.alert("Ese archivo no es un JSON válido.");
+                  return;
+                }
+                const r = importarTienda(cfg, datos);
+                if ("error" in r) {
+                  window.alert(r.error);
+                  return;
+                }
+                onSnapshot();
+                onConfigChange(r.cfg);
+                const nombre = r.cfg.tiendas?.find((t) => t.id === r.id)?.nombre ?? "la tienda";
+                window.alert(
+                  `Tienda cargada como nueva: «${nombre}», sin número ni página y con su tablero apagado. Está en 🏪 TIENDAS. Guarda para que quede.${r.avisos.length > 0 ? `\n\n${r.avisos.join("\n")}` : ""}`
+                );
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            disabled={pantalla === "tiendas" || !tiendaId || !!workflowAbierto}
+            onClick={() => {
+              const datos = exportarTienda(cfg, tiendaId);
+              if (!datos) return;
+              const nombre = tiendas.find((t) => t.id === tiendaId)?.nombre?.trim() || tiendaId;
+              const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(blob);
+              a.download = `tienda-${nombre.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.json`;
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+            }}
+            title={pantalla === "tiendas" || !tiendaId || workflowAbierto ? "Abre una tienda para exportarla" : "Descargar esta tienda (con su tablero) a tu computadora, sin número, página ni píxel"}
+            className="inline-flex items-center gap-1.5 border-l border-borde bg-tarjeta px-3 py-1.5 font-semibold text-tinta-suave hover:bg-relleno disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="13" rx="2" />
+              <path d="M8 21h8" />
+              <path d="M12 16v5" />
+              <path d="M12 6v6" />
+              <path d="m9 9 3 3 3-3" />
+            </svg>
+            Exportar
+          </button>
         </span>
         {/* LAS OPCIONES DEL TEXTO SUELTO («T»), AQUÍ ARRIBA (14/11/2026). Él: «para cambiarle de tamaño no debe ser ahí
             encima del texto sino arriba, al lado de donde dice Modo profesional». El texto elegido pone aquí su barrita. */}
